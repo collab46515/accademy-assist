@@ -29,7 +29,21 @@ import {
   UserCheck,
   Award,
   BookCheck,
-  GraduationCap as GradCap
+  GraduationCap as GradCap,
+  Target,
+  UserCog,
+  TrendingUp,
+  Briefcase,
+  MapPin,
+  DollarSign,
+  PieChart,
+  ClipboardList,
+  Folder,
+  Package,
+  Timer,
+  Plane,
+  Receipt,
+  MessageCircle
 } from "lucide-react";
 
 import {
@@ -75,6 +89,23 @@ const operationsItems = [
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Communications", url: "/communication", icon: MessageSquare },
   { title: "Finance", url: "/finance", icon: CreditCard },
+];
+
+// HR Management sub-items (only show when on HR page)
+const hrItems = [
+  { title: "Employee Directory", url: "/hr-management?tab=employees", icon: Users },
+  { title: "Performance Management", url: "/hr-management?tab=performance", icon: Target },
+  { title: "Recruitment", url: "/hr-management?tab=recruitment", icon: UserCog },
+  { title: "Training & Development", url: "/hr-management?tab=training", icon: GraduationCap },
+  { title: "Benefits Management", url: "/hr-management?tab=benefits", icon: Award },
+  { title: "Document Management", url: "/hr-management?tab=documents", icon: Folder },
+  { title: "Asset Management", url: "/hr-management?tab=assets", icon: Package },
+  { title: "Time Tracking", url: "/hr-management?tab=timeTracking", icon: Timer },
+  { title: "Travel & Expenses", url: "/hr-management?tab=travelExpenses", icon: Plane },
+  { title: "Employee Engagement", url: "/hr-management?tab=engagement", icon: MessageCircle },
+  { title: "Payroll & Benefits", url: "/hr-management?tab=payroll", icon: DollarSign },
+  { title: "Leave Management", url: "/hr-management?tab=leave", icon: Calendar },
+  { title: "Attendance Tracking", url: "/hr-management?tab=attendance", icon: Clock },
 ];
 
 // Additional features
@@ -126,16 +157,16 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
   });
   
   const getNavClassName = (isActive: boolean) => 
-    isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "";
+    isActive ? "bg-gradient-to-r from-primary/10 to-primary-glow/5 text-primary font-medium border-r-2 border-primary" : "";
 
   return (
     <SidebarGroup>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
-          <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md flex items-center justify-between">
+          <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/70 rounded-lg px-2 py-1.5 transition-colors flex items-center justify-between text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             <span>{title}</span>
             {state !== "collapsed" && (
-              isOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />
+              isOpen ? <ChevronDown className="h-3 w-3 opacity-60" /> : <ChevronRight className="h-3 w-3 opacity-60" />
             )}
           </SidebarGroupLabel>
         </CollapsibleTrigger>
@@ -163,17 +194,17 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
                       onClick={item.url.includes('?') ? handleClick : undefined}
                     >
                       {item.url.includes('?') ? (
-                        <div className={`flex items-center gap-2 ${getNavClassName(isActive)}`}>
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
+                        <div className={`flex items-center gap-3 px-2 py-1.5 rounded-lg transition-all duration-200 hover:bg-sidebar-accent/50 ${getNavClassName(isActive)}`}>
+                          <item.icon className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-sm">{item.title}</span>
                         </div>
                       ) : (
                         <NavLink 
                           to={item.url}
-                          className={getNavClassName(isActive)}
+                          className={`flex items-center gap-3 px-2 py-1.5 rounded-lg transition-all duration-200 hover:bg-sidebar-accent/50 ${getNavClassName(isActive)}`}
                         >
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
+                          <item.icon className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-sm">{item.title}</span>
                         </NavLink>
                       )}
                     </SidebarMenuButton>
@@ -193,15 +224,20 @@ export function AppSidebar() {
   const { state } = useSidebar();
   
   const getNavClassName = (isActive: boolean) => 
-    isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "";
+    isActive ? "bg-gradient-to-r from-primary/10 to-primary-glow/5 text-primary font-medium border-r-2 border-primary" : "";
 
   return (
-    <Sidebar collapsible="icon" className="border-r">
-      <SidebarHeader className="border-b border-sidebar-border">
-        <div className="flex items-center gap-2 px-2 py-1">
-          <Building2 className="h-6 w-6 text-primary" />
+    <Sidebar collapsible="icon" className="border-r shadow-lg">
+      <SidebarHeader className="border-b border-sidebar-border bg-gradient-to-r from-primary/5 to-primary-glow/5">
+        <div className="flex items-center gap-3 px-3 py-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-glow shadow-sm">
+            <Building2 className="h-5 w-5 text-primary-foreground" />
+          </div>
           {state !== "collapsed" && (
-            <span className="font-semibold text-sidebar-foreground">School Manager</span>
+            <div className="flex flex-col">
+              <span className="text-sm font-bold text-sidebar-foreground">School Manager</span>
+              <span className="text-xs text-muted-foreground">Education Platform</span>
+            </div>
           )}
         </div>
         {state !== "collapsed" && <SchoolSelector />}
@@ -223,10 +259,10 @@ export function AppSidebar() {
                     >
                       <NavLink 
                         to={item.url} 
-                        className={getNavClassName(isActive)}
+                        className={`flex items-center gap-3 px-2 py-1.5 rounded-lg transition-all duration-200 hover:bg-sidebar-accent/50 ${getNavClassName(isActive)}`}
                       >
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
+                        <item.icon className="h-5 w-5 flex-shrink-0" />
+                        <span className="text-sm font-medium">{item.title}</span>
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -248,6 +284,15 @@ export function AppSidebar() {
           <SidebarGroupItems 
             title="Admission Stages" 
             items={admissionStages}
+            defaultOpen={true}
+          />
+        )}
+
+        {/* HR Management sub-items - Only show when on HR page */}
+        {location.pathname === '/hr-management' && (
+          <SidebarGroupItems 
+            title="HR Features" 
+            items={hrItems}
             defaultOpen={true}
           />
         )}
