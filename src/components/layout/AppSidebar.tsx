@@ -16,6 +16,7 @@ import {
   Globe,
   Settings,
   Bot,
+  Database,
   Activity,
   Building2,
   ChevronDown,
@@ -155,6 +156,7 @@ const erpModules = [
       { title: "AI Suite", url: "/ai-suite", icon: Bot },
       { title: "Integrations", url: "/integrations", icon: Settings },
       { title: "User Management", url: "/user-management", icon: Users },
+      { title: "Master Data", url: "/master-data", icon: Database },
     ]
   }
 ];
@@ -165,7 +167,7 @@ function getCurrentModule(pathname: string) {
   if (pathname.startsWith('/accounting') || pathname.startsWith('/finance')) return 'Accounting';
   if (pathname.startsWith('/analytics')) return 'Analytics';
   if (pathname.startsWith('/admin-management') || pathname.startsWith('/ai-suite') || 
-      pathname.startsWith('/integrations') || pathname.startsWith('/user-management')) return 'System';
+      pathname.startsWith('/integrations') || pathname.startsWith('/user-management') || pathname.startsWith('/master-data')) return 'System';
   return 'School Management';
 }
 

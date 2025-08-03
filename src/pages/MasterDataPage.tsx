@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useForm } from 'react-hook-form';
 import { useMasterData } from '@/hooks/useMasterData';
+import { useRBAC } from '@/hooks/useRBAC';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Database,
   School as SchoolIcon,
@@ -22,18 +24,24 @@ import {
   Search,
   Filter,
   Download,
+  Upload,
   Eye,
   Edit,
   Trash,
   BarChart3,
   TrendingUp,
-  CheckCircle
+  CheckCircle,
+  FileText,
+  Shield
 } from 'lucide-react';
 
 export function MasterDataPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const form = useForm();
+  const { isSuperAdmin, isSchoolAdmin } = useRBAC();
   
   const {
     isLoading,
@@ -52,6 +60,57 @@ export function MasterDataPage() {
     getActiveEntities,
     refreshData
   } = useMasterData();
+
+  // Check admin access
+  if (!isSuperAdmin() && !isSchoolAdmin()) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Alert>
+          <Shield className="h-4 w-4" />
+          <AlertDescription>
+            Access denied. Only administrators can access Master Data Management.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  const handleBulkUpload = (type: string) => {
+    const templates = {
+      schools: 'School Name,Code,Address,Phone,Email,Principal\nExample School,EXS001,123 Main St,555-0123,admin@example.edu,Dr. Smith',
+      students: 'First Name,Last Name,Email,Phone,Date of Birth,Year Group,Form Class,Gender\nJohn,Doe,john@example.com,555-0124,2010-01-01,Year 7,7A,Male',
+      subjects: 'Subject Name,Code,Description,Department\nMathematics,MATH,Core Mathematics,Mathematics Department',
+      staff: 'First Name,Last Name,Email,Phone,Position,Department,Start Date\nJane,Smith,jane@school.edu,555-0125,Teacher,Mathematics,2023-01-01',
+      parents: 'First Name,Last Name,Email,Phone,Address,Relationship\nMark,Doe,mark@example.com,555-0126,123 Parent St,Father'
+    };
+    
+    const template = templates[type as keyof typeof templates];
+    const blob = new Blob([template], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${type}_template.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Here you would process the CSV file
+      console.log('Processing file:', file.name);
+      // Add actual CSV processing logic here
+      setUploadDialogOpen(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">Loading master data...</div>
+      </div>
+    );
+  }
 
   const entityCounts = getEntityCounts();
   const activeEntities = getActiveEntities();
@@ -92,13 +151,63 @@ export function MasterDataPage() {
               <CheckCircle className="h-3 w-3" />
               Data Synchronized
             </Badge>
+            <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Bulk Upload
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Bulk Data Upload</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {['schools', 'students', 'subjects', 'staff', 'parents'].map((type) => (
+                      <Card key={type} className="cursor-pointer hover:bg-accent/50 transition-colors">
+                        <CardContent className="p-4 text-center">
+                          <FileText className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                          <h3 className="font-medium capitalize">{type}</h3>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="mt-2 w-full"
+                            onClick={() => handleBulkUpload(type)}
+                          >
+                            Download Template
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                  <div className="border-t pt-4">
+                    <h3 className="font-medium mb-2">Upload Data File</h3>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".csv"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                    />
+                    <Button onClick={() => fileInputRef.current?.click()} className="w-full">
+                      <Upload className="h-4 w-4 mr-2" />
+                      Choose CSV File
+                    </Button>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Download a template first, fill it with your data, then upload the CSV file.
+                    </p>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             <Button variant="outline" size="sm" onClick={refreshData}>
               <Download className="h-4 w-4 mr-2" />
               Refresh
             </Button>
             <Button size="sm">
               <Plus className="h-4 w-4 mr-2" />
-              Import Data
+              Quick Add
             </Button>
           </div>
         </div>
@@ -212,7 +321,7 @@ export function MasterDataPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button className="w-full" variant="outline">
+                  <Button className="w-full" variant="outline" onClick={() => setUploadDialogOpen(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Bulk Import Data
                   </Button>
@@ -314,9 +423,7 @@ export function MasterDataPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                {isLoading ? (
-                  <div className="text-center py-8">Loading schools...</div>
-                ) : filteredSchools.length === 0 ? (
+                {filteredSchools.length === 0 ? (
                   <div className="text-center py-12">
                     <SchoolIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <h3 className="text-lg font-semibold mb-2">No schools found</h3>
@@ -465,9 +572,7 @@ export function MasterDataPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                {isLoading ? (
-                  <div className="text-center py-8">Loading subjects...</div>
-                ) : filteredSubjects.length === 0 ? (
+                {filteredSubjects.length === 0 ? (
                   <div className="text-center py-12">
                     <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <h3 className="text-lg font-semibold mb-2">No subjects found</h3>
@@ -560,9 +665,7 @@ export function MasterDataPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                {isLoading ? (
-                  <div className="text-center py-8">Loading students...</div>
-                ) : filteredStudents.length === 0 ? (
+                {filteredStudents.length === 0 ? (
                   <div className="text-center py-12">
                     <GraduationCap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <h3 className="text-lg font-semibold mb-2">No students found</h3>
