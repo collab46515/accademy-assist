@@ -30,8 +30,10 @@ import {
   TrendingUp,
   CheckCircle,
   FileText,
-  Shield
+  Shield,
+  CreditCard
 } from 'lucide-react';
+import { FeeManagementMasterData } from '@/components/master-data/FeeManagementMasterData';
 
 export function MasterDataPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -736,12 +738,13 @@ export function MasterDataPage() {
 
       <div className="p-6 space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="schools">Schools</TabsTrigger>
             <TabsTrigger value="subjects">Subjects</TabsTrigger>
             <TabsTrigger value="students">Students</TabsTrigger>
             <TabsTrigger value="parents">Parents</TabsTrigger>
+            <TabsTrigger value="fee-management">Fee Management</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -917,6 +920,11 @@ export function MasterDataPage() {
               </Card>
             </TabsContent>
           ))}
+
+          {/* Fee Management Tab */}
+          <TabsContent value="fee-management" className="space-y-6">
+            <FeeManagementMasterData />
+          </TabsContent>
         </Tabs>
       </div>
     </div>
