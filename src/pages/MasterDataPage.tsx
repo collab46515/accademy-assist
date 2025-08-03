@@ -76,21 +76,56 @@ export function MasterDataPage() {
   }
 
   const handleBulkUpload = (type: string) => {
-    const templates = {
-      schools: 'Name,Code,Address,Contact Email,Contact Phone\nExample School,EXS001,123 Main St,admin@example.edu,555-0123',
-      students: 'Student Number,Year Group,User ID,School ID\nSTU001,Year 7,user-uuid,school-uuid',
-      subjects: 'Subject Name,Subject Code,School ID\nMathematics,MATH,school-uuid',
-      parents: 'Parent ID,Student ID,Relationship Type\nparent-uuid,student-uuid,Father'
-    };
-    
-    const template = templates[type as keyof typeof templates];
-    const blob = new Blob([template], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${type}_template.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    if (type === 'master') {
+      // Generate master template with all entity types
+      const masterTemplate = [
+        '=== SCHOOLS ===',
+        'Name,Code,Address,Contact Email,Contact Phone',
+        'Example Primary School,EPS001,123 Main Street,admin@example.edu,+44 20 1234 5678',
+        'Example Secondary School,ESS002,456 Oak Avenue,contact@secondary.edu,+44 20 9876 5432',
+        '',
+        '=== SUBJECTS ===',
+        'Subject Name,Subject Code,Color Code,Requires Lab,Periods Per Week',
+        'Mathematics,MATH,#3B82F6,false,5',
+        'Chemistry,CHEM,#F59E0B,true,3',
+        'English Language,ENG,#10B981,false,4',
+        '',
+        '=== STUDENTS ===',
+        'Student Number,Year Group,Form Class,Date of Birth,Emergency Contact Name,Emergency Contact Phone',
+        'STU001,Year 7,7A,2010-05-15,John Smith,+44 7700 900123',
+        'STU002,Year 8,8B,2009-08-22,Jane Doe,+44 7700 900456',
+        '',
+        '=== PARENTS ===',
+        'Parent ID,Student ID,Relationship Type',
+        'parent-uuid-1,student-uuid-1,Father',
+        'parent-uuid-2,student-uuid-2,Mother'
+      ].join('\n');
+      
+      const blob = new Blob([masterTemplate], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'master_data_template.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    } else {
+      // Individual templates for specific entity types
+      const templates = {
+        schools: 'Name,Code,Address,Contact Email,Contact Phone\nExample School,EXS001,123 Main St,admin@example.edu,555-0123',
+        students: 'Student Number,Year Group,Form Class,Date of Birth,Emergency Contact Name,Emergency Contact Phone\nSTU001,Year 7,7A,2010-05-15,John Smith,+44 7700 900123',
+        subjects: 'Subject Name,Subject Code,Color Code,Requires Lab,Periods Per Week\nMathematics,MATH,#3B82F6,false,5',
+        parents: 'Parent ID,Student ID,Relationship Type\nparent-uuid,student-uuid,Father'
+      };
+      
+      const template = templates[type as keyof typeof templates];
+      const blob = new Blob([template], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${type}_template.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,20 +134,89 @@ export function MasterDataPage() {
       const reader = new FileReader();
       reader.onload = (e) => {
         const csvText = e.target?.result as string;
-        const lines = csvText.split('\n');
-        const headers = lines[0].split(',').map(h => h.trim());
-        const data = lines.slice(1).filter(line => line.trim()).map(line => {
-          const values = line.split(',').map(v => v.trim());
-          const obj: any = {};
-          headers.forEach((header, index) => {
-            obj[header.toLowerCase().replace(/\s+/g, '_')] = values[index] || '';
-          });
-          return obj;
-        });
+        const lines = csvText.split('\n').map(line => line.trim()).filter(line => line);
         
-        console.log('Processing CSV file:', file.name);
-        console.log('Parsed data:', data);
-        // TODO: Process the parsed CSV data based on active tab
+        let currentSection = '';
+        const parsedData: any = {
+          schools: [],
+          subjects: [],
+          students: [],
+          parents: []
+        };
+        
+        let i = 0;
+        while (i < lines.length) {
+          const line = lines[i];
+          
+          // Check for section headers
+          if (line.includes('=== SCHOOLS ===')) {
+            currentSection = 'schools';
+            i++; // Skip to headers line
+            const headers = lines[i]?.split(',').map(h => h.trim()) || [];
+            i++; // Move to data lines
+            
+            while (i < lines.length && !lines[i].includes('===') && lines[i].trim()) {
+              const values = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
+              const obj: any = {};
+              headers.forEach((header, index) => {
+                obj[header.toLowerCase().replace(/\s+/g, '_')] = values[index] || '';
+              });
+              parsedData.schools.push(obj);
+              i++;
+            }
+          } else if (line.includes('=== SUBJECTS ===')) {
+            currentSection = 'subjects';
+            i++;
+            const headers = lines[i]?.split(',').map(h => h.trim()) || [];
+            i++;
+            
+            while (i < lines.length && !lines[i].includes('===') && lines[i].trim()) {
+              const values = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
+              const obj: any = {};
+              headers.forEach((header, index) => {
+                obj[header.toLowerCase().replace(/\s+/g, '_')] = values[index] || '';
+              });
+              parsedData.subjects.push(obj);
+              i++;
+            }
+          } else if (line.includes('=== STUDENTS ===')) {
+            currentSection = 'students';
+            i++;
+            const headers = lines[i]?.split(',').map(h => h.trim()) || [];
+            i++;
+            
+            while (i < lines.length && !lines[i].includes('===') && lines[i].trim()) {
+              const values = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
+              const obj: any = {};
+              headers.forEach((header, index) => {
+                obj[header.toLowerCase().replace(/\s+/g, '_')] = values[index] || '';
+              });
+              parsedData.students.push(obj);
+              i++;
+            }
+          } else if (line.includes('=== PARENTS ===')) {
+            currentSection = 'parents';
+            i++;
+            const headers = lines[i]?.split(',').map(h => h.trim()) || [];
+            i++;
+            
+            while (i < lines.length && !lines[i].includes('===') && lines[i].trim()) {
+              const values = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
+              const obj: any = {};
+              headers.forEach((header, index) => {
+                obj[header.toLowerCase().replace(/\s+/g, '_')] = values[index] || '';
+              });
+              parsedData.parents.push(obj);
+              i++;
+            }
+          } else {
+            i++;
+          }
+        }
+        
+        console.log('Processing master CSV file:', file.name);
+        console.log('Parsed data:', parsedData);
+        // TODO: Process the parsed master CSV data
         setUploadDialogOpen(false);
       };
       reader.readAsText(file);
@@ -527,23 +631,44 @@ export function MasterDataPage() {
                   <DialogTitle>Bulk Data Upload</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-6">
-                  <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
-                    {['schools', 'students', 'subjects', 'parents'].map((type) => (
-                      <Card key={type} className="cursor-pointer hover:bg-accent/50 transition-colors">
-                        <CardContent className="p-4 text-center">
-                          <FileText className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                          <h3 className="font-medium capitalize">{type}</h3>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="mt-2 w-full"
-                            onClick={() => handleBulkUpload(type)}
-                          >
-                            Download Template
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    ))}
+                  {/* Master Template */}
+                  <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+                    <CardContent className="p-4 text-center">
+                      <Database className="h-8 w-8 mx-auto mb-2 text-primary" />
+                      <h3 className="font-semibold">Master Template</h3>
+                      <p className="text-sm text-muted-foreground mb-3">Load all data types in one shot</p>
+                      <Button 
+                        variant="default" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => handleBulkUpload('master')}
+                      >
+                        Download Master Template
+                      </Button>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* Individual Templates */}
+                  <div>
+                    <h3 className="font-medium mb-3">Individual Templates</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+                      {['schools', 'students', 'subjects', 'parents'].map((type) => (
+                        <Card key={type} className="cursor-pointer hover:bg-accent/50 transition-colors">
+                          <CardContent className="p-4 text-center">
+                            <FileText className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                            <h3 className="font-medium capitalize">{type}</h3>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="mt-2 w-full"
+                              onClick={() => handleBulkUpload(type)}
+                            >
+                              Download Template
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
                   </div>
                   <div className="border-t pt-4">
                     <h3 className="font-medium mb-2">Upload Data File</h3>
