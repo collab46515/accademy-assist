@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ import { AdmissionsWorkflow } from "@/components/admissions/AdmissionsWorkflow";
 import { AdmissionsFlowVisualization } from "@/components/admissions/AdmissionsFlowVisualization";
 import { StageDetailBreakdown } from "@/components/admissions/StageDetailBreakdown";
 import { ApplicationTaskManager } from "@/components/admissions/ApplicationTaskManager";
+import { StageWorkflowManager } from "@/components/admissions/StageWorkflowManager";
 import { 
   UserPlus, 
   FileText, 
@@ -117,6 +118,8 @@ const STATUS_COLORS = {
 
 const UnifiedAdmissionsPage = () => {
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [applications, setApplications] = useState<any[]>([]);
   const [enrollmentTypes, setEnrollmentTypes] = useState<any[]>([]);
@@ -131,6 +134,10 @@ const UnifiedAdmissionsPage = () => {
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [currentApplicationData, setCurrentApplicationData] = useState<any>(null);
   const [applicationProgress, setApplicationProgress] = useState(0);
+
+  // Check if we're viewing a specific stage
+  const stageParam = searchParams.get('stage');
+  const currentStage = stageParam ? parseInt(stageParam) : null;
 
   // Mock data for development
   const mockApplications = [
@@ -421,6 +428,25 @@ const UnifiedAdmissionsPage = () => {
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           <ApplicationForms onBackToDashboard={handleApplicationCancel} />
         </div>
+      </div>
+    );
+  }
+
+  // If viewing a specific workflow stage, show the StageWorkflowManager
+  if (currentStage !== null) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="mb-6">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/admissions')}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Admissions Dashboard
+          </Button>
+        </div>
+        <StageWorkflowManager applicationId="APP-2024-001" currentStage={currentStage} />
       </div>
     );
   }

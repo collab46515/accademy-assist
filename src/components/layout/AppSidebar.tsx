@@ -12,6 +12,7 @@ import {
   MessageSquare,
   CreditCard,
   FileText,
+  FileCheck,
   Shield,
   Globe,
   Settings,
@@ -90,15 +91,16 @@ const systemItems = [
   { title: "User Management", url: "/user-management", icon: Users },
 ];
 
-// Admission Process Stages (high-level workflow overview)
+// Admission Process Stages (detailed workflow stages)
 const admissionStages = [
-  { title: "New Applications", url: "/admissions?tab=management&filter=submitted", icon: Send },
-  { title: "Under Review", url: "/admissions?tab=management&filter=under_review", icon: Eye },
-  { title: "Assessment Stage", url: "/admissions?tab=management&filter=assessment_scheduled", icon: ClipboardCheck },
-  { title: "Interview Stage", url: "/admissions?tab=management&filter=interview_scheduled", icon: UserCheck },
-  { title: "Decision Pending", url: "/admissions?tab=management&filter=pending_approval", icon: Clock },
-  { title: "Approved Applications", url: "/admissions?tab=management&filter=approved", icon: CheckCircle },
-  { title: "Requires Attention", url: "/admissions?tab=management&filter=requires_override", icon: AlertTriangle },
+  { title: "Application Submitted", url: "/admissions?stage=0", icon: Send },
+  { title: "Document Verification", url: "/admissions?stage=1", icon: FileCheck },
+  { title: "Application Review", url: "/admissions?stage=2", icon: Eye },
+  { title: "Assessment/Interview", url: "/admissions?stage=3", icon: ClipboardCheck },
+  { title: "Admission Decision", url: "/admissions?stage=4", icon: CheckCircle },
+  { title: "Fee Payment", url: "/admissions?stage=5", icon: CreditCard },
+  { title: "Enrollment Confirmation", url: "/admissions?stage=6", icon: UserCheck },
+  { title: "Welcome & Onboarding", url: "/admissions?stage=7", icon: Users },
 ];
 
 interface SidebarGroupItemsProps {
