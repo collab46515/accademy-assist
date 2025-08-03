@@ -2305,6 +2305,96 @@ export type Database = {
           },
         ]
       }
+      fee_heads: {
+        Row: {
+          amount: number
+          applicable_classes: string[] | null
+          applicable_genders: string[] | null
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          recurrence: string
+          school_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          applicable_classes?: string[] | null
+          applicable_genders?: string[] | null
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          recurrence?: string
+          school_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          applicable_classes?: string[] | null
+          applicable_genders?: string[] | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          recurrence?: string
+          school_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fee_structures: {
+        Row: {
+          academic_year: string
+          applicable_year_groups: string[] | null
+          created_at: string
+          description: string | null
+          fee_heads: Json
+          id: string
+          name: string
+          school_id: string
+          status: string
+          term: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          academic_year: string
+          applicable_year_groups?: string[] | null
+          created_at?: string
+          description?: string | null
+          fee_heads?: Json
+          id?: string
+          name: string
+          school_id: string
+          status?: string
+          term: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          academic_year?: string
+          applicable_year_groups?: string[] | null
+          created_at?: string
+          description?: string | null
+          fee_heads?: Json
+          id?: string
+          name?: string
+          school_id?: string
+          status?: string
+          term?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       interview_schedules: {
         Row: {
           application_id: string | null
