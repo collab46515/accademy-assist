@@ -2305,6 +2305,45 @@ export type Database = {
           },
         ]
       }
+      fee_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          message: string
+          priority: string
+          school_id: string
+          target_audience: Json | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          message: string
+          priority?: string
+          school_id: string
+          target_audience?: Json | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          message?: string
+          priority?: string
+          school_id?: string
+          target_audience?: Json | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       fee_heads: {
         Row: {
           amount: number
@@ -3326,6 +3365,51 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_records: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          invoice_id: string | null
+          notes: string | null
+          payment_date: string
+          payment_method: string
+          reference_number: string | null
+          school_id: string
+          status: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          reference_number?: string | null
+          school_id: string
+          status?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          reference_number?: string | null
+          school_id?: string
+          status?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payroll_records: {
         Row: {
           allowances: number | null
@@ -4051,6 +4135,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      student_fee_assignments: {
+        Row: {
+          amount_due: number
+          amount_paid: number
+          assigned_date: string
+          class_name: string | null
+          created_at: string
+          due_date: string
+          fee_structure_id: string
+          id: string
+          school_id: string
+          status: string
+          student_id: string
+          updated_at: string
+          year_group: string | null
+        }
+        Insert: {
+          amount_due: number
+          amount_paid?: number
+          assigned_date?: string
+          class_name?: string | null
+          created_at?: string
+          due_date: string
+          fee_structure_id: string
+          id?: string
+          school_id: string
+          status?: string
+          student_id: string
+          updated_at?: string
+          year_group?: string | null
+        }
+        Update: {
+          amount_due?: number
+          amount_paid?: number
+          assigned_date?: string
+          class_name?: string | null
+          created_at?: string
+          due_date?: string
+          fee_structure_id?: string
+          id?: string
+          school_id?: string
+          status?: string
+          student_id?: string
+          updated_at?: string
+          year_group?: string | null
+        }
+        Relationships: []
       }
       student_parents: {
         Row: {
