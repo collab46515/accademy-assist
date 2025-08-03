@@ -33,6 +33,8 @@ import { useToast } from '@/hooks/use-toast';
 import { PaymentRecordModal } from './PaymentRecordModal';
 import { ClassCollectionDetailModal } from './ClassCollectionDetailModal';
 import { TodayCollectionModal } from './TodayCollectionModal';
+import { MetricDetailModal } from './MetricDetailModal';
+import { BulkActionsModal } from './BulkActionsModal';
 
 interface DashboardMetrics {
   totalCollected: number;
@@ -101,7 +103,12 @@ export function FeeDashboard() {
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [classDetailModalOpen, setClassDetailModalOpen] = useState(false);
   const [todayCollectionModalOpen, setTodayCollectionModalOpen] = useState(false);
+  const [metricDetailModalOpen, setMetricDetailModalOpen] = useState(false);
+  const [bulkActionsModalOpen, setBulkActionsModalOpen] = useState(false);
   const [selectedClass, setSelectedClass] = useState<string>('');
+  const [selectedMetric, setSelectedMetric] = useState<'collected' | 'outstanding' | 'percentage' | 'expected' | 'overdue'>('collected');
+  const [selectedBulkAction, setSelectedBulkAction] = useState<'reminder' | 'invoice' | 'collection' | 'report'>('reminder');
+  const [viewMode, setViewMode] = useState<'overall' | 'class'>('overall');
   
   const { toast } = useToast();
 
@@ -220,16 +227,12 @@ export function FeeDashboard() {
         setPaymentModalOpen(true);
         break;
       case 'Send Reminder to All Overdue':
-        toast({
-          title: "Reminders Sent",
-          description: `Sent payment reminders to ${metrics.overdueAccounts} overdue accounts`,
-        });
+        setSelectedBulkAction('reminder');
+        setBulkActionsModalOpen(true);
         break;
       case 'Generate Invoices (Bulk)':
-        toast({
-          title: "Bulk Invoice Generation",
-          description: "Invoice generation started. You'll be notified when complete.",
-        });
+        setSelectedBulkAction('invoice');
+        setBulkActionsModalOpen(true);
         break;
       case "View Today's Collection List":
         setTodayCollectionModalOpen(true);
@@ -240,6 +243,11 @@ export function FeeDashboard() {
           description: `${action} feature coming soon!`,
         });
     }
+  };
+
+  const handleMetricClick = (metricType: 'collected' | 'outstanding' | 'percentage' | 'expected' | 'overdue') => {
+    setSelectedMetric(metricType);
+    setMetricDetailModalOpen(true);
   };
 
   const handleClassClick = (className: string) => {
@@ -321,66 +329,101 @@ export function FeeDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Key Metrics Row */}
+      {/* Key Metrics Row - All Clickable */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-0">
+        <Card 
+          className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-0 cursor-pointer hover:shadow-lg transition-all duration-300"
+          onClick={() => handleMetricClick('collected')}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-primary-foreground/80 text-sm">Total Collected (This Term)</p>
                 <p className="text-3xl font-bold">£{metrics.totalCollected.toLocaleString()}</p>
+                <p className="text-sm text-primary-foreground/60 mt-1">Click for details</p>
               </div>
-              <PoundSterling className="h-8 w-8 text-primary-foreground/60" />
+              <div className="flex flex-col items-center">
+                <PoundSterling className="h-8 w-8 text-primary-foreground/60" />
+                <Eye className="h-4 w-4 text-primary-foreground/60 mt-1" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-all duration-300"
+          onClick={() => handleMetricClick('outstanding')}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-muted-foreground text-sm">Outstanding Fees</p>
                 <p className="text-3xl font-bold text-destructive">£{metrics.outstandingFees.toLocaleString()}</p>
+                <p className="text-sm text-muted-foreground mt-1">Click for breakdown</p>
               </div>
-              <AlertTriangle className="h-8 w-8 text-destructive" />
+              <div className="flex flex-col items-center">
+                <AlertTriangle className="h-8 w-8 text-destructive" />
+                <Eye className="h-4 w-4 text-muted-foreground mt-1" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-all duration-300"
+          onClick={() => handleMetricClick('percentage')}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-muted-foreground text-sm">% Collected</p>
                 <p className="text-3xl font-bold text-green-600">{metrics.collectionPercentage}%</p>
                 <Progress value={metrics.collectionPercentage} className="mt-2" />
+                <p className="text-sm text-muted-foreground mt-1">Click for trends</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-green-600" />
+              <div className="flex flex-col items-center">
+                <TrendingUp className="h-8 w-8 text-green-600" />
+                <Eye className="h-4 w-4 text-muted-foreground mt-1" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-all duration-300"
+          onClick={() => handleMetricClick('expected')}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-muted-foreground text-sm">Today's Expected</p>
                 <p className="text-3xl font-bold">£{metrics.todayExpected.toLocaleString()}</p>
+                <p className="text-sm text-muted-foreground mt-1">Click for list</p>
               </div>
-              <Calendar className="h-8 w-8 text-blue-600" />
+              <div className="flex flex-col items-center">
+                <Calendar className="h-8 w-8 text-blue-600" />
+                <Eye className="h-4 w-4 text-muted-foreground mt-1" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-all duration-300"
+          onClick={() => handleMetricClick('overdue')}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-muted-foreground text-sm">Overdue Accounts</p>
                 <p className="text-3xl font-bold text-orange-600">{metrics.overdueAccounts}</p>
                 <p className="text-sm text-muted-foreground">students</p>
+                <p className="text-sm text-muted-foreground mt-1">Click for details</p>
               </div>
-              <Users className="h-8 w-8 text-orange-600" />
+              <div className="flex flex-col items-center">
+                <Users className="h-8 w-8 text-orange-600" />
+                <Eye className="h-4 w-4 text-muted-foreground mt-1" />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -587,6 +630,19 @@ export function FeeDashboard() {
       <TodayCollectionModal
         open={todayCollectionModalOpen}
         onOpenChange={setTodayCollectionModalOpen}
+      />
+      
+      <MetricDetailModal
+        open={metricDetailModalOpen}
+        onOpenChange={setMetricDetailModalOpen}
+        metricType={selectedMetric}
+        data={{}}
+      />
+      
+      <BulkActionsModal
+        open={bulkActionsModalOpen}
+        onOpenChange={setBulkActionsModalOpen}
+        actionType={selectedBulkAction}
       />
     </div>
   );
