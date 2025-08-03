@@ -431,12 +431,10 @@ const UnifiedAdmissionsPage = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="pathways">Enrollment Pathways</TabsTrigger>
-          <TabsTrigger value="applications">Applications</TabsTrigger>
+          <TabsTrigger value="pathways">Applications</TabsTrigger>
           <TabsTrigger value="management">Application Management</TabsTrigger>
-          <TabsTrigger value="workflows">Workflow Management</TabsTrigger>
           <TabsTrigger value="approvals">Approvals</TabsTrigger>
           <TabsTrigger value="reports">Reports & Analytics</TabsTrigger>
         </TabsList>
@@ -703,56 +701,6 @@ const UnifiedAdmissionsPage = () => {
           <ApplicationManagement initialFilter={filterStatus !== "all" ? filterStatus : undefined} />
         </TabsContent>
 
-        {/* Workflow Management Tab */}
-        <TabsContent value="workflows" className="space-y-6">
-          <Card className="shadow-[var(--shadow-card)]">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Workflow className="h-5 w-5" />
-                <span>Workflow Management</span>
-              </CardTitle>
-              <CardDescription>Configure and manage enrollment workflows for each pathway</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {workflows.map((workflow) => (
-                  <Card key={workflow.id} className="border-border/50">
-                    <CardHeader>
-                      <CardTitle className="text-lg">{workflow.name}</CardTitle>
-                      <CardDescription>{workflow.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium">Pathway:</span>
-                          <Badge variant="secondary">
-                            {ENROLLMENT_PATHWAYS[workflow.pathway as keyof typeof ENROLLMENT_PATHWAYS]?.name || workflow.pathway}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium">Status:</span>
-                          <Badge variant={workflow.is_active ? "default" : "destructive"}>
-                            {workflow.is_active ? "Active" : "Inactive"}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium">Default:</span>
-                          <Badge variant={workflow.is_default ? "default" : "secondary"}>
-                            {workflow.is_default ? "Yes" : "No"}
-                          </Badge>
-                        </div>
-                        <Button variant="outline" className="w-full">
-                          <Edit className="h-4 w-4 mr-2" />
-                          Configure Workflow
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         {/* Approvals Tab */}
         <TabsContent value="approvals" className="space-y-6">

@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { WorkflowDashboard } from '@/components/admissions/workflow/WorkflowDashboard';
 import { 
   Settings, 
   Users, 
@@ -288,24 +289,14 @@ export default function AdminManagementPage() {
           </TabsContent>
 
           <TabsContent value="workflows">
-            <Card>
-              <CardHeader>
-                <CardTitle>Workflow Management</CardTitle>
-                <CardDescription>Configure and manage admission workflows across all schools</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-center py-12">
-                  <div className="text-center">
-                    <GitBranch className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">Workflow Configuration</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Set up admission workflows, approval processes, and automation rules
-                    </p>
-                    <Button>Configure Workflows</Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <WorkflowDashboard getStatusColor={(status: string) => {
+              switch (status) {
+                case 'completed': return 'text-green-600';
+                case 'pending': return 'text-amber-600';
+                case 'error': return 'text-red-600';
+                default: return 'text-slate-600';
+              }
+            }} />
           </TabsContent>
 
           <TabsContent value="users">
