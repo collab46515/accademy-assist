@@ -14,16 +14,353 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          elevated_privilege: boolean | null
+          id: string
+          ip_address: unknown | null
+          new_values: Json | null
+          old_values: Json | null
+          resource_id: string | null
+          resource_type: string
+          school_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          elevated_privilege?: boolean | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          resource_id?: string | null
+          resource_type: string
+          school_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          elevated_privilege?: boolean | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          resource_id?: string | null
+          resource_type?: string
+          school_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          is_active: boolean
+          last_login: string | null
+          last_name: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          first_name: string
+          id?: string
+          is_active?: boolean
+          last_login?: string | null
+          last_name: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          is_active?: boolean
+          last_login?: string | null
+          last_name?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      role_permissions: {
+        Row: {
+          conditions: Json | null
+          id: string
+          permission: Database["public"]["Enums"]["permission_type"]
+          resource: Database["public"]["Enums"]["resource_type"]
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          conditions?: Json | null
+          id?: string
+          permission: Database["public"]["Enums"]["permission_type"]
+          resource: Database["public"]["Enums"]["resource_type"]
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          conditions?: Json | null
+          id?: string
+          permission?: Database["public"]["Enums"]["permission_type"]
+          resource?: Database["public"]["Enums"]["resource_type"]
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
+      schools: {
+        Row: {
+          address: string | null
+          code: string
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          settings: Json | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          code: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          settings?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          code?: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          settings?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      student_parents: {
+        Row: {
+          created_at: string
+          emergency_contact: boolean | null
+          id: string
+          is_primary: boolean | null
+          parent_id: string
+          relationship: string
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          emergency_contact?: boolean | null
+          id?: string
+          is_primary?: boolean | null
+          parent_id: string
+          relationship: string
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          emergency_contact?: boolean | null
+          id?: string
+          is_primary?: boolean | null
+          parent_id?: string
+          relationship?: string
+          student_id?: string
+        }
+        Relationships: []
+      }
+      students: {
+        Row: {
+          admission_date: string | null
+          created_at: string
+          date_of_birth: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          form_class: string | null
+          id: string
+          is_enrolled: boolean
+          medical_notes: string | null
+          safeguarding_notes: string | null
+          school_id: string
+          student_number: string
+          updated_at: string
+          user_id: string
+          year_group: string
+        }
+        Insert: {
+          admission_date?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          form_class?: string | null
+          id?: string
+          is_enrolled?: boolean
+          medical_notes?: string | null
+          safeguarding_notes?: string | null
+          school_id: string
+          student_number: string
+          updated_at?: string
+          user_id: string
+          year_group: string
+        }
+        Update: {
+          admission_date?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          form_class?: string | null
+          id?: string
+          is_enrolled?: boolean
+          medical_notes?: string | null
+          safeguarding_notes?: string | null
+          school_id?: string
+          student_number?: string
+          updated_at?: string
+          user_id?: string
+          year_group?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "students_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          department: string | null
+          id: string
+          is_active: boolean
+          role: Database["public"]["Enums"]["app_role"]
+          school_id: string
+          user_id: string
+          year_group: string | null
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          department?: string | null
+          id?: string
+          is_active?: boolean
+          role: Database["public"]["Enums"]["app_role"]
+          school_id: string
+          user_id: string
+          year_group?: string | null
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          department?: string | null
+          id?: string
+          is_active?: boolean
+          role?: Database["public"]["Enums"]["app_role"]
+          school_id?: string
+          user_id?: string
+          year_group?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_roles: {
+        Args: { user_uuid: string; school_uuid?: string }
+        Returns: {
+          role: Database["public"]["Enums"]["app_role"]
+          school_id: string
+          department: string
+          year_group: string
+        }[]
+      }
+      has_permission: {
+        Args: {
+          user_uuid: string
+          school_uuid: string
+          resource: Database["public"]["Enums"]["resource_type"]
+          permission: Database["public"]["Enums"]["permission_type"]
+        }
+        Returns: boolean
+      }
+      is_super_admin: {
+        Args: { user_uuid: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role:
+        | "super_admin"
+        | "school_admin"
+        | "teacher"
+        | "form_tutor"
+        | "dsl"
+        | "nurse"
+        | "hod"
+        | "parent"
+        | "student"
+      permission_type: "read" | "write" | "delete" | "approve" | "escalate"
+      resource_type:
+        | "students"
+        | "grades"
+        | "attendance"
+        | "medical_records"
+        | "safeguarding_logs"
+        | "financial_data"
+        | "reports"
+        | "staff_management"
+        | "system_settings"
+        | "communications"
+        | "timetables"
+        | "admissions"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +487,33 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: [
+        "super_admin",
+        "school_admin",
+        "teacher",
+        "form_tutor",
+        "dsl",
+        "nurse",
+        "hod",
+        "parent",
+        "student",
+      ],
+      permission_type: ["read", "write", "delete", "approve", "escalate"],
+      resource_type: [
+        "students",
+        "grades",
+        "attendance",
+        "medical_records",
+        "safeguarding_logs",
+        "financial_data",
+        "reports",
+        "staff_management",
+        "system_settings",
+        "communications",
+        "timetables",
+        "admissions",
+      ],
+    },
   },
 } as const
