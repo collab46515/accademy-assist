@@ -416,7 +416,13 @@ export const OutstandingFees = () => {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => handleViewDetails(fee)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          alert('View details clicked');
+                          handleViewDetails(fee);
+                        }}
+                        style={{ pointerEvents: 'auto', zIndex: 1000 }}
                         title="View Details"
                       >
                         <Eye className="h-4 w-4" />
@@ -424,7 +430,13 @@ export const OutstandingFees = () => {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => handleSendReminder(fee.id)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          alert('Send reminder clicked');
+                          handleSendReminder(fee.id);
+                        }}
+                        style={{ pointerEvents: 'auto', zIndex: 1000 }}
                         title="Send Reminder"
                       >
                         <Send className="h-4 w-4" />
