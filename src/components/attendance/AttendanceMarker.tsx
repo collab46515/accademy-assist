@@ -75,6 +75,10 @@ export function AttendanceMarker() {
     return matchesSearch && matchesClass;
   });
 
+  console.log('Students from useStudentData:', students.length);
+  console.log('Filtered students:', filteredStudents.length);
+  console.log('Students attendance state:', studentsAttendance.length);
+
   // Initialize students attendance when filters change
   useEffect(() => {
     const initializeAttendance = () => {
@@ -100,13 +104,16 @@ export function AttendanceMarker() {
 
   // Update student attendance status
   const updateStudentStatus = (studentId: string, status: 'present' | 'absent' | 'late' | 'left_early', reason?: string, notes?: string) => {
-    setStudentsAttendance(prev => 
-      prev.map(student => 
+    console.log('updateStudentStatus called:', { studentId, status, reason, notes });
+    setStudentsAttendance(prev => {
+      const updated = prev.map(student => 
         student.student_id === studentId 
           ? { ...student, status, reason, notes }
           : student
-      )
-    );
+      );
+      console.log('Updated attendance state:', updated);
+      return updated;
+    });
   };
 
   // Mark all students with bulk status
