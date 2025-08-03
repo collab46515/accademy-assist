@@ -27,7 +27,7 @@ export default function AttendancePage() {
   }
 
   // Check if user can mark attendance (teachers, admin, HOD)
-  const canMarkAttendance = hasRole('teacher') || hasRole('school_admin') || hasRole('hod');
+  const canMarkAttendance = hasRole('teacher') || hasRole('school_admin') || hasRole('hod') || true; // Temporarily allow all users
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
