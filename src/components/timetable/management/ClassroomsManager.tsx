@@ -20,11 +20,14 @@ const roomTypes = [
   'classroom',
   'laboratory',
   'computer_lab',
+  'workshop',
+  'art_room', 
+  'music_room',
+  'drama_studio',
   'gym',
   'library',
   'auditorium',
-  'music_room',
-  'art_room'
+  'common_room'
 ];
 
 export function ClassroomsManager() {
@@ -38,13 +41,13 @@ export function ClassroomsManager() {
     },
     {
       id: '2',
-      room_name: 'Science Lab 1',
+      room_name: 'Biology Lab',
       room_type: 'laboratory',
-      capacity: 25
+      capacity: 24
     },
     {
       id: '3',
-      room_name: 'Computer Lab',
+      room_name: 'Computer Suite 1',
       room_type: 'computer_lab',
       capacity: 20
     },
@@ -52,7 +55,19 @@ export function ClassroomsManager() {
       id: '4',
       room_name: 'Main Gym',
       room_type: 'gym',
-      capacity: 50
+      capacity: 60
+    },
+    {
+      id: '5',
+      room_name: 'DT Workshop',
+      room_type: 'workshop',
+      capacity: 16
+    },
+    {
+      id: '6',
+      room_name: 'Drama Studio',
+      room_type: 'drama_studio',
+      capacity: 30
     }
   ]);
 
@@ -115,11 +130,14 @@ export function ClassroomsManager() {
       classroom: 'default',
       laboratory: 'destructive',
       computer_lab: 'secondary',
+      workshop: 'outline',
+      art_room: 'secondary',
+      music_room: 'secondary', 
+      drama_studio: 'secondary',
       gym: 'outline',
       library: 'secondary',
       auditorium: 'outline',
-      music_room: 'secondary',
-      art_room: 'secondary'
+      common_room: 'secondary'
     };
     return colors[type] || 'default';
   };

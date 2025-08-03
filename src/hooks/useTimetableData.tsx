@@ -70,37 +70,51 @@ const mockPeriods: TimetablePeriod[] = [
 ];
 
 const mockSubjects: Subject[] = [
-  { id: '1', school_id: '1', subject_name: 'Mathematics', subject_code: 'MATH', color_code: '#3B82F6', requires_lab: false, periods_per_week: 5, is_active: true },
-  { id: '2', school_id: '1', subject_name: 'English Language', subject_code: 'ENG', color_code: '#10B981', requires_lab: false, periods_per_week: 4, is_active: true },
-  { id: '3', school_id: '1', subject_name: 'Science', subject_code: 'SCI', color_code: '#8B5CF6', requires_lab: true, periods_per_week: 4, is_active: true },
-  { id: '4', school_id: '1', subject_name: 'History', subject_code: 'HIST', color_code: '#F59E0B', requires_lab: false, periods_per_week: 3, is_active: true },
-  { id: '5', school_id: '1', subject_name: 'Physical Education', subject_code: 'PE', color_code: '#EF4444', requires_lab: false, periods_per_week: 2, is_active: true },
-  { id: '6', school_id: '1', subject_name: 'Art', subject_code: 'ART', color_code: '#F97316', requires_lab: false, periods_per_week: 2, is_active: true },
+  { id: '1', school_id: '1', subject_name: 'Mathematics', subject_code: 'MATHS', color_code: '#3B82F6', requires_lab: false, periods_per_week: 5, is_active: true },
+  { id: '2', school_id: '1', subject_name: 'English Language', subject_code: 'ENG-LANG', color_code: '#10B981', requires_lab: false, periods_per_week: 4, is_active: true },
+  { id: '3', school_id: '1', subject_name: 'Physics', subject_code: 'PHYS', color_code: '#EF4444', requires_lab: true, periods_per_week: 3, is_active: true },
+  { id: '4', school_id: '1', subject_name: 'Chemistry', subject_code: 'CHEM', color_code: '#F59E0B', requires_lab: true, periods_per_week: 3, is_active: true },
+  { id: '5', school_id: '1', subject_name: 'Biology', subject_code: 'BIO', color_code: '#22C55E', requires_lab: true, periods_per_week: 3, is_active: true },
+  { id: '6', school_id: '1', subject_name: 'History', subject_code: 'HIST', color_code: '#F97316', requires_lab: false, periods_per_week: 3, is_active: true },
+  { id: '7', school_id: '1', subject_name: 'Geography', subject_code: 'GEOG', color_code: '#06B6D4', requires_lab: false, periods_per_week: 3, is_active: true },
+  { id: '8', school_id: '1', subject_name: 'French', subject_code: 'FR', color_code: '#EF4444', requires_lab: false, periods_per_week: 3, is_active: true },
+  { id: '9', school_id: '1', subject_name: 'Physical Education', subject_code: 'PE', color_code: '#22C55E', requires_lab: false, periods_per_week: 2, is_active: true },
+  { id: '10', school_id: '1', subject_name: 'Art & Design', subject_code: 'ART', color_code: '#EC4899', requires_lab: false, periods_per_week: 2, is_active: true },
 ];
 
 const mockClassrooms: Classroom[] = [
   { id: '1', school_id: '1', room_name: 'Room 101', room_type: 'classroom', capacity: 30, is_active: true },
   { id: '2', school_id: '1', room_name: 'Room 102', room_type: 'classroom', capacity: 30, is_active: true },
-  { id: '3', school_id: '1', room_name: 'Science Lab 1', room_type: 'lab', capacity: 25, is_active: true },
-  { id: '4', school_id: '1', room_name: 'Gymnasium', room_type: 'gym', capacity: 50, is_active: true },
+  { id: '3', school_id: '1', room_name: 'Physics Lab', room_type: 'laboratory', capacity: 24, is_active: true },
+  { id: '4', school_id: '1', room_name: 'Chemistry Lab', room_type: 'laboratory', capacity: 24, is_active: true },
+  { id: '5', school_id: '1', room_name: 'Biology Lab', room_type: 'laboratory', capacity: 24, is_active: true },
+  { id: '6', school_id: '1', room_name: 'Computer Suite 1', room_type: 'computer_lab', capacity: 20, is_active: true },
+  { id: '7', school_id: '1', room_name: 'Main Gym', room_type: 'gym', capacity: 60, is_active: true },
+  { id: '8', school_id: '1', room_name: 'Art Studio', room_type: 'art_room', capacity: 20, is_active: true },
 ];
 
 const mockTimetableEntries: TimetableEntry[] = [
-  // Monday
-  { id: '1', school_id: '1', class_id: 'Year-8A', period_id: '1', subject_id: '1', teacher_id: 'teacher1', classroom_id: '1', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '2', school_id: '1', class_id: 'Year-8A', period_id: '2', subject_id: '2', teacher_id: 'teacher2', classroom_id: '1', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '3', school_id: '1', class_id: 'Year-8A', period_id: '4', subject_id: '3', teacher_id: 'teacher3', classroom_id: '3', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '4', school_id: '1', class_id: 'Year-8A', period_id: '5', subject_id: '4', teacher_id: 'teacher4', classroom_id: '1', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '5', school_id: '1', class_id: 'Year-8A', period_id: '7', subject_id: '5', teacher_id: 'teacher5', classroom_id: '4', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '6', school_id: '1', class_id: 'Year-8A', period_id: '8', subject_id: '6', teacher_id: 'teacher6', classroom_id: '2', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  // Monday - Year 10A British Curriculum
+  { id: '1', school_id: '1', class_id: 'Year-10A', period_id: '1', subject_id: '1', teacher_id: 'teacher1', classroom_id: '1', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '2', school_id: '1', class_id: 'Year-10A', period_id: '2', subject_id: '2', teacher_id: 'teacher2', classroom_id: '1', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '3', school_id: '1', class_id: 'Year-10A', period_id: '4', subject_id: '3', teacher_id: 'teacher3', classroom_id: '3', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '4', school_id: '1', class_id: 'Year-10A', period_id: '5', subject_id: '6', teacher_id: 'teacher4', classroom_id: '1', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '5', school_id: '1', class_id: 'Year-10A', period_id: '7', subject_id: '8', teacher_id: 'teacher5', classroom_id: '2', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '6', school_id: '1', class_id: 'Year-10A', period_id: '8', subject_id: '9', teacher_id: 'teacher6', classroom_id: '7', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
   
-  // Tuesday
-  { id: '7', school_id: '1', class_id: 'Year-8A', period_id: '1', subject_id: '2', teacher_id: 'teacher2', classroom_id: '1', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '8', school_id: '1', class_id: 'Year-8A', period_id: '2', subject_id: '1', teacher_id: 'teacher1', classroom_id: '1', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '9', school_id: '1', class_id: 'Year-8A', period_id: '4', subject_id: '4', teacher_id: 'teacher4', classroom_id: '1', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '10', school_id: '1', class_id: 'Year-8A', period_id: '5', subject_id: '3', teacher_id: 'teacher3', classroom_id: '3', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '11', school_id: '1', class_id: 'Year-8A', period_id: '7', subject_id: '1', teacher_id: 'teacher1', classroom_id: '1', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '12', school_id: '1', class_id: 'Year-8A', period_id: '8', subject_id: '2', teacher_id: 'teacher2', classroom_id: '1', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  // Tuesday  
+  { id: '7', school_id: '1', class_id: 'Year-10A', period_id: '1', subject_id: '4', teacher_id: 'teacher7', classroom_id: '4', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '8', school_id: '1', class_id: 'Year-10A', period_id: '2', subject_id: '1', teacher_id: 'teacher1', classroom_id: '1', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '9', school_id: '1', class_id: 'Year-10A', period_id: '4', subject_id: '7', teacher_id: 'teacher8', classroom_id: '1', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '10', school_id: '1', class_id: 'Year-10A', period_id: '5', subject_id: '5', teacher_id: 'teacher9', classroom_id: '5', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '11', school_id: '1', class_id: 'Year-10A', period_id: '7', subject_id: '2', teacher_id: 'teacher2', classroom_id: '1', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '12', school_id: '1', class_id: 'Year-10A', period_id: '8', subject_id: '10', teacher_id: 'teacher10', classroom_id: '8', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  
+  // Wednesday
+  { id: '13', school_id: '1', class_id: 'Year-10A', period_id: '1', subject_id: '3', teacher_id: 'teacher3', classroom_id: '3', day_of_week: 3, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '14', school_id: '1', class_id: 'Year-10A', period_id: '2', subject_id: '8', teacher_id: 'teacher5', classroom_id: '2', day_of_week: 3, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '15', school_id: '1', class_id: 'Year-10A', period_id: '4', subject_id: '1', teacher_id: 'teacher1', classroom_id: '1', day_of_week: 3, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '16', school_id: '1', class_id: 'Year-10A', period_id: '5', subject_id: '4', teacher_id: 'teacher7', classroom_id: '4', day_of_week: 3, academic_year: '2024-2025', term: 'Term 1', is_active: true },
 ];
 
 export function useTimetableData() {

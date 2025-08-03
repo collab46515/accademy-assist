@@ -24,8 +24,8 @@ interface TimetableEntry {
 const mockEntries: TimetableEntry[] = [
   {
     id: '1',
-    year_group: 'Year 8',
-    form_class: '8A',
+    year_group: 'Year 10',
+    form_class: '10A',
     subject: 'Mathematics',
     teacher: 'Mr. Johnson',
     room: 'Room 101',
@@ -35,9 +35,9 @@ const mockEntries: TimetableEntry[] = [
   },
   {
     id: '2',
-    year_group: 'Year 8',
-    form_class: '8A',
-    subject: 'English',
+    year_group: 'Year 10',
+    form_class: '10A',
+    subject: 'English Language',
     teacher: 'Ms. Smith',
     room: 'Room 102',
     period: 2,
@@ -46,14 +46,25 @@ const mockEntries: TimetableEntry[] = [
   },
   {
     id: '3',
-    year_group: 'Year 9',
-    form_class: '9B',
+    year_group: 'Year 11',
+    form_class: '11B',
     subject: 'Physics',
     teacher: 'Dr. Brown',
-    room: 'Science Lab 1',
+    room: 'Physics Lab',
     period: 3,
     day: 'Tuesday',
     color: '#EF4444'
+  },
+  {
+    id: '4',
+    year_group: 'Year 9',
+    form_class: '9A',
+    subject: 'French',
+    teacher: 'Mme. Dubois',
+    room: 'Room 201',
+    period: 1,
+    day: 'Wednesday',
+    color: '#F59E0B'
   }
 ];
 
@@ -77,7 +88,7 @@ export function TimetableEntriesManager() {
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
   const periods = [1, 2, 3, 4, 5, 6, 7, 8];
-  const classes = ['8A', '8B', '9A', '9B', '10A', '10B'];
+  const classes = ['7A', '7B', '8A', '8B', '9A', '9B', '10A', '10B', '11A', '11B', '12A', '12B', '13A', '13B'];
 
   const filteredEntries = entries.filter(entry => {
     const matchesSearch = entry.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -140,12 +151,22 @@ export function TimetableEntriesManager() {
   const getSubjectColor = (subject: string) => {
     const colors: Record<string, string> = {
       'Mathematics': '#3B82F6',
-      'English': '#10B981',
+      'English Language': '#10B981',
+      'English Literature': '#059669',
       'Physics': '#EF4444',
       'Chemistry': '#F59E0B',
-      'Biology': '#8B5CF6',
+      'Biology': '#22C55E',
       'History': '#F97316',
-      'Geography': '#06B6D4'
+      'Geography': '#06B6D4',
+      'French': '#EF4444',
+      'Spanish': '#F59E0B',
+      'German': '#6B7280',
+      'Art & Design': '#EC4899',
+      'Music': '#A855F7',
+      'Physical Education': '#22C55E',
+      'Computing': '#6366F1',
+      'Design & Technology': '#84CC16',
+      'Religious Education': '#8B5CF6'
     };
     return colors[subject] || '#6B7280';
   };

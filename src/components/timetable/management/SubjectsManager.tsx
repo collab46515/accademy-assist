@@ -19,8 +19,16 @@ interface Subject {
 }
 
 const predefinedColors = [
-  '#3B82F6', '#EF4444', '#10B981', '#F59E0B', 
+  '#3B82F6', '#10B981', '#EF4444', '#F59E0B', 
   '#8B5CF6', '#F97316', '#06B6D4', '#84CC16'
+];
+
+// British Curriculum Subjects
+const britishSubjects = [
+  'English Language', 'English Literature', 'Mathematics', 'Biology', 'Chemistry', 'Physics',
+  'Religious Education', 'History', 'Geography', 'Design & Technology', 'Computing',
+  'Art & Design', 'Music', 'Physical Education', 'French', 'Spanish', 'German',
+  'Drama', 'Business Studies', 'Psychology', 'Form Time', 'Assembly'
 ];
 
 export function SubjectsManager() {
@@ -29,15 +37,15 @@ export function SubjectsManager() {
     {
       id: '1',
       subject_name: 'Mathematics',
-      subject_code: 'MATH',
+      subject_code: 'MATHS',
       color_code: '#3B82F6',
       periods_per_week: 5,
       requires_lab: false
     },
     {
       id: '2',
-      subject_name: 'English',
-      subject_code: 'ENG',
+      subject_name: 'English Language',
+      subject_code: 'ENG-LANG',
       color_code: '#10B981',
       periods_per_week: 4,
       requires_lab: false
@@ -45,8 +53,24 @@ export function SubjectsManager() {
     {
       id: '3',
       subject_name: 'Physics',
-      subject_code: 'PHY',
+      subject_code: 'PHYS',
       color_code: '#EF4444',
+      periods_per_week: 3,
+      requires_lab: true
+    },
+    {
+      id: '4',
+      subject_name: 'Chemistry',
+      subject_code: 'CHEM',
+      color_code: '#F59E0B',
+      periods_per_week: 3,
+      requires_lab: true
+    },
+    {
+      id: '5',
+      subject_name: 'Biology',
+      subject_code: 'BIO',
+      color_code: '#22C55E',
       periods_per_week: 3,
       requires_lab: true
     }
@@ -145,8 +169,14 @@ export function SubjectsManager() {
                     id="subject_name"
                     value={formData.subject_name}
                     onChange={(e) => setFormData({ ...formData, subject_name: e.target.value })}
-                    placeholder="e.g., Mathematics"
+                    placeholder="e.g., Mathematics, English Language"
+                    list="british-subjects"
                   />
+                  <datalist id="british-subjects">
+                    {britishSubjects.map((subject) => (
+                      <option key={subject} value={subject} />
+                    ))}
+                  </datalist>
                 </div>
                 <div>
                   <Label htmlFor="subject_code">Subject Code</Label>
