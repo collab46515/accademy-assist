@@ -14,6 +14,7 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ApplicationForms } from "@/components/admissions/ApplicationForms";
 import { ApplicationManagement } from "@/components/admissions/ApplicationManagement";
+import { AdmissionsWorkflow } from "@/components/admissions/AdmissionsWorkflow";
 import { 
   UserPlus, 
   FileText, 
@@ -433,11 +434,16 @@ const UnifiedAdmissionsPage = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="pathways">Applications</TabsTrigger>
+          <TabsTrigger value="workflow">Workflow</TabsTrigger>
+          <TabsTrigger value="pathways">New Applications</TabsTrigger>
           <TabsTrigger value="management">Application Management</TabsTrigger>
-          <TabsTrigger value="approvals">Approvals</TabsTrigger>
           <TabsTrigger value="reports">Reports & Analytics</TabsTrigger>
         </TabsList>
+
+        {/* Workflow Tab */}
+        <TabsContent value="workflow" className="space-y-6">
+          <AdmissionsWorkflow />
+        </TabsContent>
 
         {/* Dashboard Tab */}
         <TabsContent value="dashboard" className="space-y-6">
