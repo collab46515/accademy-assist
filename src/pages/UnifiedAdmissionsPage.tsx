@@ -17,6 +17,7 @@ import { ApplicationManagement } from "@/components/admissions/ApplicationManage
 import { AdmissionsWorkflow } from "@/components/admissions/AdmissionsWorkflow";
 import { AdmissionsFlowVisualization } from "@/components/admissions/AdmissionsFlowVisualization";
 import { StageDetailBreakdown } from "@/components/admissions/StageDetailBreakdown";
+import { ApplicationTaskManager } from "@/components/admissions/ApplicationTaskManager";
 import { 
   UserPlus, 
   FileText, 
@@ -708,7 +709,18 @@ const UnifiedAdmissionsPage = () => {
 
         {/* Application Management Tab */}
         <TabsContent value="management" className="space-y-6">
-          <ApplicationManagement initialFilter={filterStatus !== "all" ? filterStatus : undefined} />
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="overview">Application Overview</TabsTrigger>
+              <TabsTrigger value="tasks">Task Management</TabsTrigger>
+            </TabsList>
+            <TabsContent value="overview">
+              <ApplicationManagement initialFilter={filterStatus !== "all" ? filterStatus : undefined} />
+            </TabsContent>
+            <TabsContent value="tasks">
+              <ApplicationTaskManager />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
 
