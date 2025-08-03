@@ -112,8 +112,13 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
   const location = useLocation();
   const { state } = useSidebar();
   
-  // Check if any item in this group is active
-  const hasActiveItem = items.some(item => location.pathname === item.url);
+  // Check if any item in this group is active - include query parameters for admission stages
+  const hasActiveItem = items.some(item => {
+    if (item.url.includes('?')) {
+      return location.pathname + location.search === item.url;
+    }
+    return location.pathname === item.url;
+  });
   
   const getNavClassName = (isActive: boolean) => 
     isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "";
@@ -133,7 +138,9 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => {
-                const isActive = location.pathname === item.url;
+                const isActive = item.url.includes('?') 
+                  ? location.pathname + location.search === item.url
+                  : location.pathname === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
