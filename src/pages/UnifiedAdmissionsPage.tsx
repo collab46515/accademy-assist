@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -111,6 +112,7 @@ const STATUS_COLORS = {
 };
 
 const UnifiedAdmissionsPage = () => {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [applications, setApplications] = useState<any[]>([]);
   const [enrollmentTypes, setEnrollmentTypes] = useState<any[]>([]);
@@ -132,10 +134,10 @@ const UnifiedAdmissionsPage = () => {
       id: "1",
       application_number: "APP202400001",
       pathway: "standard_digital",
-      status: "interview_scheduled",
+      status: "submitted",
       student_name: "Emma Thompson",
       year_group: "Year 7",
-      workflow_completion_percentage: 60,
+      workflow_completion_percentage: 30,
       submitted_at: "2024-01-15T10:30:00Z",
       last_activity_at: "2024-01-20T14:20:00Z"
     },
@@ -143,15 +145,26 @@ const UnifiedAdmissionsPage = () => {
       id: "2",
       application_number: "APP202400002",
       pathway: "sibling_automatic",
-      status: "pending_approval",
+      status: "submitted",
       student_name: "James Wilson",
       year_group: "Year 9",
-      workflow_completion_percentage: 80,
+      workflow_completion_percentage: 25,
       submitted_at: "2024-01-18T09:15:00Z",
       last_activity_at: "2024-01-22T11:45:00Z"
     },
     {
       id: "3",
+      application_number: "APP202400003",
+      pathway: "staff_child",
+      status: "submitted",
+      student_name: "Sophie Chen",
+      year_group: "Year 8",
+      workflow_completion_percentage: 20,
+      submitted_at: "2024-01-20T14:30:00Z",
+      last_activity_at: "2024-01-20T14:30:00Z"
+    },
+    {
+      id: "4",
       application_number: "BULK202400001",
       pathway: "internal_progression",
       status: "approved",
@@ -160,12 +173,42 @@ const UnifiedAdmissionsPage = () => {
       workflow_completion_percentage: 100,
       submitted_at: "2024-01-10T08:00:00Z",
       last_activity_at: "2024-01-25T16:30:00Z"
+    },
+    {
+      id: "5",
+      application_number: "APP202400004",
+      pathway: "emergency_safeguarding",
+      status: "interview_scheduled",
+      student_name: "Marcus Rodriguez",
+      year_group: "Year 10",
+      workflow_completion_percentage: 60,
+      submitted_at: "2024-01-22T09:15:00Z",
+      last_activity_at: "2024-01-22T11:45:00Z"
     }
   ];
 
   useEffect(() => {
     loadData();
   }, []);
+
+  // Handle URL parameters for tab and filter
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const tabParam = urlParams.get('tab');
+    const filterParam = urlParams.get('filter');
+    
+    if (tabParam) {
+      setActiveTab(tabParam === 'management' ? 'applications' : tabParam);
+    }
+    if (filterParam) {
+      // Map filter parameter to status for consistency
+      if (filterParam === 'submitted') {
+        setFilterStatus('submitted');
+      } else {
+        setFilterStatus(filterParam);
+      }
+    }
+  }, [location.search]);
 
   const loadData = async () => {
     try {
@@ -657,7 +700,7 @@ const UnifiedAdmissionsPage = () => {
 
         {/* Application Management Tab */}
         <TabsContent value="management" className="space-y-6">
-          <ApplicationManagement />
+          <ApplicationManagement initialFilter={filterStatus !== "all" ? filterStatus : undefined} />
         </TabsContent>
 
         {/* Workflow Management Tab */}
