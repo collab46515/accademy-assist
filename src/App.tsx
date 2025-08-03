@@ -3,6 +3,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/hooks/useAuth";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { AuthPage } from "@/components/auth/AuthPage";
 import { Navbar } from "@/components/layout/Navbar";
 import Dashboard from "./pages/Dashboard";
 import StudentsPage from "./pages/StudentsPage";
@@ -32,30 +35,43 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <div className="min-h-screen bg-background">
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/students" element={<StudentsPage />} />
-            <Route path="/admissions" element={<AdmissionsPage />} />
-            <Route path="/attendance" element={<AttendancePage />} />
-            <Route path="/curriculum" element={<CurriculumPage />} />
-            <Route path="/assessment" element={<AssessmentPage />} />
-            <Route path="/gradebook" element={<GradebookPage />} />
-            <Route path="/exams" element={<ExamsPage />} />
-            <Route path="/staff" element={<StaffPage />} />
-            <Route path="/communication" element={<CommunicationPage />} />
-            <Route path="/portals" element={<PortalsPage />} />
-            <Route path="/finance" element={<FinancePage />} />
-            <Route path="/activities" element={<ActivitiesPage />} />
-            <Route path="/safeguarding" element={<SafeguardingPage />} />
-            <Route path="/events" element={<EventsPage />} />
-            <Route path="/analytics" element={<AnalyticsPage />} />
-            <Route path="/ai-suite" element={<AISuitePage />} />
-            <Route path="/integrations" element={<IntegrationsPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </div>
+        <AuthProvider>
+          <div className="min-h-screen bg-background">
+            <Routes>
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/*" element={
+                <ProtectedRoute>
+                  <Navbar />
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/students" element={<StudentsPage />} />
+                    <Route path="/admissions" element={<AdmissionsPage />} />
+                    <Route path="/attendance" element={<AttendancePage />} />
+                    <Route path="/curriculum" element={<CurriculumPage />} />
+                    <Route path="/assessment" element={<AssessmentPage />} />
+                    <Route path="/gradebook" element={<GradebookPage />} />
+                    <Route path="/exams" element={<ExamsPage />} />
+                    <Route path="/staff" element={<StaffPage />} />
+                    <Route path="/communication" element={<CommunicationPage />} />
+                    <Route path="/portals" element={<PortalsPage />} />
+                    <Route path="/finance" element={<FinancePage />} />
+                    <Route path="/activities" element={<ActivitiesPage />} />
+                    <Route path="/safeguarding" element={
+                      <ProtectedRoute requiredRole="dsl">
+                        <SafeguardingPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/events" element={<EventsPage />} />
+                    <Route path="/analytics" element={<AnalyticsPage />} />
+                    <Route path="/ai-suite" element={<AISuitePage />} />
+                    <Route path="/integrations" element={<IntegrationsPage />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </ProtectedRoute>
+              } />
+            </Routes>
+          </div>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
