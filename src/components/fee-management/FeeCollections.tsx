@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -93,6 +93,7 @@ interface Student {
 export default function FeeCollections() {
   const [students, setStudents] = useState<Student[]>(mockStudents);
   const [searchTerm, setSearchTerm] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [classFilter, setClassFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [timeFilter, setTimeFilter] = useState('all');
@@ -130,6 +131,13 @@ export default function FeeCollections() {
     
     return matchesSearch && matchesClass && matchesStatus && matchesTime;
   });
+
+  // Auto-focus search field when Cash Counter Mode is enabled
+  useEffect(() => {
+    if (cashCounterMode && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [cashCounterMode]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -450,10 +458,11 @@ export default function FeeCollections() {
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by student name, ID, or parent name..."
+                  ref={searchInputRef}
+                  placeholder={cashCounterMode ? "Start typing student name or scan ID..." : "Search by student name, ID, or parent name..."}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className={`pl-10 ${cashCounterMode ? 'text-lg py-3' : ''}`}
                 />
               </div>
             </div>
