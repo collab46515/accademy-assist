@@ -87,7 +87,20 @@ export function ApplicationsList({
         app.application_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.parent_email.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesStatus = statusFilter === 'all' || app.status === statusFilter;
+      // Map URL filter values to database status values
+      const statusMapping = {
+        'all': 'all',
+        'submitted': 'submitted',
+        'under_review': 'reviewing',
+        'assessment_scheduled': 'assessment',
+        'interview_scheduled': 'interview',
+        'approved': 'approved',
+        'waitlisted': 'waitlisted',
+        'rejected': 'rejected'
+      };
+      
+      const mappedFilter = statusMapping[statusFilter as keyof typeof statusMapping] || statusFilter;
+      const matchesStatus = mappedFilter === 'all' || app.status === mappedFilter;
       
       return matchesSearch && matchesStatus;
     })

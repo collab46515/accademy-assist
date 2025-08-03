@@ -98,10 +98,12 @@ export function ApplicationManagement() {
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="submitted">Submitted</SelectItem>
-                <SelectItem value="reviewing">Under Review</SelectItem>
-                <SelectItem value="assessment">Assessment</SelectItem>
+                <SelectItem value="under_review">Under Review</SelectItem>
+                <SelectItem value="assessment_scheduled">Assessment Scheduled</SelectItem>
+                <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
                 <SelectItem value="approved">Approved</SelectItem>
                 <SelectItem value="waitlisted">Waitlisted</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
               </SelectContent>
             </Select>
           </div>
