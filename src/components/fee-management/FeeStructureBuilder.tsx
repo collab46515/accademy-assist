@@ -221,15 +221,15 @@ const FeeHeadForm = ({ feeHead, onSave, onCancel }: FeeHeadFormProps) => {
 };
 
 export const FeeStructureBuilder = () => {
-  // For now, use a mock school ID - in production this would come from auth context
-  const { feeHeads, loading, createFeeHead, updateFeeHead, deleteFeeHead } = useFeeData("school_1");
+  // Show all data for demo purposes - in production this would use proper school context
+  const { feeHeads, loading, createFeeHead, updateFeeHead, deleteFeeHead } = useFeeData();
   const [showForm, setShowForm] = useState(false);
   const [editingFeeHead, setEditingFeeHead] = useState<FeeHead | undefined>();
 
   const handleSave = async (feeHeadData: Omit<FeeHead, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      // Add school_id to the fee head data
-      const dataWithSchool = { ...feeHeadData, school_id: "school_1" };
+      // Add a random school_id for demo purposes
+      const dataWithSchool = { ...feeHeadData, school_id: crypto.randomUUID() };
       
       if (editingFeeHead) {
         await updateFeeHead(editingFeeHead.id, dataWithSchool);

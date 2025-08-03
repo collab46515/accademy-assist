@@ -66,6 +66,7 @@ export const useFeeData = (schoolId?: string) => {
       
       const result = await query;
       if (result.error) throw result.error;
+      console.log('Fetched fee heads:', result.data);
       setFeeHeads(result.data || []);
     } catch (error) {
       console.error('Error fetching fee heads:', error);
@@ -84,6 +85,7 @@ export const useFeeData = (schoolId?: string) => {
 
       const { data, error } = await query;
       if (error) throw error;
+      console.log('Fetched fee structures:', data);
       setFeeStructures(data || []);
     } catch (error) {
       console.error('Error fetching fee structures:', error);
