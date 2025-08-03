@@ -24,6 +24,7 @@ import { ApplicationsManager } from './ApplicationsManager';
 import { InterviewManager } from './InterviewManager';
 import { OffersManager } from './OffersManager';
 import { OnboardingManager } from './OnboardingManager';
+import { DocumentCollection } from './DocumentCollection';
 
 export function RecruitmentDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -108,6 +109,7 @@ export function RecruitmentDashboard() {
           <TabsTrigger value="interviews">Interviews</TabsTrigger>
           <TabsTrigger value="offers">Offers</TabsTrigger>
           <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
+          <TabsTrigger value="documents">Documents</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -266,6 +268,10 @@ export function RecruitmentDashboard() {
 
         <TabsContent value="onboarding">
           <OnboardingManager />
+        </TabsContent>
+
+        <TabsContent value="documents">
+          <DocumentCollection />
         </TabsContent>
       </Tabs>
     </div>
