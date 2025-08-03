@@ -1,27 +1,24 @@
+import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
-  CreditCard, 
-  Users, 
-  Settings, 
-  BarChart3, 
-  Receipt, 
-  Plus,
   DollarSign,
   Calendar,
-  FileText,
-  AlertCircle
+  AlertCircle,
+  Users,
+  Plus
 } from "lucide-react";
 import { FeeStructureTabs } from "@/components/fee-management/FeeStructureTabs";
-import { StudentFeeAssignments } from "@/components/fee-management/StudentFeeAssignments";
-import { PaymentCollection } from "@/components/fee-management/PaymentCollection";
 import { InvoiceGeneration } from "@/components/fee-management/InvoiceGeneration";
+import { PaymentCollection } from "@/components/fee-management/PaymentCollection";
+import { InstallmentPlans } from "@/components/fee-management/InstallmentPlans";
+import { DiscountsWaivers } from "@/components/fee-management/DiscountsWaivers";
+import { OutstandingFees } from "@/components/fee-management/OutstandingFees";
 import { FeeReportsAnalytics } from "@/components/fee-management/FeeReportsAnalytics";
-import { PaymentGatewaySettings } from "@/components/fee-management/PaymentGatewaySettings";
+import { FeeCalendar } from "@/components/fee-management/FeeCalendar";
+import { RemindersAlerts } from "@/components/fee-management/RemindersAlerts";
 
-const FeeManagementPage = () => {
+const FeeManagementOverview = () => {
   const stats = [
     { label: "Total Fee Collection", value: "£2,847,650", icon: DollarSign, color: "text-success" },
     { label: "Outstanding Fees", value: "£127,450", icon: AlertCircle, color: "text-warning" },
@@ -65,60 +62,29 @@ const FeeManagementPage = () => {
         })}
       </div>
 
-      {/* Fee Management Tabs */}
-      <Tabs defaultValue="structures" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="structures" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Fee Structures
-          </TabsTrigger>
-          <TabsTrigger value="assignments" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Student Assignments
-          </TabsTrigger>
-          <TabsTrigger value="collections" className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4" />
-            Collections
-          </TabsTrigger>
-          <TabsTrigger value="invoices" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Invoices
-          </TabsTrigger>
-          <TabsTrigger value="reports" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Reports
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Settings
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="structures" className="space-y-6">
-          <FeeStructureTabs />
-        </TabsContent>
-
-        <TabsContent value="assignments" className="space-y-6">
-          <StudentFeeAssignments />
-        </TabsContent>
-
-        <TabsContent value="collections" className="space-y-6">
-          <PaymentCollection />
-        </TabsContent>
-
-        <TabsContent value="invoices" className="space-y-6">
-          <InvoiceGeneration />
-        </TabsContent>
-
-        <TabsContent value="reports" className="space-y-6">
-          <FeeReportsAnalytics />
-        </TabsContent>
-
-        <TabsContent value="settings" className="space-y-6">
-          <PaymentGatewaySettings />
-        </TabsContent>
-      </Tabs>
+      {/* Quick Actions */}
+      <div className="text-center py-12 text-muted-foreground">
+        <p>Select a section from the sidebar to manage specific fee-related activities.</p>
+      </div>
     </div>
+  );
+};
+
+const FeeManagementPage = () => {
+  return (
+    <Routes>
+      <Route index element={<FeeManagementOverview />} />
+      <Route path="structure" element={<FeeStructureTabs />} />
+      <Route path="invoices" element={<InvoiceGeneration />} />
+      <Route path="payments" element={<PaymentCollection />} />
+      <Route path="installment-plans" element={<InstallmentPlans />} />
+      <Route path="discounts-waivers" element={<DiscountsWaivers />} />
+      <Route path="outstanding-fees" element={<OutstandingFees />} />
+      <Route path="reports" element={<FeeReportsAnalytics />} />
+      <Route path="calendar" element={<FeeCalendar />} />
+      <Route path="reminders" element={<RemindersAlerts />} />
+      <Route path="*" element={<Navigate to="/fee-management" replace />} />
+    </Routes>
   );
 };
 
