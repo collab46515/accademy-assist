@@ -93,16 +93,19 @@ export const InstallmentPlans = () => {
   };
 
   const handleViewDetails = (plan: InstallmentPlan) => {
+    console.log('View details clicked for plan:', plan.name);
     setSelectedPlan(plan);
     setShowDetailsDialog(true);
   };
 
   const handleEditPlan = (plan: InstallmentPlan) => {
+    console.log('Edit plan clicked for plan:', plan.name);
     setSelectedPlan(plan);
     setShowEditDialog(true);
   };
 
   const handleDeletePlan = (planId: string) => {
+    console.log('Delete plan clicked for planId:', planId);
     setPlans(plans.filter(plan => plan.id !== planId));
     toast.success('Installment plan deleted successfully');
   };
@@ -125,6 +128,7 @@ export const InstallmentPlans = () => {
   };
 
   const handleExportPlans = () => {
+    console.log('Export plans clicked');
     try {
       const csvData = plans.map(plan => ({
         'Plan Name': plan.name,
