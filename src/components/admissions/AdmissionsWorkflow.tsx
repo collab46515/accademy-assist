@@ -24,7 +24,7 @@ interface Application {
   applicationNumber: string;
   studentName: string;
   source: 'online' | 'referral' | 'call_centre' | 'walk_in';
-  currentStage: 'submission' | 'enrollment' | 'review' | 'assessment' | 'decision' | 'deposit' | 'confirmed' | 'class_allocation';
+  currentStage: 'submission' | 'application_fee' | 'enrollment' | 'review' | 'assessment' | 'decision' | 'deposit' | 'confirmed' | 'class_allocation';
   status: 'pending' | 'in_progress' | 'completed' | 'rejected' | 'on_hold';
   yearGroup: string;
   submittedAt: string;
@@ -38,6 +38,13 @@ const WORKFLOW_STAGES = [
     description: 'Initial application received from various sources',
     icon: UserPlus,
     color: 'bg-blue-100 text-blue-800'
+  },
+  { 
+    key: 'application_fee', 
+    label: 'Application Fee', 
+    description: 'Application fee payment processing',
+    icon: DollarSign,
+    color: 'bg-yellow-100 text-yellow-800'
   },
   { 
     key: 'enrollment', 
@@ -167,7 +174,7 @@ export function AdmissionsWorkflow() {
           return {
             ...app,
             currentStage: nextStage.key as any,
-            progress: Math.min(100, app.progress + 12.5)
+            progress: Math.min(100, app.progress + 11.1)
           };
         }
       }
