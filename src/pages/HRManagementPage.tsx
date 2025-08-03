@@ -9,6 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Calendar, Clock, Users, TrendingUp, AlertCircle, CheckCircle, FileText, DollarSign, User, MapPin, Phone, Mail, Building, Briefcase, Calendar as CalendarIcon, Target, Award, BookOpen, HeartHandshake, MessageSquare, Settings, Plus, Search, Filter, Edit, Trash2, Download, Upload, Eye, UserPlus, UserCheck, UserX, Clock3, CreditCard, PieChart, BarChart3, Activity, Archive, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useHRData } from '@/hooks/useHRData';
+import { EmployeeForm } from '@/components/hr/EmployeeForm';
 
 interface Employee {
   id: string;
@@ -71,86 +73,164 @@ export function HRManagementPage() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDepartment, setFilterDepartment] = useState('all');
+  const [showEmployeeForm, setShowEmployeeForm] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<any>(null);
 
-  // Mock data
-  const employees: Employee[] = [
-    {
-      id: '1',
-      employeeId: 'EMP001',
-      name: 'John Smith',
-      email: 'john.smith@company.com',
-      phone: '+44 7700 900123',
-      department: 'Engineering',
-      position: 'Senior Developer',
-      manager: 'Sarah Johnson',
-      startDate: '2022-01-15',
-      salary: 75000,
-      status: 'active',
-      avatar: '/placeholder.svg',
-      location: 'London, UK',
-      workType: 'full-time',
-      performance: 92,
-      attendanceRate: 96,
-      leaveBalance: 18,
-      certifications: ['AWS Certified', 'React Expert']
-    },
-    {
-      id: '2',
-      employeeId: 'EMP002',
-      name: 'Emily Davis',
-      email: 'emily.davis@company.com',
-      phone: '+44 7700 900124',
-      department: 'Marketing',
-      position: 'Marketing Manager',
-      manager: 'Michael Brown',
-      startDate: '2021-08-10',
-      salary: 62000,
-      status: 'active',
-      avatar: '/placeholder.svg',
-      location: 'Manchester, UK',
-      workType: 'full-time',
-      performance: 88,
-      attendanceRate: 94,
-      leaveBalance: 15,
-      certifications: ['Digital Marketing', 'Google Analytics']
+  // Use real HR data from database
+  const {
+    loading,
+    employees: dbEmployees,
+    departments: dbDepartments,
+    leaveRequests: dbLeaveRequests,
+    attendanceRecords,
+    payrollRecords,
+    createEmployee,
+    updateEmployee,
+    createDepartment,
+    createLeaveRequest,
+    processLeaveRequest,
+    recordAttendance,
+    processPayroll,
+    updatePayrollStatus,
+    refreshData
+  } = useHRData();
+
+  // Transform database data to match UI expectations
+  const employees = dbEmployees.map(emp => ({
+    id: emp.id,
+    employeeId: emp.employee_id,
+    name: `${emp.first_name} ${emp.last_name}`,
+    email: emp.email,
+    phone: emp.phone || '',
+    department: emp.department_id, // You might want to resolve this to department name
+    position: emp.position,
+    manager: emp.manager_id || '', // You might want to resolve this to manager name
+    startDate: emp.start_date,
+    salary: emp.salary,
+    status: emp.status as 'active' | 'inactive' | 'terminated',
+    avatar: '/placeholder.svg',
+    location: emp.location || '',
+    workType: emp.work_type.replace('_', '-') as 'full-time' | 'part-time' | 'contract' | 'intern',
+    performance: 85, // Mock for now
+    attendanceRate: 94, // Mock for now
+    leaveBalance: 20, // Mock for now
+    certifications: [] // Mock for now
+  }));
+
+  const departments = dbDepartments.map(dept => ({
+    id: dept.id,
+    name: dept.name,
+    head: dept.department_head_id || 'Not assigned',
+    employeeCount: dbEmployees.filter(emp => emp.department_id === dept.id).length,
+    budget: dept.budget || 0,
+    description: dept.description || ''
+  }));
+
+  const leaveRequests = dbLeaveRequests.map(leave => ({
+    id: leave.id,
+    employeeId: leave.employee_id,
+    employeeName: (() => {
+      const emp = dbEmployees.find(e => e.id === leave.employee_id);
+      return emp ? `${emp.first_name} ${emp.last_name}` : 'Unknown';
+    })(),
+    type: leave.leave_type,
+    startDate: leave.start_date,
+    endDate: leave.end_date,
+    days: leave.days_requested,
+    status: leave.status as 'pending' | 'approved' | 'rejected',
+    reason: leave.reason || '',
+    approver: leave.approved_by || undefined
+  }));
+
+  const payrollData = payrollRecords.map(payroll => ({
+    id: payroll.id,
+    employeeId: payroll.employee_id,
+    employeeName: (() => {
+      const emp = dbEmployees.find(e => e.id === payroll.employee_id);
+      return emp ? `${emp.first_name} ${emp.last_name}` : 'Unknown';
+    })(),
+    basicSalary: payroll.basic_salary,
+    allowances: payroll.allowances,
+    deductions: payroll.total_deductions,
+    netSalary: payroll.net_salary,
+    payPeriod: `${payroll.pay_period_start} to ${payroll.pay_period_end}`,
+    status: payroll.status as 'draft' | 'processed' | 'paid',
+    payDate: payroll.pay_date || ''
+  }));
+
+  const handleApproveLeave = async (id: string) => {
+    try {
+      await processLeaveRequest(id, 'approved');
+      await refreshData();
+    } catch (error) {
+      console.error('Error approving leave:', error);
     }
-  ];
-
-  const departments: Department[] = [
-    { id: '1', name: 'Engineering', head: 'Sarah Johnson', employeeCount: 45, budget: 2800000, description: 'Software development and technical operations' },
-    { id: '2', name: 'Marketing', head: 'Michael Brown', employeeCount: 22, budget: 850000, description: 'Brand management and customer acquisition' },
-    { id: '3', name: 'Sales', head: 'David Wilson', employeeCount: 18, budget: 720000, description: 'Revenue generation and client relations' },
-    { id: '4', name: 'HR', head: 'Lisa Anderson', employeeCount: 8, budget: 480000, description: 'Human resources and talent management' }
-  ];
-
-  const leaveRequests: LeaveRequest[] = [
-    { id: '1', employeeId: 'EMP001', employeeName: 'John Smith', type: 'Annual Leave', startDate: '2024-02-15', endDate: '2024-02-19', days: 5, status: 'pending', reason: 'Family vacation' },
-    { id: '2', employeeId: 'EMP002', employeeName: 'Emily Davis', type: 'Sick Leave', startDate: '2024-02-10', endDate: '2024-02-12', days: 3, status: 'approved', reason: 'Medical appointment', approver: 'Michael Brown' }
-  ];
-
-  const payrollData: Payroll[] = [
-    { id: '1', employeeId: 'EMP001', employeeName: 'John Smith', basicSalary: 6250, allowances: 500, deductions: 750, netSalary: 6000, payPeriod: 'February 2024', status: 'processed', payDate: '2024-02-28' },
-    { id: '2', employeeId: 'EMP002', employeeName: 'Emily Davis', basicSalary: 5167, allowances: 300, deductions: 617, netSalary: 4850, payPeriod: 'February 2024', status: 'paid', payDate: '2024-02-28' }
-  ];
-
-  const handleApproveLeave = (id: string) => {
-    toast({ title: "Leave Approved", description: "Leave request has been approved successfully." });
   };
 
-  const handleRejectLeave = (id: string) => {
-    toast({ title: "Leave Rejected", description: "Leave request has been rejected." });
+  const handleRejectLeave = async (id: string) => {
+    try {
+      await processLeaveRequest(id, 'rejected', 'Not approved');
+      await refreshData();
+    } catch (error) {
+      console.error('Error rejecting leave:', error);
+    }
   };
 
-  const handleProcessPayroll = (id: string) => {
-    toast({ title: "Payroll Processed", description: "Payroll has been processed successfully." });
+  const handleProcessPayroll = async (id: string) => {
+    try {
+      await updatePayrollStatus(id, 'processed');
+      await refreshData();
+    } catch (error) {
+      console.error('Error processing payroll:', error);
+    }
+  };
+
+  const handleCreateEmployee = async (employeeData: any) => {
+    try {
+      await createEmployee({
+        employee_id: `EMP${Date.now()}`,
+        first_name: employeeData.firstName,
+        last_name: employeeData.lastName,
+        email: employeeData.email,
+        phone: employeeData.phone,
+        department_id: employeeData.departmentId,
+        position: employeeData.position,
+        manager_id: employeeData.managerId,
+        start_date: employeeData.startDate,
+        salary: employeeData.salary,
+        status: employeeData.status || 'active',
+        work_type: employeeData.workType || 'full_time',
+        location: employeeData.location,
+        emergency_contact_name: employeeData.emergencyContactName,
+        emergency_contact_phone: employeeData.emergencyContactPhone,
+        bank_account_details: {},
+        tax_information: {},
+        benefits: {}
+      });
+      setShowEmployeeForm(false);
+      await refreshData();
+    } catch (error) {
+      console.error('Error creating employee:', error);
+    }
   };
 
   const stats = {
     totalEmployees: employees.length,
     activeEmployees: employees.filter(e => e.status === 'active').length,
     pendingLeaves: leaveRequests.filter(l => l.status === 'pending').length,
-    avgPerformance: Math.round(employees.reduce((acc, emp) => acc + emp.performance, 0) / employees.length)
+    avgPerformance: employees.length > 0 ? Math.round(employees.reduce((acc, emp) => acc + emp.performance, 0) / employees.length) : 0
   };
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading HR data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -159,7 +239,7 @@ export function HRManagementPage() {
           <h1 className="text-3xl font-bold">HR Management</h1>
           <p className="text-muted-foreground">Complete human resources management system</p>
         </div>
-        <Button className="flex items-center gap-2">
+        <Button className="flex items-center gap-2" onClick={() => setShowEmployeeForm(true)}>
           <UserPlus className="h-4 w-4" />
           Add Employee
         </Button>
@@ -237,7 +317,7 @@ export function HRManagementPage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Button variant="outline" className="h-20 flex flex-col gap-2">
+                <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={() => setShowEmployeeForm(true)}>
                   <UserPlus className="h-6 w-6" />
                   <span>Add Employee</span>
                 </Button>
@@ -765,6 +845,28 @@ export function HRManagementPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Employee Form Modal */}
+      {showEmployeeForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background p-6 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-semibold mb-4">
+              {editingEmployee ? 'Edit Employee' : 'Add New Employee'}
+            </h2>
+            <EmployeeForm
+              employee={editingEmployee}
+              departments={dbDepartments}
+              employees={dbEmployees}
+              onSubmit={handleCreateEmployee}
+              onCancel={() => {
+                setShowEmployeeForm(false);
+                setEditingEmployee(null);
+              }}
+              isSubmitting={loading}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
