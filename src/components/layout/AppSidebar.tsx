@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -110,6 +110,7 @@ interface SidebarGroupItemsProps {
 function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupItemsProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const location = useLocation();
+  const navigate = useNavigate();
   const { state } = useSidebar();
   
   // Check if any item in this group is active - include query parameters for admission stages
@@ -141,23 +142,36 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
                 const isActive = item.url.includes('?') 
                   ? location.pathname + location.search === item.url
                   : location.pathname === item.url;
+                  
+                const handleClick = () => {
+                  if (item.url.includes('?')) {
+                    // For admission stages with filters, use programmatic navigation
+                    navigate(item.url);
+                  }
+                };
+                
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
-                      asChild 
+                      asChild={!item.url.includes('?')}
                       isActive={isActive}
                       tooltip={state === "collapsed" ? item.title : undefined}
+                      onClick={item.url.includes('?') ? handleClick : undefined}
                     >
-                      <NavLink 
-                        to={item.url.includes('?') ? {
-                          pathname: item.url.split('?')[0],
-                          search: '?' + item.url.split('?')[1]
-                        } : item.url}
-                        className={getNavClassName(isActive)}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </NavLink>
+                      {item.url.includes('?') ? (
+                        <div className={`flex items-center gap-2 ${getNavClassName(isActive)}`}>
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </div>
+                      ) : (
+                        <NavLink 
+                          to={item.url}
+                          className={getNavClassName(isActive)}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
