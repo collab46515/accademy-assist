@@ -32,6 +32,8 @@ import {
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/integrations/supabase/client';
+import { CollectionSessionManager } from './CollectionSessionManager';
+import { SessionReportsAndApproval } from './SessionReportsAndApproval';
 
 // Mock data - replace with actual data fetching
 const mockStudents: Student[] = [

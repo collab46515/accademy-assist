@@ -976,6 +976,63 @@ export type Database = {
         }
         Relationships: []
       }
+      collection_sessions: {
+        Row: {
+          cashier_id: string
+          closing_cash_amount: number | null
+          created_at: string
+          expected_cash_amount: number | null
+          id: string
+          notes: string | null
+          opening_cash_amount: number | null
+          school_id: string
+          session_end: string | null
+          session_start: string
+          status: string
+          supervisor_approved_at: string | null
+          supervisor_approved_by: string | null
+          supervisor_notes: string | null
+          updated_at: string
+          variance_amount: number | null
+        }
+        Insert: {
+          cashier_id: string
+          closing_cash_amount?: number | null
+          created_at?: string
+          expected_cash_amount?: number | null
+          id?: string
+          notes?: string | null
+          opening_cash_amount?: number | null
+          school_id: string
+          session_end?: string | null
+          session_start?: string
+          status?: string
+          supervisor_approved_at?: string | null
+          supervisor_approved_by?: string | null
+          supervisor_notes?: string | null
+          updated_at?: string
+          variance_amount?: number | null
+        }
+        Update: {
+          cashier_id?: string
+          closing_cash_amount?: number | null
+          created_at?: string
+          expected_cash_amount?: number | null
+          id?: string
+          notes?: string | null
+          opening_cash_amount?: number | null
+          school_id?: string
+          session_end?: string | null
+          session_start?: string
+          status?: string
+          supervisor_approved_at?: string | null
+          supervisor_approved_by?: string | null
+          supervisor_notes?: string | null
+          updated_at?: string
+          variance_amount?: number | null
+        }
+        Relationships: []
+      }
       company_assets: {
         Row: {
           asset_name: string
@@ -3372,6 +3429,7 @@ export type Database = {
           amount_paid: number | null
           cashier_id: string | null
           cashier_name: string | null
+          collection_session_id: string | null
           created_at: string
           fee_type: string | null
           id: string
@@ -3396,6 +3454,7 @@ export type Database = {
           amount_paid?: number | null
           cashier_id?: string | null
           cashier_name?: string | null
+          collection_session_id?: string | null
           created_at?: string
           fee_type?: string | null
           id?: string
@@ -3420,6 +3479,7 @@ export type Database = {
           amount_paid?: number | null
           cashier_id?: string | null
           cashier_name?: string | null
+          collection_session_id?: string | null
           created_at?: string
           fee_type?: string | null
           id?: string
@@ -3438,7 +3498,15 @@ export type Database = {
           student_name?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "payment_records_collection_session_id_fkey"
+            columns: ["collection_session_id"]
+            isOneToOne: false
+            referencedRelation: "collection_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payroll_records: {
         Row: {
@@ -4750,6 +4818,9 @@ export type Database = {
           assigned_at: string
           assigned_by: string | null
           department: string | null
+          fee_collection_role:
+            | Database["public"]["Enums"]["fee_collection_role"]
+            | null
           id: string
           is_active: boolean
           role: Database["public"]["Enums"]["app_role"]
@@ -4761,6 +4832,9 @@ export type Database = {
           assigned_at?: string
           assigned_by?: string | null
           department?: string | null
+          fee_collection_role?:
+            | Database["public"]["Enums"]["fee_collection_role"]
+            | null
           id?: string
           is_active?: boolean
           role: Database["public"]["Enums"]["app_role"]
@@ -4772,6 +4846,9 @@ export type Database = {
           assigned_at?: string
           assigned_by?: string | null
           department?: string | null
+          fee_collection_role?:
+            | Database["public"]["Enums"]["fee_collection_role"]
+            | null
           id?: string
           is_active?: boolean
           role?: Database["public"]["Enums"]["app_role"]
@@ -4917,6 +4994,7 @@ export type Database = {
         | "withdrawn"
         | "on_hold"
         | "requires_override"
+      fee_collection_role: "cashier" | "supervisor" | "admin"
       override_reason:
         | "policy_exception"
         | "emergency_circumstances"
@@ -5105,6 +5183,7 @@ export const Constants = {
         "on_hold",
         "requires_override",
       ],
+      fee_collection_role: ["cashier", "supervisor", "admin"],
       override_reason: [
         "policy_exception",
         "emergency_circumstances",
