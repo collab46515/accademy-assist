@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { StandardDigitalForm, SiblingEnrollmentForm } from "@/components/admissions/ApplicationForms";
 import { 
   UserPlus, 
   FileText, 
@@ -36,7 +37,9 @@ import {
   Building,
   Heart,
   Workflow,
-  RotateCcw
+  RotateCcw,
+  ArrowLeft,
+  X
 } from "lucide-react";
 
 // Enrollment pathway configuration
@@ -118,6 +121,9 @@ const UnifiedAdmissionsPage = () => {
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedPathway, setSelectedPathway] = useState("");
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const [currentApplicationData, setCurrentApplicationData] = useState<any>(null);
+  const [applicationProgress, setApplicationProgress] = useState(0);
 
   // Mock data for development
   const mockApplications = [
@@ -210,7 +216,58 @@ const UnifiedAdmissionsPage = () => {
 
   const handleStartApplication = (pathway: string) => {
     setSelectedPathway(pathway);
-    setShowCreateDialog(true);
+    setShowCreateDialog(false);
+    setShowApplicationForm(true);
+    setApplicationProgress(10); // Starting progress
+    toast({
+      title: "Application Started",
+      description: `Starting ${ENROLLMENT_PATHWAYS[pathway as keyof typeof ENROLLMENT_PATHWAYS]?.name} process`,
+    });
+  };
+
+  const handleApplicationSubmit = async (data: any) => {
+    try {
+      setApplicationProgress(50);
+      
+      // Here we would normally submit to Supabase
+      console.log('Submitting application:', data);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      setApplicationProgress(100);
+      
+      toast({
+        title: "Application Submitted Successfully",
+        description: "Your application has been received and is being processed",
+      });
+
+      // Reset form state
+      setShowApplicationForm(false);
+      setSelectedPathway("");
+      setApplicationProgress(0);
+      
+      // Refresh applications list
+      loadData();
+      
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      toast({
+        title: "Submission Error",
+        description: "There was an error submitting your application. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleApplicationCancel = () => {
+    setShowApplicationForm(false);
+    setSelectedPathway("");
+    setApplicationProgress(0);
+    toast({
+      title: "Application Cancelled",
+      description: "Application process has been cancelled",
+    });
   };
 
   const handleViewApplication = (app: any) => {
@@ -256,6 +313,110 @@ const UnifiedAdmissionsPage = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
             <p className="mt-4 text-muted-foreground">Loading admissions system...</p>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If showing application form, render just the form
+  if (showApplicationForm && selectedPathway) {
+    return (
+      <div className="min-h-screen bg-background">
+        {/* Progress Header */}
+        <div className="bg-card border-b sticky top-0 z-10">
+          <div className="container mx-auto px-4 py-4 max-w-7xl">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-4">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleApplicationCancel}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Dashboard
+                </Button>
+                <div>
+                  <h2 className="text-xl font-semibold">
+                    {ENROLLMENT_PATHWAYS[selectedPathway as keyof typeof ENROLLMENT_PATHWAYS]?.name}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Complete your application below
+                  </p>
+                </div>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleApplicationCancel}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            {/* Admissions Progress Bar */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Application Progress</span>
+                <span className="font-medium">{applicationProgress}%</span>
+              </div>
+              <Progress value={applicationProgress} className="h-2" />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Started</span>
+                <span>In Progress</span>
+                <span>Submitted</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Application Form */}
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          {selectedPathway === "standard_digital" && (
+            <StandardDigitalForm 
+              pathway={selectedPathway}
+              onSubmit={handleApplicationSubmit}
+              onCancel={handleApplicationCancel}
+            />
+          )}
+          {selectedPathway === "sibling_automatic" && (
+            <SiblingEnrollmentForm 
+              pathway={selectedPathway}
+              onSubmit={handleApplicationSubmit}
+              onCancel={handleApplicationCancel}
+            />
+          )}
+          {selectedPathway === "staff_child" && (
+            <div className="text-center py-12">
+              <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">Staff Child Placement Form</h3>
+              <p className="text-muted-foreground mb-4">Coming soon - specialized form for staff children</p>
+              <Button onClick={handleApplicationCancel}>Return to Dashboard</Button>
+            </div>
+          )}
+          {selectedPathway === "emergency_safeguarding" && (
+            <div className="text-center py-12">
+              <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">Emergency Safeguarding Referral</h3>
+              <p className="text-muted-foreground mb-4">Coming soon - urgent enrollment form</p>
+              <Button onClick={handleApplicationCancel}>Return to Dashboard</Button>
+            </div>
+          )}
+          {selectedPathway === "partner_school" && (
+            <div className="text-center py-12">
+              <Building className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">Partner School Acquisition</h3>
+              <p className="text-muted-foreground mb-4">Coming soon - bulk import form</p>
+              <Button onClick={handleApplicationCancel}>Return to Dashboard</Button>
+            </div>
+          )}
+          {selectedPathway === "internal_progression" && (
+            <div className="text-center py-12">
+              <GraduationCap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">Internal Year Group Progression</h3>
+              <p className="text-muted-foreground mb-4">Coming soon - bulk progression tool</p>
+              <Button onClick={handleApplicationCancel}>Return to Dashboard</Button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -689,14 +850,7 @@ const UnifiedAdmissionsPage = () => {
                   key={key}
                   variant="outline"
                   className="w-full justify-start h-auto p-4"
-                  onClick={() => {
-                    setSelectedPathway(key);
-                    setShowCreateDialog(false);
-                    toast({
-                      title: "Pathway Selected",
-                      description: `Starting ${pathway.name} application process`,
-                    });
-                  }}
+                  onClick={() => handleStartApplication(key)}
                 >
                   <div className="flex items-center space-x-3">
                     <div className={`p-2 rounded ${pathway.color}`}>
