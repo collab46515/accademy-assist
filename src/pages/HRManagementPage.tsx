@@ -10,6 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { Calendar, Clock, Users, TrendingUp, AlertCircle, CheckCircle, FileText, DollarSign, User, MapPin, Phone, Mail, Building, Briefcase, Calendar as CalendarIcon, Target, Award, BookOpen, HeartHandshake, MessageSquare, Settings, Plus, Search, Filter, Edit, Trash2, Download, Upload, Eye, UserPlus, UserCheck, UserX, Clock3, CreditCard, PieChart, BarChart3, Activity, Archive, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useHRData } from '@/hooks/useHRData';
+import { useComprehensiveHR } from '@/hooks/useComprehensiveHR';
 import { EmployeeForm } from '@/components/hr/EmployeeForm';
 
 interface Employee {
@@ -94,6 +95,30 @@ export function HRManagementPage() {
     updatePayrollStatus,
     refreshData
   } = useHRData();
+
+  // Use comprehensive HR data
+  const {
+    loading: comprehensiveLoading,
+    performanceReviews,
+    performanceGoals,
+    jobPostings,
+    jobApplications,
+    trainingCourses,
+    trainingEnrollments,
+    benefitPlans,
+    companyAssets,
+    projects,
+    timeEntries,
+    travelRequests,
+    expenseReports,
+    engagementSurveys,
+    createJobPosting,
+    createTrainingCourse,
+    createProject,
+    createTimeEntry,
+    updateApplicationStatus,
+    refreshData: refreshComprehensiveData
+  } = useComprehensiveHR();
 
   // Transform database data to match UI expectations
   const employees = dbEmployees.map(emp => ({
@@ -246,14 +271,18 @@ export function HRManagementPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-12 gap-1">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="employees">Employees</TabsTrigger>
-          <TabsTrigger value="departments">Departments</TabsTrigger>
-          <TabsTrigger value="attendance">Attendance</TabsTrigger>
-          <TabsTrigger value="leaves">Leave Management</TabsTrigger>
-          <TabsTrigger value="payroll">Payroll</TabsTrigger>
+          <TabsTrigger value="recruitment">Recruitment</TabsTrigger>
+          <TabsTrigger value="training">Training</TabsTrigger>
+          <TabsTrigger value="benefits">Benefits</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
+          <TabsTrigger value="attendance">Attendance</TabsTrigger>
+          <TabsTrigger value="leaves">Leaves</TabsTrigger>
+          <TabsTrigger value="payroll">Payroll</TabsTrigger>
+          <TabsTrigger value="assets">Assets</TabsTrigger>
+          <TabsTrigger value="time">Time Track</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
 
@@ -839,6 +868,335 @@ export function HRManagementPage() {
                       <span className="font-medium text-green-600">94%</span>
                     </div>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="recruitment" className="space-y-6">
+          {/* Recruitment Management */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Job Postings</CardTitle>
+                    <CardDescription>Manage open positions and requirements</CardDescription>
+                  </div>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Post Job
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {jobPostings.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">No job postings yet</p>
+                  ) : (
+                    jobPostings.map((job) => (
+                      <div key={job.id} className="p-3 border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium">{job.job_title}</h4>
+                          <Badge variant={job.status === 'active' ? 'default' : 'secondary'}>
+                            {job.status}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-2">{job.location} • {job.employment_type.replace('_', ' ')}</p>
+                        <p className="text-xs text-muted-foreground">Posted: {job.posting_date}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Applications</CardTitle>
+                <CardDescription>Review and process candidate applications</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {jobApplications.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">No applications yet</p>
+                  ) : (
+                    jobApplications.map((application) => (
+                      <div key={application.id} className="p-3 border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium">{application.applicant_name}</h4>
+                          <Badge variant={
+                            application.application_status === 'hired' ? 'default' :
+                            application.application_status === 'rejected' ? 'destructive' : 'secondary'
+                          }>
+                            {application.application_status}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{application.applicant_email}</p>
+                        <div className="flex gap-2 mt-2">
+                          <Button size="sm" variant="outline">
+                            <Eye className="h-4 w-4 mr-1" />
+                            Review
+                          </Button>
+                          {application.application_status === 'submitted' && (
+                            <Button size="sm" onClick={() => updateApplicationStatus(application.id, 'interview')}>
+                              Interview
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="training" className="space-y-6">
+          {/* Training Management */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Training Courses</CardTitle>
+                    <CardDescription>Available courses and programs</CardDescription>
+                  </div>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Course
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {trainingCourses.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">No courses available</p>
+                  ) : (
+                    trainingCourses.map((course) => (
+                      <div key={course.id} className="p-3 border rounded-lg">
+                        <h4 className="font-medium mb-1">{course.course_title}</h4>
+                        <p className="text-sm text-muted-foreground mb-2">{course.course_description}</p>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span>{course.course_type}</span>
+                          {course.duration_hours && <span>{course.duration_hours}h</span>}
+                          {course.cost_per_person && <span>£{course.cost_per_person}</span>}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Enrollments</CardTitle>
+                <CardDescription>Employee training progress</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {trainingEnrollments.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">No enrollments yet</p>
+                  ) : (
+                    trainingEnrollments.map((enrollment) => (
+                      <div key={enrollment.id} className="p-3 border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium">Employee {enrollment.employee_id.slice(0, 8)}...</h4>
+                          <Badge variant={enrollment.status === 'completed' ? 'default' : 'secondary'}>
+                            {enrollment.status}
+                          </Badge>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span>Progress</span>
+                            <span>{enrollment.progress_percentage}%</span>
+                          </div>
+                          <Progress value={enrollment.progress_percentage} className="h-2" />
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="benefits" className="space-y-6">
+          {/* Benefits Management */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Employee Benefits</CardTitle>
+                  <CardDescription>Manage benefit plans and enrollments</CardDescription>
+                </div>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Benefit Plan
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {benefitPlans.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8 col-span-full">No benefit plans available</p>
+                ) : (
+                  benefitPlans.map((plan) => (
+                    <Card key={plan.id} className="p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Award className="h-5 w-5 text-primary" />
+                        <h4 className="font-medium">{plan.plan_name}</h4>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3">{plan.plan_description}</p>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Type:</span>
+                          <Badge variant="outline">{plan.plan_type.replace('_', ' ')}</Badge>
+                        </div>
+                        {plan.provider_name && (
+                          <div className="flex justify-between">
+                            <span>Provider:</span>
+                            <span>{plan.provider_name}</span>
+                          </div>
+                        )}
+                        {plan.employee_contribution && (
+                          <div className="flex justify-between">
+                            <span>Employee:</span>
+                            <span>£{plan.employee_contribution}/month</span>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="assets" className="space-y-6">
+          {/* Asset Management */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Company Assets</CardTitle>
+                  <CardDescription>Track and manage company equipment</CardDescription>
+                </div>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Asset
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {companyAssets.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">No assets registered</p>
+                ) : (
+                  companyAssets.map((asset) => (
+                    <div key={asset.id} className="p-3 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium">{asset.asset_name}</h4>
+                        <Badge variant={
+                          asset.status === 'available' ? 'default' :
+                          asset.status === 'assigned' ? 'secondary' :
+                          asset.status === 'maintenance' ? 'destructive' : 'outline'
+                        }>
+                          {asset.status}
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+                        <span>Tag: {asset.asset_tag}</span>
+                        <span>Location: {asset.location || 'N/A'}</span>
+                        {asset.brand && <span>Brand: {asset.brand}</span>}
+                        {asset.model && <span>Model: {asset.model}</span>}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="time" className="space-y-6">
+          {/* Time Tracking */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Projects</CardTitle>
+                    <CardDescription>Active projects for time tracking</CardDescription>
+                  </div>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Project
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {projects.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">No projects available</p>
+                  ) : (
+                    projects.map((project) => (
+                      <div key={project.id} className="p-3 border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium">{project.project_name}</h4>
+                          <Badge variant={project.status === 'active' ? 'default' : 'secondary'}>
+                            {project.status}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{project.description}</p>
+                        {project.client_name && (
+                          <p className="text-xs text-muted-foreground mt-1">Client: {project.client_name}</p>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Time Entries</CardTitle>
+                    <CardDescription>Recent time tracking entries</CardDescription>
+                  </div>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Log Time
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {timeEntries.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">No time entries logged</p>
+                  ) : (
+                    timeEntries.slice(0, 5).map((entry) => (
+                      <div key={entry.id} className="p-3 border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium">{entry.task_description}</h4>
+                          <Badge variant={entry.status === 'approved' ? 'default' : 'secondary'}>
+                            {entry.status}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
+                          <span>Hours: {entry.hours_worked || 'N/A'}</span>
+                          <span>{entry.is_billable ? 'Billable' : 'Non-billable'}</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
