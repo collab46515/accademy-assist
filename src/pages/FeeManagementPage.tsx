@@ -186,9 +186,9 @@ const FeeManagementPage = () => {
       <Route path="structure" element={<FeeStructureTabs />} />
       <Route path="invoices" element={<InvoiceGeneration />} />
       <Route path="payments" element={<PaymentCollection />} />
-      <Route path="installment-plans" element={<InstallmentPlans />} />
-      <Route path="discounts-waivers" element={<DiscountsWaivers />} />
-      <Route path="outstanding-fees" element={<OutstandingFees />} />
+      <Route path="installments" element={<InstallmentPlans />} />
+      <Route path="discounts" element={<DiscountsWaivers />} />
+      <Route path="outstanding" element={<OutstandingFees />} />
       <Route path="reports" element={<FeeReportsAnalytics />} />
       <Route path="calendar" element={<FeeCalendar />} />
       <Route path="reminders" element={<RemindersAlerts />} />
