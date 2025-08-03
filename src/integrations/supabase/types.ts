@@ -3368,44 +3368,74 @@ export type Database = {
       payment_records: {
         Row: {
           amount: number
+          amount_due: number | null
+          amount_paid: number | null
+          cashier_id: string | null
+          cashier_name: string | null
           created_at: string
+          fee_type: string | null
           id: string
           invoice_id: string | null
           notes: string | null
+          parent_name: string | null
           payment_date: string
           payment_method: string
+          payment_time: string | null
+          receipt_number: string | null
           reference_number: string | null
           school_id: string
           status: string
+          student_class: string | null
           student_id: string
+          student_name: string | null
           updated_at: string
         }
         Insert: {
           amount: number
+          amount_due?: number | null
+          amount_paid?: number | null
+          cashier_id?: string | null
+          cashier_name?: string | null
           created_at?: string
+          fee_type?: string | null
           id?: string
           invoice_id?: string | null
           notes?: string | null
+          parent_name?: string | null
           payment_date?: string
           payment_method?: string
+          payment_time?: string | null
+          receipt_number?: string | null
           reference_number?: string | null
           school_id: string
           status?: string
+          student_class?: string | null
           student_id: string
+          student_name?: string | null
           updated_at?: string
         }
         Update: {
           amount?: number
+          amount_due?: number | null
+          amount_paid?: number | null
+          cashier_id?: string | null
+          cashier_name?: string | null
           created_at?: string
+          fee_type?: string | null
           id?: string
           invoice_id?: string | null
           notes?: string | null
+          parent_name?: string | null
           payment_date?: string
           payment_method?: string
+          payment_time?: string | null
+          receipt_number?: string | null
           reference_number?: string | null
           school_id?: string
           status?: string
+          student_class?: string | null
           student_id?: string
+          student_name?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -4821,6 +4851,10 @@ export type Database = {
       can_access_student: {
         Args: { student_uuid: string }
         Returns: boolean
+      }
+      generate_receipt_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       get_user_roles: {
         Args: { user_uuid: string; school_uuid?: string }
