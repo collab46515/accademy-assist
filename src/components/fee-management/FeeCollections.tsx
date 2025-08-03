@@ -125,6 +125,9 @@ export default function FeeCollections() {
   const [showMarkAllClassModal, setShowMarkAllClassModal] = useState(false);
   const [selectedClassForBulk, setSelectedClassForBulk] = useState('');
   const { toast } = useToast();
+  const [lastPayment, setLastPayment] = useState<any>(null);
+  const [undoTimer, setUndoTimer] = useState<number | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState(30);
 
   const [paymentForm, setPaymentForm] = useState({
     amount: '',
