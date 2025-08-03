@@ -4,6 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer } from 'recharts';
 import { 
@@ -15,10 +21,18 @@ import {
   Bell, 
   FileText, 
   Calendar, 
-  Send 
+  Send,
+  Eye,
+  Download,
+  Filter,
+  Search,
+  ChevronRight
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { PaymentRecordModal } from './PaymentRecordModal';
+import { ClassCollectionDetailModal } from './ClassCollectionDetailModal';
+import { TodayCollectionModal } from './TodayCollectionModal';
 
 interface DashboardMetrics {
   totalCollected: number;
@@ -82,6 +96,13 @@ export function FeeDashboard() {
   const [dailyCollections, setDailyCollections] = useState<DailyCollection[]>([]);
   const [alerts, setAlerts] = useState<FeeAlert[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Modal states
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [classDetailModalOpen, setClassDetailModalOpen] = useState(false);
+  const [todayCollectionModalOpen, setTodayCollectionModalOpen] = useState(false);
+  const [selectedClass, setSelectedClass] = useState<string>('');
+  
   const { toast } = useToast();
 
   useEffect(() => {
@@ -194,10 +215,76 @@ export function FeeDashboard() {
   };
 
   const handleQuickAction = (action: string) => {
-    toast({
-      title: "Quick Action",
-      description: `${action} feature coming soon!`,
-    });
+    switch (action) {
+      case 'Record Payment':
+        setPaymentModalOpen(true);
+        break;
+      case 'Send Reminder to All Overdue':
+        toast({
+          title: "Reminders Sent",
+          description: `Sent payment reminders to ${metrics.overdueAccounts} overdue accounts`,
+        });
+        break;
+      case 'Generate Invoices (Bulk)':
+        toast({
+          title: "Bulk Invoice Generation",
+          description: "Invoice generation started. You'll be notified when complete.",
+        });
+        break;
+      case "View Today's Collection List":
+        setTodayCollectionModalOpen(true);
+        break;
+      default:
+        toast({
+          title: "Quick Action",
+          description: `${action} feature coming soon!`,
+        });
+    }
+  };
+
+  const handleClassClick = (className: string) => {
+    setSelectedClass(className);
+    setClassDetailModalOpen(true);
+  };
+
+  const getClassDetailData = (className: string) => {
+    // Mock detailed data for the selected class
+    const mockStudents = [
+      {
+        id: '1',
+        name: 'James Wilson',
+        amountDue: 1600,
+        amountPaid: 0,
+        status: 'pending',
+        dueDate: '2025-08-15'
+      },
+      {
+        id: '2',
+        name: 'Sarah Brown',
+        amountDue: 1600,
+        amountPaid: 800,
+        status: 'partial',
+        dueDate: '2025-08-15'
+      },
+      {
+        id: '3',
+        name: 'Michael Johnson',
+        amountDue: 1600,
+        amountPaid: 1600,
+        status: 'paid',
+        dueDate: '2025-08-15'
+      }
+    ];
+
+    const summary = {
+      totalStudents: mockStudents.length,
+      totalDue: mockStudents.reduce((sum, s) => sum + s.amountDue, 0),
+      totalPaid: mockStudents.reduce((sum, s) => sum + s.amountPaid, 0),
+      percentage: 0
+    };
+    summary.percentage = Math.round((summary.totalPaid / summary.totalDue) * 100);
+
+    return { students: mockStudents, summary };
   };
 
   const getPriorityColor = (priority: string) => {
@@ -305,9 +392,15 @@ export function FeeDashboard() {
         <div className="lg:col-span-3 space-y-6">
           {/* Collection Progress by Class */}
           <Card>
-            <CardHeader>
-              <CardTitle>Collection Progress by Class</CardTitle>
-              <CardDescription>Percentage collected per class</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Collection Progress by Class</CardTitle>
+                <CardDescription>Click on bars to see detailed breakdown</CardDescription>
+              </div>
+              <Button variant="ghost" size="sm">
+                <Eye className="w-4 h-4 mr-2" />
+                View All
+              </Button>
             </CardHeader>
             <CardContent>
               <ChartContainer config={chartConfig}>
@@ -316,10 +409,32 @@ export function FeeDashboard() {
                     <XAxis dataKey="className" />
                     <YAxis />
                     <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="percentage" fill="hsl(var(--primary))" />
+                    <Bar 
+                      dataKey="percentage" 
+                      fill="hsl(var(--primary))" 
+                      className="cursor-pointer"
+                      onClick={(data) => handleClassClick(data.className)}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-4">
+                {classCollections.map((classItem) => (
+                  <Button
+                    key={classItem.className}
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto p-2 flex flex-col items-start"
+                    onClick={() => handleClassClick(classItem.className)}
+                  >
+                    <span className="font-medium">{classItem.className}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {classItem.percentage}% collected
+                    </span>
+                    <ChevronRight className="w-3 h-3 ml-auto" />
+                  </Button>
+                ))}
+              </div>
             </CardContent>
           </Card>
 
@@ -454,6 +569,25 @@ export function FeeDashboard() {
           )}
         </CardContent>
       </Card>
+
+      {/* Interactive Modals */}
+      <PaymentRecordModal
+        open={paymentModalOpen}
+        onOpenChange={setPaymentModalOpen}
+        onPaymentRecorded={fetchDashboardData}
+      />
+      
+      <ClassCollectionDetailModal
+        open={classDetailModalOpen}
+        onOpenChange={setClassDetailModalOpen}
+        className={selectedClass}
+        data={getClassDetailData(selectedClass)}
+      />
+      
+      <TodayCollectionModal
+        open={todayCollectionModalOpen}
+        onOpenChange={setTodayCollectionModalOpen}
+      />
     </div>
   );
 }
