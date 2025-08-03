@@ -165,88 +165,101 @@ const quickStats = [
 
 const Dashboard = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       {/* Hero Section */}
       <div 
-        className="relative bg-cover bg-center h-64 flex items-center justify-center"
+        className="relative bg-cover bg-center h-80 flex items-center justify-center overflow-hidden"
         style={{ backgroundImage: `url(${heroImage})` }}
       >
-        <div className="absolute inset-0 bg-primary/80"></div>
-        <div className="relative text-center text-primary-foreground z-10">
-          <h1 className="text-4xl font-bold mb-2">Student Information System</h1>
-          <p className="text-xl opacity-90">Complete Education Management Platform</p>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/70 via-primary/80 to-primary/90"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+        <div className="relative text-center text-primary-foreground z-10 animate-fade-in">
+          <h1 className="text-5xl font-bold mb-4 tracking-tight">Student Information System</h1>
+          <p className="text-xl opacity-90 max-w-2xl mx-auto">Complete Education Management Platform for Modern Schools</p>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto px-6 py-12 max-w-7xl space-y-12">
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {quickStats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <Card key={index} className="shadow-[var(--shadow-card)]">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">{stat.label}</p>
-                      <p className="text-3xl font-bold">{stat.value}</p>
+        <section className="animate-fade-in">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {quickStats.map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <Card key={index} className="group hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1 bg-card/60 backdrop-blur-sm border-border/50">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                        <p className="text-3xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">{stat.value}</p>
+                      </div>
+                      <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110">
+                        <Icon className={`h-6 w-6 ${stat.color} group-hover:text-primary transition-colors duration-300`} />
+                      </div>
                     </div>
-                    <Icon className={`h-8 w-8 ${stat.color}`} />
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </section>
 
         {/* System Status */}
-        <Card className="mb-8 shadow-[var(--shadow-card)]">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Activity className="h-5 w-5 text-success" />
-              <span>System Status</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="default" className="bg-success text-success-foreground">
-                All Systems Operational
-              </Badge>
-              <Badge variant="secondary">
-                18 Modules Active
-              </Badge>
-              <Badge variant="outline">
-                Last Updated: 2 minutes ago
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
+        <section className="animate-fade-in">
+          <Card className="bg-card/60 backdrop-blur-sm border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center space-x-3 text-xl">
+                <div className="p-2 bg-success/10 rounded-lg">
+                  <Activity className="h-5 w-5 text-success" />
+                </div>
+                <span>System Status</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-3">
+                <Badge variant="default" className="bg-success/90 text-success-foreground border-success/20 px-3 py-1">
+                  All Systems Operational
+                </Badge>
+                <Badge variant="secondary" className="px-3 py-1">
+                  18 Modules Active
+                </Badge>
+                <Badge variant="outline" className="px-3 py-1">
+                  Last Updated: 2 minutes ago
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
 
         {/* Core Modules */}
-        <div className="mb-12">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-foreground mb-2">Core Modules</h2>
-            <p className="text-muted-foreground">Essential education management functionality</p>
+        <section className="animate-fade-in space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl font-bold text-foreground">Core Modules</h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Essential education management functionality for modern schools</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {coreModules.map((module, index) => (
-              <ModuleCard key={index} {...module} />
+              <div key={index} className="animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+                <ModuleCard {...module} />
+              </div>
             ))}
           </div>
-        </div>
+        </section>
 
         {/* Additional Modules */}
-        <div>
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-foreground mb-2">Additional Modules</h2>
-            <p className="text-muted-foreground">Extended functionality for comprehensive school management</p>
+        <section className="animate-fade-in space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl font-bold text-foreground">Additional Modules</h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Extended functionality for comprehensive school management</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {additionalModules.map((module, index) => (
-              <ModuleCard key={index} {...module} />
+              <div key={index} className="animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
+                <ModuleCard {...module} />
+              </div>
             ))}
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );
