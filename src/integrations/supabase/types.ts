@@ -3849,6 +3849,80 @@ export type Database = {
         }
         Relationships: []
       }
+      staff: {
+        Row: {
+          created_at: string
+          email: string
+          emergency_contact: Json | null
+          employment_type: string
+          end_date: string | null
+          first_name: string
+          form_tutor_class: string | null
+          id: string
+          is_active: boolean
+          last_name: string
+          phone: string | null
+          position: string
+          qualifications: Json | null
+          school_id: string
+          staff_number: string
+          start_date: string
+          teaching_subjects: string[] | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          emergency_contact?: Json | null
+          employment_type?: string
+          end_date?: string | null
+          first_name: string
+          form_tutor_class?: string | null
+          id?: string
+          is_active?: boolean
+          last_name: string
+          phone?: string | null
+          position: string
+          qualifications?: Json | null
+          school_id: string
+          staff_number: string
+          start_date: string
+          teaching_subjects?: string[] | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          emergency_contact?: Json | null
+          employment_type?: string
+          end_date?: string | null
+          first_name?: string
+          form_tutor_class?: string | null
+          id?: string
+          is_active?: boolean
+          last_name?: string
+          phone?: string | null
+          position?: string
+          qualifications?: Json | null
+          school_id?: string
+          staff_number?: string
+          start_date?: string
+          teaching_subjects?: string[] | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_parents: {
         Row: {
           created_at: string
@@ -4483,6 +4557,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_student: {
+        Args: { student_uuid: string }
+        Returns: boolean
+      }
       get_user_roles: {
         Args: { user_uuid: string; school_uuid?: string }
         Returns: {
