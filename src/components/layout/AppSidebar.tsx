@@ -20,6 +20,16 @@ import {
   Building2,
   ChevronDown,
   ChevronRight,
+  Send,
+  Clock,
+  CheckCircle,
+  AlertTriangle,
+  Eye,
+  ClipboardCheck,
+  UserCheck,
+  Award,
+  BookCheck,
+  GraduationCap as GradCap
 } from "lucide-react";
 
 import {
@@ -77,6 +87,17 @@ const systemItems = [
   { title: "AI Suite", url: "/ai-suite", icon: Bot },
   { title: "Integrations", url: "/integrations", icon: Settings },
   { title: "User Management", url: "/user-management", icon: Users },
+];
+
+// Admission Process Stages (high-level workflow overview)
+const admissionStages = [
+  { title: "New Applications", url: "/admissions?tab=management&filter=submitted", icon: Send },
+  { title: "Under Review", url: "/admissions?tab=management&filter=under_review", icon: Eye },
+  { title: "Assessment Stage", url: "/admissions?tab=management&filter=assessment_scheduled", icon: ClipboardCheck },
+  { title: "Interview Stage", url: "/admissions?tab=management&filter=interview_scheduled", icon: UserCheck },
+  { title: "Decision Pending", url: "/admissions?tab=management&filter=pending_approval", icon: Clock },
+  { title: "Approved Applications", url: "/admissions?tab=management&filter=approved", icon: CheckCircle },
+  { title: "Requires Attention", url: "/admissions?tab=management&filter=requires_override", icon: AlertTriangle },
 ];
 
 interface SidebarGroupItemsProps {
@@ -192,6 +213,15 @@ export function AppSidebar() {
           items={studentItems} 
           defaultOpen={studentItems.some(item => location.pathname === item.url)}
         />
+
+        {/* Admission Process Stages - Only show when on admissions page */}
+        {location.pathname === '/admissions' && (
+          <SidebarGroupItems 
+            title="Admission Stages" 
+            items={admissionStages}
+            defaultOpen={true}
+          />
+        )}
 
         {/* Academic */}
         <SidebarGroupItems 
