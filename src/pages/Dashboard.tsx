@@ -195,8 +195,8 @@ const quickStats = [
 
 const Dashboard = () => {
   const [isSchoolOpen, setIsSchoolOpen] = useState(true);
-  const [isHROpen, setIsHROpen] = useState(false);
-  const [isSystemOpen, setIsSystemOpen] = useState(false);
+  const [isHROpen, setIsHROpen] = useState(true);
+  const [isSystemOpen, setIsSystemOpen] = useState(true);
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       {/* Hero Section */}
