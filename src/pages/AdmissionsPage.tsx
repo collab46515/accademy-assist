@@ -1,4 +1,5 @@
 import { useState } from "react";
+import React from "react";
 import { ApplicationManagement } from "@/components/admissions/ApplicationManagement";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,17 @@ const AdmissionsPage = () => {
   const [filterStage, setFilterStage] = useState("all");
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState("management");
+
+  // Handle URL parameters for tab
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    if (tabParam) {
+      setActiveTab(tabParam);
+    }
+  }, []);
+
   const [newApplication, setNewApplication] = useState({
     student: "",
     email: "",
@@ -305,7 +317,7 @@ const AdmissionsPage = () => {
         })}
       </div>
 
-      <Tabs defaultValue="management" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="management">Application Management</TabsTrigger>
           <TabsTrigger value="enrollment">Quick Enrollment</TabsTrigger>
