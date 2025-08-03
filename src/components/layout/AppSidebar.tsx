@@ -12,7 +12,6 @@ import {
   MessageSquare,
   CreditCard,
   FileText,
-  FileCheck,
   Shield,
   Globe,
   Settings,
@@ -94,7 +93,7 @@ const systemItems = [
 // Admission Process Stages (detailed workflow stages)
 const admissionStages = [
   { title: "Application Submitted", url: "/admissions?stage=0", icon: Send },
-  { title: "Document Verification", url: "/admissions?stage=1", icon: FileCheck },
+  { title: "Document Verification", url: "/admissions?stage=1", icon: FileText },
   { title: "Application Review", url: "/admissions?stage=2", icon: Eye },
   { title: "Assessment/Interview", url: "/admissions?stage=3", icon: ClipboardCheck },
   { title: "Admission Decision", url: "/admissions?stage=4", icon: CheckCircle },
