@@ -29,6 +29,8 @@ import IntegrationsPage from "./pages/IntegrationsPage";
 import { UserManagementPage } from "./pages/UserManagementPage";
 import NotFound from "./pages/NotFound";
 
+import UnifiedAdmissionsPage from "./pages/UnifiedAdmissionsPage";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -56,7 +58,8 @@ const App = () => (
                         <Routes>
                           <Route path="/" element={<Dashboard />} />
                           <Route path="/students" element={<StudentsPage />} />
-                          <Route path="/admissions" element={<AdmissionsPage />} />
+            <Route path="/admissions" element={<UnifiedAdmissionsPage />} />
+            <Route path="/admissions/legacy" element={<AdmissionsPage />} />
                           <Route path="/attendance" element={<AttendancePage />} />
                           <Route path="/curriculum" element={<CurriculumPage />} />
                           <Route path="/assessment" element={<AssessmentPage />} />

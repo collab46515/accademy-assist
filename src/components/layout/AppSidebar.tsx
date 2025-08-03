@@ -45,7 +45,7 @@ const mainItems = [
 // Student management items
 const studentItems = [
   { title: "Students", url: "/students", icon: Users },
-  { title: "Admissions", url: "/admissions", icon: UserPlus },
+  { title: "Unified Admissions", url: "/admissions", icon: UserPlus },
   { title: "Attendance", url: "/attendance", icon: Calendar },
 ];
 
