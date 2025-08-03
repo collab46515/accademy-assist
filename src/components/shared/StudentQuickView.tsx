@@ -93,22 +93,8 @@ export function StudentQuickView({ student, trigger }: StudentQuickViewProps) {
               <CardHeader>
                 <CardTitle className="text-sm">Current Enrollments</CardTitle>
               </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Enrollment data will be available when database is ready</p>
-                      <div key={enrollment.id} className="flex items-center justify-between p-2 border rounded">
-                        <div>
-                          <div className="font-medium">{enrollment.classes.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {enrollment.classes.subjects.name} ({enrollment.classes.subjects.code})
-                          </div>
-                        </div>
-                        <Badge variant="outline">{enrollment.classes.year_groups.name}</Badge>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No current enrollments</p>
-                )}
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Enrollment data will be available when database is ready</p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -127,7 +113,7 @@ export function StudentQuickView({ student, trigger }: StudentQuickViewProps) {
                 </CardContent>
               </Card>
 
-              {student.profile?.phone && (
+              {student.profiles?.phone && (
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
@@ -136,7 +122,7 @@ export function StudentQuickView({ student, trigger }: StudentQuickViewProps) {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <span className="text-sm">{student.profile.phone}</span>
+                    <span className="text-sm">{student.profiles.phone}</span>
                   </CardContent>
                 </Card>
               )}

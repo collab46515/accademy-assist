@@ -77,31 +77,17 @@ export function useStudentData() {
   const { currentSchool } = useRBAC();
 
   const fetchStudents = async () => {
-    if (!currentSchool) return;
+    if (!currentSchool) {
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('students')
-        .select(`
-          *,
-          profiles!inner(
-            first_name,
-            last_name,
-            email,
-            phone,
-            avatar_url
-          )
-        `)
-        .eq('school_id', currentSchool.id)
-        .eq('is_enrolled', true);
-
-      if (error) {
-        console.log('Using mock data - DB not ready yet');
-        setStudents(mockStudents);
-      } else {
-        setStudents(data || []);
-      }
+      // For now, we'll use mock data since the database migration hasn't been applied yet
+      // Once the user applies the migration, this can be updated to use real data
+      console.log('Using mock data until database migration is applied');
+      setStudents(mockStudents);
     } catch (error) {
       console.error('Error fetching students, using mock data:', error);
       setStudents(mockStudents);
