@@ -102,7 +102,7 @@ export function AdmissionStagesBreadcrumb() {
           const Icon = stage.icon;
           
           return (
-            <React.Fragment key={stage.id}>
+            <div key={stage.id} className="flex items-center">
               <Button
                 variant={isActive ? "default" : "ghost"}
                 size="sm"
@@ -123,9 +123,9 @@ export function AdmissionStagesBreadcrumb() {
               </Button>
               
               {index < admissionStages.length - 1 && (
-                <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0 mx-1" />
               )}
-            </React.Fragment>
+            </div>
           );
         })}
       </div>
