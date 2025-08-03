@@ -2401,6 +2401,57 @@ export type Database = {
         }
         Relationships: []
       }
+      fee_discounts: {
+        Row: {
+          applicable_fee_types: string[] | null
+          conditions: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          discount_type: string
+          id: string
+          name: string
+          school_id: string
+          status: string
+          updated_at: string
+          valid_from: string
+          valid_to: string
+          value: number
+        }
+        Insert: {
+          applicable_fee_types?: string[] | null
+          conditions?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_type: string
+          id?: string
+          name: string
+          school_id: string
+          status?: string
+          updated_at?: string
+          valid_from: string
+          valid_to: string
+          value: number
+        }
+        Update: {
+          applicable_fee_types?: string[] | null
+          conditions?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_type?: string
+          id?: string
+          name?: string
+          school_id?: string
+          status?: string
+          updated_at?: string
+          valid_from?: string
+          valid_to?: string
+          value?: number
+        }
+        Relationships: []
+      }
       fee_heads: {
         Row: {
           amount: number
@@ -2490,6 +2541,158 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      fee_waivers: {
+        Row: {
+          approval_date: string | null
+          approved_by: string | null
+          created_at: string
+          fee_type: string
+          id: string
+          notes: string | null
+          original_amount: number
+          reason: string
+          request_date: string
+          requested_by: string | null
+          school_id: string
+          status: string
+          student_id: string
+          student_name: string
+          supporting_documents: string[] | null
+          updated_at: string
+          waived_amount: number
+        }
+        Insert: {
+          approval_date?: string | null
+          approved_by?: string | null
+          created_at?: string
+          fee_type: string
+          id?: string
+          notes?: string | null
+          original_amount: number
+          reason: string
+          request_date?: string
+          requested_by?: string | null
+          school_id: string
+          status?: string
+          student_id: string
+          student_name: string
+          supporting_documents?: string[] | null
+          updated_at?: string
+          waived_amount: number
+        }
+        Update: {
+          approval_date?: string | null
+          approved_by?: string | null
+          created_at?: string
+          fee_type?: string
+          id?: string
+          notes?: string | null
+          original_amount?: number
+          reason?: string
+          request_date?: string
+          requested_by?: string | null
+          school_id?: string
+          status?: string
+          student_id?: string
+          student_name?: string
+          supporting_documents?: string[] | null
+          updated_at?: string
+          waived_amount?: number
+        }
+        Relationships: []
+      }
+      installment_plans: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string
+          frequency: string
+          id: string
+          interest_rate: number | null
+          name: string
+          number_of_installments: number
+          school_id: string
+          start_date: string
+          status: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date: string
+          frequency: string
+          id?: string
+          interest_rate?: number | null
+          name: string
+          number_of_installments: number
+          school_id: string
+          start_date: string
+          status?: string
+          total_amount: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string
+          frequency?: string
+          id?: string
+          interest_rate?: number | null
+          name?: string
+          number_of_installments?: number
+          school_id?: string
+          start_date?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      installment_schedules: {
+        Row: {
+          amount: number
+          created_at: string
+          due_date: string
+          id: string
+          installment_number: number
+          plan_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          due_date: string
+          id?: string
+          installment_number: number
+          plan_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          due_date?: string
+          id?: string
+          installment_number?: number
+          plan_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "installment_schedules_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "installment_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       interview_schedules: {
         Row: {
@@ -3379,6 +3582,77 @@ export type Database = {
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outstanding_fees: {
+        Row: {
+          created_at: string
+          due_date: string
+          fee_type: string
+          id: string
+          last_reminder_sent: string | null
+          original_amount: number
+          outstanding_amount: number | null
+          paid_amount: number | null
+          parent_email: string | null
+          parent_name: string | null
+          parent_phone: string | null
+          payment_plan_id: string | null
+          school_id: string
+          status: string
+          student_id: string
+          student_name: string
+          updated_at: string
+          year_group: string | null
+        }
+        Insert: {
+          created_at?: string
+          due_date: string
+          fee_type: string
+          id?: string
+          last_reminder_sent?: string | null
+          original_amount: number
+          outstanding_amount?: number | null
+          paid_amount?: number | null
+          parent_email?: string | null
+          parent_name?: string | null
+          parent_phone?: string | null
+          payment_plan_id?: string | null
+          school_id: string
+          status?: string
+          student_id: string
+          student_name: string
+          updated_at?: string
+          year_group?: string | null
+        }
+        Update: {
+          created_at?: string
+          due_date?: string
+          fee_type?: string
+          id?: string
+          last_reminder_sent?: string | null
+          original_amount?: number
+          outstanding_amount?: number | null
+          paid_amount?: number | null
+          parent_email?: string | null
+          parent_name?: string | null
+          parent_phone?: string | null
+          payment_plan_id?: string | null
+          school_id?: string
+          status?: string
+          student_id?: string
+          student_name?: string
+          updated_at?: string
+          year_group?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outstanding_fees_payment_plan_id_fkey"
+            columns: ["payment_plan_id"]
+            isOneToOne: false
+            referencedRelation: "installment_plans"
             referencedColumns: ["id"]
           },
         ]

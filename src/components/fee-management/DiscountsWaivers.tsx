@@ -11,7 +11,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Edit, Trash2, Percent, Gift, Users, TrendingDown, Download, FileText, CheckCircle, XCircle, Eye } from 'lucide-react';
 import { toast } from 'sonner';
-import { downloadCSV } from '@/utils/exportHelpers';
 
 interface Discount {
   id: string;
@@ -185,6 +184,23 @@ export const DiscountsWaivers = () => {
   const handleDeleteDiscount = (discountId: string) => {
     setDiscounts(discounts.filter(discount => discount.id !== discountId));
     toast.success('Discount deleted successfully');
+  };
+
+  const downloadCSV = (data: any[], filename: string) => {
+    const csvContent = [
+      Object.keys(data[0] || {}).join(','),
+      ...data.map(row => Object.values(row).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filename}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const handleExportDiscounts = () => {
@@ -470,11 +486,15 @@ export const DiscountsWaivers = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Button size="sm" variant="outline" title="Edit Discount">
+                        <div className="flex items-center space-x-2">
+                          <Button variant="ghost" size="sm">
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleDeleteDiscount(discount.id)} title="Delete Discount">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleDeleteDiscount(discount.id)}
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -498,9 +518,8 @@ export const DiscountsWaivers = () => {
                   <TableRow>
                     <TableHead>Student</TableHead>
                     <TableHead>Fee Type</TableHead>
-                    <TableHead>Original Amount</TableHead>
-                    <TableHead>Waived Amount</TableHead>
-                    <TableHead>Requested By</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Waived</TableHead>
                     <TableHead>Request Date</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Actions</TableHead>
@@ -521,11 +540,10 @@ export const DiscountsWaivers = () => {
                         <div>
                           <div>£{waiver.waivedAmount.toLocaleString()}</div>
                           <div className="text-sm text-muted-foreground">
-                            {Math.round((waiver.waivedAmount / waiver.originalAmount) * 100)}%
+                            ({Math.round((waiver.waivedAmount / waiver.originalAmount) * 100)}%)
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{waiver.requestedBy}</TableCell>
                       <TableCell>{new Date(waiver.requestDate).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <Badge className={getStatusColor(waiver.status)}>
@@ -533,38 +551,35 @@ export const DiscountsWaivers = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center space-x-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                              setSelectedWaiver(waiver);
+                              setShowWaiverDetailDialog(true);
+                            }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
                           {waiver.status === 'pending' && (
                             <>
                               <Button 
-                                size="sm" 
-                                variant="outline"
+                                variant="ghost" 
+                                size="sm"
                                 onClick={() => handleApproveWaiver(waiver.id)}
-                                title="Approve Waiver"
                               >
                                 <CheckCircle className="h-4 w-4 text-success" />
                               </Button>
                               <Button 
-                                size="sm" 
-                                variant="outline"
+                                variant="ghost" 
+                                size="sm"
                                 onClick={() => handleRejectWaiver(waiver.id)}
-                                title="Reject Waiver"
                               >
                                 <XCircle className="h-4 w-4 text-destructive" />
                               </Button>
                             </>
                           )}
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedWaiver(waiver);
-                              setShowWaiverDetailDialog(true);
-                            }}
-                            title="View Details"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -577,116 +592,120 @@ export const DiscountsWaivers = () => {
       </Tabs>
 
       {/* Waiver Detail Dialog */}
-      {selectedWaiver && (
-        <Dialog open={showWaiverDetailDialog} onOpenChange={setShowWaiverDetailDialog}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Waiver Request Details</DialogTitle>
-            </DialogHeader>
+      <Dialog open={showWaiverDetailDialog} onOpenChange={setShowWaiverDetailDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Waiver Request Details</DialogTitle>
+          </DialogHeader>
+          {selectedWaiver && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm font-medium">Student Name</Label>
-                  <p className="text-sm">{selectedWaiver.studentName}</p>
+                  <Label>Student Name</Label>
+                  <p className="font-medium">{selectedWaiver.studentName}</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">Student ID</Label>
-                  <p className="text-sm">{selectedWaiver.studentId}</p>
+                  <Label>Student ID</Label>
+                  <p className="font-medium">{selectedWaiver.studentId}</p>
                 </div>
               </div>
-              
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm font-medium">Fee Type</Label>
-                  <p className="text-sm">{selectedWaiver.feeType}</p>
+                  <Label>Fee Type</Label>
+                  <p className="font-medium">{selectedWaiver.feeType}</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">Status</Label>
+                  <Label>Status</Label>
                   <Badge className={getStatusColor(selectedWaiver.status)}>
                     {selectedWaiver.status}
                   </Badge>
                 </div>
               </div>
-
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <Label className="text-sm font-medium">Original Amount</Label>
-                  <p className="text-sm font-bold">£{selectedWaiver.originalAmount.toLocaleString()}</p>
+                  <Label>Original Amount</Label>
+                  <p className="font-medium">£{selectedWaiver.originalAmount.toLocaleString()}</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">Waived Amount</Label>
-                  <p className="text-sm font-bold text-destructive">£{selectedWaiver.waivedAmount.toLocaleString()}</p>
+                  <Label>Waived Amount</Label>
+                  <p className="font-medium">£{selectedWaiver.waivedAmount.toLocaleString()}</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">Waiver Percentage</Label>
-                  <p className="text-sm font-bold">{Math.round((selectedWaiver.waivedAmount / selectedWaiver.originalAmount) * 100)}%</p>
+                  <Label>Percentage</Label>
+                  <p className="font-medium">
+                    {Math.round((selectedWaiver.waivedAmount / selectedWaiver.originalAmount) * 100)}%
+                  </p>
                 </div>
               </div>
-
               <div>
-                <Label className="text-sm font-medium">Reason</Label>
-                <p className="text-sm bg-muted p-3 rounded-md">{selectedWaiver.reason}</p>
+                <Label>Reason</Label>
+                <p className="mt-1 p-3 bg-muted rounded-md">{selectedWaiver.reason}</p>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm font-medium">Requested By</Label>
-                  <p className="text-sm">{selectedWaiver.requestedBy}</p>
+                  <Label>Requested By</Label>
+                  <p className="font-medium">{selectedWaiver.requestedBy}</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">Request Date</Label>
-                  <p className="text-sm">{new Date(selectedWaiver.requestDate).toLocaleDateString()}</p>
+                  <Label>Request Date</Label>
+                  <p className="font-medium">{new Date(selectedWaiver.requestDate).toLocaleDateString()}</p>
                 </div>
               </div>
-
               {selectedWaiver.approvedBy && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-sm font-medium">Approved/Rejected By</Label>
-                    <p className="text-sm">{selectedWaiver.approvedBy}</p>
+                    <Label>Approved By</Label>
+                    <p className="font-medium">{selectedWaiver.approvedBy}</p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium">Decision Date</Label>
-                    <p className="text-sm">{selectedWaiver.approvalDate ? new Date(selectedWaiver.approvalDate).toLocaleDateString() : 'N/A'}</p>
+                    <Label>Approval Date</Label>
+                    <p className="font-medium">
+                      {selectedWaiver.approvalDate ? new Date(selectedWaiver.approvalDate).toLocaleDateString() : 'N/A'}
+                    </p>
                   </div>
                 </div>
               )}
-
               <div>
-                <Label className="text-sm font-medium">Supporting Documents</Label>
-                <div className="flex flex-wrap gap-2 mt-2">
+                <Label>Supporting Documents</Label>
+                <div className="mt-2 space-y-1">
                   {selectedWaiver.documents.map((doc, index) => (
-                    <Badge key={index} variant="outline" className="flex items-center gap-1">
-                      <FileText className="h-3 w-3" />
-                      {doc}
-                    </Badge>
+                    <div key={index} className="flex items-center space-x-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{doc}</span>
+                    </div>
                   ))}
                 </div>
               </div>
-
-              {selectedWaiver.status === 'pending' && (
-                <div className="flex justify-end space-x-2 pt-4 border-t">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handleRejectWaiver(selectedWaiver.id)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <XCircle className="h-4 w-4 mr-2" />
-                    Reject
-                  </Button>
-                  <Button 
-                    onClick={() => handleApproveWaiver(selectedWaiver.id)}
-                    className="bg-success hover:bg-success/90"
-                  >
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Approve
-                  </Button>
-                </div>
-              )}
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setShowWaiverDetailDialog(false)}>
+                  Close
+                </Button>
+                {selectedWaiver.status === 'pending' && (
+                  <>
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        handleRejectWaiver(selectedWaiver.id);
+                        setShowWaiverDetailDialog(false);
+                      }}
+                    >
+                      Reject
+                    </Button>
+                    <Button 
+                      onClick={() => {
+                        handleApproveWaiver(selectedWaiver.id);
+                        setShowWaiverDetailDialog(false);
+                      }}
+                    >
+                      Approve
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
-          </DialogContent>
-        </Dialog>
-      )}
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
