@@ -16,6 +16,7 @@ import { ApplicationForms } from "@/components/admissions/ApplicationForms";
 import { ApplicationManagement } from "@/components/admissions/ApplicationManagement";
 import { AdmissionsWorkflow } from "@/components/admissions/AdmissionsWorkflow";
 import { AdmissionsFlowVisualization } from "@/components/admissions/AdmissionsFlowVisualization";
+import { StageDetailBreakdown } from "@/components/admissions/StageDetailBreakdown";
 import { 
   UserPlus, 
   FileText, 
@@ -444,6 +445,7 @@ const UnifiedAdmissionsPage = () => {
         {/* Workflow Tab */}
         <TabsContent value="workflow" className="space-y-6">
           <AdmissionsFlowVisualization />
+          <StageDetailBreakdown />
           <AdmissionsWorkflow />
         </TabsContent>
 
