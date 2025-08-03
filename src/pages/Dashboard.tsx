@@ -199,6 +199,12 @@ const Dashboard = () => {
   const [isSystemOpen, setIsSystemOpen] = useState(true);
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      {/* TEST: Simple header to verify Dashboard is loading */}
+      <div className="p-8 text-center">
+        <h1 className="text-4xl font-bold mb-4">Dashboard Loading Test</h1>
+        <p className="text-xl mb-8">If you see this, the Dashboard component is working</p>
+      </div>
+
       {/* Hero Section */}
       <div 
         className="relative bg-cover bg-center h-80 flex items-center justify-center overflow-hidden"
