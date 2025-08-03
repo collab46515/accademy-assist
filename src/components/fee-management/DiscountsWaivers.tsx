@@ -140,6 +140,7 @@ export const DiscountsWaivers = () => {
   const [showWaiverDialog, setShowWaiverDialog] = useState(false);
   const [selectedWaiver, setSelectedWaiver] = useState<Waiver | null>(null);
   const [showWaiverDetailDialog, setShowWaiverDetailDialog] = useState(false);
+  const [selectedTab, setSelectedTab] = useState('discounts');
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -293,10 +294,10 @@ export const DiscountsWaivers = () => {
                   <div>
                     <Label htmlFor="discount-type">Discount Type</Label>
                     <Select>
-                      <SelectTrigger>
+                      <SelectTrigger className="bg-background border border-border">
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-background border border-border shadow-lg z-50">
                         <SelectItem value="percentage">Percentage</SelectItem>
                         <SelectItem value="fixed_amount">Fixed Amount</SelectItem>
                       </SelectContent>
@@ -355,10 +356,10 @@ export const DiscountsWaivers = () => {
                   <div>
                     <Label htmlFor="fee-type">Fee Type</Label>
                     <Select>
-                      <SelectTrigger>
+                      <SelectTrigger className="bg-background border border-border">
                         <SelectValue placeholder="Select fee type" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-background border border-border shadow-lg z-50">
                         <SelectItem value="tuition">Tuition Fee</SelectItem>
                         <SelectItem value="transport">Transport Fee</SelectItem>
                         <SelectItem value="meals">Meals Fee</SelectItem>
@@ -389,50 +390,54 @@ export const DiscountsWaivers = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards - Now Clickable */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedTab('discounts')}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Active Discounts</p>
                 <p className="text-2xl font-bold">{discounts.filter(d => d.status === 'active').length}</p>
+                <p className="text-xs text-muted-foreground mt-1">Click to view all</p>
               </div>
               <Percent className="h-8 w-8 text-primary" />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Savings</p>
                 <p className="text-2xl font-bold">£{totalSavings.toLocaleString()}</p>
+                <p className="text-xs text-success mt-1">+12% this month</p>
               </div>
               <TrendingDown className="h-8 w-8 text-success" />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedTab('waivers')}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Pending Waivers</p>
                 <p className="text-2xl font-bold">{waivers.filter(w => w.status === 'pending').length}</p>
+                <p className="text-xs text-warning mt-1">Needs review</p>
               </div>
               <Gift className="h-8 w-8 text-warning" />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Waived</p>
                 <p className="text-2xl font-bold">£{totalWaivedAmount.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground mt-1">Approved this term</p>
               </div>
               <Users className="h-8 w-8 text-primary" />
             </div>
@@ -441,16 +446,23 @@ export const DiscountsWaivers = () => {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="discounts" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="discounts">Discounts</TabsTrigger>
-          <TabsTrigger value="waivers">Waivers</TabsTrigger>
+      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
+        <TabsList className="bg-muted">
+          <TabsTrigger value="discounts" className="data-[state=active]:bg-background">
+            Discounts ({discounts.length})
+          </TabsTrigger>
+          <TabsTrigger value="waivers" className="data-[state=active]:bg-background">
+            Waivers ({waivers.length})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="discounts">
           <Card>
             <CardHeader>
-              <CardTitle>Active Discounts</CardTitle>
+              <CardTitle className="flex items-center justify-between">
+                Active Discounts
+                <Badge variant="secondary">{discounts.length} total</Badge>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
@@ -510,7 +522,13 @@ export const DiscountsWaivers = () => {
         <TabsContent value="waivers">
           <Card>
             <CardHeader>
-              <CardTitle>Fee Waiver Requests</CardTitle>
+              <CardTitle className="flex items-center justify-between">
+                Fee Waiver Requests
+                <div className="flex gap-2">
+                  <Badge variant="outline">{waivers.filter(w => w.status === 'pending').length} pending</Badge>
+                  <Badge variant="secondary">{waivers.length} total</Badge>
+                </div>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
