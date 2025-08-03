@@ -108,8 +108,8 @@ export const FeeStructureTabs = () => {
     updated_at: structure.updated_at || structure.lastModified || new Date().toISOString()
   });
 
-  // Use real database data, fallback to mock if empty
-  const dataToUse = feeStructures.length > 0 ? feeStructures.map(normalizeStructure) : MOCK_FEE_STRUCTURES.map(normalizeStructure);
+  // Always use real database data - no more mock fallback
+  const dataToUse = feeStructures.map(normalizeStructure);
   
   const filteredStructures = dataToUse.filter(structure => {
     const name = structure.name || '';
@@ -126,10 +126,10 @@ export const FeeStructureTabs = () => {
   });
 
   // Debug logging
-  console.log('FeeStructures from DB:', feeStructures);
-  console.log('Loading state:', loading);
-  console.log('Data being used:', dataToUse);
-  console.log('Filtered structures:', filteredStructures);
+  console.log('Raw feeStructures from DB:', feeStructures);
+  console.log('Normalized data:', dataToUse);
+  console.log('Filter criteria:', { selectedAcademicYear, selectedTerm, statusFilter, searchQuery });
+  console.log('Final filtered structures:', filteredStructures);
 
   const getStatusColor = (status: string) => {
     switch (status) {
