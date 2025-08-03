@@ -35,6 +35,24 @@ const AdmissionsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStage, setFilterStage] = useState("all");
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [newApplication, setNewApplication] = useState({
+    student: "",
+    email: "",
+    phone: "",
+    parentName: "",
+    parentEmail: "",
+    parentPhone: "",
+    year: "",
+    previousSchool: "",
+    reasonForApplication: "",
+    medicalInfo: "",
+    emergencyContact: "",
+    emergencyPhone: "",
+    address: "",
+    dateOfBirth: "",
+    nationality: ""
+  });
   const [enrollmentData, setEnrollmentData] = useState({
     studentId: "",
     parentName: "",
@@ -203,6 +221,62 @@ const AdmissionsPage = () => {
     });
   };
 
+  const handleCreateApplication = () => {
+    if (!newApplication.student || !newApplication.email || !newApplication.year || !newApplication.parentName) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Generate new application ID
+    const newId = `APP2024${String(applications.length + 1).padStart(3, '0')}`;
+    
+    const applicationToAdd = {
+      id: newId,
+      student: newApplication.student,
+      year: newApplication.year,
+      stage: "Application Received",
+      progress: 10,
+      status: "In Progress",
+      submitted: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      interview: "TBD",
+      email: newApplication.email,
+      phone: newApplication.phone,
+      documents: [],
+      notes: `New application for ${newApplication.year}. Previous school: ${newApplication.previousSchool || 'Not specified'}`
+    };
+
+    setApplications(prev => [applicationToAdd, ...prev]);
+    
+    toast({
+      title: "Application Created Successfully",
+      description: `Application ${newId} has been created for ${newApplication.student}`,
+    });
+
+    // Reset form and close dialog
+    setNewApplication({
+      student: "",
+      email: "",
+      phone: "",
+      parentName: "",
+      parentEmail: "",
+      parentPhone: "",
+      year: "",
+      previousSchool: "",
+      reasonForApplication: "",
+      medicalInfo: "",
+      emergencyContact: "",
+      emergencyPhone: "",
+      address: "",
+      dateOfBirth: "",
+      nationality: ""
+    });
+    setShowCreateDialog(false);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="mb-8">
@@ -249,6 +323,14 @@ const AdmissionsPage = () => {
                   <CardDescription>Track and manage all incoming applications</CardDescription>
                 </div>
                 <div className="flex space-x-2">
+                  <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create New Application
+                      </Button>
+                    </DialogTrigger>
+                  </Dialog>
                   <Button onClick={() => handleGenerateReport("Applications")}>
                     <Download className="h-4 w-4 mr-2" />
                     Export Report
@@ -790,6 +872,228 @@ const AdmissionsPage = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Create Application Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create New Application</DialogTitle>
+            <DialogDescription>
+              Enter the student and parent information to create a new application
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Student Information */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-lg">Student Information</h4>
+                
+                <div>
+                  <Label htmlFor="studentName">Student Name *</Label>
+                  <Input
+                    id="studentName"
+                    value={newApplication.student}
+                    onChange={(e) => setNewApplication(prev => ({ ...prev, student: e.target.value }))}
+                    placeholder="Enter student's full name"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                    <Input
+                      id="dateOfBirth"
+                      type="date"
+                      value={newApplication.dateOfBirth}
+                      onChange={(e) => setNewApplication(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="nationality">Nationality</Label>
+                    <Input
+                      id="nationality"
+                      value={newApplication.nationality}
+                      onChange={(e) => setNewApplication(prev => ({ ...prev, nationality: e.target.value }))}
+                      placeholder="e.g., British, American"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="yearGroup">Year Group *</Label>
+                  <Select value={newApplication.year} onValueChange={(value) => 
+                    setNewApplication(prev => ({ ...prev, year: value }))
+                  }>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select year group" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Year 7">Year 7</SelectItem>
+                      <SelectItem value="Year 8">Year 8</SelectItem>
+                      <SelectItem value="Year 9">Year 9</SelectItem>
+                      <SelectItem value="Year 10">Year 10</SelectItem>
+                      <SelectItem value="Year 11">Year 11</SelectItem>
+                      <SelectItem value="Year 12">Year 12 (6th Form)</SelectItem>
+                      <SelectItem value="Year 13">Year 13 (6th Form)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="studentEmail">Student Email *</Label>
+                    <Input
+                      id="studentEmail"
+                      type="email"
+                      value={newApplication.email}
+                      onChange={(e) => setNewApplication(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="student@email.com"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="studentPhone">Student Phone</Label>
+                    <Input
+                      id="studentPhone"
+                      value={newApplication.phone}
+                      onChange={(e) => setNewApplication(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="+44 7700 900000"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="address">Home Address</Label>
+                  <Textarea
+                    id="address"
+                    value={newApplication.address}
+                    onChange={(e) => setNewApplication(prev => ({ ...prev, address: e.target.value }))}
+                    placeholder="Enter full home address"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="previousSchool">Previous School</Label>
+                  <Input
+                    id="previousSchool"
+                    value={newApplication.previousSchool}
+                    onChange={(e) => setNewApplication(prev => ({ ...prev, previousSchool: e.target.value }))}
+                    placeholder="Name of current/previous school"
+                  />
+                </div>
+              </div>
+
+              {/* Parent/Guardian Information */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-lg">Parent/Guardian Information</h4>
+                
+                <div>
+                  <Label htmlFor="parentName">Parent/Guardian Name *</Label>
+                  <Input
+                    id="parentName"
+                    value={newApplication.parentName}
+                    onChange={(e) => setNewApplication(prev => ({ ...prev, parentName: e.target.value }))}
+                    placeholder="Enter parent/guardian name"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="parentEmail">Parent Email *</Label>
+                    <Input
+                      id="parentEmail"
+                      type="email"
+                      value={newApplication.parentEmail}
+                      onChange={(e) => setNewApplication(prev => ({ ...prev, parentEmail: e.target.value }))}
+                      placeholder="parent@email.com"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="parentPhone">Parent Phone</Label>
+                    <Input
+                      id="parentPhone"
+                      value={newApplication.parentPhone}
+                      onChange={(e) => setNewApplication(prev => ({ ...prev, parentPhone: e.target.value }))}
+                      placeholder="+44 7700 900000"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="emergencyContact">Emergency Contact Name</Label>
+                    <Input
+                      id="emergencyContact"
+                      value={newApplication.emergencyContact}
+                      onChange={(e) => setNewApplication(prev => ({ ...prev, emergencyContact: e.target.value }))}
+                      placeholder="Emergency contact name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="emergencyPhone">Emergency Phone</Label>
+                    <Input
+                      id="emergencyPhone"
+                      value={newApplication.emergencyPhone}
+                      onChange={(e) => setNewApplication(prev => ({ ...prev, emergencyPhone: e.target.value }))}
+                      placeholder="+44 7700 900000"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="reasonForApplication">Reason for Application</Label>
+                  <Textarea
+                    id="reasonForApplication"
+                    value={newApplication.reasonForApplication}
+                    onChange={(e) => setNewApplication(prev => ({ ...prev, reasonForApplication: e.target.value }))}
+                    placeholder="Why are you applying to this school?"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="medicalInfo">Medical Information</Label>
+                  <Textarea
+                    id="medicalInfo"
+                    value={newApplication.medicalInfo}
+                    onChange={(e) => setNewApplication(prev => ({ ...prev, medicalInfo: e.target.value }))}
+                    placeholder="Any medical conditions or special requirements"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h5 className="font-medium text-blue-900 mb-2">Required Documents</h5>
+                  <div className="space-y-1 text-sm text-blue-800">
+                    <p>• Birth Certificate or Passport</p>
+                    <p>• Previous School Reports (last 2 years)</p>
+                    <p>• Medical Records</p>
+                    <p>• Proof of Address</p>
+                    <p>• Parent/Guardian ID</p>
+                    <p>• Passport-sized photographs (2)</p>
+                  </div>
+                  <p className="text-xs text-blue-700 mt-2">
+                    Documents can be uploaded after application creation
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-2 pt-6 border-t">
+              <Button 
+                variant="outline"
+                onClick={() => setShowCreateDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleCreateApplication}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Create Application
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Application Details Modal */}
       {selectedApplication && (
