@@ -70,6 +70,8 @@ const academicItems = [
 // Staff and operations items
 const operationsItems = [
   { title: "Staff", url: "/staff", icon: Users },
+  { title: "HR Management", url: "/hr-management", icon: UserCheck },
+  { title: "Accounting", url: "/accounting", icon: Calculator },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Communications", url: "/communication", icon: MessageSquare },
   { title: "Finance", url: "/finance", icon: CreditCard },
