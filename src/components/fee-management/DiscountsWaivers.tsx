@@ -9,7 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Trash2, Percent, Gift, Users, TrendingDown } from 'lucide-react';
+import { Plus, Edit, Trash2, Percent, Gift, Users, TrendingDown, Download, FileText, CheckCircle, XCircle, Eye } from 'lucide-react';
+import { toast } from 'sonner';
+import { downloadCSV } from '@/utils/exportHelpers';
 
 interface Discount {
   id: string;
@@ -40,6 +42,7 @@ interface Waiver {
   approvalDate?: string;
   status: 'pending' | 'approved' | 'rejected';
   documents: string[];
+  notes?: string;
 }
 
 const MOCK_DISCOUNTS: Discount[] = [
@@ -136,6 +139,8 @@ export const DiscountsWaivers = () => {
   const [waivers, setWaivers] = useState<Waiver[]>(MOCK_WAIVERS);
   const [showDiscountDialog, setShowDiscountDialog] = useState(false);
   const [showWaiverDialog, setShowWaiverDialog] = useState(false);
+  const [selectedWaiver, setSelectedWaiver] = useState<Waiver | null>(null);
+  const [showWaiverDetailDialog, setShowWaiverDetailDialog] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -146,6 +151,87 @@ export const DiscountsWaivers = () => {
       case 'inactive': return 'bg-muted text-muted-foreground';
       case 'expired': return 'bg-muted text-muted-foreground';
       default: return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  const handleApproveWaiver = (waiverId: string) => {
+    setWaivers(waivers.map(waiver => 
+      waiver.id === waiverId 
+        ? { 
+            ...waiver, 
+            status: 'approved',
+            approvedBy: 'Current User',
+            approvalDate: new Date().toISOString().split('T')[0]
+          }
+        : waiver
+    ));
+    toast.success('Waiver approved successfully');
+  };
+
+  const handleRejectWaiver = (waiverId: string) => {
+    setWaivers(waivers.map(waiver => 
+      waiver.id === waiverId 
+        ? { 
+            ...waiver, 
+            status: 'rejected',
+            approvedBy: 'Current User',
+            approvalDate: new Date().toISOString().split('T')[0]
+          }
+        : waiver
+    ));
+    toast.success('Waiver rejected');
+  };
+
+  const handleDeleteDiscount = (discountId: string) => {
+    setDiscounts(discounts.filter(discount => discount.id !== discountId));
+    toast.success('Discount deleted successfully');
+  };
+
+  const handleExportDiscounts = () => {
+    try {
+      const csvData = discounts.map(discount => ({
+        'Discount Name': discount.name,
+        'Description': discount.description,
+        'Type': discount.type,
+        'Value': discount.type === 'percentage' ? `${discount.value}%` : `£${discount.value}`,
+        'Applicable Fees': discount.applicableToFees.join(', '),
+        'Conditions': discount.conditions,
+        'Valid From': new Date(discount.validFrom).toLocaleDateString(),
+        'Valid To': new Date(discount.validTo).toLocaleDateString(),
+        'Status': discount.status,
+        'Students Applied': discount.studentsApplied,
+        'Total Savings': `£${discount.totalSavings.toLocaleString()}`
+      }));
+
+      downloadCSV(csvData, 'fee_discounts');
+      toast.success('Discounts exported successfully');
+    } catch (error) {
+      toast.error('Failed to export discounts');
+    }
+  };
+
+  const handleExportWaivers = () => {
+    try {
+      const csvData = waivers.map(waiver => ({
+        'Student Name': waiver.studentName,
+        'Student ID': waiver.studentId,
+        'Fee Type': waiver.feeType,
+        'Original Amount': `£${waiver.originalAmount.toLocaleString()}`,
+        'Waived Amount': `£${waiver.waivedAmount.toLocaleString()}`,
+        'Waiver Percentage': `${Math.round((waiver.waivedAmount / waiver.originalAmount) * 100)}%`,
+        'Reason': waiver.reason,
+        'Requested By': waiver.requestedBy,
+        'Request Date': new Date(waiver.requestDate).toLocaleDateString(),
+        'Status': waiver.status,
+        'Approved By': waiver.approvedBy || 'N/A',
+        'Approval Date': waiver.approvalDate ? new Date(waiver.approvalDate).toLocaleDateString() : 'N/A',
+        'Documents Count': waiver.documents.length
+      }));
+
+      downloadCSV(csvData, 'fee_waivers');
+      toast.success('Waivers exported successfully');
+    } catch (error) {
+      toast.error('Failed to export waivers');
     }
   };
 
@@ -163,6 +249,14 @@ export const DiscountsWaivers = () => {
           <p className="text-muted-foreground">Manage fee discounts, waivers, and financial assistance</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={handleExportDiscounts}>
+            <Download className="h-4 w-4 mr-2" />
+            Export Discounts
+          </Button>
+          <Button variant="outline" onClick={handleExportWaivers}>
+            <Download className="h-4 w-4 mr-2" />
+            Export Waivers
+          </Button>
           <Dialog open={showDiscountDialog} onOpenChange={setShowDiscountDialog}>
             <DialogTrigger asChild>
               <Button variant="outline">
@@ -377,10 +471,10 @@ export const DiscountsWaivers = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" title="Edit Discount">
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleDeleteDiscount(discount.id)} title="Delete Discount">
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -423,7 +517,14 @@ export const DiscountsWaivers = () => {
                       </TableCell>
                       <TableCell>{waiver.feeType}</TableCell>
                       <TableCell>£{waiver.originalAmount.toLocaleString()}</TableCell>
-                      <TableCell>£{waiver.waivedAmount.toLocaleString()}</TableCell>
+                      <TableCell>
+                        <div>
+                          <div>£{waiver.waivedAmount.toLocaleString()}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {Math.round((waiver.waivedAmount / waiver.originalAmount) * 100)}%
+                          </div>
+                        </div>
+                      </TableCell>
                       <TableCell>{waiver.requestedBy}</TableCell>
                       <TableCell>{new Date(waiver.requestDate).toLocaleDateString()}</TableCell>
                       <TableCell>
@@ -435,16 +536,34 @@ export const DiscountsWaivers = () => {
                         <div className="flex items-center gap-2">
                           {waiver.status === 'pending' && (
                             <>
-                              <Button size="sm" variant="outline">
-                                Approve
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleApproveWaiver(waiver.id)}
+                                title="Approve Waiver"
+                              >
+                                <CheckCircle className="h-4 w-4 text-success" />
                               </Button>
-                              <Button size="sm" variant="outline">
-                                Reject
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleRejectWaiver(waiver.id)}
+                                title="Reject Waiver"
+                              >
+                                <XCircle className="h-4 w-4 text-destructive" />
                               </Button>
                             </>
                           )}
-                          <Button size="sm" variant="outline">
-                            View
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedWaiver(waiver);
+                              setShowWaiverDetailDialog(true);
+                            }}
+                            title="View Details"
+                          >
+                            <Eye className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -456,6 +575,118 @@ export const DiscountsWaivers = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Waiver Detail Dialog */}
+      {selectedWaiver && (
+        <Dialog open={showWaiverDetailDialog} onOpenChange={setShowWaiverDetailDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Waiver Request Details</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Student Name</Label>
+                  <p className="text-sm">{selectedWaiver.studentName}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Student ID</Label>
+                  <p className="text-sm">{selectedWaiver.studentId}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Fee Type</Label>
+                  <p className="text-sm">{selectedWaiver.feeType}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Status</Label>
+                  <Badge className={getStatusColor(selectedWaiver.status)}>
+                    {selectedWaiver.status}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Original Amount</Label>
+                  <p className="text-sm font-bold">£{selectedWaiver.originalAmount.toLocaleString()}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Waived Amount</Label>
+                  <p className="text-sm font-bold text-destructive">£{selectedWaiver.waivedAmount.toLocaleString()}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Waiver Percentage</Label>
+                  <p className="text-sm font-bold">{Math.round((selectedWaiver.waivedAmount / selectedWaiver.originalAmount) * 100)}%</p>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium">Reason</Label>
+                <p className="text-sm bg-muted p-3 rounded-md">{selectedWaiver.reason}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Requested By</Label>
+                  <p className="text-sm">{selectedWaiver.requestedBy}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Request Date</Label>
+                  <p className="text-sm">{new Date(selectedWaiver.requestDate).toLocaleDateString()}</p>
+                </div>
+              </div>
+
+              {selectedWaiver.approvedBy && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">Approved/Rejected By</Label>
+                    <p className="text-sm">{selectedWaiver.approvedBy}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Decision Date</Label>
+                    <p className="text-sm">{selectedWaiver.approvalDate ? new Date(selectedWaiver.approvalDate).toLocaleDateString() : 'N/A'}</p>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <Label className="text-sm font-medium">Supporting Documents</Label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {selectedWaiver.documents.map((doc, index) => (
+                    <Badge key={index} variant="outline" className="flex items-center gap-1">
+                      <FileText className="h-3 w-3" />
+                      {doc}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {selectedWaiver.status === 'pending' && (
+                <div className="flex justify-end space-x-2 pt-4 border-t">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => handleRejectWaiver(selectedWaiver.id)}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Reject
+                  </Button>
+                  <Button 
+                    onClick={() => handleApproveWaiver(selectedWaiver.id)}
+                    className="bg-success hover:bg-success/90"
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Approve
+                  </Button>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
