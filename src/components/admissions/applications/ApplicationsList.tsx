@@ -93,6 +93,10 @@ export function ApplicationsList({
     }
   };
 
+  // Add debug logs at component level
+  console.log('ApplicationsList render - statusFilter:', statusFilter, 'searchTerm:', searchTerm);
+  console.log('ApplicationsList render - applications count:', applications.length);
+
   const filteredApplications = applications
     .filter(app => {
       const matchesSearch = 
@@ -104,7 +108,7 @@ export function ApplicationsList({
       const validFilters = ['all', 'submitted', 'under_review', 'assessment_scheduled', 'interview_scheduled', 'pending_approval', 'approved'];
       const effectiveFilter = validFilters.includes(statusFilter) ? statusFilter : 'all';
       
-      console.log('StatusFilter:', statusFilter, 'EffectiveFilter:', effectiveFilter);
+      console.log('Filtering app:', app.student_name, 'status:', app.status, 'filter:', statusFilter, 'effective:', effectiveFilter);
       const matchesStatus = effectiveFilter === 'all' || app.status === effectiveFilter;
       
       return matchesSearch && matchesStatus;
