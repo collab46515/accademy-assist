@@ -95,27 +95,80 @@ export function MasterDataPage() {
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      console.log('Processing file:', file.name);
-      // TODO: Implement CSV processing logic
-      setUploadDialogOpen(false);
+    if (file && file.type === 'text/csv') {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const csvText = e.target?.result as string;
+        const lines = csvText.split('\n');
+        const headers = lines[0].split(',').map(h => h.trim());
+        const data = lines.slice(1).filter(line => line.trim()).map(line => {
+          const values = line.split(',').map(v => v.trim());
+          const obj: any = {};
+          headers.forEach((header, index) => {
+            obj[header.toLowerCase().replace(/\s+/g, '_')] = values[index] || '';
+          });
+          return obj;
+        });
+        
+        console.log('Processing CSV file:', file.name);
+        console.log('Parsed data:', data);
+        // TODO: Process the parsed CSV data based on active tab
+        setUploadDialogOpen(false);
+      };
+      reader.readAsText(file);
+    } else {
+      console.error('Please select a valid CSV file');
     }
   };
 
   const handleExportAllData = () => {
-    const allData = {
-      schools: schools,
-      subjects: subjects,
-      students: students,
-      parents: parents
-    };
+    const exportData = [];
     
-    const jsonData = JSON.stringify(allData, null, 2);
-    const blob = new Blob([jsonData], { type: 'application/json' });
+    // Export Schools
+    if (schools.length > 0) {
+      exportData.push('=== SCHOOLS ===');
+      exportData.push('Name,Code,Address,Contact Email,Contact Phone,Is Active');
+      schools.forEach(school => {
+        exportData.push(`"${school.name}","${school.code}","${school.address || ''}","${school.contact_email || ''}","${school.contact_phone || ''}","${school.is_active}"`);
+      });
+      exportData.push('');
+    }
+    
+    // Export Subjects
+    if (subjects.length > 0) {
+      exportData.push('=== SUBJECTS ===');
+      exportData.push('Subject Name,Subject Code,Color Code,Requires Lab,Periods Per Week,Is Active');
+      subjects.forEach(subject => {
+        exportData.push(`"${subject.subject_name}","${subject.subject_code}","${subject.color_code || ''}","${subject.requires_lab}","${subject.periods_per_week || ''}","${subject.is_active}"`);
+      });
+      exportData.push('');
+    }
+    
+    // Export Students
+    if (students.length > 0) {
+      exportData.push('=== STUDENTS ===');
+      exportData.push('Student Number,Year Group,Form Class,Date of Birth,Emergency Contact Name,Emergency Contact Phone,Is Enrolled');
+      students.forEach(student => {
+        exportData.push(`"${student.student_number}","${student.year_group}","${student.form_class || ''}","${student.date_of_birth || ''}","${student.emergency_contact_name || ''}","${student.emergency_contact_phone || ''}","${student.is_enrolled}"`);
+      });
+      exportData.push('');
+    }
+    
+    // Export Parents
+    if (parents.length > 0) {
+      exportData.push('=== PARENTS ===');
+      exportData.push('Parent ID,Student ID,Relationship Type');
+      parents.forEach(parent => {
+        exportData.push(`"${parent.id}","${parent.student_id}","${parent.relationship_type || ''}"`);
+      });
+    }
+    
+    const csvData = exportData.join('\n');
+    const blob = new Blob([csvData], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `master_data_export_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `master_data_export_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
