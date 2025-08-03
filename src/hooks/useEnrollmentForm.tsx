@@ -1,0 +1,353 @@
+import { useState, useEffect, useCallback } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { supabase } from '@/integrations/supabase/client';
+import { useRBAC } from './useRBAC';
+import { useToast } from '@/hooks/use-toast';
+import { enrollmentFormSchema, type EnrollmentFormData, type PathwayType, pathwayConfig } from '@/lib/enrollment-schemas';
+
+interface UseEnrollmentFormProps {
+  pathway: PathwayType;
+  applicationId?: string;
+}
+
+export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormProps) {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
+  const { currentSchool } = useRBAC();
+  const { toast } = useToast();
+  
+  const config = pathwayConfig[pathway];
+  const totalSteps = config.totalSteps;
+
+  const form = useForm<EnrollmentFormData>({
+    resolver: zodResolver(enrollmentFormSchema),
+    defaultValues: {
+      pathway,
+    } as EnrollmentFormData,
+    mode: 'onBlur',
+  });
+
+  const { watch, getValues, setValue, reset } = form;
+
+  // Helper function to serialize form data for JSON storage
+  const serializeFormData = useCallback((data: any) => {
+    return JSON.parse(JSON.stringify(data, (key, value) => {
+      // Convert Date objects to ISO strings
+      if (value instanceof Date) {
+        return value.toISOString();
+      }
+      return value;
+    }));
+  }, []);
+
+  // Helper function to safely extract common fields from any pathway
+  const extractCommonFields = useCallback((data: any) => {
+    // Try to extract student name from different pathway structures
+    let studentName = '';
+    if (data.student_name) {
+      studentName = data.student_name;
+    } else if (data.student_first_name && data.student_last_name) {
+      studentName = `${data.student_first_name} ${data.student_last_name}`;
+    }
+
+    // Extract year group - some pathways might not have it
+    const yearGroup = data.year_group || data.current_year_group || data.target_year_group || '';
+
+    // Extract parent info - not all pathways have parent_name/parent_email
+    const parentName = data.parent_name || data.staff_member_name || data.referral_source_name || '';
+    const parentEmail = data.parent_email || data.staff_member_email || data.referral_source_email || '';
+
+    // Extract date of birth with different field names
+    let dateOfBirth = null;
+    if (data.date_of_birth) {
+      dateOfBirth = data.date_of_birth instanceof Date 
+        ? data.date_of_birth.toISOString().split('T')[0] 
+        : data.date_of_birth;
+    } else if (data.student_dob) {
+      dateOfBirth = data.student_dob instanceof Date 
+        ? data.student_dob.toISOString().split('T')[0] 
+        : data.student_dob;
+    }
+
+    return {
+      studentName,
+      yearGroup,
+      parentName,
+      parentEmail,
+      dateOfBirth,
+    };
+  }, []);
+
+  // Auto-save functionality with debouncing
+  const saveAsDraft = useCallback(async (data: Partial<EnrollmentFormData>, silent = false) => {
+    if (!currentSchool) return;
+    
+    setIsSaving(true);
+    try {
+      const commonFields = extractCommonFields(data);
+      
+      // Map form data to database schema
+      const mappedData = {
+        // Required fields for database
+        application_number: `DRAFT-${Date.now()}`,
+        pathway: pathway as any,
+        school_id: currentSchool.id,
+        
+        // Map extracted common fields
+        student_name: commonFields.studentName,
+        year_group: commonFields.yearGroup,
+        parent_name: commonFields.parentName,
+        parent_email: commonFields.parentEmail,
+        date_of_birth: commonFields.dateOfBirth,
+        
+        // Status and draft fields
+        status: 'draft' as const,
+        
+        // Store all form data in additional_data as JSON
+        additional_data: serializeFormData({
+          pathway_data: data,
+          draft_data: data,
+          progress_step: currentStep,
+          total_steps: totalSteps,
+          auto_saved_at: new Date().toISOString(),
+        }),
+      };
+
+      let result;
+      if (applicationId) {
+        // Update existing draft
+        result = await supabase
+          .from('enrollment_applications')
+          .update(mappedData)
+          .eq('id', applicationId)
+          .select()
+          .single();
+      } else {
+        // Create new draft
+        result = await supabase
+          .from('enrollment_applications')
+          .insert([mappedData])
+          .select()
+          .single();
+      }
+
+      if (result.error) throw result.error;
+
+      if (!silent) {
+        toast({
+          title: "Draft saved",
+          description: "Your progress has been saved automatically.",
+        });
+      }
+
+      return result.data.id;
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      if (!silent) {
+        toast({
+          title: "Save failed",
+          description: "Failed to save your progress. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  }, [currentSchool, currentStep, totalSteps, pathway, applicationId, toast, extractCommonFields]);
+
+  // Watch for form changes and trigger auto-save
+  useEffect(() => {
+    const subscription = watch((data) => {
+      // Clear existing timeout
+      if (autoSaveTimeout) {
+        clearTimeout(autoSaveTimeout);
+      }
+
+      // Set new timeout for auto-save (debounced)
+      const timeout = setTimeout(() => {
+        saveAsDraft(data as Partial<EnrollmentFormData>, true);
+      }, 2000); // 2 second debounce
+
+      setAutoSaveTimeout(timeout);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      if (autoSaveTimeout) {
+        clearTimeout(autoSaveTimeout);
+      }
+    };
+  }, [watch, saveAsDraft, autoSaveTimeout]);
+
+  // Load existing draft
+  const loadDraft = useCallback(async (id: string) => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('enrollment_applications')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+
+      if (data.additional_data && typeof data.additional_data === 'object') {
+        const additionalData = data.additional_data as any;
+        if (additionalData.draft_data) {
+          reset(additionalData.draft_data as EnrollmentFormData);
+          setCurrentStep(additionalData.progress_step || 1);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading draft:', error);
+      toast({
+        title: "Load failed",
+        description: "Failed to load your saved progress.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [reset, toast]);
+
+  // Navigation functions
+  const nextStep = useCallback(() => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(prev => prev + 1);
+    }
+  }, [currentStep, totalSteps]);
+
+  const previousStep = useCallback(() => {
+    if (currentStep > 1) {
+      setCurrentStep(prev => prev - 1);
+    }
+  }, [currentStep]);
+
+  const goToStep = useCallback((step: number) => {
+    if (step >= 1 && step <= totalSteps) {
+      setCurrentStep(step);
+    }
+  }, [totalSteps]);
+
+  // Submit final application
+  const submitApplication = useCallback(async (data: EnrollmentFormData) => {
+    if (!currentSchool) return;
+
+    setIsLoading(true);
+    try {
+      const commonFields = extractCommonFields(data);
+      
+      const applicationData = {
+        // Required fields for database
+        application_number: `APP-${Date.now()}`,
+        pathway: pathway as any,
+        school_id: currentSchool.id,
+        
+        // Map extracted common fields
+        student_name: commonFields.studentName,
+        year_group: commonFields.yearGroup,
+        parent_name: commonFields.parentName,
+        parent_email: commonFields.parentEmail,
+        date_of_birth: commonFields.dateOfBirth,
+        
+        // Status and submission fields
+        status: 'submitted' as const,
+        submitted_at: new Date().toISOString(),
+        submitted_by: (await supabase.auth.getUser()).data.user?.id,
+        
+        // Store all form data in additional_data
+        additional_data: serializeFormData({
+          pathway_data: data,
+          submitted_data: data,
+          progress_step: totalSteps,
+          total_steps: totalSteps,
+          submitted_at: new Date().toISOString(),
+        }),
+      };
+
+      let result;
+      if (applicationId) {
+        // Update existing application
+        result = await supabase
+          .from('enrollment_applications')
+          .update(applicationData)
+          .eq('id', applicationId)
+          .select()
+          .single();
+      } else {
+        // Create new application
+        result = await supabase
+          .from('enrollment_applications')
+          .insert([applicationData])
+          .select()
+          .single();
+      }
+
+      if (result.error) throw result.error;
+
+      toast({
+        title: "Application submitted",
+        description: `Your ${config.name.toLowerCase()} application has been submitted successfully.`,
+      });
+
+      return result.data;
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      toast({
+        title: "Submission failed",
+        description: "Failed to submit your application. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentSchool, applicationId, totalSteps, config.name, toast, extractCommonFields, pathway]);
+
+  // Get field validation status
+  const getFieldErrors = useCallback((fieldPath: string) => {
+    const errors = form.formState.errors;
+    return fieldPath.split('.').reduce((acc, key) => acc?.[key], errors as any);
+  }, [form.formState.errors]);
+
+  // Check if current step is valid
+  const isStepValid = useCallback((step: number): boolean => {
+    // This would need to be implemented based on which fields are required for each step
+    // For now, return true
+    return true;
+  }, []);
+
+  return {
+    // Form
+    form,
+    
+    // State
+    currentStep,
+    totalSteps,
+    isLoading,
+    isSaving,
+    config,
+    
+    // Navigation
+    nextStep,
+    previousStep,
+    goToStep,
+    
+    // Persistence
+    saveAsDraft,
+    loadDraft,
+    submitApplication,
+    
+    // Validation
+    getFieldErrors,
+    isStepValid,
+    
+    // Progress
+    progress: (currentStep / totalSteps) * 100,
+    isFirstStep: currentStep === 1,
+    isLastStep: currentStep === totalSteps,
+  };
+}
