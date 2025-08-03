@@ -196,14 +196,14 @@ export function ApplicationManagement() {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-white border shadow-sm">
+          <TabsList className="grid w-full grid-cols-5 bg-white border shadow-sm">
             <TabsTrigger value="applications" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Applications
             </TabsTrigger>
             <TabsTrigger value="workflow" className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              Workflow
+              Progress Tracking
             </TabsTrigger>
             <TabsTrigger value="assessments" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
@@ -216,10 +216,6 @@ export function ApplicationManagement() {
             <TabsTrigger value="reports" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Reports
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Filter className="h-4 w-4" />
-              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -248,19 +244,6 @@ export function ApplicationManagement() {
             <ReportsAndAnalytics />
           </TabsContent>
 
-          <TabsContent value="settings">
-            <Card>
-              <CardHeader>
-                <CardTitle>System Settings</CardTitle>
-                <CardDescription>
-                  Configure admission workflows, notification templates, and system preferences
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Settings configuration will be implemented here</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
     </div>

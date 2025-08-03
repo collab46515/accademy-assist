@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ApplicationManagement } from "@/components/admissions/ApplicationManagement";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -304,15 +305,17 @@ const AdmissionsPage = () => {
         })}
       </div>
 
-      <Tabs defaultValue="applications" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="applications">Applications</TabsTrigger>
-          <TabsTrigger value="enrollment">Student Enrollment</TabsTrigger>
-          <TabsTrigger value="portal">Application Portal</TabsTrigger>
-          <TabsTrigger value="interviews">Interviews</TabsTrigger>
-          <TabsTrigger value="offers">Offers & Enrollment</TabsTrigger>
-          <TabsTrigger value="waitlist">Waitlist</TabsTrigger>
+      <Tabs defaultValue="management" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="management">Application Management</TabsTrigger>
+          <TabsTrigger value="enrollment">Quick Enrollment</TabsTrigger>
+          <TabsTrigger value="portal">Public Portal</TabsTrigger>
+          <TabsTrigger value="interviews">Interview Scheduler</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="management" className="space-y-6">
+          <ApplicationManagement />
+        </TabsContent>
 
         <TabsContent value="applications" className="space-y-6">
           <Card className="shadow-[var(--shadow-card)]">
@@ -721,148 +724,6 @@ const AdmissionsPage = () => {
                             View Details
                           </Button>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="offers" className="space-y-6">
-          <Card className="shadow-[var(--shadow-card)]">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <CheckCircle className="h-5 w-5" />
-                <span>Offers & Enrollment</span>
-              </CardTitle>
-              <CardDescription>Manage offer letters and track enrollment confirmations</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <Card className="border-border/50">
-                    <CardContent className="p-4 text-center">
-                      <h4 className="font-medium text-lg">156</h4>
-                      <p className="text-sm text-muted-foreground">Offers Made</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-border/50">
-                    <CardContent className="p-4 text-center">
-                      <h4 className="font-medium text-lg">89</h4>
-                      <p className="text-sm text-muted-foreground">Accepted</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-border/50">
-                    <CardContent className="p-4 text-center">
-                      <h4 className="font-medium text-lg">23</h4>
-                      <p className="text-sm text-muted-foreground">Pending</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-border/50">
-                    <CardContent className="p-4 text-center">
-                      <h4 className="font-medium text-lg">44</h4>
-                      <p className="text-sm text-muted-foreground">Declined</p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <div>
-                  <h4 className="font-medium mb-4">Recent Offers</h4>
-                  <div className="space-y-3">
-                    {[
-                      { student: "Aisha Patel", year: "Year 12", status: "Sent", date: "20 Oct 2024", deposit: "Pending" },
-                      { student: "Michael Zhang", year: "Year 9", status: "Accepted", date: "18 Oct 2024", deposit: "Paid" },
-                      { student: "Lucy Williams", year: "Year 7", status: "Declined", date: "16 Oct 2024", deposit: "N/A" }
-                    ].map((offer, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                        <div>
-                          <p className="font-medium">{offer.student}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {offer.year} • Offer {offer.status} on {offer.date}
-                          </p>
-                        </div>
-                        <div className="flex items-center space-x-4">
-                          <div className="text-right">
-                            <p className="text-sm font-medium">Deposit: {offer.deposit}</p>
-                          </div>
-                          <Badge 
-                            variant={offer.status === "Accepted" ? "default" : 
-                                   offer.status === "Declined" ? "destructive" : "secondary"}
-                          >
-                            {offer.status}
-                          </Badge>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleSendOffer(offer.student)}
-                          >
-                            <FileText className="h-4 w-4 mr-1" />
-                            View Offer
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="waitlist" className="space-y-6">
-          <Card className="shadow-[var(--shadow-card)]">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Clock className="h-5 w-5" />
-                <span>Waitlist Management</span>
-              </CardTitle>
-              <CardDescription>Manage waiting lists and priority placement</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card className="border-border/50">
-                    <CardContent className="p-4 text-center">
-                      <h4 className="font-medium text-lg">67</h4>
-                      <p className="text-sm text-muted-foreground">On Waitlist</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-border/50">
-                    <CardContent className="p-4 text-center">
-                      <h4 className="font-medium text-lg">12</h4>
-                      <p className="text-sm text-muted-foreground">Priority</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-border/50">
-                    <CardContent className="p-4 text-center">
-                      <h4 className="font-medium text-lg">8</h4>
-                      <p className="text-sm text-muted-foreground">Moved to Offers</p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <div>
-                  <h4 className="font-medium mb-4">Waitlist by Year Group</h4>
-                  <div className="space-y-3">
-                    {[
-                      { year: "Year 7", count: 23, priority: 4 },
-                      { year: "Year 8", count: 15, priority: 2 },
-                      { year: "Year 9", count: 18, priority: 3 },
-                      { year: "Year 10", count: 8, priority: 2 },
-                      { year: "Year 11", count: 3, priority: 1 }
-                    ].map((group, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                        <div>
-                          <p className="font-medium">{group.year}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {group.count} students waiting, {group.priority} priority
-                          </p>
-                        </div>
-                        <Button variant="outline" size="sm">
-                          View List
-                        </Button>
                       </div>
                     ))}
                   </div>

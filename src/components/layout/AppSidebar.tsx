@@ -84,6 +84,7 @@ const featuresItems = [
 
 // System items
 const systemItems = [
+  { title: "Admin Management", url: "/admin-management", icon: Shield },
   { title: "AI Suite", url: "/ai-suite", icon: Bot },
   { title: "Integrations", url: "/integrations", icon: Settings },
   { title: "User Management", url: "/user-management", icon: Users },

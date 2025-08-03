@@ -30,6 +30,7 @@ import { UserManagementPage } from "./pages/UserManagementPage";
 import NotFound from "./pages/NotFound";
 
 import UnifiedAdmissionsPage from "./pages/UnifiedAdmissionsPage";
+import AdminManagementPage from "./pages/AdminManagementPage";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ const App = () => (
                           <Route path="/students" element={<StudentsPage />} />
             <Route path="/admissions" element={<UnifiedAdmissionsPage />} />
             <Route path="/admissions/legacy" element={<AdmissionsPage />} />
+            <Route path="/admin-management" element={<AdminManagementPage />} />
                           <Route path="/attendance" element={<AttendancePage />} />
                           <Route path="/curriculum" element={<CurriculumPage />} />
                           <Route path="/assessment" element={<AssessmentPage />} />
