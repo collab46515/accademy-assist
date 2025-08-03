@@ -93,19 +93,16 @@ export const InstallmentPlans = () => {
   };
 
   const handleViewDetails = (plan: InstallmentPlan) => {
-    console.log('View details clicked for plan:', plan.name);
     setSelectedPlan(plan);
     setShowDetailsDialog(true);
   };
 
   const handleEditPlan = (plan: InstallmentPlan) => {
-    console.log('Edit plan clicked for plan:', plan.name);
     setSelectedPlan(plan);
     setShowEditDialog(true);
   };
 
   const handleDeletePlan = (planId: string) => {
-    console.log('Delete plan clicked for planId:', planId);
     setPlans(plans.filter(plan => plan.id !== planId));
     toast.success('Installment plan deleted successfully');
   };
@@ -128,7 +125,6 @@ export const InstallmentPlans = () => {
   };
 
   const handleExportPlans = () => {
-    console.log('Export plans clicked');
     try {
       const csvData = plans.map(plan => ({
         'Plan Name': plan.name,
@@ -353,7 +349,12 @@ export const InstallmentPlans = () => {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => handleViewDetails(plan)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleViewDetails(plan);
+                        }}
+                        className="z-10 relative"
                         title="View Details"
                       >
                         <Eye className="h-4 w-4" />
@@ -361,7 +362,12 @@ export const InstallmentPlans = () => {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => handleEditPlan(plan)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleEditPlan(plan);
+                        }}
+                        className="z-10 relative"
                         title="Edit Plan"
                       >
                         <Edit className="h-4 w-4" />
@@ -369,7 +375,12 @@ export const InstallmentPlans = () => {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => handleExportInstallments(plan)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleExportInstallments(plan);
+                        }}
+                        className="z-10 relative"
                         title="Export Schedule"
                       >
                         <Download className="h-4 w-4" />
@@ -377,7 +388,12 @@ export const InstallmentPlans = () => {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => handleDeletePlan(plan.id)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleDeletePlan(plan.id);
+                        }}
+                        className="z-10 relative"
                         title="Delete Plan"
                       >
                         <Trash2 className="h-4 w-4" />
