@@ -86,6 +86,15 @@ const App = () => (
                           <Route path="/ai-suite" element={<AISuitePage />} />
                           <Route path="/hr-management" element={<HRManagementPage />} />
                           <Route path="/accounting" element={<AccountingPage />} />
+                          <Route path="/accounting/student-fees" element={<AccountingPage />} />
+                          <Route path="/accounting/invoices" element={<AccountingPage />} />
+                          <Route path="/accounting/bills" element={<AccountingPage />} />
+                          <Route path="/accounting/vendors" element={<AccountingPage />} />
+                          <Route path="/accounting/purchase-orders" element={<AccountingPage />} />
+                          <Route path="/accounting/reports" element={<AccountingPage />} />
+                          <Route path="/accounting/accounts" element={<AccountingPage />} />
+                          <Route path="/accounting/budget" element={<AccountingPage />} />
+                          <Route path="/accounting/settings" element={<AccountingPage />} />
                           <Route path="/user-management" element={
                             <ProtectedRoute requiredRole="super_admin">
                               <UserManagementPage />
