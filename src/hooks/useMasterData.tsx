@@ -100,14 +100,13 @@ export interface House {
   updated_at: string;
 }
 
-export interface Department {
+export interface DBDepartment {
   id: string;
-  school_id?: string;
-  department_code: string;
-  department_name: string;
+  name: string;
   description?: string;
-  head_of_department_id?: string;
-  is_active: boolean;
+  budget?: number;
+  cost_center?: string;
+  department_head_id?: string;
   created_at: string;
   updated_at: string;
 }
@@ -121,7 +120,7 @@ export function useMasterData() {
   const [parents, setParents] = useState<Parent[]>([]);
   const [yearGroups, setYearGroups] = useState<YearGroup[]>([]);
   const [houses, setHouses] = useState<House[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
+  const [departments, setDepartments] = useState<DBDepartment[]>([]);
   const { toast } = useToast();
 
   // Fetch all master data
@@ -132,16 +131,22 @@ export function useMasterData() {
         schoolsResponse,
         subjectsResponse,
         studentsResponse,
-        parentsResponse
+        parentsResponse,
+        staffResponse,
+        departmentsResponse
       ] = await Promise.all([
         supabase.from('schools').select('*').order('name'),
         supabase.from('subjects').select('*').order('subject_name'),
         supabase.from('students').select('*').order('student_number'),
         supabase.from('student_parents').select(`
-          *,
-          parent:parent_id(*),
-          student:student_id(*)
-        `)
+          id,
+          parent_id,
+          student_id,
+          relationship_type,
+          created_at
+        `),
+        supabase.from('staff').select('*').order('last_name'),
+        supabase.from('departments').select('*').order('name')
       ]);
 
       if (schoolsResponse.error) throw schoolsResponse.error;
@@ -152,15 +157,18 @@ export function useMasterData() {
       setSchools(schoolsResponse.data as School[] || []);
       setSubjects(subjectsResponse.data as Subject[] || []);
       setStudents(studentsResponse.data as Student[] || []);
+      setStaff(staffResponse.data as Staff[] || []);
+      setDepartments(departmentsResponse.data as DBDepartment[] || []);
       
-      // Extract unique parents from the relationships
-      const uniqueParents = parentsResponse.data?.reduce((acc: Parent[], curr: any) => {
-        if (curr.parent && !acc.find(p => p.id === curr.parent.id)) {
-          acc.push(curr.parent);
-        }
-        return acc;
-      }, []) || [];
-      setParents(uniqueParents);
+      // Process parent relationships to show meaningful data
+      const parentRelationships = parentsResponse.data?.map((rel: any) => ({
+        id: rel.id,
+        parent_id: rel.parent_id,
+        student_id: rel.student_id,
+        relationship_type: rel.relationship_type || 'Parent',
+        created_at: rel.created_at
+      })) || [];
+      setParents(parentRelationships);
 
       toast({
         title: "Success",

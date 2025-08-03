@@ -102,6 +102,24 @@ export function MasterDataPage() {
     }
   };
 
+  const handleExportAllData = () => {
+    const allData = {
+      schools: schools,
+      subjects: subjects,
+      students: students,
+      parents: parents
+    };
+    
+    const jsonData = JSON.stringify(allData, null, 2);
+    const blob = new Blob([jsonData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `master_data_export_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleSubmit = async (data: any) => {
     try {
       if (editingItem) {
@@ -127,10 +145,12 @@ export function MasterDataPage() {
             await createSubject({ ...data, school_id: currentSchool?.id, is_active: true });
             break;
           case 'students':
+            // Generate a temporary user_id that's a valid UUID
+            const tempUserId = crypto.randomUUID();
             await createStudent({ 
               ...data, 
-              school_id: currentSchool?.id,
-              user_id: 'temp-user-id', // This should be generated properly
+              school_id: currentSchool?.id || '',
+              user_id: tempUserId,
               is_enrolled: true 
             });
             break;
@@ -172,10 +192,13 @@ export function MasterDataPage() {
     ),
     students: students.filter(item => 
       item.student_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.year_group.toLowerCase().includes(searchTerm.toLowerCase())
+      item.year_group.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.form_class && item.form_class.toLowerCase().includes(searchTerm.toLowerCase()))
     ),
     parents: parents.filter(item => 
-      item.id.toLowerCase().includes(searchTerm.toLowerCase())
+      (item.relationship_type && item.relationship_type.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (item.id && item.id.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (item.student_id && item.student_id.toLowerCase().includes(searchTerm.toLowerCase()))
     )
   };
 
@@ -380,7 +403,7 @@ export function MasterDataPage() {
                   <TableCell>
                     <div>
                       <p className="font-medium">{item.student_number}</p>
-                      <p className="text-sm text-muted-foreground">{item.form_class}</p>
+                      <p className="text-sm text-muted-foreground">{item.form_class || 'No form class'}</p>
                     </div>
                   </TableCell>
                   <TableCell className="font-medium">{item.student_number}</TableCell>
@@ -578,7 +601,7 @@ export function MasterDataPage() {
                     <Plus className="h-4 w-4 mr-2" />
                     Bulk Import Data
                   </Button>
-                  <Button className="w-full" variant="outline">
+                  <Button className="w-full" variant="outline" onClick={handleExportAllData}>
                     <Download className="h-4 w-4 mr-2" />
                     Export All Data
                   </Button>
