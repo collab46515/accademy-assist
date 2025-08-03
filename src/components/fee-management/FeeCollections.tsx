@@ -447,6 +447,7 @@ export default function FeeCollections() {
     }
   };
 
+
   const printReceipt = (student: Student, amount: number, method: string, receiptNumber?: string) => {
     const finalReceiptNumber = receiptNumber || `REC${Date.now()}`;
     // Create receipt content
