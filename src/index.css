@@ -125,6 +125,58 @@ All colors MUST be HSL.
   }
 }
 
+/* Barcode Scanner Styles */
+.barcode-scanner-active {
+  visibility: hidden;
+}
+
+.barcode-scanner-active .barcode-scanner-ui {
+  visibility: visible;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}
+
+.barcode-scanner-ui .scanner-frame {
+  width: 300px;
+  height: 300px;
+  border: 2px solid #10b981;
+  border-radius: 8px;
+  position: relative;
+  background: transparent;
+}
+
+.barcode-scanner-ui .scanner-frame::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #10b981;
+  animation: scanner-line 2s ease-in-out infinite;
+}
+
+@keyframes scanner-line {
+  0%, 100% {
+    opacity: 0;
+    transform: translateY(-150px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(150px);
+  }
+}
+
 @layer base {
   * {
     @apply border-border;

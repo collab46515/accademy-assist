@@ -25,8 +25,12 @@ import {
   AlertCircle,
   Printer,
   Download,
-  PoundSterling
+  PoundSterling,
+  Camera,
+  Scan
 } from 'lucide-react';
+import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
+import { Capacitor } from '@capacitor/core';
 
 // Mock data - replace with actual data fetching
 const mockStudents: Student[] = [
@@ -112,6 +116,8 @@ export default function FeeCollections() {
   const [showClassBreakdownModal, setShowClassBreakdownModal] = useState(false);
   const [showTimeBreakdownModal, setShowTimeBreakdownModal] = useState(false);
   const [showFeeTypeBreakdownModal, setShowFeeTypeBreakdownModal] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanSupported, setScanSupported] = useState(false);
   const { toast } = useToast();
 
   const [paymentForm, setPaymentForm] = useState({
@@ -138,6 +144,131 @@ export default function FeeCollections() {
       searchInputRef.current.focus();
     }
   }, [cashCounterMode]);
+
+  // Check if barcode scanning is supported
+  useEffect(() => {
+    const checkScanSupport = async () => {
+      if (Capacitor.isNativePlatform()) {
+        setScanSupported(true);
+      } else {
+        // Check if running on mobile web with camera support
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const hasCamera = navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function';
+        setScanSupported(isMobile && hasCamera);
+      }
+    };
+    checkScanSupport();
+  }, []);
+
+  // USB Scanner support - listen for rapid keyboard input
+  useEffect(() => {
+    let scannerBuffer = '';
+    let scannerTimeout: NodeJS.Timeout;
+
+    const handleKeyInput = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input field
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      // Clear previous timeout
+      clearTimeout(scannerTimeout);
+
+      // Add character to buffer
+      if (e.key.length === 1) {
+        scannerBuffer += e.key;
+      }
+
+      // Check for Enter key (scanner typically sends Enter at the end)
+      if (e.key === 'Enter' && scannerBuffer.length > 3) {
+        e.preventDefault();
+        handleScanResult(scannerBuffer.trim());
+        scannerBuffer = '';
+        return;
+      }
+
+      // Auto-process if buffer gets long enough (typical scanner input)
+      scannerTimeout = setTimeout(() => {
+        if (scannerBuffer.length > 3) {
+          handleScanResult(scannerBuffer.trim());
+        }
+        scannerBuffer = '';
+      }, 100);
+    };
+
+    document.addEventListener('keydown', handleKeyInput);
+    return () => {
+      document.removeEventListener('keydown', handleKeyInput);
+      clearTimeout(scannerTimeout);
+    };
+  }, []);
+
+  // Handle scan result
+  const handleScanResult = (scannedValue: string) => {
+    const foundStudent = students.find(student => 
+      student.studentId.toLowerCase() === scannedValue.toLowerCase() ||
+      student.name.toLowerCase().includes(scannedValue.toLowerCase())
+    );
+
+    if (foundStudent) {
+      setSearchTerm(scannedValue);
+      
+      // Auto-open payment modal in cash counter mode
+      if (cashCounterMode && foundStudent.status !== 'paid') {
+        handleQuickPayment(foundStudent);
+      }
+      
+      toast({
+        title: "Student Found",
+        description: `${foundStudent.name} (${foundStudent.class}) - ${foundStudent.feeType}`,
+      });
+    } else {
+      setSearchTerm(scannedValue);
+      toast({
+        title: "Student Not Found",
+        description: `No student found with ID: ${scannedValue}`,
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Camera-based barcode scanning
+  const startCameraScan = async () => {
+    try {
+      setIsScanning(true);
+      
+      // Request camera permission and start scanning
+      const permission = await BarcodeScanner.checkPermission({ force: true });
+      
+      if (permission.granted) {
+        // Hide the web content
+        document.body.classList.add('barcode-scanner-active');
+        
+        const result = await BarcodeScanner.startScan();
+        
+        if (result.hasContent) {
+          handleScanResult(result.content);
+        }
+      } else {
+        toast({
+          title: "Camera Permission Required",
+          description: "Please allow camera access to scan barcodes",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Scanning error:', error);
+      toast({
+        title: "Scanning Error",
+        description: "Unable to start camera scanner",
+        variant: "destructive"
+      });
+    } finally {
+      setIsScanning(false);
+      document.body.classList.remove('barcode-scanner-active');
+      BarcodeScanner.stopScan();
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -462,8 +593,25 @@ export default function FeeCollections() {
                   placeholder={cashCounterMode ? "Start typing student name or scan ID..." : "Search by student name, ID, or parent name..."}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className={`pl-10 ${cashCounterMode ? 'text-lg py-3' : ''}`}
+                  className={`pl-10 ${cashCounterMode ? 'text-lg py-3' : ''} ${scanSupported ? 'pr-12' : ''}`}
                 />
+                {scanSupported && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="absolute right-1 top-1 h-8 w-8 p-0"
+                    onClick={startCameraScan}
+                    disabled={isScanning}
+                  >
+                    {isScanning ? (
+                      <div className="animate-spin">
+                        <Camera className="h-4 w-4" />
+                      </div>
+                    ) : (
+                      <Scan className="h-4 w-4" />
+                    )}
+                  </Button>
+                )}
               </div>
             </div>
             
@@ -1667,6 +1815,35 @@ export default function FeeCollections() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Barcode Scanner UI Overlay */}
+      {isScanning && (
+        <div className="barcode-scanner-ui">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold mb-2">Scanning for Student ID</h2>
+            <p className="text-lg opacity-75">Point camera at barcode or QR code</p>
+          </div>
+          
+          <div className="scanner-frame mb-8">
+            {/* Scanner animation line is handled by CSS */}
+          </div>
+          
+          <div className="text-center">
+            <Button 
+              variant="outline" 
+              size="lg"
+              onClick={() => {
+                setIsScanning(false);
+                document.body.classList.remove('barcode-scanner-active');
+                BarcodeScanner.stopScan();
+              }}
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+            >
+              Cancel Scan
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
