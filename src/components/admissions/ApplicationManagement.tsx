@@ -27,7 +27,7 @@ export function ApplicationManagement() {
     if (filterParam && filterParam !== statusFilter) {
       setStatusFilter(filterParam);
     }
-  }, []);
+  }, [window.location.search]); // Watch for URL changes
 
   // Mock stats - would come from real data
   const stats = {
@@ -44,10 +44,10 @@ export function ApplicationManagement() {
     const colors = {
       draft: 'bg-slate-100 text-slate-700 border-slate-200',
       submitted: 'bg-blue-100 text-blue-700 border-blue-200',
-      reviewing: 'bg-amber-100 text-amber-700 border-amber-200',
-      assessment: 'bg-purple-100 text-purple-700 border-purple-200',
-      interview: 'bg-indigo-100 text-indigo-700 border-indigo-200',
-      decision: 'bg-orange-100 text-orange-700 border-orange-200',
+      under_review: 'bg-amber-100 text-amber-700 border-amber-200',
+      assessment_scheduled: 'bg-purple-100 text-purple-700 border-purple-200',
+      interview_scheduled: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+      pending_approval: 'bg-orange-100 text-orange-700 border-orange-200',
       approved: 'bg-green-100 text-green-700 border-green-200',
       waitlisted: 'bg-yellow-100 text-yellow-700 border-yellow-200',
       rejected: 'bg-red-100 text-red-700 border-red-200',
@@ -102,8 +102,7 @@ export function ApplicationManagement() {
                 <SelectItem value="assessment_scheduled">Assessment Scheduled</SelectItem>
                 <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
                 <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="waitlisted">Waitlisted</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
+                <SelectItem value="pending_approval">Pending Approval</SelectItem>
               </SelectContent>
             </Select>
           </div>

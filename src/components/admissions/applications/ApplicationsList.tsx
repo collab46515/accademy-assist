@@ -87,20 +87,8 @@ export function ApplicationsList({
         app.application_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.parent_email.toLowerCase().includes(searchTerm.toLowerCase());
       
-      // Map URL filter values to database status values
-      const statusMapping = {
-        'all': 'all',
-        'submitted': 'submitted',
-        'under_review': 'reviewing',
-        'assessment_scheduled': 'assessment',
-        'interview_scheduled': 'interview',
-        'approved': 'approved',
-        'waitlisted': 'waitlisted',
-        'rejected': 'rejected'
-      };
-      
-      const mappedFilter = statusMapping[statusFilter as keyof typeof statusMapping] || statusFilter;
-      const matchesStatus = mappedFilter === 'all' || app.status === mappedFilter;
+      // The statusFilter from URL should match database status values directly
+      const matchesStatus = statusFilter === 'all' || app.status === statusFilter;
       
       return matchesSearch && matchesStatus;
     })
@@ -139,10 +127,10 @@ export function ApplicationsList({
     const labels = {
       draft: 'Draft',
       submitted: 'Submitted',
-      reviewing: 'Under Review',
-      assessment: 'Assessment Stage',
-      interview: 'Interview Scheduled',
-      decision: 'Decision Pending',
+      under_review: 'Under Review',
+      assessment_scheduled: 'Assessment Scheduled',
+      interview_scheduled: 'Interview Scheduled',
+      pending_approval: 'Pending Approval',
       approved: 'Approved',
       waitlisted: 'Waitlisted',
       rejected: 'Rejected',
