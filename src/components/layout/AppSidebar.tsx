@@ -92,7 +92,22 @@ const erpModules = [
       { title: "Timetable", url: "/timetable", icon: Clock },
       { title: "Gradebook", url: "/gradebook", icon: Calculator },
       { title: "Exams", url: "/exams", icon: FileText },
-      { title: "Fee Management", url: "/school-management/fee-management", icon: CreditCard },
+      { 
+        title: "Fee Management", 
+        url: "/school-management/fee-management", 
+        icon: CreditCard,
+        subItems: [
+          { title: "Fee Structure", url: "/school-management/fee-management", icon: Settings },
+          { title: "Invoices", url: "/school-management/fee-management/invoices", icon: FileText },
+          { title: "Payments", url: "/school-management/fee-management/payments", icon: CreditCard },
+          { title: "Installment Plans", url: "/school-management/fee-management/installments", icon: Calendar },
+          { title: "Discounts & Waivers", url: "/school-management/fee-management/discounts", icon: Receipt },
+          { title: "Outstanding Fees", url: "/school-management/fee-management/outstanding", icon: AlertTriangle },
+          { title: "Fee Reports", url: "/school-management/fee-management/reports", icon: BarChart3 },
+          { title: "Fee Calendar", url: "/school-management/fee-management/calendar", icon: CalendarDays },
+          { title: "Reminders & Alerts", url: "/school-management/fee-management/reminders", icon: Bell }
+        ]
+      },
       { title: "Staff", url: "/staff", icon: Users },
       { title: "Communications", url: "/communication", icon: MessageSquare },
       { title: "Events", url: "/events", icon: Activity },
