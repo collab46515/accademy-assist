@@ -22,69 +22,7 @@ import {
 import { FeeStructureBuilder } from './FeeStructureBuilder';
 import { useFeeData } from '@/hooks/useFeeData';
 
-interface FeeStructureOverview {
-  id: string;
-  name: string;
-  academicYear: string;
-  term: string;
-  totalAmount: number;
-  studentsAssigned: number;
-  status: 'active' | 'draft' | 'archived';
-  createdAt: string;
-  lastModified: string;
-  feeHeadCount: number;
-}
-
-const MOCK_FEE_STRUCTURES: FeeStructureOverview[] = [
-  {
-    id: '1',
-    name: 'Year 7-11 Termly Fees',
-    academicYear: '2024-25',
-    term: 'Autumn',
-    totalAmount: 4850,
-    studentsAssigned: 245,
-    status: 'active',
-    createdAt: '2024-08-15',
-    lastModified: '2024-09-01',
-    feeHeadCount: 8
-  },
-  {
-    id: '2',
-    name: 'Sixth Form Fees',
-    academicYear: '2024-25',
-    term: 'Autumn',
-    totalAmount: 5250,
-    studentsAssigned: 78,
-    status: 'active',
-    createdAt: '2024-08-20',
-    lastModified: '2024-08-25',
-    feeHeadCount: 6
-  },
-  {
-    id: '3',
-    name: 'Spring Term Fees',
-    academicYear: '2024-25',
-    term: 'Spring',
-    totalAmount: 4850,
-    studentsAssigned: 0,
-    status: 'draft',
-    createdAt: '2024-09-10',
-    lastModified: '2024-09-15',
-    feeHeadCount: 8
-  },
-  {
-    id: '4',
-    name: 'International Student Fees',
-    academicYear: '2024-25',
-    term: 'Annual',
-    totalAmount: 18500,
-    studentsAssigned: 32,
-    status: 'active',
-    createdAt: '2024-07-01',
-    lastModified: '2024-08-01',
-    feeHeadCount: 12
-  }
-];
+// No mock data - using real database data only
 
 export const FeeStructureTabs = () => {
   const [selectedAcademicYear, setSelectedAcademicYear] = useState('2024-25');
@@ -126,10 +64,13 @@ export const FeeStructureTabs = () => {
   });
 
   // Debug logging
-  console.log('Raw feeStructures from DB:', feeStructures);
-  console.log('Normalized data:', dataToUse);
-  console.log('Filter criteria:', { selectedAcademicYear, selectedTerm, statusFilter, searchQuery });
-  console.log('Final filtered structures:', filteredStructures);
+  console.log('📊 FeeStructureTabs Debug Info:');
+  console.log('- Raw feeStructures from DB:', feeStructures);
+  console.log('- Loading state:', loading);
+  console.log('- Normalized data:', dataToUse);
+  console.log('- Filter criteria:', { selectedAcademicYear, selectedTerm, statusFilter, searchQuery });
+  console.log('- Final filtered structures:', filteredStructures);
+  console.log('- Component is rendering with', filteredStructures.length, 'structures');
 
   const getStatusColor = (status: string) => {
     switch (status) {
