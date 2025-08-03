@@ -312,306 +312,515 @@ export function FeeDashboard() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8 animate-fade-in">
+        {/* Loading Header */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="h-8 bg-gradient-to-r from-muted to-muted/50 rounded-lg w-64 animate-pulse"></div>
+            <div className="h-4 bg-muted rounded w-96 animate-pulse"></div>
+          </div>
+          <div className="h-10 bg-muted rounded-lg w-32 animate-pulse"></div>
+        </div>
+
+        {/* Loading Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           {[...Array(5)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
+            <Card key={i} className="overflow-hidden">
               <CardContent className="p-6">
-                <div className="h-8 bg-muted rounded mb-2"></div>
-                <div className="h-6 bg-muted rounded"></div>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2 flex-1">
+                      <div className="h-4 bg-muted rounded w-24 animate-pulse"></div>
+                      <div className="h-8 bg-gradient-to-r from-muted to-muted/50 rounded w-20 animate-pulse"></div>
+                      <div className="h-3 bg-muted rounded w-16 animate-pulse"></div>
+                    </div>
+                    <div className="h-12 w-12 bg-muted rounded-xl animate-pulse"></div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        {/* Loading Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-3">
+            <Card>
+              <CardContent className="p-6">
+                <div className="h-64 bg-gradient-to-b from-muted/50 to-muted rounded-lg animate-pulse"></div>
+              </CardContent>
+            </Card>
+          </div>
+          <div>
+            <Card>
+              <CardContent className="p-6">
+                <div className="h-64 bg-gradient-to-t from-muted/50 to-muted rounded-lg animate-pulse"></div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Key Metrics Row - All Clickable */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        <Card 
-          className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-0 cursor-pointer hover:shadow-lg transition-all duration-300"
-          onClick={() => handleMetricClick('collected')}
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-primary-foreground/80 text-sm">Total Collected (This Term)</p>
-                <p className="text-3xl font-bold">£{metrics.totalCollected.toLocaleString()}</p>
-                <p className="text-sm text-primary-foreground/60 mt-1">Click for details</p>
-              </div>
-              <div className="flex flex-col items-center">
-                <PoundSterling className="h-8 w-8 text-primary-foreground/60" />
-                <Eye className="h-4 w-4 text-primary-foreground/60 mt-1" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6 animate-fade-in">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+              Fee Management Dashboard
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl">
+              Real-time financial overview with interactive analytics and streamlined fee collection tools
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <Button variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-all duration-200">
+              <Filter className="w-4 h-4 mr-2" />
+              Filters
+            </Button>
+            <Button className="shadow-md hover:shadow-lg transition-all duration-200 bg-gradient-to-r from-primary to-primary/90">
+              <Download className="w-4 h-4 mr-2" />
+              Export Report
+            </Button>
+          </div>
+        </div>
 
-        <Card 
-          className="cursor-pointer hover:shadow-lg transition-all duration-300"
-          onClick={() => handleMetricClick('outstanding')}
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm">Outstanding Fees</p>
-                <p className="text-3xl font-bold text-destructive">£{metrics.outstandingFees.toLocaleString()}</p>
-                <p className="text-sm text-muted-foreground mt-1">Click for breakdown</p>
-              </div>
-              <div className="flex flex-col items-center">
-                <AlertTriangle className="h-8 w-8 text-destructive" />
-                <Eye className="h-4 w-4 text-muted-foreground mt-1" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card 
-          className="cursor-pointer hover:shadow-lg transition-all duration-300"
-          onClick={() => handleMetricClick('percentage')}
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm">% Collected</p>
-                <p className="text-3xl font-bold text-green-600">{metrics.collectionPercentage}%</p>
-                <Progress value={metrics.collectionPercentage} className="mt-2" />
-                <p className="text-sm text-muted-foreground mt-1">Click for trends</p>
-              </div>
-              <div className="flex flex-col items-center">
-                <TrendingUp className="h-8 w-8 text-green-600" />
-                <Eye className="h-4 w-4 text-muted-foreground mt-1" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card 
-          className="cursor-pointer hover:shadow-lg transition-all duration-300"
-          onClick={() => handleMetricClick('expected')}
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm">Today's Expected</p>
-                <p className="text-3xl font-bold">£{metrics.todayExpected.toLocaleString()}</p>
-                <p className="text-sm text-muted-foreground mt-1">Click for list</p>
-              </div>
-              <div className="flex flex-col items-center">
-                <Calendar className="h-8 w-8 text-blue-600" />
-                <Eye className="h-4 w-4 text-muted-foreground mt-1" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card 
-          className="cursor-pointer hover:shadow-lg transition-all duration-300"
-          onClick={() => handleMetricClick('overdue')}
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm">Overdue Accounts</p>
-                <p className="text-3xl font-bold text-orange-600">{metrics.overdueAccounts}</p>
-                <p className="text-sm text-muted-foreground">students</p>
-                <p className="text-sm text-muted-foreground mt-1">Click for details</p>
-              </div>
-              <div className="flex flex-col items-center">
-                <Users className="h-8 w-8 text-orange-600" />
-                <Eye className="h-4 w-4 text-muted-foreground mt-1" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts and Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Charts Section - 3 columns */}
-        <div className="lg:col-span-3 space-y-6">
-          {/* Collection Progress by Class */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Collection Progress by Class</CardTitle>
-                <CardDescription>Click on bars to see detailed breakdown</CardDescription>
-              </div>
-              <Button variant="ghost" size="sm">
-                <Eye className="w-4 h-4 mr-2" />
-                View All
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={chartConfig}>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={classCollections}>
-                    <XAxis dataKey="className" />
-                    <YAxis />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar 
-                      dataKey="percentage" 
-                      fill="hsl(var(--primary))" 
-                      className="cursor-pointer"
-                      onClick={(data) => handleClassClick(data.className)}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-4">
-                {classCollections.map((classItem) => (
-                  <Button
-                    key={classItem.className}
-                    variant="ghost"
-                    size="sm"
-                    className="h-auto p-2 flex flex-col items-start"
-                    onClick={() => handleClassClick(classItem.className)}
-                  >
-                    <span className="font-medium">{classItem.className}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {classItem.percentage}% collected
-                    </span>
-                    <ChevronRight className="w-3 h-3 ml-auto" />
-                  </Button>
-                ))}
+        {/* Key Metrics Grid - Enhanced Design */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+          {/* Total Collected */}
+          <Card 
+            className="group relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-primary-foreground border-0 cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-primary/25 animate-scale-in"
+            onClick={() => handleMetricClick('collected')}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <CardContent className="p-6 relative z-10">
+              <div className="flex items-center justify-between">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <p className="text-primary-foreground/90 text-sm font-medium">Total Collected</p>
+                    <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30">This Term</Badge>
+                  </div>
+                  <p className="text-3xl sm:text-4xl font-bold tracking-tight">£{metrics.totalCollected.toLocaleString()}</p>
+                  <div className="flex items-center gap-1 text-primary-foreground/80">
+                    <Eye className="h-3 w-3" />
+                    <span className="text-xs">Click for insights</span>
+                  </div>
+                </div>
+                <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
+                  <PoundSterling className="h-8 w-8 text-primary-foreground" />
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Outstanding Fees by Category */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Outstanding by Category</CardTitle>
-                <CardDescription>Breakdown of unpaid fees</CardDescription>
+          {/* Outstanding Fees */}
+          <Card 
+            className="group relative overflow-hidden bg-gradient-to-br from-red-50 to-red-100/50 border-red-200/50 cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-red-500/25 animate-scale-in"
+            onClick={() => handleMetricClick('outstanding')}
+            style={{ animationDelay: '0.1s' }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <CardContent className="p-6 relative z-10">
+              <div className="flex items-center justify-between">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <p className="text-red-700 text-sm font-medium">Outstanding Fees</p>
+                    <Badge variant="destructive" className="text-xs">Urgent</Badge>
+                  </div>
+                  <p className="text-3xl sm:text-4xl font-bold text-red-600 tracking-tight">£{metrics.outstandingFees.toLocaleString()}</p>
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Eye className="h-3 w-3" />
+                    <span className="text-xs">View breakdown</span>
+                  </div>
+                </div>
+                <div className="p-3 bg-red-500/10 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                  <AlertTriangle className="h-8 w-8 text-red-500" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Collection Percentage */}
+          <Card 
+            className="group relative overflow-hidden bg-gradient-to-br from-green-50 to-green-100/50 border-green-200/50 cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-green-500/25 animate-scale-in"
+            onClick={() => handleMetricClick('percentage')}
+            style={{ animationDelay: '0.2s' }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <CardContent className="p-6 relative z-10">
+              <div className="flex items-center justify-between">
+                <div className="space-y-3 flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="text-green-700 text-sm font-medium">Collection Rate</p>
+                    <Badge variant="default" className="text-xs bg-green-100 text-green-700 border-green-300">Target: 85%</Badge>
+                  </div>
+                  <p className="text-3xl sm:text-4xl font-bold text-green-600 tracking-tight">{metrics.collectionPercentage}%</p>
+                  <Progress 
+                    value={metrics.collectionPercentage} 
+                    className="h-2 bg-green-100"
+                    style={{ 
+                      // @ts-ignore
+                      '--tw-progress-background': 'hsl(142 76% 36%)'
+                    }}
+                  />
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Eye className="h-3 w-3" />
+                    <span className="text-xs">View trends</span>
+                  </div>
+                </div>
+                <div className="p-3 bg-green-500/10 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                  <TrendingUp className="h-8 w-8 text-green-500" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Today's Expected */}
+          <Card 
+            className="group relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200/50 cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25 animate-scale-in"
+            onClick={() => handleMetricClick('expected')}
+            style={{ animationDelay: '0.3s' }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <CardContent className="p-6 relative z-10">
+              <div className="flex items-center justify-between">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <p className="text-blue-700 text-sm font-medium">Today's Expected</p>
+                    <Badge variant="default" className="text-xs bg-blue-100 text-blue-700 border-blue-300">8 pending</Badge>
+                  </div>
+                  <p className="text-3xl sm:text-4xl font-bold text-blue-600 tracking-tight">£{metrics.todayExpected.toLocaleString()}</p>
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Eye className="h-3 w-3" />
+                    <span className="text-xs">View list</span>
+                  </div>
+                </div>
+                <div className="p-3 bg-blue-500/10 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                  <Calendar className="h-8 w-8 text-blue-500" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Overdue Accounts */}
+          <Card 
+            className="group relative overflow-hidden bg-gradient-to-br from-orange-50 to-orange-100/50 border-orange-200/50 cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/25 animate-scale-in"
+            onClick={() => handleMetricClick('overdue')}
+            style={{ animationDelay: '0.4s' }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <CardContent className="p-6 relative z-10">
+              <div className="flex items-center justify-between">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <p className="text-orange-700 text-sm font-medium">Overdue Accounts</p>
+                    {metrics.overdueAccounts > 0 && (
+                      <Badge variant="destructive" className="text-xs animate-pulse">Action Required</Badge>
+                    )}
+                  </div>
+                  <p className="text-3xl sm:text-4xl font-bold text-orange-600 tracking-tight">{metrics.overdueAccounts}</p>
+                  <p className="text-sm text-orange-600/80 font-medium">students</p>
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Eye className="h-3 w-3" />
+                    <span className="text-xs">View details</span>
+                  </div>
+                </div>
+                <div className="p-3 bg-orange-500/10 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                  <Users className="h-8 w-8 text-orange-500" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+          {/* Charts Section */}
+          <div className="xl:col-span-3 space-y-8">
+            {/* Collection Progress by Class */}
+            <Card className="shadow-lg border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm animate-fade-in">
+              <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <CardTitle className="text-xl font-semibold flex items-center gap-2">
+                      <div className="h-2 w-2 bg-primary rounded-full animate-pulse" />
+                      Collection Progress by Class
+                    </CardTitle>
+                    <CardDescription>Interactive overview - click bars or class buttons for detailed breakdown</CardDescription>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" className="hover:bg-primary/10">
+                      <Filter className="w-4 h-4 mr-2" />
+                      Filter Classes
+                    </Button>
+                    <Button variant="ghost" size="sm" className="hover:bg-primary/10">
+                      <Eye className="w-4 h-4 mr-2" />
+                      View All
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent>
-                <ChartContainer config={chartConfig}>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <PieChart>
-                      <Pie
-                        data={categoryBreakdown}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={100}
-                        dataKey="amount"
-                        label={({ category, percentage }) => `${category} ${percentage}%`}
-                      >
-                        {categoryBreakdown.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
+              <CardContent className="p-6">
+                <div className="mb-6">
+                  <ChartContainer config={chartConfig}>
+                    <ResponsiveContainer width="100%" height={320}>
+                      <BarChart data={classCollections} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                        <XAxis 
+                          dataKey="className" 
+                          tick={{ fontSize: 12 }}
+                          axisLine={{ stroke: 'hsl(var(--border))' }}
+                        />
+                        <YAxis 
+                          tick={{ fontSize: 12 }}
+                          axisLine={{ stroke: 'hsl(var(--border))' }}
+                          tickFormatter={(value) => `${value}%`}
+                        />
+                        <ChartTooltip 
+                          content={<ChartTooltipContent />}
+                          cursor={{ fill: 'hsl(var(--primary))', opacity: 0.1 }}
+                        />
+                        <Bar 
+                          dataKey="percentage" 
+                          fill="hsl(var(--primary))" 
+                          radius={[4, 4, 0, 0]}
+                          className="cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                          onClick={(data) => handleClassClick(data.className)}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </div>
+                
+                {/* Class Quick Access Buttons */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {classCollections.map((classItem, index) => (
+                    <Button
+                      key={classItem.className}
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-3 flex flex-col items-start bg-gradient-to-br from-muted/50 to-muted/30 hover:from-primary/10 hover:to-primary/5 border border-border/50 hover:border-primary/30 transition-all duration-300 hover:scale-105 hover:shadow-md group animate-scale-in"
+                      onClick={() => handleClassClick(classItem.className)}
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="font-semibold text-sm">{classItem.className}</span>
+                        <ChevronRight className="w-3 h-3 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-200" />
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Progress value={classItem.percentage} className="h-1.5 flex-1" />
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {classItem.percentage}%
+                        </span>
+                      </div>
+                      <span className="text-xs text-muted-foreground mt-1">
+                        £{classItem.collected.toLocaleString()} / £{classItem.total.toLocaleString()}
+                      </span>
+                    </Button>
+                  ))}
+                </div>
               </CardContent>
             </Card>
 
-            {/* Daily Collections */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Daily Collections (Last 7 Days)</CardTitle>
-                <CardDescription>Collection trend</CardDescription>
+            {/* Secondary Charts Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Outstanding by Category */}
+              <Card className="shadow-lg border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm animate-fade-in">
+                <CardHeader className="border-b border-border/50">
+                  <CardTitle className="text-lg font-semibold">Outstanding by Category</CardTitle>
+                  <CardDescription>Fee breakdown requiring attention</CardDescription>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <ChartContainer config={chartConfig}>
+                    <ResponsiveContainer width="100%" height={280}>
+                      <PieChart>
+                        <Pie
+                          data={categoryBreakdown}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={70}
+                          outerRadius={120}
+                          dataKey="amount"
+                          label={({ category, percentage }) => `${category}\n${percentage}%`}
+                          labelLine={false}
+                          className="outline-none"
+                        >
+                          {categoryBreakdown.map((entry, index) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={COLORS[index % COLORS.length]}
+                              className="hover:opacity-80 transition-opacity duration-200 cursor-pointer"
+                            />
+                          ))}
+                        </Pie>
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+
+              {/* Daily Collections Trend */}
+              <Card className="shadow-lg border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm animate-fade-in">
+                <CardHeader className="border-b border-border/50">
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                    Daily Collections Trend
+                    <Badge variant="default" className="text-xs">Last 7 Days</Badge>
+                  </CardTitle>
+                  <CardDescription>Payment collection momentum</CardDescription>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <ChartContainer config={chartConfig}>
+                    <ResponsiveContainer width="100%" height={280}>
+                      <LineChart data={dailyCollections} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                        <XAxis 
+                          dataKey="date" 
+                          tick={{ fontSize: 12 }}
+                          axisLine={{ stroke: 'hsl(var(--border))' }}
+                        />
+                        <YAxis 
+                          tick={{ fontSize: 12 }}
+                          axisLine={{ stroke: 'hsl(var(--border))' }}
+                          tickFormatter={(value) => `£${value}`}
+                        />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Line 
+                          type="monotone" 
+                          dataKey="amount" 
+                          stroke="hsl(var(--primary))" 
+                          strokeWidth={3}
+                          dot={{ 
+                            fill: "hsl(var(--primary))", 
+                            strokeWidth: 2, 
+                            r: 5,
+                            className: "hover:r-7 transition-all duration-200"
+                          }}
+                          activeDot={{ 
+                            r: 7, 
+                            fill: "hsl(var(--primary))",
+                            stroke: "hsl(var(--background))",
+                            strokeWidth: 2
+                          }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Quick Actions Sidebar */}
+          <div className="xl:col-span-1 space-y-6">
+            <Card className="shadow-lg border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm animate-slide-in-right">
+              <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                  <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
+                  Quick Actions
+                </CardTitle>
+                <CardDescription>Essential tools at your fingertips</CardDescription>
               </CardHeader>
-              <CardContent>
-                <ChartContainer config={chartConfig}>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <LineChart data={dailyCollections}>
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line 
-                        type="monotone" 
-                        dataKey="amount" 
-                        stroke="hsl(var(--primary))" 
-                        strokeWidth={3}
-                        dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 4 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
+              <CardContent className="p-4 space-y-3">
+                {[
+                  { label: 'Record Payment', icon: CreditCard, action: 'Record Payment', color: 'text-green-600', bg: 'hover:bg-green-50' },
+                  { label: 'Send Reminders', icon: Send, action: 'Send Reminder to All Overdue', color: 'text-blue-600', bg: 'hover:bg-blue-50' },
+                  { label: 'Generate Invoices', icon: FileText, action: 'Generate Invoices (Bulk)', color: 'text-purple-600', bg: 'hover:bg-purple-50' },
+                  { label: "Today's Collection", icon: Calendar, action: "View Today's Collection List", color: 'text-orange-600', bg: 'hover:bg-orange-50' }
+                ].map((item, index) => (
+                  <Button 
+                    key={item.action}
+                    onClick={() => handleQuickAction(item.action)}
+                    variant="ghost"
+                    className={`w-full justify-start h-auto p-4 ${item.bg} border border-border/50 hover:border-primary/30 transition-all duration-300 hover:scale-105 hover:shadow-md group animate-scale-in`}
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <div className={`p-2 rounded-lg bg-gradient-to-br from-background to-muted/50 group-hover:scale-110 transition-transform duration-200 mr-3`}>
+                      <item.icon className={`h-4 w-4 ${item.color}`} />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <div className="font-medium text-sm">{item.label}</div>
+                      <div className="text-xs text-muted-foreground">Click to access</div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-200" />
+                  </Button>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Mini Stats Card */}
+            <Card className="shadow-lg border-0 bg-gradient-to-br from-primary/5 to-primary/10 backdrop-blur-sm animate-fade-in">
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-sm text-primary">Quick Stats</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="text-center p-2 bg-background/50 rounded-lg">
+                      <div className="text-lg font-bold">{classCollections.length}</div>
+                      <div className="text-xs text-muted-foreground">Classes</div>
+                    </div>
+                    <div className="text-center p-2 bg-background/50 rounded-lg">
+                      <div className="text-lg font-bold">£{(metrics.totalCollected / 100).toFixed(0)}k</div>
+                      <div className="text-xs text-muted-foreground">Avg/Class</div>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
         </div>
 
-        {/* Quick Actions Sidebar - 1 column */}
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button 
-                onClick={() => handleQuickAction('Record Payment')}
-                className="w-full justify-start"
-                variant="outline"
-              >
-                <CreditCard className="mr-2 h-4 w-4" />
-                Record Payment
-              </Button>
-              <Button 
-                onClick={() => handleQuickAction('Send Reminder to All Overdue')}
-                className="w-full justify-start"
-                variant="outline"
-              >
-                <Send className="mr-2 h-4 w-4" />
-                Send Reminder to All Overdue
-              </Button>
-              <Button 
-                onClick={() => handleQuickAction('Generate Invoices (Bulk)')}
-                className="w-full justify-start"
-                variant="outline"
-              >
-                <FileText className="mr-2 h-4 w-4" />
-                Generate Invoices (Bulk)
-              </Button>
-              <Button 
-                onClick={() => handleQuickAction("View Today's Collection List")}
-                className="w-full justify-start"
-                variant="outline"
-              >
-                <Calendar className="mr-2 h-4 w-4" />
-                View Today's Collection List
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Alerts Section */}
+        <Card className="shadow-lg border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm animate-fade-in">
+          <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+              <Bell className="h-5 w-5 text-amber-500" />
+              Priority Alerts
+              {alerts.length > 0 && (
+                <Badge variant="destructive" className="animate-bounce">{alerts.length}</Badge>
+              )}
+            </CardTitle>
+            <CardDescription>Issues requiring immediate attention</CardDescription>
+          </CardHeader>
+          <CardContent className="p-6">
+            {alerts.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Bell className="h-8 w-8 text-green-600" />
+                </div>
+                <p className="text-muted-foreground font-medium">All systems operating smoothly</p>
+                <p className="text-sm text-muted-foreground mt-1">No active alerts at this time</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {alerts.map((alert, index) => (
+                  <Alert 
+                    key={alert.id} 
+                    className={`border-l-4 ${alert.priority === 'high' ? 'border-l-red-500 bg-red-50/50' : alert.priority === 'medium' ? 'border-l-amber-500 bg-amber-50/50' : 'border-l-blue-500 bg-blue-50/50'} transition-all duration-300 hover:shadow-md animate-scale-in`}
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <AlertTriangle className={`h-4 w-4 ${alert.priority === 'high' ? 'text-red-500' : alert.priority === 'medium' ? 'text-amber-500' : 'text-blue-500'}`} />
+                    <AlertDescription className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="font-semibold text-sm">{alert.title}</div>
+                        <div className="text-sm text-muted-foreground mt-1">{alert.message}</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={getPriorityColor(alert.priority) as any} className="text-xs">
+                          {alert.priority}
+                        </Badge>
+                        <Button variant="ghost" size="sm" className="text-xs">
+                          Action
+                        </Button>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
-
-      {/* Urgent Alerts */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="h-5 w-5" />
-            Urgent Alerts
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {alerts.length === 0 ? (
-            <p className="text-muted-foreground">No active alerts</p>
-          ) : (
-            alerts.map((alert) => (
-              <Alert key={alert.id} className="border-l-4 border-l-primary">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription className="flex items-center justify-between">
-                  <div>
-                    <strong>{alert.title}</strong> - {alert.message}
-                  </div>
-                  <Badge variant={getPriorityColor(alert.priority) as any}>
-                    {alert.priority}
-                  </Badge>
-                </AlertDescription>
-              </Alert>
-            ))
-          )}
-        </CardContent>
-      </Card>
 
       {/* Interactive Modals */}
       <PaymentRecordModal
