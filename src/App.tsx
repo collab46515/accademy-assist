@@ -29,6 +29,7 @@ import IntegrationsPage from "./pages/IntegrationsPage";
 import { UserManagementPage } from "./pages/UserManagementPage";
 import { HRManagementPage } from "./pages/HRManagementPage";
 import { AccountingPage } from "./pages/AccountingPage";
+import { MasterDataPage } from "./pages/MasterDataPage";
 import TimetablePage from "./pages/TimetablePage";
 import NotFound from "./pages/NotFound";
 
@@ -85,6 +86,7 @@ const App = () => (
                           <Route path="/analytics" element={<AnalyticsPage />} />
                           <Route path="/ai-suite" element={<AISuitePage />} />
                           <Route path="/hr-management" element={<HRManagementPage />} />
+                          <Route path="/master-data" element={<MasterDataPage />} />
                           <Route path="/accounting" element={<AccountingPage />} />
                           <Route path="/accounting/student-fees" element={<AccountingPage />} />
                           <Route path="/accounting/invoices" element={<AccountingPage />} />
