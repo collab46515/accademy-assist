@@ -4,27 +4,26 @@ import { useToast } from '@/components/ui/use-toast';
 
 export interface FeeHead {
   id: string;
+  school_id: string;
   name: string;
   description?: string;
   category: string;
-  default_amount: number;
-  currency: string;
-  is_mandatory: boolean;
-  is_recurring: boolean;
-  recurrence_frequency?: string;
+  amount: number;
+  recurrence: string;
   applicable_classes?: string[];
   applicable_genders?: string[];
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }
 
 export interface FeeStructure {
   id: string;
+  school_id: string;
   name: string;
   description?: string;
   academic_year: string;
-  term?: string;
-  school_id: string;
+  term: string;
   fee_heads: any[];
   total_amount: number;
   applicable_year_groups?: string[];
@@ -35,20 +34,17 @@ export interface FeeStructure {
 
 export interface Invoice {
   id: string;
-  invoice_number: string;
-  student_id: string;
   school_id: string;
-  academic_year: string;
-  term?: string;
-  issue_date: string;
+  student_id: string;
+  fee_structure_id?: string;
+  invoice_number: string;
+  amount: number;
   due_date: string;
   status: string;
-  subtotal: number;
-  tax_amount: number;
-  discount_amount: number;
-  total_amount: number;
+  payment_method?: string;
   paid_amount: number;
-  currency: string;
+  paid_at?: string;
+  notes?: string;
   created_at: string;
   updated_at: string;
 }
@@ -62,8 +58,13 @@ export const useFeeData = (schoolId?: string) => {
 
   const fetchFeeHeads = async () => {
     try {
-      // Direct query using any type until types are regenerated
-      const result = await (supabase as any).from('fee_heads').select('*').order('name');
+      let query = (supabase as any).from('fee_heads').select('*').order('name');
+      
+      if (schoolId) {
+        query = query.eq('school_id', schoolId);
+      }
+      
+      const result = await query;
       if (result.error) throw result.error;
       setFeeHeads(result.data || []);
     } catch (error) {

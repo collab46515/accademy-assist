@@ -92,7 +92,7 @@ export const FeeStructureTabs = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   
-  const { feeStructures, loading } = useFeeData();
+  const { feeStructures, loading } = useFeeData("school_1");
 
   const filteredStructures = feeStructures.filter(structure => {
     const matchesSearch = structure.name.toLowerCase().includes(searchQuery.toLowerCase());

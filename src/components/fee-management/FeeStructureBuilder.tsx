@@ -53,13 +53,12 @@ const FeeHeadForm = ({ feeHead, onSave, onCancel }: FeeHeadFormProps) => {
     name: feeHead?.name || '',
     description: feeHead?.description || '',
     category: feeHead?.category || '',
-    default_amount: feeHead?.default_amount || 0,
-    currency: feeHead?.currency || 'GBP',
-    is_mandatory: feeHead?.is_mandatory || false,
-    is_recurring: feeHead?.is_recurring || false,
-    recurrence_frequency: feeHead?.recurrence_frequency || '',
+    amount: feeHead?.amount || 0,
+    recurrence: feeHead?.recurrence || 'monthly',
     applicable_classes: feeHead?.applicable_classes || [],
-    applicable_genders: feeHead?.applicable_genders || []
+    applicable_genders: feeHead?.applicable_genders || [],
+    is_active: feeHead?.is_active !== false,
+    school_id: feeHead?.school_id || '' // We'll set this properly later
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -131,65 +130,26 @@ const FeeHeadForm = ({ feeHead, onSave, onCancel }: FeeHeadFormProps) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="amount">Default Amount</Label>
+          <Label htmlFor="amount">Amount</Label>
           <Input
             id="amount"
             type="number"
             step="0.01"
-            value={formData.default_amount}
-            onChange={(e) => setFormData(prev => ({ ...prev, default_amount: parseFloat(e.target.value) || 0 }))}
+            value={formData.amount}
+            onChange={(e) => setFormData(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
             placeholder="0.00"
             required
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="currency">Currency</Label>
+          <Label htmlFor="recurrence">Recurrence</Label>
           <Select
-            value={formData.currency}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, currency: value }))}
+            value={formData.recurrence}
+            onValueChange={(value) => setFormData(prev => ({ ...prev, recurrence: value }))}
           >
             <SelectTrigger>
               <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="GBP">GBP (£)</SelectItem>
-              <SelectItem value="USD">USD ($)</SelectItem>
-              <SelectItem value="EUR">EUR (€)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between py-4">
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="mandatory"
-            checked={formData.is_mandatory}
-            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_mandatory: checked }))}
-          />
-          <Label htmlFor="mandatory">Mandatory Fee</Label>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="recurring"
-            checked={formData.is_recurring}
-            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_recurring: checked }))}
-          />
-          <Label htmlFor="recurring">Recurring Fee</Label>
-        </div>
-      </div>
-
-      {formData.is_recurring && (
-        <div className="space-y-2">
-          <Label>Recurrence Frequency</Label>
-          <Select
-            value={formData.recurrence_frequency}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, recurrence_frequency: value }))}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select frequency" />
             </SelectTrigger>
             <SelectContent>
               {RECURRENCE_OPTIONS.map(option => (
@@ -200,7 +160,18 @@ const FeeHeadForm = ({ feeHead, onSave, onCancel }: FeeHeadFormProps) => {
             </SelectContent>
           </Select>
         </div>
-      )}
+      </div>
+
+      <div className="flex items-center justify-between py-4">
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="active"
+            checked={formData.is_active}
+            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+          />
+          <Label htmlFor="active">Active Fee</Label>
+        </div>
+      </div>
 
       <Separator />
 
@@ -250,16 +221,20 @@ const FeeHeadForm = ({ feeHead, onSave, onCancel }: FeeHeadFormProps) => {
 };
 
 export const FeeStructureBuilder = () => {
-  const { feeHeads, loading, createFeeHead, updateFeeHead, deleteFeeHead } = useFeeData();
+  // For now, use a mock school ID - in production this would come from auth context
+  const { feeHeads, loading, createFeeHead, updateFeeHead, deleteFeeHead } = useFeeData("school_1");
   const [showForm, setShowForm] = useState(false);
   const [editingFeeHead, setEditingFeeHead] = useState<FeeHead | undefined>();
 
   const handleSave = async (feeHeadData: Omit<FeeHead, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      // Add school_id to the fee head data
+      const dataWithSchool = { ...feeHeadData, school_id: "school_1" };
+      
       if (editingFeeHead) {
-        await updateFeeHead(editingFeeHead.id, feeHeadData);
+        await updateFeeHead(editingFeeHead.id, dataWithSchool);
       } else {
-        await createFeeHead(feeHeadData);
+        await createFeeHead(dataWithSchool);
       }
       setShowForm(false);
       setEditingFeeHead(undefined);
@@ -382,19 +357,17 @@ export const FeeStructureBuilder = () => {
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Amount:</span>
                             <span className="font-medium">
-                              {feeHead.currency} {feeHead.default_amount.toFixed(2)}
+                              £{feeHead.amount.toFixed(2)}
                             </span>
                           </div>
                           
                           <div className="flex flex-wrap gap-1">
-                            {feeHead.is_mandatory && (
-                              <Badge variant="secondary" className="text-xs">Mandatory</Badge>
+                            {feeHead.is_active && (
+                              <Badge variant="secondary" className="text-xs">Active</Badge>
                             )}
-                            {feeHead.is_recurring && (
-                              <Badge variant="outline" className="text-xs">
-                                {feeHead.recurrence_frequency}
-                              </Badge>
-                            )}
+                            <Badge variant="outline" className="text-xs">
+                              {feeHead.recurrence}
+                            </Badge>
                           </div>
                           
                           {feeHead.applicable_classes && feeHead.applicable_classes.length > 0 && (
