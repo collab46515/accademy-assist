@@ -392,11 +392,7 @@ export const DiscountsWaivers = () => {
 
       {/* Stats Cards - Now Clickable */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
-          console.log('DiscountsWaivers: Active Discounts card clicked');
-          alert('Active Discounts card clicked');
-          setSelectedTab('discounts');
-        }}>
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedTab('discounts')}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -409,10 +405,7 @@ export const DiscountsWaivers = () => {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
-          console.log('DiscountsWaivers: Total Savings card clicked');
-          alert('Total Savings card clicked');
-        }}>
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -438,10 +431,7 @@ export const DiscountsWaivers = () => {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
-          console.log('DiscountsWaivers: Total Waived card clicked');
-          alert('Total Waived card clicked');
-        }}>
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>

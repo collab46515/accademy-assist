@@ -248,10 +248,7 @@ export const InstallmentPlans = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
-          console.log('InstallmentPlans: Active Plans card clicked');
-          alert('Active Plans card clicked');
-        }}>
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -264,10 +261,7 @@ export const InstallmentPlans = () => {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
-          console.log('InstallmentPlans: Total Students card clicked');
-          alert('Total Students card clicked');
-        }}>
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -280,10 +274,7 @@ export const InstallmentPlans = () => {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
-          console.log('InstallmentPlans: Total Value card clicked');
-          alert('Total Value card clicked');
-        }}>
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -296,10 +287,7 @@ export const InstallmentPlans = () => {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
-          console.log('InstallmentPlans: Avg Plan Size card clicked');
-          alert('Avg Plan Size card clicked');
-        }}>
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -362,10 +350,9 @@ export const InstallmentPlans = () => {
                         variant="ghost" 
                         size="sm"
                         onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          alert('View details clicked');
-                          handleViewDetails(plan);
+                         e.preventDefault();
+                         e.stopPropagation();
+                         handleViewDetails(plan);
                         }}
                         style={{ pointerEvents: 'auto', zIndex: 1000 }}
                         title="View Details"
@@ -376,10 +363,9 @@ export const InstallmentPlans = () => {
                         variant="ghost" 
                         size="sm"
                         onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          alert('Edit clicked');
-                          handleEditPlan(plan);
+                         e.preventDefault();
+                         e.stopPropagation();
+                         handleEditPlan(plan);
                         }}
                         style={{ pointerEvents: 'auto', zIndex: 1000 }}
                         title="Edit Plan"
@@ -390,10 +376,9 @@ export const InstallmentPlans = () => {
                         variant="ghost" 
                         size="sm"
                         onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          alert('Export clicked');
-                          handleExportInstallments(plan);
+                         e.preventDefault();
+                         e.stopPropagation();
+                         handleExportInstallments(plan);
                         }}
                         style={{ pointerEvents: 'auto', zIndex: 1000 }}
                         title="Export Schedule"
@@ -404,10 +389,9 @@ export const InstallmentPlans = () => {
                         variant="ghost" 
                         size="sm"
                         onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          alert('Delete clicked');
-                          handleDeletePlan(plan.id);
+                         e.preventDefault();
+                         e.stopPropagation();
+                         handleDeletePlan(plan.id);
                         }}
                         style={{ pointerEvents: 'auto', zIndex: 1000 }}
                         title="Delete Plan"
