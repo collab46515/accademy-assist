@@ -98,49 +98,315 @@ export function useHRData() {
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const [payrollRecords, setPayrollRecords] = useState<PayrollRecord[]>([]);
 
-  // Fetch all HR data - disabled until migration
+  // Fetch all HR data
   const fetchHRData = async () => {
-    console.log('HR tables not yet created. Please approve the database migration.');
+    try {
+      setLoading(true);
+      
+      // Fetch employees
+      const { data: employeesData, error: employeesError } = await supabase
+        .from('employees')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (employeesError) throw employeesError;
+
+      // Fetch departments
+      const { data: departmentsData, error: departmentsError } = await supabase
+        .from('departments')
+        .select('*')
+        .order('name');
+
+      if (departmentsError) throw departmentsError;
+
+      // Fetch leave requests
+      const { data: leaveData, error: leaveError } = await supabase
+        .from('leave_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (leaveError) throw leaveError;
+
+      // Fetch attendance records
+      const { data: attendanceData, error: attendanceError } = await supabase
+        .from('attendance_records_hr')
+        .select('*')
+        .order('date', { ascending: false })
+        .limit(100);
+
+      if (attendanceError) throw attendanceError;
+
+      // Fetch payroll records
+      const { data: payrollData, error: payrollError } = await supabase
+        .from('payroll_records')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (payrollError) throw payrollError;
+
+      setEmployees(employeesData as Employee[] || []);
+      setDepartments(departmentsData as Department[] || []);
+      setLeaveRequests(leaveData as LeaveRequest[] || []);
+      setAttendanceRecords(attendanceData as AttendanceRecord[] || []);
+      setPayrollRecords(payrollData as PayrollRecord[] || []);
+
+    } catch (error) {
+      console.error('Error fetching HR data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load HR data. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Create new employee - disabled until migration
+  // Create new employee
   const createEmployee = async (employeeData: Omit<Employee, 'id' | 'created_at' | 'updated_at'>) => {
-    throw new Error('HR tables not created yet. Please approve the database migration.');
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .insert([employeeData])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setEmployees(prev => [data as Employee, ...prev]);
+      toast({
+        title: "Success",
+        description: "Employee created successfully.",
+      });
+
+      return data;
+    } catch (error) {
+      console.error('Error creating employee:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create employee. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
-  // Update employee - disabled until migration
+  // Update employee
   const updateEmployee = async (id: string, updates: Partial<Employee>) => {
-    throw new Error('HR tables not created yet. Please approve the database migration.');
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setEmployees(prev => prev.map(emp => emp.id === id ? data as Employee : emp));
+      toast({
+        title: "Success",
+        description: "Employee updated successfully.",
+      });
+
+      return data;
+    } catch (error) {
+      console.error('Error updating employee:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update employee. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
-  // Create department - disabled until migration
+  // Create department
   const createDepartment = async (deptData: Omit<Department, 'id' | 'created_at' | 'updated_at'>) => {
-    throw new Error('HR tables not created yet. Please approve the database migration.');
+    try {
+      const { data, error } = await supabase
+        .from('departments')
+        .insert([deptData])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setDepartments(prev => [...prev, data as Department]);
+      toast({
+        title: "Success",
+        description: "Department created successfully.",
+      });
+
+      return data;
+    } catch (error) {
+      console.error('Error creating department:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create department. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
-  // Create leave request - disabled until migration
+  // Create leave request
   const createLeaveRequest = async (leaveData: Omit<LeaveRequest, 'id' | 'created_at' | 'updated_at' | 'status'>) => {
-    throw new Error('HR tables not created yet. Please approve the database migration.');
+    try {
+      const { data, error } = await supabase
+        .from('leave_requests')
+        .insert([{ ...leaveData, status: 'pending' }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setLeaveRequests(prev => [data as LeaveRequest, ...prev]);
+      toast({
+        title: "Success",
+        description: "Leave request submitted successfully.",
+      });
+
+      return data;
+    } catch (error) {
+      console.error('Error creating leave request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit leave request. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
-  // Approve/Reject leave request - disabled until migration
+  // Approve/Reject leave request
   const processLeaveRequest = async (id: string, action: 'approved' | 'rejected', reason?: string) => {
-    throw new Error('HR tables not created yet. Please approve the database migration.');
+    try {
+      const updates: any = {
+        status: action,
+        approved_at: new Date().toISOString(),
+      };
+
+      if (action === 'rejected' && reason) {
+        updates.rejection_reason = reason;
+      }
+
+      const { data, error } = await supabase
+        .from('leave_requests')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setLeaveRequests(prev => prev.map(req => req.id === id ? data as LeaveRequest : req));
+      toast({
+        title: "Success",
+        description: `Leave request ${action} successfully.`,
+      });
+
+      return data;
+    } catch (error) {
+      console.error('Error processing leave request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process leave request. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
-  // Record attendance - disabled until migration
+  // Record attendance
   const recordAttendance = async (attendanceData: Omit<AttendanceRecord, 'id' | 'created_at' | 'updated_at'>) => {
-    throw new Error('HR tables not created yet. Please approve the database migration.');
+    try {
+      const { data, error } = await supabase
+        .from('attendance_records_hr')
+        .insert([attendanceData])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setAttendanceRecords(prev => [data as AttendanceRecord, ...prev]);
+      toast({
+        title: "Success",
+        description: "Attendance recorded successfully.",
+      });
+
+      return data;
+    } catch (error) {
+      console.error('Error recording attendance:', error);
+      toast({
+        title: "Error",
+        description: "Failed to record attendance. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
-  // Process payroll - disabled until migration
+  // Process payroll
   const processPayroll = async (payrollData: Omit<PayrollRecord, 'id' | 'created_at' | 'updated_at'>) => {
-    throw new Error('HR tables not created yet. Please approve the database migration.');
+    try {
+      const { data, error } = await supabase
+        .from('payroll_records')
+        .insert([payrollData])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setPayrollRecords(prev => [data as PayrollRecord, ...prev]);
+      toast({
+        title: "Success",
+        description: "Payroll processed successfully.",
+      });
+
+      return data;
+    } catch (error) {
+      console.error('Error processing payroll:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process payroll. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
-  // Update payroll status - disabled until migration
+  // Update payroll status
   const updatePayrollStatus = async (id: string, status: 'draft' | 'processed' | 'paid', payDate?: string) => {
-    throw new Error('HR tables not created yet. Please approve the database migration.');
+    try {
+      const updates: any = { status };
+      if (payDate) updates.pay_date = payDate;
+
+      const { data, error } = await supabase
+        .from('payroll_records')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setPayrollRecords(prev => prev.map(record => record.id === id ? data as PayrollRecord : record));
+      toast({
+        title: "Success",
+        description: `Payroll ${status} successfully.`,
+      });
+
+      return data;
+    } catch (error) {
+      console.error('Error updating payroll status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update payroll status. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
   useEffect(() => {
