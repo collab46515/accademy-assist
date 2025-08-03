@@ -365,6 +365,16 @@ export default function FeeCollections() {
       });
 
       setStudents(updatedStudents);
+      
+      // Store last payment for undo functionality
+      setLastPayment({
+        ...paymentRecord,
+        studentData: selectedStudentForPayment,
+        originalAmount: amountPaid
+      });
+      setTimeRemaining(30);
+      setUndoTimer(Date.now());
+      
       setShowPaymentModal(false);
       
       toast({
@@ -381,6 +391,58 @@ export default function FeeCollections() {
         title: "Payment Error",
         description: "Failed to record payment. Please try again.",
         variant: "destructive"
+      });
+    }
+  };
+
+  const undoLastPayment = async (reason: string = "Mistake in amount") => {
+    if (!lastPayment) return;
+
+    try {
+      // Mark payment as reversed
+      const { error } = await supabase
+        .from('payment_records')
+        .update({
+          status: 'reversed',
+          notes: `${lastPayment.notes || ''}\n[REVERSED] ${reason} - Reversed by Current User at ${new Date().toLocaleString()}`
+        })
+        .eq('id', lastPayment.id);
+
+      if (error) throw error;
+
+      // Revert student status in local state
+      if (lastPayment.studentData) {
+        const updatedStudents = students.map(student => {
+          if (student.id === lastPayment.studentData.id) {
+            const revertedPaid = Math.max(0, (student.amountPaid || 0) - lastPayment.originalAmount);
+            return {
+              ...student,
+              amountPaid: revertedPaid,
+              status: revertedPaid >= student.amountDue ? 'paid' as const : 
+                      revertedPaid > 0 ? 'partial' as const : 'not_paid' as const
+            };
+          }
+          return student;
+        });
+        setStudents(updatedStudents);
+      }
+
+      toast({
+        title: "Payment Reversed",
+        description: `Payment ${lastPayment.receipt_number} has been reversed. Reason: ${reason}`,
+        variant: "destructive",
+      });
+
+      // Clear the undo option
+      setLastPayment(null);
+      setUndoTimer(null);
+
+    } catch (error) {
+      console.error('Error reversing payment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reverse payment",
+        variant: "destructive",
       });
     }
   };
