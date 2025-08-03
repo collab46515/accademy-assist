@@ -16,6 +16,14 @@ interface StageWorkflowManagerProps {
 export function StageWorkflowManager({ applicationId, currentStage = 0 }: StageWorkflowManagerProps) {
   const [activeStage, setActiveStage] = useState(currentStage);
 
+  // Mock application data for demonstration
+  const mockApplicationData = {
+    application_number: 'APP-2024-001',
+    student_name: 'John Smith',
+    year_group: 'Year 7',
+    submitted_at: new Date().toISOString()
+  };
+
   const stages = [
     { component: ApplicationSubmittedStage, title: 'Application Submitted' },
     { component: DocumentVerificationStage, title: 'Document Verification' },
@@ -50,6 +58,7 @@ export function StageWorkflowManager({ applicationId, currentStage = 0 }: StageW
       
       <CurrentStageComponent
         applicationId={applicationId}
+        applicationData={mockApplicationData}
         onMoveToNext={handleNextStage}
         onComplete={handleComplete}
       />
