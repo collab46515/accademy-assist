@@ -264,7 +264,10 @@ export const InstallmentPlans = () => {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
+          console.log('InstallmentPlans: Total Students card clicked');
+          alert('Total Students card clicked');
+        }}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -277,7 +280,10 @@ export const InstallmentPlans = () => {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
+          console.log('InstallmentPlans: Total Value card clicked');
+          alert('Total Value card clicked');
+        }}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -290,7 +296,10 @@ export const InstallmentPlans = () => {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
+          console.log('InstallmentPlans: Avg Plan Size card clicked');
+          alert('Avg Plan Size card clicked');
+        }}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>

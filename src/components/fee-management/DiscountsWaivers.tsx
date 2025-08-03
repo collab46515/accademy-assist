@@ -409,7 +409,10 @@ export const DiscountsWaivers = () => {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
+          console.log('DiscountsWaivers: Total Savings card clicked');
+          alert('Total Savings card clicked');
+        }}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -435,7 +438,10 @@ export const DiscountsWaivers = () => {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
+          console.log('DiscountsWaivers: Total Waived card clicked');
+          alert('Total Waived card clicked');
+        }}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
