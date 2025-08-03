@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useForm } from 'react-hook-form';
 import { useLocation } from 'react-router-dom';
+import { useAccountingData } from '@/hooks/useAccountingData';
 import { 
   DollarSign, 
   TrendingUp, 
@@ -34,41 +35,41 @@ import {
   Building2,
   Target,
   ShoppingCart,
-  Globe
+  Globe,
+  Save,
+  Trash,
+  Settings
 } from 'lucide-react';
-
-// Mock data with multi-currency support
-const mockData = {
-  overview: {
-    totalRevenue: { amount: 2450000, currency: 'GBP' },
-    totalExpenses: { amount: 1850000, currency: 'GBP' },
-    netProfit: { amount: 600000, currency: 'GBP' },
-    cashFlow: { amount: 1200000, currency: 'GBP' },
-    outstandingFees: { amount: 285000, currency: 'GBP' },
-    paidThisMonth: { amount: 425000, currency: 'GBP' }
-  },
-  currencies: [
-    { code: 'GBP', name: 'British Pound', symbol: '£', rate: 1.0 },
-    { code: 'USD', name: 'US Dollar', symbol: '$', rate: 1.25 },
-    { code: 'EUR', name: 'Euro', symbol: '€', rate: 1.15 }
-  ],
-  recentTransactions: [
-    { id: '1', date: '2024-01-15', description: 'Tuition Fee - Year 7', amount: 1200, currency: 'GBP', type: 'income', status: 'completed' },
-    { id: '2', date: '2024-01-14', description: 'Office Supplies', amount: -150, currency: 'GBP', type: 'expense', status: 'completed' },
-    { id: '3', date: '2024-01-13', description: 'Lunch Fee - Student ID: ST001', amount: 25, currency: 'GBP', type: 'income', status: 'pending' },
-    { id: '4', date: '2024-01-12', description: 'Utilities Payment', amount: -850, currency: 'GBP', type: 'expense', status: 'completed' }
-  ]
-};
-
-const formatCurrency = (amount: number, currency: string) => {
-  const currencyData = mockData.currencies.find(c => c.code === currency);
-  return `${currencyData?.symbol || ''}${amount.toLocaleString()}`;
-};
 
 export function AccountingPage() {
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
   const form = useForm();
+  
+  const {
+    isLoading,
+    chartOfAccounts,
+    vendors,
+    invoices,
+    bills,
+    purchaseOrders,
+    budgets,
+    accountingSettings,
+    createAccount,
+    createVendor,
+    createInvoice,
+    createBill,
+    createPurchaseOrder,
+    createBudget,
+    updateVendor,
+    updateInvoice,
+    updateAccountingSetting,
+    formatCurrency,
+    getNextInvoiceNumber,
+    getNextBillNumber,
+    getNextPONumber,
+    refreshData
+  } = useAccountingData();
   
   // Determine which accounting page to show based on the URL path
   const getAccountingView = () => {
@@ -102,6 +103,40 @@ export function AccountingPage() {
     }
   };
 
+  // Mock data for dashboard overview - would be calculated from real data
+  const mockDashboardData = {
+    totalRevenue: { amount: 2450000, currency: 'GBP' },
+    totalExpenses: { amount: 1850000, currency: 'GBP' },
+    netProfit: { amount: 600000, currency: 'GBP' },
+    outstandingFees: { amount: 285000, currency: 'GBP' },
+    recentTransactions: [
+      { id: '1', date: '2024-01-15', description: 'Tuition Fee - Year 7', amount: 1200, currency: 'GBP', type: 'income', status: 'completed' },
+      { id: '2', date: '2024-01-14', description: 'Office Supplies', amount: -150, currency: 'GBP', type: 'expense', status: 'completed' },
+      { id: '3', date: '2024-01-13', description: 'Lunch Fee - Student ID: ST001', amount: 25, currency: 'GBP', type: 'income', status: 'pending' },
+      { id: '4', date: '2024-01-12', description: 'Utilities Payment', amount: -850, currency: 'GBP', type: 'expense', status: 'completed' }
+    ]
+  };
+
+  const filteredVendors = vendors.filter(vendor => 
+    vendor.vendor_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    vendor.vendor_code.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredInvoices = invoices.filter(invoice => 
+    invoice.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    invoice.invoice_number.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredBills = bills.filter(bill => 
+    bill.vendor_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    bill.bill_number.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredPurchaseOrders = purchaseOrders.filter(po => 
+    po.vendor_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    po.po_number.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       {/* Header */}
@@ -127,7 +162,7 @@ export function AccountingPage() {
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
-            <Button size="sm">
+            <Button size="sm" onClick={refreshData}>
               <Plus className="h-4 w-4 mr-2" />
               New Transaction
             </Button>
@@ -147,7 +182,7 @@ export function AccountingPage() {
                   <TrendingUp className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{formatCurrency(mockData.overview.totalRevenue.amount, mockData.overview.totalRevenue.currency)}</div>
+                  <div className="text-2xl font-bold">{formatCurrency(mockDashboardData.totalRevenue.amount, mockDashboardData.totalRevenue.currency)}</div>
                   <p className="text-xs text-muted-foreground mt-1">+12% from last month</p>
                 </CardContent>
               </Card>
@@ -158,7 +193,7 @@ export function AccountingPage() {
                   <TrendingDown className="h-4 w-4 text-red-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{formatCurrency(mockData.overview.totalExpenses.amount, mockData.overview.totalExpenses.currency)}</div>
+                  <div className="text-2xl font-bold">{formatCurrency(mockDashboardData.totalExpenses.amount, mockDashboardData.totalExpenses.currency)}</div>
                   <p className="text-xs text-muted-foreground mt-1">+5% from last month</p>
                 </CardContent>
               </Card>
@@ -169,7 +204,7 @@ export function AccountingPage() {
                   <DollarSign className="h-4 w-4 text-blue-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{formatCurrency(mockData.overview.netProfit.amount, mockData.overview.netProfit.currency)}</div>
+                  <div className="text-2xl font-bold">{formatCurrency(mockDashboardData.netProfit.amount, mockDashboardData.netProfit.currency)}</div>
                   <p className="text-xs text-muted-foreground mt-1">+18% from last month</p>
                 </CardContent>
               </Card>
@@ -180,7 +215,7 @@ export function AccountingPage() {
                   <AlertCircle className="h-4 w-4 text-purple-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{formatCurrency(mockData.overview.outstandingFees.amount, mockData.overview.outstandingFees.currency)}</div>
+                  <div className="text-2xl font-bold">{formatCurrency(mockDashboardData.outstandingFees.amount, mockDashboardData.outstandingFees.currency)}</div>
                   <p className="text-xs text-muted-foreground mt-1">15 overdue accounts</p>
                 </CardContent>
               </Card>
@@ -197,7 +232,7 @@ export function AccountingPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockData.recentTransactions.map((transaction) => (
+                    {mockDashboardData.recentTransactions.map((transaction) => (
                       <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg">
                         <div className="flex items-center gap-3">
                           <div className={`h-3 w-3 rounded-full ${
@@ -304,307 +339,1090 @@ export function AccountingPage() {
               </Card>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Student Fee Management */}
-              <div className="lg:col-span-2">
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2">
-                        <Users className="h-5 w-5" />
-                        Student Accounts
-                      </CardTitle>
-                      <div className="flex items-center gap-3">
-                        <div className="relative">
-                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            placeholder="Search students..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 w-64"
-                          />
-                        </div>
-                        <Button variant="outline" size="sm">
-                          <Filter className="h-4 w-4 mr-2" />
-                          Filter
-                        </Button>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button size="sm">
-                              <Plus className="h-4 w-4 mr-2" />
-                              Add Fee
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-2xl">
-                            <DialogHeader>
-                              <DialogTitle>Add Student Fee</DialogTitle>
-                            </DialogHeader>
-                            <div className="space-y-4">
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <label className="text-sm font-medium">Student</label>
-                                  <Select>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select student" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="st001">John Smith (ST001)</SelectItem>
-                                      <SelectItem value="st002">Sarah Johnson (ST002)</SelectItem>
-                                      <SelectItem value="st003">Mike Brown (ST003)</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium">Fee Type</label>
-                                  <Select>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select fee type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="tuition">Tuition Fee</SelectItem>
-                                      <SelectItem value="boarding">Boarding Fee</SelectItem>
-                                      <SelectItem value="activities">Activities Fee</SelectItem>
-                                      <SelectItem value="transport">Transport Fee</SelectItem>
-                                      <SelectItem value="meals">Meals Fee</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              </div>
-                              <div className="grid grid-cols-3 gap-4">
-                                <div>
-                                  <label className="text-sm font-medium">Amount</label>
-                                  <Input placeholder="0.00" />
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium">Currency</label>
-                                  <Select defaultValue="GBP">
-                                    <SelectTrigger>
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="GBP">£ GBP</SelectItem>
-                                      <SelectItem value="USD">$ USD</SelectItem>
-                                      <SelectItem value="EUR">€ EUR</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium">Due Date</label>
-                                  <Input type="date" />
-                                </div>
-                              </div>
-                              <div>
-                                <label className="text-sm font-medium">Payment Plan</label>
-                                <Select>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select payment plan" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="full">Full Payment</SelectItem>
-                                    <SelectItem value="termly">Termly (3 installments)</SelectItem>
-                                    <SelectItem value="monthly">Monthly (12 installments)</SelectItem>
-                                    <SelectItem value="custom">Custom Plan</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div>
-                                <label className="text-sm font-medium">Notes</label>
-                                <Textarea placeholder="Additional notes..." />
-                              </div>
-                              <div className="flex justify-end gap-3">
-                                <Button variant="outline">Cancel</Button>
-                                <Button>Add Fee</Button>
-                              </div>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                      </div>
+            {/* Student Fees Management Interface */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    Student Fee Management
+                  </CardTitle>
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search students..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 w-64"
+                      />
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Student</TableHead>
-                          <TableHead>Year Group</TableHead>
-                          <TableHead>Outstanding</TableHead>
-                          <TableHead>Last Payment</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {[
-                          { id: 'ST001', name: 'John Smith', year: 'Year 7', outstanding: 1200, currency: 'GBP', lastPayment: '2024-01-15', status: 'current' },
-                          { id: 'ST002', name: 'Sarah Johnson', year: 'Year 8', outstanding: 0, currency: 'GBP', lastPayment: '2024-01-15', status: 'paid' },
-                          { id: 'ST003', name: 'Mike Brown', year: 'Year 9', outstanding: 2400, currency: 'GBP', lastPayment: '2023-12-15', status: 'overdue' },
-                          { id: 'ST004', name: 'Emily Davis', year: 'Year 10', outstanding: 600, currency: 'GBP', lastPayment: '2024-01-10', status: 'current' },
-                          { id: 'ST005', name: 'Alex Wilson', year: 'Year 11', outstanding: 3600, currency: 'USD', lastPayment: '2024-01-08', status: 'current' }
-                        ].map((student) => (
-                          <TableRow key={student.id}>
-                            <TableCell>
-                              <div>
-                                <p className="font-medium">{student.name}</p>
-                                <p className="text-sm text-muted-foreground">{student.id}</p>
-                              </div>
-                            </TableCell>
-                            <TableCell>{student.year}</TableCell>
-                            <TableCell>
-                              <span className={`font-semibold ${
-                                student.outstanding > 0 ? 'text-red-600' : 'text-green-600'
-                              }`}>
-                                {formatCurrency(student.outstanding, student.currency)}
-                              </span>
-                            </TableCell>
-                            <TableCell className="text-sm">{student.lastPayment}</TableCell>
-                            <TableCell>
-                              <Badge variant={
-                                student.status === 'paid' ? 'default' : 
-                                student.status === 'overdue' ? 'destructive' : 'secondary'
-                              }>
-                                {student.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Button size="sm" variant="outline">
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                                <Button size="sm" variant="outline">
-                                  <CreditCard className="h-4 w-4" />
-                                </Button>
-                                <Button size="sm" variant="outline">
-                                  <Send className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Fee Structure & Quick Actions */}
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Calculator className="h-5 w-5" />
-                      Fee Structure
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {[
-                      { type: 'Tuition Fee', amount: 12000, currency: 'GBP', period: 'Annual' },
-                      { type: 'Boarding Fee', amount: 8500, currency: 'GBP', period: 'Annual' },
-                      { type: 'Activities Fee', amount: 800, currency: 'GBP', period: 'Annual' },
-                      { type: 'Transport Fee', amount: 150, currency: 'GBP', period: 'Monthly' },
-                      { type: 'Meals Fee', amount: 450, currency: 'GBP', period: 'Monthly' }
-                    ].map((fee, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div>
-                          <p className="font-medium text-sm">{fee.type}</p>
-                          <p className="text-xs text-muted-foreground">{fee.period}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold">{formatCurrency(fee.amount, fee.currency)}</p>
-                        </div>
-                      </div>
-                    ))}
-                    <Button className="w-full" variant="outline">
-                      <Edit className="h-4 w-4 mr-2" />
-                      Manage Fee Structure
+                    <Button variant="outline" size="sm">
+                      <Filter className="h-4 w-4 mr-2" />
+                      Filter
                     </Button>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Quick Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Button className="w-full" variant="outline">
-                      <Send className="h-4 w-4 mr-2" />
-                      Send Payment Reminders
-                    </Button>
-                    <Button className="w-full" variant="outline">
-                      <Download className="h-4 w-4 mr-2" />
-                      Export Fee Report
-                    </Button>
-                    <Button className="w-full" variant="outline">
-                      <CreditCard className="h-4 w-4 mr-2" />
-                      Bulk Payment Entry
-                    </Button>
-                    <Button className="w-full" variant="outline">
-                      <Calculator className="h-4 w-4 mr-2" />
-                      Fee Calculator
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Student Fee Management</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Comprehensive student fee tracking, payment processing, and account management will be available here.
+                  </p>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <p>• Track student payments and outstanding balances</p>
+                    <p>• Generate fee statements and invoices</p>
+                    <p>• Manage payment plans and installments</p>
+                    <p>• Send automated payment reminders</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
 
-        {/* Placeholder content for other views */}
-        {currentView === 'invoices' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Invoice Management
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Invoice management with multi-currency and tax calculations will be implemented here.</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {currentView === 'bills' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Receipt className="h-5 w-5" />
-                Bills & Expenses Management
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Bills and expense tracking with vendor management and multi-currency support will be implemented here.</p>
-            </CardContent>
-          </Card>
-        )}
-
+        {/* Vendors View */}
         {currentView === 'vendors' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5" />
-                Vendor Management
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Comprehensive vendor management with multi-currency support will be implemented here.</p>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5" />
+                    Vendor Management
+                  </CardTitle>
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search vendors..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 w-64"
+                      />
+                    </div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Vendor
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>Add New Vendor</DialogTitle>
+                        </DialogHeader>
+                        <form className="space-y-4" onSubmit={form.handleSubmit(async (data) => {
+                          try {
+                            await createVendor({
+                              vendor_code: data.vendor_code,
+                              vendor_name: data.vendor_name,
+                              contact_person: data.contact_person,
+                              email: data.email,
+                              phone: data.phone,
+                              address: {
+                                street: data.street,
+                                city: data.city,
+                                postal_code: data.postal_code,
+                                country: data.country
+                              },
+                              tax_number: data.tax_number,
+                              payment_terms: data.payment_terms,
+                              currency: data.currency,
+                              is_active: true,
+                              notes: data.notes,
+                              bank_details: {}
+                            });
+                            form.reset();
+                          } catch (error) {
+                            console.error('Error creating vendor:', error);
+                          }
+                        })}>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium">Vendor Code</label>
+                              <Input {...form.register('vendor_code')} placeholder="VEN001" />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Vendor Name</label>
+                              <Input {...form.register('vendor_name')} placeholder="Vendor Name" />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium">Contact Person</label>
+                              <Input {...form.register('contact_person')} placeholder="John Smith" />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Email</label>
+                              <Input {...form.register('email')} type="email" placeholder="vendor@company.com" />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium">Phone</label>
+                              <Input {...form.register('phone')} placeholder="+44 20 1234 5678" />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Tax Number</label>
+                              <Input {...form.register('tax_number')} placeholder="VAT123456789" />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium">Payment Terms</label>
+                              <Select onValueChange={(value) => form.setValue('payment_terms', value)}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select payment terms" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="net_15">Net 15 Days</SelectItem>
+                                  <SelectItem value="net_30">Net 30 Days</SelectItem>
+                                  <SelectItem value="net_60">Net 60 Days</SelectItem>
+                                  <SelectItem value="due_on_receipt">Due on Receipt</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Currency</label>
+                              <Select onValueChange={(value) => form.setValue('currency', value)}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select currency" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="GBP">£ GBP</SelectItem>
+                                  <SelectItem value="USD">$ USD</SelectItem>
+                                  <SelectItem value="EUR">€ EUR</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Notes</label>
+                            <Textarea {...form.register('notes')} placeholder="Additional notes..." />
+                          </div>
+                          <div className="flex justify-end gap-3">
+                            <Button type="button" variant="outline">Cancel</Button>
+                            <Button type="submit">Add Vendor</Button>
+                          </div>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="text-center py-8">Loading vendors...</div>
+                ) : filteredVendors.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No vendors found</h3>
+                    <p className="text-muted-foreground">Get started by adding your first vendor.</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Vendor</TableHead>
+                        <TableHead>Contact</TableHead>
+                        <TableHead>Currency</TableHead>
+                        <TableHead>Payment Terms</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredVendors.map((vendor) => (
+                        <TableRow key={vendor.id}>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{vendor.vendor_name}</p>
+                              <p className="text-sm text-muted-foreground">{vendor.vendor_code}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="text-sm">{vendor.contact_person}</p>
+                              <p className="text-xs text-muted-foreground">{vendor.email}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>{vendor.currency}</TableCell>
+                          <TableCell className="capitalize">{vendor.payment_terms.replace('_', ' ')}</TableCell>
+                          <TableCell>
+                            <Badge variant={vendor.is_active ? 'default' : 'secondary'}>
+                              {vendor.is_active ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button size="sm" variant="outline">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" variant="outline">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         )}
 
+        {/* Invoices View */}
+        {currentView === 'invoices' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Invoice Management
+                  </CardTitle>
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search invoices..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 w-64"
+                      />
+                    </div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create Invoice
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-3xl">
+                        <DialogHeader>
+                          <DialogTitle>Create New Invoice</DialogTitle>
+                        </DialogHeader>
+                        <form className="space-y-4" onSubmit={form.handleSubmit(async (data) => {
+                          try {
+                            await createInvoice({
+                              invoice_number: getNextInvoiceNumber(),
+                              customer_name: data.customer_name,
+                              customer_email: data.customer_email,
+                              customer_address: {
+                                street: data.street,
+                                city: data.city,
+                                postal_code: data.postal_code
+                              },
+                              invoice_date: data.invoice_date,
+                              due_date: data.due_date,
+                              currency: data.currency,
+                              subtotal: parseFloat(data.subtotal) || 0,
+                              tax_amount: parseFloat(data.tax_amount) || 0,
+                              discount_amount: parseFloat(data.discount_amount) || 0,
+                              total_amount: parseFloat(data.total_amount) || 0,
+                              paid_amount: 0,
+                              balance_due: parseFloat(data.total_amount) || 0,
+                              status: 'draft',
+                              notes: data.notes,
+                              terms_conditions: data.terms_conditions
+                            });
+                            form.reset();
+                          } catch (error) {
+                            console.error('Error creating invoice:', error);
+                          }
+                        })}>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium">Customer Name</label>
+                              <Input {...form.register('customer_name')} placeholder="Customer Name" />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Customer Email</label>
+                              <Input {...form.register('customer_email')} type="email" placeholder="customer@email.com" />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium">Invoice Date</label>
+                              <Input {...form.register('invoice_date')} type="date" />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Due Date</label>
+                              <Input {...form.register('due_date')} type="date" />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-3 gap-4">
+                            <div>
+                              <label className="text-sm font-medium">Subtotal</label>
+                              <Input {...form.register('subtotal')} type="number" step="0.01" placeholder="0.00" />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Tax Amount</label>
+                              <Input {...form.register('tax_amount')} type="number" step="0.01" placeholder="0.00" />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Total Amount</label>
+                              <Input {...form.register('total_amount')} type="number" step="0.01" placeholder="0.00" />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Currency</label>
+                            <Select onValueChange={(value) => form.setValue('currency', value)}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select currency" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="GBP">£ GBP</SelectItem>
+                                <SelectItem value="USD">$ USD</SelectItem>
+                                <SelectItem value="EUR">€ EUR</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Notes</label>
+                            <Textarea {...form.register('notes')} placeholder="Invoice notes..." />
+                          </div>
+                          <div className="flex justify-end gap-3">
+                            <Button type="button" variant="outline">Cancel</Button>
+                            <Button type="submit">Create Invoice</Button>
+                          </div>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="text-center py-8">Loading invoices...</div>
+                ) : filteredInvoices.length === 0 ? (
+                  <div className="text-center py-12">
+                    <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No invoices found</h3>
+                    <p className="text-muted-foreground">Create your first invoice to get started.</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Invoice #</TableHead>
+                        <TableHead>Customer</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredInvoices.map((invoice) => (
+                        <TableRow key={invoice.id}>
+                          <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{invoice.customer_name}</p>
+                              <p className="text-xs text-muted-foreground">{invoice.customer_email}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>{new Date(invoice.invoice_date).toLocaleDateString()}</TableCell>
+                          <TableCell>{formatCurrency(invoice.total_amount, invoice.currency)}</TableCell>
+                          <TableCell>
+                            <Badge variant={
+                              invoice.status === 'paid' ? 'default' : 
+                              invoice.status === 'overdue' ? 'destructive' : 'secondary'
+                            }>
+                              {invoice.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button size="sm" variant="outline">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" variant="outline">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" variant="outline">
+                                <Send className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Bills View */}
+        {currentView === 'bills' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Receipt className="h-5 w-5" />
+                    Bills & Expenses Management
+                  </CardTitle>
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search bills..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 w-64"
+                      />
+                    </div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Bill
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>Add New Bill</DialogTitle>
+                        </DialogHeader>
+                        <form className="space-y-4" onSubmit={form.handleSubmit(async (data) => {
+                          try {
+                            await createBill({
+                              bill_number: getNextBillNumber(),
+                              vendor_name: data.vendor_name,
+                              bill_date: data.bill_date,
+                              due_date: data.due_date,
+                              currency: data.currency,
+                              subtotal: parseFloat(data.subtotal) || 0,
+                              tax_amount: parseFloat(data.tax_amount) || 0,
+                              total_amount: parseFloat(data.total_amount) || 0,
+                              paid_amount: 0,
+                              balance_due: parseFloat(data.total_amount) || 0,
+                              status: 'pending',
+                              category: data.category,
+                              description: data.description,
+                              notes: data.notes
+                            });
+                            form.reset();
+                          } catch (error) {
+                            console.error('Error creating bill:', error);
+                          }
+                        })}>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium">Vendor</label>
+                              <Select onValueChange={(value) => form.setValue('vendor_name', value)}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select vendor" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {vendors.map((vendor) => (
+                                    <SelectItem key={vendor.id} value={vendor.vendor_name}>
+                                      {vendor.vendor_name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Category</label>
+                              <Select onValueChange={(value) => form.setValue('category', value)}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select category" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="utilities">Utilities</SelectItem>
+                                  <SelectItem value="supplies">Office Supplies</SelectItem>
+                                  <SelectItem value="maintenance">Maintenance</SelectItem>
+                                  <SelectItem value="services">Professional Services</SelectItem>
+                                  <SelectItem value="other">Other</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium">Bill Date</label>
+                              <Input {...form.register('bill_date')} type="date" />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Due Date</label>
+                              <Input {...form.register('due_date')} type="date" />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-3 gap-4">
+                            <div>
+                              <label className="text-sm font-medium">Subtotal</label>
+                              <Input {...form.register('subtotal')} type="number" step="0.01" placeholder="0.00" />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Tax Amount</label>
+                              <Input {...form.register('tax_amount')} type="number" step="0.01" placeholder="0.00" />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Total Amount</label>
+                              <Input {...form.register('total_amount')} type="number" step="0.01" placeholder="0.00" />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Description</label>
+                            <Textarea {...form.register('description')} placeholder="Bill description..." />
+                          </div>
+                          <div className="flex justify-end gap-3">
+                            <Button type="button" variant="outline">Cancel</Button>
+                            <Button type="submit">Add Bill</Button>
+                          </div>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="text-center py-8">Loading bills...</div>
+                ) : filteredBills.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No bills found</h3>
+                    <p className="text-muted-foreground">Add your first bill to get started.</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Bill #</TableHead>
+                        <TableHead>Vendor</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredBills.map((bill) => (
+                        <TableRow key={bill.id}>
+                          <TableCell className="font-medium">{bill.bill_number}</TableCell>
+                          <TableCell>{bill.vendor_name}</TableCell>
+                          <TableCell>{new Date(bill.bill_date).toLocaleDateString()}</TableCell>
+                          <TableCell>{formatCurrency(bill.total_amount, bill.currency)}</TableCell>
+                          <TableCell>
+                            <Badge variant={
+                              bill.status === 'paid' ? 'default' : 
+                              bill.status === 'overdue' ? 'destructive' : 'secondary'
+                            }>
+                              {bill.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button size="sm" variant="outline">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" variant="outline">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Purchase Orders View */}
         {currentView === 'purchase-orders' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5" />
-                Purchase Orders
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Purchase order management with approval workflows will be implemented here.</p>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <ShoppingCart className="h-5 w-5" />
+                    Purchase Orders
+                  </CardTitle>
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search purchase orders..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 w-64"
+                      />
+                    </div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create PO
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>Create Purchase Order</DialogTitle>
+                        </DialogHeader>
+                        <form className="space-y-4" onSubmit={form.handleSubmit(async (data) => {
+                          try {
+                            await createPurchaseOrder({
+                              po_number: getNextPONumber(),
+                              vendor_name: data.vendor_name,
+                              order_date: data.order_date,
+                              expected_delivery_date: data.expected_delivery_date,
+                              currency: data.currency,
+                              subtotal: parseFloat(data.subtotal) || 0,
+                              tax_amount: parseFloat(data.tax_amount) || 0,
+                              total_amount: parseFloat(data.total_amount) || 0,
+                              status: 'draft',
+                              delivery_address: {
+                                street: data.delivery_street,
+                                city: data.delivery_city,
+                                postal_code: data.delivery_postal_code
+                              },
+                              notes: data.notes
+                            });
+                            form.reset();
+                          } catch (error) {
+                            console.error('Error creating purchase order:', error);
+                          }
+                        })}>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium">Vendor</label>
+                              <Select onValueChange={(value) => form.setValue('vendor_name', value)}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select vendor" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {vendors.map((vendor) => (
+                                    <SelectItem key={vendor.id} value={vendor.vendor_name}>
+                                      {vendor.vendor_name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Currency</label>
+                              <Select onValueChange={(value) => form.setValue('currency', value)}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select currency" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="GBP">£ GBP</SelectItem>
+                                  <SelectItem value="USD">$ USD</SelectItem>
+                                  <SelectItem value="EUR">€ EUR</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium">Order Date</label>
+                              <Input {...form.register('order_date')} type="date" />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Expected Delivery</label>
+                              <Input {...form.register('expected_delivery_date')} type="date" />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-3 gap-4">
+                            <div>
+                              <label className="text-sm font-medium">Subtotal</label>
+                              <Input {...form.register('subtotal')} type="number" step="0.01" placeholder="0.00" />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Tax Amount</label>
+                              <Input {...form.register('tax_amount')} type="number" step="0.01" placeholder="0.00" />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Total Amount</label>
+                              <Input {...form.register('total_amount')} type="number" step="0.01" placeholder="0.00" />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Notes</label>
+                            <Textarea {...form.register('notes')} placeholder="Purchase order notes..." />
+                          </div>
+                          <div className="flex justify-end gap-3">
+                            <Button type="button" variant="outline">Cancel</Button>
+                            <Button type="submit">Create PO</Button>
+                          </div>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="text-center py-8">Loading purchase orders...</div>
+                ) : filteredPurchaseOrders.length === 0 ? (
+                  <div className="text-center py-12">
+                    <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No purchase orders found</h3>
+                    <p className="text-muted-foreground">Create your first purchase order to get started.</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>PO #</TableHead>
+                        <TableHead>Vendor</TableHead>
+                        <TableHead>Order Date</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredPurchaseOrders.map((po) => (
+                        <TableRow key={po.id}>
+                          <TableCell className="font-medium">{po.po_number}</TableCell>
+                          <TableCell>{po.vendor_name}</TableCell>
+                          <TableCell>{new Date(po.order_date).toLocaleDateString()}</TableCell>
+                          <TableCell>{formatCurrency(po.total_amount, po.currency)}</TableCell>
+                          <TableCell>
+                            <Badge variant={
+                              po.status === 'approved' ? 'default' : 
+                              po.status === 'received' ? 'default' : 'secondary'
+                            }>
+                              {po.status.replace('_', ' ')}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button size="sm" variant="outline">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" variant="outline">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         )}
 
+        {/* Chart of Accounts View */}
+        {currentView === 'accounts' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <PieChart className="h-5 w-5" />
+                    Chart of Accounts
+                  </CardTitle>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Account
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Add New Account</DialogTitle>
+                      </DialogHeader>
+                      <form className="space-y-4" onSubmit={form.handleSubmit(async (data) => {
+                        try {
+                          await createAccount({
+                            account_code: data.account_code,
+                            account_name: data.account_name,
+                            account_type: data.account_type,
+                            balance_type: data.balance_type,
+                            level: parseInt(data.level) || 1,
+                            is_active: true,
+                            description: data.description
+                          });
+                          form.reset();
+                        } catch (error) {
+                          console.error('Error creating account:', error);
+                        }
+                      })}>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium">Account Code</label>
+                            <Input {...form.register('account_code')} placeholder="1000" />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Account Name</label>
+                            <Input {...form.register('account_name')} placeholder="Cash" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium">Account Type</label>
+                            <Select onValueChange={(value) => form.setValue('account_type', value)}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="asset">Asset</SelectItem>
+                                <SelectItem value="liability">Liability</SelectItem>
+                                <SelectItem value="equity">Equity</SelectItem>
+                                <SelectItem value="revenue">Revenue</SelectItem>
+                                <SelectItem value="expense">Expense</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Balance Type</label>
+                            <Select onValueChange={(value) => form.setValue('balance_type', value)}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select balance type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="debit">Debit</SelectItem>
+                                <SelectItem value="credit">Credit</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">Description</label>
+                          <Textarea {...form.register('description')} placeholder="Account description..." />
+                        </div>
+                        <div className="flex justify-end gap-3">
+                          <Button type="button" variant="outline">Cancel</Button>
+                          <Button type="submit">Add Account</Button>
+                        </div>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="text-center py-8">Loading chart of accounts...</div>
+                ) : chartOfAccounts.length === 0 ? (
+                  <div className="text-center py-12">
+                    <PieChart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No accounts found</h3>
+                    <p className="text-muted-foreground">Chart of accounts will be loaded automatically.</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Code</TableHead>
+                        <TableHead>Account Name</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Balance Type</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {chartOfAccounts.map((account) => (
+                        <TableRow key={account.id}>
+                          <TableCell className="font-medium">{account.account_code}</TableCell>
+                          <TableCell>
+                            <div style={{ paddingLeft: `${(account.level - 1) * 20}px` }}>
+                              {account.account_name}
+                            </div>
+                          </TableCell>
+                          <TableCell className="capitalize">{account.account_type}</TableCell>
+                          <TableCell className="capitalize">{account.balance_type}</TableCell>
+                          <TableCell>
+                            <Badge variant={account.is_active ? 'default' : 'secondary'}>
+                              {account.is_active ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button size="sm" variant="outline">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Budget View */}
+        {currentView === 'budget' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5" />
+                    Budget Planning
+                  </CardTitle>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Budget
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Create Budget</DialogTitle>
+                      </DialogHeader>
+                      <form className="space-y-4" onSubmit={form.handleSubmit(async (data) => {
+                        try {
+                          await createBudget({
+                            budget_name: data.budget_name,
+                            fiscal_year: data.fiscal_year,
+                            department: data.department,
+                            period_type: data.period_type,
+                            budgeted_amount: parseFloat(data.budgeted_amount) || 0,
+                            actual_amount: 0,
+                            variance: 0,
+                            variance_percentage: 0,
+                            currency: data.currency,
+                            is_active: true,
+                            notes: data.notes
+                          });
+                          form.reset();
+                        } catch (error) {
+                          console.error('Error creating budget:', error);
+                        }
+                      })}>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium">Budget Name</label>
+                            <Input {...form.register('budget_name')} placeholder="Annual Marketing Budget" />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Fiscal Year</label>
+                            <Input {...form.register('fiscal_year')} placeholder="2024-2025" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium">Department</label>
+                            <Input {...form.register('department')} placeholder="Marketing" />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Period Type</label>
+                            <Select onValueChange={(value) => form.setValue('period_type', value)}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select period" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                                <SelectItem value="quarterly">Quarterly</SelectItem>
+                                <SelectItem value="annually">Annually</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium">Budgeted Amount</label>
+                            <Input {...form.register('budgeted_amount')} type="number" step="0.01" placeholder="0.00" />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Currency</label>
+                            <Select onValueChange={(value) => form.setValue('currency', value)}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select currency" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="GBP">£ GBP</SelectItem>
+                                <SelectItem value="USD">$ USD</SelectItem>
+                                <SelectItem value="EUR">€ EUR</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">Notes</label>
+                          <Textarea {...form.register('notes')} placeholder="Budget notes..." />
+                        </div>
+                        <div className="flex justify-end gap-3">
+                          <Button type="button" variant="outline">Cancel</Button>
+                          <Button type="submit">Create Budget</Button>
+                        </div>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="text-center py-8">Loading budgets...</div>
+                ) : budgets.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No budgets found</h3>
+                    <p className="text-muted-foreground">Create your first budget to get started.</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Budget Name</TableHead>
+                        <TableHead>Department</TableHead>
+                        <TableHead>Fiscal Year</TableHead>
+                        <TableHead>Budgeted</TableHead>
+                        <TableHead>Actual</TableHead>
+                        <TableHead>Variance</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {budgets.map((budget) => (
+                        <TableRow key={budget.id}>
+                          <TableCell className="font-medium">{budget.budget_name}</TableCell>
+                          <TableCell>{budget.department}</TableCell>
+                          <TableCell>{budget.fiscal_year}</TableCell>
+                          <TableCell>{formatCurrency(budget.budgeted_amount, budget.currency)}</TableCell>
+                          <TableCell>{formatCurrency(budget.actual_amount, budget.currency)}</TableCell>
+                          <TableCell>
+                            <div className={`font-semibold ${
+                              budget.variance > 0 ? 'text-red-600' : 'text-green-600'
+                            }`}>
+                              {formatCurrency(Math.abs(budget.variance), budget.currency)}
+                              <span className="text-xs ml-1">
+                                ({budget.variance_percentage.toFixed(1)}%)
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button size="sm" variant="outline">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Reports View */}
         {currentView === 'reports' && (
           <Card>
             <CardHeader>
@@ -614,51 +1432,79 @@ export function AccountingPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">Comprehensive financial reporting with multi-currency consolidation will be implemented here.</p>
+              <div className="text-center py-12">
+                <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Financial Reports</h3>
+                <p className="text-muted-foreground mb-4">
+                  Comprehensive financial reporting with multi-currency consolidation and analysis.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+                  <Button variant="outline" className="h-24 flex-col gap-2">
+                    <PieChart className="h-6 w-6" />
+                    Profit & Loss
+                  </Button>
+                  <Button variant="outline" className="h-24 flex-col gap-2">
+                    <BarChart3 className="h-6 w-6" />
+                    Balance Sheet
+                  </Button>
+                  <Button variant="outline" className="h-24 flex-col gap-2">
+                    <TrendingUp className="h-6 w-6" />
+                    Cash Flow
+                  </Button>
+                  <Button variant="outline" className="h-24 flex-col gap-2">
+                    <Receipt className="h-6 w-6" />
+                    A/R Aging
+                  </Button>
+                  <Button variant="outline" className="h-24 flex-col gap-2">
+                    <CreditCard className="h-6 w-6" />
+                    A/P Aging
+                  </Button>
+                  <Button variant="outline" className="h-24 flex-col gap-2">
+                    <Target className="h-6 w-6" />
+                    Budget Variance
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         )}
 
-        {currentView === 'accounts' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <PieChart className="h-5 w-5" />
-                Chart of Accounts
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Chart of accounts with multi-currency support will be implemented here.</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {currentView === 'budget' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                Budget Planning
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Budget planning and variance analysis will be implemented here.</p>
-            </CardContent>
-          </Card>
-        )}
-
+        {/* Settings View */}
         {currentView === 'settings' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5" />
-                Accounting Settings
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Multi-currency settings, tax configuration, and system preferences will be implemented here.</p>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Accounting Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="text-center py-8">Loading settings...</div>
+                ) : (
+                  <div className="space-y-6">
+                    {accountingSettings.map((setting) => (
+                      <div key={setting.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <h4 className="font-medium capitalize">{setting.setting_key.replace('_', ' ')}</h4>
+                          <p className="text-sm text-muted-foreground">{setting.description}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={setting.is_system_setting ? 'secondary' : 'outline'}>
+                            {setting.is_system_setting ? 'System' : 'Custom'}
+                          </Badge>
+                          <Button size="sm" variant="outline">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </div>
