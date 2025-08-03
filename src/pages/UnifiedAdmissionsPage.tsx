@@ -446,7 +446,7 @@ const UnifiedAdmissionsPage = () => {
             Back to Admissions Dashboard
           </Button>
         </div>
-        <StageWorkflowManager applicationId="APP-2024-001" currentStage={currentStage} />
+        <StageWorkflowManager currentStage={currentStage} />
       </div>
     );
   }
