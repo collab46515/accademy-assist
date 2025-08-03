@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { BookOpen, Plus, Edit, Trash2, Palette } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useTimetableData } from '@/hooks/useTimetableData';
 
 interface Subject {
   id: string;
@@ -33,48 +34,8 @@ const britishSubjects = [
 
 export function SubjectsManager() {
   const { toast } = useToast();
-  const [subjects, setSubjects] = useState<Subject[]>([
-    {
-      id: '1',
-      subject_name: 'Mathematics',
-      subject_code: 'MATHS',
-      color_code: '#3B82F6',
-      periods_per_week: 5,
-      requires_lab: false
-    },
-    {
-      id: '2',
-      subject_name: 'English Language',
-      subject_code: 'ENG-LANG',
-      color_code: '#10B981',
-      periods_per_week: 4,
-      requires_lab: false
-    },
-    {
-      id: '3',
-      subject_name: 'Physics',
-      subject_code: 'PHYS',
-      color_code: '#EF4444',
-      periods_per_week: 3,
-      requires_lab: true
-    },
-    {
-      id: '4',
-      subject_name: 'Chemistry',
-      subject_code: 'CHEM',
-      color_code: '#F59E0B',
-      periods_per_week: 3,
-      requires_lab: true
-    },
-    {
-      id: '5',
-      subject_name: 'Biology',
-      subject_code: 'BIO',
-      color_code: '#22C55E',
-      periods_per_week: 3,
-      requires_lab: true
-    }
-  ]);
+  const { subjects: fetchedSubjects, fetchSubjects } = useTimetableData();
+  const [subjects, setSubjects] = useState<Subject[]>([]);
 
   const [isOpen, setIsOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
@@ -86,6 +47,14 @@ export function SubjectsManager() {
     periods_per_week: 5,
     requires_lab: false
   });
+
+  useEffect(() => {
+    setSubjects(fetchedSubjects);
+  }, [fetchedSubjects]);
+
+  useEffect(() => {
+    fetchSubjects();
+  }, []);
 
   const handleSave = () => {
     if (editingSubject) {

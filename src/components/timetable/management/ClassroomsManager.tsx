@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Building, Plus, Edit, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useTimetableData } from '@/hooks/useTimetableData';
 
 interface Classroom {
   id: string;
@@ -32,44 +33,16 @@ const roomTypes = [
 
 export function ClassroomsManager() {
   const { toast } = useToast();
-  const [classrooms, setClassrooms] = useState<Classroom[]>([
-    {
-      id: '1',
-      room_name: 'Room 101',
-      room_type: 'classroom',
-      capacity: 30
-    },
-    {
-      id: '2',
-      room_name: 'Biology Lab',
-      room_type: 'laboratory',
-      capacity: 24
-    },
-    {
-      id: '3',
-      room_name: 'Computer Suite 1',
-      room_type: 'computer_lab',
-      capacity: 20
-    },
-    {
-      id: '4',
-      room_name: 'Main Gym',
-      room_type: 'gym',
-      capacity: 60
-    },
-    {
-      id: '5',
-      room_name: 'DT Workshop',
-      room_type: 'workshop',
-      capacity: 16
-    },
-    {
-      id: '6',
-      room_name: 'Drama Studio',
-      room_type: 'drama_studio',
-      capacity: 30
-    }
-  ]);
+  const { classrooms: fetchedClassrooms, roomTypes, fetchClassrooms } = useTimetableData();
+  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+  
+  useEffect(() => {
+    setClassrooms(fetchedClassrooms);
+  }, [fetchedClassrooms]);
+
+  useEffect(() => {
+    fetchClassrooms();
+  }, []);
 
   const [isOpen, setIsOpen] = useState(false);
   const [editingClassroom, setEditingClassroom] = useState<Classroom | null>(null);

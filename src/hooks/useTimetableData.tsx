@@ -131,10 +131,35 @@ export function useTimetableData() {
     if (!currentSchool) return;
 
     try {
-      console.log('Using mock timetable periods data');
-      setPeriods(mockPeriods);
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('school_periods')
+        .select('*')
+        .eq('school_id', currentSchool.id)
+        .eq('is_active', true)
+        .order('period_number');
+      
+      if (error) throw error;
+      
+      // Transform to match our interface
+      const transformedPeriods: TimetablePeriod[] = (data || []).map(period => ({
+        id: period.id,
+        school_id: period.school_id,
+        period_number: period.period_number,
+        period_name: period.period_name,
+        start_time: period.start_time,
+        end_time: period.end_time,
+        is_break: period.period_name.toLowerCase().includes('break') || period.period_name.toLowerCase().includes('lunch'),
+        is_active: period.is_active
+      }));
+      
+      setPeriods(transformedPeriods);
     } catch (error: any) {
       console.error('Error fetching periods:', error);
+      // Fallback to mock data
+      setPeriods(mockPeriods);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -143,10 +168,22 @@ export function useTimetableData() {
     if (!currentSchool) return;
 
     try {
-      console.log('Using mock subjects data');
-      setSubjects(mockSubjects);
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('subjects')
+        .select('*')
+        .eq('school_id', currentSchool.id)
+        .eq('is_active', true)
+        .order('subject_name');
+      
+      if (error) throw error;
+      setSubjects(data || []);
     } catch (error: any) {
       console.error('Error fetching subjects:', error);
+      // Fallback to mock data
+      setSubjects(mockSubjects);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -155,10 +192,22 @@ export function useTimetableData() {
     if (!currentSchool) return;
 
     try {
-      console.log('Using mock classrooms data');
-      setClassrooms(mockClassrooms);
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('classrooms')
+        .select('*')
+        .eq('school_id', currentSchool.id)
+        .eq('is_active', true)
+        .order('room_name');
+      
+      if (error) throw error;
+      setClassrooms(data || []);
     } catch (error: any) {
       console.error('Error fetching classrooms:', error);
+      // Fallback to mock data
+      setClassrooms(mockClassrooms);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -259,6 +308,34 @@ export function useTimetableData() {
     }
   }, [currentSchool]);
 
+  // British curriculum data
+  const yearGroups = [
+    'Year 7', 'Year 8', 'Year 9', 'Year 10', 'Year 11', 'Year 12', 'Year 13'
+  ];
+
+  const formClasses = [
+    '7A', '7B', '7C', '7D',
+    '8A', '8B', '8C', '8D', 
+    '9A', '9B', '9C', '9D',
+    '10A', '10B', '10C', '10D',
+    '11A', '11B', '11C', '11D',
+    '12A', '12B', '12C',
+    '13A', '13B', '13C'
+  ];
+
+  const roomTypes = [
+    'classroom',
+    'laboratory', 
+    'computer_lab',
+    'art_room',
+    'music_room',
+    'drama_studio',
+    'gymnasium',
+    'workshop',
+    'library',
+    'assembly_hall'
+  ];
+
   return {
     // State
     loading,
@@ -266,6 +343,11 @@ export function useTimetableData() {
     subjects,
     classrooms,
     timetableEntries,
+    
+    // British curriculum data
+    yearGroups,
+    formClasses,
+    roomTypes,
     
     // Actions
     fetchPeriods,
