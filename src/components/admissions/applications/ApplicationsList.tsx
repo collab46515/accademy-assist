@@ -61,16 +61,23 @@ export function ApplicationsList({
   const fetchApplications = async () => {
     try {
       setLoading(true);
-      console.log('Fetching applications...');
+      console.log('Fetching applications from database...');
+      
+      // Force real database fetch
       const { data, error } = await supabase
         .from('enrollment_applications')
         .select('*')
         .order('submitted_at', { ascending: false });
 
-      console.log('Applications data:', data);
-      console.log('Applications error:', error);
+      console.log('Database response - data:', data);
+      console.log('Database response - error:', error);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
+      
+      console.log('Setting applications data:', data?.length || 0, 'applications');
       setApplications(data || []);
     } catch (error) {
       console.error('Error fetching applications:', error);
@@ -79,6 +86,8 @@ export function ApplicationsList({
         description: "Failed to load applications",
         variant: "destructive"
       });
+      // Set empty array on error instead of keeping loading state
+      setApplications([]);
     } finally {
       setLoading(false);
     }
