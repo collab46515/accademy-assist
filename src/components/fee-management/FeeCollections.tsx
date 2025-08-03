@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { Capacitor } from '@capacitor/core';
+import { supabase } from '@/integrations/supabase/client';
 
 // Mock data - replace with actual data fetching
 const mockStudents: Student[] = [
@@ -310,7 +311,7 @@ export default function FeeCollections() {
     setShowPaymentModal(true);
   };
 
-  const recordPayment = () => {
+  const recordPayment = async () => {
     if (!selectedStudentForPayment) return;
 
     const amountPaid = parseFloat(paymentForm.amount);
@@ -318,31 +319,69 @@ export default function FeeCollections() {
     const previouslyPaid = selectedStudentForPayment.amountPaid || 0;
     const newTotalPaid = previouslyPaid + amountPaid;
 
-    // Update student status
-    const updatedStudents = students.map(student => {
-      if (student.id === selectedStudentForPayment.id) {
-        return {
-          ...student,
-          amountPaid: newTotalPaid,
-          status: newTotalPaid >= totalDue ? 'paid' as const : 'partial' as const
-        };
+    try {
+      // Insert payment record into database with auto-generated receipt number
+      const { data: paymentRecord, error } = await supabase
+        .from('payment_records')
+        .insert({
+          school_id: '00000000-0000-0000-0000-000000000000', // Default school ID for now
+          student_id: '00000000-0000-0000-0000-000000000000', // Mock student ID 
+          amount: amountPaid,
+          payment_method: paymentForm.paymentMethod,
+          reference_number: paymentForm.reference,
+          notes: paymentForm.notes,
+          status: 'completed',
+          // Additional fields from our migration
+          student_name: selectedStudentForPayment.name,
+          student_class: selectedStudentForPayment.class,
+          parent_name: selectedStudentForPayment.parentName,
+          fee_type: selectedStudentForPayment.feeType,
+          amount_due: totalDue,
+          amount_paid: amountPaid,
+          cashier_name: 'Current User' // This should be from auth context
+        })
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
       }
-      return student;
-    });
 
-    setStudents(updatedStudents);
-    setShowPaymentModal(false);
-    
-    toast({
-      title: "Payment Recorded",
-      description: `Payment of £${amountPaid} recorded for ${selectedStudentForPayment.name}`,
-    });
+      // Update student status in local state
+      const updatedStudents = students.map(student => {
+        if (student.id === selectedStudentForPayment.id) {
+          return {
+            ...student,
+            amountPaid: newTotalPaid,
+            status: newTotalPaid >= totalDue ? 'paid' as const : 'partial' as const
+          };
+        }
+        return student;
+      });
 
-    // Auto-print receipt
-    printReceipt(selectedStudentForPayment, amountPaid, paymentForm.paymentMethod);
+      setStudents(updatedStudents);
+      setShowPaymentModal(false);
+      
+      toast({
+        title: "Payment Recorded",
+        description: `Receipt ${paymentRecord.receipt_number} - Payment of £${amountPaid} recorded for ${selectedStudentForPayment.name}`,
+      });
+
+      // Auto-print receipt with proper receipt number
+      printReceipt(selectedStudentForPayment, amountPaid, paymentForm.paymentMethod, paymentRecord.receipt_number);
+      
+    } catch (error) {
+      console.error('Error recording payment:', error);
+      toast({
+        title: "Payment Error",
+        description: "Failed to record payment. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const printReceipt = (student: Student, amount: number, method: string) => {
+  const printReceipt = (student: Student, amount: number, method: string, receiptNumber?: string) => {
+    const finalReceiptNumber = receiptNumber || `REC${Date.now()}`;
     // Create receipt content
     const receiptContent = `
       <div style="width: 300px; font-family: monospace; padding: 20px;">
@@ -351,10 +390,13 @@ export default function FeeCollections() {
           <p>Fee Payment Receipt</p>
         </div>
         <div style="margin-bottom: 10px;">
-          <strong>Receipt #:</strong> REC${Date.now()}
+          <strong>Receipt #:</strong> ${finalReceiptNumber}
         </div>
         <div style="margin-bottom: 10px;">
           <strong>Date:</strong> ${new Date().toLocaleDateString()}
+        </div>
+        <div style="margin-bottom: 10px;">
+          <strong>Time:</strong> ${new Date().toLocaleTimeString()}
         </div>
         <div style="margin-bottom: 10px;">
           <strong>Student:</strong> ${student.name}
