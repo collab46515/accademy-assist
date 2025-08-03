@@ -248,7 +248,13 @@ export const InstallmentPlans = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
+          // Filter to show only active plans
+          const activePlans = plans.filter(p => p.status === 'active');
+          if (activePlans.length > 0) {
+            handleViewDetails(activePlans[0]); // Show details of first active plan
+          }
+        }}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -261,7 +267,14 @@ export const InstallmentPlans = () => {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
+          // Show plans with most students first
+          const plansWithStudents = plans.filter(p => p.studentsEnrolled > 0);
+          if (plansWithStudents.length > 0) {
+            const topPlan = plansWithStudents.sort((a, b) => b.studentsEnrolled - a.studentsEnrolled)[0];
+            handleViewDetails(topPlan);
+          }
+        }}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -274,7 +287,13 @@ export const InstallmentPlans = () => {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
+          // Show plan with highest value
+          const highestValuePlan = plans.sort((a, b) => b.totalAmount - a.totalAmount)[0];
+          if (highestValuePlan) {
+            handleViewDetails(highestValuePlan);
+          }
+        }}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>

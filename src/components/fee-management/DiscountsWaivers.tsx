@@ -405,7 +405,10 @@ export const DiscountsWaivers = () => {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
+          // Show export options or summary
+          handleExportDiscounts();
+        }}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
