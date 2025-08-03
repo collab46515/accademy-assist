@@ -20,6 +20,15 @@ export function ApplicationManagement() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [activeTab, setActiveTab] = useState('applications');
 
+  // Check URL parameters for initial filter state
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const filterParam = urlParams.get('filter');
+    if (filterParam && filterParam !== statusFilter) {
+      setStatusFilter(filterParam);
+    }
+  }, []);
+
   // Mock stats - would come from real data
   const stats = {
     total: 245,
