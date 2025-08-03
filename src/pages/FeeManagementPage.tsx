@@ -15,6 +15,11 @@ import {
   AlertCircle
 } from "lucide-react";
 import { FeeStructureTabs } from "@/components/fee-management/FeeStructureTabs";
+import { StudentFeeAssignments } from "@/components/fee-management/StudentFeeAssignments";
+import { PaymentCollection } from "@/components/fee-management/PaymentCollection";
+import { InvoiceGeneration } from "@/components/fee-management/InvoiceGeneration";
+import { FeeReportsAnalytics } from "@/components/fee-management/FeeReportsAnalytics";
+import { PaymentGatewaySettings } from "@/components/fee-management/PaymentGatewaySettings";
 
 const FeeManagementPage = () => {
   const stats = [
@@ -94,108 +99,23 @@ const FeeManagementPage = () => {
         </TabsContent>
 
         <TabsContent value="assignments" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Student Fee Assignments
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <Users className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Student Assignments Coming Soon</h3>
-                <p className="text-muted-foreground mb-4">
-                  Assign fee structures to students, manage scholarships, discounts, and individual fee adjustments.
-                </p>
-                <Badge variant="secondary">Ready for Configuration</Badge>
-              </div>
-            </CardContent>
-          </Card>
+          <StudentFeeAssignments />
         </TabsContent>
 
         <TabsContent value="collections" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
-                Fee Collections & Payments
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <CreditCard className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Collections Management Coming Soon</h3>
-                <p className="text-muted-foreground mb-4">
-                  Process payments, track collections, manage payment methods, and handle refunds.
-                </p>
-                <Badge variant="secondary">Ready for Configuration</Badge>
-              </div>
-            </CardContent>
-          </Card>
+          <PaymentCollection />
         </TabsContent>
 
         <TabsContent value="invoices" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Invoicing & Billing
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <FileText className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Invoicing System Coming Soon</h3>
-                <p className="text-muted-foreground mb-4">
-                  Generate invoices, send payment reminders, track payment status, and manage billing cycles.
-                </p>
-                <Badge variant="secondary">Ready for Configuration</Badge>
-              </div>
-            </CardContent>
-          </Card>
+          <InvoiceGeneration />
         </TabsContent>
 
         <TabsContent value="reports" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Fee Reports & Analytics
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <BarChart3 className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Fee Analytics Coming Soon</h3>
-                <p className="text-muted-foreground mb-4">
-                  View collection reports, outstanding fee analysis, payment trends, and financial insights.
-                </p>
-                <Badge variant="secondary">Ready for Configuration</Badge>
-              </div>
-            </CardContent>
-          </Card>
+          <FeeReportsAnalytics />
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Fee Management Settings
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <Settings className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Settings Coming Soon</h3>
-                <p className="text-muted-foreground mb-4">
-                  Configure payment gateways, late fee policies, academic year settings, and notification preferences.
-                </p>
-                <Badge variant="secondary">Ready for Configuration</Badge>
-              </div>
-            </CardContent>
-          </Card>
+          <PaymentGatewaySettings />
         </TabsContent>
       </Tabs>
     </div>
