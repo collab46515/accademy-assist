@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { StandardDigitalForm, SiblingEnrollmentForm } from "@/components/admissions/ApplicationForms";
+import { ApplicationForms } from "@/components/admissions/ApplicationForms";
 import { 
   UserPlus, 
   FileText, 
@@ -371,52 +371,7 @@ const UnifiedAdmissionsPage = () => {
 
         {/* Application Form */}
         <div className="container mx-auto px-4 py-8 max-w-7xl">
-          {selectedPathway === "standard_digital" && (
-            <StandardDigitalForm 
-              pathway={selectedPathway}
-              onSubmit={handleApplicationSubmit}
-              onCancel={handleApplicationCancel}
-            />
-          )}
-          {selectedPathway === "sibling_automatic" && (
-            <SiblingEnrollmentForm 
-              pathway={selectedPathway}
-              onSubmit={handleApplicationSubmit}
-              onCancel={handleApplicationCancel}
-            />
-          )}
-          {selectedPathway === "staff_child" && (
-            <div className="text-center py-12">
-              <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Staff Child Placement Form</h3>
-              <p className="text-muted-foreground mb-4">Coming soon - specialized form for staff children</p>
-              <Button onClick={handleApplicationCancel}>Return to Dashboard</Button>
-            </div>
-          )}
-          {selectedPathway === "emergency_safeguarding" && (
-            <div className="text-center py-12">
-              <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Emergency Safeguarding Referral</h3>
-              <p className="text-muted-foreground mb-4">Coming soon - urgent enrollment form</p>
-              <Button onClick={handleApplicationCancel}>Return to Dashboard</Button>
-            </div>
-          )}
-          {selectedPathway === "partner_school" && (
-            <div className="text-center py-12">
-              <Building className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Partner School Acquisition</h3>
-              <p className="text-muted-foreground mb-4">Coming soon - bulk import form</p>
-              <Button onClick={handleApplicationCancel}>Return to Dashboard</Button>
-            </div>
-          )}
-          {selectedPathway === "internal_progression" && (
-            <div className="text-center py-12">
-              <GraduationCap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Internal Year Group Progression</h3>
-              <p className="text-muted-foreground mb-4">Coming soon - bulk progression tool</p>
-              <Button onClick={handleApplicationCancel}>Return to Dashboard</Button>
-            </div>
-          )}
+          <ApplicationForms onBackToDashboard={handleApplicationCancel} />
         </div>
       </div>
     );
