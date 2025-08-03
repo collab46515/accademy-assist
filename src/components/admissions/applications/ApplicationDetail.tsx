@@ -102,7 +102,7 @@ export function ApplicationDetail({ applicationId, onBack, getStatusColor }: App
     try {
       const { error } = await supabase
         .from('enrollment_applications')
-        .update({ status: newStatus })
+        .update({ status: newStatus as any })
         .eq('id', applicationId);
 
       if (error) throw error;
