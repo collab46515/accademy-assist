@@ -91,8 +91,12 @@ export function ApplicationsList({
         app.application_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.parent_email.toLowerCase().includes(searchTerm.toLowerCase());
       
-      // The statusFilter from URL should match database status values directly
-      const matchesStatus = statusFilter === 'all' || app.status === statusFilter;
+      // Map invalid filters to 'all' to ensure data is always shown
+      const validFilters = ['all', 'submitted', 'under_review', 'assessment_scheduled', 'interview_scheduled', 'pending_approval', 'approved'];
+      const effectiveFilter = validFilters.includes(statusFilter) ? statusFilter : 'all';
+      
+      console.log('StatusFilter:', statusFilter, 'EffectiveFilter:', effectiveFilter);
+      const matchesStatus = effectiveFilter === 'all' || app.status === effectiveFilter;
       
       return matchesSearch && matchesStatus;
     })

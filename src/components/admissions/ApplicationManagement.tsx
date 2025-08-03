@@ -29,8 +29,11 @@ export function ApplicationManagement() {
     console.log('Current statusFilter:', statusFilter);
     
     if (filterParam && filterParam !== statusFilter) {
-      console.log('Setting statusFilter to:', filterParam);
-      setStatusFilter(filterParam);
+      // Only set valid filters, otherwise default to 'all'
+      const validFilters = ['all', 'submitted', 'under_review', 'assessment_scheduled', 'interview_scheduled', 'pending_approval', 'approved'];
+      const filterToSet = validFilters.includes(filterParam) ? filterParam : 'all';
+      console.log('Setting statusFilter to:', filterToSet);
+      setStatusFilter(filterToSet);
     }
   }, [window.location.search]); // Watch for URL changes
 
