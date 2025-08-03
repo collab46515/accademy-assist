@@ -40,6 +40,8 @@ const AdmissionsPage = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("management");
 
+  console.log('AdmissionsPage render - filterStage:', filterStage, 'activeTab:', activeTab);
+
   // Handle URL parameters for tab and pass filter to ApplicationManagement
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
