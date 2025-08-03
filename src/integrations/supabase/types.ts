@@ -14,6 +14,195 @@ export type Database = {
   }
   public: {
     Tables: {
+      attendance_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          id: string
+          message: string
+          metadata: Json | null
+          recipients: Json
+          school_id: string
+          sent_at: string | null
+          status: string | null
+          student_id: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          id?: string
+          message: string
+          metadata?: Json | null
+          recipients: Json
+          school_id: string
+          sent_at?: string | null
+          status?: string | null
+          student_id: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          id?: string
+          message?: string
+          metadata?: Json | null
+          recipients?: Json
+          school_id?: string
+          sent_at?: string | null
+          status?: string | null
+          student_id?: string
+        }
+        Relationships: []
+      }
+      attendance_excuses: {
+        Row: {
+          attendance_record_id: string
+          created_at: string
+          excuse_reason: string
+          id: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_at: string
+          submitted_by: string
+          supporting_document_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          attendance_record_id: string
+          created_at?: string
+          excuse_reason: string
+          id?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+          submitted_by: string
+          supporting_document_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attendance_record_id?: string
+          created_at?: string
+          excuse_reason?: string
+          id?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+          submitted_by?: string
+          supporting_document_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      attendance_records: {
+        Row: {
+          created_at: string
+          date: string
+          excuse_document_url: string | null
+          excused_at: string | null
+          excused_by: string | null
+          id: string
+          is_excused: boolean | null
+          marked_at: string
+          notes: string | null
+          period: number | null
+          reason: string | null
+          school_id: string
+          status: string
+          student_id: string
+          subject: string | null
+          teacher_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          excuse_document_url?: string | null
+          excused_at?: string | null
+          excused_by?: string | null
+          id?: string
+          is_excused?: boolean | null
+          marked_at?: string
+          notes?: string | null
+          period?: number | null
+          reason?: string | null
+          school_id: string
+          status: string
+          student_id: string
+          subject?: string | null
+          teacher_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          excuse_document_url?: string | null
+          excused_at?: string | null
+          excused_by?: string | null
+          id?: string
+          is_excused?: boolean | null
+          marked_at?: string
+          notes?: string | null
+          period?: number | null
+          reason?: string | null
+          school_id?: string
+          status?: string
+          student_id?: string
+          subject?: string | null
+          teacher_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      attendance_settings: {
+        Row: {
+          alert_after_days: number | null
+          attendance_mode: string | null
+          auto_mark_weekends: boolean | null
+          created_at: string
+          enable_biometric_checkin: boolean | null
+          enable_qr_checkin: boolean | null
+          id: string
+          late_threshold_minutes: number | null
+          require_excuse_approval: boolean | null
+          school_id: string
+          settings: Json | null
+          updated_at: string
+        }
+        Insert: {
+          alert_after_days?: number | null
+          attendance_mode?: string | null
+          auto_mark_weekends?: boolean | null
+          created_at?: string
+          enable_biometric_checkin?: boolean | null
+          enable_qr_checkin?: boolean | null
+          id?: string
+          late_threshold_minutes?: number | null
+          require_excuse_approval?: boolean | null
+          school_id: string
+          settings?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          alert_after_days?: number | null
+          attendance_mode?: string | null
+          auto_mark_weekends?: boolean | null
+          created_at?: string
+          enable_biometric_checkin?: boolean | null
+          enable_qr_checkin?: boolean | null
+          id?: string
+          late_threshold_minutes?: number | null
+          require_excuse_approval?: boolean | null
+          school_id?: string
+          settings?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -66,6 +255,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      class_schedules: {
+        Row: {
+          created_at: string
+          days_of_week: number[]
+          form_class: string | null
+          id: string
+          is_active: boolean | null
+          period_id: string
+          room: string | null
+          school_id: string
+          student_ids: string[]
+          subject: string
+          teacher_id: string
+          updated_at: string
+          year_group: string
+        }
+        Insert: {
+          created_at?: string
+          days_of_week: number[]
+          form_class?: string | null
+          id?: string
+          is_active?: boolean | null
+          period_id: string
+          room?: string | null
+          school_id: string
+          student_ids: string[]
+          subject: string
+          teacher_id: string
+          updated_at?: string
+          year_group: string
+        }
+        Update: {
+          created_at?: string
+          days_of_week?: number[]
+          form_class?: string | null
+          id?: string
+          is_active?: boolean | null
+          period_id?: string
+          room?: string | null
+          school_id?: string
+          student_ids?: string[]
+          subject?: string
+          teacher_id?: string
+          updated_at?: string
+          year_group?: string
+        }
+        Relationships: []
       }
       enrollment_applications: {
         Row: {
@@ -930,6 +1167,45 @@ export type Database = {
           permission?: Database["public"]["Enums"]["permission_type"]
           resource?: Database["public"]["Enums"]["resource_type"]
           role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
+      school_periods: {
+        Row: {
+          created_at: string
+          days_of_week: number[]
+          end_time: string
+          id: string
+          is_active: boolean | null
+          period_name: string
+          period_number: number
+          school_id: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          days_of_week: number[]
+          end_time: string
+          id?: string
+          is_active?: boolean | null
+          period_name: string
+          period_number: number
+          school_id: string
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          days_of_week?: number[]
+          end_time?: string
+          id?: string
+          is_active?: boolean | null
+          period_name?: string
+          period_number?: number
+          school_id?: string
+          start_time?: string
+          updated_at?: string
         }
         Relationships: []
       }
