@@ -596,11 +596,24 @@ export function FeeDashboard() {
                     <CardDescription>Interactive overview - click bars or class buttons for detailed breakdown</CardDescription>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" className="hover:bg-primary/10">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="hover:bg-primary/10"
+                      onClick={() => setFiltersModalOpen(true)}
+                    >
                       <Filter className="w-4 h-4 mr-2" />
                       Filter Classes
                     </Button>
-                    <Button variant="ghost" size="sm" className="hover:bg-primary/10">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="hover:bg-primary/10"
+                      onClick={() => {
+                        setSelectedMetric('collected');
+                        setMetricDetailModalOpen(true);
+                      }}
+                    >
                       <Eye className="w-4 h-4 mr-2" />
                       View All
                     </Button>

@@ -190,6 +190,179 @@ export function MetricDetailModal({ open, onOpenChange, metricType, data }: Metr
           )
         };
 
+      case 'percentage':
+        return {
+          title: 'Collection Rate Analysis',
+          description: 'Detailed breakdown of collection rates across different segments',
+          content: (
+            <div className="space-y-6">
+              <div className="grid grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-2xl font-bold text-green-600">83%</div>
+                    <div className="text-sm text-muted-foreground">Overall Rate</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-2xl font-bold">£42,800</div>
+                    <div className="text-sm text-muted-foreground">Collected</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-2xl font-bold text-red-600">£8,450</div>
+                    <div className="text-sm text-muted-foreground">Outstanding</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-2xl font-bold">£51,250</div>
+                    <div className="text-sm text-muted-foreground">Total Expected</div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Collection Rate by Class</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer config={chartConfig}>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={[
+                        { class: '7A', rate: 95, collected: 4750, outstanding: 250 },
+                        { class: '8B', rate: 87, collected: 6960, outstanding: 1040 },
+                        { class: '9C', rate: 82, collected: 4920, outstanding: 1080 },
+                        { class: '10A', rate: 78, collected: 5460, remaining: 1540 },
+                        { class: '11B', rate: 75, collected: 4500, remaining: 1500 },
+                        { class: '12A', rate: 92, collected: 5520, remaining: 480 }
+                      ]}>
+                        <XAxis dataKey="class" />
+                        <YAxis />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Bar dataKey="rate" fill="hsl(var(--primary))" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Collection Rate Trends</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer config={chartConfig}>
+                    <ResponsiveContainer width="100%" height={250}>
+                      <LineChart data={[
+                        { month: 'Jan', rate: 78 },
+                        { month: 'Feb', rate: 82 },
+                        { month: 'Mar', rate: 85 },
+                        { month: 'Apr', rate: 83 },
+                        { month: 'May', rate: 87 },
+                        { month: 'Jun', rate: 89 },
+                        { month: 'Jul', rate: 83 }
+                      ]}>
+                        <XAxis dataKey="month" />
+                        <YAxis />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Line type="monotone" dataKey="rate" stroke="hsl(var(--primary))" strokeWidth={3} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+            </div>
+          )
+        };
+
+      case 'overdue':
+        return {
+          title: 'Overdue Accounts Analysis',
+          description: 'Detailed breakdown of overdue accounts requiring immediate attention',
+          content: (
+            <div className="space-y-6">
+              <div className="grid grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-2xl font-bold text-red-600">17</div>
+                    <div className="text-sm text-muted-foreground">Overdue Accounts</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-2xl font-bold text-red-600">£4,250</div>
+                    <div className="text-sm text-muted-foreground">Total Overdue</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-2xl font-bold">£250</div>
+                    <div className="text-sm text-muted-foreground">Avg Overdue</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-2xl font-bold">23</div>
+                    <div className="text-sm text-muted-foreground">Avg Days Late</div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Overdue Accounts by Severity</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Student</TableHead>
+                        <TableHead>Class</TableHead>
+                        <TableHead>Amount Overdue</TableHead>
+                        <TableHead>Days Late</TableHead>
+                        <TableHead>Last Contact</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {[
+                        { student: 'James Wilson', class: '8B', amount: 1600, days: 45, lastContact: '2025-07-15', severity: 'high' },
+                        { student: 'Sarah Connor', class: '7A', amount: 800, days: 32, lastContact: '2025-07-20', severity: 'high' },
+                        { student: 'Michael Davis', class: '9C', amount: 450, days: 28, lastContact: '2025-07-25', severity: 'medium' },
+                        { student: 'Emma Johnson', class: '10A', amount: 300, days: 15, lastContact: '2025-08-01', severity: 'low' },
+                        { student: 'Tom Wilson', class: '11B', amount: 250, days: 12, lastContact: '2025-08-02', severity: 'low' }
+                      ].map((item, i) => (
+                        <TableRow key={i}>
+                          <TableCell className="font-medium">{item.student}</TableCell>
+                          <TableCell>{item.class}</TableCell>
+                          <TableCell className="text-red-600 font-semibold">£{item.amount}</TableCell>
+                          <TableCell>
+                            <Badge variant={item.days > 30 ? 'destructive' : item.days > 14 ? 'default' : 'secondary'}>
+                              {item.days} days
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{item.lastContact}</TableCell>
+                          <TableCell>
+                            <div className="flex gap-1">
+                              <Button variant="outline" size="sm">
+                                <Send className="w-3 h-3 mr-1" />
+                                Remind
+                              </Button>
+                              <Button variant="ghost" size="sm">Call</Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </div>
+          )
+        };
+
       case 'expected':
         return {
           title: "Today's Expected Collections",
