@@ -275,20 +275,32 @@ export const FeeStructureTabs = () => {
                         <p>Modified: {new Date(structure.updated_at).toLocaleDateString()}</p>
                        </div>
                       
-                      <div className="flex items-center gap-2 justify-end">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                       <div className="flex items-center gap-2 justify-end">
+                         <Button variant="ghost" size="sm" onClick={() => {
+                           console.log('FeeStructureTabs: View button clicked');
+                           alert('View button clicked');
+                         }}>
+                           <Eye className="h-4 w-4" />
+                         </Button>
+                         <Button variant="ghost" size="sm" onClick={() => {
+                           console.log('FeeStructureTabs: Edit button clicked');
+                           alert('Edit button clicked');
+                         }}>
+                           <Edit className="h-4 w-4" />
+                         </Button>
+                         <Button variant="ghost" size="sm" onClick={() => {
+                           console.log('FeeStructureTabs: Copy button clicked');
+                           alert('Copy button clicked');
+                         }}>
+                           <Copy className="h-4 w-4" />
+                         </Button>
+                         <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => {
+                           console.log('FeeStructureTabs: Delete button clicked');
+                           alert('Delete button clicked');
+                         }}>
+                           <Trash2 className="h-4 w-4" />
+                         </Button>
+                       </div>
                     </div>
                   </div>
                 ))}

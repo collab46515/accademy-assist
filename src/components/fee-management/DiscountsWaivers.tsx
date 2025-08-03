@@ -392,7 +392,11 @@ export const DiscountsWaivers = () => {
 
       {/* Stats Cards - Now Clickable */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedTab('discounts')}>
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
+          console.log('DiscountsWaivers: Active Discounts card clicked');
+          alert('Active Discounts card clicked');
+          setSelectedTab('discounts');
+        }}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>

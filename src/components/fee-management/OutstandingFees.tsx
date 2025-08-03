@@ -276,7 +276,10 @@ export const OutstandingFees = () => {
 
       {/* Stats Cards - Now Clickable */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
+          console.log('OutstandingFees: Total Outstanding card clicked');
+          alert('Total Outstanding card clicked');
+        }}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>

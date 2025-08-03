@@ -248,7 +248,10 @@ export const InstallmentPlans = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
+          console.log('InstallmentPlans: Active Plans card clicked');
+          alert('Active Plans card clicked');
+        }}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
