@@ -467,7 +467,7 @@ const BulkAssignmentForm = ({
           <Checkbox 
             id="apply-discounts" 
             checked={applyDiscounts}
-            onCheckedChange={setApplyDiscounts}
+            onCheckedChange={(checked) => setApplyDiscounts(checked === true)}
           />
           <Label htmlFor="apply-discounts">Apply automatic discounts (sibling, early payment, etc.)</Label>
         </div>

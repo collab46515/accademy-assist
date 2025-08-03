@@ -3197,6 +3197,45 @@ export type Database = {
           },
         ]
       }
+      payment_gateway_settings: {
+        Row: {
+          api_key: string | null
+          configuration: Json | null
+          created_at: string
+          gateway_id: string
+          gateway_name: string
+          id: string
+          is_enabled: boolean
+          secret_key: string | null
+          updated_at: string
+          webhook_url: string | null
+        }
+        Insert: {
+          api_key?: string | null
+          configuration?: Json | null
+          created_at?: string
+          gateway_id: string
+          gateway_name: string
+          id?: string
+          is_enabled?: boolean
+          secret_key?: string | null
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Update: {
+          api_key?: string | null
+          configuration?: Json | null
+          created_at?: string
+          gateway_id?: string
+          gateway_name?: string
+          id?: string
+          is_enabled?: boolean
+          secret_key?: string | null
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
       payroll_records: {
         Row: {
           allowances: number | null
