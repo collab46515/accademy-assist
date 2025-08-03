@@ -16,7 +16,23 @@ import {
 } from 'lucide-react';
 
 export default function TimetablePage() {
-  const { currentSchool, hasRole } = useRBAC();
+  const { currentSchool, hasRole, userRoles, loading } = useRBAC();
+
+  // Debug logging
+  console.log('Timetable Debug:', { currentSchool, userRoles, loading });
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <p className="mt-4 text-muted-foreground">Loading...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (!currentSchool) {
     return (
@@ -70,7 +86,7 @@ export default function TimetablePage() {
               <GraduationCap className="h-4 w-4" />
               Student View
             </TabsTrigger>
-            <TabsTrigger value="teacher-view" className="flex items-center gap-2" disabled={!hasRole('teacher') && !canManageTimetables}>
+            <TabsTrigger value="teacher-view" className="flex items-center gap-2" disabled={!hasRole('teacher', currentSchool?.id) && !canManageTimetables}>
               <Users className="h-4 w-4" />
               Teacher View
             </TabsTrigger>
