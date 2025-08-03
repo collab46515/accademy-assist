@@ -3,24 +3,102 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { AlertTriangle, Send, Download, Eye, DollarSign, Clock, Users } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { AlertTriangle, Send, Download, Eye, DollarSign, Clock, Users, FileText } from 'lucide-react';
+import { toast } from 'sonner';
 
-const MOCK_FEES = [
+interface OutstandingFee {
+  id: string;
+  studentName: string;
+  studentId: string;
+  parentName: string;
+  parentEmail: string;
+  parentPhone: string;
+  feeType: string;
+  originalAmount: number;
+  paidAmount: number;
+  outstandingAmount: number;
+  dueDate: string;
+  daysPastDue: number;
+  lastReminderSent: string;
+  reminderCount: number;
+  status: 'overdue' | 'due_soon' | 'payment_plan' | 'pending';
+  paymentPlan?: {
+    planName: string;
+    nextInstallmentDate: string;
+    nextInstallmentAmount: number;
+  };
+}
+
+const MOCK_OUTSTANDING_FEES: OutstandingFee[] = [
   {
     id: '1',
     studentName: 'Alice Johnson',
     studentId: 'STU2024001',
+    parentName: 'Mary Johnson',
+    parentEmail: 'mary.johnson@email.com',
+    parentPhone: '07700 900123',
     feeType: 'Tuition Fee - Term 1',
     originalAmount: 3000,
+    paidAmount: 1500,
     outstandingAmount: 1500,
     dueDate: '2024-01-15',
     daysPastDue: 10,
+    lastReminderSent: '2024-01-20',
+    reminderCount: 2,
     status: 'overdue'
+  },
+  {
+    id: '2',
+    studentName: 'Bob Smith',
+    studentId: 'STU2024002',
+    parentName: 'John Smith',
+    parentEmail: 'john.smith@email.com',
+    parentPhone: '07700 900124',
+    feeType: 'Transport Fee',
+    originalAmount: 150,
+    paidAmount: 0,
+    outstandingAmount: 150,
+    dueDate: '2024-02-01',
+    daysPastDue: 0,
+    lastReminderSent: '2024-01-25',
+    reminderCount: 1,
+    status: 'due_soon'
+  },
+  {
+    id: '3',
+    studentName: 'Carol Williams',
+    studentId: 'STU2024003',
+    parentName: 'Sarah Williams',
+    parentEmail: 'sarah.williams@email.com',
+    parentPhone: '07700 900125',
+    feeType: 'Tuition Fee - Term 1',
+    originalAmount: 3000,
+    paidAmount: 750,
+    outstandingAmount: 2250,
+    dueDate: '2024-01-15',
+    daysPastDue: 25,
+    lastReminderSent: '2024-01-18',
+    reminderCount: 3,
+    status: 'payment_plan',
+    paymentPlan: {
+      planName: 'Monthly Payment Plan',
+      nextInstallmentDate: '2024-02-15',
+      nextInstallmentAmount: 750
+    }
   }
 ];
 
 export const OutstandingFees = () => {
-  const [fees] = useState(MOCK_FEES);
+  const [fees, setFees] = useState<OutstandingFee[]>(MOCK_OUTSTANDING_FEES);
+  const [showReminderDialog, setShowReminderDialog] = useState(false);
+  const [selectedFee, setSelectedFee] = useState<OutstandingFee | null>(null);
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<string>('all');
 
   const getStatusColor = (status: string) => {
     switch (status) {
