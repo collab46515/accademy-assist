@@ -125,8 +125,13 @@ const erpModules = [
     icon: Calculator,
     subItems: [
       { title: "Accounting Dashboard", url: "/accounting", icon: LayoutDashboard },
+      { title: "Student Fees", url: "/accounting?tab=students", icon: Users },
+      { title: "Invoices", url: "/accounting?tab=invoices", icon: FileText },
+      { title: "Expenses", url: "/accounting?tab=expenses", icon: Receipt },
+      { title: "Reports", url: "/accounting?tab=reports", icon: BarChart3 },
+      { title: "Chart of Accounts", url: "/accounting?tab=accounts", icon: PieChart },
+      { title: "Budget Planning", url: "/accounting?tab=budget", icon: Target },
       { title: "Finance", url: "/finance", icon: CreditCard },
-      // Add more accounting sub-items as needed
     ]
   },
   {

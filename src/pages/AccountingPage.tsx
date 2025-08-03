@@ -1,1166 +1,601 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Progress } from '@/components/ui/progress';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar, Clock, TrendingUp, TrendingDown, DollarSign, FileText, CreditCard, Building2, Users, ShoppingCart, Package, BarChart3, PieChart, Activity, AlertCircle, CheckCircle, Plus, Search, Filter, Edit, Trash2, Download, Upload, Eye, Send, Calculator, Receipt, Banknote, Wallet, Target, ArrowUpRight, ArrowDownRight, RefreshCw, Archive, Settings, Bell, Mail, Phone, MapPin, Globe, Calendar as CalendarIcon, Printer, Share2, Copy, ExternalLink } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useForm } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom';
+import { 
+  DollarSign, 
+  TrendingUp, 
+  TrendingDown,
+  CreditCard,
+  Receipt,
+  PieChart,
+  BarChart3,
+  FileText,
+  Users,
+  Calendar,
+  Plus,
+  Search,
+  Filter,
+  Download,
+  Eye,
+  Edit,
+  Trash2,
+  Send,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  Calculator,
+  Building2,
+  Banknote,
+  Target,
+  Award
+} from 'lucide-react';
 
-interface Invoice {
-  id: string;
-  invoiceNumber: string;
-  customerId: string;
-  customerName: string;
-  amount: number;
-  tax: number;
-  total: number;
-  issueDate: string;
-  dueDate: string;
-  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
-  items: InvoiceItem[];
-}
+// Mock data for demonstration
+const mockData = {
+  overview: {
+    totalRevenue: 2450000,
+    totalExpenses: 1850000,
+    netProfit: 600000,
+    cashFlow: 1200000,
+    outstandingFees: 285000,
+    paidThisMonth: 425000
+  },
+  recentTransactions: [
+    { id: '1', date: '2024-01-15', description: 'Tuition Fee - Year 7', amount: 1200, type: 'income', status: 'completed' },
+    { id: '2', date: '2024-01-14', description: 'Office Supplies', amount: -150, type: 'expense', status: 'completed' },
+    { id: '3', date: '2024-01-13', description: 'Lunch Fee - Student ID: ST001', amount: 25, type: 'income', status: 'pending' },
+    { id: '4', date: '2024-01-12', description: 'Utilities Payment', amount: -850, type: 'expense', status: 'completed' },
+    { id: '5', date: '2024-01-11', description: 'Book Sales', amount: 85, type: 'income', status: 'completed' }
+  ],
+  chartOfAccounts: [
+    { id: '1', code: '1000', name: 'Cash and Bank', type: 'Assets', balance: 150000 },
+    { id: '2', code: '1100', name: 'Accounts Receivable', type: 'Assets', balance: 75000 },
+    { id: '3', code: '2000', name: 'Accounts Payable', type: 'Liabilities', balance: 25000 },
+    { id: '4', code: '3000', name: 'Tuition Revenue', type: 'Revenue', balance: 850000 },
+    { id: '5', code: '4000', name: 'Operating Expenses', type: 'Expenses', balance: 420000 }
+  ]
+};
 
-interface InvoiceItem {
-  id: string;
-  description: string;
-  quantity: number;
-  rate: number;
-  amount: number;
-}
-
-interface Customer {
+interface Student {
   id: string;
   name: string;
-  email: string;
-  phone: string;
-  address: string;
-  totalInvoiced: number;
-  totalPaid: number;
-  outstanding: number;
-  status: 'active' | 'inactive';
+  yearGroup: string;
+  outstandingBalance: number;
+  lastPayment: string;
 }
 
-interface Expense {
-  id: string;
-  description: string;
-  category: string;
-  amount: number;
-  date: string;
-  vendor: string;
-  status: 'pending' | 'approved' | 'paid';
-  receipt?: string;
-}
-
-interface Bill {
-  id: string;
-  billNumber: string;
-  vendorId: string;
-  vendorName: string;
-  amount: number;
-  tax: number;
-  total: number;
-  billDate: string;
-  dueDate: string;
-  status: 'draft' | 'pending' | 'paid' | 'overdue';
-}
-
-interface BankTransaction {
-  id: string;
-  date: string;
-  description: string;
-  type: 'credit' | 'debit';
-  amount: number;
-  balance: number;
-  category: string;
-  status: 'cleared' | 'pending';
-}
+const mockStudents: Student[] = [
+  { id: 'ST001', name: 'John Smith', yearGroup: 'Year 7', outstandingBalance: 1200, lastPayment: '2024-01-01' },
+  { id: 'ST002', name: 'Sarah Johnson', yearGroup: 'Year 8', outstandingBalance: 0, lastPayment: '2024-01-15' },
+  { id: 'ST003', name: 'Mike Brown', yearGroup: 'Year 9', outstandingBalance: 2400, lastPayment: '2023-12-15' },
+  { id: 'ST004', name: 'Emily Davis', yearGroup: 'Year 10', outstandingBalance: 600, lastPayment: '2024-01-10' }
+];
 
 export function AccountingPage() {
-  const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [isCreateInvoiceOpen, setIsCreateInvoiceOpen] = useState(false);
+  const activeTab = searchParams.get('tab') || 'dashboard';
+  const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
+  const form = useForm();
 
-  // Mock data
-  const invoices: Invoice[] = [
-    {
-      id: '1',
-      invoiceNumber: 'INV-2024-001',
-      customerId: '1',
-      customerName: 'Acme Corporation',
-      amount: 5000,
-      tax: 1000,
-      total: 6000,
-      issueDate: '2024-02-01',
-      dueDate: '2024-03-01',
-      status: 'sent',
-      items: [
-        { id: '1', description: 'Web Development Services', quantity: 40, rate: 125, amount: 5000 }
-      ]
-    },
-    {
-      id: '2',
-      invoiceNumber: 'INV-2024-002',
-      customerId: '2',
-      customerName: 'Tech Solutions Ltd',
-      amount: 3500,
-      tax: 700,
-      total: 4200,
-      issueDate: '2024-02-05',
-      dueDate: '2024-03-05',
-      status: 'paid',
-      items: [
-        { id: '2', description: 'Software Consultation', quantity: 28, rate: 125, amount: 3500 }
-      ]
-    },
-    {
-      id: '3',
-      invoiceNumber: 'INV-2024-003',
-      customerId: '3',
-      customerName: 'Global Industries',
-      amount: 7500,
-      tax: 1500,
-      total: 9000,
-      issueDate: '2024-01-15',
-      dueDate: '2024-02-15',
-      status: 'overdue',
-      items: [
-        { id: '3', description: 'System Integration', quantity: 60, rate: 125, amount: 7500 }
-      ]
-    }
-  ];
-
-  const customers: Customer[] = [
-    {
-      id: '1',
-      name: 'Acme Corporation',
-      email: 'contact@acme.com',
-      phone: '+44 20 7946 0958',
-      address: '123 Business Street, London, UK',
-      totalInvoiced: 25000,
-      totalPaid: 19000,
-      outstanding: 6000,
-      status: 'active'
-    },
-    {
-      id: '2',
-      name: 'Tech Solutions Ltd',
-      email: 'info@techsolutions.co.uk',
-      phone: '+44 161 496 0000',
-      address: '456 Innovation Ave, Manchester, UK',
-      totalInvoiced: 18500,
-      totalPaid: 18500,
-      outstanding: 0,
-      status: 'active'
-    },
-    {
-      id: '3',
-      name: 'Global Industries',
-      email: 'accounts@global.com',
-      phone: '+44 121 496 0000',
-      address: '789 Commerce Road, Birmingham, UK',
-      totalInvoiced: 42000,
-      totalPaid: 33000,
-      outstanding: 9000,
-      status: 'active'
-    }
-  ];
-
-  const expenses: Expense[] = [
-    {
-      id: '1',
-      description: 'Office Rent - February',
-      category: 'Office Expenses',
-      amount: 2500,
-      date: '2024-02-01',
-      vendor: 'Property Management Ltd',
-      status: 'paid'
-    },
-    {
-      id: '2',
-      description: 'Software Licenses',
-      category: 'Technology',
-      amount: 899,
-      date: '2024-02-03',
-      vendor: 'Adobe Systems',
-      status: 'approved'
-    },
-    {
-      id: '3',
-      description: 'Marketing Campaign',
-      category: 'Marketing',
-      amount: 1500,
-      date: '2024-02-05',
-      vendor: 'Digital Marketing Pro',
-      status: 'pending'
-    }
-  ];
-
-  const bills: Bill[] = [
-    {
-      id: '1',
-      billNumber: 'BILL-2024-001',
-      vendorId: '1',
-      vendorName: 'Office Supplies Co',
-      amount: 450,
-      tax: 90,
-      total: 540,
-      billDate: '2024-02-01',
-      dueDate: '2024-02-28',
-      status: 'pending'
-    },
-    {
-      id: '2',
-      billNumber: 'BILL-2024-002',
-      vendorId: '2',
-      vendorName: 'Internet Service Provider',
-      amount: 199,
-      tax: 40,
-      total: 239,
-      billDate: '2024-02-01',
-      dueDate: '2024-02-28',
-      status: 'paid'
-    }
-  ];
-
-  const bankTransactions: BankTransaction[] = [
-    {
-      id: '1',
-      date: '2024-02-08',
-      description: 'Payment from Tech Solutions Ltd',
-      type: 'credit',
-      amount: 4200,
-      balance: 45670,
-      category: 'Sales Revenue',
-      status: 'cleared'
-    },
-    {
-      id: '2',
-      date: '2024-02-07',
-      description: 'Office Rent Payment',
-      type: 'debit',
-      amount: 2500,
-      balance: 41470,
-      category: 'Office Expenses',
-      status: 'cleared'
-    },
-    {
-      id: '3',
-      date: '2024-02-06',
-      description: 'Software License Fee',
-      type: 'debit',
-      amount: 899,
-      balance: 43970,
-      category: 'Technology',
-      status: 'pending'
-    }
-  ];
-
-  const handleCreateInvoice = () => {
-    toast({ title: "Invoice Created", description: "New invoice has been created successfully." });
-    setIsCreateInvoiceOpen(false);
-  };
-
-  const handleSendInvoice = (id: string) => {
-    toast({ title: "Invoice Sent", description: "Invoice has been sent to the customer." });
-  };
-
-  const handleMarkPaid = (id: string) => {
-    toast({ title: "Payment Recorded", description: "Invoice has been marked as paid." });
-  };
-
-  const handleApproveExpense = (id: string) => {
-    toast({ title: "Expense Approved", description: "Expense has been approved for payment." });
-  };
-
-  // Calculate dashboard stats
-  const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.status === 'paid' ? inv.total : 0), 0);
-  const totalOutstanding = invoices.reduce((sum, inv) => sum + (inv.status !== 'paid' && inv.status !== 'cancelled' ? inv.total : 0), 0);
-  const totalExpenses = expenses.reduce((sum, exp) => sum + (exp.status === 'paid' ? exp.amount : 0), 0);
-  const netProfit = totalRevenue - totalExpenses;
+  const filteredStudents = mockStudents.filter(student =>
+    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Accounting & Finance</h1>
-          <p className="text-muted-foreground">Complete financial management system</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline">
-            <Download className="h-4 w-4 mr-2" />
-            Export Data
-          </Button>
-          <Dialog open={isCreateInvoiceOpen} onOpenChange={setIsCreateInvoiceOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Invoice
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Create New Invoice</DialogTitle>
-                <DialogDescription>Generate a new invoice for your customer</DialogDescription>
-              </DialogHeader>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="customer">Customer</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select customer" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {customers.map((customer) => (
-                        <SelectItem key={customer.id} value={customer.id}>{customer.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="dueDate">Due Date</Label>
-                  <Input type="date" />
-                </div>
-                <div className="col-span-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea placeholder="Describe the work performed..." />
-                </div>
-                <div>
-                  <Label htmlFor="amount">Amount</Label>
-                  <Input type="number" placeholder="0.00" />
-                </div>
-                <div>
-                  <Label htmlFor="tax">Tax Rate (%)</Label>
-                  <Input type="number" placeholder="20" />
-                </div>
-              </div>
-              <div className="flex justify-end gap-2 mt-4">
-                <Button variant="outline" onClick={() => setIsCreateInvoiceOpen(false)}>Cancel</Button>
-                <Button onClick={handleCreateInvoice}>Create Invoice</Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      {/* Header */}
+      <div className="border-b bg-card/50 backdrop-blur-sm">
+        <div className="flex h-16 items-center justify-between px-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-glow">
+              <Calculator className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">Accounting</h1>
+              <p className="text-sm text-muted-foreground">Financial Management System</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+            <Button size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              New Transaction
+            </Button>
+          </div>
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="invoices">Invoices</TabsTrigger>
-          <TabsTrigger value="customers">Customers</TabsTrigger>
-          <TabsTrigger value="expenses">Expenses</TabsTrigger>
-          <TabsTrigger value="bills">Bills</TabsTrigger>
-          <TabsTrigger value="banking">Banking</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-        </TabsList>
+      <div className="p-6 space-y-6">
+        <Tabs value={activeTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-8">
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="students">Student Fees</TabsTrigger>
+            <TabsTrigger value="invoices">Invoices</TabsTrigger>
+            <TabsTrigger value="expenses">Expenses</TabsTrigger>
+            <TabsTrigger value="reports">Reports</TabsTrigger>
+            <TabsTrigger value="accounts">Chart of Accounts</TabsTrigger>
+            <TabsTrigger value="budget">Budget</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="dashboard" className="space-y-6">
-          {/* Financial Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Revenue</p>
-                    <p className="text-3xl font-bold text-green-600">£{totalRevenue.toLocaleString()}</p>
-                    <p className="text-sm text-green-600 flex items-center mt-1">
-                      <ArrowUpRight className="h-3 w-3 mr-1" />
-                      +12% from last month
-                    </p>
+          {/* Dashboard Tab */}
+          <TabsContent value="dashboard" className="space-y-6">
+            {/* Overview Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="bg-gradient-to-br from-green-50 to-green-100/50 border-green-200 dark:from-green-900/20 dark:to-green-800/20 dark:border-green-800">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-green-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">£{mockData.overview.totalRevenue.toLocaleString()}</div>
+                  <p className="text-xs text-muted-foreground mt-1">+12% from last month</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-red-50 to-red-100/50 border-red-200 dark:from-red-900/20 dark:to-red-800/20 dark:border-red-800">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
+                  <TrendingDown className="h-4 w-4 text-red-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">£{mockData.overview.totalExpenses.toLocaleString()}</div>
+                  <p className="text-xs text-muted-foreground mt-1">+5% from last month</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200 dark:from-blue-900/20 dark:to-blue-800/20 dark:border-blue-800">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Net Profit</CardTitle>
+                  <DollarSign className="h-4 w-4 text-blue-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">£{mockData.overview.netProfit.toLocaleString()}</div>
+                  <p className="text-xs text-muted-foreground mt-1">+18% from last month</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-200 dark:from-purple-900/20 dark:to-purple-800/20 dark:border-purple-800">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Outstanding Fees</CardTitle>
+                  <AlertCircle className="h-4 w-4 text-purple-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">£{mockData.overview.outstandingFees.toLocaleString()}</div>
+                  <p className="text-xs text-muted-foreground mt-1">15 overdue accounts</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Recent Transactions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Receipt className="h-5 w-5" />
+                    Recent Transactions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {mockData.recentTransactions.map((transaction) => (
+                      <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className={`h-3 w-3 rounded-full ${
+                            transaction.type === 'income' ? 'bg-green-500' : 'bg-red-500'
+                          }`} />
+                          <div>
+                            <p className="font-medium text-sm">{transaction.description}</p>
+                            <p className="text-xs text-muted-foreground">{transaction.date}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className={`font-semibold ${
+                            transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {transaction.amount > 0 ? '+' : ''}£{Math.abs(transaction.amount)}
+                          </p>
+                          <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
+                            {transaction.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <TrendingUp className="h-8 w-8 text-green-600" />
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Outstanding</p>
-                    <p className="text-3xl font-bold text-orange-600">£{totalOutstanding.toLocaleString()}</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {invoices.filter(i => i.status === 'overdue').length} overdue
-                    </p>
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button variant="outline" className="h-20 flex-col gap-2">
+                      <Send className="h-6 w-6" />
+                      Send Invoice
+                    </Button>
+                    <Button variant="outline" className="h-20 flex-col gap-2">
+                      <CreditCard className="h-6 w-6" />
+                      Record Payment
+                    </Button>
+                    <Button variant="outline" className="h-20 flex-col gap-2">
+                      <Receipt className="h-6 w-6" />
+                      Add Expense
+                    </Button>
+                    <Button variant="outline" className="h-20 flex-col gap-2">
+                      <FileText className="h-6 w-6" />
+                      Generate Report
+                    </Button>
                   </div>
-                  <Clock className="h-8 w-8 text-orange-600" />
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Expenses</p>
-                    <p className="text-3xl font-bold text-red-600">£{totalExpenses.toLocaleString()}</p>
-                    <p className="text-sm text-red-600 flex items-center mt-1">
-                      <ArrowDownRight className="h-3 w-3 mr-1" />
-                      +5% from last month
-                    </p>
-                  </div>
-                  <CreditCard className="h-8 w-8 text-red-600" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Net Profit</p>
-                    <p className={`text-3xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      £{netProfit.toLocaleString()}
-                    </p>
-                    <p className={`text-sm flex items-center mt-1 ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {netProfit >= 0 ? <ArrowUpRight className="h-3 w-3 mr-1" /> : <ArrowDownRight className="h-3 w-3 mr-1" />}
-                      {Math.abs(((netProfit / totalRevenue) * 100)).toFixed(1)}% margin
-                    </p>
-                  </div>
-                  <Target className="h-8 w-8 text-primary" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Frequently used accounting functions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={() => setIsCreateInvoiceOpen(true)}>
-                  <FileText className="h-6 w-6" />
-                  <span>New Invoice</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex flex-col gap-2">
-                  <Receipt className="h-6 w-6" />
-                  <span>Record Expense</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex flex-col gap-2">
-                  <Users className="h-6 w-6" />
-                  <span>Add Customer</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex flex-col gap-2">
-                  <CreditCard className="h-6 w-6" />
-                  <span>Record Payment</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex flex-col gap-2">
-                  <BarChart3 className="h-6 w-6" />
-                  <span>View Reports</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex flex-col gap-2">
-                  <Calculator className="h-6 w-6" />
-                  <span>Tax Calculator</span>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recent Activity & Cash Flow */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Student Fees Tab */}
+          <TabsContent value="students" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Recent Invoices</CardTitle>
-                <CardDescription>Latest invoice activity</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {invoices.slice(0, 5).map((invoice) => (
-                    <div key={invoice.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">{invoice.invoiceNumber}</p>
-                        <p className="text-sm text-muted-foreground">{invoice.customerName}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium">£{invoice.total.toLocaleString()}</p>
-                        <Badge variant={
-                          invoice.status === 'paid' ? 'default' : 
-                          invoice.status === 'overdue' ? 'destructive' : 
-                          invoice.status === 'sent' ? 'secondary' : 'outline'
-                        }>
-                          {invoice.status}
-                        </Badge>
-                      </div>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    Student Fee Management
+                  </CardTitle>
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search students..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 w-64"
+                      />
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Cash Flow Summary</CardTitle>
-                <CardDescription>Current month overview</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center p-3 border rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <ArrowUpRight className="h-4 w-4 text-green-600" />
-                      <span>Money In</span>
-                    </div>
-                    <span className="font-medium text-green-600">£{totalRevenue.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 border rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <ArrowDownRight className="h-4 w-4 text-red-600" />
-                      <span>Money Out</span>
-                    </div>
-                    <span className="font-medium text-red-600">£{totalExpenses.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 border rounded-lg bg-muted/50">
-                    <div className="flex items-center gap-2">
-                      <Wallet className="h-4 w-4 text-primary" />
-                      <span className="font-medium">Net Cash Flow</span>
-                    </div>
-                    <span className={`font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      £{netProfit.toLocaleString()}
-                    </span>
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Fee
+                    </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Outstanding Items */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5 text-orange-600" />
-                  Overdue Invoices
-                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {invoices.filter(i => i.status === 'overdue').map((invoice) => (
-                    <div key={invoice.id} className="flex items-center justify-between p-3 border border-orange-200 rounded-lg bg-orange-50">
-                      <div>
-                        <p className="font-medium">{invoice.invoiceNumber}</p>
-                        <p className="text-sm text-muted-foreground">{invoice.customerName}</p>
-                        <p className="text-xs text-orange-600">Due: {invoice.dueDate}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium text-orange-600">£{invoice.total.toLocaleString()}</p>
-                        <Button size="sm" variant="outline">
-                          <Send className="h-4 w-4 mr-1" />
-                          Send Reminder
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Student ID</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Year Group</TableHead>
+                      <TableHead>Outstanding Balance</TableHead>
+                      <TableHead>Last Payment</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredStudents.map((student) => (
+                      <TableRow key={student.id}>
+                        <TableCell className="font-medium">{student.id}</TableCell>
+                        <TableCell>{student.name}</TableCell>
+                        <TableCell>{student.yearGroup}</TableCell>
+                        <TableCell>
+                          <span className={`font-semibold ${
+                            student.outstandingBalance > 0 ? 'text-red-600' : 'text-green-600'
+                          }`}>
+                            £{student.outstandingBalance}
+                          </span>
+                        </TableCell>
+                        <TableCell>{student.lastPayment}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button size="sm" variant="outline">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button size="sm" variant="outline">
+                              <Send className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
+          </TabsContent>
 
+          {/* Chart of Accounts Tab */}
+          <TabsContent value="accounts" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-blue-600" />
-                  Pending Bills
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {bills.filter(b => b.status === 'pending').map((bill) => (
-                    <div key={bill.id} className="flex items-center justify-between p-3 border border-blue-200 rounded-lg bg-blue-50">
-                      <div>
-                        <p className="font-medium">{bill.billNumber}</p>
-                        <p className="text-sm text-muted-foreground">{bill.vendorName}</p>
-                        <p className="text-xs text-blue-600">Due: {bill.dueDate}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium text-blue-600">£{bill.total.toLocaleString()}</p>
-                        <Button size="sm" variant="outline">
-                          <CreditCard className="h-4 w-4 mr-1" />
-                          Pay Now
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="invoices" className="space-y-6">
-          {/* Invoice Management */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Invoices</CardTitle>
-                  <CardDescription>Manage and track all your invoices</CardDescription>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export
-                  </Button>
-                  <Button size="sm" onClick={() => setIsCreateInvoiceOpen(true)}>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    Chart of Accounts
+                  </CardTitle>
+                  <Button>
                     <Plus className="h-4 w-4 mr-2" />
-                    New Invoice
+                    Add Account
                   </Button>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-4 mb-6">
-                <div className="flex-1">
-                  <Input
-                    placeholder="Search invoices..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="max-w-md"
-                  />
-                </div>
-                <Select value={filterStatus} onValueChange={setFilterStatus}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="sent">Sent</SelectItem>
-                    <SelectItem value="paid">Paid</SelectItem>
-                    <SelectItem value="overdue">Overdue</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-4">
-                {invoices.map((invoice) => (
-                  <div key={invoice.id} className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-4">
-                        <div>
-                          <h3 className="font-semibold text-lg">{invoice.invoiceNumber}</h3>
-                          <p className="text-sm text-muted-foreground">{invoice.customerName}</p>
-                        </div>
-                        <Badge variant={
-                          invoice.status === 'paid' ? 'default' : 
-                          invoice.status === 'overdue' ? 'destructive' : 
-                          invoice.status === 'sent' ? 'secondary' : 'outline'
-                        }>
-                          {invoice.status}
-                        </Badge>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold">£{invoice.total.toLocaleString()}</p>
-                        <p className="text-sm text-muted-foreground">Due: {invoice.dueDate}</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Issue Date</p>
-                        <p className="font-medium">{invoice.issueDate}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Amount</p>
-                        <p className="font-medium">£{invoice.amount.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Tax</p>
-                        <p className="font-medium">£{invoice.tax.toLocaleString()}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        <Eye className="h-4 w-4 mr-2" />
-                        View
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        PDF
-                      </Button>
-                      {invoice.status === 'draft' && (
-                        <Button size="sm" onClick={() => handleSendInvoice(invoice.id)}>
-                          <Send className="h-4 w-4 mr-2" />
-                          Send
-                        </Button>
-                      )}
-                      {(invoice.status === 'sent' || invoice.status === 'overdue') && (
-                        <Button size="sm" variant="outline" onClick={() => handleMarkPaid(invoice.id)}>
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          Mark Paid
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="customers" className="space-y-6">
-          {/* Customer Management */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Customers</CardTitle>
-                  <CardDescription>Manage customer information and billing details</CardDescription>
-                </div>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Customer
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {customers.map((customer) => (
-                  <Card key={customer.id} className="relative">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <CardTitle className="text-lg">{customer.name}</CardTitle>
-                          <CardDescription className="flex items-center gap-1">
-                            <Mail className="h-3 w-3" />
-                            {customer.email}
-                          </CardDescription>
-                        </div>
-                        <Badge variant={customer.status === 'active' ? 'default' : 'secondary'}>
-                          {customer.status}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-sm">
-                          <Phone className="h-4 w-4 text-muted-foreground" />
-                          <span>{customer.phone}</span>
-                        </div>
-                        <div className="flex items-start gap-2 text-sm">
-                          <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                          <span>{customer.address}</span>
-                        </div>
-                        <div className="pt-2 space-y-2">
-                          <div className="flex justify-between">
-                            <span className="text-sm text-muted-foreground">Total Invoiced</span>
-                            <span className="font-medium">£{customer.totalInvoiced.toLocaleString()}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm text-muted-foreground">Total Paid</span>
-                            <span className="font-medium text-green-600">£{customer.totalPaid.toLocaleString()}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm text-muted-foreground">Outstanding</span>
-                            <span className={`font-medium ${customer.outstanding > 0 ? 'text-orange-600' : 'text-green-600'}`}>
-                              £{customer.outstanding.toLocaleString()}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex gap-2 pt-3">
-                          <Button variant="outline" size="sm" className="flex-1">
-                            <Eye className="h-4 w-4 mr-2" />
-                            View
-                          </Button>
-                          <Button variant="outline" size="sm" className="flex-1">
-                            <FileText className="h-4 w-4 mr-2" />
-                            Invoice
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="expenses" className="space-y-6">
-          {/* Expense Management */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Expenses</CardTitle>
-                  <CardDescription>Track and manage business expenses</CardDescription>
-                </div>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Expense
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {expenses.map((expense) => (
-                  <div key={expense.id} className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <h3 className="font-semibold">{expense.description}</h3>
-                        <p className="text-sm text-muted-foreground">{expense.category} • {expense.vendor}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xl font-bold">£{expense.amount.toLocaleString()}</p>
-                        <Badge variant={
-                          expense.status === 'paid' ? 'default' : 
-                          expense.status === 'approved' ? 'secondary' : 'outline'
-                        }>
-                          {expense.status}
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-muted-foreground">{expense.date}</p>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4 mr-2" />
-                          View
-                        </Button>
-                        {expense.status === 'pending' && (
-                          <Button size="sm" onClick={() => handleApproveExpense(expense.id)}>
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Approve
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="bills" className="space-y-6">
-          {/* Bill Management */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Bills & Payables</CardTitle>
-                  <CardDescription>Manage vendor bills and payments</CardDescription>
-                </div>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Bill
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {bills.map((bill) => (
-                  <div key={bill.id} className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <h3 className="font-semibold">{bill.billNumber}</h3>
-                        <p className="text-sm text-muted-foreground">{bill.vendorName}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xl font-bold">£{bill.total.toLocaleString()}</p>
-                        <Badge variant={
-                          bill.status === 'paid' ? 'default' : 
-                          bill.status === 'overdue' ? 'destructive' : 'secondary'
-                        }>
-                          {bill.status}
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Bill Date</p>
-                        <p className="font-medium">{bill.billDate}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Due Date</p>
-                        <p className="font-medium">{bill.dueDate}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Amount</p>
-                        <p className="font-medium">£{bill.amount.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Tax</p>
-                        <p className="font-medium">£{bill.tax.toLocaleString()}</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        <Eye className="h-4 w-4 mr-2" />
-                        View
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </Button>
-                      {bill.status === 'pending' && (
-                        <Button size="sm">
-                          <CreditCard className="h-4 w-4 mr-2" />
-                          Pay Bill
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="banking" className="space-y-6">
-          {/* Banking & Transactions */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Banknote className="h-5 w-5" />
-                  Current Account
-                </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold">£45,670</p>
-                <p className="text-sm text-muted-foreground">Available Balance</p>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Code</TableHead>
+                      <TableHead>Account Name</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Balance</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {mockData.chartOfAccounts.map((account) => (
+                      <TableRow key={account.id}>
+                        <TableCell className="font-medium">{account.code}</TableCell>
+                        <TableCell>{account.name}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{account.type}</Badge>
+                        </TableCell>
+                        <TableCell className="font-semibold">
+                          £{account.balance.toLocaleString()}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button size="sm" variant="outline">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button size="sm" variant="outline">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Invoices Tab */}
+          <TabsContent value="invoices" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Wallet className="h-5 w-5" />
-                  Savings Account
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Invoice Management
+                  </CardTitle>
+                  <Dialog open={isInvoiceDialogOpen} onOpenChange={setIsInvoiceDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Invoice
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>Create New Invoice</DialogTitle>
+                      </DialogHeader>
+                      <Form {...form}>
+                        <div className="grid grid-cols-2 gap-4">
+                          <FormField
+                            name="studentId"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Student</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select student" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {mockStudents.map(student => (
+                                      <SelectItem key={student.id} value={student.id}>
+                                        {student.name} ({student.id})
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            name="dueDate"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Due Date</FormLabel>
+                                <FormControl>
+                                  <Input type="date" {...field} />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            name="amount"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Amount</FormLabel>
+                                <FormControl>
+                                  <Input type="number" placeholder="0.00" {...field} />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            name="feeType"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Fee Type</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select fee type" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="tuition">Tuition Fee</SelectItem>
+                                    <SelectItem value="lunch">Lunch Fee</SelectItem>
+                                    <SelectItem value="transport">Transport Fee</SelectItem>
+                                    <SelectItem value="uniform">Uniform Fee</SelectItem>
+                                    <SelectItem value="books">Books Fee</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <FormField
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Description</FormLabel>
+                              <FormControl>
+                                <Textarea placeholder="Invoice description..." {...field} />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <div className="flex justify-end gap-3 mt-6">
+                          <Button variant="outline" onClick={() => setIsInvoiceDialogOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button type="submit">Create Invoice</Button>
+                        </div>
+                      </Form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold">£25,340</p>
-                <p className="text-sm text-muted-foreground">Available Balance</p>
+                <div className="text-center py-12 text-muted-foreground">
+                  <FileText className="h-12 w-12 mx-auto mb-4" />
+                  <p>No invoices found. Create your first invoice to get started.</p>
+                </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Expenses Tab */}
+          <TabsContent value="expenses" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" />
-                  Credit Card
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Receipt className="h-5 w-5" />
+                    Expense Management
+                  </CardTitle>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Expense
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold">£2,830</p>
-                <p className="text-sm text-muted-foreground">Outstanding Balance</p>
+                <div className="text-center py-12 text-muted-foreground">
+                  <Receipt className="h-12 w-12 mx-auto mb-4" />
+                  <p>No expenses recorded yet. Start tracking your expenses here.</p>
+                </div>
               </CardContent>
             </Card>
-          </div>
+          </TabsContent>
 
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Recent Transactions</CardTitle>
-                  <CardDescription>Bank account activity</CardDescription>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Sync
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {bankTransactions.map((transaction) => (
-                  <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-full ${transaction.type === 'credit' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                        {transaction.type === 'credit' ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
-                      </div>
-                      <div>
-                        <p className="font-medium">{transaction.description}</p>
-                        <p className="text-sm text-muted-foreground">{transaction.category} • {transaction.date}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className={`font-medium ${transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'}`}>
-                        {transaction.type === 'credit' ? '+' : '-'}£{transaction.amount.toLocaleString()}
-                      </p>
-                      <p className="text-sm text-muted-foreground">Balance: £{transaction.balance.toLocaleString()}</p>
-                      <Badge variant={transaction.status === 'cleared' ? 'default' : 'secondary'} className="text-xs">
-                        {transaction.status}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+          {/* Reports Tab */}
+          <TabsContent value="reports" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    Income Statement
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">Profit and loss report for the selected period.</p>
+                </CardContent>
+              </Card>
 
-        <TabsContent value="reports" className="space-y-6">
-          {/* Reports & Analytics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Financial Reports</CardTitle>
-                <CardDescription>Generate comprehensive financial reports</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start">
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    Profit & Loss Statement
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <PieChart className="h-4 w-4 mr-2" />
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <PieChart className="h-5 w-5" />
                     Balance Sheet
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Activity className="h-4 w-4 mr-2" />
-                    Cash Flow Statement
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Sales Report
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Receipt className="h-4 w-4 mr-2" />
-                    Expense Report
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Calculator className="h-4 w-4 mr-2" />
-                    Tax Report
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">Financial position at a specific point in time.</p>
+                </CardContent>
+              </Card>
 
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    Cash Flow
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">Track cash inflows and outflows.</p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Budget Tab */}
+          <TabsContent value="budget" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Business Intelligence</CardTitle>
-                <CardDescription>Key financial metrics and insights</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  Budget Planning
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="p-3 border rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Monthly Recurring Revenue</span>
-                      <span className="font-medium text-green-600">£18,500</span>
-                    </div>
-                  </div>
-                  <div className="p-3 border rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Average Invoice Value</span>
-                      <span className="font-medium">£6,400</span>
-                    </div>
-                  </div>
-                  <div className="p-3 border rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Collection Period</span>
-                      <span className="font-medium">28 days</span>
-                    </div>
-                  </div>
-                  <div className="p-3 border rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Expense Ratio</span>
-                      <span className="font-medium text-orange-600">32%</span>
-                    </div>
-                  </div>
-                  <div className="p-3 border rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Profit Margin</span>
-                      <span className="font-medium text-green-600">68%</span>
-                    </div>
-                  </div>
+                <div className="text-center py-12 text-muted-foreground">
+                  <Target className="h-12 w-12 mx-auto mb-4" />
+                  <p>Budget planning tools coming soon.</p>
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </TabsContent>
+          </TabsContent>
 
-        <TabsContent value="settings" className="space-y-6">
-          {/* Settings & Configuration */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Company Information</CardTitle>
-                <CardDescription>Update your business details</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5" />
+                  Accounting Settings
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="companyName">Company Name</Label>
-                    <Input id="companyName" defaultValue="Your Company Ltd" />
-                  </div>
-                  <div>
-                    <Label htmlFor="companyEmail">Email</Label>
-                    <Input id="companyEmail" defaultValue="info@yourcompany.com" />
-                  </div>
-                  <div>
-                    <Label htmlFor="companyPhone">Phone</Label>
-                    <Input id="companyPhone" defaultValue="+44 20 7946 0958" />
-                  </div>
-                  <div>
-                    <Label htmlFor="companyAddress">Address</Label>
-                    <Textarea id="companyAddress" defaultValue="123 Business Street, London, UK" />
-                  </div>
-                  <Button>Save Changes</Button>
+                <div className="text-center py-12 text-muted-foreground">
+                  <Award className="h-12 w-12 mx-auto mb-4" />
+                  <p>Configure your accounting preferences and settings.</p>
                 </div>
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Invoice Settings</CardTitle>
-                <CardDescription>Configure invoice preferences</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="invoicePrefix">Invoice Number Prefix</Label>
-                    <Input id="invoicePrefix" defaultValue="INV-" />
-                  </div>
-                  <div>
-                    <Label htmlFor="taxRate">Default Tax Rate (%)</Label>
-                    <Input id="taxRate" type="number" defaultValue="20" />
-                  </div>
-                  <div>
-                    <Label htmlFor="paymentTerms">Default Payment Terms (days)</Label>
-                    <Input id="paymentTerms" type="number" defaultValue="30" />
-                  </div>
-                  <div>
-                    <Label htmlFor="currency">Currency</Label>
-                    <Select defaultValue="GBP">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="GBP">GBP (£)</SelectItem>
-                        <SelectItem value="USD">USD ($)</SelectItem>
-                        <SelectItem value="EUR">EUR (€)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button>Save Settings</Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
