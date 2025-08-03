@@ -6,6 +6,7 @@ import {
   GraduationCap,
   UserPlus,
   Calendar,
+  CalendarDays,
   BookOpen,
   Calculator,
   BarChart3,
@@ -45,7 +46,8 @@ import {
   Plane,
   Receipt,
   MessageCircle,
-  ShoppingCart
+  ShoppingCart,
+  Bell
 } from "lucide-react";
 
 import {
