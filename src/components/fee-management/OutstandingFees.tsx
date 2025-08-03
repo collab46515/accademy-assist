@@ -203,6 +203,14 @@ export const OutstandingFees = () => {
 
   return (
     <div className="space-y-6">
+      {/* TEST BUTTON */}
+      <button 
+        onClick={() => alert('TEST BUTTON WORKS!')} 
+        className="bg-red-500 text-white p-4 text-lg font-bold"
+      >
+        CLICK ME TO TEST
+      </button>
+      
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
