@@ -3,6 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StudentTimetableView } from '@/components/timetable/StudentTimetableView';
+import { PeriodsManager } from '@/components/timetable/management/PeriodsManager';
+import { SubjectsManager } from '@/components/timetable/management/SubjectsManager';
+import { ClassroomsManager } from '@/components/timetable/management/ClassroomsManager';
+import { TimetableEntriesManager } from '@/components/timetable/management/TimetableEntriesManager';
 import { useRBAC } from '@/hooks/useRBAC';
 import { 
   Calendar, 
@@ -170,40 +174,35 @@ export default function TimetablePage() {
               </div>
 
               {/* Management Options */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Manual Timetable Management */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Settings className="h-5 w-5" />
-                      Manual Management
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <p className="text-sm text-muted-foreground">
-                      Create and edit timetables manually with full control over every period.
-                    </p>
-                    <div className="space-y-2">
-                      <Button variant="outline" className="w-full justify-start">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        Manage Periods & Times
-                      </Button>
-                      <Button variant="outline" className="w-full justify-start">
-                        <BookOpen className="h-4 w-4 mr-2" />
-                        Manage Subjects
-                      </Button>
-                      <Button variant="outline" className="w-full justify-start">
-                        <Users className="h-4 w-4 mr-2" />
-                        Manage Classrooms
-                      </Button>
-                      <Button variant="outline" className="w-full justify-start">
-                        <Settings className="h-4 w-4 mr-2" />
-                        Edit Timetable Entries
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+              <div className="space-y-6">
+                <Tabs defaultValue="periods" className="w-full">
+                  <TabsList className="grid w-full max-w-lg grid-cols-4">
+                    <TabsTrigger value="periods">Periods</TabsTrigger>
+                    <TabsTrigger value="subjects">Subjects</TabsTrigger>
+                    <TabsTrigger value="rooms">Rooms</TabsTrigger>
+                    <TabsTrigger value="entries">Entries</TabsTrigger>
+                  </TabsList>
 
+                  <TabsContent value="periods" className="mt-6">
+                    <PeriodsManager />
+                  </TabsContent>
+
+                  <TabsContent value="subjects" className="mt-6">
+                    <SubjectsManager />
+                  </TabsContent>
+
+                  <TabsContent value="rooms" className="mt-6">
+                    <ClassroomsManager />
+                  </TabsContent>
+
+                  <TabsContent value="entries" className="mt-6">
+                    <TimetableEntriesManager />
+                  </TabsContent>
+                </Tabs>
+              </div>
+
+              {/* Future Auto-Generator Section */}
+              <div className="grid grid-cols-1 gap-6">
                 {/* Auto-Generated Timetable (Phase 2) */}
                 <Card className="border-dashed border-2">
                   <CardHeader>
