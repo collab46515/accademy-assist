@@ -47,14 +47,16 @@ const AdmissionsPage = () => {
     const filterParam = urlParams.get('filter');
     
     console.log('AdmissionsPage - URL params:', { tab: tabParam, filter: filterParam });
+    console.log('AdmissionsPage - Current filterStage:', filterStage);
     
     if (tabParam) {
       setActiveTab(tabParam);
     }
     if (filterParam) {
+      console.log('AdmissionsPage - Setting filterStage to:', filterParam);
       setFilterStage(filterParam);
     }
-  }, [window.location.search]); // Watch for URL changes
+  }, []);
 
   const [newApplication, setNewApplication] = useState({
     student: "",
