@@ -19,6 +19,7 @@ import { AdmissionsFlowVisualization } from "@/components/admissions/AdmissionsF
 import { StageDetailBreakdown } from "@/components/admissions/StageDetailBreakdown";
 import { ApplicationTaskManager } from "@/components/admissions/ApplicationTaskManager";
 import { StageWorkflowManager } from "@/components/admissions/StageWorkflowManager";
+import { AdmissionStagesBreadcrumb } from "@/components/admissions/AdmissionStagesBreadcrumb";
 import { 
   UserPlus, 
   FileText, 
@@ -458,6 +459,9 @@ const UnifiedAdmissionsPage = () => {
         <p className="text-muted-foreground">
           Complete admissions management with 6 enrollment pathways, workflow automation, and approval processes
         </p>
+        
+        {/* Admission Stages Breadcrumb */}
+        <AdmissionStagesBreadcrumb />
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

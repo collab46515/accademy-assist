@@ -298,24 +298,6 @@ export function AppSidebar() {
             defaultOpen={true}
           />
         )}
-
-        {/* Special case for Admissions stages when on admissions page */}
-        {location.pathname === '/admissions' && (
-          <SidebarGroupItems 
-            title="Admission Stages" 
-            items={[
-              { title: "Application Submitted", url: "/admissions?stage=0", icon: Send },
-              { title: "Document Verification", url: "/admissions?stage=1", icon: FileText },
-              { title: "Application Review", url: "/admissions?stage=2", icon: Eye },
-              { title: "Assessment/Interview", url: "/admissions?stage=3", icon: ClipboardCheck },
-              { title: "Admission Decision", url: "/admissions?stage=4", icon: CheckCircle },
-              { title: "Fee Payment", url: "/admissions?stage=5", icon: CreditCard },
-              { title: "Enrollment Confirmation", url: "/admissions?stage=6", icon: UserCheck },
-              { title: "Welcome & Onboarding", url: "/admissions?stage=7", icon: Users },
-            ]}
-            defaultOpen={true}
-          />
-        )}
       </SidebarContent>
     </Sidebar>
   );
