@@ -59,8 +59,8 @@ const App = () => (
                         <Routes>
                           <Route path="/" element={<Dashboard />} />
                           <Route path="/students" element={<StudentsPage />} />
-            <Route path="/admissions" element={<UnifiedAdmissionsPage />} />
-            <Route path="/admissions/legacy" element={<AdmissionsPage />} />
+            <Route path="/admissions" element={<AdmissionsPage />} />
+            <Route path="/unified-admissions" element={<UnifiedAdmissionsPage />} />
             <Route path="/admin-management" element={<AdminManagementPage />} />
                           <Route path="/attendance" element={<AttendancePage />} />
                           <Route path="/curriculum" element={<CurriculumPage />} />
