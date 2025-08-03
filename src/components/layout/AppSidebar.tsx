@@ -62,6 +62,7 @@ const studentItems = [
 // Academic items
 const academicItems = [
   { title: "Curriculum", url: "/curriculum", icon: BookOpen },
+  { title: "Timetable", url: "/timetable", icon: Clock },
   { title: "Gradebook", url: "/gradebook", icon: Calculator },
   { title: "Exams", url: "/exams", icon: FileText },
 ];

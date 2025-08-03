@@ -304,6 +304,39 @@ export type Database = {
         }
         Relationships: []
       }
+      classrooms: {
+        Row: {
+          capacity: number | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          room_name: string
+          room_type: string | null
+          school_id: string
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          room_name: string
+          room_type?: string | null
+          school_id: string
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          room_name?: string
+          room_type?: string | null
+          school_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       enrollment_applications: {
         Row: {
           academic_notes: string | null
@@ -1339,6 +1372,162 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subjects: {
+        Row: {
+          color_code: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          periods_per_week: number | null
+          requires_lab: boolean | null
+          school_id: string
+          subject_code: string
+          subject_name: string
+          updated_at: string
+        }
+        Insert: {
+          color_code?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          periods_per_week?: number | null
+          requires_lab?: boolean | null
+          school_id: string
+          subject_code: string
+          subject_name: string
+          updated_at?: string
+        }
+        Update: {
+          color_code?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          periods_per_week?: number | null
+          requires_lab?: boolean | null
+          school_id?: string
+          subject_code?: string
+          subject_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      teacher_subjects: {
+        Row: {
+          created_at: string
+          id: string
+          max_periods_per_week: number | null
+          subject_id: string
+          teacher_id: string
+          year_groups: string[]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          max_periods_per_week?: number | null
+          subject_id: string
+          teacher_id: string
+          year_groups: string[]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          max_periods_per_week?: number | null
+          subject_id?: string
+          teacher_id?: string
+          year_groups?: string[]
+        }
+        Relationships: []
+      }
+      timetable_entries: {
+        Row: {
+          academic_year: string
+          class_id: string
+          classroom_id: string
+          created_at: string
+          day_of_week: number
+          id: string
+          is_active: boolean | null
+          notes: string | null
+          period_id: string
+          school_id: string
+          subject_id: string
+          teacher_id: string
+          term: string | null
+          updated_at: string
+        }
+        Insert: {
+          academic_year: string
+          class_id: string
+          classroom_id: string
+          created_at?: string
+          day_of_week: number
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          period_id: string
+          school_id: string
+          subject_id: string
+          teacher_id: string
+          term?: string | null
+          updated_at?: string
+        }
+        Update: {
+          academic_year?: string
+          class_id?: string
+          classroom_id?: string
+          created_at?: string
+          day_of_week?: number
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          period_id?: string
+          school_id?: string
+          subject_id?: string
+          teacher_id?: string
+          term?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      timetable_periods: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          is_active: boolean | null
+          is_break: boolean | null
+          period_name: string
+          period_number: number
+          school_id: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          is_active?: boolean | null
+          is_break?: boolean | null
+          period_name: string
+          period_number: number
+          school_id: string
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          is_active?: boolean | null
+          is_break?: boolean | null
+          period_name?: string
+          period_number?: number
+          school_id?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {

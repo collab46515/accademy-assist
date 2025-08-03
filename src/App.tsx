@@ -27,6 +27,7 @@ import AnalyticsPage from "./pages/AnalyticsPage";
 import AISuitePage from "./pages/AISuitePage";
 import IntegrationsPage from "./pages/IntegrationsPage";
 import { UserManagementPage } from "./pages/UserManagementPage";
+import TimetablePage from "./pages/TimetablePage";
 import NotFound from "./pages/NotFound";
 
 import UnifiedAdmissionsPage from "./pages/UnifiedAdmissionsPage";
@@ -63,6 +64,7 @@ const App = () => (
             <Route path="/legacy-admissions" element={<AdmissionsPage />} />
             <Route path="/admin-management" element={<AdminManagementPage />} />
                           <Route path="/attendance" element={<AttendancePage />} />
+                          <Route path="/timetable" element={<TimetablePage />} />
                           <Route path="/curriculum" element={<CurriculumPage />} />
                           <Route path="/assessment" element={<AssessmentPage />} />
                           <Route path="/gradebook" element={<GradebookPage />} />

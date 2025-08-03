@@ -1,0 +1,268 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './useAuth';
+import { useRBAC } from './useRBAC';
+import { toast } from '@/hooks/use-toast';
+
+export interface TimetablePeriod {
+  id: string;
+  school_id: string;
+  period_number: number;
+  period_name: string;
+  start_time: string;
+  end_time: string;
+  is_break: boolean;
+  is_active: boolean;
+}
+
+export interface Subject {
+  id: string;
+  school_id: string;
+  subject_name: string;
+  subject_code: string;
+  color_code: string;
+  requires_lab: boolean;
+  periods_per_week: number;
+  is_active: boolean;
+}
+
+export interface Classroom {
+  id: string;
+  school_id: string;
+  room_name: string;
+  room_type: string;
+  capacity: number;
+  is_active: boolean;
+}
+
+export interface TimetableEntry {
+  id: string;
+  school_id: string;
+  class_id: string;
+  period_id: string;
+  subject_id: string;
+  teacher_id: string;
+  classroom_id: string;
+  day_of_week: number;
+  academic_year: string;
+  term: string;
+  is_active: boolean;
+  notes?: string;
+  
+  // Joined data
+  period?: TimetablePeriod;
+  subject?: Subject;
+  classroom?: Classroom;
+  teacher_name?: string;
+  attendance_status?: 'present' | 'absent' | 'late' | 'left_early' | null;
+}
+
+// Mock data for development
+const mockPeriods: TimetablePeriod[] = [
+  { id: '1', school_id: '1', period_number: 1, period_name: 'Period 1', start_time: '08:00', end_time: '08:45', is_break: false, is_active: true },
+  { id: '2', school_id: '1', period_number: 2, period_name: 'Period 2', start_time: '08:45', end_time: '09:30', is_break: false, is_active: true },
+  { id: '3', school_id: '1', period_number: 3, period_name: 'Break', start_time: '09:30', end_time: '09:45', is_break: true, is_active: true },
+  { id: '4', school_id: '1', period_number: 4, period_name: 'Period 3', start_time: '09:45', end_time: '10:30', is_break: false, is_active: true },
+  { id: '5', school_id: '1', period_number: 5, period_name: 'Period 4', start_time: '10:30', end_time: '11:15', is_break: false, is_active: true },
+  { id: '6', school_id: '1', period_number: 6, period_name: 'Lunch', start_time: '11:15', end_time: '12:00', is_break: true, is_active: true },
+  { id: '7', school_id: '1', period_number: 7, period_name: 'Period 5', start_time: '12:00', end_time: '12:45', is_break: false, is_active: true },
+  { id: '8', school_id: '1', period_number: 8, period_name: 'Period 6', start_time: '12:45', end_time: '13:30', is_break: false, is_active: true },
+];
+
+const mockSubjects: Subject[] = [
+  { id: '1', school_id: '1', subject_name: 'Mathematics', subject_code: 'MATH', color_code: '#3B82F6', requires_lab: false, periods_per_week: 5, is_active: true },
+  { id: '2', school_id: '1', subject_name: 'English Language', subject_code: 'ENG', color_code: '#10B981', requires_lab: false, periods_per_week: 4, is_active: true },
+  { id: '3', school_id: '1', subject_name: 'Science', subject_code: 'SCI', color_code: '#8B5CF6', requires_lab: true, periods_per_week: 4, is_active: true },
+  { id: '4', school_id: '1', subject_name: 'History', subject_code: 'HIST', color_code: '#F59E0B', requires_lab: false, periods_per_week: 3, is_active: true },
+  { id: '5', school_id: '1', subject_name: 'Physical Education', subject_code: 'PE', color_code: '#EF4444', requires_lab: false, periods_per_week: 2, is_active: true },
+  { id: '6', school_id: '1', subject_name: 'Art', subject_code: 'ART', color_code: '#F97316', requires_lab: false, periods_per_week: 2, is_active: true },
+];
+
+const mockClassrooms: Classroom[] = [
+  { id: '1', school_id: '1', room_name: 'Room 101', room_type: 'classroom', capacity: 30, is_active: true },
+  { id: '2', school_id: '1', room_name: 'Room 102', room_type: 'classroom', capacity: 30, is_active: true },
+  { id: '3', school_id: '1', room_name: 'Science Lab 1', room_type: 'lab', capacity: 25, is_active: true },
+  { id: '4', school_id: '1', room_name: 'Gymnasium', room_type: 'gym', capacity: 50, is_active: true },
+];
+
+const mockTimetableEntries: TimetableEntry[] = [
+  // Monday
+  { id: '1', school_id: '1', class_id: 'Year-8A', period_id: '1', subject_id: '1', teacher_id: 'teacher1', classroom_id: '1', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '2', school_id: '1', class_id: 'Year-8A', period_id: '2', subject_id: '2', teacher_id: 'teacher2', classroom_id: '1', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '3', school_id: '1', class_id: 'Year-8A', period_id: '4', subject_id: '3', teacher_id: 'teacher3', classroom_id: '3', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '4', school_id: '1', class_id: 'Year-8A', period_id: '5', subject_id: '4', teacher_id: 'teacher4', classroom_id: '1', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '5', school_id: '1', class_id: 'Year-8A', period_id: '7', subject_id: '5', teacher_id: 'teacher5', classroom_id: '4', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '6', school_id: '1', class_id: 'Year-8A', period_id: '8', subject_id: '6', teacher_id: 'teacher6', classroom_id: '2', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  
+  // Tuesday
+  { id: '7', school_id: '1', class_id: 'Year-8A', period_id: '1', subject_id: '2', teacher_id: 'teacher2', classroom_id: '1', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '8', school_id: '1', class_id: 'Year-8A', period_id: '2', subject_id: '1', teacher_id: 'teacher1', classroom_id: '1', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '9', school_id: '1', class_id: 'Year-8A', period_id: '4', subject_id: '4', teacher_id: 'teacher4', classroom_id: '1', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '10', school_id: '1', class_id: 'Year-8A', period_id: '5', subject_id: '3', teacher_id: 'teacher3', classroom_id: '3', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '11', school_id: '1', class_id: 'Year-8A', period_id: '7', subject_id: '1', teacher_id: 'teacher1', classroom_id: '1', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '12', school_id: '1', class_id: 'Year-8A', period_id: '8', subject_id: '2', teacher_id: 'teacher2', classroom_id: '1', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+];
+
+export function useTimetableData() {
+  const { user } = useAuth();
+  const { currentSchool } = useRBAC();
+  const [loading, setLoading] = useState(false);
+  const [periods, setPeriods] = useState<TimetablePeriod[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+  const [timetableEntries, setTimetableEntries] = useState<TimetableEntry[]>([]);
+
+  // Fetch school periods
+  const fetchPeriods = async () => {
+    if (!currentSchool) return;
+
+    try {
+      console.log('Using mock timetable periods data');
+      setPeriods(mockPeriods);
+    } catch (error: any) {
+      console.error('Error fetching periods:', error);
+    }
+  };
+
+  // Fetch subjects
+  const fetchSubjects = async () => {
+    if (!currentSchool) return;
+
+    try {
+      console.log('Using mock subjects data');
+      setSubjects(mockSubjects);
+    } catch (error: any) {
+      console.error('Error fetching subjects:', error);
+    }
+  };
+
+  // Fetch classrooms
+  const fetchClassrooms = async () => {
+    if (!currentSchool) return;
+
+    try {
+      console.log('Using mock classrooms data');
+      setClassrooms(mockClassrooms);
+    } catch (error: any) {
+      console.error('Error fetching classrooms:', error);
+    }
+  };
+
+  // Fetch timetable entries for a specific class
+  const fetchTimetableForClass = async (classId: string, academicYear: string = '2024-2025', term: string = 'Term 1') => {
+    if (!currentSchool) return;
+
+    setLoading(true);
+    try {
+      console.log('Using mock timetable entries data');
+      
+      // Filter mock data for the specific class
+      const classEntries = mockTimetableEntries.filter(entry => 
+        entry.class_id === classId && 
+        entry.academic_year === academicYear && 
+        entry.term === term
+      );
+
+      // Enrich with joined data
+      const enrichedEntries: TimetableEntry[] = classEntries.map(entry => ({
+        ...entry,
+        period: mockPeriods.find(p => p.id === entry.period_id),
+        subject: mockSubjects.find(s => s.id === entry.subject_id),
+        classroom: mockClassrooms.find(c => c.id === entry.classroom_id),
+        teacher_name: `Teacher ${entry.teacher_id}`, // Mock teacher name
+        attendance_status: Math.random() > 0.7 ? (['present', 'absent', 'late'] as const)[Math.floor(Math.random() * 3)] : null
+      }));
+
+      setTimetableEntries(enrichedEntries);
+    } catch (error: any) {
+      console.error('Error fetching timetable:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch timetable",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get timetable organized by day and period
+  const getTimetableGrid = (classId: string) => {
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    const grid: Record<string, Record<string, TimetableEntry | null>> = {};
+
+    // Initialize grid
+    days.forEach((day, dayIndex) => {
+      grid[day] = {};
+      periods.forEach(period => {
+        if (!period.is_break) {
+          grid[day][period.id] = null;
+        }
+      });
+    });
+
+    // Fill grid with timetable entries
+    timetableEntries.forEach(entry => {
+      const dayName = days[entry.day_of_week - 1]; // Convert 1-based to 0-based
+      if (dayName && grid[dayName] && entry.period) {
+        grid[dayName][entry.period_id] = entry;
+      }
+    });
+
+    return grid;
+  };
+
+  // Get current period based on time
+  const getCurrentPeriod = () => {
+    const now = new Date();
+    const currentTime = now.toTimeString().slice(0, 5); // HH:MM format
+    
+    return periods.find(period => {
+      return currentTime >= period.start_time && currentTime <= period.end_time;
+    });
+  };
+
+  // Get next period
+  const getNextPeriod = () => {
+    const now = new Date();
+    const currentTime = now.toTimeString().slice(0, 5);
+    
+    return periods
+      .filter(period => period.start_time > currentTime)
+      .sort((a, b) => a.start_time.localeCompare(b.start_time))[0];
+  };
+
+  // Check if attendance has been marked for a specific period
+  const hasAttendanceBeenMarked = (entry: TimetableEntry) => {
+    return entry.attendance_status !== null;
+  };
+
+  useEffect(() => {
+    if (currentSchool) {
+      fetchPeriods();
+      fetchSubjects();
+      fetchClassrooms();
+    }
+  }, [currentSchool]);
+
+  return {
+    // State
+    loading,
+    periods,
+    subjects,
+    classrooms,
+    timetableEntries,
+    
+    // Actions
+    fetchPeriods,
+    fetchSubjects,
+    fetchClassrooms,
+    fetchTimetableForClass,
+    
+    // Utilities
+    getTimetableGrid,
+    getCurrentPeriod,
+    getNextPeriod,
+    hasAttendanceBeenMarked,
+  };
+}
