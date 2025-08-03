@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useRBAC, AppRole, ResourceType, PermissionType } from '@/hooks/useRBAC';
@@ -24,8 +24,22 @@ export function ProtectedRoute({
   const { user, loading: authLoading } = useAuth();
   const { loading: rbacLoading, hasRole, hasPermission, currentSchool } = useRBAC();
   const location = useLocation();
+  const [permissionCheckResult, setPermissionCheckResult] = useState<boolean | null>(null);
+  const [permissionLoading, setPermissionLoading] = useState(false);
 
-  const loading = authLoading || rbacLoading;
+  // Handle async permission checking
+  useEffect(() => {
+    if (requiredResource && requiredPermission && user && currentSchool && !rbacLoading) {
+      setPermissionLoading(true);
+      hasPermission(requiredResource, requiredPermission, currentSchool.id)
+        .then(setPermissionCheckResult)
+        .finally(() => setPermissionLoading(false));
+    } else if (!requiredResource || !requiredPermission) {
+      setPermissionCheckResult(true);
+    }
+  }, [requiredResource, requiredPermission, user, currentSchool, rbacLoading, hasPermission]);
+
+  const loading = authLoading || rbacLoading || (requiredResource && requiredPermission && permissionLoading);
 
   if (loading) {
     return (
@@ -55,10 +69,17 @@ export function ProtectedRoute({
   }
 
   // Check resource and permission requirement
-  if (requiredResource && requiredPermission) {
-    // This is async, so we need to handle it differently
-    // For now, we'll just render the children and let the component handle permission checking
-    // A better approach would be to use a permission provider
+  if (requiredResource && requiredPermission && permissionCheckResult === false) {
+    return fallback || (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-destructive mb-2">Access Denied</h2>
+          <p className="text-muted-foreground">
+            You don't have the required permissions to access this resource.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;
