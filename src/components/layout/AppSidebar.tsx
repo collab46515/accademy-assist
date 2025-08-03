@@ -43,7 +43,8 @@ import {
   Timer,
   Plane,
   Receipt,
-  MessageCircle
+  MessageCircle,
+  ShoppingCart
 } from "lucide-react";
 
 import {
@@ -125,13 +126,15 @@ const erpModules = [
     icon: Calculator,
     subItems: [
       { title: "Accounting Dashboard", url: "/accounting", icon: LayoutDashboard },
-      { title: "Student Fees", url: "/accounting?tab=students", icon: Users },
-      { title: "Invoices", url: "/accounting?tab=invoices", icon: FileText },
-      { title: "Expenses", url: "/accounting?tab=expenses", icon: Receipt },
-      { title: "Reports", url: "/accounting?tab=reports", icon: BarChart3 },
-      { title: "Chart of Accounts", url: "/accounting?tab=accounts", icon: PieChart },
-      { title: "Budget Planning", url: "/accounting?tab=budget", icon: Target },
-      { title: "Finance", url: "/finance", icon: CreditCard },
+      { title: "Student Fees", url: "/accounting/student-fees", icon: Users },
+      { title: "Invoices", url: "/accounting/invoices", icon: FileText },
+      { title: "Bills & Expenses", url: "/accounting/bills", icon: Receipt },
+      { title: "Vendors", url: "/accounting/vendors", icon: Building2 },
+      { title: "Purchase Orders", url: "/accounting/purchase-orders", icon: ShoppingCart },
+      { title: "Reports", url: "/accounting/reports", icon: BarChart3 },
+      { title: "Chart of Accounts", url: "/accounting/accounts", icon: PieChart },
+      { title: "Budget Planning", url: "/accounting/budget", icon: Target },
+      { title: "Settings", url: "/accounting/settings", icon: Settings },
     ]
   },
   {
