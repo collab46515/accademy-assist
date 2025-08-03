@@ -54,6 +54,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useHRData } from '@/hooks/useHRData';
 import { useComprehensiveHR } from '@/hooks/useComprehensiveHR';
+import { RecruitmentDashboard } from '@/components/recruitment/RecruitmentDashboard';
 import { EmployeeForm } from '@/components/hr/EmployeeForm';
 
 export function HRManagementPage() {
@@ -551,24 +552,14 @@ export function HRManagementPage() {
         return renderDashboard();
       case 'employees':
         return renderEmployees();
+      case 'recruitment':
+        return <RecruitmentDashboard />;
       case 'performance':
         return renderComingSoon('Performance Management', 'Track and manage employee performance reviews and goals', Target, 'Add Performance Review');
-      case 'recruitment':
-        return renderComingSoon('Recruitment & Hiring', 'Manage job postings and applications', UserPlus, 'Create Job Posting');
       case 'training':
         return renderComingSoon('Training & Development', 'Employee learning and development programs', BookOpen, 'Add Training Course');
       case 'benefits':
         return renderComingSoon('Benefits Management', 'Employee benefits and compensation packages', Award, 'Add Benefits Plan');
-      case 'documents':
-        return renderComingSoon('Document Management', 'Employee documents and file management', Folder, 'Upload Document');
-      case 'assets':
-        return renderComingSoon('Asset Management', 'Company assets and equipment tracking', Package, 'Add Asset');
-      case 'timeTracking':
-        return renderComingSoon('Time Tracking', 'Employee time and attendance management', Timer, 'Log Time');
-      case 'travelExpenses':
-        return renderComingSoon('Travel & Expenses', 'Travel requests and expense management', Plane, 'Submit Expense');
-      case 'engagement':
-        return renderComingSoon('Employee Engagement', 'Employee satisfaction and engagement surveys', MessageSquare, 'Create Survey');
       case 'payroll':
         return renderComingSoon('Payroll Management', 'Payroll processing and management', DollarSign, 'Process Payroll');
       default:

@@ -9,52 +9,49 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Edit, Eye, Calendar, DollarSign, MapPin, Users } from 'lucide-react';
-import { useAdvancedRecruitment } from '@/hooks/useAdvancedRecruitment';
+import { useComprehensiveHR } from '@/hooks/useComprehensiveHR';
 
 export function JobRequisitionsManager() {
-  const { jobRequisitions, createJobRequisition, loading } = useAdvancedRecruitment();
+  const { jobPostings, createJobPosting, loading } = useComprehensiveHR();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
   const [formData, setFormData] = useState({
-    title: '',
-    justification: '',
-    urgency_level: 'medium',
-    headcount_requested: 1,
-    employment_type: 'full_time',
+    job_title: '',
+    job_description: '',
+    requirements: '',
+    employment_type: 'full_time' as const,
     location: '',
-    remote_work_option: false,
     salary_range_min: '',
     salary_range_max: '',
-    required_start_date: '',
-    requested_by: '' // This should be set to current user ID
+    closing_date: '',
+    posted_by: '' // This should be set to current user ID
   });
 
   const handleCreateRequisition = async () => {
     try {
-      await createJobRequisition({
+      await createJobPosting({
         ...formData,
         salary_range_min: formData.salary_range_min ? parseFloat(formData.salary_range_min) : undefined,
         salary_range_max: formData.salary_range_max ? parseFloat(formData.salary_range_max) : undefined,
+        posting_date: new Date().toISOString().split('T')[0],
         status: 'draft'
       });
       setIsCreateDialogOpen(false);
       setFormData({
-        title: '',
-        justification: '',
-        urgency_level: 'medium',
-        headcount_requested: 1,
-        employment_type: 'full_time',
+        job_title: '',
+        job_description: '',
+        requirements: '',
+        employment_type: 'full_time' as const,
         location: '',
-        remote_work_option: false,
         salary_range_min: '',
         salary_range_max: '',
-        required_start_date: '',
-        requested_by: ''
+        closing_date: '',
+        posted_by: ''
       });
     } catch (error) {
-      console.error('Error creating requisition:', error);
+      console.error('Error creating job posting:', error);
     }
   };
 
@@ -80,11 +77,11 @@ export function JobRequisitionsManager() {
     }
   };
 
-  const filteredRequisitions = jobRequisitions.filter(req => {
-    const matchesSearch = req.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         req.justification?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         req.location?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || req.status === statusFilter;
+  const filteredRequisitions = jobPostings.filter(job => {
+    const matchesSearch = job.job_title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         job.job_description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         job.location?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || job.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -114,50 +111,35 @@ export function JobRequisitionsManager() {
             </DialogHeader>
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <Label htmlFor="title">Job Title</Label>
+                <Label htmlFor="job_title">Job Title</Label>
                 <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  id="job_title"
+                  value={formData.job_title}
+                  onChange={(e) => setFormData({ ...formData, job_title: e.target.value })}
                   placeholder="Senior Software Engineer"
                 />
               </div>
               <div className="col-span-2">
-                <Label htmlFor="justification">Business Justification</Label>
+                <Label htmlFor="job_description">Job Description</Label>
                 <Textarea
-                  id="justification"
-                  value={formData.justification}
-                  onChange={(e) => setFormData({ ...formData, justification: e.target.value })}
-                  placeholder="Explain why this position is needed..."
+                  id="job_description"
+                  value={formData.job_description}
+                  onChange={(e) => setFormData({ ...formData, job_description: e.target.value })}
+                  placeholder="Describe the role and responsibilities..."
                 />
               </div>
-              <div>
-                <Label htmlFor="urgency">Urgency Level</Label>
-                <Select value={formData.urgency_level} onValueChange={(value) => setFormData({ ...formData, urgency_level: value })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="critical">Critical</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="headcount">Headcount</Label>
-                <Input
-                  id="headcount"
-                  type="number"
-                  min="1"
-                  value={formData.headcount_requested}
-                  onChange={(e) => setFormData({ ...formData, headcount_requested: parseInt(e.target.value) })}
+              <div className="col-span-2">
+                <Label htmlFor="requirements">Requirements</Label>
+                <Textarea
+                  id="requirements"
+                  value={formData.requirements}
+                  onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+                  placeholder="List the key requirements..."
                 />
               </div>
               <div>
                 <Label htmlFor="employment_type">Employment Type</Label>
-                <Select value={formData.employment_type} onValueChange={(value) => setFormData({ ...formData, employment_type: value })}>
+                <Select value={formData.employment_type} onValueChange={(value: any) => setFormData({ ...formData, employment_type: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -165,8 +147,7 @@ export function JobRequisitionsManager() {
                     <SelectItem value="full_time">Full Time</SelectItem>
                     <SelectItem value="part_time">Part Time</SelectItem>
                     <SelectItem value="contract">Contract</SelectItem>
-                    <SelectItem value="temporary">Temporary</SelectItem>
-                    <SelectItem value="internship">Internship</SelectItem>
+                    <SelectItem value="intern">Intern</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -200,12 +181,12 @@ export function JobRequisitionsManager() {
                 />
               </div>
               <div>
-                <Label htmlFor="start_date">Required Start Date</Label>
+                <Label htmlFor="closing_date">Closing Date</Label>
                 <Input
-                  id="start_date"
+                  id="closing_date"
                   type="date"
-                  value={formData.required_start_date}
-                  onChange={(e) => setFormData({ ...formData, required_start_date: e.target.value })}
+                  value={formData.closing_date}
+                  onChange={(e) => setFormData({ ...formData, closing_date: e.target.value })}
                 />
               </div>
             </div>
@@ -248,9 +229,9 @@ export function JobRequisitionsManager() {
       {/* Requisitions Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Active Requisitions</CardTitle>
+          <CardTitle>Active Job Postings</CardTitle>
           <CardDescription>
-            {filteredRequisitions.length} requisition(s) found
+            {filteredRequisitions.length} job posting(s) found
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -259,55 +240,48 @@ export function JobRequisitionsManager() {
               <TableRow>
                 <TableHead>Job Title</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Urgency</TableHead>
-                <TableHead>Headcount</TableHead>
+                <TableHead>Employment Type</TableHead>
                 <TableHead>Location</TableHead>
                 <TableHead>Salary Range</TableHead>
-                <TableHead>Start Date</TableHead>
+                <TableHead>Closing Date</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredRequisitions.map((requisition) => (
-                <TableRow key={requisition.id}>
-                  <TableCell className="font-medium">{requisition.title}</TableCell>
+              {filteredRequisitions.map((jobPosting) => (
+                <TableRow key={jobPosting.id}>
+                  <TableCell className="font-medium">{jobPosting.job_title}</TableCell>
                   <TableCell>
-                    <Badge className={getStatusColor(requisition.status)}>
-                      {requisition.status.replace('_', ' ')}
+                    <Badge className={getStatusColor(jobPosting.status)}>
+                      {jobPosting.status.replace('_', ' ')}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge className={getUrgencyColor(requisition.urgency_level)}>
-                      {requisition.urgency_level}
+                    <Badge variant="outline">
+                      {jobPosting.employment_type.replace('_', ' ')}
                     </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      {requisition.headcount_requested}
-                    </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
-                      {requisition.location || 'Not specified'}
+                      {jobPosting.location || 'Not specified'}
                     </div>
                   </TableCell>
                   <TableCell>
-                    {requisition.salary_range_min && requisition.salary_range_max ? (
+                    {jobPosting.salary_range_min && jobPosting.salary_range_max ? (
                       <div className="flex items-center gap-1">
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        £{requisition.salary_range_min.toLocaleString()} - £{requisition.salary_range_max.toLocaleString()}
+                        £{jobPosting.salary_range_min.toLocaleString()} - £{jobPosting.salary_range_max.toLocaleString()}
                       </div>
                     ) : 'Not specified'}
                   </TableCell>
                   <TableCell>
-                    {requisition.required_start_date ? (
+                    {jobPosting.closing_date ? (
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        {new Date(requisition.required_start_date).toLocaleDateString()}
+                        {new Date(jobPosting.closing_date).toLocaleDateString()}
                       </div>
-                    ) : 'Flexible'}
+                    ) : 'Open'}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">

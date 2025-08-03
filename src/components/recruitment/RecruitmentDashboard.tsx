@@ -17,7 +17,7 @@ import {
   Plus,
   Filter
 } from 'lucide-react';
-import { useAdvancedRecruitment } from '@/hooks/useAdvancedRecruitment';
+import { useComprehensiveHR } from '@/hooks/useComprehensiveHR';
 import { JobRequisitionsManager } from './JobRequisitionsManager';
 import { CandidatePool } from './CandidatePool';
 import { ApplicationsManager } from './ApplicationsManager';
@@ -31,22 +31,18 @@ export function RecruitmentDashboard() {
   
   const {
     loading,
-    jobRequisitions,
-    candidates,
-    jobApplications,
-    interviewSchedules,
-    jobOffers,
-    onboardingProgress
-  } = useAdvancedRecruitment();
+    jobPostings,
+    jobApplications
+  } = useComprehensiveHR();
 
-  // Calculate dashboard statistics
+  // Calculate dashboard statistics using existing data
   const stats = {
-    activeRequisitions: jobRequisitions.filter(req => req.status === 'approved').length,
-    totalCandidates: candidates.length,
-    pendingApplications: jobApplications.filter(app => app.status === 'submitted').length,
-    scheduledInterviews: interviewSchedules.filter(int => int.status === 'scheduled').length,
-    pendingOffers: jobOffers.filter(offer => offer.status === 'pending').length,
-    activeOnboarding: onboardingProgress.filter(prog => prog.status === 'in_progress').length
+    activeRequisitions: jobPostings.filter(job => job.status === 'active').length,
+    totalCandidates: 0, // Will be implemented when candidate pool is ready
+    pendingApplications: jobApplications.filter(app => app.application_status === 'submitted').length,
+    scheduledInterviews: 0, // Will be implemented when interviews are ready
+    pendingOffers: 0, // Will be implemented when offers are ready
+    activeOnboarding: 0 // Will be implemented when onboarding is ready
   };
 
   const recentActivities = [
@@ -54,17 +50,9 @@ export function RecruitmentDashboard() {
       id: app.id,
       type: 'application',
       title: `New application received`,
-      description: `Application for ${app.job_posting_id}`,
+      description: `Application from ${app.applicant_name}`,
       time: app.created_at,
-      status: app.status
-    })),
-    ...interviewSchedules.slice(0, 3).map(interview => ({
-      id: interview.id,
-      type: 'interview',
-      title: `Interview scheduled`,
-      description: `${interview.stage_id} interview`,
-      time: interview.scheduled_date,
-      status: interview.status
+      status: app.application_status
     }))
   ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()).slice(0, 5);
 
