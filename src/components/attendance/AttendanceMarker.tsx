@@ -49,7 +49,7 @@ export function AttendanceMarker() {
   const { students, getStudentsByClass } = useStudentData();
   
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [selectedClass, setSelectedClass] = useState<string>('');
+  const [selectedClass, setSelectedClass] = useState<string>('all_classes');
   const [selectedPeriod, setSelectedPeriod] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [studentsAttendance, setStudentsAttendance] = useState<StudentAttendance[]>([]);
@@ -68,7 +68,7 @@ export function AttendanceMarker() {
                          lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          student.student_number.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesClass = !selectedClass || 
+    const matchesClass = selectedClass === 'all_classes' || !selectedClass || 
                         student.year_group === selectedClass || 
                         student.form_class === selectedClass;
     
@@ -240,7 +240,7 @@ export function AttendanceMarker() {
                 <SelectValue placeholder="Select class" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Classes</SelectItem>
+                <SelectItem value="all_classes">All Classes</SelectItem>
                 {yearGroups.map(year => (
                   <SelectItem key={year} value={year}>Year {year}</SelectItem>
                 ))}
@@ -252,12 +252,12 @@ export function AttendanceMarker() {
 
             {/* Period Selection (if period-based attendance) */}
             {attendanceSettings?.attendance_mode === 'period' && (
-              <Select value={selectedPeriod?.toString() || ''} onValueChange={(value) => setSelectedPeriod(value ? parseInt(value) : null)}>
+              <Select value={selectedPeriod?.toString() || 'daily'} onValueChange={(value) => setSelectedPeriod(value === 'daily' ? null : parseInt(value))}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select period" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Daily Attendance</SelectItem>
+                  <SelectItem value="daily">Daily Attendance</SelectItem>
                   {schoolPeriods.map(period => (
                     <SelectItem key={period.id} value={period.period_number.toString()}>
                       {period.period_name}
