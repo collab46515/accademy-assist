@@ -70,7 +70,21 @@ const erpModules = [
     subItems: [
       { title: "Dashboard", url: "/", icon: LayoutDashboard },
       { title: "Students", url: "/students", icon: Users },
-      { title: "Unified Admissions", url: "/admissions", icon: UserPlus },
+      { 
+        title: "Unified Admissions", 
+        url: "/admissions", 
+        icon: UserPlus,
+        subItems: [
+          { title: "Application Submitted", url: "/admissions?stage=0", icon: Send },
+          { title: "Document Verification", url: "/admissions?stage=1", icon: FileText },
+          { title: "Application Review", url: "/admissions?stage=2", icon: Eye },
+          { title: "Assessment/Interview", url: "/admissions?stage=3", icon: ClipboardCheck },
+          { title: "Admission Decision", url: "/admissions?stage=4", icon: CheckCircle },
+          { title: "Fee Payment", url: "/admissions?stage=5", icon: CreditCard },
+          { title: "Enrollment Confirmation", url: "/admissions?stage=6", icon: UserCheck },
+          { title: "Welcome & Onboarding", url: "/admissions?stage=7", icon: Users },
+        ]
+      },
       { title: "Attendance", url: "/attendance", icon: Calendar },
       { title: "Curriculum", url: "/curriculum", icon: BookOpen },
       { title: "Timetable", url: "/timetable", icon: Clock },
@@ -149,7 +163,7 @@ function getCurrentModule(pathname: string) {
 
 interface SidebarGroupItemsProps {
   title: string;
-  items: Array<{ title: string; url: string; icon: any }>;
+  items: Array<{ title: string; url: string; icon: any; subItems?: Array<{ title: string; url: string; icon: any }> }>;
   defaultOpen?: boolean;
 }
 
@@ -191,11 +205,96 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
                   
                 const handleClick = () => {
                   if (item.url.includes('?')) {
-                    // For admission stages with filters, use programmatic navigation
                     navigate(item.url);
                   }
                 };
+
+                // If item has subItems (like Unified Admissions), render as collapsible
+                if (item.subItems) {
+                  const hasActiveSubItem = item.subItems.some(subItem => 
+                    subItem.url.includes('?') 
+                      ? location.pathname + location.search === subItem.url
+                      : location.pathname === subItem.url
+                  );
+                  const isMainActive = location.pathname === item.url.split('?')[0];
+                  const shouldExpand = isMainActive || hasActiveSubItem;
+
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <Collapsible defaultOpen={shouldExpand}>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton 
+                            asChild={!item.url.includes('?')}
+                            isActive={isMainActive}
+                            tooltip={state === "collapsed" ? item.title : undefined}
+                            onClick={item.url.includes('?') ? handleClick : undefined}
+                          >
+                            {item.url.includes('?') ? (
+                              <div className={`flex items-center gap-3 px-2 py-1.5 rounded-lg transition-all duration-200 hover:bg-sidebar-accent/50 w-full ${getNavClassName(isMainActive)}`}>
+                                <item.icon className="h-4 w-4 flex-shrink-0" />
+                                <span className="text-sm flex-1">{item.title}</span>
+                                <ChevronRight className="h-3 w-3 opacity-60 transition-transform ui-expanded:rotate-90" />
+                              </div>
+                            ) : (
+                              <NavLink 
+                                to={item.url}
+                                className={`flex items-center gap-3 px-2 py-1.5 rounded-lg transition-all duration-200 hover:bg-sidebar-accent/50 w-full ${getNavClassName(isMainActive)}`}
+                              >
+                                <item.icon className="h-4 w-4 flex-shrink-0" />
+                                <span className="text-sm flex-1">{item.title}</span>
+                                <ChevronRight className="h-3 w-3 opacity-60 transition-transform ui-expanded:rotate-90" />
+                              </NavLink>
+                            )}
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <SidebarMenu className="ml-4 border-l border-sidebar-border">
+                            {item.subItems.map((subItem) => {
+                              const isSubActive = subItem.url.includes('?') 
+                                ? location.pathname + location.search === subItem.url
+                                : location.pathname === subItem.url;
+                              
+                              const handleSubClick = () => {
+                                if (subItem.url.includes('?')) {
+                                  navigate(subItem.url);
+                                }
+                              };
+
+                              return (
+                                <SidebarMenuItem key={subItem.title}>
+                                  <SidebarMenuButton 
+                                    asChild={!subItem.url.includes('?')}
+                                    isActive={isSubActive}
+                                    tooltip={state === "collapsed" ? subItem.title : undefined}
+                                    onClick={subItem.url.includes('?') ? handleSubClick : undefined}
+                                    size="sm"
+                                  >
+                                    {subItem.url.includes('?') ? (
+                                      <div className={`flex items-center gap-3 px-2 py-1.5 rounded-lg transition-all duration-200 hover:bg-sidebar-accent/50 ${getNavClassName(isSubActive)}`}>
+                                        <subItem.icon className="h-3 w-3 flex-shrink-0" />
+                                        <span className="text-xs">{subItem.title}</span>
+                                      </div>
+                                    ) : (
+                                      <NavLink 
+                                        to={subItem.url}
+                                        className={`flex items-center gap-3 px-2 py-1.5 rounded-lg transition-all duration-200 hover:bg-sidebar-accent/50 ${getNavClassName(isSubActive)}`}
+                                      >
+                                        <subItem.icon className="h-3 w-3 flex-shrink-0" />
+                                        <span className="text-xs">{subItem.title}</span>
+                                      </NavLink>
+                                    )}
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              );
+                            })}
+                          </SidebarMenu>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    </SidebarMenuItem>
+                  );
+                }
                 
+                // Regular menu item without subItems
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
