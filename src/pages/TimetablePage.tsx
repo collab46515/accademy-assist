@@ -51,8 +51,9 @@ export default function TimetablePage() {
   }
 
   // Check user permissions
-  const canManageTimetables = hasRole('school_admin', currentSchool?.id) || hasRole('hod', currentSchool?.id);
-  const canViewTimetables = hasRole('teacher', currentSchool?.id) || hasRole('student', currentSchool?.id) || hasRole('parent', currentSchool?.id) || canManageTimetables;
+  const isSuperAdmin = hasRole('super_admin', currentSchool?.id);
+  const canManageTimetables = isSuperAdmin || hasRole('school_admin', currentSchool?.id) || hasRole('hod', currentSchool?.id);
+  const canViewTimetables = isSuperAdmin || hasRole('teacher', currentSchool?.id) || hasRole('student', currentSchool?.id) || hasRole('parent', currentSchool?.id) || canManageTimetables;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
