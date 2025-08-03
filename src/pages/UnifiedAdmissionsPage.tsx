@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ApplicationForms } from "@/components/admissions/ApplicationForms";
+import { ApplicationManagement } from "@/components/admissions/ApplicationManagement";
 import { 
   UserPlus, 
   FileText, 
@@ -387,10 +388,11 @@ const UnifiedAdmissionsPage = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="pathways">Enrollment Pathways</TabsTrigger>
           <TabsTrigger value="applications">Applications</TabsTrigger>
+          <TabsTrigger value="management">Application Management</TabsTrigger>
           <TabsTrigger value="workflows">Workflow Management</TabsTrigger>
           <TabsTrigger value="approvals">Approvals</TabsTrigger>
           <TabsTrigger value="reports">Reports & Analytics</TabsTrigger>
@@ -651,6 +653,11 @@ const UnifiedAdmissionsPage = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Application Management Tab */}
+        <TabsContent value="management" className="space-y-6">
+          <ApplicationManagement />
         </TabsContent>
 
         {/* Workflow Management Tab */}
