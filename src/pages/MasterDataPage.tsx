@@ -123,7 +123,24 @@ export function MasterDataPage() {
         '=== STAFF ===',
         'Employee ID,First Name,Last Name,Email,Position,Department,Start Date',
         'EMP001,John,Smith,j.smith@school.edu,Head Teacher,Administration,2020-09-01',
-        'EMP002,Sarah,Jones,s.jones@school.edu,Mathematics Teacher,Mathematics,2021-01-15'
+        'EMP002,Sarah,Jones,s.jones@school.edu,Mathematics Teacher,Mathematics,2021-01-15',
+        '',
+        '=== FEE HEADS ===',
+        'Fee Name,Description,Category,Default Amount,Currency,Is Mandatory,Is Recurring,Recurrence Frequency,Applicable Classes,Applicable Genders',
+        'Tuition Fee,Main academic tuition fees,Tuition,1500,GBP,true,true,termly,,',
+        'Registration Fee,One-time registration fee for new students,Registration,250,GBP,true,false,,,',
+        'Transport Fee,School transport services,Transport,150,GBP,false,true,termly,,',
+        'Meals Fee,School lunch and meal services,Meals,200,GBP,false,true,termly,,',
+        'Examination Fee,External and internal examination fees,Examination,100,GBP,true,false,,Year 10;Year 11;Year 12;Year 13,',
+        'ICT Fee,Information and Communication Technology resources,ICT,75,GBP,false,true,annually,,',
+        'Laboratory Fee,Science laboratory usage and materials,Laboratory,120,GBP,false,true,termly,Year 7;Year 8;Year 9;Year 10;Year 11;Year 12;Year 13,',
+        'Library Fee,Library resources and book replacement,Library,30,GBP,false,true,annually,,',
+        'Sports Fee,Sports equipment and activities,Sports,80,GBP,false,true,termly,,',
+        'Music Lessons,Individual music lessons and instrument hire,Music Lessons,200,GBP,false,true,termly,,',
+        'Boarding Fee,Accommodation and boarding services,Boarding,2500,GBP,false,true,termly,,',
+        'Uniform Fee,School uniform and PE kit,Uniform,150,GBP,true,false,,,',
+        'Activity Fee,Extracurricular activities and clubs,Activity Fees,60,GBP,false,true,termly,,',
+        'Excursion Fee,Educational trips and excursions,Excursions,100,GBP,false,false,,,'
       ].join('\n');
       
       const blob = new Blob([masterTemplate], { type: 'text/csv' });
@@ -143,7 +160,8 @@ export function MasterDataPage() {
         classrooms: 'Room Name,Room Type,Capacity\nRoom 101,Classroom,30',
         periods: 'Period Number,Start Time,End Time,Day of Week\n1,09:00,09:45,Monday',
         departments: 'Name,Description,Cost Center\nMathematics,Mathematics Department,MATH001',
-        staff: 'Employee ID,First Name,Last Name,Email,Position,Department,Start Date\nEMP001,John,Smith,j.smith@school.edu,Head Teacher,Administration,2020-09-01'
+        staff: 'Employee ID,First Name,Last Name,Email,Position,Department,Start Date\nEMP001,John,Smith,j.smith@school.edu,Head Teacher,Administration,2020-09-01',
+        'fee-heads': 'Fee Name,Description,Category,Default Amount,Currency,Is Mandatory,Is Recurring,Recurrence Frequency,Applicable Classes,Applicable Genders\nTuition Fee,Main academic tuition fees,Tuition,1500,GBP,true,true,termly,,'
       };
       
       const template = templates[type as keyof typeof templates];
@@ -170,7 +188,8 @@ export function MasterDataPage() {
           schools: [],
           subjects: [],
           students: [],
-          parents: []
+          parents: [],
+          feeHeads: []
         };
         
         let i = 0;
@@ -238,6 +257,33 @@ export function MasterDataPage() {
               parsedData.parents.push(obj);
               i++;
             }
+          } else if (line.includes('=== FEE HEADS ===')) {
+            currentSection = 'feeHeads';
+            i++;
+            const headers = lines[i]?.split(',').map(h => h.trim()) || [];
+            i++;
+            
+            while (i < lines.length && !lines[i].includes('===') && lines[i].trim()) {
+              const values = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
+              const obj: any = {};
+              headers.forEach((header, index) => {
+                const key = header.toLowerCase().replace(/\s+/g, '_');
+                let value: any = values[index] || '';
+                
+                // Handle special processing for fee heads
+                if (key === 'is_mandatory' || key === 'is_recurring') {
+                  obj[key] = value.toLowerCase() === 'true';
+                } else if (key === 'default_amount') {
+                  obj[key] = parseFloat(value) || 0;
+                } else if (key === 'applicable_classes' || key === 'applicable_genders') {
+                  obj[key] = value ? value.split(';').filter((v: string) => v.trim()) : [];
+                } else {
+                  obj[key] = value;
+                }
+              });
+              parsedData.feeHeads.push(obj);
+              i++;
+            }
           } else {
             i++;
           }
@@ -294,7 +340,11 @@ export function MasterDataPage() {
       parents.forEach(parent => {
         exportData.push(`"${parent.id}","${parent.student_id}","${parent.relationship_type || ''}"`);
       });
+      exportData.push('');
     }
+    
+    // Note: Fee heads can be exported separately from the Fee Management tab
+    // as they are managed centrally in the Master Data section
     
     const csvData = exportData.join('\n');
     const blob = new Blob([csvData], { type: 'text/csv' });
