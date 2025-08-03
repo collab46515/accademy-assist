@@ -47,6 +47,7 @@ const navigationItems = [
   { name: "Events", href: "/events", icon: CalendarDays },
   { name: "Analytics", href: "/analytics", icon: TrendingUp },
   { name: "AI Suite", href: "/ai-suite", icon: Bot },
+  { name: "User Management", href: "/user-management", icon: Settings },
   { name: "Integrations", href: "/integrations", icon: Settings },
 ];
 
@@ -74,6 +75,8 @@ export const Navbar = () => {
           return hasRole('school_admin', currentSchool?.id) || hasRole('super_admin');
         case '/admissions':
           return hasRole('school_admin', currentSchool?.id) || hasRole('super_admin');
+        case '/user-management':
+          return hasRole('super_admin');
         case '/integrations':
           return hasRole('school_admin', currentSchool?.id) || hasRole('super_admin');
         default:

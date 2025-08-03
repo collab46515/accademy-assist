@@ -25,6 +25,7 @@ import EventsPage from "./pages/EventsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import AISuitePage from "./pages/AISuitePage";
 import IntegrationsPage from "./pages/IntegrationsPage";
+import { UserManagementPage } from "./pages/UserManagementPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -64,6 +65,11 @@ const App = () => (
                     <Route path="/events" element={<EventsPage />} />
                     <Route path="/analytics" element={<AnalyticsPage />} />
                     <Route path="/ai-suite" element={<AISuitePage />} />
+                    <Route path="/user-management" element={
+                      <ProtectedRoute requiredRole="super_admin">
+                        <UserManagementPage />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/integrations" element={<IntegrationsPage />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
