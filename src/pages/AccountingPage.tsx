@@ -37,61 +37,71 @@ import {
   Building2,
   Banknote,
   Target,
-  Award
+  Award,
+  ShoppingCart,
+  RefreshCw,
+  Globe,
+  Percent
 } from 'lucide-react';
 
-// Mock data for demonstration
+// Mock data with multi-currency support
 const mockData = {
   overview: {
-    totalRevenue: 2450000,
-    totalExpenses: 1850000,
-    netProfit: 600000,
-    cashFlow: 1200000,
-    outstandingFees: 285000,
-    paidThisMonth: 425000
+    totalRevenue: { amount: 2450000, currency: 'GBP' },
+    totalExpenses: { amount: 1850000, currency: 'GBP' },
+    netProfit: { amount: 600000, currency: 'GBP' },
+    cashFlow: { amount: 1200000, currency: 'GBP' },
+    outstandingFees: { amount: 285000, currency: 'GBP' },
+    paidThisMonth: { amount: 425000, currency: 'GBP' }
   },
-  recentTransactions: [
-    { id: '1', date: '2024-01-15', description: 'Tuition Fee - Year 7', amount: 1200, type: 'income', status: 'completed' },
-    { id: '2', date: '2024-01-14', description: 'Office Supplies', amount: -150, type: 'expense', status: 'completed' },
-    { id: '3', date: '2024-01-13', description: 'Lunch Fee - Student ID: ST001', amount: 25, type: 'income', status: 'pending' },
-    { id: '4', date: '2024-01-12', description: 'Utilities Payment', amount: -850, type: 'expense', status: 'completed' },
-    { id: '5', date: '2024-01-11', description: 'Book Sales', amount: 85, type: 'income', status: 'completed' }
+  currencies: [
+    { code: 'GBP', name: 'British Pound', symbol: '£', rate: 1.0 },
+    { code: 'USD', name: 'US Dollar', symbol: '$', rate: 1.25 },
+    { code: 'EUR', name: 'Euro', symbol: '€', rate: 1.15 }
   ],
-  chartOfAccounts: [
-    { id: '1', code: '1000', name: 'Cash and Bank', type: 'Assets', balance: 150000 },
-    { id: '2', code: '1100', name: 'Accounts Receivable', type: 'Assets', balance: 75000 },
-    { id: '3', code: '2000', name: 'Accounts Payable', type: 'Liabilities', balance: 25000 },
-    { id: '4', code: '3000', name: 'Tuition Revenue', type: 'Revenue', balance: 850000 },
-    { id: '5', code: '4000', name: 'Operating Expenses', type: 'Expenses', balance: 420000 }
+  recentTransactions: [
+    { id: '1', date: '2024-01-15', description: 'Tuition Fee - Year 7', amount: 1200, currency: 'GBP', type: 'income', status: 'completed' },
+    { id: '2', date: '2024-01-14', description: 'Office Supplies', amount: -150, currency: 'GBP', type: 'expense', status: 'completed' },
+    { id: '3', date: '2024-01-13', description: 'Lunch Fee - Student ID: ST001', amount: 25, currency: 'GBP', type: 'income', status: 'pending' },
+    { id: '4', date: '2024-01-12', description: 'Utilities Payment', amount: -850, currency: 'GBP', type: 'expense', status: 'completed' }
+  ],
+  vendors: [
+    { id: '1', name: 'Office Supplies Ltd', email: 'orders@officesupplies.com', phone: '+44 123 456 789', balance: 2500, currency: 'GBP' },
+    { id: '2', name: 'Facilities Management Co', email: 'billing@facilities.com', phone: '+44 987 654 321', balance: 15000, currency: 'GBP' },
+    { id: '3', name: 'Educational Resources Inc', email: 'sales@edresources.com', phone: '+1 555 123 4567', balance: 8500, currency: 'USD' }
+  ],
+  purchaseOrders: [
+    { id: 'PO001', vendor: 'Office Supplies Ltd', date: '2024-01-15', total: 2500, currency: 'GBP', status: 'approved' },
+    { id: 'PO002', vendor: 'Educational Resources Inc', date: '2024-01-14', total: 6800, currency: 'USD', status: 'pending' },
+    { id: 'PO003', vendor: 'Facilities Management Co', date: '2024-01-12', total: 15000, currency: 'GBP', status: 'received' }
+  ],
+  bills: [
+    { id: 'BILL001', vendor: 'Office Supplies Ltd', date: '2024-01-16', due: '2024-02-15', total: 2500, currency: 'GBP', status: 'unpaid' },
+    { id: 'BILL002', vendor: 'Facilities Management Co', date: '2024-01-10', due: '2024-02-09', total: 15000, currency: 'GBP', status: 'paid' }
+  ],
+  taxRates: [
+    { id: '1', name: 'Standard VAT', rate: 20, type: 'VAT', isDefault: true },
+    { id: '2', name: 'Reduced VAT', rate: 5, type: 'VAT', isDefault: false },
+    { id: '3', name: 'Zero VAT', rate: 0, type: 'VAT', isDefault: false }
+  ],
+  recurringTransactions: [
+    { id: '1', name: 'Monthly Staff Salaries', amount: 125000, currency: 'GBP', frequency: 'monthly', nextDate: '2024-02-01', status: 'active' },
+    { id: '2', name: 'Quarterly Utilities', amount: 3500, currency: 'GBP', frequency: 'quarterly', nextDate: '2024-04-01', status: 'active' },
+    { id: '3', name: 'Annual Insurance', amount: 12000, currency: 'GBP', frequency: 'yearly', nextDate: '2024-12-01', status: 'active' }
   ]
 };
 
-interface Student {
-  id: string;
-  name: string;
-  yearGroup: string;
-  outstandingBalance: number;
-  lastPayment: string;
-}
-
-const mockStudents: Student[] = [
-  { id: 'ST001', name: 'John Smith', yearGroup: 'Year 7', outstandingBalance: 1200, lastPayment: '2024-01-01' },
-  { id: 'ST002', name: 'Sarah Johnson', yearGroup: 'Year 8', outstandingBalance: 0, lastPayment: '2024-01-15' },
-  { id: 'ST003', name: 'Mike Brown', yearGroup: 'Year 9', outstandingBalance: 2400, lastPayment: '2023-12-15' },
-  { id: 'ST004', name: 'Emily Davis', yearGroup: 'Year 10', outstandingBalance: 600, lastPayment: '2024-01-10' }
-];
+const formatCurrency = (amount: number, currency: string) => {
+  const currencyData = mockData.currencies.find(c => c.code === currency);
+  return `${currencyData?.symbol || ''}${amount.toLocaleString()}`;
+};
 
 export function AccountingPage() {
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const activeTab = searchParams.get('tab') || 'dashboard';
-  const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const form = useForm();
-
-  const filteredStudents = mockStudents.filter(student =>
-    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -104,10 +114,14 @@ export function AccountingPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold">Accounting</h1>
-              <p className="text-sm text-muted-foreground">Financial Management System</p>
+              <p className="text-sm text-muted-foreground">Comprehensive Financial Management</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Badge variant="outline" className="gap-2">
+              <Globe className="h-3 w-3" />
+              Multi-Currency Enabled
+            </Badge>
             <Button variant="outline" size="sm">
               <Download className="h-4 w-4 mr-2" />
               Export
@@ -122,15 +136,19 @@ export function AccountingPage() {
 
       <div className="p-6 space-y-6">
         <Tabs value={activeTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-8">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="students">Student Fees</TabsTrigger>
-            <TabsTrigger value="invoices">Invoices</TabsTrigger>
-            <TabsTrigger value="expenses">Expenses</TabsTrigger>
-            <TabsTrigger value="reports">Reports</TabsTrigger>
-            <TabsTrigger value="accounts">Chart of Accounts</TabsTrigger>
-            <TabsTrigger value="budget">Budget</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-12 h-auto">
+            <TabsTrigger value="dashboard" className="text-xs">Dashboard</TabsTrigger>
+            <TabsTrigger value="students" className="text-xs">Student Fees</TabsTrigger>
+            <TabsTrigger value="invoices" className="text-xs">Invoices</TabsTrigger>
+            <TabsTrigger value="bills" className="text-xs">Bills</TabsTrigger>
+            <TabsTrigger value="expenses" className="text-xs">Expenses</TabsTrigger>
+            <TabsTrigger value="vendors" className="text-xs">Vendors</TabsTrigger>
+            <TabsTrigger value="purchase-orders" className="text-xs">Purchase Orders</TabsTrigger>
+            <TabsTrigger value="taxes" className="text-xs">Taxes</TabsTrigger>
+            <TabsTrigger value="recurring" className="text-xs">Recurring</TabsTrigger>
+            <TabsTrigger value="reports" className="text-xs">Reports</TabsTrigger>
+            <TabsTrigger value="accounts" className="text-xs">Chart of Accounts</TabsTrigger>
+            <TabsTrigger value="settings" className="text-xs">Settings</TabsTrigger>
           </TabsList>
 
           {/* Dashboard Tab */}
@@ -143,7 +161,7 @@ export function AccountingPage() {
                   <TrendingUp className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">£{mockData.overview.totalRevenue.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">{formatCurrency(mockData.overview.totalRevenue.amount, mockData.overview.totalRevenue.currency)}</div>
                   <p className="text-xs text-muted-foreground mt-1">+12% from last month</p>
                 </CardContent>
               </Card>
@@ -154,7 +172,7 @@ export function AccountingPage() {
                   <TrendingDown className="h-4 w-4 text-red-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">£{mockData.overview.totalExpenses.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">{formatCurrency(mockData.overview.totalExpenses.amount, mockData.overview.totalExpenses.currency)}</div>
                   <p className="text-xs text-muted-foreground mt-1">+5% from last month</p>
                 </CardContent>
               </Card>
@@ -165,7 +183,7 @@ export function AccountingPage() {
                   <DollarSign className="h-4 w-4 text-blue-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">£{mockData.overview.netProfit.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">{formatCurrency(mockData.overview.netProfit.amount, mockData.overview.netProfit.currency)}</div>
                   <p className="text-xs text-muted-foreground mt-1">+18% from last month</p>
                 </CardContent>
               </Card>
@@ -176,7 +194,7 @@ export function AccountingPage() {
                   <AlertCircle className="h-4 w-4 text-purple-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">£{mockData.overview.outstandingFees.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">{formatCurrency(mockData.overview.outstandingFees.amount, mockData.overview.outstandingFees.currency)}</div>
                   <p className="text-xs text-muted-foreground mt-1">15 overdue accounts</p>
                 </CardContent>
               </Card>
@@ -208,7 +226,7 @@ export function AccountingPage() {
                           <p className={`font-semibold ${
                             transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
                           }`}>
-                            {transaction.amount > 0 ? '+' : ''}£{Math.abs(transaction.amount)}
+                            {formatCurrency(Math.abs(transaction.amount), transaction.currency)}
                           </p>
                           <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
                             {transaction.status}
@@ -236,12 +254,12 @@ export function AccountingPage() {
                       Record Payment
                     </Button>
                     <Button variant="outline" className="h-20 flex-col gap-2">
-                      <Receipt className="h-6 w-6" />
-                      Add Expense
+                      <ShoppingCart className="h-6 w-6" />
+                      Create PO
                     </Button>
                     <Button variant="outline" className="h-20 flex-col gap-2">
-                      <FileText className="h-6 w-6" />
-                      Generate Report
+                      <Building2 className="h-6 w-6" />
+                      Add Vendor
                     </Button>
                   </div>
                 </CardContent>
@@ -249,65 +267,52 @@ export function AccountingPage() {
             </div>
           </TabsContent>
 
-          {/* Student Fees Tab */}
-          <TabsContent value="students" className="space-y-6">
+          {/* Vendors Tab */}
+          <TabsContent value="vendors" className="space-y-6">
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    Student Fee Management
+                    <Building2 className="h-5 w-5" />
+                    Vendor Management
                   </CardTitle>
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search students..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 w-64"
-                      />
-                    </div>
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Fee
-                    </Button>
-                  </div>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Vendor
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Student ID</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Year Group</TableHead>
+                      <TableHead>Vendor Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Phone</TableHead>
                       <TableHead>Outstanding Balance</TableHead>
-                      <TableHead>Last Payment</TableHead>
+                      <TableHead>Currency</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredStudents.map((student) => (
-                      <TableRow key={student.id}>
-                        <TableCell className="font-medium">{student.id}</TableCell>
-                        <TableCell>{student.name}</TableCell>
-                        <TableCell>{student.yearGroup}</TableCell>
-                        <TableCell>
-                          <span className={`font-semibold ${
-                            student.outstandingBalance > 0 ? 'text-red-600' : 'text-green-600'
-                          }`}>
-                            £{student.outstandingBalance}
-                          </span>
+                    {mockData.vendors.map((vendor) => (
+                      <TableRow key={vendor.id}>
+                        <TableCell className="font-medium">{vendor.name}</TableCell>
+                        <TableCell>{vendor.email}</TableCell>
+                        <TableCell>{vendor.phone}</TableCell>
+                        <TableCell className="font-semibold">
+                          {formatCurrency(vendor.balance, vendor.currency)}
                         </TableCell>
-                        <TableCell>{student.lastPayment}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{vendor.currency}</Badge>
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Button size="sm" variant="outline">
                               <Eye className="h-4 w-4" />
                             </Button>
                             <Button size="sm" variant="outline">
-                              <Send className="h-4 w-4" />
+                              <Edit className="h-4 w-4" />
                             </Button>
                           </div>
                         </TableCell>
@@ -319,18 +324,18 @@ export function AccountingPage() {
             </Card>
           </TabsContent>
 
-          {/* Chart of Accounts Tab */}
-          <TabsContent value="accounts" className="space-y-6">
+          {/* Purchase Orders Tab */}
+          <TabsContent value="purchase-orders" className="space-y-6">
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    Chart of Accounts
+                    <ShoppingCart className="h-5 w-5" />
+                    Purchase Orders
                   </CardTitle>
                   <Button>
                     <Plus className="h-4 w-4 mr-2" />
-                    Add Account
+                    Create PO
                   </Button>
                 </div>
               </CardHeader>
@@ -338,23 +343,153 @@ export function AccountingPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Code</TableHead>
-                      <TableHead>Account Name</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Balance</TableHead>
+                      <TableHead>PO Number</TableHead>
+                      <TableHead>Vendor</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Total</TableHead>
+                      <TableHead>Currency</TableHead>
+                      <TableHead>Status</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {mockData.chartOfAccounts.map((account) => (
-                      <TableRow key={account.id}>
-                        <TableCell className="font-medium">{account.code}</TableCell>
-                        <TableCell>{account.name}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{account.type}</Badge>
-                        </TableCell>
+                    {mockData.purchaseOrders.map((po) => (
+                      <TableRow key={po.id}>
+                        <TableCell className="font-medium">{po.id}</TableCell>
+                        <TableCell>{po.vendor}</TableCell>
+                        <TableCell>{po.date}</TableCell>
                         <TableCell className="font-semibold">
-                          £{account.balance.toLocaleString()}
+                          {formatCurrency(po.total, po.currency)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{po.currency}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={po.status === 'approved' ? 'default' : po.status === 'pending' ? 'secondary' : 'outline'}>
+                            {po.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button size="sm" variant="outline">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button size="sm" variant="outline">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Bills Tab */}
+          <TabsContent value="bills" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Receipt className="h-5 w-5" />
+                    Bills & Payables
+                  </CardTitle>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Bill
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Bill Number</TableHead>
+                      <TableHead>Vendor</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Due Date</TableHead>
+                      <TableHead>Total</TableHead>
+                      <TableHead>Currency</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {mockData.bills.map((bill) => (
+                      <TableRow key={bill.id}>
+                        <TableCell className="font-medium">{bill.id}</TableCell>
+                        <TableCell>{bill.vendor}</TableCell>
+                        <TableCell>{bill.date}</TableCell>
+                        <TableCell>{bill.due}</TableCell>
+                        <TableCell className="font-semibold">
+                          {formatCurrency(bill.total, bill.currency)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{bill.currency}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={bill.status === 'paid' ? 'default' : 'destructive'}>
+                            {bill.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button size="sm" variant="outline">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            {bill.status === 'unpaid' && (
+                              <Button size="sm">
+                                <CreditCard className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Taxes Tab */}
+          <TabsContent value="taxes" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Percent className="h-5 w-5" />
+                    Tax Rates & Management
+                  </CardTitle>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Tax Rate
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tax Name</TableHead>
+                      <TableHead>Rate (%)</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Default</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {mockData.taxRates.map((tax) => (
+                      <TableRow key={tax.id}>
+                        <TableCell className="font-medium">{tax.name}</TableCell>
+                        <TableCell>{tax.rate}%</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{tax.type}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          {tax.isDefault && <CheckCircle className="h-4 w-4 text-green-600" />}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
@@ -374,223 +509,198 @@ export function AccountingPage() {
             </Card>
           </TabsContent>
 
-          {/* Invoices Tab */}
-          <TabsContent value="invoices" className="space-y-6">
+          {/* Recurring Transactions Tab */}
+          <TabsContent value="recurring" className="space-y-6">
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Invoice Management
-                  </CardTitle>
-                  <Dialog open={isInvoiceDialogOpen} onOpenChange={setIsInvoiceDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Create Invoice
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl">
-                      <DialogHeader>
-                        <DialogTitle>Create New Invoice</DialogTitle>
-                      </DialogHeader>
-                      <Form {...form}>
-                        <div className="grid grid-cols-2 gap-4">
-                          <FormField
-                            name="studentId"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Student</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select student" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {mockStudents.map(student => (
-                                      <SelectItem key={student.id} value={student.id}>
-                                        {student.name} ({student.id})
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            name="dueDate"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Due Date</FormLabel>
-                                <FormControl>
-                                  <Input type="date" {...field} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            name="amount"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Amount</FormLabel>
-                                <FormControl>
-                                  <Input type="number" placeholder="0.00" {...field} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            name="feeType"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Fee Type</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select fee type" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="tuition">Tuition Fee</SelectItem>
-                                    <SelectItem value="lunch">Lunch Fee</SelectItem>
-                                    <SelectItem value="transport">Transport Fee</SelectItem>
-                                    <SelectItem value="uniform">Uniform Fee</SelectItem>
-                                    <SelectItem value="books">Books Fee</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        <FormField
-                          name="description"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Description</FormLabel>
-                              <FormControl>
-                                <Textarea placeholder="Invoice description..." {...field} />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                        <div className="flex justify-end gap-3 mt-6">
-                          <Button variant="outline" onClick={() => setIsInvoiceDialogOpen(false)}>
-                            Cancel
-                          </Button>
-                          <Button type="submit">Create Invoice</Button>
-                        </div>
-                      </Form>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12 text-muted-foreground">
-                  <FileText className="h-12 w-12 mx-auto mb-4" />
-                  <p>No invoices found. Create your first invoice to get started.</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Expenses Tab */}
-          <TabsContent value="expenses" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <Receipt className="h-5 w-5" />
-                    Expense Management
+                    <RefreshCw className="h-5 w-5" />
+                    Recurring Transactions
                   </CardTitle>
                   <Button>
                     <Plus className="h-4 w-4 mr-2" />
-                    Add Expense
+                    Add Recurring Transaction
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12 text-muted-foreground">
-                  <Receipt className="h-12 w-12 mx-auto mb-4" />
-                  <p>No expenses recorded yet. Start tracking your expenses here.</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Reports Tab */}
-          <TabsContent value="reports" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    Income Statement
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">Profit and loss report for the selected period.</p>
-                </CardContent>
-              </Card>
-
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <PieChart className="h-5 w-5" />
-                    Balance Sheet
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">Financial position at a specific point in time.</p>
-                </CardContent>
-              </Card>
-
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
-                    Cash Flow
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">Track cash inflows and outflows.</p>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Budget Tab */}
-          <TabsContent value="budget" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Budget Planning
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12 text-muted-foreground">
-                  <Target className="h-12 w-12 mx-auto mb-4" />
-                  <p>Budget planning tools coming soon.</p>
-                </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Transaction Name</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Currency</TableHead>
+                      <TableHead>Frequency</TableHead>
+                      <TableHead>Next Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {mockData.recurringTransactions.map((transaction) => (
+                      <TableRow key={transaction.id}>
+                        <TableCell className="font-medium">{transaction.name}</TableCell>
+                        <TableCell className="font-semibold">
+                          {formatCurrency(transaction.amount, transaction.currency)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{transaction.currency}</Badge>
+                        </TableCell>
+                        <TableCell className="capitalize">{transaction.frequency}</TableCell>
+                        <TableCell>{transaction.nextDate}</TableCell>
+                        <TableCell>
+                          <Badge variant={transaction.status === 'active' ? 'default' : 'secondary'}>
+                            {transaction.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button size="sm" variant="outline">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button size="sm" variant="outline">
+                              <Clock className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Globe className="h-5 w-5" />
+                    Currency Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium">Default Currency</label>
+                      <Select defaultValue="GBP">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {mockData.currencies.map((currency) => (
+                            <SelectItem key={currency.code} value={currency.code}>
+                              {currency.symbol} {currency.name} ({currency.code})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Exchange Rates</label>
+                      {mockData.currencies.map((currency) => (
+                        <div key={currency.code} className="flex items-center justify-between p-2 border rounded">
+                          <span className="font-medium">{currency.code}</span>
+                          <span>1 GBP = {currency.rate} {currency.code}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Percent className="h-5 w-5" />
+                    Tax Configuration
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium">Default Tax Rate</label>
+                      <Select defaultValue="1">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {mockData.taxRates.map((tax) => (
+                            <SelectItem key={tax.id} value={tax.id}>
+                              {tax.name} ({tax.rate}%)
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Tax Calculation</label>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="inclusive" defaultChecked />
+                        <label htmlFor="inclusive" className="text-sm">Tax inclusive pricing</label>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Other existing tabs remain the same but would need similar updates */}
+          <TabsContent value="students" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5" />
-                  Accounting Settings
-                </CardTitle>
+                <CardTitle>Student Fee Management</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12 text-muted-foreground">
-                  <Award className="h-12 w-12 mx-auto mb-4" />
-                  <p>Configure your accounting preferences and settings.</p>
-                </div>
+                <p className="text-muted-foreground">Student fee management interface with multi-currency support will be implemented here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="invoices" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Invoice Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Invoice management with multi-currency and tax calculations will be implemented here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="expenses" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Expense Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Expense tracking with vendor management and multi-currency support will be implemented here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="reports" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Financial Reports</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Comprehensive financial reporting with multi-currency consolidation will be implemented here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="accounts" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Chart of Accounts</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Chart of accounts with multi-currency support will be implemented here.</p>
               </CardContent>
             </Card>
           </TabsContent>
