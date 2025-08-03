@@ -9,7 +9,6 @@ import { AuthPage } from "@/components/auth/AuthPage";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import Dashboard from "./pages/Dashboard";
-import { HRLayout } from "@/layouts/HRLayout";
 import StudentsPage from "./pages/StudentsPage";
 import AdmissionsPage from "./pages/AdmissionsPage";
 import AttendancePage from "./pages/AttendancePage";
@@ -85,9 +84,7 @@ const App = () => (
                           <Route path="/events" element={<EventsPage />} />
                           <Route path="/analytics" element={<AnalyticsPage />} />
                           <Route path="/ai-suite" element={<AISuitePage />} />
-                          <Route path="/hr-management/*" element={<HRLayout />}>
-                            <Route index element={<HRManagementPage />} />
-                          </Route>
+                          <Route path="/hr-management" element={<HRManagementPage />} />
                           <Route path="/accounting" element={<AccountingPage />} />
                           <Route path="/user-management" element={
                             <ProtectedRoute requiredRole="super_admin">

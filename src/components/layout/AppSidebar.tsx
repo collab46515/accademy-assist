@@ -61,79 +61,91 @@ import {
 import { SchoolSelector } from "@/components/layout/SchoolSelector";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-// Main navigation items
-const mainItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
+// ERP Module Structure
+const erpModules = [
+  {
+    title: "School Management",
+    url: "/",
+    icon: GraduationCap,
+    subItems: [
+      { title: "Dashboard", url: "/", icon: LayoutDashboard },
+      { title: "Students", url: "/students", icon: Users },
+      { title: "Unified Admissions", url: "/admissions", icon: UserPlus },
+      { title: "Attendance", url: "/attendance", icon: Calendar },
+      { title: "Curriculum", url: "/curriculum", icon: BookOpen },
+      { title: "Timetable", url: "/timetable", icon: Clock },
+      { title: "Gradebook", url: "/gradebook", icon: Calculator },
+      { title: "Exams", url: "/exams", icon: FileText },
+      { title: "Staff", url: "/staff", icon: Users },
+      { title: "Communications", url: "/communication", icon: MessageSquare },
+      { title: "Events", url: "/events", icon: Activity },
+      { title: "Activities", url: "/activities", icon: Activity },
+      { title: "Safeguarding", url: "/safeguarding", icon: Shield },
+      { title: "Portals", url: "/portals", icon: Globe },
+    ]
+  },
+  {
+    title: "HR Management",
+    url: "/hr-management",
+    icon: UserCheck,
+    subItems: [
+      { title: "HR Dashboard", url: "/hr-management", icon: LayoutDashboard },
+      { title: "Employee Directory", url: "/hr-management?tab=employees", icon: Users },
+      { title: "Performance Management", url: "/hr-management?tab=performance", icon: Target },
+      { title: "Recruitment", url: "/hr-management?tab=recruitment", icon: UserCog },
+      { title: "Training & Development", url: "/hr-management?tab=training", icon: GraduationCap },
+      { title: "Benefits Management", url: "/hr-management?tab=benefits", icon: Award },
+      { title: "Document Management", url: "/hr-management?tab=documents", icon: Folder },
+      { title: "Asset Management", url: "/hr-management?tab=assets", icon: Package },
+      { title: "Time Tracking", url: "/hr-management?tab=timeTracking", icon: Timer },
+      { title: "Travel & Expenses", url: "/hr-management?tab=travelExpenses", icon: Plane },
+      { title: "Employee Engagement", url: "/hr-management?tab=engagement", icon: MessageCircle },
+      { title: "Payroll & Benefits", url: "/hr-management?tab=payroll", icon: DollarSign },
+      { title: "Leave Management", url: "/hr-management?tab=leave", icon: Calendar },
+      { title: "Attendance Tracking", url: "/hr-management?tab=attendance", icon: Clock },
+    ]
+  },
+  {
+    title: "Accounting",
+    url: "/accounting",
+    icon: Calculator,
+    subItems: [
+      { title: "Accounting Dashboard", url: "/accounting", icon: LayoutDashboard },
+      { title: "Finance", url: "/finance", icon: CreditCard },
+      // Add more accounting sub-items as needed
+    ]
+  },
+  {
+    title: "Analytics",
+    url: "/analytics", 
+    icon: BarChart3,
+    subItems: [
+      { title: "Analytics Dashboard", url: "/analytics", icon: BarChart3 },
+      // Add more analytics sub-items as needed
+    ]
+  },
+  {
+    title: "System",
+    url: "/admin-management",
+    icon: Settings,
+    subItems: [
+      { title: "Admin Management", url: "/admin-management", icon: Shield },
+      { title: "AI Suite", url: "/ai-suite", icon: Bot },
+      { title: "Integrations", url: "/integrations", icon: Settings },
+      { title: "User Management", url: "/user-management", icon: Users },
+    ]
+  }
 ];
 
-// Student management items
-const studentItems = [
-  { title: "Students", url: "/students", icon: Users },
-  { title: "Unified Admissions", url: "/admissions", icon: UserPlus },
-  { title: "Attendance", url: "/attendance", icon: Calendar },
-];
-
-// Academic items
-const academicItems = [
-  { title: "Curriculum", url: "/curriculum", icon: BookOpen },
-  { title: "Timetable", url: "/timetable", icon: Clock },
-  { title: "Gradebook", url: "/gradebook", icon: Calculator },
-  { title: "Exams", url: "/exams", icon: FileText },
-];
-
-// Staff and operations items
-const operationsItems = [
-  { title: "Staff", url: "/staff", icon: Users },
-  { title: "Accounting", url: "/accounting", icon: Calculator },
-  { title: "Analytics", url: "/analytics", icon: BarChart3 },
-  { title: "Communications", url: "/communication", icon: MessageSquare },
-  { title: "Finance", url: "/finance", icon: CreditCard },
-];
-
-// HR Management sub-items (only show when on HR page)
-const hrItems = [
-  { title: "Employee Directory", url: "/hr-management?tab=employees", icon: Users },
-  { title: "Performance Management", url: "/hr-management?tab=performance", icon: Target },
-  { title: "Recruitment", url: "/hr-management?tab=recruitment", icon: UserCog },
-  { title: "Training & Development", url: "/hr-management?tab=training", icon: GraduationCap },
-  { title: "Benefits Management", url: "/hr-management?tab=benefits", icon: Award },
-  { title: "Document Management", url: "/hr-management?tab=documents", icon: Folder },
-  { title: "Asset Management", url: "/hr-management?tab=assets", icon: Package },
-  { title: "Time Tracking", url: "/hr-management?tab=timeTracking", icon: Timer },
-  { title: "Travel & Expenses", url: "/hr-management?tab=travelExpenses", icon: Plane },
-  { title: "Employee Engagement", url: "/hr-management?tab=engagement", icon: MessageCircle },
-  { title: "Payroll & Benefits", url: "/hr-management?tab=payroll", icon: DollarSign },
-  { title: "Leave Management", url: "/hr-management?tab=leave", icon: Calendar },
-  { title: "Attendance Tracking", url: "/hr-management?tab=attendance", icon: Clock },
-];
-
-// Additional features
-const featuresItems = [
-  { title: "Events", url: "/events", icon: Activity },
-  { title: "Activities", url: "/activities", icon: Activity },
-  { title: "Safeguarding", url: "/safeguarding", icon: Shield },
-  { title: "Portals", url: "/portals", icon: Globe },
-];
-
-// System items
-const systemItems = [
-  { title: "Admin Management", url: "/admin-management", icon: Shield },
-  { title: "AI Suite", url: "/ai-suite", icon: Bot },
-  { title: "Integrations", url: "/integrations", icon: Settings },
-  { title: "User Management", url: "/user-management", icon: Users },
-];
-
-// Admission Process Stages (detailed workflow stages)
-const admissionStages = [
-  { title: "Application Submitted", url: "/admissions?stage=0", icon: Send },
-  { title: "Document Verification", url: "/admissions?stage=1", icon: FileText },
-  { title: "Application Review", url: "/admissions?stage=2", icon: Eye },
-  { title: "Assessment/Interview", url: "/admissions?stage=3", icon: ClipboardCheck },
-  { title: "Admission Decision", url: "/admissions?stage=4", icon: CheckCircle },
-  { title: "Fee Payment", url: "/admissions?stage=5", icon: CreditCard },
-  { title: "Enrollment Confirmation", url: "/admissions?stage=6", icon: UserCheck },
-  { title: "Welcome & Onboarding", url: "/admissions?stage=7", icon: Users },
-];
+// Get current module based on pathname
+function getCurrentModule(pathname: string) {
+  if (pathname.startsWith('/hr-management')) return 'HR Management';
+  if (pathname.startsWith('/accounting') || pathname.startsWith('/finance')) return 'Accounting';
+  if (pathname.startsWith('/analytics')) return 'Analytics';
+  if (pathname.startsWith('/admin-management') || pathname.startsWith('/ai-suite') || 
+      pathname.startsWith('/integrations') || pathname.startsWith('/user-management')) return 'System';
+  return 'School Management';
+}
 
 interface SidebarGroupItemsProps {
   title: string;
@@ -220,7 +232,11 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
 
 export function AppSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { state } = useSidebar();
+  
+  const currentModule = getCurrentModule(location.pathname);
+  const currentModuleData = erpModules.find(module => module.title === currentModule);
   
   const getNavClassName = (isActive: boolean) => 
     isActive ? "bg-gradient-to-r from-primary/10 to-primary-glow/5 text-primary font-medium border-r-2 border-primary" : "";
@@ -234,8 +250,8 @@ export function AppSidebar() {
           </div>
           {state !== "collapsed" && (
             <div className="flex flex-col">
-              <span className="text-sm font-bold text-sidebar-foreground">School Manager</span>
-              <span className="text-xs text-muted-foreground">Education Platform</span>
+              <span className="text-sm font-bold text-sidebar-foreground">ERP System</span>
+              <span className="text-xs text-muted-foreground">{currentModule}</span>
             </div>
           )}
         </div>
@@ -243,25 +259,28 @@ export function AppSidebar() {
       </SidebarHeader>
       
       <SidebarContent className="gap-0">
-        {/* Main Dashboard */}
+        {/* Module Switcher */}
         <SidebarGroup>
+          <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 py-1.5">
+            Modules
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainItems.map((item) => {
-                const isActive = location.pathname === item.url;
+              {erpModules.map((module) => {
+                const isActive = module.title === currentModule;
                 return (
-                  <SidebarMenuItem key={item.title}>
+                  <SidebarMenuItem key={module.title}>
                     <SidebarMenuButton 
                       asChild 
                       isActive={isActive}
-                      tooltip={state === "collapsed" ? item.title : undefined}
+                      tooltip={state === "collapsed" ? module.title : undefined}
                     >
                       <NavLink 
-                        to={item.url} 
+                        to={module.url} 
                         className={`flex items-center gap-3 px-2 py-1.5 rounded-lg transition-all duration-200 hover:bg-sidebar-accent/50 ${getNavClassName(isActive)}`}
                       >
-                        <item.icon className="h-5 w-5 flex-shrink-0" />
-                        <span className="text-sm font-medium">{item.title}</span>
+                        <module.icon className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">{module.title}</span>
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -271,58 +290,32 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Student Management */}
-        <SidebarGroupItems 
-          title="Student Management" 
-          items={studentItems} 
-          defaultOpen={studentItems.some(item => location.pathname === item.url)}
-        />
+        {/* Current Module Features */}
+        {currentModuleData && (
+          <SidebarGroupItems 
+            title={`${currentModule} Features`}
+            items={currentModuleData.subItems}
+            defaultOpen={true}
+          />
+        )}
 
-        {/* Admission Process Stages - Only show when on admissions page */}
+        {/* Special case for Admissions stages when on admissions page */}
         {location.pathname === '/admissions' && (
           <SidebarGroupItems 
             title="Admission Stages" 
-            items={admissionStages}
+            items={[
+              { title: "Application Submitted", url: "/admissions?stage=0", icon: Send },
+              { title: "Document Verification", url: "/admissions?stage=1", icon: FileText },
+              { title: "Application Review", url: "/admissions?stage=2", icon: Eye },
+              { title: "Assessment/Interview", url: "/admissions?stage=3", icon: ClipboardCheck },
+              { title: "Admission Decision", url: "/admissions?stage=4", icon: CheckCircle },
+              { title: "Fee Payment", url: "/admissions?stage=5", icon: CreditCard },
+              { title: "Enrollment Confirmation", url: "/admissions?stage=6", icon: UserCheck },
+              { title: "Welcome & Onboarding", url: "/admissions?stage=7", icon: Users },
+            ]}
             defaultOpen={true}
           />
         )}
-
-        {/* HR Management sub-items - Only show when on HR page */}
-        {location.pathname === '/hr-management' && (
-          <SidebarGroupItems 
-            title="HR Features" 
-            items={hrItems}
-            defaultOpen={true}
-          />
-        )}
-
-        {/* Academic */}
-        <SidebarGroupItems 
-          title="Academic" 
-          items={academicItems}
-          defaultOpen={academicItems.some(item => location.pathname === item.url)}
-        />
-
-        {/* Operations */}
-        <SidebarGroupItems 
-          title="Operations" 
-          items={operationsItems}
-          defaultOpen={operationsItems.some(item => location.pathname === item.url)}
-        />
-
-        {/* Additional Features */}
-        <SidebarGroupItems 
-          title="Features" 
-          items={featuresItems}
-          defaultOpen={featuresItems.some(item => location.pathname === item.url)}
-        />
-
-        {/* System */}
-        <SidebarGroupItems 
-          title="System" 
-          items={systemItems}
-          defaultOpen={systemItems.some(item => location.pathname === item.url)}
-        />
       </SidebarContent>
     </Sidebar>
   );
