@@ -149,7 +149,10 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
                       tooltip={state === "collapsed" ? item.title : undefined}
                     >
                       <NavLink 
-                        to={item.url} 
+                        to={item.url.includes('?') ? {
+                          pathname: item.url.split('?')[0],
+                          search: '?' + item.url.split('?')[1]
+                        } : item.url}
                         className={getNavClassName(isActive)}
                       >
                         <item.icon className="h-4 w-4" />
