@@ -102,10 +102,10 @@ const schoolManagementModules = [
     status: "active" as const
   },
   {
-    title: "Finance & Fee Management",
-    description: "Full financial operations with automated invoicing, payment plans, and multi-currency support.",
+    title: "Fee Management",
+    description: "Complete fee management with fee structures, payment tracking, invoicing, and multi-currency support.",
     icon: CreditCard,
-    href: "/finance",
+    href: "/school-management/fee-management",
     status: "active" as const
   },
   {

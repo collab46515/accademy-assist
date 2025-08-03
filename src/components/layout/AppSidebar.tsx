@@ -92,6 +92,7 @@ const erpModules = [
       { title: "Timetable", url: "/timetable", icon: Clock },
       { title: "Gradebook", url: "/gradebook", icon: Calculator },
       { title: "Exams", url: "/exams", icon: FileText },
+      { title: "Fee Management", url: "/school-management/fee-management", icon: CreditCard },
       { title: "Staff", url: "/staff", icon: Users },
       { title: "Communications", url: "/communication", icon: MessageSquare },
       { title: "Events", url: "/events", icon: Activity },
@@ -127,7 +128,6 @@ const erpModules = [
     icon: Calculator,
     subItems: [
       { title: "Accounting Dashboard", url: "/accounting", icon: LayoutDashboard },
-      { title: "Student Fees", url: "/accounting/student-fees", icon: Users },
       { title: "Invoices", url: "/accounting/invoices", icon: FileText },
       { title: "Bills & Expenses", url: "/accounting/bills", icon: Receipt },
       { title: "Vendors", url: "/accounting/vendors", icon: Building2 },

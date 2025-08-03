@@ -20,6 +20,7 @@ import StaffPage from "./pages/StaffPage";
 import CommunicationPage from "./pages/CommunicationPage";
 import PortalsPage from "./pages/PortalsPage";
 import FinancePage from "./pages/FinancePage";
+import FeeManagementPage from "./pages/FeeManagementPage";
 import ActivitiesPage from "./pages/ActivitiesPage";
 import SafeguardingPage from "./pages/SafeguardingPage";
 import EventsPage from "./pages/EventsPage";
@@ -73,6 +74,7 @@ const App = () => (
                           <Route path="/gradebook" element={<GradebookPage />} />
                           <Route path="/exams" element={<ExamsPage />} />
                           <Route path="/staff" element={<StaffPage />} />
+                          <Route path="/school-management/fee-management" element={<FeeManagementPage />} />
                           <Route path="/communication" element={<CommunicationPage />} />
                           <Route path="/portals" element={<PortalsPage />} />
                           <Route path="/finance" element={<FinancePage />} />
