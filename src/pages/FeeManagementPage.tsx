@@ -18,6 +18,7 @@ import { FeeReportsAnalytics } from "@/components/fee-management/FeeReportsAnaly
 import { FeeCalendar } from "@/components/fee-management/FeeCalendar";
 import { RemindersAlerts } from "@/components/fee-management/RemindersAlerts";
 import { FeeDashboard } from "@/components/fee-management/FeeDashboard";
+import FeeCollections from "@/components/fee-management/FeeCollections";
 import { useFeeData } from "@/hooks/useFeeData";
 
 const FeeManagementOverview = () => {
@@ -181,6 +182,7 @@ const FeeManagementPage = () => {
   return (
     <Routes>
       <Route index element={<FeeDashboard />} />
+      <Route path="collections" element={<FeeCollections />} />
       <Route path="structure" element={<FeeStructureTabs />} />
       <Route path="invoices" element={<InvoiceGeneration />} />
       <Route path="payments" element={<PaymentCollection />} />

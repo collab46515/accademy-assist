@@ -100,6 +100,7 @@ const erpModules = [
         icon: CreditCard,
         subItems: [
           { title: "Fee Dashboard", url: "/school-management/fee-management", icon: Settings },
+          { title: "Fee Collections", url: "/school-management/fee-management/collections", icon: CreditCard },
           { title: "Invoices", url: "/school-management/fee-management/invoices", icon: FileText },
           { title: "Payments", url: "/school-management/fee-management/payments", icon: CreditCard },
           { title: "Installment Plans", url: "/school-management/fee-management/installments", icon: Calendar },
