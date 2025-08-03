@@ -6,7 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AuthPage } from "@/components/auth/AuthPage";
-import { Navbar } from "@/components/layout/Navbar";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/layout/AppSidebar";
 import Dashboard from "./pages/Dashboard";
 import StudentsPage from "./pages/StudentsPage";
 import AdmissionsPage from "./pages/AdmissionsPage";
@@ -37,46 +38,58 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <div className="min-h-screen bg-background">
-            <Routes>
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/*" element={
-                <ProtectedRoute>
-                  <Navbar />
-                  <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/students" element={<StudentsPage />} />
-                    <Route path="/admissions" element={<AdmissionsPage />} />
-                    <Route path="/attendance" element={<AttendancePage />} />
-                    <Route path="/curriculum" element={<CurriculumPage />} />
-                    <Route path="/assessment" element={<AssessmentPage />} />
-                    <Route path="/gradebook" element={<GradebookPage />} />
-                    <Route path="/exams" element={<ExamsPage />} />
-                    <Route path="/staff" element={<StaffPage />} />
-                    <Route path="/communication" element={<CommunicationPage />} />
-                    <Route path="/portals" element={<PortalsPage />} />
-                    <Route path="/finance" element={<FinancePage />} />
-                    <Route path="/activities" element={<ActivitiesPage />} />
-                    <Route path="/safeguarding" element={
-                      <ProtectedRoute requiredRole="dsl">
-                        <SafeguardingPage />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/events" element={<EventsPage />} />
-                    <Route path="/analytics" element={<AnalyticsPage />} />
-                    <Route path="/ai-suite" element={<AISuitePage />} />
-                    <Route path="/user-management" element={
-                      <ProtectedRoute requiredRole="super_admin">
-                        <UserManagementPage />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/integrations" element={<IntegrationsPage />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </ProtectedRoute>
-              } />
-            </Routes>
-          </div>
+          <Routes>
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/*" element={
+              <ProtectedRoute>
+                <SidebarProvider defaultOpen={true}>
+                  <div className="flex min-h-screen w-full">
+                    <AppSidebar />
+                    <SidebarInset>
+                      <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
+                        <SidebarTrigger className="-ml-1" />
+                        <div className="ml-auto">
+                          <span className="text-sm text-muted-foreground">School Management System</span>
+                        </div>
+                      </header>
+                      <main className="flex-1 overflow-auto">
+                        <Routes>
+                          <Route path="/" element={<Dashboard />} />
+                          <Route path="/students" element={<StudentsPage />} />
+                          <Route path="/admissions" element={<AdmissionsPage />} />
+                          <Route path="/attendance" element={<AttendancePage />} />
+                          <Route path="/curriculum" element={<CurriculumPage />} />
+                          <Route path="/assessment" element={<AssessmentPage />} />
+                          <Route path="/gradebook" element={<GradebookPage />} />
+                          <Route path="/exams" element={<ExamsPage />} />
+                          <Route path="/staff" element={<StaffPage />} />
+                          <Route path="/communication" element={<CommunicationPage />} />
+                          <Route path="/portals" element={<PortalsPage />} />
+                          <Route path="/finance" element={<FinancePage />} />
+                          <Route path="/activities" element={<ActivitiesPage />} />
+                          <Route path="/safeguarding" element={
+                            <ProtectedRoute requiredRole="dsl">
+                              <SafeguardingPage />
+                            </ProtectedRoute>
+                          } />
+                          <Route path="/events" element={<EventsPage />} />
+                          <Route path="/analytics" element={<AnalyticsPage />} />
+                          <Route path="/ai-suite" element={<AISuitePage />} />
+                          <Route path="/user-management" element={
+                            <ProtectedRoute requiredRole="super_admin">
+                              <UserManagementPage />
+                            </ProtectedRoute>
+                          } />
+                          <Route path="/integrations" element={<IntegrationsPage />} />
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                      </main>
+                    </SidebarInset>
+                  </div>
+                </SidebarProvider>
+              </ProtectedRoute>
+            } />
+          </Routes>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
