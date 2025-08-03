@@ -142,7 +142,6 @@ export function useMasterData() {
           id,
           parent_id,
           student_id,
-          relationship_type,
           created_at
         `),
         supabase.from('staff').select('*').order('last_name'),
