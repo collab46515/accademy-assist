@@ -94,14 +94,42 @@ export const FeeStructureTabs = () => {
   
   const { feeStructures, loading } = useFeeData();
 
-  const filteredStructures = feeStructures.filter(structure => {
-    const matchesSearch = structure.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTerm = selectedTerm === 'all' || structure.term === selectedTerm;
-    const matchesStatus = statusFilter === 'all' || structure.status === statusFilter;
-    const matchesYear = structure.academic_year === selectedAcademicYear;
+  // Helper function to normalize structure data
+  const normalizeStructure = (structure: any) => ({
+    id: structure.id,
+    name: structure.name,
+    term: structure.term,
+    status: structure.status || 'draft',
+    academic_year: structure.academic_year || structure.academicYear,
+    total_amount: structure.total_amount || structure.totalAmount || 0,
+    fee_heads: structure.fee_heads || [],
+    feeHeadCount: structure.feeHeadCount || (structure.fee_heads?.length) || 0,
+    studentsAssigned: structure.studentsAssigned || 0,
+    updated_at: structure.updated_at || structure.lastModified || new Date().toISOString()
+  });
+
+  // Use real database data, fallback to mock if empty
+  const dataToUse = feeStructures.length > 0 ? feeStructures.map(normalizeStructure) : MOCK_FEE_STRUCTURES.map(normalizeStructure);
+  
+  const filteredStructures = dataToUse.filter(structure => {
+    const name = structure.name || '';
+    const term = structure.term || '';
+    const status = structure.status || 'draft';
+    const academicYear = structure.academic_year || '';
+    
+    const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTerm = selectedTerm === 'all' || term === selectedTerm;
+    const matchesStatus = statusFilter === 'all' || status === statusFilter;
+    const matchesYear = academicYear === selectedAcademicYear;
     
     return matchesSearch && matchesTerm && matchesStatus && matchesYear;
   });
+
+  // Debug logging
+  console.log('FeeStructures from DB:', feeStructures);
+  console.log('Loading state:', loading);
+  console.log('Data being used:', dataToUse);
+  console.log('Filtered structures:', filteredStructures);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -273,30 +301,38 @@ export const FeeStructureTabs = () => {
                 {filteredStructures.map((structure) => (
                   <div key={structure.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
-                      <div className="space-y-1">
+                       <div className="space-y-1">
                         <p className="font-medium text-foreground">{structure.name}</p>
-                        <p className="text-sm text-muted-foreground">{structure.academic_year} • {structure.term || 'N/A'}</p>
-                      </div>
-                      
-                      <div className="text-center">
-                        <p className="font-semibold text-foreground">£{(structure.total_amount || 0).toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">{structure.fee_heads?.length || 0} fee heads</p>
-                      </div>
-                      
-                      <div className="text-center">
-                        <p className="font-semibold text-foreground">0</p>
+                        <p className="text-sm text-muted-foreground">
+                          {structure.academic_year} • {structure.term || 'N/A'}
+                        </p>
+                       </div>
+                       
+                       <div className="text-center">
+                        <p className="font-semibold text-foreground">
+                          £{structure.total_amount.toLocaleString()}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {structure.feeHeadCount} fee heads
+                        </p>
+                       </div>
+                       
+                       <div className="text-center">
+                        <p className="font-semibold text-foreground">
+                          {structure.studentsAssigned}
+                        </p>
                         <p className="text-xs text-muted-foreground">students assigned</p>
-                      </div>
-                      
-                      <div className="flex justify-center">
-                        <Badge className={getStatusColor(structure.status || 'draft')}>
-                          {structure.status || 'draft'}
+                       </div>
+                       
+                       <div className="flex justify-center">
+                        <Badge className={getStatusColor(structure.status)}>
+                          {structure.status}
                         </Badge>
-                      </div>
-                      
-                      <div className="text-center text-sm text-muted-foreground">
+                       </div>
+                       
+                       <div className="text-center text-sm text-muted-foreground">
                         <p>Modified: {new Date(structure.updated_at).toLocaleDateString()}</p>
-                      </div>
+                       </div>
                       
                       <div className="flex items-center gap-2 justify-end">
                         <Button variant="ghost" size="sm">
