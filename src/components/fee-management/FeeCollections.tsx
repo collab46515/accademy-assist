@@ -107,6 +107,10 @@ export default function FeeCollections() {
   const [showStudentsPaidModal, setShowStudentsPaidModal] = useState(false);
   const [showCashCollectedModal, setShowCashCollectedModal] = useState(false);
   const [showPendingModal, setShowPendingModal] = useState(false);
+  const [showDetailedCashModal, setShowDetailedCashModal] = useState(false);
+  const [showClassBreakdownModal, setShowClassBreakdownModal] = useState(false);
+  const [showTimeBreakdownModal, setShowTimeBreakdownModal] = useState(false);
+  const [showFeeTypeBreakdownModal, setShowFeeTypeBreakdownModal] = useState(false);
   const { toast } = useToast();
 
   const [paymentForm, setPaymentForm] = useState({
@@ -275,6 +279,91 @@ export default function FeeCollections() {
     });
   };
 
+  // CSV Export Functions
+  const exportToCSV = (data: any[], filename: string, headers: string[]) => {
+    const csvContent = [
+      headers.join(','),
+      ...data.map(row => headers.map(header => `"${row[header] || ''}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    toast({
+      title: "Export Successful",
+      description: `${filename} has been downloaded`,
+    });
+  };
+
+  const exportStudentsList = () => {
+    const data = students.map(student => ({
+      'Student Name': student.name,
+      'Student ID': student.studentId,
+      'Class': student.class,
+      'Parent Name': student.parentName,
+      'Fee Type': student.feeType,
+      'Amount Due': student.amountDue,
+      'Amount Paid': student.amountPaid || 0,
+      'Outstanding': student.amountDue - (student.amountPaid || 0),
+      'Status': student.status,
+      'Due Time': student.dueTime
+    }));
+
+    exportToCSV(
+      data,
+      `fee-collections-${new Date().toISOString().split('T')[0]}.csv`,
+      ['Student Name', 'Student ID', 'Class', 'Parent Name', 'Fee Type', 'Amount Due', 'Amount Paid', 'Outstanding', 'Status', 'Due Time']
+    );
+  };
+
+  const exportPendingPayments = () => {
+    const data = students.filter(s => s.status === 'not_paid').map(student => ({
+      'Student Name': student.name,
+      'Student ID': student.studentId,
+      'Class': student.class,
+      'Parent Name': student.parentName,
+      'Fee Type': student.feeType,
+      'Amount Due': student.amountDue,
+      'Days Overdue': '2',
+      'Due Time': student.dueTime
+    }));
+
+    exportToCSV(
+      data,
+      `pending-payments-${new Date().toISOString().split('T')[0]}.csv`,
+      ['Student Name', 'Student ID', 'Class', 'Parent Name', 'Fee Type', 'Amount Due', 'Days Overdue', 'Due Time']
+    );
+  };
+
+  const exportCollectionsSummary = () => {
+    const data = [{
+      'Date': new Date().toLocaleDateString(),
+      'Total Collected': mockCollectionSummary.totalCollected,
+      'Cash Collected': mockCollectionSummary.cashCollected,
+      'Bank Transfers': mockCollectionSummary.bankTransfers,
+      'Online Payments': mockCollectionSummary.onlinePayments,
+      'Total Students': mockCollectionSummary.totalStudents,
+      'Paid Students': mockCollectionSummary.paidStudents,
+      'Partial Payments': mockCollectionSummary.partialPayments,
+      'Pending Payments': mockCollectionSummary.pendingPayments
+    }];
+
+    exportToCSV(
+      data,
+      `daily-collections-summary-${new Date().toISOString().split('T')[0]}.csv`,
+      ['Date', 'Total Collected', 'Cash Collected', 'Bank Transfers', 'Online Payments', 'Total Students', 'Paid Students', 'Partial Payments', 'Pending Payments']
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -412,6 +501,11 @@ export default function FeeCollections() {
                 Bulk Pay ({selectedStudents.length})
               </Button>
             )}
+            
+            <Button variant="outline" onClick={exportStudentsList}>
+              <Download className="w-4 h-4 mr-2" />
+              Export All
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -696,9 +790,23 @@ export default function FeeCollections() {
 
       {/* Total Collected Drill-Down Modal */}
       <Dialog open={showTotalCollectedModal} onOpenChange={setShowTotalCollectedModal}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Total Collections Breakdown</DialogTitle>
+            <DialogTitle className="flex items-center justify-between">
+              Total Collections Breakdown
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={exportCollectionsSummary}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Summary
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => setShowClassBreakdownModal(true)}>
+                  Class Breakdown
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => setShowTimeBreakdownModal(true)}>
+                  Time Analysis
+                </Button>
+              </div>
+            </DialogTitle>
           </DialogHeader>
           
           <div className="space-y-6">
@@ -896,7 +1004,29 @@ export default function FeeCollections() {
       <Dialog open={showCashCollectedModal} onOpenChange={setShowCashCollectedModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Cash Collection Details</DialogTitle>
+            <DialogTitle className="flex items-center justify-between">
+              Cash Collection Details
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={() => setShowDetailedCashModal(true)}>
+                  <Calculator className="w-4 h-4 mr-2" />
+                  Detailed Analysis
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => {
+                  const cashData = students.filter(s => s.status === 'paid').map(s => ({
+                    'Student': s.name,
+                    'Class': s.class,
+                    'Amount': s.amountDue,
+                    'Fee Type': s.feeType,
+                    'Time': '09:15 AM'
+                  }));
+                  exportToCSV(cashData, `cash-transactions-${new Date().toISOString().split('T')[0]}.csv`, 
+                    ['Student', 'Class', 'Amount', 'Fee Type', 'Time']);
+                }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Cash
+                </Button>
+              </div>
+            </DialogTitle>
           </DialogHeader>
           
           <div className="space-y-6">
@@ -1100,6 +1230,431 @@ export default function FeeCollections() {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Class Breakdown Modal */}
+      <Dialog open={showClassBreakdownModal} onOpenChange={setShowClassBreakdownModal}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              Class-wise Collection Analysis
+              <Button size="sm" variant="outline" onClick={() => {
+                const classData = ['7A', '8B', '9C'].map(cls => ({
+                  'Class': cls,
+                  'Total Students': students.filter(s => s.class === cls).length,
+                  'Paid Students': students.filter(s => s.class === cls && s.status === 'paid').length,
+                  'Total Due': students.filter(s => s.class === cls).reduce((sum, s) => sum + s.amountDue, 0),
+                  'Total Collected': students.filter(s => s.class === cls).reduce((sum, s) => sum + (s.amountPaid || 0), 0),
+                  'Outstanding': students.filter(s => s.class === cls).reduce((sum, s) => sum + (s.amountDue - (s.amountPaid || 0)), 0)
+                }));
+                exportToCSV(classData, `class-breakdown-${new Date().toISOString().split('T')[0]}.csv`, 
+                  ['Class', 'Total Students', 'Paid Students', 'Total Due', 'Total Collected', 'Outstanding']);
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export Class Data
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {['7A', '8B', '9C'].map(cls => {
+                const classStudents = students.filter(s => s.class === cls);
+                const paidStudents = classStudents.filter(s => s.status === 'paid').length;
+                const totalDue = classStudents.reduce((sum, s) => sum + s.amountDue, 0);
+                const totalCollected = classStudents.reduce((sum, s) => sum + (s.amountPaid || 0), 0);
+                const collectionRate = totalDue > 0 ? (totalCollected / totalDue) * 100 : 0;
+                
+                return (
+                  <Card key={cls} className="cursor-pointer hover:shadow-lg transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="text-center mb-4">
+                        <h3 className="text-xl font-bold">Class {cls}</h3>
+                        <p className="text-sm text-muted-foreground">{classStudents.length} students</p>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-sm">Collection Rate:</span>
+                          <span className="font-semibold">{collectionRate.toFixed(1)}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Students Paid:</span>
+                          <span className="font-semibold">{paidStudents}/{classStudents.length}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Total Collected:</span>
+                          <span className="font-semibold">£{totalCollected.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Outstanding:</span>
+                          <span className="font-semibold text-destructive">£{(totalDue - totalCollected).toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+            
+            <Tabs defaultValue="7A" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="7A">Class 7A</TabsTrigger>
+                <TabsTrigger value="8B">Class 8B</TabsTrigger>
+                <TabsTrigger value="9C">Class 9C</TabsTrigger>
+              </TabsList>
+              
+              {['7A', '8B', '9C'].map(cls => (
+                <TabsContent key={cls} value={cls} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Payment Status Breakdown</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {['paid', 'partial', 'not_paid'].map(status => {
+                            const count = students.filter(s => s.class === cls && s.status === status).length;
+                            const percentage = students.filter(s => s.class === cls).length > 0 
+                              ? (count / students.filter(s => s.class === cls).length) * 100 
+                              : 0;
+                            return (
+                              <div key={status} className="flex justify-between">
+                                <span className="capitalize">{status.replace('_', ' ')}:</span>
+                                <span className="font-semibold">{count} ({percentage.toFixed(1)}%)</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Fee Type Analysis</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {['Tuition', 'Transport', 'Activity'].map(feeType => {
+                            const classStudentsWithFee = students.filter(s => s.class === cls && s.feeType === feeType);
+                            const collected = classStudentsWithFee.reduce((sum, s) => sum + (s.amountPaid || 0), 0);
+                            return (
+                              <div key={feeType} className="flex justify-between">
+                                <span>{feeType}:</span>
+                                <span className="font-semibold">£{collected.toFixed(2)}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Student Details - Class {cls}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2 max-h-60 overflow-y-auto">
+                        {students.filter(s => s.class === cls).map(student => (
+                          <div key={student.id} className="flex items-center justify-between p-3 border rounded">
+                            <div>
+                              <p className="font-medium">{student.name}</p>
+                              <p className="text-sm text-muted-foreground">{student.feeType} • {student.dueTime}</p>
+                            </div>
+                            <div className="text-right">
+                              {getStatusBadge(student.status)}
+                              <p className="text-sm text-muted-foreground mt-1">
+                                £{(student.amountPaid || 0).toFixed(2)} / £{student.amountDue.toFixed(2)}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              ))}
+            </Tabs>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Time Breakdown Modal */}
+      <Dialog open={showTimeBreakdownModal} onOpenChange={setShowTimeBreakdownModal}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              Time-based Collection Analysis
+              <Button size="sm" variant="outline" onClick={() => {
+                const timeData = [
+                  {
+                    'Time Period': 'Morning (8:00-12:00)',
+                    'Total Collections': '£1,650.00',
+                    'Number of Transactions': '18',
+                    'Average Payment': '£91.67',
+                    'Payment Methods': 'Cash: 60%, Bank: 25%, Online: 15%'
+                  },
+                  {
+                    'Time Period': 'Afternoon (12:00-17:00)',
+                    'Total Collections': '£1,200.00',
+                    'Number of Transactions': '14',
+                    'Average Payment': '£85.71',
+                    'Payment Methods': 'Cash: 45%, Bank: 35%, Online: 20%'
+                  }
+                ];
+                exportToCSV(timeData, `time-analysis-${new Date().toISOString().split('T')[0]}.csv`, 
+                  ['Time Period', 'Total Collections', 'Number of Transactions', 'Average Payment', 'Payment Methods']);
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export Time Data
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="text-center mb-4">
+                    <Clock className="h-8 w-8 mx-auto mb-2 text-primary" />
+                    <h3 className="text-lg font-semibold">Morning Collections</h3>
+                    <p className="text-sm text-muted-foreground">8:00 AM - 12:00 PM</p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span>Total Collected:</span>
+                      <span className="font-bold text-success">£1,650.00</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Transactions:</span>
+                      <span className="font-semibold">18</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Average Payment:</span>
+                      <span className="font-semibold">£91.67</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Peak Hour:</span>
+                      <span className="font-semibold">10:00-11:00 AM</span>
+                    </div>
+                  </div>
+                  
+                  <Separator className="my-4" />
+                  
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Payment Methods</h4>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span>Cash:</span>
+                        <span>60% (£990.00)</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Bank Transfer:</span>
+                        <span>25% (£412.50)</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Online:</span>
+                        <span>15% (£247.50)</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="text-center mb-4">
+                    <Clock className="h-8 w-8 mx-auto mb-2 text-warning" />
+                    <h3 className="text-lg font-semibold">Afternoon Collections</h3>
+                    <p className="text-sm text-muted-foreground">12:00 PM - 5:00 PM</p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span>Total Collected:</span>
+                      <span className="font-bold text-success">£1,200.00</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Transactions:</span>
+                      <span className="font-semibold">14</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Average Payment:</span>
+                      <span className="font-semibold">£85.71</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Peak Hour:</span>
+                      <span className="font-semibold">2:00-3:00 PM</span>
+                    </div>
+                  </div>
+                  
+                  <Separator className="my-4" />
+                  
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Payment Methods</h4>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span>Cash:</span>
+                        <span>45% (£540.00)</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Bank Transfer:</span>
+                        <span>35% (£420.00)</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Online:</span>
+                        <span>20% (£240.00)</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Hourly Collection Pattern</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { time: '8-9 AM', amount: 320, transactions: 4 },
+                    { time: '9-10 AM', amount: 480, transactions: 6 },
+                    { time: '10-11 AM', amount: 650, transactions: 7 },
+                    { time: '11-12 PM', amount: 200, transactions: 1 },
+                    { time: '12-1 PM', amount: 150, transactions: 2 },
+                    { time: '1-2 PM', amount: 250, transactions: 3 },
+                    { time: '2-3 PM', amount: 450, transactions: 5 },
+                    { time: '3-4 PM', amount: 350, transactions: 4 }
+                  ].map((hour, index) => (
+                    <div key={index} className="text-center p-3 border rounded">
+                      <p className="font-semibold">{hour.time}</p>
+                      <p className="text-sm text-success font-medium">£{hour.amount}</p>
+                      <p className="text-xs text-muted-foreground">{hour.transactions} transactions</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Detailed Cash Modal */}
+      <Dialog open={showDetailedCashModal} onOpenChange={setShowDetailedCashModal}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              Detailed Cash Analysis
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={() => {
+                  const cashData = students.filter(s => s.status === 'paid').map(s => ({
+                    'Student': s.name,
+                    'Class': s.class,
+                    'Amount': s.amountDue,
+                    'Fee Type': s.feeType,
+                    'Time': '09:15 AM',
+                    'Cashier': 'John Doe'
+                  }));
+                  exportToCSV(cashData, `cash-transactions-${new Date().toISOString().split('T')[0]}.csv`, 
+                    ['Student', 'Class', 'Amount', 'Fee Type', 'Time', 'Cashier']);
+                }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Cash Data
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => setShowDetailedCashModal(false)}>
+                  Close
+                </Button>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <Banknote className="h-6 w-6 mx-auto mb-2 text-warning" />
+                  <p className="text-sm text-muted-foreground">Cash Float Start</p>
+                  <p className="text-lg font-bold">£500.00</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <Calculator className="h-6 w-6 mx-auto mb-2 text-primary" />
+                  <p className="text-sm text-muted-foreground">Cash Received</p>
+                  <p className="text-lg font-bold">£{mockCollectionSummary.cashCollected.toFixed(2)}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <PoundSterling className="h-6 w-6 mx-auto mb-2 text-success" />
+                  <p className="text-sm text-muted-foreground">Expected Till</p>
+                  <p className="text-lg font-bold">£{(500 + mockCollectionSummary.cashCollected).toFixed(2)}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <CheckCircle className="h-6 w-6 mx-auto mb-2 text-success" />
+                  <p className="text-sm text-muted-foreground">Till Variance</p>
+                  <p className="text-lg font-bold text-success">£0.00</p>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Largest Cash Payments</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center p-2 border rounded">
+                      <span className="font-medium">John Smith (7A)</span>
+                      <span className="font-bold">£450.00</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 border rounded">
+                      <span className="font-medium">Lucy Davis (7B)</span>
+                      <span className="font-bold">£450.00</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 border rounded">
+                      <span className="font-medium">Sarah Williams (8C)</span>
+                      <span className="font-bold">£120.00</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Cash Payment Frequency</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span>£400+ payments:</span>
+                      <span className="font-semibold">3 payments</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>£100-399 payments:</span>
+                      <span className="font-semibold">8 payments</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Under £100 payments:</span>
+                      <span className="font-semibold">4 payments</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between font-medium">
+                      <span>Total Cash Payments:</span>
+                      <span>15 payments</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
