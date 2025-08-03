@@ -352,9 +352,10 @@ export const InstallmentPlans = () => {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
+                          alert('View details clicked');
                           handleViewDetails(plan);
                         }}
-                        className="z-10 relative"
+                        style={{ pointerEvents: 'auto', zIndex: 1000 }}
                         title="View Details"
                       >
                         <Eye className="h-4 w-4" />
@@ -365,9 +366,10 @@ export const InstallmentPlans = () => {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
+                          alert('Edit clicked');
                           handleEditPlan(plan);
                         }}
-                        className="z-10 relative"
+                        style={{ pointerEvents: 'auto', zIndex: 1000 }}
                         title="Edit Plan"
                       >
                         <Edit className="h-4 w-4" />
@@ -378,9 +380,10 @@ export const InstallmentPlans = () => {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
+                          alert('Export clicked');
                           handleExportInstallments(plan);
                         }}
-                        className="z-10 relative"
+                        style={{ pointerEvents: 'auto', zIndex: 1000 }}
                         title="Export Schedule"
                       >
                         <Download className="h-4 w-4" />
@@ -391,9 +394,10 @@ export const InstallmentPlans = () => {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
+                          alert('Delete clicked');
                           handleDeletePlan(plan.id);
                         }}
-                        className="z-10 relative"
+                        style={{ pointerEvents: 'auto', zIndex: 1000 }}
                         title="Delete Plan"
                       >
                         <Trash2 className="h-4 w-4" />
