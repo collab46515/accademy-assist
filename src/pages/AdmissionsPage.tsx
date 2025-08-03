@@ -44,6 +44,10 @@ const AdmissionsPage = () => {
 
   // Handle URL parameters for tab and pass filter to ApplicationManagement
   React.useEffect(() => {
+    console.log('AdmissionsPage useEffect triggered');
+    console.log('Current URL:', window.location.href);
+    console.log('URL search params:', window.location.search);
+    
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
     const filterParam = urlParams.get('filter');
@@ -52,13 +56,14 @@ const AdmissionsPage = () => {
     console.log('AdmissionsPage - Current filterStage:', filterStage);
     
     if (tabParam) {
+      console.log('Setting activeTab to:', tabParam);
       setActiveTab(tabParam);
     }
     if (filterParam) {
       console.log('AdmissionsPage - Setting filterStage to:', filterParam);
       setFilterStage(filterParam);
     }
-  }, []);
+  }, [window.location.search]);
 
   const [newApplication, setNewApplication] = useState({
     student: "",
