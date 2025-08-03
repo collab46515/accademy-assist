@@ -14,13 +14,24 @@ import { DocumentManager } from './documents/DocumentManager';
 import { ReportsAndAnalytics } from './reports/ReportsAndAnalytics';
 import { Search, Filter, Users, Clock, CheckCircle, AlertTriangle, Calendar, FileText, BarChart3 } from 'lucide-react';
 
-export function ApplicationManagement() {
+interface ApplicationManagementProps {
+  initialFilter?: string;
+}
+
+export function ApplicationManagement({ initialFilter = 'all' }: ApplicationManagementProps) {
   const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState(initialFilter);
   const [activeTab, setActiveTab] = useState('applications');
 
   // Check URL parameters for initial filter state
+  // Update filter when initialFilter prop changes
+  React.useEffect(() => {
+    console.log('ApplicationManagement - initialFilter changed:', initialFilter);
+    setStatusFilter(initialFilter);
+  }, [initialFilter]);
+
+  // Also check URL parameters for filter changes
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const filterParam = urlParams.get('filter');

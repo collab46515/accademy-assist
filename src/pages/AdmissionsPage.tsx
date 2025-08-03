@@ -40,14 +40,21 @@ const AdmissionsPage = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("management");
 
-  // Handle URL parameters for tab
+  // Handle URL parameters for tab and pass filter to ApplicationManagement
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
+    const filterParam = urlParams.get('filter');
+    
+    console.log('AdmissionsPage - URL params:', { tab: tabParam, filter: filterParam });
+    
     if (tabParam) {
       setActiveTab(tabParam);
     }
-  }, []);
+    if (filterParam) {
+      setFilterStage(filterParam);
+    }
+  }, [window.location.search]); // Watch for URL changes
 
   const [newApplication, setNewApplication] = useState({
     student: "",
@@ -326,7 +333,7 @@ const AdmissionsPage = () => {
         </TabsList>
 
         <TabsContent value="management" className="space-y-6">
-          <ApplicationManagement />
+          <ApplicationManagement initialFilter={filterStage} />
         </TabsContent>
 
         <TabsContent value="applications" className="space-y-6">
