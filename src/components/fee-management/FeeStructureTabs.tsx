@@ -91,12 +91,14 @@ export const FeeStructureTabs = () => {
   const [selectedTerm, setSelectedTerm] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  
+  const { feeStructures, loading } = useFeeData();
 
-  const filteredStructures = MOCK_FEE_STRUCTURES.filter(structure => {
+  const filteredStructures = feeStructures.filter(structure => {
     const matchesSearch = structure.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTerm = selectedTerm === 'all' || structure.term === selectedTerm;
     const matchesStatus = statusFilter === 'all' || structure.status === statusFilter;
-    const matchesYear = structure.academicYear === selectedAcademicYear;
+    const matchesYear = structure.academic_year === selectedAcademicYear;
     
     return matchesSearch && matchesTerm && matchesStatus && matchesYear;
   });
@@ -113,10 +115,8 @@ export const FeeStructureTabs = () => {
   // Calculate overview stats
   const totalStructures = filteredStructures.length;
   const activeStructures = filteredStructures.filter(s => s.status === 'active').length;
-  const totalStudentsAssigned = filteredStructures.reduce((sum, s) => sum + s.studentsAssigned, 0);
-  const totalRevenue = filteredStructures
-    .filter(s => s.status === 'active')
-    .reduce((sum, s) => sum * s.studentsAssigned, 0);
+  const totalStudentsAssigned = 0; // TODO: Add student assignment tracking
+  const totalRevenue = 0; // TODO: Calculate from assignments
 
   return (
     <div className="space-y-6">
@@ -275,27 +275,27 @@ export const FeeStructureTabs = () => {
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
                       <div className="space-y-1">
                         <p className="font-medium text-foreground">{structure.name}</p>
-                        <p className="text-sm text-muted-foreground">{structure.academicYear} • {structure.term}</p>
+                        <p className="text-sm text-muted-foreground">{structure.academic_year} • {structure.term || 'N/A'}</p>
                       </div>
                       
                       <div className="text-center">
-                        <p className="font-semibold text-foreground">£{structure.totalAmount.toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">{structure.feeHeadCount} fee heads</p>
+                        <p className="font-semibold text-foreground">£{(structure.total_amount || 0).toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground">{structure.fee_heads?.length || 0} fee heads</p>
                       </div>
                       
                       <div className="text-center">
-                        <p className="font-semibold text-foreground">{structure.studentsAssigned}</p>
+                        <p className="font-semibold text-foreground">0</p>
                         <p className="text-xs text-muted-foreground">students assigned</p>
                       </div>
                       
                       <div className="flex justify-center">
-                        <Badge className={getStatusColor(structure.status)}>
-                          {structure.status}
+                        <Badge className={getStatusColor(structure.status || 'draft')}>
+                          {structure.status || 'draft'}
                         </Badge>
                       </div>
                       
                       <div className="text-center text-sm text-muted-foreground">
-                        <p>Modified: {new Date(structure.lastModified).toLocaleDateString()}</p>
+                        <p>Modified: {new Date(structure.updated_at).toLocaleDateString()}</p>
                       </div>
                       
                       <div className="flex items-center gap-2 justify-end">
@@ -316,9 +316,16 @@ export const FeeStructureTabs = () => {
                   </div>
                 ))}
                 
-                {filteredStructures.length === 0 && (
+                {loading && (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <p>Loading fee structures...</p>
+                  </div>
+                )}
+                
+                {!loading && filteredStructures.length === 0 && (
                   <div className="text-center py-12 text-muted-foreground">
                     <p>No fee structures found matching your filters.</p>
+                    <p className="text-sm mt-2">Create your first fee structure to get started.</p>
                   </div>
                 )}
               </div>

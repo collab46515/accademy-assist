@@ -25,7 +25,10 @@ export interface FeeStructure {
   academic_year: string;
   term?: string;
   school_id: string;
-  fee_heads: string[];
+  fee_heads: any[];
+  total_amount: number;
+  applicable_year_groups?: string[];
+  status: string;
   created_at: string;
   updated_at: string;
 }
