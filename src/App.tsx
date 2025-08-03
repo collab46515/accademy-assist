@@ -7,6 +7,21 @@ import { Navbar } from "@/components/layout/Navbar";
 import Dashboard from "./pages/Dashboard";
 import StudentsPage from "./pages/StudentsPage";
 import AdmissionsPage from "./pages/AdmissionsPage";
+import AttendancePage from "./pages/AttendancePage";
+import CurriculumPage from "./pages/CurriculumPage";
+import AssessmentPage from "./pages/AssessmentPage";
+import GradebookPage from "./pages/GradebookPage";
+import ExamsPage from "./pages/ExamsPage";
+import StaffPage from "./pages/StaffPage";
+import CommunicationPage from "./pages/CommunicationPage";
+import PortalsPage from "./pages/PortalsPage";
+import FinancePage from "./pages/FinancePage";
+import ActivitiesPage from "./pages/ActivitiesPage";
+import SafeguardingPage from "./pages/SafeguardingPage";
+import EventsPage from "./pages/EventsPage";
+import AnalyticsPage from "./pages/AnalyticsPage";
+import AISuitePage from "./pages/AISuitePage";
+import IntegrationsPage from "./pages/IntegrationsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,21 +38,21 @@ const App = () => (
             <Route path="/" element={<Dashboard />} />
             <Route path="/students" element={<StudentsPage />} />
             <Route path="/admissions" element={<AdmissionsPage />} />
-            <Route path="/attendance" element={<Dashboard />} />
-            <Route path="/curriculum" element={<Dashboard />} />
-            <Route path="/assessment" element={<Dashboard />} />
-            <Route path="/gradebook" element={<Dashboard />} />
-            <Route path="/exams" element={<Dashboard />} />
-            <Route path="/staff" element={<Dashboard />} />
-            <Route path="/communication" element={<Dashboard />} />
-            <Route path="/portals" element={<Dashboard />} />
-            <Route path="/finance" element={<Dashboard />} />
-            <Route path="/activities" element={<Dashboard />} />
-            <Route path="/safeguarding" element={<Dashboard />} />
-            <Route path="/events" element={<Dashboard />} />
-            <Route path="/analytics" element={<Dashboard />} />
-            <Route path="/ai-suite" element={<Dashboard />} />
-            <Route path="/integrations" element={<Dashboard />} />
+            <Route path="/attendance" element={<AttendancePage />} />
+            <Route path="/curriculum" element={<CurriculumPage />} />
+            <Route path="/assessment" element={<AssessmentPage />} />
+            <Route path="/gradebook" element={<GradebookPage />} />
+            <Route path="/exams" element={<ExamsPage />} />
+            <Route path="/staff" element={<StaffPage />} />
+            <Route path="/communication" element={<CommunicationPage />} />
+            <Route path="/portals" element={<PortalsPage />} />
+            <Route path="/finance" element={<FinancePage />} />
+            <Route path="/activities" element={<ActivitiesPage />} />
+            <Route path="/safeguarding" element={<SafeguardingPage />} />
+            <Route path="/events" element={<EventsPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/ai-suite" element={<AISuitePage />} />
+            <Route path="/integrations" element={<IntegrationsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
