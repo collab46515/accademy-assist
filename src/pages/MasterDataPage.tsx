@@ -77,7 +77,7 @@ export function MasterDataPage() {
 
   const handleBulkUpload = (type: string) => {
     if (type === 'master') {
-      // Generate master template with all entity types
+      // Generate comprehensive master template with all entity types
       const masterTemplate = [
         '=== SCHOOLS ===',
         'Name,Code,Address,Contact Email,Contact Phone',
@@ -98,7 +98,30 @@ export function MasterDataPage() {
         '=== PARENTS ===',
         'Parent ID,Student ID,Relationship Type',
         'parent-uuid-1,student-uuid-1,Father',
-        'parent-uuid-2,student-uuid-2,Mother'
+        'parent-uuid-2,student-uuid-2,Mother',
+        '',
+        '=== CLASSROOMS ===',
+        'Room Name,Room Type,Capacity',
+        'Room 101,Classroom,30',
+        'Science Lab A,Laboratory,25',
+        'Main Hall,Assembly,200',
+        '',
+        '=== PERIODS ===',
+        'Period Number,Start Time,End Time,Day of Week',
+        '1,09:00,09:45,Monday',
+        '2,09:45,10:30,Monday',
+        '3,11:00,11:45,Monday',
+        '',
+        '=== DEPARTMENTS ===',
+        'Name,Description,Cost Center',
+        'Mathematics,Mathematics Department,MATH001',
+        'Science,Science Department,SCI001',
+        'English,English Department,ENG001',
+        '',
+        '=== STAFF ===',
+        'Employee ID,First Name,Last Name,Email,Position,Department,Start Date',
+        'EMP001,John,Smith,j.smith@school.edu,Head Teacher,Administration,2020-09-01',
+        'EMP002,Sarah,Jones,s.jones@school.edu,Mathematics Teacher,Mathematics,2021-01-15'
       ].join('\n');
       
       const blob = new Blob([masterTemplate], { type: 'text/csv' });
@@ -114,7 +137,11 @@ export function MasterDataPage() {
         schools: 'Name,Code,Address,Contact Email,Contact Phone\nExample School,EXS001,123 Main St,admin@example.edu,555-0123',
         students: 'Student Number,Year Group,Form Class,Date of Birth,Emergency Contact Name,Emergency Contact Phone\nSTU001,Year 7,7A,2010-05-15,John Smith,+44 7700 900123',
         subjects: 'Subject Name,Subject Code,Color Code,Requires Lab,Periods Per Week\nMathematics,MATH,#3B82F6,false,5',
-        parents: 'Parent ID,Student ID,Relationship Type\nparent-uuid,student-uuid,Father'
+        parents: 'Parent ID,Student ID,Relationship Type\nparent-uuid,student-uuid,Father',
+        classrooms: 'Room Name,Room Type,Capacity\nRoom 101,Classroom,30',
+        periods: 'Period Number,Start Time,End Time,Day of Week\n1,09:00,09:45,Monday',
+        departments: 'Name,Description,Cost Center\nMathematics,Mathematics Department,MATH001',
+        staff: 'Employee ID,First Name,Last Name,Email,Position,Department,Start Date\nEMP001,John,Smith,j.smith@school.edu,Head Teacher,Administration,2020-09-01'
       };
       
       const template = templates[type as keyof typeof templates];
@@ -651,19 +678,28 @@ export function MasterDataPage() {
                   {/* Individual Templates */}
                   <div>
                     <h3 className="font-medium mb-3">Individual Templates</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
-                      {['schools', 'students', 'subjects', 'parents'].map((type) => (
-                        <Card key={type} className="cursor-pointer hover:bg-accent/50 transition-colors">
-                          <CardContent className="p-4 text-center">
-                            <FileText className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                            <h3 className="font-medium capitalize">{type}</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {[
+                        { type: 'schools', icon: SchoolIcon, color: 'text-blue-600' },
+                        { type: 'subjects', icon: BookOpen, color: 'text-green-600' },
+                        { type: 'students', icon: GraduationCap, color: 'text-purple-600' },
+                        { type: 'parents', icon: Home, color: 'text-red-600' },
+                        { type: 'classrooms', icon: Building2, color: 'text-orange-600' },
+                        { type: 'periods', icon: FileText, color: 'text-teal-600' },
+                        { type: 'departments', icon: Users, color: 'text-indigo-600' },
+                        { type: 'staff', icon: Users, color: 'text-pink-600' }
+                      ].map((item) => (
+                        <Card key={item.type} className="cursor-pointer hover:bg-accent/50 transition-colors">
+                          <CardContent className="p-3 text-center">
+                            <item.icon className={`h-6 w-6 mx-auto mb-2 ${item.color}`} />
+                            <h4 className="font-medium text-xs capitalize mb-2">{item.type}</h4>
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="mt-2 w-full"
-                              onClick={() => handleBulkUpload(type)}
+                              className="w-full text-xs h-7"
+                              onClick={() => handleBulkUpload(item.type)}
                             >
-                              Download Template
+                              Download
                             </Button>
                           </CardContent>
                         </Card>
