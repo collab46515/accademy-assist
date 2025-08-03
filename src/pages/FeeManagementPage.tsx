@@ -17,13 +17,46 @@ import { OutstandingFees } from "@/components/fee-management/OutstandingFees";
 import { FeeReportsAnalytics } from "@/components/fee-management/FeeReportsAnalytics";
 import { FeeCalendar } from "@/components/fee-management/FeeCalendar";
 import { RemindersAlerts } from "@/components/fee-management/RemindersAlerts";
+import { useFeeData } from "@/hooks/useFeeData";
 
 const FeeManagementOverview = () => {
+  const { feeStructures, feeHeads, invoices, loading } = useFeeData();
+
+  // Calculate real stats from database data
+  const totalFeeHeads = feeHeads.length;
+  const activeFeeStructures = feeStructures.filter(fs => fs.status === 'active').length;
+  const totalStructuredAmount = feeStructures.reduce((sum, fs) => sum + (fs.total_amount || 0), 0);
+  const totalInvoices = invoices.length;
+
   const stats = [
-    { label: "Total Fee Collection", value: "£2,847,650", icon: DollarSign, color: "text-success" },
-    { label: "Outstanding Fees", value: "£127,450", icon: AlertCircle, color: "text-warning" },
-    { label: "Fee Payers", value: "2,847", icon: Users, color: "text-primary" },
-    { label: "This Month", value: "£234,580", icon: Calendar, color: "text-success" }
+    { 
+      label: "Fee Heads", 
+      value: totalFeeHeads.toString(), 
+      icon: DollarSign, 
+      color: "text-success",
+      description: "Total fee types configured"
+    },
+    { 
+      label: "Active Structures", 
+      value: activeFeeStructures.toString(), 
+      icon: AlertCircle, 
+      color: "text-primary",
+      description: "Fee structures currently in use"
+    },
+    { 
+      label: "Total Structure Value", 
+      value: `£${totalStructuredAmount.toLocaleString()}`, 
+      icon: Users, 
+      color: "text-success",
+      description: "Combined value of all fee structures"
+    },
+    { 
+      label: "Generated Invoices", 
+      value: totalInvoices.toString(), 
+      icon: Calendar, 
+      color: "text-primary",
+      description: "Total invoices in system"
+    }
   ];
 
   return (
@@ -40,31 +73,104 @@ const FeeManagementOverview = () => {
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={index} className="group hover:shadow-lg transition-all duration-300">
+      {/* Loading State */}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, index) => (
+            <Card key={index} className="animate-pulse">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                    <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-muted rounded w-24"></div>
+                    <div className="h-8 bg-muted rounded w-16"></div>
                   </div>
-                  <div className="p-3 bg-primary/10 rounded-xl">
-                    <Icon className={`h-5 w-5 ${stat.color}`} />
-                  </div>
+                  <div className="h-12 w-12 bg-muted rounded-xl"></div>
                 </div>
               </CardContent>
             </Card>
-          );
-        })}
+          ))}
+        </div>
+      ) : (
+        /* Stats Cards */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <Card key={index} className="group hover:shadow-lg transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                      <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                      <p className="text-xs text-muted-foreground">{stat.description}</p>
+                    </div>
+                    <div className="p-3 bg-primary/10 rounded-xl">
+                      <Icon className={`h-5 w-5 ${stat.color}`} />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Real Data Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Fee Structures</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {feeStructures.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">No fee structures created yet</p>
+            ) : (
+              <div className="space-y-3">
+                {feeStructures.slice(0, 3).map((structure) => (
+                  <div key={structure.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">{structure.name}</p>
+                      <p className="text-sm text-muted-foreground">{structure.academic_year} • {structure.term}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">£{structure.total_amount?.toLocaleString() || '0'}</p>
+                      <p className="text-sm text-muted-foreground">{structure.status}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Fee Heads</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {feeHeads.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">No fee heads created yet</p>
+            ) : (
+              <div className="space-y-3">
+                {feeHeads.slice(0, 5).map((feeHead) => (
+                  <div key={feeHead.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">{feeHead.name}</p>
+                      <p className="text-sm text-muted-foreground">{feeHead.category} • {feeHead.recurrence}</p>
+                    </div>
+                    <p className="font-semibold">£{feeHead.amount?.toFixed(2) || '0.00'}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Quick Actions */}
-      <div className="text-center py-12 text-muted-foreground">
+      <div className="text-center py-8 text-muted-foreground">
         <p>Select a section from the sidebar to manage specific fee-related activities.</p>
+        <p className="text-sm mt-2">Or click "Add Fee Structure" above to create your first fee structure.</p>
       </div>
     </div>
   );
