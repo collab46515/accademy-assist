@@ -413,34 +413,26 @@ export const OutstandingFees = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
+                      <button 
+                        className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground h-8 w-8"
+                        onClick={() => {
                           alert('View details clicked');
                           handleViewDetails(fee);
                         }}
-                        style={{ pointerEvents: 'auto', zIndex: 1000 }}
                         title="View Details"
                       >
                         <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
+                      </button>
+                      <button 
+                        className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground h-8 w-8"
+                        onClick={() => {
                           alert('Send reminder clicked');
                           handleSendReminder(fee.id);
                         }}
-                        style={{ pointerEvents: 'auto', zIndex: 1000 }}
                         title="Send Reminder"
                       >
                         <Send className="h-4 w-4" />
-                      </Button>
+                      </button>
                     </div>
                   </TableCell>
                 </TableRow>
