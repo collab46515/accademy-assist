@@ -292,7 +292,11 @@ export const OutstandingFees = () => {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setFilterStatus('overdue')}>
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
+          console.log('OutstandingFees: Overdue card clicked');
+          alert('Overdue card clicked');
+          setFilterStatus('overdue');
+        }}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -305,7 +309,11 @@ export const OutstandingFees = () => {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setFilterStatus('due_soon')}>
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
+          console.log('OutstandingFees: Due Soon card clicked');
+          alert('Due Soon card clicked');
+          setFilterStatus('due_soon');
+        }}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -318,7 +326,11 @@ export const OutstandingFees = () => {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setFilterStatus('payment_plan')}>
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
+          console.log('OutstandingFees: Payment Plans card clicked');
+          alert('Payment Plans card clicked');
+          setFilterStatus('payment_plan');
+        }}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
