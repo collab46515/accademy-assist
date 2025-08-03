@@ -118,6 +118,9 @@ export default function FeeCollections() {
   const [showFeeTypeBreakdownModal, setShowFeeTypeBreakdownModal] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [scanSupported, setScanSupported] = useState(false);
+  const [showMarkAllVisibleModal, setShowMarkAllVisibleModal] = useState(false);
+  const [showMarkAllClassModal, setShowMarkAllClassModal] = useState(false);
+  const [selectedClassForBulk, setSelectedClassForBulk] = useState('');
   const { toast } = useToast();
 
   const [paymentForm, setPaymentForm] = useState({
@@ -418,6 +421,84 @@ export default function FeeCollections() {
     });
   };
 
+  // Mark all visible students as paid
+  const markAllVisibleAsPaid = () => {
+    const unpaidVisibleStudents = filteredStudents.filter(s => s.status !== 'paid');
+    
+    if (unpaidVisibleStudents.length === 0) {
+      toast({
+        title: "No Unpaid Students",
+        description: "All visible students are already paid",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setShowMarkAllVisibleModal(true);
+  };
+
+  const confirmMarkAllVisible = () => {
+    const unpaidVisibleStudents = filteredStudents.filter(s => s.status !== 'paid');
+    const updatedStudents = students.map(student => {
+      if (unpaidVisibleStudents.find(vs => vs.id === student.id)) {
+        return {
+          ...student,
+          amountPaid: student.amountDue,
+          status: 'paid' as const
+        };
+      }
+      return student;
+    });
+
+    setStudents(updatedStudents);
+    setShowMarkAllVisibleModal(false);
+    
+    toast({
+      title: "Bulk Payment Completed",
+      description: `${unpaidVisibleStudents.length} students marked as paid`,
+    });
+  };
+
+  // Mark all students in a class as paid
+  const markAllInClassAsPaid = (className: string) => {
+    const classStudents = students.filter(s => s.class === className && s.status !== 'paid');
+    
+    if (classStudents.length === 0) {
+      toast({
+        title: "No Unpaid Students",
+        description: `All students in ${className} are already paid`,
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setSelectedClassForBulk(className);
+    setShowMarkAllClassModal(true);
+  };
+
+  const confirmMarkAllClass = () => {
+    const classStudents = students.filter(s => s.class === selectedClassForBulk && s.status !== 'paid');
+    const updatedStudents = students.map(student => {
+      if (classStudents.find(cs => cs.id === student.id)) {
+        return {
+          ...student,
+          amountPaid: student.amountDue,
+          status: 'paid' as const
+        };
+      }
+      return student;
+    });
+
+    setStudents(updatedStudents);
+    setShowMarkAllClassModal(false);
+    setSelectedClassForBulk('');
+    
+    toast({
+      title: "Class Payment Completed",
+      description: `${classStudents.length} students in ${selectedClassForBulk} marked as paid`,
+    });
+  };
+
   // CSV Export Functions
   const exportToCSV = (data: any[], filename: string, headers: string[]) => {
     const csvContent = [
@@ -663,6 +744,22 @@ export default function FeeCollections() {
               <Download className="w-4 h-4 mr-2" />
               Export All
             </Button>
+            
+            <Button variant="outline" onClick={markAllVisibleAsPaid}>
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Mark All Visible
+            </Button>
+            
+            <Select onValueChange={(value) => markAllInClassAsPaid(value)}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Mark Class Paid" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7A">Mark 7A Paid</SelectItem>
+                <SelectItem value="8B">Mark 8B Paid</SelectItem>
+                <SelectItem value="9C">Mark 9C Paid</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -1844,6 +1941,140 @@ export default function FeeCollections() {
           </div>
         </div>
       )}
+
+      {/* Mark All Visible Confirmation Modal */}
+      <Dialog open={showMarkAllVisibleModal} onOpenChange={setShowMarkAllVisibleModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <AlertCircle className="h-5 w-5 text-warning" />
+              <span>Confirm Bulk Payment</span>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="p-4 bg-warning/10 border border-warning/20 rounded-lg">
+              <h4 className="font-semibold text-warning mb-2">Mark All Visible Students as Paid</h4>
+              <p className="text-sm text-muted-foreground mb-3">
+                This will mark all currently visible students as fully paid. This action cannot be easily undone.
+              </p>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Visible Students:</span>
+                  <span className="font-semibold">{filteredStudents.length}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Unpaid Students:</span>
+                  <span className="font-semibold text-warning">
+                    {filteredStudents.filter(s => s.status !== 'paid').length}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Total Amount:</span>
+                  <span className="font-semibold text-success">
+                    £{filteredStudents
+                      .filter(s => s.status !== 'paid')
+                      .reduce((sum, s) => sum + (s.amountDue - (s.amountPaid || 0)), 0)
+                      .toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-muted p-3 rounded text-sm">
+              <h5 className="font-medium mb-1">Students to be marked as paid:</h5>
+              <div className="max-h-32 overflow-y-auto space-y-1">
+                {filteredStudents.filter(s => s.status !== 'paid').map(student => (
+                  <div key={student.id} className="flex justify-between">
+                    <span>{student.name} ({student.class})</span>
+                    <span>£{(student.amountDue - (student.amountPaid || 0)).toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setShowMarkAllVisibleModal(false)}>
+                Cancel
+              </Button>
+              <Button onClick={confirmMarkAllVisible} className="bg-warning hover:bg-warning/90">
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Confirm Payment
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Mark All Class Confirmation Modal */}
+      <Dialog open={showMarkAllClassModal} onOpenChange={setShowMarkAllClassModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <AlertCircle className="h-5 w-5 text-warning" />
+              <span>Confirm Class Payment</span>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="p-4 bg-warning/10 border border-warning/20 rounded-lg">
+              <h4 className="font-semibold text-warning mb-2">Mark All Class {selectedClassForBulk} as Paid</h4>
+              <p className="text-sm text-muted-foreground mb-3">
+                This will mark all students in Class {selectedClassForBulk} as fully paid. This action cannot be easily undone.
+              </p>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Total Students in Class:</span>
+                  <span className="font-semibold">
+                    {students.filter(s => s.class === selectedClassForBulk).length}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Unpaid Students:</span>
+                  <span className="font-semibold text-warning">
+                    {students.filter(s => s.class === selectedClassForBulk && s.status !== 'paid').length}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Total Amount:</span>
+                  <span className="font-semibold text-success">
+                    £{students
+                      .filter(s => s.class === selectedClassForBulk && s.status !== 'paid')
+                      .reduce((sum, s) => sum + (s.amountDue - (s.amountPaid || 0)), 0)
+                      .toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-muted p-3 rounded text-sm">
+              <h5 className="font-medium mb-1">Students to be marked as paid:</h5>
+              <div className="max-h-32 overflow-y-auto space-y-1">
+                {students
+                  .filter(s => s.class === selectedClassForBulk && s.status !== 'paid')
+                  .map(student => (
+                    <div key={student.id} className="flex justify-between">
+                      <span>{student.name}</span>
+                      <span>£{(student.amountDue - (student.amountPaid || 0)).toFixed(2)}</span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setShowMarkAllClassModal(false)}>
+                Cancel
+              </Button>
+              <Button onClick={confirmMarkAllClass} className="bg-warning hover:bg-warning/90">
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Confirm Payment
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
