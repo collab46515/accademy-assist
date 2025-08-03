@@ -14,6 +14,7 @@ import {
   FileText,
   AlertCircle
 } from "lucide-react";
+import { FeeStructureTabs } from "@/components/fee-management/FeeStructureTabs";
 
 const FeeManagementPage = () => {
   const stats = [
@@ -89,24 +90,7 @@ const FeeManagementPage = () => {
         </TabsList>
 
         <TabsContent value="structures" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Fee Structures & Master Data
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <Settings className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Fee Structures Coming Soon</h3>
-                <p className="text-muted-foreground mb-4">
-                  Configure fee heads, academic year fee structures, payment schedules, and fee categories.
-                </p>
-                <Badge variant="secondary">Ready for Configuration</Badge>
-              </div>
-            </CardContent>
-          </Card>
+          <FeeStructureTabs />
         </TabsContent>
 
         <TabsContent value="assignments" className="space-y-6">
