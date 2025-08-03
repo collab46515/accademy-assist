@@ -83,7 +83,6 @@ const FeeManagementPage = () => {
       <Route path="reports" element={<FeeReportsAnalytics />} />
       <Route path="calendar" element={<FeeCalendar />} />
       <Route path="reminders" element={<RemindersAlerts />} />
-      <Route path="*" element={<Navigate to="/fee-management" replace />} />
     </Routes>
   );
 };
