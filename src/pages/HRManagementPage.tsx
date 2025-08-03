@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -71,7 +72,10 @@ interface Payroll {
 
 export function HRManagementPage() {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(() => {
+    return searchParams.get('tab') || 'dashboard';
+  });
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDepartment, setFilterDepartment] = useState('all');
   const [showEmployeeForm, setShowEmployeeForm] = useState(false);
@@ -270,20 +274,32 @@ export function HRManagementPage() {
         </Button>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      {/* Sync activeTab with URL parameters */}
+      {(() => {
+        const tab = searchParams.get('tab');
+        if (tab && tab !== activeTab) {
+          setActiveTab(tab);
+        }
+        return null;
+      })()}
+
+      <Tabs value={activeTab} onValueChange={(value) => {
+        setActiveTab(value);
+        setSearchParams({ tab: value });
+      }} className="space-y-6">
         <TabsList className="grid w-full grid-cols-12 gap-1">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="employees">Employees</TabsTrigger>
+          <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="recruitment">Recruitment</TabsTrigger>
           <TabsTrigger value="training">Training</TabsTrigger>
           <TabsTrigger value="benefits">Benefits</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="attendance">Attendance</TabsTrigger>
-          <TabsTrigger value="leaves">Leaves</TabsTrigger>
-          <TabsTrigger value="payroll">Payroll</TabsTrigger>
+          <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="assets">Assets</TabsTrigger>
-          <TabsTrigger value="time">Time Track</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
+          <TabsTrigger value="timeTracking">Time Track</TabsTrigger>
+          <TabsTrigger value="travelExpenses">Travel & Exp</TabsTrigger>
+          <TabsTrigger value="engagement">Engagement</TabsTrigger>
+          <TabsTrigger value="payroll">Payroll</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6">
@@ -1201,6 +1217,186 @@ export function HRManagementPage() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="performance" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Performance Management</CardTitle>
+              <CardDescription>Track and manage employee performance reviews and goals</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Performance Management</h3>
+                <p className="text-muted-foreground mb-4">Comprehensive performance tracking coming soon</p>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Performance Review
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="recruitment" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recruitment & Hiring</CardTitle>
+              <CardDescription>Manage job postings and applications</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <UserPlus className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Recruitment Portal</h3>
+                <p className="text-muted-foreground mb-4">Full recruitment workflow coming soon</p>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Job Posting
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="training" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Training & Development</CardTitle>
+              <CardDescription>Employee learning and development programs</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Training Programs</h3>
+                <p className="text-muted-foreground mb-4">Learning management system coming soon</p>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Training Course
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="benefits" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Benefits Management</CardTitle>
+              <CardDescription>Employee benefits and compensation packages</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Employee Benefits</h3>
+                <p className="text-muted-foreground mb-4">Benefits administration coming soon</p>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Benefits Plan
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="documents" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Document Management</CardTitle>
+              <CardDescription>Employee documents and file management</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Document Hub</h3>
+                <p className="text-muted-foreground mb-4">Document management system coming soon</p>
+                <Button>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Document
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="assets" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Asset Management</CardTitle>
+              <CardDescription>Company assets and equipment tracking</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <Archive className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Asset Tracking</h3>
+                <p className="text-muted-foreground mb-4">Asset management system coming soon</p>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Asset
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="timeTracking" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Time Tracking</CardTitle>
+              <CardDescription>Employee time and attendance management</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Time Management</h3>
+                <p className="text-muted-foreground mb-4">Time tracking system coming soon</p>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Log Time
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="travelExpenses" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Travel & Expenses</CardTitle>
+              <CardDescription>Travel requests and expense management</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Travel & Expenses</h3>
+                <p className="text-muted-foreground mb-4">Expense management system coming soon</p>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Submit Expense
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="engagement" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Employee Engagement</CardTitle>
+              <CardDescription>Employee satisfaction and engagement surveys</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Engagement Surveys</h3>
+                <p className="text-muted-foreground mb-4">Employee engagement tools coming soon</p>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Survey
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 
