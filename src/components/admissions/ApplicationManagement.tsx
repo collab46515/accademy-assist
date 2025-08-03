@@ -24,7 +24,12 @@ export function ApplicationManagement() {
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const filterParam = urlParams.get('filter');
+    console.log('ApplicationManagement mounted');
+    console.log('URL filter param:', filterParam);
+    console.log('Current statusFilter:', statusFilter);
+    
     if (filterParam && filterParam !== statusFilter) {
+      console.log('Setting statusFilter to:', filterParam);
       setStatusFilter(filterParam);
     }
   }, [window.location.search]); // Watch for URL changes

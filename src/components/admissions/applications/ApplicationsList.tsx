@@ -61,11 +61,15 @@ export function ApplicationsList({
   const fetchApplications = async () => {
     try {
       setLoading(true);
+      console.log('Fetching applications...');
       const { data, error } = await supabase
         .from('enrollment_applications')
         .select('*')
         .order('submitted_at', { ascending: false });
 
+      console.log('Applications data:', data);
+      console.log('Applications error:', error);
+      
       if (error) throw error;
       setApplications(data || []);
     } catch (error) {
