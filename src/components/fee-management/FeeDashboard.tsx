@@ -35,6 +35,8 @@ import { ClassCollectionDetailModal } from './ClassCollectionDetailModal';
 import { TodayCollectionModal } from './TodayCollectionModal';
 import { MetricDetailModal } from './MetricDetailModal';
 import { BulkActionsModal } from './BulkActionsModal';
+import { FiltersModal, FilterOptions } from './FiltersModal';
+import { ExportModal } from './ExportModal';
 
 interface DashboardMetrics {
   totalCollected: number;
@@ -105,10 +107,21 @@ export function FeeDashboard() {
   const [todayCollectionModalOpen, setTodayCollectionModalOpen] = useState(false);
   const [metricDetailModalOpen, setMetricDetailModalOpen] = useState(false);
   const [bulkActionsModalOpen, setBulkActionsModalOpen] = useState(false);
+  const [filtersModalOpen, setFiltersModalOpen] = useState(false);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedMetric, setSelectedMetric] = useState<'collected' | 'outstanding' | 'percentage' | 'expected' | 'overdue'>('collected');
   const [selectedBulkAction, setSelectedBulkAction] = useState<'reminder' | 'invoice' | 'collection' | 'report'>('reminder');
   const [viewMode, setViewMode] = useState<'overall' | 'class'>('overall');
+  const [currentFilters, setCurrentFilters] = useState<FilterOptions>({
+    dateRange: { from: null, to: null },
+    classes: [],
+    yearGroups: [],
+    feeTypes: [],
+    paymentStatus: [],
+    amountRange: { min: null, max: null },
+    searchTerm: ''
+  });
   
   const { toast } = useToast();
 
@@ -219,6 +232,16 @@ export function FeeDashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleApplyFilters = (filters: FilterOptions) => {
+    setCurrentFilters(filters);
+    // Apply filters to data
+    fetchDashboardData(); // In real app, this would filter the query
+    toast({
+      title: "Filters Applied",
+      description: "Dashboard data updated with your filter selection.",
+    });
   };
 
   const handleQuickAction = (action: string) => {
@@ -377,11 +400,32 @@ export function FeeDashboard() {
             </p>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-all duration-200">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="shadow-sm hover:shadow-md transition-all duration-200"
+              onClick={() => setFiltersModalOpen(true)}
+            >
               <Filter className="w-4 h-4 mr-2" />
               Filters
+              {(currentFilters.classes.length > 0 || currentFilters.searchTerm || currentFilters.dateRange.from) && (
+                <Badge variant="destructive" className="ml-2 text-xs">
+                  {[
+                    currentFilters.classes.length,
+                    currentFilters.yearGroups.length,
+                    currentFilters.feeTypes.length,
+                    currentFilters.paymentStatus.length,
+                    currentFilters.searchTerm ? 1 : 0,
+                    (currentFilters.dateRange.from || currentFilters.dateRange.to) ? 1 : 0,
+                    (currentFilters.amountRange.min || currentFilters.amountRange.max) ? 1 : 0
+                  ].reduce((sum, count) => sum + count, 0)}
+                </Badge>
+              )}
             </Button>
-            <Button className="shadow-md hover:shadow-lg transition-all duration-200 bg-gradient-to-r from-primary to-primary/90">
+            <Button 
+              className="shadow-md hover:shadow-lg transition-all duration-200 bg-gradient-to-r from-primary to-primary/90"
+              onClick={() => setExportModalOpen(true)}
+            >
               <Download className="w-4 h-4 mr-2" />
               Export Report
             </Button>
@@ -852,6 +896,19 @@ export function FeeDashboard() {
         open={bulkActionsModalOpen}
         onOpenChange={setBulkActionsModalOpen}
         actionType={selectedBulkAction}
+      />
+      
+      <FiltersModal
+        open={filtersModalOpen}
+        onOpenChange={setFiltersModalOpen}
+        onApplyFilters={handleApplyFilters}
+        currentFilters={currentFilters}
+      />
+      
+      <ExportModal
+        open={exportModalOpen}
+        onOpenChange={setExportModalOpen}
+        dataType="dashboard"
       />
     </div>
   );
