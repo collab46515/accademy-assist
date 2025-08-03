@@ -1,6 +1,8 @@
 import { ModuleCard } from "@/components/dashboard/ModuleCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useState } from "react";
 import { 
   Database,
   UserPlus,
@@ -20,11 +22,15 @@ import {
   Settings,
   AlertCircle,
   CheckCircle,
-  Activity
+  Activity,
+  ChevronDown,
+  ChevronRight,
+  GraduationCap,
+  Building2
 } from "lucide-react";
 import heroImage from "@/assets/hero-education.jpg";
 
-const coreModules = [
+const schoolManagementModules = [
   {
     title: "Student Information System",
     description: "Central database for all student data, demographics, enrollment history, and family links with UK-styled Student IDs.",
@@ -57,7 +63,7 @@ const coreModules = [
     title: "Curriculum & Timetabling",
     description: "AI-powered scheduling for British curriculum with auto-generation, option blocks, and exam timetable builder.",
     icon: Calendar,
-    href: "/curriculum",
+    href: "/timetable",
     stats: [{ label: "Subjects", value: "47" }, { label: "Classes", value: "284" }]
   },
   {
@@ -66,10 +72,7 @@ const coreModules = [
     icon: BarChart3,
     href: "/assessment",
     stats: [{ label: "Assessments", value: "1,247" }, { label: "Overdue", value: "8" }]
-  }
-];
-
-const additionalModules = [
+  },
   {
     title: "Gradebook & Reporting",
     description: "Termly reports with UK-style comments, AI-assisted generation, and parent portal access.",
@@ -82,13 +85,6 @@ const additionalModules = [
     description: "Full exam board lifecycle with entry management, access arrangements, and results tracking.",
     icon: Trophy,
     href: "/exams",
-    status: "active" as const
-  },
-  {
-    title: "Teacher & Staff Management",
-    description: "HR for academic and non-academic staff with contracts, CPD tracking, and performance reviews.",
-    icon: Users,
-    href: "/staff",
     status: "active" as const
   },
   {
@@ -139,7 +135,41 @@ const additionalModules = [
     icon: TrendingUp,
     href: "/analytics",
     status: "active" as const
+  }
+];
+
+const hrManagementModules = [
+  {
+    title: "Staff Management",
+    description: "Complete HR management for academic and non-academic staff with contracts and performance tracking.",
+    icon: Users,
+    href: "/staff",
+    stats: [{ label: "Staff", value: "284" }, { label: "Active", value: "276" }]
   },
+  {
+    title: "Recruitment",
+    description: "End-to-end recruitment process with job postings, applications, interviews, and onboarding.",
+    icon: UserPlus,
+    href: "/staff?tab=recruitment",
+    stats: [{ label: "Open Roles", value: "12" }, { label: "Candidates", value: "47" }]
+  },
+  {
+    title: "Professional Development",
+    description: "CPD tracking, training programs, and professional growth planning for all staff members.",
+    icon: GraduationCap,
+    href: "/staff?tab=cpd",
+    status: "active" as const
+  },
+  {
+    title: "Performance Management",
+    description: "Staff appraisals, performance reviews, and goal setting with automated reminders.",
+    icon: BarChart3,
+    href: "/staff?tab=performance",
+    status: "active" as const
+  }
+];
+
+const systemModules = [
   {
     title: "AI & Automation Suite",
     description: "Smart features with AI-generated comments, predictive analytics, and automated scheduling.",
@@ -164,6 +194,9 @@ const quickStats = [
 ];
 
 const Dashboard = () => {
+  const [isSchoolOpen, setIsSchoolOpen] = useState(true);
+  const [isHROpen, setIsHROpen] = useState(false);
+  const [isSystemOpen, setIsSystemOpen] = useState(false);
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       {/* Hero Section */}
@@ -231,34 +264,100 @@ const Dashboard = () => {
           </Card>
         </section>
 
-        {/* Core Modules */}
-        <section className="animate-fade-in space-y-8">
-          <div className="text-center space-y-2">
-            <h2 className="text-3xl font-bold text-foreground">Core Modules</h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Essential education management functionality for modern schools</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {coreModules.map((module, index) => (
-              <div key={index} className="animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
-                <ModuleCard {...module} />
+        {/* School Management Modules */}
+        <section className="animate-fade-in space-y-6">
+          <Collapsible open={isSchoolOpen} onOpenChange={setIsSchoolOpen}>
+            <CollapsibleTrigger className="w-full">
+              <Card className="bg-card/60 backdrop-blur-sm border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-pointer">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center justify-between text-2xl">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-3 bg-primary/10 rounded-xl">
+                        <Building2 className="h-6 w-6 text-primary" />
+                      </div>
+                      <span>School Management</span>
+                      <Badge variant="secondary" className="ml-2">{schoolManagementModules.length} modules</Badge>
+                    </div>
+                    {isSchoolOpen ? <ChevronDown className="h-5 w-5 text-muted-foreground" /> : <ChevronRight className="h-5 w-5 text-muted-foreground" />}
+                  </CardTitle>
+                  <CardDescription className="text-left">Complete education management functionality for modern schools</CardDescription>
+                </CardHeader>
+              </Card>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {schoolManagementModules.map((module, index) => (
+                  <div key={index} className="animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
+                    <ModuleCard {...module} />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </CollapsibleContent>
+          </Collapsible>
         </section>
 
-        {/* Additional Modules */}
-        <section className="animate-fade-in space-y-8">
-          <div className="text-center space-y-2">
-            <h2 className="text-3xl font-bold text-foreground">Additional Modules</h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Extended functionality for comprehensive school management</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {additionalModules.map((module, index) => (
-              <div key={index} className="animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
-                <ModuleCard {...module} />
+        {/* HR Management Modules */}
+        <section className="animate-fade-in space-y-6">
+          <Collapsible open={isHROpen} onOpenChange={setIsHROpen}>
+            <CollapsibleTrigger className="w-full">
+              <Card className="bg-card/60 backdrop-blur-sm border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-pointer">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center justify-between text-2xl">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-3 bg-primary/10 rounded-xl">
+                        <Users className="h-6 w-6 text-primary" />
+                      </div>
+                      <span>HR Management</span>
+                      <Badge variant="secondary" className="ml-2">{hrManagementModules.length} modules</Badge>
+                    </div>
+                    {isHROpen ? <ChevronDown className="h-5 w-5 text-muted-foreground" /> : <ChevronRight className="h-5 w-5 text-muted-foreground" />}
+                  </CardTitle>
+                  <CardDescription className="text-left">Human resources and staff management tools</CardDescription>
+                </CardHeader>
+              </Card>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {hrManagementModules.map((module, index) => (
+                  <div key={index} className="animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
+                    <ModuleCard {...module} />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </CollapsibleContent>
+          </Collapsible>
+        </section>
+
+        {/* System & Integration Modules */}
+        <section className="animate-fade-in space-y-6">
+          <Collapsible open={isSystemOpen} onOpenChange={setIsSystemOpen}>
+            <CollapsibleTrigger className="w-full">
+              <Card className="bg-card/60 backdrop-blur-sm border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-pointer">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center justify-between text-2xl">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-3 bg-primary/10 rounded-xl">
+                        <Settings className="h-6 w-6 text-primary" />
+                      </div>
+                      <span>System & Integration</span>
+                      <Badge variant="secondary" className="ml-2">{systemModules.length} modules</Badge>
+                    </div>
+                    {isSystemOpen ? <ChevronDown className="h-5 w-5 text-muted-foreground" /> : <ChevronRight className="h-5 w-5 text-muted-foreground" />}
+                  </CardTitle>
+                  <CardDescription className="text-left">AI automation and third-party integrations</CardDescription>
+                </CardHeader>
+              </Card>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {systemModules.map((module, index) => (
+                  <div key={index} className="animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
+                    <ModuleCard {...module} />
+                  </div>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         </section>
       </div>
     </div>
