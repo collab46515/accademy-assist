@@ -1,25 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, Download, Send, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ReportCardGenerator } from '@/components/reports/ReportCardGenerator';
+import { ReportCardsList } from '@/components/reports/ReportCardsList';
 
 export default function ReportCardsPage() {
   const { toast } = useToast();
+  const [generatorOpen, setGeneratorOpen] = useState(false);
+  const [generatorMode, setGeneratorMode] = useState<'individual' | 'bulk'>('individual');
 
   const handleGenerateIndividual = () => {
-    toast({
-      title: "Generate Individual Report",
-      description: "Individual report generation feature coming soon!",
-    });
+    setGeneratorMode('individual');
+    setGeneratorOpen(true);
   };
 
   const handleBulkGenerate = () => {
-    toast({
-      title: "Bulk Generate Reports",
-      description: "Bulk report generation feature coming soon!",
-    });
+    setGeneratorMode('bulk');
+    setGeneratorOpen(true);
   };
 
   const handleCardClick = (cardType: string) => {
@@ -146,6 +146,14 @@ export default function ReportCardsPage() {
           </CardContent>
         </Card>
       </div>
+      
+      <ReportCardsList />
+      
+      <ReportCardGenerator 
+        open={generatorOpen}
+        onOpenChange={setGeneratorOpen}
+        mode={generatorMode}
+      />
     </div>
   );
 }
