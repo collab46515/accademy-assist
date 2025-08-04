@@ -115,14 +115,6 @@ const CurriculumPage = () => {
         ]}
       />
       <div className="container mx-auto px-4 py-8 max-w-7xl space-y-8 pb-16">
-        
-        {/* Debug Info */}
-        <div className="bg-muted p-4 rounded-lg text-sm">
-          <div>Selected Framework: {selectedFramework ? selectedFramework.name : 'None'}</div>
-          <div>Can View Progress: {canViewProgress ? 'Yes' : 'No'}</div>
-          <div>Can Manage Curriculum: {canManageCurriculum ? 'Yes' : 'No'}</div>
-          <div>Active Tab: {activeTab}</div>
-        </div>
 
         {/* Stats Cards - Show only if framework is selected */}
         {selectedFramework && (
