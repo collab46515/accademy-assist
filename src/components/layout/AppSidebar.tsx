@@ -83,13 +83,9 @@ const erpModules = [
           { title: "Exams", url: "/academics/exams", icon: FileText },
           { title: "Homework", url: "/academics/homework", icon: ClipboardCheck },
           { title: "Assignments", url: "/academics/assignments", icon: ClipboardCheck },
+          { title: "Attendance", url: "/academics/attendance", icon: Calendar },
         ]
       },
-      { title: "Attendance", url: "/attendance", icon: Calendar },
-      { title: "Curriculum", url: "/curriculum", icon: BookOpen },
-      { title: "Timetable", url: "/timetable", icon: Clock },
-      { title: "Gradebook", url: "/gradebook", icon: Calculator },
-      { title: "Exams", url: "/exams", icon: FileText },
       { 
         title: "Fee Management", 
         url: "/school-management/fee-management", 
