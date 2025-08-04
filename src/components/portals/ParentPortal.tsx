@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,8 @@ import {
 } from 'lucide-react';
 
 export function ParentPortal() {
+  const navigate = useNavigate();
+  
   const children = [
     { 
       name: 'Emma Johnson', 
@@ -223,7 +226,12 @@ export function ParentPortal() {
                   <p className="text-xs text-muted-foreground mt-1">Due: {hw.due}</p>
                 </div>
               ))}
-              <Button variant="outline" size="sm" className="w-full">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full"
+                onClick={() => navigate('/parents/academics/assignments')}
+              >
                 View All Assignments
               </Button>
             </CardContent>
