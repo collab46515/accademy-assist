@@ -44,7 +44,7 @@ export const LessonPlanningClean: React.FC<LessonPlanningProps> = ({ schoolId, c
   const filteredPlans = lessonPlans.filter(plan => {
     const matchesSearch = plan.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          plan.subject.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSubject = filterSubject === 'all' || plan.subject.toLowerCase() === filterSubject;
+    const matchesSubject = filterSubject === 'all' || plan.subject === filterSubject;
     const matchesStatus = filterStatus === 'all' || plan.status === filterStatus;
     return matchesSearch && matchesSubject && matchesStatus;
   });
@@ -229,10 +229,10 @@ function ListView({
           </SelectTrigger>
           <SelectContent className="bg-white border shadow-lg z-50">
             <SelectItem value="all">All Subjects</SelectItem>
-            <SelectItem value="mathematics">Mathematics</SelectItem>
-            <SelectItem value="english">English</SelectItem>
-            <SelectItem value="science">Science</SelectItem>
-            <SelectItem value="history">History</SelectItem>
+            <SelectItem value="Mathematics">Mathematics</SelectItem>
+            <SelectItem value="English">English</SelectItem>
+            <SelectItem value="Science">Science</SelectItem>
+            <SelectItem value="History">History</SelectItem>
           </SelectContent>
         </Select>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
