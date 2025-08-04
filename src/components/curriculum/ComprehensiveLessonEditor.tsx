@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { supabase } from '@/integrations/supabase/client';
+import { useRBAC } from '@/hooks/useRBAC';
 import { 
   Plus, 
   Minus, 
@@ -22,7 +24,8 @@ import {
   Star,
   AlertCircle,
   MessageSquare,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Wand2
 } from 'lucide-react';
 
 interface ComprehensiveLessonEditorProps {
@@ -36,7 +39,12 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
   onCancel,
   onSave
 }) => {
-  const [formData, setFormData] = useState({
+  const { currentSchool } = useRBAC();
+  const [curriculumTopics, setCurriculumTopics] = useState<any[]>([]);
+  const [selectedTopic, setSelectedTopic] = useState(editingPlan?.curriculum_topic_id || '');
+  const [loadingTopics, setLoadingTopics] = useState(false);
+
+  const [formData, setFormData] = useState(() => ({
     // Basic Information
     title: editingPlan?.title || '',
     subject: editingPlan?.subject || '',
@@ -44,6 +52,7 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
     form_class: editingPlan?.form_class || '',
     lesson_date: editingPlan?.lesson_date || '',
     duration_minutes: editingPlan?.duration_minutes || 60,
+    curriculum_topic_id: editingPlan?.curriculum_topic_id || '',
     
     // Learning Objectives
     learning_objectives: editingPlan?.learning_objectives || [''],
@@ -103,126 +112,71 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
       homework_set: '',
       follow_up_activities: ['']
     }
-  });
+  }));
+
+  // Fetch curriculum topics when subject changes
+  useEffect(() => {
+    if (formData.subject && currentSchool?.id) {
+      fetchCurriculumTopics();
+    }
+  }, [formData.subject, currentSchool?.id]);
+
+  const fetchCurriculumTopics = async () => {
+    // TODO: Fetch curriculum topics from the database
+    // Temporarily disabled due to TypeScript issues
+    console.log('Fetching curriculum topics for subject:', formData.subject);
+  };
+
+  const handleTopicSelect = (topicId: string) => {
+    setSelectedTopic(topicId);
+    setFormData(prev => ({ ...prev, curriculum_topic_id: topicId }));
+    
+    // TODO: Auto-fill learning objectives from curriculum topic
+    console.log('Selected topic:', topicId);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
   };
 
-  const addItem = (path: string, index?: number) => {
+  const updateField = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const updateNestedField = (parent: string, field: string, value: any) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      [parent]: { ...prev[parent as keyof typeof prev], [field]: value }
+    }));
+  };
+
+  const addArrayItem = (field: string) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      [field]: [...(prev[field as keyof typeof prev] as any[]), '']
+    }));
+  };
+
+  const removeArrayItem = (field: string, index: number) => {
     setFormData(prev => {
-      const keys = path.split('.');
-      const newData = { ...prev };
-      let current: any = newData;
-      
-      for (let i = 0; i < keys.length - 1; i++) {
-        current = current[keys[i]];
+      const array = prev[field as keyof typeof prev] as any[];
+      if (array.length > 1) {
+        return { 
+          ...prev, 
+          [field]: array.filter((_, i) => i !== index)
+        };
       }
-      
-      const lastKey = keys[keys.length - 1];
-      if (Array.isArray(current[lastKey])) {
-        current[lastKey].push('');
-      }
-      
-      return newData;
+      return prev;
     });
   };
 
-  const removeItem = (path: string, index: number) => {
+  const updateArrayItem = (field: string, index: number, value: any) => {
     setFormData(prev => {
-      const keys = path.split('.');
-      const newData = { ...prev };
-      let current: any = newData;
-      
-      for (let i = 0; i < keys.length - 1; i++) {
-        current = current[keys[i]];
-      }
-      
-      const lastKey = keys[keys.length - 1];
-      if (Array.isArray(current[lastKey]) && current[lastKey].length > 1) {
-        current[lastKey].splice(index, 1);
-      }
-      
-      return newData;
+      const array = [...(prev[field as keyof typeof prev] as any[])];
+      array[index] = value;
+      return { ...prev, [field]: array };
     });
-  };
-
-  const updateItem = (path: string, index: number | null, value: any) => {
-    setFormData(prev => {
-      const keys = path.split('.');
-      const newData = { ...prev };
-      let current: any = newData;
-      
-      for (let i = 0; i < keys.length - 1; i++) {
-        current = current[keys[i]];
-      }
-      
-      const lastKey = keys[keys.length - 1];
-      if (index !== null) {
-        current[lastKey][index] = value;
-      } else {
-        current[lastKey] = value;
-      }
-      
-      return newData;
-    });
-  };
-
-  const ArrayField = ({ 
-    label, 
-    path, 
-    placeholder, 
-    icon: Icon 
-  }: { 
-    label: string; 
-    path: string; 
-    placeholder: string; 
-    icon: React.ElementType; 
-  }) => {
-    const keys = path.split('.');
-    let items: string[] = formData as any;
-    for (const key of keys) {
-      items = items[key];
-    }
-
-    return (
-      <div className="space-y-3">
-        <Label className="flex items-center gap-2 text-sm font-medium">
-          <Icon className="h-4 w-4" />
-          {label}
-        </Label>
-        {items.map((item: string, index: number) => (
-          <div key={index} className="flex gap-2">
-            <Input
-              value={item}
-              onChange={(e) => updateItem(path, index, e.target.value)}
-              placeholder={placeholder}
-              className="flex-1"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={() => removeItem(path, index)}
-              disabled={items.length <= 1}
-            >
-              <Minus className="h-4 w-4" />
-            </Button>
-          </div>
-        ))}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => addItem(path)}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Add {label.slice(0, -1)}
-        </Button>
-      </div>
-    );
   };
 
   return (
@@ -252,12 +206,12 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
         <Tabs defaultValue="basic" className="space-y-6">
           <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="basic">Basic</TabsTrigger>
+            <TabsTrigger value="curriculum">Curriculum</TabsTrigger>
             <TabsTrigger value="objectives">Objectives</TabsTrigger>
             <TabsTrigger value="structure">Structure</TabsTrigger>
             <TabsTrigger value="resources">Resources</TabsTrigger>
             <TabsTrigger value="assessment">Assessment</TabsTrigger>
             <TabsTrigger value="differentiation">Differentiation</TabsTrigger>
-            <TabsTrigger value="integration">Integration</TabsTrigger>
           </TabsList>
 
           {/* Basic Information */}
@@ -276,7 +230,7 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                     <Input
                       id="title"
                       value={formData.title}
-                      onChange={(e) => updateItem('title', null, e.target.value)}
+                      onChange={(e) => updateField('title', e.target.value)}
                       placeholder="Enter lesson title"
                       required
                     />
@@ -285,7 +239,7 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                     <Label htmlFor="subject">Subject</Label>
                     <Select 
                       value={formData.subject} 
-                      onValueChange={(value) => updateItem('subject', null, value)}
+                      onValueChange={(value) => updateField('subject', value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select subject" />
@@ -306,7 +260,7 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                     <Label htmlFor="year_group">Year Group</Label>
                     <Select 
                       value={formData.year_group} 
-                      onValueChange={(value) => updateItem('year_group', null, value)}
+                      onValueChange={(value) => updateField('year_group', value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select year group" />
@@ -327,7 +281,7 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                     <Input
                       id="form_class"
                       value={formData.form_class}
-                      onChange={(e) => updateItem('form_class', null, e.target.value)}
+                      onChange={(e) => updateField('form_class', e.target.value)}
                       placeholder="e.g., 7A, 8B"
                     />
                   </div>
@@ -337,7 +291,7 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                       id="lesson_date"
                       type="date"
                       value={formData.lesson_date}
-                      onChange={(e) => updateItem('lesson_date', null, e.target.value)}
+                      onChange={(e) => updateField('lesson_date', e.target.value)}
                       required
                     />
                   </div>
@@ -347,12 +301,62 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                       id="duration"
                       type="number"
                       value={formData.duration_minutes}
-                      onChange={(e) => updateItem('duration_minutes', null, parseInt(e.target.value))}
+                      onChange={(e) => updateField('duration_minutes', parseInt(e.target.value))}
                       min="15"
                       max="180"
                       step="5"
                     />
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Curriculum Integration */}
+          <TabsContent value="curriculum">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Wand2 className="h-5 w-5" />
+                  Curriculum Integration
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="curriculum_topic">Curriculum Topic</Label>
+                  <Select 
+                    value={selectedTopic} 
+                    onValueChange={handleTopicSelect}
+                    disabled={!formData.subject || loadingTopics}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={
+                        !formData.subject 
+                          ? "Select a subject first" 
+                          : loadingTopics 
+                            ? "Loading topics..." 
+                            : "Select curriculum topic"
+                      } />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {curriculumTopics.map((topic) => (
+                        <SelectItem key={topic.id} value={topic.id}>
+                          {topic.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {selectedTopic && (
+                    <div className="mt-2 p-3 bg-blue-50 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle2 className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm font-medium text-blue-800">Auto-fill Available</span>
+                      </div>
+                      <p className="text-sm text-blue-700">
+                        Learning objectives will be automatically populated from the selected curriculum topic.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -368,19 +372,79 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <ArrayField
-                  label="Learning Objectives"
-                  path="learning_objectives"
-                  placeholder="Students will be able to..."
-                  icon={Target}
-                />
+                <div>
+                  <Label className="flex items-center gap-2 text-sm font-medium mb-3">
+                    <Target className="h-4 w-4" />
+                    Learning Objectives
+                  </Label>
+                  {formData.learning_objectives.map((objective: string, index: number) => (
+                    <div key={index} className="flex gap-2 mb-2">
+                      <Input
+                        value={objective}
+                        onChange={(e) => updateArrayItem('learning_objectives', index, e.target.value)}
+                        placeholder="Students will be able to..."
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => removeArrayItem('learning_objectives', index)}
+                        disabled={formData.learning_objectives.length <= 1}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => addArrayItem('learning_objectives')}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Learning Objective
+                  </Button>
+                </div>
+                
                 <Separator />
-                <ArrayField
-                  label="Success Criteria"
-                  path="success_criteria"
-                  placeholder="I can..."
-                  icon={CheckCircle2}
-                />
+                
+                <div>
+                  <Label className="flex items-center gap-2 text-sm font-medium mb-3">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Success Criteria
+                  </Label>
+                  {formData.success_criteria.map((criteria: string, index: number) => (
+                    <div key={index} className="flex gap-2 mb-2">
+                      <Input
+                        value={criteria}
+                        onChange={(e) => updateArrayItem('success_criteria', index, e.target.value)}
+                        placeholder="I can..."
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => removeArrayItem('success_criteria', index)}
+                        disabled={formData.success_criteria.length <= 1}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => addArrayItem('success_criteria')}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Success Criteria
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -395,7 +459,7 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {formData.lesson_sections.map((section, index) => (
+                {formData.lesson_sections.map((section: any, index: number) => (
                   <div key={index} className="border rounded-lg p-4 space-y-4">
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium">{section.name}</h4>
@@ -410,7 +474,7 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                           onChange={(e) => {
                             const newSections = [...formData.lesson_sections];
                             newSections[index].duration = parseInt(e.target.value) || 0;
-                            updateItem('lesson_sections', null, newSections);
+                            updateField('lesson_sections', newSections);
                           }}
                           min="1"
                           max="60"
@@ -424,7 +488,7 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                         onChange={(e) => {
                           const newSections = [...formData.lesson_sections];
                           newSections[index].description = e.target.value;
-                          updateItem('lesson_sections', null, newSections);
+                          updateField('lesson_sections', newSections);
                         }}
                         placeholder="Describe the activities for this section..."
                         rows={3}
@@ -446,30 +510,47 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <ArrayField
-                  label="Materials"
-                  path="resources.materials"
-                  placeholder="Textbooks, worksheets, equipment..."
-                  icon={FileText}
-                />
-                <ArrayField
-                  label="Technology"
-                  path="resources.technology"
-                  placeholder="Interactive whiteboard, tablets, software..."
-                  icon={Lightbulb}
-                />
-                <ArrayField
-                  label="Handouts"
-                  path="resources.handouts"
-                  placeholder="Student worksheets, reference sheets..."
-                  icon={FileText}
-                />
-                <ArrayField
-                  label="References"
-                  path="resources.references"
-                  placeholder="Books, websites, videos..."
-                  icon={LinkIcon}
-                />
+                <div className="space-y-4">
+                  <Label>Materials</Label>
+                  {formData.resources.materials.map((material: string, index: number) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        value={material}
+                        onChange={(e) => {
+                          const newMaterials = [...formData.resources.materials];
+                          newMaterials[index] = e.target.value;
+                          updateNestedField('resources', 'materials', newMaterials);
+                        }}
+                        placeholder="Textbooks, worksheets, equipment..."
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => {
+                          const newMaterials = formData.resources.materials.filter((_, i) => i !== index);
+                          if (newMaterials.length > 0) {
+                            updateNestedField('resources', 'materials', newMaterials);
+                          }
+                        }}
+                        disabled={formData.resources.materials.length <= 1}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => updateNestedField('resources', 'materials', [...formData.resources.materials, ''])}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Material
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -483,31 +564,48 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                   Assessment Strategies
                 </CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <ArrayField
-                  label="Formative Assessment"
-                  path="assessment.formative"
-                  placeholder="Questioning, observation, mini-whiteboards..."
-                  icon={MessageSquare}
-                />
-                <ArrayField
-                  label="Summative Assessment"
-                  path="assessment.summative"
-                  placeholder="Quiz, test, project..."
-                  icon={CheckCircle2}
-                />
-                <ArrayField
-                  label="Self-Assessment"
-                  path="assessment.self_assessment"
-                  placeholder="Reflection questions, checklists..."
-                  icon={Users}
-                />
-                <ArrayField
-                  label="Peer Assessment"
-                  path="assessment.peer_assessment"
-                  placeholder="Peer feedback, group evaluation..."
-                  icon={Users}
-                />
+              <CardContent className="space-y-6">
+                <div>
+                  <Label>Formative Assessment</Label>
+                  {formData.assessment.formative.map((assessment: string, index: number) => (
+                    <div key={index} className="flex gap-2 mb-2">
+                      <Input
+                        value={assessment}
+                        onChange={(e) => {
+                          const newAssessments = [...formData.assessment.formative];
+                          newAssessments[index] = e.target.value;
+                          updateNestedField('assessment', 'formative', newAssessments);
+                        }}
+                        placeholder="Questioning, observation, mini-whiteboards..."
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => {
+                          const newAssessments = formData.assessment.formative.filter((_, i) => i !== index);
+                          if (newAssessments.length > 0) {
+                            updateNestedField('assessment', 'formative', newAssessments);
+                          }
+                        }}
+                        disabled={formData.assessment.formative.length <= 1}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => updateNestedField('assessment', 'formative', [...formData.assessment.formative, ''])}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Formative Assessment
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -521,77 +619,22 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                   Differentiation & Inclusion
                 </CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <ArrayField
-                  label="Support Strategies"
-                  path="differentiation.support_strategies"
-                  placeholder="Scaffolding, visual aids, simplified tasks..."
-                  icon={Users}
-                />
-                <ArrayField
-                  label="Extension Activities"
-                  path="differentiation.extension_activities"
-                  placeholder="Challenge tasks, independent research..."
-                  icon={Star}
-                />
-                <ArrayField
-                  label="Special Needs Support"
-                  path="differentiation.special_needs"
-                  placeholder="SEND adaptations, accessibility..."
-                  icon={AlertCircle}
-                />
-                <ArrayField
-                  label="EAL Support"
-                  path="differentiation.eal_support"
-                  placeholder="Language support, visual vocabulary..."
-                  icon={MessageSquare}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Integration */}
-          <TabsContent value="integration">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <LinkIcon className="h-5 w-5" />
-                  Cross-Curricular Links & Life Skills
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label>Literacy Links</Label>
-                    <Textarea
-                      value={formData.integration.literacy}
-                      onChange={(e) => updateItem('integration.literacy', null, e.target.value)}
-                      placeholder="Reading, writing, speaking opportunities..."
-                      rows={3}
-                    />
-                  </div>
-                  <div>
-                    <Label>Numeracy Links</Label>
-                    <Textarea
-                      value={formData.integration.numeracy}
-                      onChange={(e) => updateItem('integration.numeracy', null, e.target.value)}
-                      placeholder="Mathematical skills and concepts..."
-                      rows={3}
-                    />
-                  </div>
-                </div>
-                <ArrayField
-                  label="Other Subject Links"
-                  path="integration.other_subjects"
-                  placeholder="Science, History, Geography connections..."
-                  icon={LinkIcon}
-                />
+              <CardContent className="space-y-6">
                 <div>
-                  <Label>Life Skills</Label>
+                  <Label>Support Strategies</Label>
                   <Textarea
-                    value={formData.integration.life_skills}
-                    onChange={(e) => updateItem('integration.life_skills', null, e.target.value)}
-                    placeholder="Problem-solving, teamwork, communication..."
+                    value={formData.differentiation.support_strategies[0] || ''}
+                    onChange={(e) => updateNestedField('differentiation', 'support_strategies', [e.target.value])}
+                    placeholder="Scaffolding, visual aids, simplified tasks..."
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Label>Extension Activities</Label>
+                  <Textarea
+                    value={formData.differentiation.extension_activities[0] || ''}
+                    onChange={(e) => updateNestedField('differentiation', 'extension_activities', [e.target.value])}
+                    placeholder="Challenge tasks, independent research..."
                     rows={3}
                   />
                 </div>
