@@ -72,6 +72,19 @@ const erpModules = [
           { title: "Welcome & Onboarding", url: "/admissions?stage=7", icon: Users },
         ]
       },
+      { 
+        title: "Academics", 
+        url: "/academics", 
+        icon: BookOpen,
+        subItems: [
+          { title: "Timetable", url: "/academics/timetable", icon: Clock },
+          { title: "Curriculum", url: "/academics/curriculum", icon: BookOpen },
+          { title: "Gradebook", url: "/academics/gradebook", icon: Calculator },
+          { title: "Exams", url: "/academics/exams", icon: FileText },
+          { title: "Homework", url: "/academics/homework", icon: ClipboardCheck },
+          { title: "Assignments", url: "/academics/assignments", icon: ClipboardCheck },
+        ]
+      },
       { title: "Attendance", url: "/attendance", icon: Calendar },
       { title: "Curriculum", url: "/curriculum", icon: BookOpen },
       { title: "Timetable", url: "/timetable", icon: Clock },
