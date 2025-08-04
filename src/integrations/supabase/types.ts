@@ -1108,6 +1108,44 @@ export type Database = {
           },
         ]
       }
+      complaint_actions: {
+        Row: {
+          action_date: string
+          action_type: string
+          complaint_id: string
+          created_at: string
+          description: string
+          id: string
+          taken_by: string
+        }
+        Insert: {
+          action_date?: string
+          action_type: string
+          complaint_id: string
+          created_at?: string
+          description: string
+          id?: string
+          taken_by: string
+        }
+        Update: {
+          action_date?: string
+          action_type?: string
+          complaint_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          taken_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "complaint_actions_complaint_id_fkey"
+            columns: ["complaint_id"]
+            isOneToOne: false
+            referencedRelation: "complaints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       complaint_communications: {
         Row: {
           attachments: string[] | null
@@ -3736,6 +3774,75 @@ export type Database = {
         }
         Relationships: []
       }
+      medical_visits: {
+        Row: {
+          attended_by: string | null
+          chief_complaint: string | null
+          created_at: string
+          created_by: string
+          discharge_time: string | null
+          follow_up_date: string | null
+          follow_up_required: boolean | null
+          id: string
+          medications_administered: Json | null
+          parent_notification_time: string | null
+          parent_notified: boolean | null
+          recommendations: string | null
+          reference_number: string
+          status: Database["public"]["Enums"]["medical_visit_status"]
+          student_id: string
+          symptoms: string | null
+          treatment_given: string | null
+          updated_at: string
+          visit_type: Database["public"]["Enums"]["medical_visit_type"]
+          vital_signs: Json | null
+        }
+        Insert: {
+          attended_by?: string | null
+          chief_complaint?: string | null
+          created_at?: string
+          created_by: string
+          discharge_time?: string | null
+          follow_up_date?: string | null
+          follow_up_required?: boolean | null
+          id?: string
+          medications_administered?: Json | null
+          parent_notification_time?: string | null
+          parent_notified?: boolean | null
+          recommendations?: string | null
+          reference_number?: string
+          status?: Database["public"]["Enums"]["medical_visit_status"]
+          student_id: string
+          symptoms?: string | null
+          treatment_given?: string | null
+          updated_at?: string
+          visit_type: Database["public"]["Enums"]["medical_visit_type"]
+          vital_signs?: Json | null
+        }
+        Update: {
+          attended_by?: string | null
+          chief_complaint?: string | null
+          created_at?: string
+          created_by?: string
+          discharge_time?: string | null
+          follow_up_date?: string | null
+          follow_up_required?: boolean | null
+          id?: string
+          medications_administered?: Json | null
+          parent_notification_time?: string | null
+          parent_notified?: boolean | null
+          recommendations?: string | null
+          reference_number?: string
+          status?: Database["public"]["Enums"]["medical_visit_status"]
+          student_id?: string
+          symptoms?: string | null
+          treatment_given?: string | null
+          updated_at?: string
+          visit_type?: Database["public"]["Enums"]["medical_visit_type"]
+          vital_signs?: Json | null
+        }
+        Relationships: []
+      }
       medicine_administration: {
         Row: {
           administered_by: string
@@ -5093,6 +5200,54 @@ export type Database = {
         }
         Relationships: []
       }
+      student_medical_info: {
+        Row: {
+          allergies: string[] | null
+          blood_type: string | null
+          consent_date: string | null
+          consent_for_treatment: boolean | null
+          created_at: string
+          current_medications: Json | null
+          emergency_contacts: Json | null
+          id: string
+          medical_conditions: string[] | null
+          medical_notes: string | null
+          special_dietary_requirements: string | null
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          allergies?: string[] | null
+          blood_type?: string | null
+          consent_date?: string | null
+          consent_for_treatment?: boolean | null
+          created_at?: string
+          current_medications?: Json | null
+          emergency_contacts?: Json | null
+          id?: string
+          medical_conditions?: string[] | null
+          medical_notes?: string | null
+          special_dietary_requirements?: string | null
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          allergies?: string[] | null
+          blood_type?: string | null
+          consent_date?: string | null
+          consent_for_treatment?: boolean | null
+          created_at?: string
+          current_medications?: Json | null
+          emergency_contacts?: Json | null
+          id?: string
+          medical_conditions?: string[] | null
+          medical_notes?: string | null
+          special_dietary_requirements?: string | null
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       student_parents: {
         Row: {
           created_at: string
@@ -5780,6 +5935,12 @@ export type Database = {
         | "student"
       approval_status: "pending" | "approved" | "rejected" | "escalated"
       complaint_priority: "low" | "medium" | "high" | "urgent"
+      complaint_status:
+        | "submitted"
+        | "under_review"
+        | "investigating"
+        | "resolved"
+        | "closed"
       complaint_type:
         | "academic"
         | "behavioral"
@@ -5823,6 +5984,14 @@ export type Database = {
         | "medication"
         | "emergency"
         | "other"
+      medical_visit_status: "pending" | "in_progress" | "completed" | "referred"
+      medical_visit_type:
+        | "routine_checkup"
+        | "illness"
+        | "injury"
+        | "medication_administration"
+        | "emergency"
+        | "follow_up"
       override_reason:
         | "policy_exception"
         | "emergency_circumstances"
@@ -5862,6 +6031,13 @@ export type Database = {
         | "radicalisation"
         | "other"
       safeguarding_risk_level: "low" | "medium" | "high" | "critical"
+      safeguarding_status:
+        | "reported"
+        | "assessed"
+        | "investigating"
+        | "action_taken"
+        | "monitoring"
+        | "closed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -6002,6 +6178,13 @@ export const Constants = {
       ],
       approval_status: ["pending", "approved", "rejected", "escalated"],
       complaint_priority: ["low", "medium", "high", "urgent"],
+      complaint_status: [
+        "submitted",
+        "under_review",
+        "investigating",
+        "resolved",
+        "closed",
+      ],
       complaint_type: [
         "academic",
         "behavioral",
@@ -6049,6 +6232,15 @@ export const Constants = {
         "emergency",
         "other",
       ],
+      medical_visit_status: ["pending", "in_progress", "completed", "referred"],
+      medical_visit_type: [
+        "routine_checkup",
+        "illness",
+        "injury",
+        "medication_administration",
+        "emergency",
+        "follow_up",
+      ],
       override_reason: [
         "policy_exception",
         "emergency_circumstances",
@@ -6086,6 +6278,14 @@ export const Constants = {
         "other",
       ],
       safeguarding_risk_level: ["low", "medium", "high", "critical"],
+      safeguarding_status: [
+        "reported",
+        "assessed",
+        "investigating",
+        "action_taken",
+        "monitoring",
+        "closed",
+      ],
     },
   },
 } as const
