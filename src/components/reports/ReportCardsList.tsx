@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Eye, Download, Send, Edit, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { ReportViewDialog } from './ReportViewDialog';
 
 interface ReportCard {
   id: string;
@@ -16,6 +17,9 @@ interface ReportCard {
   status: string;
   generated_at: string;
   teacher_name: string;
+  grades_data: any;
+  attendance_data: any;
+  class_name: string;
 }
 
 interface ReportCardsListProps {
@@ -25,6 +29,8 @@ interface ReportCardsListProps {
 export function ReportCardsList({ onRefresh }: ReportCardsListProps) {
   const [reports, setReports] = useState<ReportCard[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedReport, setSelectedReport] = useState<ReportCard | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -61,11 +67,91 @@ export function ReportCardsList({ onRefresh }: ReportCardsListProps) {
     }
   };
 
-  const handleAction = (action: string, reportId: string) => {
-    toast({
-      title: `${action} Report`,
-      description: `${action} functionality coming soon!`,
-    });
+  const handleAction = (action: string, report: ReportCard) => {
+    switch (action) {
+      case 'View':
+        setSelectedReport(report);
+        setViewDialogOpen(true);
+        break;
+      case 'Download':
+        toast({
+          title: "Download Started",
+          description: "PDF generation feature coming soon!",
+        });
+        break;
+      case 'Edit':
+        toast({
+          title: "Edit Report",
+          description: "Edit functionality coming soon!",
+        });
+        break;
+      case 'Publish':
+        handleStatusChange(report.id, 'published');
+        break;
+      case 'Delete':
+        handleDelete(report.id);
+        break;
+      default:
+        toast({
+          title: `${action} Report`,
+          description: `${action} functionality coming soon!`,
+        });
+    }
+  };
+
+  const handleStatusChange = async (reportId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('report_cards')
+        .update({ 
+          status: newStatus,
+          ...(newStatus === 'published' && { published_at: new Date().toISOString() })
+        })
+        .eq('id', reportId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Status Updated",
+        description: `Report ${newStatus === 'published' ? 'published' : 'updated'} successfully`,
+      });
+
+      fetchReports(); // Refresh the list
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast({
+        title: "Update Failed",
+        description: "Failed to update report status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (reportId: string) => {
+    if (!confirm('Are you sure you want to delete this report?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('report_cards')
+        .delete()
+        .eq('id', reportId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Report Deleted",
+        description: "Report card has been deleted successfully",
+      });
+
+      fetchReports(); // Refresh the list
+    } catch (error) {
+      console.error('Error deleting report:', error);
+      toast({
+        title: "Delete Failed",
+        description: "Failed to delete report card",
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {
@@ -121,14 +207,14 @@ export function ReportCardsList({ onRefresh }: ReportCardsListProps) {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleAction('View', report.id)}
+                        onClick={() => handleAction('View', report)}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleAction('Download', report.id)}
+                        onClick={() => handleAction('Download', report)}
                       >
                         <Download className="h-4 w-4" />
                       </Button>
@@ -137,14 +223,14 @@ export function ReportCardsList({ onRefresh }: ReportCardsListProps) {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => handleAction('Edit', report.id)}
+                            onClick={() => handleAction('Edit', report)}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => handleAction('Publish', report.id)}
+                            onClick={() => handleAction('Publish', report)}
                           >
                             <Send className="h-4 w-4" />
                           </Button>
@@ -153,7 +239,7 @@ export function ReportCardsList({ onRefresh }: ReportCardsListProps) {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleAction('Delete', report.id)}
+                        onClick={() => handleAction('Delete', report)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -165,6 +251,13 @@ export function ReportCardsList({ onRefresh }: ReportCardsListProps) {
           </Table>
         )}
       </CardContent>
+      
+      <ReportViewDialog
+        open={viewDialogOpen}
+        onOpenChange={setViewDialogOpen}
+        report={selectedReport}
+        onStatusChange={fetchReports}
+      />
     </Card>
   );
 }

@@ -19,9 +19,10 @@ interface ReportCardGeneratorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   mode: 'individual' | 'bulk';
+  onGenerationComplete?: () => void;
 }
 
-export function ReportCardGenerator({ open, onOpenChange, mode }: ReportCardGeneratorProps) {
+export function ReportCardGenerator({ open, onOpenChange, mode, onGenerationComplete }: ReportCardGeneratorProps) {
   const [loading, setLoading] = useState(false);
   const [studentId, setStudentId] = useState('');
   const [yearGroup, setYearGroup] = useState('');
@@ -108,6 +109,9 @@ export function ReportCardGenerator({ open, onOpenChange, mode }: ReportCardGene
           title: "Report Generated Successfully",
           description: `Report card created for ${selectedStudent.first_name} ${selectedStudent.last_name}`,
         });
+        
+        // Call the callback to refresh the parent list
+        onGenerationComplete?.();
       } else {
         // Bulk generation - this would iterate through multiple students
         toast({

@@ -11,6 +11,7 @@ export default function ReportCardsPage() {
   const { toast } = useToast();
   const [generatorOpen, setGeneratorOpen] = useState(false);
   const [generatorMode, setGeneratorMode] = useState<'individual' | 'bulk'>('individual');
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleGenerateIndividual = () => {
     setGeneratorMode('individual');
@@ -20,6 +21,11 @@ export default function ReportCardsPage() {
   const handleBulkGenerate = () => {
     setGeneratorMode('bulk');
     setGeneratorOpen(true);
+  };
+
+  const handleGenerationComplete = () => {
+    // Refresh the reports list when a new report is generated
+    setRefreshKey(prev => prev + 1);
   };
 
   const handleCardClick = (cardType: string) => {
@@ -147,12 +153,13 @@ export default function ReportCardsPage() {
         </Card>
       </div>
       
-      <ReportCardsList />
+      <ReportCardsList key={refreshKey} />
       
       <ReportCardGenerator 
         open={generatorOpen}
         onOpenChange={setGeneratorOpen}
         mode={generatorMode}
+        onGenerationComplete={handleGenerationComplete}
       />
     </div>
   );
