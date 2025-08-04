@@ -24,10 +24,12 @@ import { useAssignmentData } from '@/hooks/useAssignmentData';
 import { useRBAC } from '@/hooks/useRBAC';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 export const StudentAssignmentView = () => {
   const { currentSchool } = useRBAC();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { assignments } = useAssignmentData(currentSchool?.id);
   const { toast } = useToast();
   const [selectedAssignment, setSelectedAssignment] = useState<string | null>(null);
@@ -241,10 +243,10 @@ export const StudentAssignmentView = () => {
                         </div>
                       </div>
                       <Button 
-                        onClick={() => setSelectedAssignment(assignment.id)}
+                        onClick={() => navigate(`/academics/assignments/${assignment.id}/submit`)}
                         variant={assignment.submissionStatus === 'submitted' ? 'outline' : 'default'}
                       >
-                        {assignment.submissionStatus === 'submitted' ? 'View' : 'Submit'}
+                        {assignment.submissionStatus === 'submitted' ? 'View Submission' : 'Submit Work'}
                       </Button>
                     </div>
                   </div>

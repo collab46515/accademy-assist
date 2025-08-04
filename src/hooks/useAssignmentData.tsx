@@ -38,7 +38,7 @@ export interface AssignmentSubmission {
   feedback?: string;
   graded_by?: string;
   graded_at?: string;
-  status: 'not_submitted' | 'submitted' | 'graded' | 'late';
+  status: 'not_submitted' | 'in_progress' | 'submitted' | 'graded' | 'late';
   is_late: boolean;
   created_at: string;
   updated_at: string;
@@ -201,6 +201,40 @@ export const useAssignmentData = (schoolId?: string) => {
     }
   }, [activeSchoolId]);
 
+  const updateSubmission = async (assignmentId: string, updates: Partial<AssignmentSubmission>): Promise<void> => {
+    try {
+      const existingSubmission = submissions.find(s => s.assignment_id === assignmentId);
+      
+      if (existingSubmission) {
+        // Update existing submission
+        const updatedSubmissions = submissions.map(s => 
+          s.assignment_id === assignmentId ? { ...s, ...updates, updated_at: new Date().toISOString() } : s
+        );
+        setSubmissions(updatedSubmissions);
+      } else {
+        // Create new submission
+        const newSubmission: AssignmentSubmission = {
+          id: `sub_${Date.now()}`,
+          assignment_id: assignmentId,
+          student_id: user?.id || 'student_1',
+          status: 'not_submitted',
+          is_late: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          ...updates
+        };
+        setSubmissions(prev => [...prev, newSubmission]);
+      }
+    } catch (error) {
+      console.error('Failed to update submission:', error);
+      throw error;
+    }
+  };
+
+  const getSubmissionByAssignmentId = (assignmentId: string): AssignmentSubmission | undefined => {
+    return submissions.find(s => s.assignment_id === assignmentId);
+  };
+
   return {
     assignments,
     submissions,
@@ -208,6 +242,8 @@ export const useAssignmentData = (schoolId?: string) => {
     fetchAssignments,
     createAssignment,
     updateAssignment,
+    updateSubmission,
+    getSubmissionByAssignmentId,
     getAssignmentStats
   };
 };
