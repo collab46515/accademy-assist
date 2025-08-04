@@ -176,7 +176,7 @@ export function PageHeader({
         <Breadcrumb>
           <BreadcrumbList>
             {breadcrumbs.map((crumb, index) => (
-              <React.Fragment key={`breadcrumb-${index}`}>
+              <div key={`breadcrumb-${index}`}>
                 <BreadcrumbItem>
                   {crumb.href ? (
                     <BreadcrumbLink 
@@ -194,7 +194,7 @@ export function PageHeader({
                     <ChevronRight className="h-4 w-4" />
                   </BreadcrumbSeparator>
                 )}
-              </React.Fragment>
+              </div>
             ))}
           </BreadcrumbList>
         </Breadcrumb>
