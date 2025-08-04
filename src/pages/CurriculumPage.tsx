@@ -131,9 +131,10 @@ const CurriculumPage = () => {
 
       {/* Main Tabs */}
       <Tabs defaultValue="subjects" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="subjects">Subjects</TabsTrigger>
           <TabsTrigger value="timetable">Timetable</TabsTrigger>
+          <TabsTrigger value="lesson-planning">Lesson Planning</TabsTrigger>
           <TabsTrigger value="rooms">Rooms</TabsTrigger>
         </TabsList>
 
@@ -265,6 +266,108 @@ const CurriculumPage = () => {
                          </TableCell>
                        </TableRow>
                      ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="lesson-planning">
+          <Card className="shadow-[var(--shadow-card)]">
+            <CardHeader>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <CardTitle className="flex items-center space-x-2">
+                    <BookOpen className="h-5 w-5 text-primary" />
+                    <span>Lesson Planning</span>
+                  </CardTitle>
+                  <CardDescription>Create and manage lesson plans for your curriculum</CardDescription>
+                </div>
+                <Button size="sm" className="shadow-[var(--shadow-elegant)]">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Lesson Plan
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Total Plans</p>
+                        <p className="text-2xl font-bold text-primary">24</p>
+                      </div>
+                      <BookOpen className="h-6 w-6 text-primary" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">This Week</p>
+                        <p className="text-2xl font-bold text-success">8</p>
+                      </div>
+                      <Calendar className="h-6 w-6 text-success" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Draft Plans</p>
+                        <p className="text-2xl font-bold text-warning">3</p>
+                      </div>
+                      <Clock className="h-6 w-6 text-warning" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="mb-6">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search lesson plans by subject, topic, or date..."
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Subject</TableHead>
+                      <TableHead>Topic</TableHead>
+                      <TableHead>Year Group</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Duration</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {displaySubjects.slice(0, 5).map((subject, index) => (
+                      <TableRow key={`lesson-${subject.id}-${index}`}>
+                        <TableCell className="font-medium">{subject.name}</TableCell>
+                        <TableCell>Introduction to {subject.name}</TableCell>
+                        <TableCell>{subject.year}</TableCell>
+                        <TableCell>{new Date(Date.now() + index * 24 * 60 * 60 * 1000).toLocaleDateString()}</TableCell>
+                        <TableCell>60 min</TableCell>
+                        <TableCell>
+                          <Badge variant={index % 3 === 0 ? "default" : index % 3 === 1 ? "secondary" : "outline"}>
+                            {index % 3 === 0 ? "Published" : index % 3 === 1 ? "Draft" : "Review"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="sm">Edit</Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </div>
