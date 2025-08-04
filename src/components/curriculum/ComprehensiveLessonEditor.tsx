@@ -25,7 +25,8 @@ import {
   AlertCircle,
   MessageSquare,
   Link as LinkIcon,
-  Wand2
+  Wand2,
+  Calendar
 } from 'lucide-react';
 
 interface ComprehensiveLessonEditorProps {
@@ -318,46 +319,185 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Wand2 className="h-5 w-5" />
-                  Curriculum Integration
+                  Curriculum Topic Selection
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="curriculum_topic">Curriculum Topic</Label>
-                  <Select 
-                    value={selectedTopic} 
-                    onValueChange={handleTopicSelect}
-                    disabled={!formData.subject || loadingTopics}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={
-                        !formData.subject 
-                          ? "Select a subject first" 
-                          : loadingTopics 
-                            ? "Loading topics..." 
-                            : "Select curriculum topic"
-                      } />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {curriculumTopics.map((topic) => (
-                        <SelectItem key={topic.id} value={topic.id}>
-                          {topic.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {selectedTopic && (
-                    <div className="mt-2 p-3 bg-blue-50 rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <CheckCircle2 className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm font-medium text-blue-800">Auto-fill Available</span>
-                      </div>
-                      <p className="text-sm text-blue-700">
-                        Learning objectives will be automatically populated from the selected curriculum topic.
-                      </p>
+              <CardContent className="space-y-6">
+                {/* Step 1: Class & Subject Selection */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+                  <h3 className="font-medium text-blue-900 mb-3">Step 1: Select Class & Subject</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Class</Label>
+                      <Select 
+                        value={`${formData.year_group}${formData.form_class ? formData.form_class : ''}`}
+                        onValueChange={(value) => {
+                          // Parse year group and form class from combined value
+                          const yearGroup = value.replace(/[A-Z]$/, '');
+                          const formClass = value.match(/[A-Z]$/)?.[0] || '';
+                          updateField('year_group', yearGroup);
+                          updateField('form_class', formClass);
+                        }}
+                      >
+                        <SelectTrigger className="bg-white">
+                          <SelectValue placeholder="Select class" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border shadow-lg z-50">
+                          <SelectItem value="Year 7A">Year 7A</SelectItem>
+                          <SelectItem value="Year 7B">Year 7B</SelectItem>
+                          <SelectItem value="Year 8A">Year 8A</SelectItem>
+                          <SelectItem value="Year 8B">Year 8B</SelectItem>
+                          <SelectItem value="Year 9A">Year 9A</SelectItem>
+                          <SelectItem value="Year 9B">Year 9B</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                  )}
+                    <div>
+                      <Label>Subject</Label>
+                      <Select 
+                        value={formData.subject} 
+                        onValueChange={(value) => updateField('subject', value)}
+                      >
+                        <SelectTrigger className="bg-white">
+                          <SelectValue placeholder="Select subject" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border shadow-lg z-50">
+                          <SelectItem value="Mathematics">Mathematics</SelectItem>
+                          <SelectItem value="English">English</SelectItem>
+                          <SelectItem value="Science">Science</SelectItem>
+                          <SelectItem value="History">History</SelectItem>
+                          <SelectItem value="Geography">Geography</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Step 2: Topic Selection with Filters */}
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
+                  <h3 className="font-medium text-green-900 mb-3">Step 2: Select Curriculum Topic</h3>
+                  
+                  {/* Filters */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                      <Label>Term</Label>
+                      <Select defaultValue="all">
+                        <SelectTrigger className="bg-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border shadow-lg z-50">
+                          <SelectItem value="all">All Terms</SelectItem>
+                          <SelectItem value="autumn">Autumn Term</SelectItem>
+                          <SelectItem value="spring">Spring Term</SelectItem>
+                          <SelectItem value="summer">Summer Term</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Status</Label>
+                      <Select defaultValue="all">
+                        <SelectTrigger className="bg-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border shadow-lg z-50">
+                          <SelectItem value="all">All Status</SelectItem>
+                          <SelectItem value="not-started">Not Started</SelectItem>
+                          <SelectItem value="in-progress">In Progress</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Search Topics</Label>
+                      <Input
+                        placeholder="Search: fractions, photosynthesis..."
+                        className="bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Topic Selection */}
+                  <div>
+                    <Label>Curriculum Topic</Label>
+                    <Select 
+                      value={selectedTopic} 
+                      onValueChange={handleTopicSelect}
+                      disabled={!formData.subject}
+                    >
+                      <SelectTrigger className="bg-white">
+                        <SelectValue placeholder={
+                          !formData.subject 
+                            ? "Select class & subject first" 
+                            : "Select curriculum topic"
+                        } />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border shadow-lg z-50">
+                        {/* Sample curriculum topics */}
+                        <SelectItem value="fractions-equiv">
+                          🔹 Recognise equivalent fractions
+                        </SelectItem>
+                        <SelectItem value="fractions-add">
+                          🔹 Add and subtract fractions
+                        </SelectItem>
+                        <SelectItem value="photosynthesis">
+                          🧬 Photosynthesis in plants
+                        </SelectItem>
+                        <SelectItem value="victorian-era">
+                          📜 The Victorian era
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Selected Topic Details */}
+                {selectedTopic && (
+                  <div className="bg-white border rounded-lg p-4">
+                    <h3 className="font-medium text-gray-900 mb-3">Selected Topic Details</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3">
+                        <div className="text-2xl">🔹</div>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-lg">Recognise equivalent fractions</h4>
+                          <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
+                            <span className="flex items-center gap-1">
+                              <FileText className="h-3 w-3" />
+                              Ma4/2.2b
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              3 hours
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              Autumn Term
+                            </span>
+                          </div>
+                          <div className="mt-2">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-600">Progress</span>
+                              <span className="font-medium">0% taught (0 of 3 lessons completed)</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+                              <div className="bg-blue-600 h-2 rounded-full" style={{ width: '0%' }}></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Auto-fill notification */}
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          <span className="text-sm font-medium text-green-800">Auto-fill Available</span>
+                        </div>
+                        <p className="text-sm text-green-700 mt-1">
+                          Learning objectives, success criteria, and suggested activities will be automatically populated from this curriculum topic.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
