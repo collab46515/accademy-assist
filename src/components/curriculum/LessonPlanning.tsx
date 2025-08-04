@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Plus, Search, Calendar, Edit, Copy, Trash2, FileText, Clock, User, BookOpen, ChevronDown, Upload, Paperclip, Play, Pause, RotateCcw, Share2, Users, Link, Zap, BarChart3, TrendingUp, X } from 'lucide-react';
+import { Plus, Search, Calendar, Edit, Copy, Trash2, FileText, Clock, User, BookOpen, ChevronDown, Upload, Paperclip, Play, Pause, RotateCcw, Share2, Users, Link, Zap, BarChart3, TrendingUp, X, AlertTriangle, CheckCircle2, Target, BookmarkCheck, UserCheck, TrendingDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
@@ -811,7 +811,136 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
   const selectedTopic = mockCurriculumTopics.find(topic => topic.id === formData.curriculum_topic_id);
 
   return (
-    <div className="space-y-6">
+                    <div className="space-y-6">
+                      {/* Deep System Integration Alert */}
+                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Link className="h-5 w-5 text-blue-600" />
+                          <span className="font-medium text-blue-800">Deep System Integration</span>
+                          <Badge className="bg-blue-100 text-blue-800 text-xs">🔗 Auto-Connected</Badge>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                          <div className="flex items-center gap-2 p-2 bg-white rounded border">
+                            <BookOpen className={`h-4 w-4 ${formData.curriculum_topic_id ? 'text-green-600' : 'text-red-500'}`} />
+                            <span className={formData.curriculum_topic_id ? 'text-green-700' : 'text-red-700'}>
+                              {formData.curriculum_topic_id ? '✅ Curriculum Linked' : '❌ Must Link Topic'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 p-2 bg-white rounded border">
+                            <Calendar className="h-4 w-4 text-blue-600" />
+                            <span className="text-blue-700">🔄 Timetable Sync</span>
+                          </div>
+                          <div className="flex items-center gap-2 p-2 bg-white rounded border">
+                            <FileText className="h-4 w-4 text-purple-600" />
+                            <span className="text-purple-700">📝 Auto-Homework</span>
+                          </div>
+                          <div className="flex items-center gap-2 p-2 bg-white rounded border">
+                            <UserCheck className="h-4 w-4 text-orange-600" />
+                            <span className="text-orange-700">👥 Attendance Link</span>
+                          </div>
+                          <div className="flex items-center gap-2 p-2 bg-white rounded border">
+                            <Target className="h-4 w-4 text-emerald-600" />
+                            <span className="text-emerald-700">🎯 Gradebook Sync</span>
+                          </div>
+                          <div className="flex items-center gap-2 p-2 bg-white rounded border">
+                            <BarChart3 className="h-4 w-4 text-indigo-600" />
+                            <span className="text-indigo-700">📊 Reports Feed</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Timetable Integration */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-5 w-5 text-blue-600" />
+                            <Label className="text-base font-medium">Timetable Integration</Label>
+                            <Badge className="bg-blue-100 text-blue-800 text-xs">Auto-Fill</Badge>
+                          </div>
+                          
+                          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div className="text-sm text-blue-800 mb-3">📅 <strong>Smart Auto-Fill from Timetable</strong></div>
+                            <div className="space-y-2 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Detected Period:</span>
+                                <span className="font-medium">Period 3 (11:30-12:30)</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Auto-Selected Class:</span>
+                                <span className="font-medium">Year 7B Mathematics</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Room:</span>
+                                <span className="font-medium">Room M12</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Students Count:</span>
+                                <span className="font-medium">28 students</span>
+                              </div>
+                            </div>
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              size="sm" 
+                              className="mt-3 text-xs"
+                              onClick={() => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  subject: 'Mathematics',
+                                  year_group: 'Year 7',
+                                  form_class: '7B',
+                                  period_id: 'period-3',
+                                  duration_minutes: 60
+                                }));
+                              }}
+                            >
+                              ✨ Use Timetable Data
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Curriculum Coverage Requirement */}
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2">
+                            <BookOpen className="h-5 w-5 text-red-600" />
+                            <Label className="text-base font-medium">Curriculum Coverage (Required)</Label>
+                            <Badge className="bg-red-100 text-red-800 text-xs">Mandatory</Badge>
+                          </div>
+                          
+                          {!formData.curriculum_topic_id ? (
+                            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                              <div className="flex items-center gap-2 text-red-800 mb-2">
+                                <AlertTriangle className="h-4 w-4" />
+                                <span className="font-medium">Curriculum Topic Required</span>
+                              </div>
+                              <div className="text-sm text-red-700 mb-3">
+                                Every lesson must link to a curriculum topic to ensure coverage tracking and standards alignment.
+                              </div>
+                              <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-xs border-red-300 text-red-700 hover:bg-red-100"
+                              >
+                                🔍 Browse Topics
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                              <div className="flex items-center gap-2 text-green-800 mb-2">
+                                <CheckCircle2 className="h-4 w-4" />
+                                <span className="font-medium">Coverage Tracked</span>
+                              </div>
+                              <div className="text-sm text-green-700 mb-2">
+                                <strong>Topic:</strong> {selectedTopic?.title || 'Introduction to Fractions'}
+                              </div>
+                              <div className="text-xs text-green-600">
+                                ✅ This lesson will count toward curriculum coverage analytics
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
@@ -3302,8 +3431,187 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
                                         }))}
                                         className="w-full p-3 border rounded-md text-sm min-h-[60px] resize-y mt-2"
                                       />
+                          </div>
+                        )}
+
+                        {/* Post-Lesson System Actions */}
+                        {formData.status === 'completed' && (
+                          <div className="mt-6 p-4 bg-gradient-to-br from-gray-50 to-slate-50 border border-gray-200 rounded-lg">
+                            <div className="flex items-center gap-2 mb-4">
+                              <Zap className="h-5 w-5 text-gray-600" />
+                              <span className="font-medium text-gray-800">Post-Lesson System Actions</span>
+                              <Badge className="bg-gray-100 text-gray-800 text-xs">🔗 Integration Hub</Badge>
+                            </div>
+                            
+                            <div className="grid md:grid-cols-2 gap-4">
+                              {/* Attendance Integration */}
+                              <div className="bg-white p-4 border rounded-lg">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <UserCheck className="h-4 w-4 text-orange-600" />
+                                  <span className="font-medium text-orange-800">Mark Attendance</span>
+                                </div>
+                                <div className="text-sm text-gray-600 mb-3">
+                                  After completing this lesson, mark attendance for Period 3 - Year 7B Mathematics
+                                </div>
+                                <Button 
+                                  type="button" 
+                                  size="sm" 
+                                  className="w-full bg-orange-600 hover:bg-orange-700"
+                                >
+                                  📋 Mark Attendance (28 students)
+                                </Button>
+                              </div>
+
+                              {/* Assignment Creation */}
+                              <div className="bg-white p-4 border rounded-lg">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <FileText className="h-4 w-4 text-purple-600" />
+                                  <span className="font-medium text-purple-800">Create Homework</span>
+                                </div>
+                                <div className="text-sm text-gray-600 mb-3">
+                                  Auto-create homework assignment from lesson tasks
+                                </div>
+                                <div className="text-xs text-purple-600 mb-2">
+                                  📝 Will use: "Draw two equivalent fractions and explain why they are equal"
+                                </div>
+                                <Button 
+                                  type="button" 
+                                  size="sm" 
+                                  className="w-full bg-purple-600 hover:bg-purple-700"
+                                >
+                                  📚 Create Assignment (Due Tomorrow)
+                                </Button>
+                              </div>
+
+                              {/* Gradebook Integration */}
+                              <div className="bg-white p-4 border rounded-lg">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <Target className="h-4 w-4 text-emerald-600" />
+                                  <span className="font-medium text-emerald-800">Update Gradebook</span>
+                                </div>
+                                <div className="text-sm text-gray-600 mb-3">
+                                  Skills assessed will appear in student records
+                                </div>
+                                <div className="text-xs text-emerald-600 mb-2">
+                                  🎯 Adding: Number sense, Fraction understanding, Mathematical communication
+                                </div>
+                                <Button 
+                                  type="button" 
+                                  size="sm" 
+                                  className="w-full bg-emerald-600 hover:bg-emerald-700"
+                                >
+                                  ✅ Sync to Gradebook
+                                </Button>
+                              </div>
+
+                              {/* Report Analytics */}
+                              <div className="bg-white p-4 border rounded-lg">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <BarChart3 className="h-4 w-4 text-indigo-600" />
+                                  <span className="font-medium text-indigo-800">Analytics Impact</span>
+                                </div>
+                                <div className="text-sm text-gray-600 mb-3">
+                                  This lesson contributes to teacher performance metrics
+                                </div>
+                                <div className="text-xs space-y-1">
+                                  <div className="text-green-600">✅ "Teacher consistently plans ahead"</div>
+                                  <div className="text-green-600">✅ "Curriculum coverage on track"</div>
+                                  <div className="text-green-600">✅ "Reflective practice documented"</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Homework Auto-Creation Preview */}
+                        {formData.lesson_sections.some(section => 
+                          section.title.toLowerCase().includes('task') || 
+                          section.content.toLowerCase().includes('practice') ||
+                          section.content.toLowerCase().includes('exercise')
+                        ) && (
+                          <div className="mt-6 p-4 bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 rounded-lg">
+                            <div className="flex items-center gap-2 mb-3">
+                              <FileText className="h-5 w-5 text-purple-600" />
+                              <span className="font-medium text-purple-800">Auto-Assignment Ready</span>
+                              <Badge className="bg-purple-100 text-purple-800 text-xs">One-Click Create</Badge>
+                            </div>
+                            
+                            <div className="space-y-3">
+                              <div className="text-sm text-purple-700 mb-2">
+                                📚 <strong>Homework will auto-populate from your lesson content:</strong>
+                              </div>
+                              
+                              {formData.lesson_sections
+                                .filter(section => 
+                                  section.title.toLowerCase().includes('task') || 
+                                  section.content.toLowerCase().includes('practice') ||
+                                  section.content.toLowerCase().includes('exercise')
+                                )
+                                .map((section, index) => (
+                                  <div key={index} className="bg-white p-3 border rounded">
+                                    <div className="flex items-start gap-2">
+                                      <input 
+                                        type="checkbox" 
+                                        defaultChecked 
+                                        className="mt-1 rounded text-purple-600"
+                                      />
+                                      <div className="flex-1">
+                                        <div className="font-medium text-sm">{section.title}</div>
+                                        <div className="text-xs text-gray-600 mt-1">{section.content.substring(0, 100)}...</div>
+                                        <div className="text-xs text-purple-600 mt-1">
+                                          ⏱️ Estimated time: {section.duration_minutes} mins | 📅 Due: Tomorrow
+                                        </div>
+                                      </div>
                                     </div>
-                                  )}
+                                  </div>
+                                ))}
+                              
+                              <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="sm" 
+                                className="w-full border-purple-300 text-purple-700 hover:bg-purple-100"
+                              >
+                                🚀 Create Homework Assignment(s)
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* System Integration Summary */}
+                        <div className="mt-6 p-4 bg-gradient-to-r from-slate-50 to-gray-50 border border-slate-200 rounded-lg">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Link className="h-5 w-5 text-slate-600" />
+                            <span className="font-medium text-slate-800">Integration Impact Summary</span>
+                          </div>
+                          
+                          <div className="grid md:grid-cols-3 gap-4 text-sm">
+                            <div className="space-y-2">
+                              <div className="font-medium text-slate-700">📊 Curriculum Coverage</div>
+                              <div className="text-xs text-slate-600">
+                                ✅ Topic logged for coverage tracking<br/>
+                                📈 Contributes to standards alignment<br/>
+                                🎯 Feeds into school reports
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <div className="font-medium text-slate-700">👥 Student Records</div>
+                              <div className="text-xs text-slate-600">
+                                📝 Skills added to gradebook<br/>
+                                📋 Attendance linked to lesson<br/>
+                                📚 Homework auto-assigned
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <div className="font-medium text-slate-700">📈 Teacher Analytics</div>
+                              <div className="text-xs text-slate-600">
+                                ⭐ Planning consistency tracked<br/>
+                                🔄 Reflection practice logged<br/>
+                                📊 Performance metrics updated
+                              </div>
+                            </div>
+                          </div>
+                        )
                                 </div>
                               </div>
 
@@ -3313,6 +3621,7 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
                                   🌟 <strong>Professional Growth Tracker</strong> - This reflection will help you identify patterns and improve your teaching practice over time.
                                 </div>
                               </div>
+                            </div>
                             </div>
                           </div>
                         )}
