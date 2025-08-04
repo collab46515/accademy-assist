@@ -1033,6 +1033,45 @@ export type Database = {
         }
         Relationships: []
       }
+      comment_bank: {
+        Row: {
+          category: string
+          comment_template: string
+          created_at: string
+          created_by: string
+          grade_level: string
+          id: string
+          is_active: boolean | null
+          school_id: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          comment_template: string
+          created_at?: string
+          created_by: string
+          grade_level: string
+          id?: string
+          is_active?: boolean | null
+          school_id: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          comment_template?: string
+          created_at?: string
+          created_by?: string
+          grade_level?: string
+          id?: string
+          is_active?: boolean | null
+          school_id?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       communication_recipients: {
         Row: {
           communication_id: string
@@ -5498,6 +5537,96 @@ export type Database = {
           },
         ]
       }
+      report_cards: {
+        Row: {
+          academic_term: string
+          academic_year: string
+          attendance_data: Json
+          class_name: string
+          comments_data: Json
+          created_at: string
+          curriculum_coverage: Json
+          effort_data: Json
+          generated_at: string
+          generated_by: string
+          grades_data: Json
+          id: string
+          parent_access_enabled: boolean | null
+          parent_viewed_at: string | null
+          pdf_generated_at: string | null
+          pdf_url: string | null
+          published_at: string | null
+          school_id: string
+          status: string
+          student_id: string
+          student_name: string
+          student_photo_url: string | null
+          targets: Json
+          teacher_id: string
+          teacher_name: string
+          updated_at: string
+          year_group: string
+        }
+        Insert: {
+          academic_term: string
+          academic_year: string
+          attendance_data?: Json
+          class_name: string
+          comments_data?: Json
+          created_at?: string
+          curriculum_coverage?: Json
+          effort_data?: Json
+          generated_at?: string
+          generated_by: string
+          grades_data?: Json
+          id?: string
+          parent_access_enabled?: boolean | null
+          parent_viewed_at?: string | null
+          pdf_generated_at?: string | null
+          pdf_url?: string | null
+          published_at?: string | null
+          school_id: string
+          status?: string
+          student_id: string
+          student_name: string
+          student_photo_url?: string | null
+          targets?: Json
+          teacher_id: string
+          teacher_name: string
+          updated_at?: string
+          year_group: string
+        }
+        Update: {
+          academic_term?: string
+          academic_year?: string
+          attendance_data?: Json
+          class_name?: string
+          comments_data?: Json
+          created_at?: string
+          curriculum_coverage?: Json
+          effort_data?: Json
+          generated_at?: string
+          generated_by?: string
+          grades_data?: Json
+          id?: string
+          parent_access_enabled?: boolean | null
+          parent_viewed_at?: string | null
+          pdf_generated_at?: string | null
+          pdf_url?: string | null
+          published_at?: string | null
+          school_id?: string
+          status?: string
+          student_id?: string
+          student_name?: string
+          student_photo_url?: string | null
+          targets?: Json
+          teacher_id?: string
+          teacher_name?: string
+          updated_at?: string
+          year_group?: string
+        }
+        Relationships: []
+      }
       role_permissions: {
         Row: {
           conditions: Json | null
@@ -6751,6 +6880,14 @@ export type Database = {
       generate_receipt_number: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      generate_report_card_data: {
+        Args: {
+          p_student_id: string
+          p_academic_term: string
+          p_academic_year: string
+        }
+        Returns: Json
       }
       get_user_roles: {
         Args: { user_uuid: string; school_uuid?: string }
