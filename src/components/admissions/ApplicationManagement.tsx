@@ -131,7 +131,13 @@ export function ApplicationManagement({ initialFilter = 'all' }: ApplicationMana
 
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
+          <Card 
+            className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all duration-200 transform hover:scale-105"
+            onClick={() => {
+              setStatusFilter('all');
+              setActiveTab('applications');
+            }}
+          >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -143,7 +149,13 @@ export function ApplicationManagement({ initialFilter = 'all' }: ApplicationMana
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-amber-500 to-amber-600 text-white border-0">
+          <Card 
+            className="bg-gradient-to-br from-amber-500 to-amber-600 text-white border-0 cursor-pointer hover:from-amber-600 hover:to-amber-700 transition-all duration-200 transform hover:scale-105"
+            onClick={() => {
+              setStatusFilter('submitted');
+              setActiveTab('applications');
+            }}
+          >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -155,7 +167,13 @@ export function ApplicationManagement({ initialFilter = 'all' }: ApplicationMana
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0">
+          <Card 
+            className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 cursor-pointer hover:from-purple-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105"
+            onClick={() => {
+              setStatusFilter('under_review');
+              setActiveTab('applications');
+            }}
+          >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -167,7 +185,13 @@ export function ApplicationManagement({ initialFilter = 'all' }: ApplicationMana
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white border-0">
+          <Card 
+            className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white border-0 cursor-pointer hover:from-indigo-600 hover:to-indigo-700 transition-all duration-200 transform hover:scale-105"
+            onClick={() => {
+              setStatusFilter('assessment_scheduled');
+              setActiveTab('applications');
+            }}
+          >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -179,7 +203,13 @@ export function ApplicationManagement({ initialFilter = 'all' }: ApplicationMana
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0">
+          <Card 
+            className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0 cursor-pointer hover:from-green-600 hover:to-green-700 transition-all duration-200 transform hover:scale-105"
+            onClick={() => {
+              setStatusFilter('approved');
+              setActiveTab('applications');
+            }}
+          >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -191,7 +221,13 @@ export function ApplicationManagement({ initialFilter = 'all' }: ApplicationMana
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white border-0">
+          <Card 
+            className="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white border-0 cursor-pointer hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 transform hover:scale-105"
+            onClick={() => {
+              setStatusFilter('waitlisted');
+              setActiveTab('applications');
+            }}
+          >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -203,7 +239,13 @@ export function ApplicationManagement({ initialFilter = 'all' }: ApplicationMana
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white border-0">
+          <Card 
+            className="bg-gradient-to-br from-red-500 to-red-600 text-white border-0 cursor-pointer hover:from-red-600 hover:to-red-700 transition-all duration-200 transform hover:scale-105"
+            onClick={() => {
+              setStatusFilter('rejected');
+              setActiveTab('applications');
+            }}
+          >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
