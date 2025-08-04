@@ -75,8 +75,9 @@ const CurriculumPage = () => {
 
   const handleFrameworkSelect = (framework: CurriculumFramework) => {
     console.log('Framework selected:', framework);
-    console.log('Setting selectedFramework to:', framework);
+    console.log('Current selectedFramework before:', selectedFramework);
     setSelectedFramework(framework);
+    console.log('Framework name:', framework.name);
     setActiveTab('topics'); // Auto-switch to topics tab when framework is selected
   };
 
@@ -175,13 +176,22 @@ const CurriculumPage = () => {
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="framework">Framework</TabsTrigger>
             <TabsTrigger value="topics">
-              {selectedFramework ? `Topics - ${selectedFramework.name}` : "Topics (Select Framework First)"}
+              {(() => {
+                console.log('Rendering Topics tab - selectedFramework:', selectedFramework);
+                return selectedFramework ? `Topics - ${selectedFramework.name}` : "Topics (Select Framework First)";
+              })()}
             </TabsTrigger>
             <TabsTrigger value="progress">
-              {selectedFramework && canViewProgress ? `Progress - ${selectedFramework.name}` : "Progress (Select Framework First)"}
+              {(() => {
+                console.log('Rendering Progress tab - selectedFramework:', selectedFramework, 'canViewProgress:', canViewProgress);
+                return selectedFramework && canViewProgress ? `Progress - ${selectedFramework.name}` : "Progress (Select Framework First)";
+              })()}
             </TabsTrigger>
             <TabsTrigger value="reports">
-              {selectedFramework ? `Reports - ${selectedFramework.name}` : "Reports (Select Framework First)"}
+              {(() => {
+                console.log('Rendering Reports tab - selectedFramework:', selectedFramework);
+                return selectedFramework ? `Reports - ${selectedFramework.name}` : "Reports (Select Framework First)";
+              })()}
             </TabsTrigger>
             <TabsTrigger value="import">Import/Export</TabsTrigger>
           </TabsList>
