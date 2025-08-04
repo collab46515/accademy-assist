@@ -159,9 +159,9 @@ export function generateReportCardPDF(report: ReportCard) {
   });
   
   // Performance Table Header
-  yPos += 10;
+  yPos += 45;
   doc.setFillColor(schoolBlue[0], schoolBlue[1], schoolBlue[2]);
-  doc.rect(20, yPos - 5, 170, 12, 'F');
+  doc.rect(20, yPos, 170, 12, 'F');
   
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(11);
@@ -208,7 +208,7 @@ export function generateReportCardPDF(report: ReportCard) {
     doc.text(grade.effort || 'Good', 115, yPos + 2);
     
     // Wrap comment text
-    const comment = grade.comment || 'Making good progress in this subject.';
+    const comment = grade.comments || grade.comment || 'Making good progress in this subject.';
     const wrappedComment = doc.splitTextToSize(comment, 45);
     doc.text(wrappedComment[0], 140, yPos + 2);
     
