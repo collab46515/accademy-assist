@@ -103,10 +103,19 @@ const erpModules = [
           { title: "Reminders", url: "/school-management/fee-management/reminders", icon: Bell }
         ]
       },
+      { 
+        title: "Student Welfare", 
+        url: "/student-welfare", 
+        icon: Shield,
+        subItems: [
+          { title: "Infirmary", url: "/student-welfare/infirmary", icon: Activity },
+          { title: "Complaints", url: "/student-welfare/complaints", icon: MessageSquare },
+          { title: "Safeguarding", url: "/student-welfare/safeguarding", icon: Shield },
+        ]
+      },
       { title: "Communications", url: "/communication", icon: MessageSquare },
       { title: "Events", url: "/events", icon: Activity },
       { title: "Activities", url: "/activities", icon: Activity },
-      { title: "Safeguarding", url: "/safeguarding", icon: Shield },
       { title: "Portals", url: "/portals", icon: Globe },
     ]
   },
