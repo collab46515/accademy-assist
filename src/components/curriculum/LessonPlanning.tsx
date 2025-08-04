@@ -44,6 +44,13 @@ interface LessonAttachment {
   size: number;
 }
 
+interface LessonDifferentiation {
+  support: string[];
+  challenge: string[];
+  sen: string[];
+  eal: string[];
+}
+
 interface LessonResources {
   materials_list: string[];
   digital_resources: DigitalResource[];
@@ -78,6 +85,7 @@ interface LessonPlan {
   objectives_edited: boolean;
   lesson_sections: LessonSection[];
   resources: LessonResources;
+  differentiation: LessonDifferentiation;
   total_planned_time: number;
 }
 
@@ -95,7 +103,16 @@ interface LessonPlanFormData {
   objectives_edited: boolean;
   lesson_sections: LessonSection[];
   resources: LessonResources;
+  differentiation: LessonDifferentiation;
 }
+
+// Default differentiation template
+const createDefaultDifferentiation = (): LessonDifferentiation => ({
+  support: [],
+  challenge: [],
+  sen: [],
+  eal: []
+});
 
 // Default resources template
 const createDefaultResources = (): LessonResources => ({
@@ -291,6 +308,12 @@ const mockLessonPlans: LessonPlan[] = [
       tech_requirements: ['Projector', 'Document camera'],
       shared_with_students: true
     },
+    differentiation: {
+      support: ['Use fraction tiles', 'Pair with buddy'],
+      challenge: ['Find 3 fractions = 3/6', 'Create your own equivalent fraction problem'],
+      sen: ['Use visual schedule', 'Reduce task size to 3 problems'],
+      eal: ['Use bilingual glossary', 'Pair with fluent speaker']
+    },
     total_planned_time: 50
   }
 ];
@@ -334,7 +357,8 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
     success_criteria: [''],
     objectives_edited: false,
     lesson_sections: createDefaultLessonSections(),
-    resources: createDefaultResources()
+    resources: createDefaultResources(),
+    differentiation: createDefaultDifferentiation()
   });
 
   const resetForm = () => {
@@ -351,7 +375,8 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
       success_criteria: [''],
       objectives_edited: false,
       lesson_sections: createDefaultLessonSections(),
-      resources: createDefaultResources()
+      resources: createDefaultResources(),
+      differentiation: createDefaultDifferentiation()
     });
     setExpandedSections(['hook']);
   };
@@ -430,7 +455,8 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
       success_criteria: plan.success_criteria || [''],
       objectives_edited: plan.objectives_edited || false,
       lesson_sections: plan.lesson_sections || createDefaultLessonSections(),
-      resources: plan.resources || createDefaultResources()
+      resources: plan.resources || createDefaultResources(),
+      differentiation: plan.differentiation || createDefaultDifferentiation()
     });
     setExpandedSections(['hook']);
     setIsDialogOpen(true);
@@ -1411,6 +1437,321 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
                             <span className="text-xs text-muted-foreground">
                               Worksheets, PPTs, rubrics, etc.
                             </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Differentiation & Accessibility Section */}
+                    <div className="space-y-4 border-t pt-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <Label className="text-lg font-semibold">🎯 Differentiation & Accessibility</Label>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Ensure inclusive planning for all learners with targeted support and challenges
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid gap-6 md:grid-cols-2">
+                        {/* Support Section */}
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                              <span className="text-blue-600 font-semibold text-sm">S</span>
+                            </div>
+                            <div>
+                              <Label className="text-base font-medium">Support</Label>
+                              <p className="text-sm text-muted-foreground">For students who need extra help</p>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            {formData.differentiation.support.map((item, index) => (
+                              <div key={index} className="flex gap-2">
+                                <Input
+                                  value={item}
+                                  onChange={(e) => {
+                                    const newSupport = [...formData.differentiation.support];
+                                    newSupport[index] = e.target.value;
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      differentiation: {
+                                        ...prev.differentiation,
+                                        support: newSupport
+                                      }
+                                    }));
+                                  }}
+                                  placeholder="e.g., Use fraction tiles, Pair with buddy, Extra time"
+                                  className="flex-1"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newSupport = formData.differentiation.support.filter((_, i) => i !== index);
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      differentiation: {
+                                        ...prev.differentiation,
+                                        support: newSupport
+                                      }
+                                    }));
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setFormData(prev => ({
+                                ...prev,
+                                differentiation: {
+                                  ...prev.differentiation,
+                                  support: [...prev.differentiation.support, '']
+                                }
+                              }))}
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add Support Strategy
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Challenge Section */}
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                              <span className="text-green-600 font-semibold text-sm">C</span>
+                            </div>
+                            <div>
+                              <Label className="text-base font-medium">Challenge</Label>
+                              <p className="text-sm text-muted-foreground">For students who need extension</p>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            {formData.differentiation.challenge.map((item, index) => (
+                              <div key={index} className="flex gap-2">
+                                <Input
+                                  value={item}
+                                  onChange={(e) => {
+                                    const newChallenge = [...formData.differentiation.challenge];
+                                    newChallenge[index] = e.target.value;
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      differentiation: {
+                                        ...prev.differentiation,
+                                        challenge: newChallenge
+                                      }
+                                    }));
+                                  }}
+                                  placeholder="e.g., Find 3 fractions = 3/6, Create your own"
+                                  className="flex-1"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newChallenge = formData.differentiation.challenge.filter((_, i) => i !== index);
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      differentiation: {
+                                        ...prev.differentiation,
+                                        challenge: newChallenge
+                                      }
+                                    }));
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setFormData(prev => ({
+                                ...prev,
+                                differentiation: {
+                                  ...prev.differentiation,
+                                  challenge: [...prev.differentiation.challenge, '']
+                                }
+                              }))}
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add Challenge Activity
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* SEN Section */}
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                              <span className="text-purple-600 font-semibold text-sm">SEN</span>
+                            </div>
+                            <div>
+                              <Label className="text-base font-medium">Special Educational Needs</Label>
+                              <p className="text-sm text-muted-foreground">Specific accommodations and adaptations</p>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            {formData.differentiation.sen.map((item, index) => (
+                              <div key={index} className="flex gap-2">
+                                <Input
+                                  value={item}
+                                  onChange={(e) => {
+                                    const newSen = [...formData.differentiation.sen];
+                                    newSen[index] = e.target.value;
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      differentiation: {
+                                        ...prev.differentiation,
+                                        sen: newSen
+                                      }
+                                    }));
+                                  }}
+                                  placeholder="e.g., Use visual schedule, Reduce task size"
+                                  className="flex-1"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newSen = formData.differentiation.sen.filter((_, i) => i !== index);
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      differentiation: {
+                                        ...prev.differentiation,
+                                        sen: newSen
+                                      }
+                                    }));
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setFormData(prev => ({
+                                ...prev,
+                                differentiation: {
+                                  ...prev.differentiation,
+                                  sen: [...prev.differentiation.sen, '']
+                                }
+                              }))}
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add SEN Support
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* EAL Section */}
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                              <span className="text-orange-600 font-semibold text-sm">EAL</span>
+                            </div>
+                            <div>
+                              <Label className="text-base font-medium">English as Additional Language</Label>
+                              <p className="text-sm text-muted-foreground">Language support and scaffolding</p>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            {formData.differentiation.eal.map((item, index) => (
+                              <div key={index} className="flex gap-2">
+                                <Input
+                                  value={item}
+                                  onChange={(e) => {
+                                    const newEal = [...formData.differentiation.eal];
+                                    newEal[index] = e.target.value;
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      differentiation: {
+                                        ...prev.differentiation,
+                                        eal: newEal
+                                      }
+                                    }));
+                                  }}
+                                  placeholder="e.g., Use bilingual glossary, Pair with fluent speaker"
+                                  className="flex-1"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newEal = formData.differentiation.eal.filter((_, i) => i !== index);
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      differentiation: {
+                                        ...prev.differentiation,
+                                        eal: newEal
+                                      }
+                                    }));
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setFormData(prev => ({
+                                ...prev,
+                                differentiation: {
+                                  ...prev.differentiation,
+                                  eal: [...prev.differentiation.eal, '']
+                                }
+                              }))}
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add EAL Support
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Differentiation Summary */}
+                      <div className="mt-4 p-4 bg-muted/30 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-sm font-medium">Inclusive Planning Summary:</span>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center">
+                              <span className="text-blue-600 text-xs font-bold">S</span>
+                            </div>
+                            <span>{formData.differentiation.support.filter(s => s.trim()).length} Support strategies</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
+                              <span className="text-green-600 text-xs font-bold">C</span>
+                            </div>
+                            <span>{formData.differentiation.challenge.filter(c => c.trim()).length} Challenge activities</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-purple-100 rounded-full flex items-center justify-center">
+                              <span className="text-purple-600 text-xs font-bold">SEN</span>
+                            </div>
+                            <span>{formData.differentiation.sen.filter(s => s.trim()).length} SEN accommodations</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-orange-100 rounded-full flex items-center justify-center">
+                              <span className="text-orange-600 text-xs font-bold">EAL</span>
+                            </div>
+                            <span>{formData.differentiation.eal.filter(e => e.trim()).length} EAL supports</span>
                           </div>
                         </div>
                       </div>
