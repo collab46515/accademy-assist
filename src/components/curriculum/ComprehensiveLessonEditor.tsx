@@ -26,8 +26,11 @@ import {
   MessageSquare,
   Link as LinkIcon,
   Wand2,
-  Calendar
+  Calendar,
+  Info
 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ComprehensiveLessonEditorProps {
   editingPlan: any;
@@ -435,140 +438,132 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
             </Card>
           </TabsContent>
 
-          {/* Curriculum Integration */}
+          {/* Curriculum Section */}
           <TabsContent value="curriculum">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Wand2 className="h-5 w-5" />
-                  Curriculum Topic Selection
+            <Card className="border-emerald-200 bg-emerald-50/50">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-emerald-800 flex items-center gap-2">
+                  📌 Curriculum Section
+                  <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">
+                    Auto-filled, Editable
+                  </Badge>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Step 1: Class & Subject Selection */}
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
-                  <h3 className="font-medium text-blue-900 mb-3">Step 1: Select Class & Subject</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CardContent className="space-y-4">
+                {/* Topic Selection and Framework Info */}
+                <div className="bg-white/60 rounded-lg p-4 border border-emerald-200 space-y-3">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div>
-                      <Label>Class</Label>
+                      <Label className="text-sm font-medium text-emerald-700">Selected Topic:</Label>
                       <Select 
-                        value={`${formData.year_group}${formData.form_class ? formData.form_class : ''}`}
-                        onValueChange={(value) => {
-                          // Parse year group and form class from combined value
-                          const yearGroup = value.replace(/[A-Z]$/, '');
-                          const formClass = value.match(/[A-Z]$/)?.[0] || '';
-                          updateField('year_group', yearGroup);
-                          updateField('form_class', formClass);
-                        }}
+                        value={selectedTopic} 
+                        onValueChange={handleTopicSelect}
                       >
-                        <SelectTrigger className="bg-white">
-                          <SelectValue placeholder="Select class" />
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select curriculum topic" />
                         </SelectTrigger>
-                        <SelectContent className="bg-white border shadow-lg z-50">
-                          <SelectItem value="Year 7A">Year 7A</SelectItem>
-                          <SelectItem value="Year 7B">Year 7B</SelectItem>
-                          <SelectItem value="Year 8A">Year 8A</SelectItem>
-                          <SelectItem value="Year 8B">Year 8B</SelectItem>
-                          <SelectItem value="Year 9A">Year 9A</SelectItem>
-                          <SelectItem value="Year 9B">Year 9B</SelectItem>
+                        <SelectContent>
+                          <SelectItem value="fractions-equiv">Recognise equivalent fractions</SelectItem>
+                          <SelectItem value="fractions-add">Add and subtract fractions</SelectItem>
+                          <SelectItem value="photosynthesis">Photosynthesis in plants</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
-                      <Label>Subject</Label>
-                      <Select 
-                        value={formData.subject} 
-                        onValueChange={(value) => updateField('subject', value)}
-                      >
-                        <SelectTrigger className="bg-white">
-                          <SelectValue placeholder="Select subject" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white border shadow-lg z-50">
-                          <SelectItem value="Mathematics">Mathematics</SelectItem>
-                          <SelectItem value="English">English</SelectItem>
-                          <SelectItem value="Science">Science</SelectItem>
-                          <SelectItem value="History">History</SelectItem>
-                          <SelectItem value="Geography">Geography</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="text-sm text-emerald-600 space-y-1">
+                        <div><strong>Framework:</strong> English National Curriculum</div>
+                        <div><strong>Reference:</strong> Ma4/2.2b</div>
+                        <div className="flex items-center gap-2">
+                          <strong>Teaching Hours:</strong> 3 | 
+                          <span className="text-emerald-700 font-medium">Completed: 1 of 3 (33%)</span>
+                          <div className="flex-1 bg-emerald-100 rounded-full h-2 ml-2">
+                            <div className="bg-emerald-500 h-2 rounded-full" style={{ width: '33%' }}></div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Step 2: Topic Selection with Filters */}
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
-                  <h3 className="font-medium text-green-900 mb-3">Step 2: Select Curriculum Topic</h3>
-                  
-                  {/* Filters */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div>
-                      <Label>Term</Label>
-                      <Select defaultValue="all">
-                        <SelectTrigger className="bg-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white border shadow-lg z-50">
-                          <SelectItem value="all">All Terms</SelectItem>
-                          <SelectItem value="autumn">Autumn Term</SelectItem>
-                          <SelectItem value="spring">Spring Term</SelectItem>
-                          <SelectItem value="summer">Summer Term</SelectItem>
-                        </SelectContent>
-                      </Select>
+                {/* Learning Objective */}
+                <div className="bg-white/60 rounded-lg p-4 border border-emerald-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-lg">🎯</span>
+                    <Label className="text-sm font-medium text-emerald-700">Learning Objective</Label>
+                    <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
+                      Auto-filled
+                    </Badge>
+                  </div>
+                  <Input 
+                    value={formData.learning_objectives[0] || "I can find fractions that are the same size"}
+                    onChange={(e) => updateArrayItem('learning_objectives', 0, e.target.value)}
+                    className="bg-blue-50/50 border-blue-200"
+                  />
+                </div>
+
+                {/* Success Criteria */}
+                <div className="bg-white/60 rounded-lg p-4 border border-emerald-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-lg">✅</span>
+                    <Label className="text-sm font-medium text-emerald-700">Success Criteria</Label>
+                    <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
+                      Auto-filled
+                    </Badge>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2">
+                      <Checkbox id="criteria1" className="mt-1" />
+                      <Label htmlFor="criteria1" className="text-sm leading-relaxed">
+                        {formData.success_criteria[0] || "I can draw 1/2 and 2/4 and explain why they're equal"}
+                      </Label>
                     </div>
-                    <div>
-                      <Label>Status</Label>
-                      <Select defaultValue="all">
-                        <SelectTrigger className="bg-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white border shadow-lg z-50">
-                          <SelectItem value="all">All Status</SelectItem>
-                          <SelectItem value="not-started">Not Started</SelectItem>
-                          <SelectItem value="in-progress">In Progress</SelectItem>
-                          <SelectItem value="completed">Completed</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <div className="flex items-start gap-2">
+                      <Checkbox id="criteria2" className="mt-1" />
+                      <Label htmlFor="criteria2" className="text-sm leading-relaxed">
+                        {formData.success_criteria[1] || "I can use a fraction wall to find equivalent fractions"}
+                      </Label>
                     </div>
+                    <Button variant="ghost" size="sm" className="text-emerald-600 h-8 px-2">
+                      <Plus className="h-3 w-3 mr-1" />
+                      Add criteria
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Suggested Activities */}
+                <div className="bg-white/60 rounded-lg p-4 border border-emerald-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-lg">💡</span>
+                    <Label className="text-sm font-medium text-emerald-700">Suggested Activities</Label>
+                    <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
+                      Auto-filled, optional
+                    </Badge>
+                  </div>
+                  <div className="space-y-3">
                     <div>
-                      <Label>Search Topics</Label>
-                      <Input
-                        placeholder="Search: fractions, photosynthesis..."
-                        className="bg-white"
+                      <Label className="text-xs font-medium text-gray-600">Starter:</Label>
+                      <Input 
+                        value={formData.lesson_sections[0]?.description || "Show 1/2 and 2/4 — are they equal?"}
+                        onChange={(e) => {
+                          const newSections = [...formData.lesson_sections];
+                          if (newSections[0]) newSections[0].description = e.target.value;
+                          updateField('lesson_sections', newSections);
+                        }}
+                        className="mt-1 bg-blue-50/50 border-blue-200"
                       />
                     </div>
-                  </div>
-
-                  {/* Topic Selection */}
-                  <div>
-                    <Label>Curriculum Topic</Label>
-                    <Select 
-                      value={selectedTopic} 
-                      onValueChange={handleTopicSelect}
-                      disabled={!formData.subject}
-                    >
-                      <SelectTrigger className="bg-white">
-                        <SelectValue placeholder={
-                          !formData.subject 
-                            ? "Select class & subject first" 
-                            : "Select curriculum topic"
-                        } />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white border shadow-lg z-50">
-                        {/* Sample curriculum topics */}
-                        <SelectItem value="fractions-equiv">
-                          🔹 Recognise equivalent fractions
-                        </SelectItem>
-                        <SelectItem value="fractions-add">
-                          🔹 Add and subtract fractions
-                        </SelectItem>
-                        <SelectItem value="photosynthesis">
-                          🧬 Photosynthesis in plants
-                        </SelectItem>
-                        <SelectItem value="victorian-era">
-                          📜 The Victorian era
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div>
+                      <Label className="text-xs font-medium text-gray-600">Main:</Label>
+                      <Input 
+                        value={formData.lesson_sections[1]?.description || "Use fraction walls to find 3 fractions equal to 1/2"}
+                        onChange={(e) => {
+                          const newSections = [...formData.lesson_sections];
+                          if (newSections[1]) newSections[1].description = e.target.value;
+                          updateField('lesson_sections', newSections);
+                        }}
+                        className="mt-1 bg-blue-50/50 border-blue-200"
+                      />
+                    </div>
                   </div>
                 </div>
 
