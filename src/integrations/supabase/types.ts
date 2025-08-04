@@ -1483,6 +1483,59 @@ export type Database = {
         }
         Relationships: []
       }
+      curriculum_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          alert_type: string
+          created_at: string | null
+          gap_id: string | null
+          id: string
+          message: string
+          priority: string | null
+          read_at: string | null
+          recipient_id: string
+          school_id: string
+          sent_at: string | null
+          status: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          alert_type: string
+          created_at?: string | null
+          gap_id?: string | null
+          id?: string
+          message: string
+          priority?: string | null
+          read_at?: string | null
+          recipient_id: string
+          school_id: string
+          sent_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          alert_type?: string
+          created_at?: string | null
+          gap_id?: string | null
+          id?: string
+          message?: string
+          priority?: string | null
+          read_at?: string | null
+          recipient_id?: string
+          school_id?: string
+          sent_at?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curriculum_alerts_gap_id_fkey"
+            columns: ["gap_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_gaps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       curriculum_frameworks: {
         Row: {
           academic_periods: Json
@@ -1534,6 +1587,72 @@ export type Database = {
           subjects?: Json
           type?: Database["public"]["Enums"]["curriculum_type"]
           updated_at?: string
+        }
+        Relationships: []
+      }
+      curriculum_gaps: {
+        Row: {
+          alert_count: number | null
+          alert_sent: boolean | null
+          assigned_teacher_id: string | null
+          completed_lessons: number
+          coverage_percentage: number
+          created_at: string | null
+          days_behind: number | null
+          deadline_date: string | null
+          id: string
+          last_lesson_date: string | null
+          planned_lessons: number
+          projected_completion_date: string | null
+          risk_level: string | null
+          school_id: string
+          subject: string
+          topic_id: string
+          topic_name: string
+          updated_at: string | null
+          year_group: string
+        }
+        Insert: {
+          alert_count?: number | null
+          alert_sent?: boolean | null
+          assigned_teacher_id?: string | null
+          completed_lessons?: number
+          coverage_percentage?: number
+          created_at?: string | null
+          days_behind?: number | null
+          deadline_date?: string | null
+          id?: string
+          last_lesson_date?: string | null
+          planned_lessons?: number
+          projected_completion_date?: string | null
+          risk_level?: string | null
+          school_id: string
+          subject: string
+          topic_id: string
+          topic_name: string
+          updated_at?: string | null
+          year_group: string
+        }
+        Update: {
+          alert_count?: number | null
+          alert_sent?: boolean | null
+          assigned_teacher_id?: string | null
+          completed_lessons?: number
+          coverage_percentage?: number
+          created_at?: string | null
+          days_behind?: number | null
+          deadline_date?: string | null
+          id?: string
+          last_lesson_date?: string | null
+          planned_lessons?: number
+          projected_completion_date?: string | null
+          risk_level?: string | null
+          school_id?: string
+          subject?: string
+          topic_id?: string
+          topic_name?: string
+          updated_at?: string | null
+          year_group?: string
         }
         Relationships: []
       }
@@ -1676,6 +1795,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      department_coverage: {
+        Row: {
+          behind_topics: number
+          completed_topics: number
+          created_at: string | null
+          critical_topics: number
+          department: string
+          id: string
+          in_progress_topics: number
+          last_updated: string | null
+          not_started_topics: number
+          on_track_topics: number
+          overall_coverage_percentage: number
+          school_id: string
+          total_topics: number
+          year_group: string
+        }
+        Insert: {
+          behind_topics?: number
+          completed_topics?: number
+          created_at?: string | null
+          critical_topics?: number
+          department: string
+          id?: string
+          in_progress_topics?: number
+          last_updated?: string | null
+          not_started_topics?: number
+          on_track_topics?: number
+          overall_coverage_percentage?: number
+          school_id: string
+          total_topics?: number
+          year_group: string
+        }
+        Update: {
+          behind_topics?: number
+          completed_topics?: number
+          created_at?: string | null
+          critical_topics?: number
+          department?: string
+          id?: string
+          in_progress_topics?: number
+          last_updated?: string | null
+          not_started_topics?: number
+          on_track_topics?: number
+          overall_coverage_percentage?: number
+          school_id?: string
+          total_topics?: number
+          year_group?: string
+        }
+        Relationships: []
       }
       departments: {
         Row: {
@@ -6554,6 +6724,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_gap_risk_level: {
+        Args: {
+          coverage_percentage: number
+          days_behind: number
+          deadline_date: string
+        }
+        Returns: string
+      }
       can_access_lesson_plan: {
         Args: { lesson_plan_id: string; user_id?: string }
         Returns: boolean
