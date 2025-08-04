@@ -22,6 +22,11 @@ import {
   Bot,
   Star
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Grade {
   id: string;
@@ -120,6 +125,11 @@ const GradebookPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [grades] = useState(mockGrades);
   const [reports] = useState(mockReports);
+  const [selectedGrade, setSelectedGrade] = useState<Grade | null>(null);
+  const [isAICommentDialogOpen, setIsAICommentDialogOpen] = useState(false);
+  const [isGeneratingComment, setIsGeneratingComment] = useState(false);
+  const [generatedComment, setGeneratedComment] = useState("");
+  const { toast } = useToast();
 
   const getEffortBadge = (effort: Grade["effort"]) => {
     switch (effort) {
@@ -145,6 +155,46 @@ const GradebookPage = () => {
     }
   };
 
+  const handleStatCardClick = (cardType: string) => {
+    toast({
+      title: `${cardType} Details`,
+      description: `Detailed breakdown of ${cardType.toLowerCase()} would be shown here.`,
+    });
+  };
+
+  const handleExportGrades = () => {
+    toast({
+      title: "Export Started",
+      description: "Exporting grades to CSV format...",
+    });
+    
+    // Simulate export process
+    setTimeout(() => {
+      toast({
+        title: "Export Complete",
+        description: "Grades have been exported successfully.",
+      });
+    }, 2000);
+  };
+
+  const generateAIComment = async (grade: Grade) => {
+    setIsGeneratingComment(true);
+    setGeneratedComment("");
+    
+    // Simulate AI comment generation
+    setTimeout(() => {
+      const comments = [
+        `${grade.studentName} demonstrates excellent understanding in ${grade.subject}. The ${grade.score}% score on ${grade.assessment} reflects consistent effort and strong grasp of concepts. Continue encouraging analytical thinking and problem-solving skills.`,
+        `Strong performance by ${grade.studentName} in ${grade.subject}. The ${grade.grade} grade on ${grade.assessment} shows good progress. Focus on developing deeper understanding and application of key concepts.`,
+        `${grade.studentName} shows promising potential in ${grade.subject}. With continued effort and focus on fundamental concepts, there is excellent scope for improvement. The current ${grade.effort} effort level is commendable.`
+      ];
+      
+      const randomComment = comments[Math.floor(Math.random() * comments.length)];
+      setGeneratedComment(randomComment);
+      setIsGeneratingComment(false);
+    }, 3000);
+  };
+
   const filteredGrades = grades.filter(grade =>
     grade.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     grade.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -164,7 +214,10 @@ const GradebookPage = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card className="shadow-[var(--shadow-card)]">
+        <Card 
+          className="shadow-[var(--shadow-card)] cursor-pointer hover:shadow-lg transition-shadow" 
+          onClick={() => handleStatCardClick("Total Grades")}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -175,7 +228,10 @@ const GradebookPage = () => {
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-[var(--shadow-card)]">
+        <Card 
+          className="shadow-[var(--shadow-card)] cursor-pointer hover:shadow-lg transition-shadow" 
+          onClick={() => handleStatCardClick("Average Score")}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -186,7 +242,10 @@ const GradebookPage = () => {
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-[var(--shadow-card)]">
+        <Card 
+          className="shadow-[var(--shadow-card)] cursor-pointer hover:shadow-lg transition-shadow" 
+          onClick={() => handleStatCardClick("Excellent Effort")}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -197,7 +256,10 @@ const GradebookPage = () => {
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-[var(--shadow-card)]">
+        <Card 
+          className="shadow-[var(--shadow-card)] cursor-pointer hover:shadow-lg transition-shadow" 
+          onClick={() => handleStatCardClick("Reports Sent")}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -229,11 +291,83 @@ const GradebookPage = () => {
                   <CardDescription>Manage individual assessment grades and feedback</CardDescription>
                 </div>
                 <div className="flex space-x-2">
-                  <Button variant="outline" size="sm">
-                    <Bot className="h-4 w-4 mr-2" />
-                    AI Comments
-                  </Button>
-                  <Button variant="outline" size="sm">
+                  <Dialog open={isAICommentDialogOpen} onOpenChange={setIsAICommentDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Bot className="h-4 w-4 mr-2" />
+                        AI Comments
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[600px]">
+                      <DialogHeader>
+                        <DialogTitle>AI Comment Generator</DialogTitle>
+                        <DialogDescription>
+                          Generate personalized comments for student assessments using AI
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="student-select">Select Student Grade</Label>
+                          <Select onValueChange={(value) => setSelectedGrade(grades.find(g => g.id === value) || null)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Choose a grade to generate comment for" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {grades.map((grade) => (
+                                <SelectItem key={grade.id} value={grade.id}>
+                                  {grade.studentName} - {grade.subject} ({grade.grade})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        {selectedGrade && (
+                          <div className="p-4 bg-muted rounded-lg">
+                            <h4 className="font-semibold mb-2">Selected Grade Details:</h4>
+                            <p><strong>Student:</strong> {selectedGrade.studentName}</p>
+                            <p><strong>Subject:</strong> {selectedGrade.subject}</p>
+                            <p><strong>Assessment:</strong> {selectedGrade.assessment}</p>
+                            <p><strong>Score:</strong> {selectedGrade.score}% ({selectedGrade.grade})</p>
+                            <p><strong>Effort:</strong> {selectedGrade.effort}</p>
+                          </div>
+                        )}
+                        <div>
+                          <Label htmlFor="comment-output">Generated Comment</Label>
+                          <Textarea
+                            id="comment-output"
+                            value={isGeneratingComment ? "Generating personalized comment..." : generatedComment}
+                            placeholder="Generated AI comment will appear here"
+                            className="min-h-32"
+                            readOnly={isGeneratingComment}
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            onClick={() => selectedGrade && generateAIComment(selectedGrade)}
+                            disabled={!selectedGrade || isGeneratingComment}
+                            className="flex-1"
+                          >
+                            {isGeneratingComment ? "Generating..." : "Generate AI Comment"}
+                          </Button>
+                          {generatedComment && (
+                            <Button 
+                              variant="outline"
+                              onClick={() => {
+                                navigator.clipboard.writeText(generatedComment);
+                                toast({
+                                  title: "Copied!",
+                                  description: "Comment copied to clipboard",
+                                });
+                              }}
+                            >
+                              Copy
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  <Button variant="outline" size="sm" onClick={handleExportGrades}>
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>
