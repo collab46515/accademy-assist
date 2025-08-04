@@ -199,7 +199,7 @@ export function generateReportCardPDF(report: ReportCard) {
   
   // Data rows
   grades.forEach((grade, index) => {
-    if (yPos > 240) { // Start new page if needed
+    if (yPos > 220) { // Start new page earlier to avoid footer overlap
       doc.addPage();
       yPos = 30;
       
@@ -251,23 +251,24 @@ export function generateReportCardPDF(report: ReportCard) {
     doc.setDrawColor(226, 232, 240);
     doc.line(xPos, yPos, xPos, yPos + rowHeight);
     
-    // Grade with modern badge styling
-    const gradeColor = grade.grade.startsWith('A') ? [16, 185, 129] : 
-                      grade.grade.startsWith('B') ? [59, 130, 246] : 
-                      grade.grade.startsWith('C') ? [245, 158, 11] : [239, 68, 68];
+    // Grade with modern badge styling - darker, more visible colors
+    const gradeColor = grade.grade.startsWith('A') ? [5, 150, 105] : 
+                      grade.grade.startsWith('B') ? [37, 99, 235] : 
+                      grade.grade.startsWith('C') ? [217, 119, 6] : [220, 38, 127];
     
-    // Grade badge with shadow effect
+    // Grade badge with stronger colors
     doc.setFillColor(gradeColor[0], gradeColor[1], gradeColor[2]);
     doc.roundedRect(xPos + 4, yPos + 7, 17, 10, 3, 3, 'F');
     
-    // Subtle shadow
-    doc.setFillColor(0, 0, 0, 0.1);
-    doc.roundedRect(xPos + 5, yPos + 8, 17, 10, 3, 3, 'F');
+    // Darker border for definition
+    doc.setDrawColor(gradeColor[0] - 30, gradeColor[1] - 30, gradeColor[2] - 30);
+    doc.setLineWidth(0.8);
+    doc.roundedRect(xPos + 4, yPos + 7, 17, 10, 3, 3);
     
-    // Grade text
+    // Grade text with better contrast
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
+    doc.setFontSize(10);
     doc.text(grade.grade, xPos + colWidths[1]/2, yPos + 13, { align: 'center' });
     xPos += colWidths[1];
     
