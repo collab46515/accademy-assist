@@ -121,7 +121,7 @@ const UnifiedAdmissionsPage = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState("management");
   const [applications, setApplications] = useState<any[]>([]);
   const [enrollmentTypes, setEnrollmentTypes] = useState<any[]>([]);
   const [workflows, setWorkflows] = useState<any[]>([]);
@@ -465,11 +465,10 @@ const UnifiedAdmissionsPage = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="management">Application Management</TabsTrigger>
           <TabsTrigger value="workflow">Workflow</TabsTrigger>
           <TabsTrigger value="pathways">New Applications</TabsTrigger>
-          <TabsTrigger value="management">Application Management</TabsTrigger>
           <TabsTrigger value="reports">Reports & Analytics</TabsTrigger>
         </TabsList>
 
@@ -480,106 +479,20 @@ const UnifiedAdmissionsPage = () => {
           <AdmissionsWorkflow />
         </TabsContent>
 
-        {/* Dashboard Tab */}
-        <TabsContent value="dashboard" className="space-y-6">
-          {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="shadow-[var(--shadow-card)]">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Applications</p>
-                    <p className="text-3xl font-bold">{stats.total}</p>
-                  </div>
-                  <FileText className="h-8 w-8 text-primary" />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="shadow-[var(--shadow-card)]">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">In Progress</p>
-                    <p className="text-3xl font-bold text-yellow-600">{stats.inProgress}</p>
-                  </div>
-                  <Clock className="h-8 w-8 text-yellow-600" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-[var(--shadow-card)]">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Approved</p>
-                    <p className="text-3xl font-bold text-green-600">{stats.approved}</p>
-                  </div>
-                  <CheckCircle className="h-8 w-8 text-green-600" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-[var(--shadow-card)]">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Pending Review</p>
-                    <p className="text-3xl font-bold text-orange-600">{stats.pending}</p>
-                  </div>
-                  <AlertCircle className="h-8 w-8 text-orange-600" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Recent Applications */}
-          <Card className="shadow-[var(--shadow-card)]">
-            <CardHeader>
-              <CardTitle>Recent Applications</CardTitle>
-              <CardDescription>Latest application activity across all pathways</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {applications.slice(0, 5).map((app) => {
-                  const pathwayConfig = ENROLLMENT_PATHWAYS[app.pathway as keyof typeof ENROLLMENT_PATHWAYS];
-                  const IconComponent = pathwayConfig?.icon || FileText;
-                  
-                  return (
-                    <div key={app.id} className="flex items-center justify-between p-4 border border-border/50 rounded-lg hover:border-primary/20 transition-[var(--transition-smooth)]">
-                      <div className="flex items-center space-x-4">
-                        <div className={`p-2 rounded-lg ${pathwayConfig?.color || 'bg-gray-100'}`}>
-                          <IconComponent className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium">{app.student_name}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {app.application_number} • {pathwayConfig?.name}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <Badge className={STATUS_COLORS[app.status as keyof typeof STATUS_COLORS]}>
-                          {app.status.replace('_', ' ')}
-                        </Badge>
-                        <div className="text-right">
-                          <p className={`text-sm font-medium ${getProgressColor(app.workflow_completion_percentage)}`}>
-                            {app.workflow_completion_percentage}%
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {formatDate(app.last_activity_at)}
-                          </p>
-                        </div>
-                        <Button variant="outline" size="sm" onClick={() => handleViewApplication(app)}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
+        {/* Application Management Tab */}
+        <TabsContent value="management" className="space-y-6">
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="overview">Application Overview</TabsTrigger>
+              <TabsTrigger value="tasks">Task Management</TabsTrigger>
+            </TabsList>
+            <TabsContent value="overview">
+              <ApplicationManagement initialFilter={filterStatus !== "all" ? filterStatus : undefined} />
+            </TabsContent>
+            <TabsContent value="tasks">
+              <ApplicationTaskManager />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         {/* Enrollment Pathways Tab */}
@@ -737,21 +650,6 @@ const UnifiedAdmissionsPage = () => {
           </Card>
         </TabsContent>
 
-        {/* Application Management Tab */}
-        <TabsContent value="management" className="space-y-6">
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="overview">Application Overview</TabsTrigger>
-              <TabsTrigger value="tasks">Task Management</TabsTrigger>
-            </TabsList>
-            <TabsContent value="overview">
-              <ApplicationManagement initialFilter={filterStatus !== "all" ? filterStatus : undefined} />
-            </TabsContent>
-            <TabsContent value="tasks">
-              <ApplicationTaskManager />
-            </TabsContent>
-          </Tabs>
-        </TabsContent>
 
 
         {/* Approvals Tab */}
