@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { 
   ArrowLeft, 
@@ -18,18 +17,34 @@ import {
   MessageSquare,
   Download,
   Send,
-  GraduationCap
+  GraduationCap,
+  Target,
+  User,
+  FileDown,
+  Mail,
+  BookOpen,
+  Eye,
+  Edit,
+  X,
+  Circle
 } from 'lucide-react';
 import { useAssignmentData } from '@/hooks/useAssignmentData';
-import { useStudentData } from '@/hooks/useStudentData';
 import { GradingInterface } from './GradingInterface';
+import { 
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 export const AssignmentDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { assignments } = useAssignmentData();
-  const { students } = useStudentData();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [showGrading, setShowGrading] = useState(false);
+  const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
 
   const assignment = assignments.find(a => a.id === id);
 
@@ -46,16 +61,27 @@ export const AssignmentDetailPage = () => {
     );
   }
 
-  // Mock submission data
+  // Enhanced assignment metadata to match spec
+  const assignmentMeta = {
+    ...assignment,
+    class: 'Year 4A',
+    topic_name: 'Recognise equivalent fractions',
+    created_by_name: 'Mr. Ade',
+    created_date: '2025-03-07',
+    attachment_urls: ['fractions-worksheet.pdf'],
+    lesson_plan_title: 'Lesson on Equivalent Fractions' // If created from lesson plan
+  };
+
+  // Enhanced mock submission data to match the spec exactly
   const mockSubmissions = [
     {
       id: '1',
       student_id: 'student-1',
-      student_name: 'Emma Thompson',
+      student_name: 'Ada Nwosu',
       status: 'submitted',
-      submitted_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-      submission_text: 'I have completed all the fraction exercises. Here are my answers...',
-      attachment_urls: ['worksheet.pdf'],
+      submitted_at: '2025-04-08T09:12:00Z',
+      submission_text: 'I have completed all the fraction exercises using fraction walls.',
+      attachment_urls: ['ada_fractions.pdf'],
       marks_awarded: null,
       feedback: null,
       is_late: false
@@ -63,7 +89,31 @@ export const AssignmentDetailPage = () => {
     {
       id: '2',
       student_id: 'student-2',
-      student_name: 'Oliver Johnson',
+      student_name: 'Tunde Okon',
+      status: 'submitted',
+      submitted_at: '2025-04-08T10:05:00Z',
+      submission_text: 'Here is my completed worksheet.',
+      attachment_urls: ['tunde_work.pdf'],
+      marks_awarded: null,
+      feedback: null,
+      is_late: false
+    },
+    {
+      id: '3',
+      student_id: 'student-3',
+      student_name: 'Chinedu Okeke',
+      status: 'in_progress',
+      submitted_at: null,
+      submission_text: null,
+      attachment_urls: [],
+      marks_awarded: null,
+      feedback: null,
+      is_late: false
+    },
+    {
+      id: '4',
+      student_id: 'student-4',
+      student_name: 'Bisi Adebayo',
       status: 'not_submitted',
       submitted_at: null,
       submission_text: null,
@@ -73,24 +123,12 @@ export const AssignmentDetailPage = () => {
       is_late: false
     },
     {
-      id: '3',
-      student_id: 'student-3',
-      student_name: 'Sophie Williams',
-      status: 'graded',
-      submitted_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-      submission_text: 'Here is my completed work on fractions.',
-      attachment_urls: ['sophie_fractions.pdf'],
-      marks_awarded: 18,
-      feedback: 'Excellent work! Very clear explanations.',
-      is_late: false
-    },
-    {
-      id: '4',
-      student_id: 'student-4',
-      student_name: 'James Brown',
+      id: '5',
+      student_id: 'student-5',
+      student_name: 'Kemi Okafor',
       status: 'late',
-      submitted_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-      submission_text: 'Sorry for the late submission. Here is my work.',
+      submitted_at: '2025-04-09T14:30:00Z',
+      submission_text: 'Sorry for late submission. Here is my work.',
       attachment_urls: [],
       marks_awarded: null,
       feedback: null,
@@ -104,8 +142,10 @@ export const AssignmentDetailPage = () => {
         return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'graded':
         return <GraduationCap className="h-4 w-4 text-blue-600" />;
+      case 'in_progress':
+        return <Circle className="h-4 w-4 text-orange-500" />;
       case 'late':
-        return <Timer className="h-4 w-4 text-orange-600" />;
+        return <Timer className="h-4 w-4 text-red-600" />;
       case 'not_submitted':
         return <XCircle className="h-4 w-4 text-red-600" />;
       default:
@@ -113,315 +153,235 @@ export const AssignmentDetailPage = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusText = (status: string) => {
     switch (status) {
       case 'submitted':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return '✅ Submitted';
       case 'graded':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+        return '✅ Graded';
+      case 'in_progress':
+        return '🟠 In Progress';
       case 'late':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
+        return '⏳ Late';
       case 'not_submitted':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return '❌ Not Started';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return status;
     }
   };
 
   const submissionStats = {
-    total: mockSubmissions.length,
+    total: 32, // Total students in class
     submitted: mockSubmissions.filter(s => s.status === 'submitted' || s.status === 'graded').length,
     graded: mockSubmissions.filter(s => s.status === 'graded').length,
     notSubmitted: mockSubmissions.filter(s => s.status === 'not_submitted').length,
-    late: mockSubmissions.filter(s => s.is_late).length
+    late: mockSubmissions.filter(s => s.is_late).length,
+    inProgress: mockSubmissions.filter(s => s.status === 'in_progress').length
   };
 
-  const formatDueDate = (dueDate: string) => {
-    const date = new Date(dueDate);
-    const now = new Date();
-    const diffTime = date.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 0) {
-      return `Overdue by ${Math.abs(diffDays)} days`;
-    } else if (diffDays === 0) {
-      return 'Due today';
-    } else if (diffDays === 1) {
-      return 'Due tomorrow';
-    } else {
-      return `Due in ${diffDays} days`;
-    }
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+      month: 'short',
+      day: 'numeric'
+    }) + ', ' + date.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
+
+  const handleSendReminder = (studentIds?: string[]) => {
+    // TODO: Implement reminder functionality
+    console.log('Sending reminder to:', studentIds || 'all late students');
+  };
+
+  const handleExportSubmissions = () => {
+    // TODO: Implement export functionality
+    console.log('Exporting submissions as ZIP');
+  };
+
+  const handleCloseAssignment = () => {
+    // TODO: Implement close assignment functionality
+    console.log('Closing assignment - no more submissions allowed');
+  };
+
+  if (showGrading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="mb-4">
+          <Button variant="ghost" onClick={() => setShowGrading(false)}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Assignment Details
+          </Button>
+        </div>
+        <GradingInterface 
+          assignment={assignment}
+          submissions={mockSubmissions}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/academics/assignments')}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Assignments
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold text-foreground">{assignment.title}</h1>
-          <p className="text-muted-foreground">{assignment.subject} • {assignment.year_group}</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline">
-            <Send className="h-4 w-4 mr-2" />
-            Send Reminder
-          </Button>
-          <Button variant="outline">
-            <Download className="h-4 w-4 mr-2" />
-            Export Results
+      {/* Header Section */}
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/academics/assignments')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Assignments
           </Button>
         </div>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{submissionStats.total}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Submitted</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{submissionStats.submitted}</div>
-            <p className="text-xs text-muted-foreground">
-              {Math.round((submissionStats.submitted / submissionStats.total) * 100)}% completion
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Graded</CardTitle>
-            <GraduationCap className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{submissionStats.graded}</div>
-            <p className="text-xs text-muted-foreground">
-              {submissionStats.submitted - submissionStats.graded} pending
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Late/Missing</CardTitle>
-            <AlertCircle className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{submissionStats.late + submissionStats.notSubmitted}</div>
-            <p className="text-xs text-muted-foreground">
-              {submissionStats.late} late, {submissionStats.notSubmitted} missing
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="submissions">Submissions ({submissionStats.total})</TabsTrigger>
-          <TabsTrigger value="grading">Grade All</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Assignment Details */}
-            <div className="lg:col-span-2 space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Assignment Details</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">
-                        <strong>Due:</strong> {formatDueDate(assignment.due_date)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">
-                        <strong>Total Marks:</strong> {assignment.total_marks}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">
-                        <strong>Type:</strong> {assignment.assignment_type}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className={getStatusColor(assignment.status)}>
-                        {assignment.status}
-                      </Badge>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold mb-2">Description</h4>
-                    <p className="text-sm text-muted-foreground">{assignment.description}</p>
-                  </div>
-
-                  {assignment.instructions && (
-                    <div>
-                      <h4 className="font-semibold mb-2">Instructions</h4>
-                      <p className="text-sm text-muted-foreground">{assignment.instructions}</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+      {/* Assignment Header - Matching the spec format */}
+      <Card>
+        <CardHeader>
+          <div className="space-y-3">
+            <div className="flex items-start justify-between">
+              <div>
+                <h1 className="text-2xl font-bold">📌 Assignment: {assignmentMeta.title}</h1>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+                  <span><strong>Class:</strong> {assignmentMeta.class}</span>
+                  <span>|</span>
+                  <span><strong>Subject:</strong> {assignmentMeta.subject}</span>
+                  <span>|</span>
+                  <Button variant="link" className="h-auto p-0 text-sm text-blue-600">
+                    <strong>Topic:</strong> {assignmentMeta.topic_name}
+                  </Button>
+                </div>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                  <span><strong>Due:</strong> {new Date(assignmentMeta.due_date).toLocaleDateString('en-GB', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                  <span>|</span>
+                  <Badge variant="secondary">{assignmentMeta.status}</Badge>
+                  <span>|</span>
+                  <span><strong>Submissions:</strong> {submissionStats.submitted}/{submissionStats.total} ({Math.round((submissionStats.submitted / submissionStats.total) * 100)}%)</span>
+                </div>
+              </div>
             </div>
-
-            {/* Recent Activity */}
-            <div>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Submissions</CardTitle>
-                  <CardDescription>Latest student activity</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {mockSubmissions
-                    .filter(s => s.submitted_at)
-                    .sort((a, b) => new Date(b.submitted_at!).getTime() - new Date(a.submitted_at!).getTime())
-                    .slice(0, 5)
-                    .map((submission) => (
-                      <div key={submission.id} className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="text-xs">
-                            {submission.student_name.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 space-y-1">
-                          <p className="text-sm font-medium">{submission.student_name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Submitted {new Date(submission.submitted_at!).toLocaleDateString()}
-                          </p>
-                        </div>
-                        {getStatusIcon(submission.status)}
-                      </div>
-                    ))
-                  }
-                </CardContent>
-              </Card>
+            
+            <hr className="border-muted" />
+            
+            {/* Description Section */}
+            <div className="space-y-3">
+              <div>
+                <h3 className="font-semibold">📝 Description</h3>
+                <p className="text-sm text-muted-foreground mt-1">{assignmentMeta.description}</p>
+                {assignmentMeta.attachment_urls && assignmentMeta.attachment_urls.length > 0 && (
+                  <div className="mt-2">
+                    <span className="text-sm"><strong>Attachment:</strong></span>
+                    {assignmentMeta.attachment_urls.map((url, index) => (
+                      <Button key={index} variant="link" className="h-auto p-0 ml-2 text-blue-600">
+                        [ {url} ]
+                      </Button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2 border-t">
+                <span>📅 <strong>Created:</strong> {assignmentMeta.created_date}</span>
+                <span>|</span>
+                <span><strong>By:</strong> {assignmentMeta.created_by_name}</span>
+                {assignmentMeta.lesson_plan_title && (
+                  <>
+                    <span>|</span>
+                    <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+                      Created from: {assignmentMeta.lesson_plan_title}
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
-        </TabsContent>
+        </CardHeader>
+      </Card>
 
-        <TabsContent value="submissions">
-          <Card>
-            <CardHeader>
-              <CardTitle>Student Submissions</CardTitle>
-              <CardDescription>
-                View and manage all student submissions for this assignment
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {mockSubmissions.map((submission) => (
-                  <div key={submission.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarFallback>
-                            {submission.student_name.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h4 className="font-medium">{submission.student_name}</h4>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            {getStatusIcon(submission.status)}
-                            <Badge variant="outline" className={getStatusColor(submission.status)}>
-                              {submission.status.replace('_', ' ')}
-                            </Badge>
-                            {submission.submitted_at && (
-                              <span>• {new Date(submission.submitted_at).toLocaleDateString()}</span>
-                            )}
-                            {submission.is_late && <span className="text-orange-600">• Late</span>}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        {submission.marks_awarded !== null && (
-                          <Badge variant="secondary">
-                            {submission.marks_awarded}/{assignment.total_marks}
-                          </Badge>
-                        )}
-                        <Button variant="outline" size="sm">
-                          {submission.status === 'graded' ? 'Review' : 'Grade'}
-                        </Button>
-                      </div>
+      {/* Student Submissions Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>✅ Student Submissions ({submissionStats.submitted}/{submissionStats.total})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Student</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Submitted</TableHead>
+                <TableHead>Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {mockSubmissions.map((submission) => (
+                <TableRow key={submission.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="text-xs">
+                          {submission.student_name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="font-medium">{submission.student_name}</span>
                     </div>
-                    
-                    {submission.submission_text && (
-                      <div className="mt-3 p-3 bg-muted rounded">
-                        <p className="text-sm">{submission.submission_text}</p>
-                      </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {getStatusIcon(submission.status)}
+                      <span className="text-sm">{getStatusText(submission.status)}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {submission.submitted_at ? formatDateTime(submission.submitted_at) : '—'}
+                  </TableCell>
+                  <TableCell>
+                    {submission.status === 'submitted' || submission.status === 'late' ? (
+                      <Button variant="outline" size="sm">
+                        [ Grade ]
+                      </Button>
+                    ) : (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleSendReminder([submission.student_id])}
+                      >
+                        [ Send Reminder ]
+                      </Button>
                     )}
-                    
-                    {submission.attachment_urls && submission.attachment_urls.length > 0 && (
-                      <div className="mt-3 flex gap-2">
-                        {submission.attachment_urls.map((url, index) => (
-                          <Button key={index} variant="outline" size="sm">
-                            <FileText className="h-4 w-4 mr-2" />
-                            {url}
-                          </Button>
-                        ))}
-                      </div>
-                    )}
-                    
-                    {submission.feedback && (
-                      <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
-                        <div className="flex items-center gap-2 mb-2">
-                          <MessageSquare className="h-4 w-4 text-blue-600" />
-                          <span className="text-sm font-medium text-blue-800">Teacher Feedback</span>
-                        </div>
-                        <p className="text-sm text-blue-700">{submission.feedback}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="grading">
-          <GradingInterface 
-            assignment={assignment}
-            submissions={mockSubmissions}
-          />
-        </TabsContent>
-
-        <TabsContent value="analytics">
-          <Card>
-            <CardHeader>
-              <CardTitle>Assignment Analytics</CardTitle>
-              <CardDescription>Performance insights and statistics</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">Analytics coming soon...</p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      {/* Quick Actions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>📊 Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-3">
+            <Button onClick={() => setShowGrading(true)}>
+              <GraduationCap className="h-4 w-4 mr-2" />
+              Grade All
+            </Button>
+            <Button variant="outline" onClick={handleExportSubmissions}>
+              <FileDown className="h-4 w-4 mr-2" />
+              Export Submissions
+            </Button>
+            <Button variant="outline" onClick={() => handleSendReminder()}>
+              <Mail className="h-4 w-4 mr-2" />
+              Send Reminder to All Late
+            </Button>
+            <Button variant="outline" onClick={handleCloseAssignment}>
+              <X className="h-4 w-4 mr-2" />
+              Close Assignment
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
