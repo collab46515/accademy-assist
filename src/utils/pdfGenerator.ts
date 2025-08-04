@@ -37,7 +37,11 @@ export function generateReportCardPDF(report: ReportCard) {
     percentage: 92.6
   };
 
-  // Use sample data if no real data exists
+  // Use real data from report or fallback to sample data
+  console.log('PDF Generator - Report data:', report);
+  console.log('PDF Generator - Grades data:', report.grades_data);
+  console.log('PDF Generator - Attendance data:', report.attendance_data);
+  
   const grades = report.grades_data?.length > 0 ? report.grades_data : sampleGrades;
   const attendance = Object.keys(report.attendance_data || {}).length > 0 ? report.attendance_data : sampleAttendance;
   
