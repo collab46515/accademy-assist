@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Mail, Lock, User, Phone, School } from 'lucide-react';
-import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const AuthPage: React.FC = () => {
   const { user, signIn, signUp, loading } = useAuth();
@@ -15,11 +15,7 @@ const AuthPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Redirect if already authenticated
-  if (user && !loading) {
-    return <Navigate to="/" replace />;
-  }
-
+  // Move ALL useState hooks to the top
   const [loginForm, setLoginForm] = useState({
     email: '',
     password: ''
@@ -33,6 +29,15 @@ const AuthPage: React.FC = () => {
     lastName: '',
     phone: ''
   });
+
+  // Use useEffect for navigation instead of early return
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    if (user && !loading) {
+      navigate('/', { replace: true });
+    }
+  }, [user, loading, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
