@@ -11,6 +11,7 @@ import { CurriculumFrameworkSelector } from '@/components/curriculum/CurriculumF
 import { TopicManager } from '@/components/curriculum/TopicManager';
 import { CoverageReporting } from '@/components/curriculum/CoverageReporting';
 import { ImportExportTools } from '@/components/curriculum/ImportExportTools';
+import { LessonPlanning } from '@/components/curriculum/LessonPlanning';
 import { useCurriculumData, CurriculumFramework } from '@/hooks/useCurriculumData';
 import { useRBAC } from '@/hooks/useRBAC';
 import { useToast } from '@/hooks/use-toast';
@@ -170,9 +171,10 @@ const CurriculumPage = () => {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="framework">Framework</TabsTrigger>
             <TabsTrigger value="topics">Topics</TabsTrigger>
+            <TabsTrigger value="lessons">Lesson Plans</TabsTrigger>
             <TabsTrigger value="progress">Progress</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
             <TabsTrigger value="import">Import/Export</TabsTrigger>
@@ -208,6 +210,13 @@ const CurriculumPage = () => {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        <TabsContent value="lessons">
+          <LessonPlanning 
+            schoolId={currentSchoolId}
+            canEdit={canManageCurriculum}
+          />
         </TabsContent>
 
         <TabsContent value="progress">
