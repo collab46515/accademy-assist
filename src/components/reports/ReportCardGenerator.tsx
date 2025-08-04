@@ -103,7 +103,20 @@ export function ReportCardGenerator({ open, onOpenChange, mode, onGenerationComp
           };
         }) || [];
         
-        setStudents(combinedData);
+        // If no real students found, use demo data
+        if (combinedData.length === 0) {
+          const demoStudents = [
+            { id: '550e8400-e29b-41d4-a716-446655440001', first_name: 'John', last_name: 'Smith', year_group: 'Year 7' },
+            { id: '550e8400-e29b-41d4-a716-446655440002', first_name: 'Emma', last_name: 'Johnson', year_group: 'Year 7' },
+            { id: '550e8400-e29b-41d4-a716-446655440003', first_name: 'Michael', last_name: 'Brown', year_group: 'Year 8' },
+          ];
+          const filteredStudents = yearGroup 
+            ? demoStudents.filter(student => student.year_group === yearGroup)
+            : demoStudents;
+          setStudents(filteredStudents);
+        } else {
+          setStudents(combinedData);
+        }
       } else {
         // Transform the joined data
         const transformedStudents = (studentsData || []).map((student: any) => ({
