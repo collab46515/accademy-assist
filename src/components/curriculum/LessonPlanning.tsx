@@ -44,6 +44,28 @@ interface LessonAttachment {
   size: number;
 }
 
+interface AssessmentMethod {
+  id: string;
+  type: 'formative' | 'summative';
+  method: string;
+  description: string;
+  rubric_url?: string;
+  links_to_gradebook: boolean;
+  skills_assessed: string[];
+}
+
+interface LessonAssessment {
+  formative: AssessmentMethod[];
+  summative: AssessmentMethod[];
+  skills_assessed: string[];
+  rubrics: {
+    id: string;
+    name: string;
+    url: string;
+    type: 'attached' | 'linked';
+  }[];
+}
+
 interface LessonDifferentiation {
   support: string[];
   challenge: string[];
@@ -86,6 +108,7 @@ interface LessonPlan {
   lesson_sections: LessonSection[];
   resources: LessonResources;
   differentiation: LessonDifferentiation;
+  assessment: LessonAssessment;
   total_planned_time: number;
 }
 
@@ -104,7 +127,16 @@ interface LessonPlanFormData {
   lesson_sections: LessonSection[];
   resources: LessonResources;
   differentiation: LessonDifferentiation;
+  assessment: LessonAssessment;
 }
+
+// Default assessment template
+const createDefaultAssessment = (): LessonAssessment => ({
+  formative: [],
+  summative: [],
+  skills_assessed: [],
+  rubrics: []
+});
 
 // Default differentiation template
 const createDefaultDifferentiation = (): LessonDifferentiation => ({
@@ -314,6 +346,21 @@ const mockLessonPlans: LessonPlan[] = [
       sen: ['Use visual schedule', 'Reduce task size to 3 problems'],
       eal: ['Use bilingual glossary', 'Pair with fluent speaker']
     },
+    assessment: {
+      formative: [
+        {
+          id: '1',
+          type: 'formative',
+          method: 'Exit ticket',
+          description: 'Draw two equivalent fractions and explain why they are equal',
+          links_to_gradebook: false,
+          skills_assessed: ['Understanding equivalent fractions', 'Mathematical reasoning']
+        }
+      ],
+      summative: [],
+      skills_assessed: ['Number sense', 'Fraction understanding', 'Mathematical communication'],
+      rubrics: []
+    },
     total_planned_time: 50
   }
 ];
@@ -358,7 +405,8 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
     objectives_edited: false,
     lesson_sections: createDefaultLessonSections(),
     resources: createDefaultResources(),
-    differentiation: createDefaultDifferentiation()
+    differentiation: createDefaultDifferentiation(),
+    assessment: createDefaultAssessment()
   });
 
   const resetForm = () => {
@@ -376,7 +424,8 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
       objectives_edited: false,
       lesson_sections: createDefaultLessonSections(),
       resources: createDefaultResources(),
-      differentiation: createDefaultDifferentiation()
+      differentiation: createDefaultDifferentiation(),
+      assessment: createDefaultAssessment()
     });
     setExpandedSections(['hook']);
   };
@@ -456,7 +505,8 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
       objectives_edited: plan.objectives_edited || false,
       lesson_sections: plan.lesson_sections || createDefaultLessonSections(),
       resources: plan.resources || createDefaultResources(),
-      differentiation: plan.differentiation || createDefaultDifferentiation()
+      differentiation: plan.differentiation || createDefaultDifferentiation(),
+      assessment: plan.assessment || createDefaultAssessment()
     });
     setExpandedSections(['hook']);
     setIsDialogOpen(true);
@@ -1752,6 +1802,560 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
                               <span className="text-orange-600 text-xs font-bold">EAL</span>
                             </div>
                             <span>{formData.differentiation.eal.filter(e => e.trim()).length} EAL supports</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Assessment Methods Section */}
+                    <div className="space-y-4 border-t pt-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <Label className="text-lg font-semibold">📊 Assessment Methods</Label>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Plan how you'll assess student learning and track progress
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid gap-6 md:grid-cols-2">
+                        {/* Formative Assessment */}
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                              <span className="text-blue-600 font-semibold text-sm">F</span>
+                            </div>
+                            <div>
+                              <Label className="text-base font-medium">Formative Assessment</Label>
+                              <p className="text-sm text-muted-foreground">Ongoing feedback during learning</p>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-3">
+                            {formData.assessment.formative.map((assessment, index) => (
+                              <div key={assessment.id} className="p-4 border rounded-lg space-y-3">
+                                <div className="grid gap-3 md:grid-cols-2">
+                                  <div>
+                                    <Label className="text-sm">Method</Label>
+                                    <select
+                                      value={assessment.method}
+                                      onChange={(e) => {
+                                        const newFormative = [...formData.assessment.formative];
+                                        newFormative[index] = { ...newFormative[index], method: e.target.value };
+                                        setFormData(prev => ({
+                                          ...prev,
+                                          assessment: {
+                                            ...prev.assessment,
+                                            formative: newFormative
+                                          }
+                                        }));
+                                      }}
+                                      className="w-full p-2 border rounded-md text-sm"
+                                    >
+                                      <option value="">Select method</option>
+                                      <option value="Exit ticket">Exit ticket</option>
+                                      <option value="Questioning">Questioning</option>
+                                      <option value="Observation checklist">Observation checklist</option>
+                                      <option value="Thumbs up/down">Thumbs up/down</option>
+                                      <option value="Mini whiteboard">Mini whiteboard</option>
+                                      <option value="Peer assessment">Peer assessment</option>
+                                      <option value="Self-assessment">Self-assessment</option>
+                                    </select>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <input
+                                      type="checkbox"
+                                      id={`gradebook-${assessment.id}`}
+                                      checked={assessment.links_to_gradebook}
+                                      onChange={(e) => {
+                                        const newFormative = [...formData.assessment.formative];
+                                        newFormative[index] = { ...newFormative[index], links_to_gradebook: e.target.checked };
+                                        setFormData(prev => ({
+                                          ...prev,
+                                          assessment: {
+                                            ...prev.assessment,
+                                            formative: newFormative
+                                          }
+                                        }));
+                                      }}
+                                      className="rounded"
+                                    />
+                                    <Label htmlFor={`gradebook-${assessment.id}`} className="text-sm">Link to Gradebook</Label>
+                                  </div>
+                                </div>
+                                
+                                <div>
+                                  <Label className="text-sm">Description</Label>
+                                  <Textarea
+                                    value={assessment.description}
+                                    onChange={(e) => {
+                                      const newFormative = [...formData.assessment.formative];
+                                      newFormative[index] = { ...newFormative[index], description: e.target.value };
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        assessment: {
+                                          ...prev.assessment,
+                                          formative: newFormative
+                                        }
+                                      }));
+                                    }}
+                                    placeholder="Describe the assessment activity"
+                                    className="min-h-[60px]"
+                                  />
+                                </div>
+
+                                <div className="flex justify-between items-center">
+                                  <Label className="text-sm">Skills Assessed</Label>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      const newFormative = formData.assessment.formative.filter((_, i) => i !== index);
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        assessment: {
+                                          ...prev.assessment,
+                                          formative: newFormative
+                                        }
+                                      }));
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                                
+                                <div className="space-y-2">
+                                  {assessment.skills_assessed.map((skill, skillIndex) => (
+                                    <div key={skillIndex} className="flex gap-2">
+                                      <Input
+                                        value={skill}
+                                        onChange={(e) => {
+                                          const newFormative = [...formData.assessment.formative];
+                                          const newSkills = [...newFormative[index].skills_assessed];
+                                          newSkills[skillIndex] = e.target.value;
+                                          newFormative[index] = { ...newFormative[index], skills_assessed: newSkills };
+                                          setFormData(prev => ({
+                                            ...prev,
+                                            assessment: {
+                                              ...prev.assessment,
+                                              formative: newFormative
+                                            }
+                                          }));
+                                        }}
+                                        placeholder="e.g., Understanding equivalent fractions"
+                                        className="flex-1 text-sm"
+                                      />
+                                      <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                          const newFormative = [...formData.assessment.formative];
+                                          const newSkills = newFormative[index].skills_assessed.filter((_, i) => i !== skillIndex);
+                                          newFormative[index] = { ...newFormative[index], skills_assessed: newSkills };
+                                          setFormData(prev => ({
+                                            ...prev,
+                                            assessment: {
+                                              ...prev.assessment,
+                                              formative: newFormative
+                                            }
+                                          }));
+                                        }}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      const newFormative = [...formData.assessment.formative];
+                                      newFormative[index] = {
+                                        ...newFormative[index],
+                                        skills_assessed: [...newFormative[index].skills_assessed, '']
+                                      };
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        assessment: {
+                                          ...prev.assessment,
+                                          formative: newFormative
+                                        }
+                                      }));
+                                    }}
+                                  >
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Add Skill
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                            
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setFormData(prev => ({
+                                ...prev,
+                                assessment: {
+                                  ...prev.assessment,
+                                  formative: [
+                                    ...prev.assessment.formative,
+                                    {
+                                      id: Date.now().toString(),
+                                      type: 'formative',
+                                      method: '',
+                                      description: '',
+                                      links_to_gradebook: false,
+                                      skills_assessed: ['']
+                                    }
+                                  ]
+                                }
+                              }))}
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add Formative Assessment
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Summative Assessment */}
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                              <span className="text-green-600 font-semibold text-sm">S</span>
+                            </div>
+                            <div>
+                              <Label className="text-base font-medium">Summative Assessment</Label>
+                              <p className="text-sm text-muted-foreground">Final evaluation of learning</p>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-3">
+                            {formData.assessment.summative.map((assessment, index) => (
+                              <div key={assessment.id} className="p-4 border rounded-lg space-y-3">
+                                <div className="grid gap-3 md:grid-cols-2">
+                                  <div>
+                                    <Label className="text-sm">Method</Label>
+                                    <select
+                                      value={assessment.method}
+                                      onChange={(e) => {
+                                        const newSummative = [...formData.assessment.summative];
+                                        newSummative[index] = { ...newSummative[index], method: e.target.value };
+                                        setFormData(prev => ({
+                                          ...prev,
+                                          assessment: {
+                                            ...prev.assessment,
+                                            summative: newSummative
+                                          }
+                                        }));
+                                      }}
+                                      className="w-full p-2 border rounded-md text-sm"
+                                    >
+                                      <option value="">Select method</option>
+                                      <option value="Quiz">Quiz</option>
+                                      <option value="Project">Project</option>
+                                      <option value="End-of-topic test">End-of-topic test</option>
+                                      <option value="Portfolio">Portfolio</option>
+                                      <option value="Presentation">Presentation</option>
+                                      <option value="Lab report">Lab report</option>
+                                      <option value="Essay">Essay</option>
+                                    </select>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <input
+                                      type="checkbox"
+                                      id={`gradebook-sum-${assessment.id}`}
+                                      checked={assessment.links_to_gradebook}
+                                      onChange={(e) => {
+                                        const newSummative = [...formData.assessment.summative];
+                                        newSummative[index] = { ...newSummative[index], links_to_gradebook: e.target.checked };
+                                        setFormData(prev => ({
+                                          ...prev,
+                                          assessment: {
+                                            ...prev.assessment,
+                                            summative: newSummative
+                                          }
+                                        }));
+                                      }}
+                                      className="rounded"
+                                    />
+                                    <Label htmlFor={`gradebook-sum-${assessment.id}`} className="text-sm">Link to Gradebook</Label>
+                                  </div>
+                                </div>
+                                
+                                <div>
+                                  <Label className="text-sm">Description</Label>
+                                  <Textarea
+                                    value={assessment.description}
+                                    onChange={(e) => {
+                                      const newSummative = [...formData.assessment.summative];
+                                      newSummative[index] = { ...newSummative[index], description: e.target.value };
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        assessment: {
+                                          ...prev.assessment,
+                                          summative: newSummative
+                                        }
+                                      }));
+                                    }}
+                                    placeholder="Describe the assessment activity"
+                                    className="min-h-[60px]"
+                                  />
+                                </div>
+
+                                <div className="flex justify-between items-center">
+                                  <Label className="text-sm">Skills Assessed</Label>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      const newSummative = formData.assessment.summative.filter((_, i) => i !== index);
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        assessment: {
+                                          ...prev.assessment,
+                                          summative: newSummative
+                                        }
+                                      }));
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                                
+                                <div className="space-y-2">
+                                  {assessment.skills_assessed.map((skill, skillIndex) => (
+                                    <div key={skillIndex} className="flex gap-2">
+                                      <Input
+                                        value={skill}
+                                        onChange={(e) => {
+                                          const newSummative = [...formData.assessment.summative];
+                                          const newSkills = [...newSummative[index].skills_assessed];
+                                          newSkills[skillIndex] = e.target.value;
+                                          newSummative[index] = { ...newSummative[index], skills_assessed: newSkills };
+                                          setFormData(prev => ({
+                                            ...prev,
+                                            assessment: {
+                                              ...prev.assessment,
+                                              summative: newSummative
+                                            }
+                                          }));
+                                        }}
+                                        placeholder="e.g., Mathematical reasoning"
+                                        className="flex-1 text-sm"
+                                      />
+                                      <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                          const newSummative = [...formData.assessment.summative];
+                                          const newSkills = newSummative[index].skills_assessed.filter((_, i) => i !== skillIndex);
+                                          newSummative[index] = { ...newSummative[index], skills_assessed: newSkills };
+                                          setFormData(prev => ({
+                                            ...prev,
+                                            assessment: {
+                                              ...prev.assessment,
+                                              summative: newSummative
+                                            }
+                                          }));
+                                        }}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      const newSummative = [...formData.assessment.summative];
+                                      newSummative[index] = {
+                                        ...newSummative[index],
+                                        skills_assessed: [...newSummative[index].skills_assessed, '']
+                                      };
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        assessment: {
+                                          ...prev.assessment,
+                                          summative: newSummative
+                                        }
+                                      }));
+                                    }}
+                                  >
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Add Skill
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                            
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setFormData(prev => ({
+                                ...prev,
+                                assessment: {
+                                  ...prev.assessment,
+                                  summative: [
+                                    ...prev.assessment.summative,
+                                    {
+                                      id: Date.now().toString(),
+                                      type: 'summative',
+                                      method: '',
+                                      description: '',
+                                      links_to_gradebook: true,
+                                      skills_assessed: ['']
+                                    }
+                                  ]
+                                }
+                              }))}
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add Summative Assessment
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Rubrics Section */}
+                      <div className="space-y-3 border-t pt-4">
+                        <Label className="text-base font-medium">Rubrics & Grading Criteria</Label>
+                        <div className="space-y-3">
+                          {formData.assessment.rubrics.length > 0 && (
+                            <div className="space-y-2">
+                              {formData.assessment.rubrics.map((rubric, index) => (
+                                <div key={rubric.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                  <div className="flex items-center gap-3">
+                                    <Paperclip className="h-4 w-4 text-muted-foreground" />
+                                    <div>
+                                      <p className="font-medium text-sm">{rubric.name}</p>
+                                      <p className="text-xs text-muted-foreground capitalize">{rubric.type}</p>
+                                    </div>
+                                  </div>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      const newRubrics = formData.assessment.rubrics.filter((_, i) => i !== index);
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        assessment: {
+                                          ...prev.assessment,
+                                          rubrics: newRubrics
+                                        }
+                                      }));
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const input = document.createElement('input');
+                                input.type = 'file';
+                                input.accept = '.pdf,.doc,.docx';
+                                input.onchange = (e) => {
+                                  const file = (e.target as HTMLInputElement).files?.[0];
+                                  if (file) {
+                                    const newRubric = {
+                                      id: Date.now().toString(),
+                                      name: file.name,
+                                      url: '', // Would be set after upload
+                                      type: 'attached' as const
+                                    };
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      assessment: {
+                                        ...prev.assessment,
+                                        rubrics: [...prev.assessment.rubrics, newRubric]
+                                      }
+                                    }));
+                                    toast({
+                                      title: "Rubric attached",
+                                      description: `${file.name} has been attached`
+                                    });
+                                  }
+                                };
+                                input.click();
+                              }}
+                            >
+                              <Upload className="h-4 w-4 mr-2" />
+                              Attach Rubric
+                            </Button>
+                            <Input
+                              placeholder="Or paste rubric URL"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                                  const url = e.currentTarget.value.trim();
+                                  const newRubric = {
+                                    id: Date.now().toString(),
+                                    name: 'Linked Rubric',
+                                    url: url,
+                                    type: 'linked' as const
+                                  };
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    assessment: {
+                                      ...prev.assessment,
+                                      rubrics: [...prev.assessment.rubrics, newRubric]
+                                    }
+                                  }));
+                                  e.currentTarget.value = '';
+                                  toast({
+                                    title: "Rubric linked",
+                                    description: "URL has been added to rubrics"
+                                  });
+                                }
+                              }}
+                              className="flex-1"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Assessment Summary */}
+                      <div className="mt-4 p-4 bg-muted/30 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-sm font-medium">Assessment Overview:</span>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center">
+                              <span className="text-blue-600 text-xs font-bold">F</span>
+                            </div>
+                            <span>{formData.assessment.formative.length} Formative</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
+                              <span className="text-green-600 text-xs font-bold">S</span>
+                            </div>
+                            <span>{formData.assessment.summative.length} Summative</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Paperclip className="w-4 h-4 text-muted-foreground" />
+                            <span>{formData.assessment.rubrics.length} Rubrics</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground text-xs">→ Gradebook:</span>
+                            <span>
+                              {[...formData.assessment.formative, ...formData.assessment.summative]
+                                .filter(a => a.links_to_gradebook).length} linked
+                            </span>
                           </div>
                         </div>
                       </div>
