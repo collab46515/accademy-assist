@@ -44,6 +44,22 @@ interface LessonAttachment {
   size: number;
 }
 
+interface LessonResources {
+  materials_list: string[];
+  digital_resources: DigitalResource[];
+  file_attachments: LessonAttachment[];
+  tech_requirements: string[];
+  shared_with_students: boolean;
+}
+
+interface DigitalResource {
+  id: string;
+  title: string;
+  url: string;
+  type: 'youtube' | 'google_slides' | 'pdf' | 'website' | 'other';
+  description?: string;
+}
+
 interface LessonPlan {
   id: string;
   title: string;
@@ -61,6 +77,7 @@ interface LessonPlan {
   success_criteria: string[];
   objectives_edited: boolean;
   lesson_sections: LessonSection[];
+  resources: LessonResources;
   total_planned_time: number;
 }
 
@@ -77,7 +94,17 @@ interface LessonPlanFormData {
   success_criteria: string[];
   objectives_edited: boolean;
   lesson_sections: LessonSection[];
+  resources: LessonResources;
 }
+
+// Default resources template
+const createDefaultResources = (): LessonResources => ({
+  materials_list: [],
+  digital_resources: [],
+  file_attachments: [],
+  tech_requirements: [],
+  shared_with_students: false
+});
 
 // Default lesson structure template
 const createDefaultLessonSections = (): LessonSection[] => [
@@ -249,6 +276,21 @@ const mockLessonPlans: LessonPlan[] = [
         description: 'Summarize, connect, preview next lesson'
       }
     ],
+    resources: {
+      materials_list: ['Whiteboards', 'Fraction manipulatives', 'Pizza slice models'],
+      digital_resources: [
+        {
+          id: '1',
+          title: 'Equivalent Fractions Video',
+          url: 'https://youtube.com/watch?v=example',
+          type: 'youtube',
+          description: 'Visual explanation of equivalent fractions'
+        }
+      ],
+      file_attachments: [],
+      tech_requirements: ['Projector', 'Document camera'],
+      shared_with_students: true
+    },
     total_planned_time: 50
   }
 ];
@@ -291,7 +333,8 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
     learning_objectives: [''],
     success_criteria: [''],
     objectives_edited: false,
-    lesson_sections: createDefaultLessonSections()
+    lesson_sections: createDefaultLessonSections(),
+    resources: createDefaultResources()
   });
 
   const resetForm = () => {
@@ -307,7 +350,8 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
       learning_objectives: [''],
       success_criteria: [''],
       objectives_edited: false,
-      lesson_sections: createDefaultLessonSections()
+      lesson_sections: createDefaultLessonSections(),
+      resources: createDefaultResources()
     });
     setExpandedSections(['hook']);
   };
@@ -385,7 +429,8 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
       learning_objectives: plan.learning_objectives || [''],
       success_criteria: plan.success_criteria || [''],
       objectives_edited: plan.objectives_edited || false,
-      lesson_sections: plan.lesson_sections || createDefaultLessonSections()
+      lesson_sections: plan.lesson_sections || createDefaultLessonSections(),
+      resources: plan.resources || createDefaultResources()
     });
     setExpandedSections(['hook']);
     setIsDialogOpen(true);
@@ -1011,6 +1056,362 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
                              timeVariance < 0 ? `${timeVariance} min (under)` : 
                              'Perfect match!'}
                           </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Resources & Materials Section */}
+                    <div className="space-y-4 border-t pt-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <Label className="text-lg font-semibold">📎 Resources & Materials</Label>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Add all materials, digital resources, and tech requirements for this lesson
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="shared-with-students" className="text-sm">Share with students:</Label>
+                          <input
+                            type="checkbox"
+                            id="shared-with-students"
+                            checked={formData.resources.shared_with_students}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              resources: {
+                                ...prev.resources,
+                                shared_with_students: e.target.checked
+                              }
+                            }))}
+                            className="rounded border-gray-300"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid gap-6 md:grid-cols-2">
+                        {/* Materials List */}
+                        <div className="space-y-3">
+                          <Label className="text-base font-medium">Physical Materials</Label>
+                          <div className="space-y-2">
+                            {formData.resources.materials_list.map((material, index) => (
+                              <div key={index} className="flex gap-2">
+                                <Input
+                                  value={material}
+                                  onChange={(e) => {
+                                    const newMaterials = [...formData.resources.materials_list];
+                                    newMaterials[index] = e.target.value;
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      resources: {
+                                        ...prev.resources,
+                                        materials_list: newMaterials
+                                      }
+                                    }));
+                                  }}
+                                  placeholder="e.g., Whiteboards, Scissors, Lab equipment"
+                                  className="flex-1"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newMaterials = formData.resources.materials_list.filter((_, i) => i !== index);
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      resources: {
+                                        ...prev.resources,
+                                        materials_list: newMaterials
+                                      }
+                                    }));
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setFormData(prev => ({
+                                ...prev,
+                                resources: {
+                                  ...prev.resources,
+                                  materials_list: [...prev.resources.materials_list, '']
+                                }
+                              }))}
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add Material
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Tech Requirements */}
+                        <div className="space-y-3">
+                          <Label className="text-base font-medium">Tech Requirements</Label>
+                          <div className="space-y-2">
+                            {formData.resources.tech_requirements.map((tech, index) => (
+                              <div key={index} className="flex gap-2">
+                                <Input
+                                  value={tech}
+                                  onChange={(e) => {
+                                    const newTech = [...formData.resources.tech_requirements];
+                                    newTech[index] = e.target.value;
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      resources: {
+                                        ...prev.resources,
+                                        tech_requirements: newTech
+                                      }
+                                    }));
+                                  }}
+                                  placeholder="e.g., Chromebooks, Projector required"
+                                  className="flex-1"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newTech = formData.resources.tech_requirements.filter((_, i) => i !== index);
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      resources: {
+                                        ...prev.resources,
+                                        tech_requirements: newTech
+                                      }
+                                    }));
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setFormData(prev => ({
+                                ...prev,
+                                resources: {
+                                  ...prev.resources,
+                                  tech_requirements: [...prev.resources.tech_requirements, '']
+                                }
+                              }))}
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add Requirement
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Digital Resources */}
+                      <div className="space-y-3">
+                        <Label className="text-base font-medium">Digital Resources</Label>
+                        <div className="space-y-3">
+                          {formData.resources.digital_resources.map((resource, index) => (
+                            <div key={resource.id} className="p-4 border rounded-lg space-y-3">
+                              <div className="grid gap-3 md:grid-cols-3">
+                                <Input
+                                  value={resource.title}
+                                  onChange={(e) => {
+                                    const newResources = [...formData.resources.digital_resources];
+                                    newResources[index] = { ...newResources[index], title: e.target.value };
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      resources: {
+                                        ...prev.resources,
+                                        digital_resources: newResources
+                                      }
+                                    }));
+                                  }}
+                                  placeholder="Resource title"
+                                />
+                                <Select
+                                  value={resource.type}
+                                  onValueChange={(value: any) => {
+                                    const newResources = [...formData.resources.digital_resources];
+                                    newResources[index] = { ...newResources[index], type: value };
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      resources: {
+                                        ...prev.resources,
+                                        digital_resources: newResources
+                                      }
+                                    }));
+                                  }}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Type" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="youtube">YouTube</SelectItem>
+                                    <SelectItem value="google_slides">Google Slides</SelectItem>
+                                    <SelectItem value="pdf">PDF</SelectItem>
+                                    <SelectItem value="website">Website</SelectItem>
+                                    <SelectItem value="other">Other</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newResources = formData.resources.digital_resources.filter((_, i) => i !== index);
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      resources: {
+                                        ...prev.resources,
+                                        digital_resources: newResources
+                                      }
+                                    }));
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                              <div className="grid gap-3 md:grid-cols-2">
+                                <Input
+                                  value={resource.url}
+                                  onChange={(e) => {
+                                    const newResources = [...formData.resources.digital_resources];
+                                    newResources[index] = { ...newResources[index], url: e.target.value };
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      resources: {
+                                        ...prev.resources,
+                                        digital_resources: newResources
+                                      }
+                                    }));
+                                  }}
+                                  placeholder="URL"
+                                />
+                                <Input
+                                  value={resource.description || ''}
+                                  onChange={(e) => {
+                                    const newResources = [...formData.resources.digital_resources];
+                                    newResources[index] = { ...newResources[index], description: e.target.value };
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      resources: {
+                                        ...prev.resources,
+                                        digital_resources: newResources
+                                      }
+                                    }));
+                                  }}
+                                  placeholder="Description (optional)"
+                                />
+                              </div>
+                            </div>
+                          ))}
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setFormData(prev => ({
+                              ...prev,
+                              resources: {
+                                ...prev.resources,
+                                digital_resources: [
+                                  ...prev.resources.digital_resources,
+                                  {
+                                    id: Date.now().toString(),
+                                    title: '',
+                                    url: '',
+                                    type: 'website',
+                                    description: ''
+                                  }
+                                ]
+                              }
+                            }))}
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Digital Resource
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* File Attachments */}
+                      <div className="space-y-3">
+                        <Label className="text-base font-medium">File Attachments</Label>
+                        <div className="space-y-3">
+                          {formData.resources.file_attachments.length > 0 && (
+                            <div className="space-y-2">
+                              {formData.resources.file_attachments.map((file, index) => (
+                                <div key={file.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                  <div className="flex items-center gap-3">
+                                    <Paperclip className="h-4 w-4 text-muted-foreground" />
+                                    <div>
+                                      <p className="font-medium text-sm">{file.name}</p>
+                                      <p className="text-xs text-muted-foreground">
+                                        {file.type} • {(file.size / 1024).toFixed(1)} KB
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      const newFiles = formData.resources.file_attachments.filter((_, i) => i !== index);
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        resources: {
+                                          ...prev.resources,
+                                          file_attachments: newFiles
+                                        }
+                                      }));
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const input = document.createElement('input');
+                                input.type = 'file';
+                                input.accept = '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.gif';
+                                input.multiple = true;
+                                input.onchange = (e) => {
+                                  const files = Array.from((e.target as HTMLInputElement).files || []);
+                                  const newAttachments = files.map(file => ({
+                                    id: Date.now().toString() + Math.random(),
+                                    name: file.name,
+                                    url: '', // Would be set after upload
+                                    type: file.type,
+                                    size: file.size
+                                  }));
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    resources: {
+                                      ...prev.resources,
+                                      file_attachments: [...prev.resources.file_attachments, ...newAttachments]
+                                    }
+                                  }));
+                                  toast({
+                                    title: "Files added",
+                                    description: `${files.length} file(s) added to resources`
+                                  });
+                                };
+                                input.click();
+                              }}
+                            >
+                              <Upload className="h-4 w-4 mr-2" />
+                              Upload Files
+                            </Button>
+                            <span className="text-xs text-muted-foreground">
+                              Worksheets, PPTs, rubrics, etc.
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
