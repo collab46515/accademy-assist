@@ -32,7 +32,10 @@ import {
   Target,
   DollarSign,
   Receipt,
-  Bell
+  Bell,
+  PenTool,
+  ClipboardList,
+  CheckSquare
 } from "lucide-react";
 
 import {
@@ -77,13 +80,14 @@ const erpModules = [
         url: "/academics", 
         icon: BookOpen,
         subItems: [
-          { title: "Timetable", url: "/academics/timetable", icon: Clock },
           { title: "Curriculum", url: "/academics/curriculum", icon: BookOpen },
-          { title: "Gradebook", url: "/academics/gradebook", icon: Calculator },
+          { title: "Lesson Planning", url: "/academics/lesson-planning", icon: PenTool },
+          { title: "Timetable", url: "/academics/timetable", icon: Clock },
+          { title: "Assignments & Homework", url: "/academics/assignments", icon: ClipboardList },
+          { title: "Attendance (by Period)", url: "/academics/attendance", icon: CheckSquare },
           { title: "Exams", url: "/academics/exams", icon: FileText },
-          { title: "Homework", url: "/academics/homework", icon: ClipboardCheck },
-          { title: "Assignments", url: "/academics/assignments", icon: ClipboardCheck },
-          { title: "Attendance", url: "/academics/attendance", icon: Calendar },
+          { title: "Gradebook", url: "/academics/gradebook", icon: Calculator },
+          { title: "Reports", url: "/academics/reports", icon: BarChart3 },
         ]
       },
       { 

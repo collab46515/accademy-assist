@@ -75,6 +75,7 @@ const CurriculumPage = () => {
 
   const handleFrameworkSelect = (framework: CurriculumFramework) => {
     console.log('Framework selected:', framework);
+    console.log('Setting selectedFramework to:', framework);
     setSelectedFramework(framework);
     setActiveTab('topics'); // Auto-switch to topics tab when framework is selected
   };
@@ -174,13 +175,13 @@ const CurriculumPage = () => {
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="framework">Framework</TabsTrigger>
             <TabsTrigger value="topics">
-              Topics {!selectedFramework && "(Select Framework First)"}
+              Topics {!selectedFramework && "(Select Framework First)"} {selectedFramework && `- ${selectedFramework.name}`}
             </TabsTrigger>
             <TabsTrigger value="progress">
-              Progress {(!selectedFramework || !canViewProgress) && "(Select Framework First)"}
+              Progress {(!selectedFramework || !canViewProgress) && "(Select Framework First)"} {selectedFramework && canViewProgress && `- ${selectedFramework.name}`}
             </TabsTrigger>
             <TabsTrigger value="reports">
-              Reports {!selectedFramework && "(Select Framework First)"}
+              Reports {!selectedFramework && "(Select Framework First)"} {selectedFramework && `- ${selectedFramework.name}`}
             </TabsTrigger>
             <TabsTrigger value="import">Import/Export</TabsTrigger>
           </TabsList>
