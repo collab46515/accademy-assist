@@ -199,7 +199,7 @@ export function generateReportCardPDF(report: ReportCard) {
   
   // Data rows
   grades.forEach((grade, index) => {
-    if (yPos > 220) { // Start new page earlier to avoid footer overlap
+    if (yPos > 180) { // Much earlier page break to avoid footer overlap
       doc.addPage();
       yPos = 30;
       
