@@ -142,7 +142,7 @@ const ComplaintsPage = () => {
           <TabsTrigger value="active">Active Complaints</TabsTrigger>
           <TabsTrigger value="all">All Complaints</TabsTrigger>
           <TabsTrigger value="resolved">Resolved</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
+          <TabsTrigger value="reports">📊 Reports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="active" className="space-y-4">
