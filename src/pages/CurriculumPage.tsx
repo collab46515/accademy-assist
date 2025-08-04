@@ -172,7 +172,7 @@ const CurriculumPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Active Classes</p>
-                <p className="text-3xl font-bold text-primary">47</p>
+                <p className="text-3xl font-bold text-primary">{timetable.length}</p>
               </div>
               <Calendar className="h-8 w-8 text-primary" />
             </div>
