@@ -162,140 +162,159 @@ export function generateReportCardPDF(report: ReportCard) {
   doc.addPage();
   yPos = 30;
   
-  // Performance Table Header
-  doc.setFillColor(schoolBlue[0], schoolBlue[1], schoolBlue[2]);
-  doc.rect(20, yPos, 170, 18, 'F');
+  // Modern Professional Table Design
+  yPos += 5;
   
-  // Outer table border
-  doc.setDrawColor(100, 100, 100);
-  doc.setLineWidth(0.8);
-  doc.rect(20, yPos, 170, 18);
-  
-  // Column separators in header
-  doc.setDrawColor(255, 255, 255);
-  doc.setLineWidth(0.6);
-  doc.line(65, yPos, 65, yPos + 18); // After Subject (45px wide)
-  doc.line(95, yPos, 95, yPos + 18); // After Grade (30px wide) 
-  doc.line(125, yPos, 125, yPos + 18); // After Effort (30px wide)
-  // Comments gets remaining 65px
-  
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(12);
+  // Table title
+  doc.setTextColor(schoolBlue[0], schoolBlue[1], schoolBlue[2]);
+  doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
-  doc.text('SUBJECT', 42.5, yPos + 11, { align: 'center' });
-  doc.text('GRADE', 80, yPos + 11, { align: 'center' });
-  doc.text('EFFORT', 110, yPos + 11, { align: 'center' });
-  doc.text('TEACHER COMMENTS', 157.5, yPos + 11, { align: 'center' });
+  doc.text('ACADEMIC PERFORMANCE BY SUBJECT', 20, yPos);
+  yPos += 15;
   
-  yPos += 18;
-  doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
+  // Clean table with modern styling
+  const tableStartY = yPos;
+  const colWidths = [50, 25, 25, 70]; // Subject, Grade, Effort, Comments
+  const tableWidth = colWidths.reduce((sum, width) => sum + width, 0);
   
-  // Add grade rows with professional styling
+  // Header row with gradient-like effect
+  doc.setFillColor(25, 46, 94); // Darker blue
+  doc.rect(20, yPos, tableWidth, 16, 'F');
+  
+  // Header text
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  
+  let xPos = 20;
+  doc.text('SUBJECT', xPos + colWidths[0]/2, yPos + 10, { align: 'center' });
+  xPos += colWidths[0];
+  doc.text('GRADE', xPos + colWidths[1]/2, yPos + 10, { align: 'center' });
+  xPos += colWidths[1];
+  doc.text('EFFORT', xPos + colWidths[2]/2, yPos + 10, { align: 'center' });
+  xPos += colWidths[2];
+  doc.text('TEACHER COMMENTS', xPos + colWidths[3]/2, yPos + 10, { align: 'center' });
+  
+  yPos += 16;
+  
+  // Data rows
   grades.forEach((grade, index) => {
     if (yPos > 240) { // Start new page if needed
       doc.addPage();
       yPos = 30;
       
-      // Repeat header on new page
-      doc.setFillColor(schoolBlue[0], schoolBlue[1], schoolBlue[2]);
-      doc.rect(20, yPos, 170, 18, 'F');
-      doc.setDrawColor(100, 100, 100);
-      doc.setLineWidth(0.8);
-      doc.rect(20, yPos, 170, 18);
-      
-      doc.setDrawColor(255, 255, 255);
-      doc.setLineWidth(0.6);
-      doc.line(65, yPos, 65, yPos + 18);
-      doc.line(95, yPos, 95, yPos + 18);
-      doc.line(125, yPos, 125, yPos + 18);
-      
+      // Repeat header
+      doc.setFillColor(25, 46, 94);
+      doc.rect(20, yPos, tableWidth, 16, 'F');
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(12);
+      doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
-      doc.text('SUBJECT', 42.5, yPos + 11, { align: 'center' });
-      doc.text('GRADE', 80, yPos + 11, { align: 'center' });
-      doc.text('EFFORT', 110, yPos + 11, { align: 'center' });
-      doc.text('TEACHER COMMENTS', 157.5, yPos + 11, { align: 'center' });
       
-      yPos += 18;
-      doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
+      let headerX = 20;
+      doc.text('SUBJECT', headerX + colWidths[0]/2, yPos + 10, { align: 'center' });
+      headerX += colWidths[0];
+      doc.text('GRADE', headerX + colWidths[1]/2, yPos + 10, { align: 'center' });
+      headerX += colWidths[1];
+      doc.text('EFFORT', headerX + colWidths[2]/2, yPos + 10, { align: 'center' });
+      headerX += colWidths[2];
+      doc.text('TEACHER COMMENTS', headerX + colWidths[3]/2, yPos + 10, { align: 'center' });
+      
+      yPos += 16;
     }
     
-    const rowHeight = 20;
+    const rowHeight = 24;
     
-    // Alternate row colors with subtle difference
+    // Clean alternating rows
     if (index % 2 === 0) {
-      doc.setFillColor(248, 250, 252);
+      doc.setFillColor(250, 251, 252);
     } else {
       doc.setFillColor(255, 255, 255);
     }
-    doc.rect(20, yPos, 170, rowHeight, 'F');
+    doc.rect(20, yPos, tableWidth, rowHeight, 'F');
     
-    // Row borders
-    doc.setDrawColor(220, 220, 220);
-    doc.setLineWidth(0.4);
-    doc.rect(20, yPos, 170, rowHeight);
-    
-    // Column separators with lighter color
-    doc.setDrawColor(235, 235, 235);
+    // Subtle row border
+    doc.setDrawColor(226, 232, 240);
     doc.setLineWidth(0.3);
-    doc.line(65, yPos, 65, yPos + rowHeight);
-    doc.line(95, yPos, 95, yPos + rowHeight);
-    doc.line(125, yPos, 125, yPos + rowHeight);
+    doc.line(20, yPos + rowHeight, 20 + tableWidth, yPos + rowHeight);
     
-    // Subject column
+    // Column content
+    xPos = 20;
+    
+    // Subject
+    doc.setTextColor(15, 23, 42);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(40, 40, 40);
-    doc.text(grade.subject, 42.5, yPos + 12, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text(grade.subject, xPos + colWidths[0]/2, yPos + 14, { align: 'center' });
+    xPos += colWidths[0];
     
-    // Grade column with professional styling
+    // Vertical separator
+    doc.setDrawColor(226, 232, 240);
+    doc.line(xPos, yPos, xPos, yPos + rowHeight);
+    
+    // Grade with modern badge styling
     const gradeColor = grade.grade.startsWith('A') ? [16, 185, 129] : 
                       grade.grade.startsWith('B') ? [59, 130, 246] : 
                       grade.grade.startsWith('C') ? [245, 158, 11] : [239, 68, 68];
     
+    // Grade badge with shadow effect
     doc.setFillColor(gradeColor[0], gradeColor[1], gradeColor[2]);
-    doc.roundedRect(72, yPos + 6, 16, 8, 2, 2, 'F');
+    doc.roundedRect(xPos + 4, yPos + 7, 17, 10, 3, 3, 'F');
     
-    // Grade border
-    doc.setDrawColor(gradeColor[0] - 20, gradeColor[1] - 20, gradeColor[2] - 20);
-    doc.setLineWidth(0.5);
-    doc.roundedRect(72, yPos + 6, 16, 8, 2, 2);
+    // Subtle shadow
+    doc.setFillColor(0, 0, 0, 0.1);
+    doc.roundedRect(xPos + 5, yPos + 8, 17, 10, 3, 3, 'F');
     
+    // Grade text
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
-    doc.text(grade.grade, 80, yPos + 11, { align: 'center' });
+    doc.text(grade.grade, xPos + colWidths[1]/2, yPos + 13, { align: 'center' });
+    xPos += colWidths[1];
     
-    // Effort column
-    doc.setTextColor(60, 60, 60);
+    // Vertical separator
+    doc.setDrawColor(226, 232, 240);
+    doc.line(xPos, yPos, xPos, yPos + rowHeight);
+    
+    // Effort
+    doc.setTextColor(71, 85, 105);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    doc.text(grade.effort || 'Good', 110, yPos + 12, { align: 'center' });
+    doc.text(grade.effort || 'Good', xPos + colWidths[2]/2, yPos + 14, { align: 'center' });
+    xPos += colWidths[2];
     
-    // Comments column with better text handling
-    doc.setTextColor(50, 50, 50);
+    // Vertical separator
+    doc.setDrawColor(226, 232, 240);
+    doc.line(xPos, yPos, xPos, yPos + rowHeight);
+    
+    // Comments with proper wrapping
+    doc.setTextColor(51, 65, 85);
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
-    const comment = grade.comments || grade.comment || 'Making good progress in this subject.';
-    const wrappedComment = doc.splitTextToSize(comment, 60);
     
-    // Handle multi-line comments better
+    const comment = grade.comments || grade.comment || 'Making good progress in this subject.';
+    const wrappedComment = doc.splitTextToSize(comment, colWidths[3] - 4);
+    
     if (wrappedComment.length === 1) {
-      doc.text(wrappedComment[0], 127, yPos + 12);
+      doc.text(wrappedComment[0], xPos + 2, yPos + 14);
     } else if (wrappedComment.length === 2) {
-      doc.text(wrappedComment[0], 127, yPos + 9);
-      doc.text(wrappedComment[1], 127, yPos + 15);
+      doc.text(wrappedComment[0], xPos + 2, yPos + 10);
+      doc.text(wrappedComment[1], xPos + 2, yPos + 18);
     } else {
-      // For longer comments, show first 2 lines with ellipsis
-      doc.text(wrappedComment[0], 127, yPos + 9);
-      doc.text(wrappedComment[1].substring(0, 25) + '...', 127, yPos + 15);
+      doc.text(wrappedComment[0], xPos + 2, yPos + 9);
+      doc.text(wrappedComment[1], xPos + 2, yPos + 15);
+      if (wrappedComment[2]) {
+        const truncated = wrappedComment[2].length > 30 ? wrappedComment[2].substring(0, 27) + '...' : wrappedComment[2];
+        doc.text(truncated, xPos + 2, yPos + 21);
+      }
     }
     
     yPos += rowHeight;
   });
+  
+  // Table border
+  doc.setDrawColor(148, 163, 184);
+  doc.setLineWidth(0.8);
+  doc.rect(20, tableStartY, tableWidth, yPos - tableStartY);
   
   // Start new page for additional sections
   doc.addPage();
