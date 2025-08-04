@@ -3,13 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Activity, Plus, Users, Calendar, Pill, FileText } from "lucide-react";
 import { useState } from "react";
-import { MedicalVisitForm, TodaysVisitsModal, ActiveCasesModal } from "@/components/infirmary";
+import { MedicalVisitForm, TodaysVisitsModal, ActiveCasesModal, MedicineGivenModal, AppointmentsModal } from "@/components/infirmary";
+import { CSVReportSection } from "@/components/shared/CSVReportSection";
 
 const InfirmaryPage = () => {
   const [activeTab, setActiveTab] = useState("visits");
   const [showMedicalVisitForm, setShowMedicalVisitForm] = useState(false);
   const [showTodaysVisits, setShowTodaysVisits] = useState(false);
   const [showActiveCases, setShowActiveCases] = useState(false);
+  const [showMedicineGiven, setShowMedicineGiven] = useState(false);
+  const [showAppointments, setShowAppointments] = useState(false);
 
   const handleNewMedicalVisit = () => {
     setShowMedicalVisitForm(true);
@@ -52,7 +55,7 @@ const InfirmaryPage = () => {
             <p className="text-xs text-muted-foreground">Ongoing medical needs</p>
           </CardContent>
         </Card>
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => alert('Medicine administration log will be implemented')}>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setShowMedicineGiven(true)}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Medicine Given</CardTitle>
             <Pill className="h-4 w-4 text-muted-foreground" />
@@ -62,7 +65,7 @@ const InfirmaryPage = () => {
             <p className="text-xs text-muted-foreground">Doses administered today</p>
           </CardContent>
         </Card>
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => alert('Appointments schedule will be implemented')}>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setShowAppointments(true)}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Appointments</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -147,6 +150,13 @@ const InfirmaryPage = () => {
         </TabsContent>
       </Tabs>
 
+      {/* CSV Reports Section */}
+      <CSVReportSection 
+        title="Infirmary Reports & Analytics"
+        description="Generate comprehensive reports for medical visits, medicine administration, and health trends"
+        moduleName="infirmary"
+      />
+
       <MedicalVisitForm 
         open={showMedicalVisitForm} 
         onOpenChange={setShowMedicalVisitForm} 
@@ -160,6 +170,16 @@ const InfirmaryPage = () => {
       <ActiveCasesModal 
         open={showActiveCases} 
         onOpenChange={setShowActiveCases} 
+      />
+      
+      <MedicineGivenModal 
+        open={showMedicineGiven} 
+        onOpenChange={setShowMedicineGiven} 
+      />
+      
+      <AppointmentsModal 
+        open={showAppointments} 
+        onOpenChange={setShowAppointments} 
       />
     </div>
   );
