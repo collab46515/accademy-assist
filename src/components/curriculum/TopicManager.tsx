@@ -95,9 +95,9 @@ export function TopicManager({
     const matchesSearch = topic.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          topic.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          topic.grade_level.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSubject = !selectedSubject || topic.subject === selectedSubject;
-    const matchesGrade = !selectedGradeLevel || topic.grade_level === selectedGradeLevel;
-    const matchesPeriod = !selectedPeriod || topic.academic_period === selectedPeriod;
+    const matchesSubject = !selectedSubject || selectedSubject === 'all' || topic.subject === selectedSubject;
+    const matchesGrade = !selectedGradeLevel || selectedGradeLevel === 'all' || topic.grade_level === selectedGradeLevel;
+    const matchesPeriod = !selectedPeriod || selectedPeriod === 'all' || topic.academic_period === selectedPeriod;
     
     return matchesSearch && matchesSubject && matchesGrade && matchesPeriod;
   });
@@ -299,7 +299,7 @@ export function TopicManager({
                 <SelectValue placeholder="Filter by subject" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Subjects</SelectItem>
+                <SelectItem value="all">All Subjects</SelectItem>
                 {uniqueSubjects.map((subject) => (
                   <SelectItem key={subject} value={subject}>{subject}</SelectItem>
                 ))}
@@ -311,7 +311,7 @@ export function TopicManager({
                 <SelectValue placeholder="Filter by grade" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Grades</SelectItem>
+                <SelectItem value="all">All Grades</SelectItem>
                 {framework.grade_levels.map((level) => (
                   <SelectItem key={level} value={level}>{level}</SelectItem>
                 ))}
@@ -323,7 +323,7 @@ export function TopicManager({
                 <SelectValue placeholder="Filter by period" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Periods</SelectItem>
+                <SelectItem value="all">All Periods</SelectItem>
                 {uniquePeriods.map((period) => (
                   <SelectItem key={period} value={period}>{period}</SelectItem>
                 ))}

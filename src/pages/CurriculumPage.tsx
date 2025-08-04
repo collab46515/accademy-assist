@@ -18,7 +18,7 @@ const CurriculumPage = () => {
   const [selectedFramework, setSelectedFramework] = useState<CurriculumFramework | null>(null);
   const [activeTab, setActiveTab] = useState('framework');
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentSchoolId] = useState('mock-school-id'); // This would come from auth context
+  const [currentSchoolId] = useState('8cafd4e6-2974-4cf7-aa6e-39c70aef789f'); // Using the actual school ID from auth
   const [currentAcademicYear] = useState('2024-2025');
   
   const { 
