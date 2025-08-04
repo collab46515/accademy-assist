@@ -33,6 +33,10 @@ import { AccountingPage } from "./pages/AccountingPage";
 import { MasterDataPage } from "./pages/MasterDataPage";
 import TimetablePage from "./pages/TimetablePage";
 import NotFound from "./pages/NotFound";
+import StudentWelfarePage from "./pages/StudentWelfarePage";
+import InfirmaryPage from "./pages/InfirmaryPage";
+import ComplaintsPage from "./pages/ComplaintsPage";
+import StudentWelfareSafeguardingPage from "./pages/StudentWelfareSafeguardingPage";
 
 import UnifiedAdmissionsPage from "./pages/UnifiedAdmissionsPage";
 import AdminManagementPage from "./pages/AdminManagementPage";
@@ -80,6 +84,10 @@ const App = () => (
                           <Route path="/finance" element={<FinancePage />} />
                           <Route path="/activities" element={<ActivitiesPage />} />
                           <Route path="/safeguarding" element={<SafeguardingPage />} />
+                          <Route path="/student-welfare" element={<StudentWelfarePage />} />
+                          <Route path="/student-welfare/infirmary" element={<InfirmaryPage />} />
+                          <Route path="/student-welfare/complaints" element={<ComplaintsPage />} />
+                          <Route path="/student-welfare/safeguarding" element={<StudentWelfareSafeguardingPage />} />
                           <Route path="/events" element={<EventsPage />} />
                           <Route path="/analytics" element={<AnalyticsPage />} />
                           <Route path="/ai-suite" element={<AISuitePage />} />
