@@ -34,6 +34,8 @@ import {
   CreditCard
 } from 'lucide-react';
 import { FeeManagementMasterData } from '@/components/master-data/FeeManagementMasterData';
+import { HRMasterData } from '@/components/master-data/HRMasterData';
+import { AccountingMasterData } from '@/components/master-data/AccountingMasterData';
 
 export function MasterDataPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -788,13 +790,15 @@ export function MasterDataPage() {
 
       <div className="p-6 space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="schools">Schools</TabsTrigger>
             <TabsTrigger value="subjects">Subjects</TabsTrigger>
             <TabsTrigger value="students">Students</TabsTrigger>
             <TabsTrigger value="parents">Parents</TabsTrigger>
             <TabsTrigger value="fee-management">Fee Management</TabsTrigger>
+            <TabsTrigger value="hr-management">HR Management</TabsTrigger>
+            <TabsTrigger value="accounting">Accounting</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -974,6 +978,16 @@ export function MasterDataPage() {
           {/* Fee Management Tab */}
           <TabsContent value="fee-management" className="space-y-6">
             <FeeManagementMasterData />
+          </TabsContent>
+
+          {/* HR Management Tab */}
+          <TabsContent value="hr-management" className="space-y-6">
+            <HRMasterData />
+          </TabsContent>
+
+          {/* Accounting Tab */}
+          <TabsContent value="accounting" className="space-y-6">
+            <AccountingMasterData />
           </TabsContent>
         </Tabs>
       </div>
