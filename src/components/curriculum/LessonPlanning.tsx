@@ -189,6 +189,7 @@ interface LessonPlanFormData {
   collaboration: LessonCollaboration;
   sequence: LessonSequence;
   integration: LessonIntegration;
+  status: 'draft' | 'completed';
 }
 
 // Default collaboration template
@@ -518,7 +519,8 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
     assessment: createDefaultAssessment(),
     collaboration: createDefaultCollaboration(),
     sequence: createDefaultSequence(),
-    integration: createDefaultIntegration()
+    integration: createDefaultIntegration(),
+    status: 'draft'
   });
 
   const resetForm = () => {
@@ -540,7 +542,8 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
       assessment: createDefaultAssessment(),
       collaboration: createDefaultCollaboration(),
       sequence: createDefaultSequence(),
-      integration: createDefaultIntegration()
+      integration: createDefaultIntegration(),
+      status: 'draft'
     });
     setExpandedSections(['hook']);
   };
@@ -624,7 +627,8 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
       assessment: plan.assessment || createDefaultAssessment(),
       collaboration: plan.collaboration || createDefaultCollaboration(),
       sequence: plan.sequence || createDefaultSequence(),
-      integration: plan.integration || createDefaultIntegration()
+      integration: plan.integration || createDefaultIntegration(),
+      status: 'draft'
     });
     setExpandedSections(['hook']);
     setIsDialogOpen(true);
@@ -2879,75 +2883,74 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
                             )}
                           </div>
                         </div>
-                      </div>
 
-                      {/* Integration Summary */}
-                      <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg">
-                        <div className="flex items-center gap-2 mb-3">
-                          <Zap className="h-5 w-5 text-amber-600" />
-                          <span className="font-medium text-amber-800">Integration Status</span>
+                        {/* Integration Summary */}
+                        <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Zap className="h-5 w-5 text-amber-600" />
+                            <span className="font-medium text-amber-800">Integration Status</span>
+                          </div>
+                          <div className="grid grid-cols-2 md:grid-cols-7 gap-3 text-sm">
+                            <div className="flex flex-col items-center p-2 bg-white rounded border">
+                              <BookOpen className={`h-4 w-4 mb-1 ${formData.curriculum_topic_id ? 'text-blue-600' : 'text-gray-400'}`} />
+                              <span className="text-xs text-center">
+                                {formData.curriculum_topic_id ? '✅ Linked' : '⚪ Curriculum'}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-center p-2 bg-white rounded border">
+                              <Share2 className={`h-4 w-4 mb-1 ${formData.collaboration.shared_with.length > 0 ? 'text-green-600' : 'text-gray-400'}`} />
+                              <span className="text-xs text-center">
+                                {formData.collaboration.shared_with.length > 0 ? `✅ ${formData.collaboration.shared_with.length} shared` : '⚪ Solo'}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-center p-2 bg-white rounded border">
+                              <BarChart3 className={`h-4 w-4 mb-1 ${formData.sequence.is_part_of_sequence ? 'text-orange-600' : 'text-gray-400'}`} />
+                              <span className="text-xs text-center">
+                                {formData.sequence.is_part_of_sequence ? 
+                                  `✅ ${formData.sequence.lesson_number}/${formData.sequence.total_lessons}` : 
+                                  '⚪ Standalone'}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-center p-2 bg-white rounded border">
+                              <Calendar className={`h-4 w-4 mb-1 ${formData.integration.period_info ? 'text-cyan-600' : 'text-gray-400'}`} />
+                              <span className="text-xs text-center">
+                                {formData.integration.period_info ? '✅ Scheduled' : '⚪ Timetable'}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-center p-2 bg-white rounded border">
+                              <FileText className={`h-4 w-4 mb-1 ${formData.integration.auto_assignment?.enabled ? 'text-emerald-600' : 'text-gray-400'}`} />
+                              <span className="text-xs text-center">
+                                {formData.integration.auto_assignment?.enabled ? '✅ Auto-HW' : '⚪ Assignment'}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-center p-2 bg-white rounded border">
+                              <Copy className="h-4 w-4 mb-1 text-purple-600" />
+                              <span className="text-xs text-center">✅ Template</span>
+                            </div>
+                            <div className="flex flex-col items-center p-2 bg-white rounded border">
+                              <BarChart3 className={`h-4 w-4 mb-1 ${formData.status === 'completed' ? 'text-indigo-600' : 'text-gray-400'}`} />
+                              <span className="text-xs text-center">
+                                {formData.status === 'completed' ? '✅ Done' : '⚪ Progress'}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-7 gap-3 text-sm">
-                          <div className="flex flex-col items-center p-2 bg-white rounded border">
-                            <BookOpen className={`h-4 w-4 mb-1 ${formData.curriculum_topic_id ? 'text-blue-600' : 'text-gray-400'}`} />
-                            <span className="text-xs text-center">
-                              {formData.curriculum_topic_id ? '✅ Linked' : '⚪ Curriculum'}
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-center p-2 bg-white rounded border">
-                            <Share2 className={`h-4 w-4 mb-1 ${formData.collaboration.shared_with.length > 0 ? 'text-green-600' : 'text-gray-400'}`} />
-                            <span className="text-xs text-center">
-                              {formData.collaboration.shared_with.length > 0 ? `✅ ${formData.collaboration.shared_with.length} shared` : '⚪ Solo'}
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-center p-2 bg-white rounded border">
-                            <BarChart3 className={`h-4 w-4 mb-1 ${formData.sequence.is_part_of_sequence ? 'text-orange-600' : 'text-gray-400'}`} />
-                            <span className="text-xs text-center">
-                              {formData.sequence.is_part_of_sequence ? 
-                                `✅ ${formData.sequence.lesson_number}/${formData.sequence.total_lessons}` : 
-                                '⚪ Standalone'}
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-center p-2 bg-white rounded border">
-                            <Calendar className={`h-4 w-4 mb-1 ${formData.integration.period_info ? 'text-cyan-600' : 'text-gray-400'}`} />
-                            <span className="text-xs text-center">
-                              {formData.integration.period_info ? '✅ Scheduled' : '⚪ Timetable'}
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-center p-2 bg-white rounded border">
-                            <FileText className={`h-4 w-4 mb-1 ${formData.integration.auto_assignment?.enabled ? 'text-emerald-600' : 'text-gray-400'}`} />
-                            <span className="text-xs text-center">
-                              {formData.integration.auto_assignment?.enabled ? '✅ Auto-HW' : '⚪ Assignment'}
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-center p-2 bg-white rounded border">
-                            <Copy className="h-4 w-4 mb-1 text-purple-600" />
-                            <span className="text-xs text-center">✅ Template</span>
-                          </div>
-                          <div className="flex flex-col items-center p-2 bg-white rounded border">
-                            <BarChart3 className={`h-4 w-4 mb-1 ${formData.status === 'completed' ? 'text-indigo-600' : 'text-gray-400'}`} />
-                            <span className="text-xs text-center">
-                              {formData.status === 'completed' ? '✅ Done' : '⚪ Progress'}
-                            </span>
-                          </div>
+
+                        <div className="flex justify-end gap-2 pt-4 border-t">
+                          <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button type="submit">
+                            {editingPlan ? 'Update' : 'Create'} Lesson Plan
+                          </Button>
                         </div>
                       </div>
-                    </div>
-
-                    <div className="flex justify-end gap-2 pt-4 border-t">
-                      <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button type="submit">
-                        {editingPlan ? 'Update' : 'Create'} Lesson Plan
-                      </Button>
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            )}
-          </div>
-        </CardHeader>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
+          </CardHeader>
         <CardContent>
           {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
