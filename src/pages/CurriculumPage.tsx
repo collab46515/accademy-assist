@@ -11,7 +11,7 @@ import { CurriculumFrameworkSelector } from '@/components/curriculum/CurriculumF
 import { TopicManager } from '@/components/curriculum/TopicManager';
 import { CoverageReporting } from '@/components/curriculum/CoverageReporting';
 import { ImportExportTools } from '@/components/curriculum/ImportExportTools';
-import { LessonPlanning } from '@/components/curriculum/LessonPlanning';
+import { LessonPlanningClean } from '@/components/curriculum/LessonPlanningClean';
 import { useCurriculumData, CurriculumFramework } from '@/hooks/useCurriculumData';
 import { useRBAC } from '@/hooks/useRBAC';
 import { useToast } from '@/hooks/use-toast';
@@ -213,7 +213,7 @@ const CurriculumPage = () => {
         </TabsContent>
 
         <TabsContent value="lessons">
-          <LessonPlanning 
+          <LessonPlanningClean 
             schoolId={currentSchoolId}
             canEdit={canManageCurriculum}
           />
