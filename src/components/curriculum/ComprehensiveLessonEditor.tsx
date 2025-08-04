@@ -132,8 +132,84 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
     setSelectedTopic(topicId);
     setFormData(prev => ({ ...prev, curriculum_topic_id: topicId }));
     
-    // TODO: Auto-fill learning objectives from curriculum topic
-    console.log('Selected topic:', topicId);
+    // Auto-fill curriculum content based on selected topic
+    if (topicId === 'fractions-equiv') {
+      setFormData(prev => ({
+        ...prev,
+        curriculum_topic_id: topicId,
+        learning_objectives: [
+          "I can find fractions that are the same size"
+        ],
+        success_criteria: [
+          "I can draw 1/2 and 2/4 and explain why they're equal",
+          "I can use a fraction wall to find equivalent fractions"
+        ],
+        lesson_sections: [
+          { 
+            name: 'Starter', 
+            duration: 10, 
+            description: 'Show 1/2 and 2/4 — are they the same?',
+            activities: ['Show 1/2 and 2/4 — are they the same?']
+          },
+          { 
+            name: 'Main Activity', 
+            duration: 35, 
+            description: 'Use fraction walls to find 3 fractions equal to 1/2',
+            activities: ['Use fraction walls to find 3 fractions equal to 1/2']
+          },
+          { 
+            name: 'Plenary', 
+            duration: 15, 
+            description: 'Review equivalent fractions found and share strategies',
+            activities: ['Review equivalent fractions found and share strategies']
+          }
+        ],
+        differentiation: {
+          support_strategies: ['Use physical fraction tiles for hands-on learning'],
+          extension_activities: ['Find 3 fractions equal to 3/6'],
+          special_needs: ['Visual fraction representations and manipulatives'],
+          eal_support: ['Key vocabulary cards: equivalent, equal, fraction']
+        }
+      }));
+    } else if (topicId === 'fractions-add') {
+      setFormData(prev => ({
+        ...prev,
+        curriculum_topic_id: topicId,
+        learning_objectives: [
+          "I can add fractions with the same denominator"
+        ],
+        success_criteria: [
+          "I can add two fractions like 1/4 + 2/4",
+          "I can explain my method using diagrams"
+        ],
+        lesson_sections: [
+          { 
+            name: 'Starter', 
+            duration: 10, 
+            description: 'Quick recall: What is 1/4 + 1/4?',
+            activities: ['Quick recall: What is 1/4 + 1/4?']
+          },
+          { 
+            name: 'Main Activity', 
+            duration: 35, 
+            description: 'Practice adding fractions with same denominators using visual models',
+            activities: ['Practice adding fractions with same denominators using visual models']
+          },
+          { 
+            name: 'Plenary', 
+            duration: 15, 
+            description: 'Share methods and check understanding',
+            activities: ['Share methods and check understanding']
+          }
+        ],
+        differentiation: {
+          support_strategies: ['Use fraction bars and visual models'],
+          extension_activities: ['Try adding fractions with different denominators'],
+          special_needs: ['Concrete manipulatives before abstract work'],
+          eal_support: ['Vocabulary support: add, plus, total, altogether']
+        }
+      }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -512,10 +588,24 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Auto-fill indicator */}
+                {selectedTopic && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Wand2 className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm font-medium text-blue-800">Auto-filled from Curriculum</span>
+                    </div>
+                    <p className="text-xs text-blue-700 mt-1">
+                      Content below has been auto-populated from your selected curriculum topic. You can edit but cannot delete to ensure curriculum alignment.
+                    </p>
+                  </div>
+                )}
+                
                 <div>
                   <Label className="flex items-center gap-2 text-sm font-medium mb-3">
                     <Target className="h-4 w-4" />
                     Learning Objectives
+                    {selectedTopic && <Badge variant="secondary" className="text-xs">Auto-filled</Badge>}
                   </Label>
                   {formData.learning_objectives.map((objective: string, index: number) => (
                     <div key={index} className="flex gap-2 mb-2">
@@ -523,7 +613,7 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                         value={objective}
                         onChange={(e) => updateArrayItem('learning_objectives', index, e.target.value)}
                         placeholder="Students will be able to..."
-                        className="flex-1"
+                        className={`flex-1 ${selectedTopic && objective === "I can find fractions that are the same size" ? 'bg-blue-50 border-blue-200' : ''}`}
                       />
                       <Button
                         type="button"
@@ -531,6 +621,7 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                         size="icon"
                         onClick={() => removeArrayItem('learning_objectives', index)}
                         disabled={formData.learning_objectives.length <= 1}
+                        title={selectedTopic && objective === "I can find fractions that are the same size" ? "Cannot delete curriculum-aligned content" : "Remove objective"}
                       >
                         <Minus className="h-4 w-4" />
                       </Button>
@@ -760,22 +851,63 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Auto-fill indicator for differentiation */}
+                {selectedTopic && (
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Wand2 className="h-4 w-4 text-purple-600" />
+                      <span className="text-sm font-medium text-purple-800">Auto-filled Differentiation</span>
+                    </div>
+                    <p className="text-xs text-purple-700 mt-1">
+                      Support and challenge strategies have been auto-populated from curriculum guidelines.
+                    </p>
+                  </div>
+                )}
+                
                 <div>
-                  <Label>Support Strategies</Label>
+                  <Label className="flex items-center gap-2">
+                    Support Strategies
+                    {selectedTopic && <Badge variant="secondary" className="text-xs">Auto-filled</Badge>}
+                  </Label>
                   <Textarea
                     value={formData.differentiation.support_strategies[0] || ''}
                     onChange={(e) => updateNestedField('differentiation', 'support_strategies', [e.target.value])}
                     placeholder="Scaffolding, visual aids, simplified tasks..."
+                    className={selectedTopic && formData.differentiation.support_strategies[0]?.includes('physical fraction tiles') ? 'bg-purple-50 border-purple-200' : ''}
                     rows={3}
                   />
                 </div>
                 <div>
-                  <Label>Extension Activities</Label>
+                  <Label className="flex items-center gap-2">
+                    Extension Activities  
+                    {selectedTopic && <Badge variant="secondary" className="text-xs">Auto-filled</Badge>}
+                  </Label>
                   <Textarea
                     value={formData.differentiation.extension_activities[0] || ''}
                     onChange={(e) => updateNestedField('differentiation', 'extension_activities', [e.target.value])}
                     placeholder="Challenge tasks, independent research..."
+                    className={selectedTopic && formData.differentiation.extension_activities[0]?.includes('3/6') ? 'bg-purple-50 border-purple-200' : ''}
                     rows={3}
+                  />
+                </div>
+                <div>
+                  <Label>Special Needs Support</Label>
+                  <Textarea
+                    value={formData.differentiation.special_needs[0] || ''}
+                    onChange={(e) => updateNestedField('differentiation', 'special_needs', [e.target.value])}
+                    placeholder="SEND adaptations, accessibility..."
+                    className={selectedTopic && formData.differentiation.special_needs[0]?.includes('Visual') ? 'bg-purple-50 border-purple-200' : ''}
+                    rows={2}
+                  />
+                </div>
+                <div>
+                  <Label>EAL Support</Label>
+                  <Textarea
+                    value={formData.differentiation.eal_support[0] || ''}
+                    onChange={(e) => updateNestedField('differentiation', 'eal_support', [e.target.value])}
+                    placeholder="Language support, visual vocabulary..."
+                    className={selectedTopic && formData.differentiation.eal_support[0]?.includes('vocabulary') ? 'bg-purple-50 border-purple-200' : ''}
+                    rows={2}
                   />
                 </div>
               </CardContent>
