@@ -197,9 +197,15 @@ export function generateReportCardPDF(report: ReportCard) {
   
   yPos += 16;
   
-  // Data rows
+  // Data rows with dynamic heights
   grades.forEach((grade, index) => {
-    if (yPos > 180) { // Much earlier page break to avoid footer overlap
+    // Calculate required height based on comment length
+    const comment = grade.comments || grade.comment || 'Making good progress in this subject.';
+    const wrappedComment = doc.splitTextToSize(comment, colWidths[3] - 4);
+    const commentLines = Math.min(wrappedComment.length, 4); // Max 4 lines
+    const rowHeight = Math.max(24, 12 + (commentLines * 4)); // Minimum 24px, grows with content
+    
+    if (yPos + rowHeight > 250) { // Check if row fits on page
       doc.addPage();
       yPos = 30;
       
@@ -222,8 +228,6 @@ export function generateReportCardPDF(report: ReportCard) {
       yPos += 16;
     }
     
-    const rowHeight = 24;
-    
     // Clean alternating rows
     if (index % 2 === 0) {
       doc.setFillColor(250, 251, 252);
@@ -240,74 +244,60 @@ export function generateReportCardPDF(report: ReportCard) {
     // Column content
     xPos = 20;
     
-    // Subject
+    // Subject - vertically centered
     doc.setTextColor(15, 23, 42);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
-    doc.text(grade.subject, xPos + colWidths[0]/2, yPos + 14, { align: 'center' });
+    doc.text(grade.subject, xPos + colWidths[0]/2, yPos + (rowHeight/2) + 2, { align: 'center' });
     xPos += colWidths[0];
     
     // Vertical separator
     doc.setDrawColor(226, 232, 240);
     doc.line(xPos, yPos, xPos, yPos + rowHeight);
     
-    // Grade with modern badge styling - darker, more visible colors
+    // Grade with modern badge styling - vertically centered
     const gradeColor = grade.grade.startsWith('A') ? [5, 150, 105] : 
                       grade.grade.startsWith('B') ? [37, 99, 235] : 
                       grade.grade.startsWith('C') ? [217, 119, 6] : [220, 38, 127];
     
-    // Grade badge with stronger colors
+    const badgeY = yPos + (rowHeight/2) - 5;
     doc.setFillColor(gradeColor[0], gradeColor[1], gradeColor[2]);
-    doc.roundedRect(xPos + 4, yPos + 7, 17, 10, 3, 3, 'F');
+    doc.roundedRect(xPos + 4, badgeY, 17, 10, 3, 3, 'F');
     
-    // Darker border for definition
     doc.setDrawColor(gradeColor[0] - 30, gradeColor[1] - 30, gradeColor[2] - 30);
     doc.setLineWidth(0.8);
-    doc.roundedRect(xPos + 4, yPos + 7, 17, 10, 3, 3);
+    doc.roundedRect(xPos + 4, badgeY, 17, 10, 3, 3);
     
-    // Grade text with better contrast
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
-    doc.text(grade.grade, xPos + colWidths[1]/2, yPos + 13, { align: 'center' });
+    doc.text(grade.grade, xPos + colWidths[1]/2, yPos + (rowHeight/2) + 2, { align: 'center' });
     xPos += colWidths[1];
     
     // Vertical separator
     doc.setDrawColor(226, 232, 240);
     doc.line(xPos, yPos, xPos, yPos + rowHeight);
     
-    // Effort
+    // Effort - vertically centered
     doc.setTextColor(71, 85, 105);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    doc.text(grade.effort || 'Good', xPos + colWidths[2]/2, yPos + 14, { align: 'center' });
+    doc.text(grade.effort || 'Good', xPos + colWidths[2]/2, yPos + (rowHeight/2) + 2, { align: 'center' });
     xPos += colWidths[2];
     
     // Vertical separator
     doc.setDrawColor(226, 232, 240);
     doc.line(xPos, yPos, xPos, yPos + rowHeight);
     
-    // Comments with proper wrapping
+    // Comments with dynamic spacing
     doc.setTextColor(51, 65, 85);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     
-    const comment = grade.comments || grade.comment || 'Making good progress in this subject.';
-    const wrappedComment = doc.splitTextToSize(comment, colWidths[3] - 4);
-    
-    if (wrappedComment.length === 1) {
-      doc.text(wrappedComment[0], xPos + 2, yPos + 14);
-    } else if (wrappedComment.length === 2) {
-      doc.text(wrappedComment[0], xPos + 2, yPos + 10);
-      doc.text(wrappedComment[1], xPos + 2, yPos + 18);
-    } else {
-      doc.text(wrappedComment[0], xPos + 2, yPos + 9);
-      doc.text(wrappedComment[1], xPos + 2, yPos + 15);
-      if (wrappedComment[2]) {
-        const truncated = wrappedComment[2].length > 30 ? wrappedComment[2].substring(0, 27) + '...' : wrappedComment[2];
-        doc.text(truncated, xPos + 2, yPos + 21);
-      }
-    }
+    const startY = yPos + 8; // Start comments 8px from top of row
+    wrappedComment.slice(0, 4).forEach((line, i) => {
+      doc.text(line, xPos + 2, startY + (i * 4));
+    });
     
     yPos += rowHeight;
   });
