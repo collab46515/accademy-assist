@@ -355,16 +355,16 @@ export function TopicManager({
                   
                   return (
                     <TableRow key={topic.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{topic.title}</div>
-                          {topic.description && (
-                            <div className="text-sm text-muted-foreground line-clamp-1">
-                              {topic.description}
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
+                       <TableCell className="max-w-xs">
+                         <div className="space-y-1">
+                           <div className="font-medium text-sm">{topic.title}</div>
+                           {topic.description && (
+                             <div className="text-xs text-muted-foreground truncate">
+                               {topic.description}
+                             </div>
+                           )}
+                         </div>
+                       </TableCell>
                       <TableCell>{topic.subject}</TableCell>
                       <TableCell>{topic.grade_level}</TableCell>
                       <TableCell>
