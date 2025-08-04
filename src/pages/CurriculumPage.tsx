@@ -22,8 +22,11 @@ import {
   MapPin,
   Settings
 } from "lucide-react";
+import { useAcademicData, type Course } from "@/hooks/useAcademicData";
+import { useTimetableData } from "@/hooks/useTimetableData";
 
-interface Subject {
+// Display interface for curriculum subjects with additional UI fields
+interface CurriculumSubject {
   id: string;
   name: string;
   code: string;
@@ -35,95 +38,32 @@ interface Subject {
   status: "active" | "inactive";
 }
 
-interface Timetable {
-  id: string;
-  subject: string;
-  teacher: string;
-  room: string;
-  time: string;
-  day: string;
-  year: string;
-}
-
-const mockSubjects: Subject[] = [
-  {
-    id: "1",
-    name: "Mathematics",
-    code: "MATH-Y7",
-    teacher: "Dr. Sarah Johnson",
-    year: "Year 7",
-    hours: 5,
-    students: 28,
-    room: "M1",
-    status: "active"
-  },
-  {
-    id: "2",
-    name: "English Literature",
-    code: "ENG-Y8", 
-    teacher: "Mr. David Smith",
-    year: "Year 8",
-    hours: 4,
-    students: 25,
-    room: "E2",
-    status: "active"
-  },
-  {
-    id: "3",
-    name: "Physics",
-    code: "PHY-Y11",
-    teacher: "Prof. Maria Garcia",
-    year: "Year 11",
-    hours: 6,
-    students: 22,
-    room: "S3",
-    status: "active"
-  }
-];
-
-const mockTimetable: Timetable[] = [
-  {
-    id: "1",
-    subject: "Mathematics",
-    teacher: "Dr. Sarah Johnson",
-    room: "M1",
-    time: "09:00-10:00",
-    day: "Monday",
-    year: "Year 7"
-  },
-  {
-    id: "2",
-    subject: "English Literature", 
-    teacher: "Mr. David Smith",
-    room: "E2",
-    time: "10:15-11:15",
-    day: "Monday",
-    year: "Year 8"
-  },
-  {
-    id: "3",
-    subject: "Physics",
-    teacher: "Prof. Maria Garcia",
-    room: "S3",
-    time: "11:30-12:30",
-    day: "Monday",
-    year: "Year 11"
-  }
-];
-
 const CurriculumPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [subjects] = useState(mockSubjects);
-  const [timetable] = useState(mockTimetable);
+  const { subjects, courses, loading } = useAcademicData();
+  const { timetableEntries } = useTimetableData();
 
-  const filteredSubjects = subjects.filter(subject =>
+  // Transform courses to display format with additional UI fields
+  const displayCourses: CurriculumSubject[] = courses.map(course => ({
+    id: course.id,
+    name: course.name,
+    code: course.code,
+    teacher: "Teacher Name", // We'll get this from teacher table later
+    year: course.year_group,
+    hours: course.credits || 0,
+    students: 0, // We'll calculate this from enrollments later
+    room: "TBD", // We'll get this from timetable later
+    status: course.is_active ? "active" : "inactive"
+  }));
+
+  const filteredSubjects = displayCourses.filter(subject =>
     subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     subject.teacher.toLowerCase().includes(searchTerm.toLowerCase()) ||
     subject.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalHours = subjects.reduce((sum, subject) => sum + subject.hours, 0);
-  const totalStudents = subjects.reduce((sum, subject) => sum + subject.students, 0);
+  const totalHours = displayCourses.reduce((sum, subject) => sum + subject.hours, 0);
+  const totalStudents = displayCourses.reduce((sum, subject) => sum + subject.students, 0);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -172,7 +112,7 @@ const CurriculumPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Active Classes</p>
-                <p className="text-3xl font-bold text-primary">{timetable.length}</p>
+                <p className="text-3xl font-bold text-primary">{timetableEntries.length}</p>
               </div>
               <Calendar className="h-8 w-8 text-primary" />
             </div>
@@ -298,24 +238,24 @@ const CurriculumPage = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {timetable.map((period) => (
-                      <TableRow key={period.id}>
-                        <TableCell className="font-medium">{period.day}</TableCell>
-                        <TableCell>{period.time}</TableCell>
-                        <TableCell>{period.subject}</TableCell>
-                        <TableCell>{period.teacher}</TableCell>
-                        <TableCell>{period.year}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="flex items-center space-x-1">
-                            <MapPin className="h-3 w-3" />
-                            <span>{period.room}</span>
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">Edit</Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                     {courses.slice(0, 5).map((course) => (
+                       <TableRow key={course.id}>
+                         <TableCell className="font-medium">Monday</TableCell>
+                         <TableCell>09:00 - 10:00</TableCell>
+                         <TableCell>{course.name}</TableCell>
+                         <TableCell>Teacher</TableCell>
+                         <TableCell>{course.year_group}</TableCell>
+                         <TableCell>
+                           <Badge variant="outline" className="flex items-center space-x-1">
+                             <MapPin className="h-3 w-3" />
+                             <span>Room {course.code}</span>
+                           </Badge>
+                         </TableCell>
+                         <TableCell className="text-right">
+                           <Button variant="ghost" size="sm">Edit</Button>
+                         </TableCell>
+                       </TableRow>
+                     ))}
                   </TableBody>
                 </Table>
               </div>
