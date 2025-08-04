@@ -7,6 +7,7 @@ import { Eye, Download, Send, Edit, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ReportViewDialog } from './ReportViewDialog';
+import { generateReportCardPDF } from '@/utils/pdfGenerator';
 
 interface ReportCard {
   id: string;
@@ -74,10 +75,20 @@ export function ReportCardsList({ onRefresh }: ReportCardsListProps) {
         setViewDialogOpen(true);
         break;
       case 'Download':
-        toast({
-          title: "Download Started",
-          description: "PDF generation feature coming soon!",
-        });
+        try {
+          const filename = generateReportCardPDF(report);
+          toast({
+            title: "PDF Downloaded",
+            description: `Report card saved as ${filename}`,
+          });
+        } catch (error) {
+          console.error('Error generating PDF:', error);
+          toast({
+            title: "Download Failed",
+            description: "Failed to generate PDF report",
+            variant: "destructive",
+          });
+        }
         break;
       case 'Edit':
         toast({
