@@ -55,7 +55,7 @@ const ComplaintsPage = () => {
             Track and resolve student and parent complaints
           </p>
         </div>
-        <Button>
+        <Button onClick={() => console.log('New Complaint button clicked')}>
           <Plus className="mr-2 h-4 w-4" />
           New Complaint
         </Button>
@@ -105,12 +105,12 @@ const ComplaintsPage = () => {
         </Card>
       </div>
 
-      <Tabs defaultValue="active" className="space-y-4">
+      <Tabs defaultValue="active" className="space-y-4" onValueChange={(value) => console.log('Complaints tab changed to:', value)}>
         <TabsList>
-          <TabsTrigger value="active">Active Complaints</TabsTrigger>
-          <TabsTrigger value="all">All Complaints</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="communications">Communications</TabsTrigger>
+          <TabsTrigger value="active" onClick={() => console.log('Active complaints tab clicked')}>Active Complaints</TabsTrigger>
+          <TabsTrigger value="all" onClick={() => console.log('All complaints tab clicked')}>All Complaints</TabsTrigger>
+          <TabsTrigger value="analytics" onClick={() => console.log('Analytics tab clicked')}>Analytics</TabsTrigger>
+          <TabsTrigger value="communications" onClick={() => console.log('Communications tab clicked')}>Communications</TabsTrigger>
         </TabsList>
 
         <TabsContent value="active" className="space-y-4">
@@ -141,7 +141,7 @@ const ComplaintsPage = () => {
                         Submitted {complaint.submittedDate}
                       </p>
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => console.log('View Details clicked for:', complaint.id)}>
                       View Details
                     </Button>
                   </div>

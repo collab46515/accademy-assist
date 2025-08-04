@@ -13,7 +13,7 @@ const InfirmaryPage = () => {
             Manage student health records and medical visits
           </p>
         </div>
-        <Button>
+        <Button onClick={() => console.log('New Medical Visit button clicked')}>
           <Plus className="mr-2 h-4 w-4" />
           New Medical Visit
         </Button>
@@ -63,12 +63,12 @@ const InfirmaryPage = () => {
         </Card>
       </div>
 
-      <Tabs defaultValue="visits" className="space-y-4">
+      <Tabs defaultValue="visits" className="space-y-4" onValueChange={(value) => console.log('Tab changed to:', value)}>
         <TabsList>
-          <TabsTrigger value="visits">Medical Visits</TabsTrigger>
-          <TabsTrigger value="records">Medical Records</TabsTrigger>
-          <TabsTrigger value="medicine">Medicine Administration</TabsTrigger>
-          <TabsTrigger value="appointments">Appointments</TabsTrigger>
+          <TabsTrigger value="visits" onClick={() => console.log('Visits tab clicked')}>Medical Visits</TabsTrigger>
+          <TabsTrigger value="records" onClick={() => console.log('Records tab clicked')}>Medical Records</TabsTrigger>
+          <TabsTrigger value="medicine" onClick={() => console.log('Medicine tab clicked')}>Medicine Administration</TabsTrigger>
+          <TabsTrigger value="appointments" onClick={() => console.log('Appointments tab clicked')}>Appointments</TabsTrigger>
         </TabsList>
 
         <TabsContent value="visits" className="space-y-4">

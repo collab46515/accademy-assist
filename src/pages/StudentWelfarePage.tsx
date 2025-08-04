@@ -100,7 +100,10 @@ const StudentWelfarePage = () => {
             </CardHeader>
             <CardContent>
               <Button 
-                onClick={() => navigate(module.path)}
+                onClick={() => {
+                  console.log('Button clicked for module:', module.title, 'Path:', module.path);
+                  navigate(module.path);
+                }}
                 className="w-full"
               >
                 Access {module.title}

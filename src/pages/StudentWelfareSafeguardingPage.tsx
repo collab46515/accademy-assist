@@ -56,7 +56,7 @@ const StudentWelfareSafeguardingPage = () => {
             Manage safeguarding concerns and protect student welfare
           </p>
         </div>
-        <Button>
+        <Button onClick={() => console.log('Report Concern button clicked')}>
           <Plus className="mr-2 h-4 w-4" />
           Report Concern
         </Button>
@@ -106,12 +106,12 @@ const StudentWelfareSafeguardingPage = () => {
         </Card>
       </div>
 
-      <Tabs defaultValue="concerns" className="space-y-4">
+      <Tabs defaultValue="concerns" className="space-y-4" onValueChange={(value) => console.log('Safeguarding tab changed to:', value)}>
         <TabsList>
-          <TabsTrigger value="concerns">Active Concerns</TabsTrigger>
-          <TabsTrigger value="actions">Actions & Plans</TabsTrigger>
-          <TabsTrigger value="reviews">Reviews</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
+          <TabsTrigger value="concerns" onClick={() => console.log('Concerns tab clicked')}>Active Concerns</TabsTrigger>
+          <TabsTrigger value="actions" onClick={() => console.log('Actions tab clicked')}>Actions & Plans</TabsTrigger>
+          <TabsTrigger value="reviews" onClick={() => console.log('Reviews tab clicked')}>Reviews</TabsTrigger>
+          <TabsTrigger value="reports" onClick={() => console.log('Reports tab clicked')}>Reports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="concerns" className="space-y-4">
@@ -142,7 +142,7 @@ const StudentWelfareSafeguardingPage = () => {
                         Reported {concern.reportedDate} • Last updated {concern.lastUpdate}
                       </p>
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => console.log('View Details clicked for:', concern.id)}>
                       View Details
                     </Button>
                   </div>
