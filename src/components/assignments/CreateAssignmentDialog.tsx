@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Dialog, 
   DialogContent, 
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { 
   Select,
   SelectContent,
@@ -18,8 +19,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
 import { useAssignmentData, Assignment } from '@/hooks/useAssignmentData';
+import { useCurriculumData } from '@/hooks/useCurriculumData';
+import { useLessonPlanningData } from '@/hooks/useLessonPlanningData';
 import { useToast } from '@/hooks/use-toast';
+import { BookOpen, Lightbulb, Target } from 'lucide-react';
 
 interface CreateAssignmentDialogProps {
   open: boolean;
@@ -31,8 +36,13 @@ export const CreateAssignmentDialog: React.FC<CreateAssignmentDialogProps> = ({
   onOpenChange
 }) => {
   const { createAssignment } = useAssignmentData();
+  const { frameworks, topics, fetchTopics } = useCurriculumData();
+  const { lessonPlans } = useLessonPlanningData();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [availableTopics, setAvailableTopics] = useState<any[]>([]);
+  const [availableLessons, setAvailableLessons] = useState<any[]>([]);
+  const [showLessonPlans, setShowLessonPlans] = useState(false);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -41,6 +51,8 @@ export const CreateAssignmentDialog: React.FC<CreateAssignmentDialogProps> = ({
     due_date: '',
     total_marks: 10,
     assignment_type: 'homework' as Assignment['assignment_type'],
+    curriculum_topic_id: '',
+    lesson_plan_id: '',
     subject: '',
     year_group: '',
     submission_type: 'both' as Assignment['submission_type'],
@@ -48,6 +60,61 @@ export const CreateAssignmentDialog: React.FC<CreateAssignmentDialogProps> = ({
     late_penalty_percentage: 10,
     status: 'draft' as Assignment['status']
   });
+
+  // Load curriculum topics when subject/year changes
+  useEffect(() => {
+    if (formData.subject && formData.year_group) {
+      // Mock curriculum topics - in real app, fetch from curriculum_topics table
+      const mockTopics = [
+        { id: 'fractions-equiv', name: 'Recognise equivalent fractions', subject: 'Mathematics', year_group: 'Year 4' },
+        { id: 'fractions-add', name: 'Add and subtract fractions', subject: 'Mathematics', year_group: 'Year 4' },
+        { id: 'place-value', name: 'Place value and number', subject: 'Mathematics', year_group: 'Year 4' },
+        { id: 'photosynthesis', name: 'Photosynthesis in plants', subject: 'Science', year_group: 'Year 7' },
+        { id: 'ecosystems', name: 'Ecosystems and food chains', subject: 'Science', year_group: 'Year 7' },
+        { id: 'creative-writing', name: 'Creative writing techniques', subject: 'English', year_group: 'Year 6' },
+        { id: 'shakespeare', name: 'Shakespeare - Romeo and Juliet', subject: 'English', year_group: 'Year 9' },
+        { id: 'world-war', name: 'World War II and its impact', subject: 'History', year_group: 'Year 8' }
+      ];
+      
+      const filteredTopics = mockTopics.filter(t => 
+        t.subject === formData.subject && t.year_group === formData.year_group
+      );
+      setAvailableTopics(filteredTopics);
+    } else {
+      setAvailableTopics([]);
+    }
+  }, [formData.subject, formData.year_group]);
+
+  // Load related lesson plans when topic changes
+  useEffect(() => {
+    if (formData.curriculum_topic_id) {
+      const relatedLessons = lessonPlans.filter(l => 
+        l.curriculum_topic_id === formData.curriculum_topic_id
+      );
+      setAvailableLessons(relatedLessons);
+    } else {
+      setAvailableLessons([]);
+    }
+  }, [formData.curriculum_topic_id, lessonPlans]);
+
+  // Create from lesson plan
+  const createFromLessonPlan = (lessonPlan: any) => {
+    setFormData(prev => ({
+      ...prev,
+      title: `${lessonPlan.title} - Assignment`,
+      description: `Follow up assignment for: ${lessonPlan.title}`,
+      instructions: lessonPlan.learning_objectives?.join('\n') || '',
+      lesson_plan_id: lessonPlan.id,
+      subject: lessonPlan.subject,
+      year_group: lessonPlan.year_group,
+      curriculum_topic_id: lessonPlan.curriculum_topic_id || ''
+    }));
+    setShowLessonPlans(false);
+    toast({
+      title: "Template Applied",
+      description: "Assignment details filled from lesson plan"
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,6 +139,8 @@ export const CreateAssignmentDialog: React.FC<CreateAssignmentDialogProps> = ({
         due_date: '',
         total_marks: 10,
         assignment_type: 'homework',
+        curriculum_topic_id: '',
+        lesson_plan_id: '',
         subject: '',
         year_group: '',
         submission_type: 'both',
@@ -99,7 +168,7 @@ export const CreateAssignmentDialog: React.FC<CreateAssignmentDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Assignment</DialogTitle>
           <DialogDescription>
@@ -108,6 +177,59 @@ export const CreateAssignmentDialog: React.FC<CreateAssignmentDialogProps> = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Quick Actions */}
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowLessonPlans(!showLessonPlans)}
+              className="gap-2"
+            >
+              <Lightbulb className="h-4 w-4" />
+              Create from Lesson Plan
+            </Button>
+          </div>
+
+          {/* Lesson Plan Selector */}
+          {showLessonPlans && (
+            <div className="p-4 border rounded-lg bg-muted/50">
+              <h4 className="font-medium mb-3 flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                Select a Lesson Plan Template
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-48 overflow-y-auto">
+                {lessonPlans.slice(0, 6).map((lesson) => (
+                  <div key={lesson.id} className="border rounded p-3 bg-background">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h5 className="font-medium text-sm">{lesson.title}</h5>
+                        <p className="text-xs text-muted-foreground">
+                          {lesson.subject} • {lesson.year_group}
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => createFromLessonPlan(lesson)}
+                      >
+                        Use
+                      </Button>
+                    </div>
+                    {lesson.learning_objectives && (
+                      <div className="text-xs text-muted-foreground">
+                        <Target className="h-3 w-3 inline mr-1" />
+                        {lesson.learning_objectives.slice(0, 2).join(', ')}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <Separator />
+
           {/* Basic Information */}
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -166,47 +288,111 @@ export const CreateAssignmentDialog: React.FC<CreateAssignmentDialogProps> = ({
             </div>
           </div>
 
-          {/* Assignment Details */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="subject">Subject *</Label>
-              <Select 
-                value={formData.subject}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, subject: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select subject" />
-                </SelectTrigger>
-                <SelectContent>
-                  {subjects.map((subject) => (
-                    <SelectItem key={subject} value={subject}>
-                      {subject}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {/* Curriculum Integration */}
+          <div className="space-y-4 p-4 border rounded-lg bg-blue-50/50">
+            <h3 className="font-semibold text-blue-900 flex items-center gap-2">
+              <Target className="h-4 w-4" />
+              Curriculum Links
+            </h3>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="subject">Subject *</Label>
+                <Select 
+                  value={formData.subject}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, subject: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select subject" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subjects.map((subject) => (
+                      <SelectItem key={subject} value={subject}>
+                        {subject}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="year_group">Year Group *</Label>
+                <Select 
+                  value={formData.year_group}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, year_group: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select year group" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {yearGroups.map((year) => (
+                      <SelectItem key={year} value={year}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="year_group">Year Group *</Label>
-              <Select 
-                value={formData.year_group}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, year_group: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select year group" />
-                </SelectTrigger>
-                <SelectContent>
-                  {yearGroups.map((year) => (
-                    <SelectItem key={year} value={year}>
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Curriculum Topic Selector */}
+            {availableTopics.length > 0 && (
+              <div className="space-y-2">
+                <Label htmlFor="curriculum_topic_id">Curriculum Topic (Optional)</Label>
+                <Select 
+                  value={formData.curriculum_topic_id}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, curriculum_topic_id: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Link to curriculum topic" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableTopics.map((topic) => (
+                      <SelectItem key={topic.id} value={topic.id}>
+                        {topic.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formData.curriculum_topic_id && (
+                  <Badge variant="secondary" className="mt-2">
+                    <Target className="h-3 w-3 mr-1" />
+                    Linked to curriculum
+                  </Badge>
+                )}
+              </div>
+            )}
+
+            {/* Related Lesson Plans */}
+            {availableLessons.length > 0 && (
+              <div className="space-y-2">
+                <Label htmlFor="lesson_plan_id">Related Lesson Plan (Optional)</Label>
+                <Select 
+                  value={formData.lesson_plan_id}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, lesson_plan_id: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Link to lesson plan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableLessons.map((lesson) => (
+                      <SelectItem key={lesson.id} value={lesson.id}>
+                        {lesson.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formData.lesson_plan_id && (
+                  <Badge variant="secondary" className="mt-2">
+                    <BookOpen className="h-3 w-3 mr-1" />
+                    Linked to lesson plan
+                  </Badge>
+                )}
+              </div>
+            )}
           </div>
 
+          {/* Assignment Details */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="due_date">Due Date *</Label>
