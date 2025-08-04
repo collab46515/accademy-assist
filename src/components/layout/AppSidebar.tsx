@@ -103,7 +103,6 @@ const erpModules = [
           { title: "Reminders", url: "/school-management/fee-management/reminders", icon: Bell }
         ]
       },
-      { title: "Staff", url: "/staff", icon: Users },
       { title: "Communications", url: "/communication", icon: MessageSquare },
       { title: "Events", url: "/events", icon: Activity },
       { title: "Activities", url: "/activities", icon: Activity },
