@@ -4018,6 +4018,172 @@ export type Database = {
           },
         ]
       }
+      lesson_plan_assignments: {
+        Row: {
+          assigned_by: string
+          assigned_to: string
+          created_at: string
+          id: string
+          lesson_plan_id: string
+          permissions: Json | null
+          role: string
+        }
+        Insert: {
+          assigned_by: string
+          assigned_to: string
+          created_at?: string
+          id?: string
+          lesson_plan_id: string
+          permissions?: Json | null
+          role: string
+        }
+        Update: {
+          assigned_by?: string
+          assigned_to?: string
+          created_at?: string
+          id?: string
+          lesson_plan_id?: string
+          permissions?: Json | null
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_plan_assignments_lesson_plan_id_fkey"
+            columns: ["lesson_plan_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_plan_comments: {
+        Row: {
+          comment: string
+          comment_type: string | null
+          created_at: string
+          id: string
+          is_private: boolean | null
+          lesson_plan_id: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          comment_type?: string | null
+          created_at?: string
+          id?: string
+          is_private?: boolean | null
+          lesson_plan_id: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          comment_type?: string | null
+          created_at?: string
+          id?: string
+          is_private?: boolean | null
+          lesson_plan_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_plan_comments_lesson_plan_id_fkey"
+            columns: ["lesson_plan_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_plans: {
+        Row: {
+          approval_comments: string | null
+          approved_at: string | null
+          approved_by: string | null
+          assessment: Json | null
+          collaboration: Json | null
+          created_at: string
+          curriculum_topic_id: string | null
+          differentiation: Json | null
+          duration_minutes: number
+          form_class: string | null
+          id: string
+          integration: Json | null
+          learning_objectives: Json | null
+          lesson_date: string
+          lesson_sections: Json | null
+          period_id: string | null
+          post_lesson_reflection: Json | null
+          resources: Json | null
+          school_id: string
+          sequence: Json | null
+          status: string
+          subject: string
+          success_criteria: Json | null
+          teacher_id: string
+          title: string
+          updated_at: string
+          year_group: string
+        }
+        Insert: {
+          approval_comments?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          assessment?: Json | null
+          collaboration?: Json | null
+          created_at?: string
+          curriculum_topic_id?: string | null
+          differentiation?: Json | null
+          duration_minutes?: number
+          form_class?: string | null
+          id?: string
+          integration?: Json | null
+          learning_objectives?: Json | null
+          lesson_date: string
+          lesson_sections?: Json | null
+          period_id?: string | null
+          post_lesson_reflection?: Json | null
+          resources?: Json | null
+          school_id: string
+          sequence?: Json | null
+          status?: string
+          subject: string
+          success_criteria?: Json | null
+          teacher_id: string
+          title: string
+          updated_at?: string
+          year_group: string
+        }
+        Update: {
+          approval_comments?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          assessment?: Json | null
+          collaboration?: Json | null
+          created_at?: string
+          curriculum_topic_id?: string | null
+          differentiation?: Json | null
+          duration_minutes?: number
+          form_class?: string | null
+          id?: string
+          integration?: Json | null
+          learning_objectives?: Json | null
+          lesson_date?: string
+          lesson_sections?: Json | null
+          period_id?: string | null
+          post_lesson_reflection?: Json | null
+          resources?: Json | null
+          school_id?: string
+          sequence?: Json | null
+          status?: string
+          subject?: string
+          success_criteria?: Json | null
+          teacher_id?: string
+          title?: string
+          updated_at?: string
+          year_group?: string
+        }
+        Relationships: []
+      }
       medical_incidents: {
         Row: {
           created_at: string | null
@@ -6388,8 +6554,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_lesson_plan: {
+        Args: { lesson_plan_id: string; user_id?: string }
+        Returns: boolean
+      }
       can_access_student: {
         Args: { student_uuid: string }
+        Returns: boolean
+      }
+      can_approve_lesson_plan: {
+        Args: { lesson_plan_id: string; user_id?: string }
+        Returns: boolean
+      }
+      can_edit_lesson_plan: {
+        Args: { lesson_plan_id: string; user_id?: string }
         Returns: boolean
       }
       generate_receipt_number: {
@@ -6431,6 +6609,7 @@ export type Database = {
         | "hod"
         | "parent"
         | "student"
+        | "ta"
       approval_status: "pending" | "approved" | "rejected" | "escalated"
       audience_type:
         | "entire_school"
@@ -6709,6 +6888,7 @@ export const Constants = {
         "hod",
         "parent",
         "student",
+        "ta",
       ],
       approval_status: ["pending", "approved", "rejected", "escalated"],
       audience_type: [
