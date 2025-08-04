@@ -3,8 +3,32 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, Download, Send, Users } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ReportCardsPage() {
+  const { toast } = useToast();
+
+  const handleGenerateIndividual = () => {
+    toast({
+      title: "Generate Individual Report",
+      description: "Individual report generation feature coming soon!",
+    });
+  };
+
+  const handleBulkGenerate = () => {
+    toast({
+      title: "Bulk Generate Reports",
+      description: "Bulk report generation feature coming soon!",
+    });
+  };
+
+  const handleCardClick = (cardType: string) => {
+    toast({
+      title: `${cardType} Details`,
+      description: `Viewing ${cardType.toLowerCase()} details - feature coming soon!`,
+    });
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <PageHeader 
@@ -13,7 +37,7 @@ export default function ReportCardsPage() {
       />
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleCardClick("Draft Reports")}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Draft Reports</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
@@ -26,7 +50,7 @@ export default function ReportCardsPage() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleCardClick("Published Reports")}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Published Reports</CardTitle>
             <Send className="h-4 w-4 text-muted-foreground" />
@@ -39,7 +63,7 @@ export default function ReportCardsPage() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleCardClick("Total Students")}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Students</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -52,7 +76,7 @@ export default function ReportCardsPage() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleCardClick("Downloads")}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Downloads</CardTitle>
             <Download className="h-4 w-4 text-muted-foreground" />
@@ -76,11 +100,11 @@ export default function ReportCardsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Button className="w-full" size="lg">
+              <Button className="w-full" size="lg" onClick={handleGenerateIndividual}>
                 <FileText className="mr-2 h-4 w-4" />
                 Generate Individual Report
               </Button>
-              <Button variant="outline" className="w-full" size="lg">
+              <Button variant="outline" className="w-full" size="lg" onClick={handleBulkGenerate}>
                 <Users className="mr-2 h-4 w-4" />
                 Bulk Generate Reports
               </Button>
