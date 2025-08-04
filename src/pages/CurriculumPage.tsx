@@ -175,13 +175,13 @@ const CurriculumPage = () => {
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="framework">Framework</TabsTrigger>
             <TabsTrigger value="topics">
-              Topics {!selectedFramework && "(Select Framework First)"} {selectedFramework && `- ${selectedFramework.name}`}
+              {selectedFramework ? `Topics - ${selectedFramework.name}` : "Topics (Select Framework First)"}
             </TabsTrigger>
             <TabsTrigger value="progress">
-              Progress {(!selectedFramework || !canViewProgress) && "(Select Framework First)"} {selectedFramework && canViewProgress && `- ${selectedFramework.name}`}
+              {selectedFramework && canViewProgress ? `Progress - ${selectedFramework.name}` : "Progress (Select Framework First)"}
             </TabsTrigger>
             <TabsTrigger value="reports">
-              Reports {!selectedFramework && "(Select Framework First)"} {selectedFramework && `- ${selectedFramework.name}`}
+              {selectedFramework ? `Reports - ${selectedFramework.name}` : "Reports (Select Framework First)"}
             </TabsTrigger>
             <TabsTrigger value="import">Import/Export</TabsTrigger>
           </TabsList>
