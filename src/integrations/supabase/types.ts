@@ -1483,6 +1483,200 @@ export type Database = {
         }
         Relationships: []
       }
+      curriculum_frameworks: {
+        Row: {
+          academic_periods: Json
+          country: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          grade_levels: Json
+          id: string
+          is_active: boolean
+          is_template: boolean
+          name: string
+          period_type: Database["public"]["Enums"]["academic_period_type"]
+          school_id: string | null
+          subjects: Json
+          type: Database["public"]["Enums"]["curriculum_type"]
+          updated_at: string
+        }
+        Insert: {
+          academic_periods?: Json
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          grade_levels?: Json
+          id?: string
+          is_active?: boolean
+          is_template?: boolean
+          name: string
+          period_type?: Database["public"]["Enums"]["academic_period_type"]
+          school_id?: string | null
+          subjects?: Json
+          type: Database["public"]["Enums"]["curriculum_type"]
+          updated_at?: string
+        }
+        Update: {
+          academic_periods?: Json
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          grade_levels?: Json
+          id?: string
+          is_active?: boolean
+          is_template?: boolean
+          name?: string
+          period_type?: Database["public"]["Enums"]["academic_period_type"]
+          school_id?: string | null
+          subjects?: Json
+          type?: Database["public"]["Enums"]["curriculum_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      curriculum_imports: {
+        Row: {
+          created_at: string
+          errors: Json | null
+          failed_records: number | null
+          file_name: string
+          file_size: number | null
+          framework_id: string | null
+          id: string
+          import_type: string
+          imported_by: string | null
+          school_id: string | null
+          successful_records: number | null
+          total_records: number | null
+        }
+        Insert: {
+          created_at?: string
+          errors?: Json | null
+          failed_records?: number | null
+          file_name: string
+          file_size?: number | null
+          framework_id?: string | null
+          id?: string
+          import_type: string
+          imported_by?: string | null
+          school_id?: string | null
+          successful_records?: number | null
+          total_records?: number | null
+        }
+        Update: {
+          created_at?: string
+          errors?: Json | null
+          failed_records?: number | null
+          file_name?: string
+          file_size?: number | null
+          framework_id?: string | null
+          id?: string
+          import_type?: string
+          imported_by?: string | null
+          school_id?: string | null
+          successful_records?: number | null
+          total_records?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curriculum_imports_framework_id_fkey"
+            columns: ["framework_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_frameworks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curriculum_topics: {
+        Row: {
+          academic_period: string | null
+          assessment_criteria: Json | null
+          created_at: string
+          description: string | null
+          difficulty_level: number | null
+          estimated_hours: number | null
+          framework_id: string
+          grade_level: string
+          id: string
+          is_mandatory: boolean
+          learning_objectives: Json | null
+          parent_topic_id: string | null
+          prerequisites: Json | null
+          resources: Json | null
+          skills: Json | null
+          subject: string
+          tags: Json | null
+          title: string
+          topic_code: string | null
+          topic_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          academic_period?: string | null
+          assessment_criteria?: Json | null
+          created_at?: string
+          description?: string | null
+          difficulty_level?: number | null
+          estimated_hours?: number | null
+          framework_id: string
+          grade_level: string
+          id?: string
+          is_mandatory?: boolean
+          learning_objectives?: Json | null
+          parent_topic_id?: string | null
+          prerequisites?: Json | null
+          resources?: Json | null
+          skills?: Json | null
+          subject: string
+          tags?: Json | null
+          title: string
+          topic_code?: string | null
+          topic_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          academic_period?: string | null
+          assessment_criteria?: Json | null
+          created_at?: string
+          description?: string | null
+          difficulty_level?: number | null
+          estimated_hours?: number | null
+          framework_id?: string
+          grade_level?: string
+          id?: string
+          is_mandatory?: boolean
+          learning_objectives?: Json | null
+          parent_topic_id?: string | null
+          prerequisites?: Json | null
+          resources?: Json | null
+          skills?: Json | null
+          subject?: string
+          tags?: Json | null
+          title?: string
+          topic_code?: string | null
+          topic_order?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curriculum_topics_framework_id_fkey"
+            columns: ["framework_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_frameworks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curriculum_topics_parent_topic_id_fkey"
+            columns: ["parent_topic_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       departments: {
         Row: {
           budget: number | null
@@ -5191,6 +5385,44 @@ export type Database = {
           },
         ]
       }
+      school_curriculum_adoption: {
+        Row: {
+          academic_year: string
+          adopted_at: string
+          customizations: Json | null
+          framework_id: string
+          id: string
+          is_active: boolean
+          school_id: string
+        }
+        Insert: {
+          academic_year: string
+          adopted_at?: string
+          customizations?: Json | null
+          framework_id: string
+          id?: string
+          is_active?: boolean
+          school_id: string
+        }
+        Update: {
+          academic_year?: string
+          adopted_at?: string
+          customizations?: Json | null
+          framework_id?: string
+          id?: string
+          is_active?: boolean
+          school_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_curriculum_adoption_framework_id_fkey"
+            columns: ["framework_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_frameworks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       school_periods: {
         Row: {
           created_at: string
@@ -5802,6 +6034,80 @@ export type Database = {
         }
         Relationships: []
       }
+      topic_coverage: {
+        Row: {
+          academic_year: string
+          actual_end_date: string | null
+          actual_start_date: string | null
+          assessment_completed: boolean | null
+          class_id: string | null
+          completion_percentage: number | null
+          created_at: string
+          id: string
+          marked_at: string | null
+          marked_by: string | null
+          planned_end_date: string | null
+          planned_start_date: string | null
+          resources_used: Json | null
+          school_id: string
+          status: Database["public"]["Enums"]["coverage_status"]
+          teacher_id: string | null
+          teaching_notes: string | null
+          topic_id: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year: string
+          actual_end_date?: string | null
+          actual_start_date?: string | null
+          assessment_completed?: boolean | null
+          class_id?: string | null
+          completion_percentage?: number | null
+          created_at?: string
+          id?: string
+          marked_at?: string | null
+          marked_by?: string | null
+          planned_end_date?: string | null
+          planned_start_date?: string | null
+          resources_used?: Json | null
+          school_id: string
+          status?: Database["public"]["Enums"]["coverage_status"]
+          teacher_id?: string | null
+          teaching_notes?: string | null
+          topic_id: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year?: string
+          actual_end_date?: string | null
+          actual_start_date?: string | null
+          assessment_completed?: boolean | null
+          class_id?: string | null
+          completion_percentage?: number | null
+          created_at?: string
+          id?: string
+          marked_at?: string | null
+          marked_by?: string | null
+          planned_end_date?: string | null
+          planned_start_date?: string | null
+          resources_used?: Json | null
+          school_id?: string
+          status?: Database["public"]["Enums"]["coverage_status"]
+          teacher_id?: string | null
+          teaching_notes?: string | null
+          topic_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topic_coverage_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       training_courses: {
         Row: {
           cost_per_person: number | null
@@ -6114,6 +6420,7 @@ export type Database = {
       }
     }
     Enums: {
+      academic_period_type: "term" | "semester" | "quarter" | "year" | "custom"
       app_role:
         | "super_admin"
         | "school_admin"
@@ -6166,6 +6473,15 @@ export type Database = {
         | "facilities"
         | "discrimination"
         | "other"
+      coverage_status: "not_started" | "in_progress" | "completed" | "reviewed"
+      curriculum_type:
+        | "english_national"
+        | "common_core"
+        | "cbse"
+        | "icse"
+        | "cambridge"
+        | "ib"
+        | "custom"
       enrollment_pathway:
         | "standard_digital"
         | "sibling_automatic"
@@ -6382,6 +6698,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      academic_period_type: ["term", "semester", "quarter", "year", "custom"],
       app_role: [
         "super_admin",
         "school_admin",
@@ -6439,6 +6756,16 @@ export const Constants = {
         "facilities",
         "discrimination",
         "other",
+      ],
+      coverage_status: ["not_started", "in_progress", "completed", "reviewed"],
+      curriculum_type: [
+        "english_national",
+        "common_core",
+        "cbse",
+        "icse",
+        "cambridge",
+        "ib",
+        "custom",
       ],
       enrollment_pathway: [
         "standard_digital",
