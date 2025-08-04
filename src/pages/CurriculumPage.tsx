@@ -102,7 +102,7 @@ const CurriculumPage = () => {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full min-h-full">
       <PageHeader
         title="Universal Curriculum System"
         description="Manage any curriculum framework with configurable grade levels, academic periods, and progress tracking"
@@ -112,7 +112,7 @@ const CurriculumPage = () => {
           { label: 'Curriculum' }
         ]}
       />
-      <div className="container mx-auto px-4 py-8 max-w-7xl space-y-8">
+      <div className="container mx-auto px-4 py-8 max-w-7xl space-y-8 pb-16">
 
         {/* Stats Cards - Show only if framework is selected */}
         {selectedFramework && (

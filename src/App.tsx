@@ -67,7 +67,7 @@ const App = () => (
                           <span className="text-sm text-muted-foreground">School Management System</span>
                         </div>
                       </header>
-                      <main className="flex-1 overflow-auto">
+                      <main className="flex-1 overflow-y-auto max-h-screen">
                         <Routes>
                           <Route path="/" element={<Dashboard />} />
                           <Route path="/students" element={<StudentsPage />} />
