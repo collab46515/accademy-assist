@@ -10,7 +10,8 @@ import {
   MoreHorizontal,
   Edit,
   Eye,
-  Trash2
+  Trash2,
+  Target
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -158,6 +159,14 @@ export const AssignmentsList: React.FC<AssignmentsListProps> = ({
                         <Clock className="h-4 w-4" />
                         {assignment.total_marks} marks
                       </div>
+                      {assignment.curriculum_topic_id && (
+                        <div className="flex items-center gap-1">
+                          <Target className="h-4 w-4" />
+                          <Button variant="link" className="h-auto p-0 text-sm text-blue-600">
+                            Curriculum Topic
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
