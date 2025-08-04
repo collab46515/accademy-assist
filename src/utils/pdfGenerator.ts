@@ -164,114 +164,134 @@ export function generateReportCardPDF(report: ReportCard) {
   
   // Performance Table Header
   doc.setFillColor(schoolBlue[0], schoolBlue[1], schoolBlue[2]);
-  doc.rect(20, yPos, 170, 15, 'F');
+  doc.rect(20, yPos, 170, 18, 'F');
   
-  // Header borders
-  doc.setDrawColor(200, 200, 200);
-  doc.setLineWidth(0.5);
-  doc.rect(20, yPos, 170, 15);
+  // Outer table border
+  doc.setDrawColor(100, 100, 100);
+  doc.setLineWidth(0.8);
+  doc.rect(20, yPos, 170, 18);
   
   // Column separators in header
-  doc.line(70, yPos, 70, yPos + 15); // After Subject
-  doc.line(100, yPos, 100, yPos + 15); // After Grade
-  doc.line(130, yPos, 130, yPos + 15); // After Effort
+  doc.setDrawColor(255, 255, 255);
+  doc.setLineWidth(0.6);
+  doc.line(65, yPos, 65, yPos + 18); // After Subject (45px wide)
+  doc.line(95, yPos, 95, yPos + 18); // After Grade (30px wide) 
+  doc.line(125, yPos, 125, yPos + 18); // After Effort (30px wide)
+  // Comments gets remaining 65px
   
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(11);
+  doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
-  doc.text('SUBJECT', 45, yPos + 9, { align: 'center' });
-  doc.text('GRADE', 85, yPos + 9, { align: 'center' });
-  doc.text('EFFORT', 115, yPos + 9, { align: 'center' });
-  doc.text('TEACHER COMMENTS', 160, yPos + 9, { align: 'center' });
+  doc.text('SUBJECT', 42.5, yPos + 11, { align: 'center' });
+  doc.text('GRADE', 80, yPos + 11, { align: 'center' });
+  doc.text('EFFORT', 110, yPos + 11, { align: 'center' });
+  doc.text('TEACHER COMMENTS', 157.5, yPos + 11, { align: 'center' });
   
-  yPos += 15;
+  yPos += 18;
   doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   
-  // Add grade rows with proper borders
+  // Add grade rows with professional styling
   grades.forEach((grade, index) => {
-    if (yPos > 250) { // Start new page if needed
+    if (yPos > 240) { // Start new page if needed
       doc.addPage();
       yPos = 30;
       
       // Repeat header on new page
       doc.setFillColor(schoolBlue[0], schoolBlue[1], schoolBlue[2]);
-      doc.rect(20, yPos, 170, 15, 'F');
-      doc.setDrawColor(200, 200, 200);
-      doc.rect(20, yPos, 170, 15);
-      doc.line(70, yPos, 70, yPos + 15);
-      doc.line(100, yPos, 100, yPos + 15);
-      doc.line(130, yPos, 130, yPos + 15);
+      doc.rect(20, yPos, 170, 18, 'F');
+      doc.setDrawColor(100, 100, 100);
+      doc.setLineWidth(0.8);
+      doc.rect(20, yPos, 170, 18);
+      
+      doc.setDrawColor(255, 255, 255);
+      doc.setLineWidth(0.6);
+      doc.line(65, yPos, 65, yPos + 18);
+      doc.line(95, yPos, 95, yPos + 18);
+      doc.line(125, yPos, 125, yPos + 18);
       
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(11);
+      doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
-      doc.text('SUBJECT', 45, yPos + 9, { align: 'center' });
-      doc.text('GRADE', 85, yPos + 9, { align: 'center' });
-      doc.text('EFFORT', 115, yPos + 9, { align: 'center' });
-      doc.text('TEACHER COMMENTS', 160, yPos + 9, { align: 'center' });
+      doc.text('SUBJECT', 42.5, yPos + 11, { align: 'center' });
+      doc.text('GRADE', 80, yPos + 11, { align: 'center' });
+      doc.text('EFFORT', 110, yPos + 11, { align: 'center' });
+      doc.text('TEACHER COMMENTS', 157.5, yPos + 11, { align: 'center' });
       
-      yPos += 15;
+      yPos += 18;
       doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
     }
     
-    const rowHeight = 15;
+    const rowHeight = 20;
     
-    // Alternate row colors
+    // Alternate row colors with subtle difference
     if (index % 2 === 0) {
-      doc.setFillColor(250, 250, 250);
-      doc.rect(20, yPos, 170, rowHeight, 'F');
+      doc.setFillColor(248, 250, 252);
     } else {
       doc.setFillColor(255, 255, 255);
-      doc.rect(20, yPos, 170, rowHeight, 'F');
     }
+    doc.rect(20, yPos, 170, rowHeight, 'F');
     
     // Row borders
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.3);
+    doc.setDrawColor(220, 220, 220);
+    doc.setLineWidth(0.4);
     doc.rect(20, yPos, 170, rowHeight);
     
-    // Column separators
-    doc.line(70, yPos, 70, yPos + rowHeight);
-    doc.line(100, yPos, 100, yPos + rowHeight);
-    doc.line(130, yPos, 130, yPos + rowHeight);
+    // Column separators with lighter color
+    doc.setDrawColor(235, 235, 235);
+    doc.setLineWidth(0.3);
+    doc.line(65, yPos, 65, yPos + rowHeight);
+    doc.line(95, yPos, 95, yPos + rowHeight);
+    doc.line(125, yPos, 125, yPos + rowHeight);
     
     // Subject column
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
-    doc.text(grade.subject, 45, yPos + 9, { align: 'center' });
+    doc.setTextColor(40, 40, 40);
+    doc.text(grade.subject, 42.5, yPos + 12, { align: 'center' });
     
-    // Grade column with colored background
-    const gradeColor = grade.grade.startsWith('A') ? [34, 197, 94] : 
+    // Grade column with professional styling
+    const gradeColor = grade.grade.startsWith('A') ? [16, 185, 129] : 
                       grade.grade.startsWith('B') ? [59, 130, 246] : 
                       grade.grade.startsWith('C') ? [245, 158, 11] : [239, 68, 68];
     
     doc.setFillColor(gradeColor[0], gradeColor[1], gradeColor[2]);
-    doc.roundedRect(77, yPos + 4, 16, 7, 1, 1, 'F');
+    doc.roundedRect(72, yPos + 6, 16, 8, 2, 2, 'F');
+    
+    // Grade border
+    doc.setDrawColor(gradeColor[0] - 20, gradeColor[1] - 20, gradeColor[2] - 20);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(72, yPos + 6, 16, 8, 2, 2);
+    
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
-    doc.text(grade.grade, 85, yPos + 9, { align: 'center' });
+    doc.setFontSize(9);
+    doc.text(grade.grade, 80, yPos + 11, { align: 'center' });
     
     // Effort column
-    doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+    doc.setTextColor(60, 60, 60);
     doc.setFont('helvetica', 'normal');
-    doc.text(grade.effort || 'Good', 115, yPos + 9, { align: 'center' });
+    doc.setFontSize(9);
+    doc.text(grade.effort || 'Good', 110, yPos + 12, { align: 'center' });
     
-    // Comments column
+    // Comments column with better text handling
+    doc.setTextColor(50, 50, 50);
+    doc.setFontSize(8);
     const comment = grade.comments || grade.comment || 'Making good progress in this subject.';
-    const wrappedComment = doc.splitTextToSize(comment, 55);
+    const wrappedComment = doc.splitTextToSize(comment, 60);
     
-    // Center the comment vertically if it's a single line
+    // Handle multi-line comments better
     if (wrappedComment.length === 1) {
-      doc.text(wrappedComment[0], 132, yPos + 9);
+      doc.text(wrappedComment[0], 127, yPos + 12);
+    } else if (wrappedComment.length === 2) {
+      doc.text(wrappedComment[0], 127, yPos + 9);
+      doc.text(wrappedComment[1], 127, yPos + 15);
     } else {
-      // For multi-line comments, start a bit higher
-      wrappedComment.slice(0, 2).forEach((line, i) => {
-        doc.text(line, 132, yPos + 6 + (i * 4));
-      });
+      // For longer comments, show first 2 lines with ellipsis
+      doc.text(wrappedComment[0], 127, yPos + 9);
+      doc.text(wrappedComment[1].substring(0, 25) + '...', 127, yPos + 15);
     }
     
     yPos += rowHeight;
@@ -422,14 +442,18 @@ export function generateReportCardPDF(report: ReportCard) {
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     
-    // School footer
+    // School footer background
     doc.setFillColor(245, 245, 245);
-    doc.rect(0, 285, 210, 12, 'F');
+    doc.rect(0, 280, 210, 17, 'F');
     
-    doc.setFontSize(9);
+    // Page number at top of footer
+    doc.setFontSize(8);
     doc.setTextColor(mediumGray[0], mediumGray[1], mediumGray[2]);
-    doc.text('Greenwood Academy • 123 Education Street, Learning City, LC1 2AB • Tel: 01234 567890 • www.greenwoodacademy.edu', 105, 291, { align: 'center' });
-    doc.text(`Page ${i} of ${pageCount}`, 105, 282, { align: 'center' });
+    doc.text(`Page ${i} of ${pageCount}`, 105, 285, { align: 'center' });
+    
+    // School info at bottom of footer
+    doc.setFontSize(9);
+    doc.text('Greenwood Academy • 123 Education Street, Learning City, LC1 2AB • Tel: 01234 567890 • www.greenwoodacademy.edu', 105, 292, { align: 'center' });
   }
   
   // Generate filename
