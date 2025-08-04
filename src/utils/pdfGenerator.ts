@@ -158,8 +158,11 @@ export function generateReportCardPDF(report: ReportCard) {
     }
   });
   
+  // Start new page for performance table
+  doc.addPage();
+  yPos = 30;
+  
   // Performance Table Header
-  yPos += 75;
   doc.setFillColor(schoolBlue[0], schoolBlue[1], schoolBlue[2]);
   doc.rect(20, yPos, 170, 12, 'F');
   
