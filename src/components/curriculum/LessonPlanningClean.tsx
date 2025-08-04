@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Search, Calendar, Edit, Copy, List, Download, Filter, SortAsc, Eye, BookOpen, Save, CheckCircle2, MessageSquare, UserCheck, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ComprehensiveLessonEditor } from './ComprehensiveLessonEditor';
 import { format } from 'date-fns';
 import { useLessonPlanningData, type LessonPlan } from '@/hooks/useLessonPlanningData';
 import { useRBAC } from '@/hooks/useRBAC';
@@ -171,7 +172,7 @@ export const LessonPlanningClean: React.FC<LessonPlanningProps> = ({ schoolId, c
             )}
             
             {currentView === 'editor' && (
-              <EditorView 
+              <ComprehensiveLessonEditor 
                 editingPlan={editingPlan}
                 onCancel={() => setCurrentView('list')}
                 onSave={async (planData: any) => {
@@ -501,202 +502,6 @@ function CalendarView({ lessonPlans, onEdit, onDuplicate }: any) {
           Click and drag lessons to reschedule (coming soon)
         </div>
       </div>
-    </div>
-  );
-}
-
-// Editor View Component
-function EditorView({ editingPlan, onCancel, onSave }: any) {
-  const [formData, setFormData] = useState({
-    title: editingPlan?.title || '',
-    subject: editingPlan?.subject || '',
-    year_group: editingPlan?.year_group || '',
-    form_class: editingPlan?.form_class || '',
-    lesson_date: editingPlan?.lesson_date || '',
-    duration_minutes: editingPlan?.duration_minutes || 60,
-    status: 'draft'
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(formData);
-  };
-
-  return (
-    <div className="p-4 max-w-4xl mx-auto animate-fade-in">
-      {/* Editor Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 pb-4 border-b">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">
-            {editingPlan ? 'Edit Lesson Plan' : 'New Lesson Plan'}
-          </h2>
-          <p className="text-sm text-gray-600 mt-1">
-            Create a detailed lesson plan with curriculum alignment and automated integrations
-          </p>
-        </div>
-        <div className="flex items-center gap-2 mt-4 sm:mt-0">
-          <Button variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button variant="outline" className="flex items-center gap-2">
-            <Save className="h-4 w-4" />
-            Save as Template
-          </Button>
-        </div>
-      </div>
-
-      {/* Teacher Workflow Steps */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 animate-scale-in">
-        <div className="flex items-center gap-2 mb-3">
-          <BookOpen className="h-5 w-5 text-blue-600" />
-          <span className="font-medium text-blue-800">Teacher Workflow</span>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center">1</div>
-            <span className="text-blue-700">Select class/date → auto-fill from timetable</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center">2</div>
-            <span className="text-blue-700">Choose curriculum topic → auto-fill objectives</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center">3</div>
-            <span className="text-blue-700">Edit lesson plan</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center">4</div>
-            <span className="text-blue-700">Save → or "Save & Create Homework"</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Lesson Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Basic Information */}
-        <div className="bg-white border rounded-lg p-6 animate-scale-in">
-          <h3 className="text-lg font-medium mb-4">Basic Information</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="title">Lesson Title</Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Enter lesson title"
-                className="mt-1"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="subject">Subject</Label>
-              <Select 
-                value={formData.subject} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, subject: value }))}
-                required
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Select subject" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border shadow-lg z-50">
-                  <SelectItem value="Mathematics">Mathematics</SelectItem>
-                  <SelectItem value="English">English</SelectItem>
-                  <SelectItem value="Science">Science</SelectItem>
-                  <SelectItem value="History">History</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="year_group">Year Group</Label>
-              <Select 
-                value={formData.year_group} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, year_group: value }))}
-                required
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Select year group" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border shadow-lg z-50">
-                  <SelectItem value="Year 7">Year 7</SelectItem>
-                  <SelectItem value="Year 8">Year 8</SelectItem>
-                  <SelectItem value="Year 9">Year 9</SelectItem>
-                  <SelectItem value="Year 10">Year 10</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="form_class">Form Class</Label>
-              <Input
-                id="form_class"
-                value={formData.form_class}
-                onChange={(e) => setFormData(prev => ({ ...prev, form_class: e.target.value }))}
-                placeholder="e.g., 7A, 8B"
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="lesson-date">Date</Label>
-              <Input
-                id="lesson-date"
-                type="date"
-                value={formData.lesson_date}
-                onChange={(e) => setFormData(prev => ({ ...prev, lesson_date: e.target.value }))}
-                className="mt-1"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="duration">Duration (minutes)</Label>
-              <Input
-                id="duration"
-                type="number"
-                value={formData.duration_minutes}
-                onChange={(e) => setFormData(prev => ({ ...prev, duration_minutes: parseInt(e.target.value) }))}
-                className="mt-1"
-                min="15"
-                max="180"
-                step="5"
-                required
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Auto-fill Section */}
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <CheckCircle2 className="h-5 w-5 text-green-600" />
-            <span className="font-medium text-green-800">Auto-filled from Timetable</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-            <div>
-              <span className="text-green-700 font-medium">Period:</span> Period 3 (11:30-12:30)
-            </div>
-            <div>
-              <span className="text-green-700 font-medium">Room:</span> M12
-            </div>
-            <div>
-              <span className="text-green-700 font-medium">Students:</span> 28 enrolled
-            </div>
-          </div>
-        </div>
-
-        {/* Save Actions */}
-        <div className="flex items-center justify-between pt-6 border-t">
-          <div className="text-sm text-gray-600">
-            Your lesson plan will automatically integrate with attendance, gradebook, and assignments.
-          </div>
-          <div className="flex items-center gap-2">
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
-            </Button>
-            <Button type="submit" className="flex items-center gap-2 hover-scale">
-              <Save className="h-4 w-4" />
-              Save & Create Homework
-            </Button>
-          </div>
-        </div>
-      </form>
     </div>
   );
 }
