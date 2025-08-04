@@ -8,7 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Search, Calendar, Edit, Copy, Trash2, FileText, Clock, User, BookOpen } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Plus, Search, Calendar, Edit, Copy, Trash2, FileText, Clock, User, BookOpen, ChevronDown, Upload, Paperclip, Play, Pause, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
@@ -20,6 +21,27 @@ interface CurriculumTopic {
   grade_level: string;
   learning_objectives: string[];
   assessment_criteria: string[];
+}
+
+// Enhanced lesson structure interfaces
+interface LessonSection {
+  id: string;
+  title: string;
+  content: string;
+  duration_minutes: number;
+  suggested_min: number;
+  suggested_max: number;
+  attachments: LessonAttachment[];
+  icon: string;
+  description: string;
+}
+
+interface LessonAttachment {
+  id: string;
+  name: string;
+  url: string;
+  type: string;
+  size: number;
 }
 
 interface LessonPlan {
@@ -37,7 +59,9 @@ interface LessonPlan {
   curriculum_topic?: CurriculumTopic;
   learning_objectives: string[];
   success_criteria: string[];
-  objectives_edited: boolean; // Track if teacher has modified the auto-filled objectives
+  objectives_edited: boolean;
+  lesson_sections: LessonSection[];
+  total_planned_time: number;
 }
 
 interface LessonPlanFormData {
@@ -52,7 +76,56 @@ interface LessonPlanFormData {
   learning_objectives: string[];
   success_criteria: string[];
   objectives_edited: boolean;
+  lesson_sections: LessonSection[];
 }
+
+// Default lesson structure template
+const createDefaultLessonSections = (): LessonSection[] => [
+  {
+    id: 'hook',
+    title: 'Hook',
+    content: '',
+    duration_minutes: 8,
+    suggested_min: 5,
+    suggested_max: 10,
+    attachments: [],
+    icon: '🎯',
+    description: 'Grab attention: question, video, quick quiz'
+  },
+  {
+    id: 'main-activities',
+    title: 'Main Activities', 
+    content: '',
+    duration_minutes: 25,
+    suggested_min: 20,
+    suggested_max: 30,
+    attachments: [],
+    icon: '📘',
+    description: 'Teaching + student practice (step-by-step)'
+  },
+  {
+    id: 'assessment',
+    title: 'Assessment for Learning (AfL)',
+    content: '',
+    duration_minutes: 5,
+    suggested_min: 3,
+    suggested_max: 8,
+    attachments: [],
+    icon: '✅',
+    description: 'How will you know they learned it? (e.g., thumbs up, exit ticket)'
+  },
+  {
+    id: 'closure',
+    title: 'Closure',
+    content: '',
+    duration_minutes: 5,
+    suggested_min: 3,
+    suggested_max: 7,
+    attachments: [],
+    icon: '🔚',
+    description: 'Summarize, connect, preview next lesson'
+  }
+];
 
 // Mock curriculum topics with learning objectives
 const mockCurriculumTopics: CurriculumTopic[] = [
@@ -106,7 +179,7 @@ const mockCurriculumTopics: CurriculumTopic[] = [
   }
 ];
 
-// Mock data for development
+// Enhanced mock data with lesson sections
 const mockLessonPlans: LessonPlan[] = [
   {
     id: '1',
@@ -129,30 +202,54 @@ const mockLessonPlans: LessonPlan[] = [
       'I can draw 1/2 and 2/4 and explain why they\'re equal',
       'I can use a fraction wall to find equivalents'
     ],
-    objectives_edited: false
-  },
-  {
-    id: '2',
-    title: 'How Plants Make Food',
-    subject: 'Science',
-    year_group: 'Year 8',
-    form_class: '8B',
-    lesson_date: '2024-01-16',
-    period_id: 'period-2',
-    duration_minutes: 45,
-    status: 'draft',
-    teacher_name: 'Mr. Smith',
-    curriculum_topic_id: 'topic-2',
-    curriculum_topic: mockCurriculumTopics[1],
-    learning_objectives: [
-      'I can explain the process of photosynthesis',
-      'I can identify the key components needed for photosynthesis'
+    objectives_edited: false,
+    lesson_sections: [
+      {
+        id: 'hook',
+        title: 'Hook',
+        content: 'Show students pizza slices - half a pizza vs 2/4 of a pizza. Ask: "Which would you rather have?" Discuss their reasoning.',
+        duration_minutes: 8,
+        suggested_min: 5,
+        suggested_max: 10,
+        attachments: [{id: '1', name: 'pizza-fractions.jpg', url: '', type: 'image', size: 245760}],
+        icon: '🎯',
+        description: 'Grab attention: question, video, quick quiz'
+      },
+      {
+        id: 'main-activities',
+        title: 'Main Activities',
+        content: '1. Demonstrate with fraction walls\n2. Students work in pairs with manipulatives\n3. Practice exercises on worksheets',
+        duration_minutes: 30,
+        suggested_min: 20,
+        suggested_max: 30,
+        attachments: [{id: '2', name: 'fraction-wall-worksheet.pdf', url: '', type: 'pdf', size: 512000}],
+        icon: '📘',
+        description: 'Teaching + student practice (step-by-step)'
+      },
+      {
+        id: 'assessment',
+        title: 'Assessment for Learning (AfL)',
+        content: 'Exit ticket: Draw two equivalent fractions and explain why they are equal.',
+        duration_minutes: 7,
+        suggested_min: 3,
+        suggested_max: 8,
+        attachments: [],
+        icon: '✅',
+        description: 'How will you know they learned it?'
+      },
+      {
+        id: 'closure',
+        title: 'Closure',
+        content: 'Recap key points about equivalent fractions. Preview tomorrow\'s lesson on simplifying fractions.',
+        duration_minutes: 5,
+        suggested_min: 3,
+        suggested_max: 7,
+        attachments: [],
+        icon: '🔚',
+        description: 'Summarize, connect, preview next lesson'
+      }
     ],
-    success_criteria: [
-      'I can label the parts of a leaf involved in photosynthesis',
-      'I can write the word equation for photosynthesis'
-    ],
-    objectives_edited: true // Teacher has customized the objectives
+    total_planned_time: 50
   }
 ];
 
@@ -179,6 +276,7 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
   const [filterStatus, setFilterStatus] = useState('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<LessonPlan | null>(null);
+  const [expandedSections, setExpandedSections] = useState<string[]>(['hook']);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState<LessonPlanFormData>({
@@ -192,7 +290,8 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
     curriculum_topic_id: '',
     learning_objectives: [''],
     success_criteria: [''],
-    objectives_edited: false
+    objectives_edited: false,
+    lesson_sections: createDefaultLessonSections()
   });
 
   const resetForm = () => {
@@ -207,9 +306,10 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
       curriculum_topic_id: '',
       learning_objectives: [''],
       success_criteria: [''],
-      objectives_edited: false
+      objectives_edited: false,
+      lesson_sections: createDefaultLessonSections()
     });
-    setEditingPlan(null);
+    setExpandedSections(['hook']);
   };
 
   // Auto-fill objectives when curriculum topic is selected
@@ -257,7 +357,8 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
         ...formData,
         status: 'draft',
         teacher_name: 'Current User',
-        curriculum_topic: selectedTopic
+        curriculum_topic: selectedTopic,
+        total_planned_time: totalPlannedTime
       };
       setLessonPlans(prev => [...prev, newPlan]);
       toast({
@@ -283,8 +384,10 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
       curriculum_topic_id: plan.curriculum_topic_id || '',
       learning_objectives: plan.learning_objectives || [''],
       success_criteria: plan.success_criteria || [''],
-      objectives_edited: plan.objectives_edited || false
+      objectives_edited: plan.objectives_edited || false,
+      lesson_sections: plan.lesson_sections || createDefaultLessonSections()
     });
+    setExpandedSections(['hook']);
     setIsDialogOpen(true);
   };
 
@@ -364,6 +467,58 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
       success_criteria: prev.success_criteria.filter((_, i) => i !== index)
     }));
   };
+
+  // Lesson section management
+  const updateLessonSection = (sectionId: string, field: keyof LessonSection, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      lesson_sections: prev.lesson_sections.map(section =>
+        section.id === sectionId ? { ...section, [field]: value } : section
+      )
+    }));
+  };
+
+  const toggleSectionExpanded = (sectionId: string) => {
+    setExpandedSections(prev => 
+      prev.includes(sectionId) 
+        ? prev.filter(id => id !== sectionId)
+        : [...prev, sectionId]
+    );
+  };
+
+  const handleFileUpload = async (sectionId: string, file: File) => {
+    // Mock file upload - in real implementation, upload to Supabase storage
+    const mockAttachment: LessonAttachment = {
+      id: Date.now().toString(),
+      name: file.name,
+      url: URL.createObjectURL(file),
+      type: file.type,
+      size: file.size
+    };
+
+    updateLessonSection(sectionId, 'attachments', [
+      ...formData.lesson_sections.find(s => s.id === sectionId)?.attachments || [],
+      mockAttachment
+    ]);
+
+    toast({
+      title: "File uploaded",
+      description: `${file.name} has been attached to ${formData.lesson_sections.find(s => s.id === sectionId)?.title}`,
+    });
+  };
+
+  const removeAttachment = (sectionId: string, attachmentId: string) => {
+    const section = formData.lesson_sections.find(s => s.id === sectionId);
+    if (section) {
+      updateLessonSection(sectionId, 'attachments', 
+        section.attachments.filter(att => att.id !== attachmentId)
+      );
+    }
+  };
+
+  // Calculate total planned time
+  const totalPlannedTime = formData.lesson_sections.reduce((total, section) => total + section.duration_minutes, 0);
+  const timeVariance = totalPlannedTime - formData.duration_minutes;
 
   const stats = {
     total: lessonPlans.length,
@@ -454,7 +609,7 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
                     New Lesson Plan
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>
                       {editingPlan ? 'Edit Lesson Plan' : 'Create New Lesson Plan'}
@@ -690,7 +845,177 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
                       </div>
                     </div>
 
-                    <div className="flex justify-end gap-2">
+                    {/* Lesson Structure Section */}
+                    <div className="space-y-4 border-t pt-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <Label className="text-lg font-semibold">Lesson Structure</Label>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Organize your lesson into timed sections for better flow and time management
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-semibold">
+                            Total: {totalPlannedTime} min
+                          </div>
+                          <div className={`text-sm ${timeVariance > 0 ? 'text-red-600' : timeVariance < 0 ? 'text-blue-600' : 'text-green-600'}`}>
+                            {timeVariance > 0 ? `+${timeVariance} min over` : 
+                             timeVariance < 0 ? `${Math.abs(timeVariance)} min under` : 
+                             'Perfect timing!'}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        {formData.lesson_sections.map((section, sectionIndex) => (
+                          <div key={section.id} className="border rounded-lg overflow-hidden">
+                            <Collapsible 
+                              open={expandedSections.includes(section.id)}
+                              onOpenChange={() => toggleSectionExpanded(section.id)}
+                            >
+                              <CollapsibleTrigger className="w-full p-4 hover:bg-muted/50 transition-colors">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-lg">{section.icon}</span>
+                                    <div className="text-left">
+                                      <div className="font-medium">{section.title}</div>
+                                      <div className="text-sm text-muted-foreground">{section.description}</div>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <div className="text-right">
+                                      <div className="font-medium">{section.duration_minutes} min</div>
+                                      <div className="text-sm text-muted-foreground">
+                                        Suggested: {section.suggested_min}-{section.suggested_max} min
+                                      </div>
+                                    </div>
+                                    <ChevronDown className={`h-4 w-4 transition-transform ${
+                                      expandedSections.includes(section.id) ? 'rotate-180' : ''
+                                    }`} />
+                                  </div>
+                                </div>
+                              </CollapsibleTrigger>
+                              
+                              <CollapsibleContent className="border-t bg-muted/20">
+                                <div className="p-4 space-y-4">
+                                  {/* Time allocation */}
+                                  <div className="flex items-center gap-4">
+                                    <Label className="flex items-center gap-2 min-w-fit">
+                                      <Clock className="h-4 w-4" />
+                                      Duration (minutes)
+                                    </Label>
+                                    <Input
+                                      type="number"
+                                      value={section.duration_minutes}
+                                      onChange={(e) => updateLessonSection(section.id, 'duration_minutes', parseInt(e.target.value) || 0)}
+                                      min={1}
+                                      max={60}
+                                      className="w-24"
+                                    />
+                                    <span className="text-sm text-muted-foreground">
+                                      Suggested: {section.suggested_min}-{section.suggested_max} minutes
+                                    </span>
+                                  </div>
+
+                                  {/* Content editor */}
+                                  <div className="space-y-2">
+                                    <Label>Section Content</Label>
+                                    <Textarea
+                                      value={section.content}
+                                      onChange={(e) => updateLessonSection(section.id, 'content', e.target.value)}
+                                      placeholder={`Describe your ${section.title.toLowerCase()} activities...`}
+                                      className="min-h-24"
+                                    />
+                                  </div>
+
+                                  {/* File attachments */}
+                                  <div className="space-y-2">
+                                    <Label className="flex items-center gap-2">
+                                      <Paperclip className="h-4 w-4" />
+                                      Attachments
+                                    </Label>
+                                    
+                                    {/* Existing attachments */}
+                                    {section.attachments.length > 0 && (
+                                      <div className="space-y-2 p-3 bg-muted/50 rounded-md">
+                                        {section.attachments.map((attachment) => (
+                                          <div key={attachment.id} className="flex items-center justify-between p-2 bg-background rounded border">
+                                            <div className="flex items-center gap-2">
+                                              <FileText className="h-4 w-4" />
+                                              <span className="text-sm">{attachment.name}</span>
+                                              <span className="text-xs text-muted-foreground">
+                                                ({Math.round(attachment.size / 1024)} KB)
+                                              </span>
+                                            </div>
+                                            <Button
+                                              type="button"
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => removeAttachment(section.id, attachment.id)}
+                                            >
+                                              <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+
+                                    {/* Upload button */}
+                                    <div className="flex items-center gap-2">
+                                      <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                          const input = document.createElement('input');
+                                          input.type = 'file';
+                                          input.accept = 'image/*,application/pdf,.doc,.docx,.ppt,.pptx';
+                                          input.onchange = (e) => {
+                                            const file = (e.target as HTMLInputElement).files?.[0];
+                                            if (file) handleFileUpload(section.id, file);
+                                          };
+                                          input.click();
+                                        }}
+                                      >
+                                        <Upload className="h-4 w-4 mr-2" />
+                                        Add File
+                                      </Button>
+                                      <span className="text-xs text-muted-foreground">
+                                        Images, PDFs, Word docs, PowerPoints
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </CollapsibleContent>
+                            </Collapsible>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Time summary */}
+                      <div className="mt-4 p-4 bg-muted/30 rounded-lg">
+                        <div className="flex items-center justify-between text-sm">
+                          <span>Lesson Duration:</span>
+                          <span className="font-medium">{formData.duration_minutes} minutes</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span>Planned Activities:</span>
+                          <span className="font-medium">{totalPlannedTime} minutes</span>
+                        </div>
+                        <div className={`flex items-center justify-between text-sm font-medium ${
+                          timeVariance > 0 ? 'text-red-600' : timeVariance < 0 ? 'text-blue-600' : 'text-green-600'
+                        }`}>
+                          <span>Difference:</span>
+                          <span>
+                            {timeVariance > 0 ? `+${timeVariance} min (over)` : 
+                             timeVariance < 0 ? `${timeVariance} min (under)` : 
+                             'Perfect match!'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-4 border-t">
                       <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                         Cancel
                       </Button>
@@ -783,17 +1108,34 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
                           <div className="font-medium text-sm">
                             {plan.curriculum_topic?.title || 'No topic selected'}
                           </div>
-                          {plan.objectives_edited && (
-                            <Badge variant="secondary" className="text-xs">
-                              Customized
-                            </Badge>
-                          )}
+                          <div className="flex items-center gap-2">
+                            {plan.objectives_edited && (
+                              <Badge variant="secondary" className="text-xs">
+                                Customized
+                              </Badge>
+                            )}
+                            {plan.lesson_sections && (
+                              <Badge variant="outline" className="text-xs">
+                                {plan.lesson_sections.filter(s => s.content.trim()).length}/{plan.lesson_sections.length} sections planned
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
-                          {plan.duration_minutes}min
+                          <div className="text-sm">
+                            <div>{plan.duration_minutes}min</div>
+                            {plan.total_planned_time && (
+                              <div className={`text-xs ${
+                                plan.total_planned_time > plan.duration_minutes ? 'text-red-600' : 
+                                plan.total_planned_time < plan.duration_minutes ? 'text-blue-600' : 'text-green-600'
+                              }`}>
+                                ({plan.total_planned_time}min planned)
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
