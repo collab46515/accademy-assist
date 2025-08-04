@@ -32,7 +32,7 @@ const AcademicsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="w-full">
       <PageHeader
         title="Academic Management"
         description="Manage subjects, classes, and academic structure"

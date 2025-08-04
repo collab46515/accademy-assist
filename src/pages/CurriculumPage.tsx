@@ -79,7 +79,7 @@ const CurriculumPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="w-full">
         <PageHeader
           title="Curriculum Management"
           description="Manage curriculum frameworks, topics, and track teaching progress across your school"
@@ -102,7 +102,7 @@ const CurriculumPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="w-full">
       <PageHeader
         title="Universal Curriculum System"
         description="Manage any curriculum framework with configurable grade levels, academic periods, and progress tracking"
@@ -112,10 +112,10 @@ const CurriculumPage = () => {
           { label: 'Curriculum' }
         ]}
       />
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto px-4 py-8 max-w-7xl space-y-8">
 
-      {/* Stats Cards - Show only if framework is selected */}
-      {selectedFramework && (
+        {/* Stats Cards - Show only if framework is selected */}
+        {selectedFramework && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardContent className="p-6">
@@ -165,10 +165,10 @@ const CurriculumPage = () => {
             </CardContent>
           </Card>
         </div>
-      )}
+        )}
 
-      {/* Main Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        {/* Main Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="framework">Framework</TabsTrigger>
           <TabsTrigger value="topics" disabled={!selectedFramework}>Topics</TabsTrigger>
@@ -344,7 +344,7 @@ const CurriculumPage = () => {
             academicYear={currentAcademicYear}
           />
         </TabsContent>
-      </Tabs>
+        </Tabs>
       </div>
     </div>
   );

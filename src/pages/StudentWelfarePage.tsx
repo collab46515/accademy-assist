@@ -62,7 +62,7 @@ const StudentWelfarePage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="w-full">
       <PageHeader
         title="Student Welfare"
         description="Comprehensive student welfare management system for health, complaints, and safeguarding"
