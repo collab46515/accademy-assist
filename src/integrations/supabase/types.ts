@@ -1033,6 +1033,197 @@ export type Database = {
         }
         Relationships: []
       }
+      communication_recipients: {
+        Row: {
+          communication_id: string
+          created_at: string
+          delivered_at: string | null
+          delivery_method: string | null
+          delivery_status: string | null
+          id: string
+          read_at: string | null
+          recipient_id: string
+          recipient_type: string
+        }
+        Insert: {
+          communication_id: string
+          created_at?: string
+          delivered_at?: string | null
+          delivery_method?: string | null
+          delivery_status?: string | null
+          id?: string
+          read_at?: string | null
+          recipient_id: string
+          recipient_type: string
+        }
+        Update: {
+          communication_id?: string
+          created_at?: string
+          delivered_at?: string | null
+          delivery_method?: string | null
+          delivery_status?: string | null
+          id?: string
+          read_at?: string | null
+          recipient_id?: string
+          recipient_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communication_recipients_communication_id_fkey"
+            columns: ["communication_id"]
+            isOneToOne: false
+            referencedRelation: "communications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      communication_templates: {
+        Row: {
+          content_template: string
+          created_at: string
+          created_by: string
+          default_audience_type:
+            | Database["public"]["Enums"]["audience_type"]
+            | null
+          default_priority:
+            | Database["public"]["Enums"]["communication_priority"]
+            | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          school_id: string
+          subject_template: string
+          tags: string[] | null
+          template_name: string
+          template_type: Database["public"]["Enums"]["communication_type"]
+          updated_at: string
+        }
+        Insert: {
+          content_template: string
+          created_at?: string
+          created_by: string
+          default_audience_type?:
+            | Database["public"]["Enums"]["audience_type"]
+            | null
+          default_priority?:
+            | Database["public"]["Enums"]["communication_priority"]
+            | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          school_id: string
+          subject_template: string
+          tags?: string[] | null
+          template_name: string
+          template_type: Database["public"]["Enums"]["communication_type"]
+          updated_at?: string
+        }
+        Update: {
+          content_template?: string
+          created_at?: string
+          created_by?: string
+          default_audience_type?:
+            | Database["public"]["Enums"]["audience_type"]
+            | null
+          default_priority?:
+            | Database["public"]["Enums"]["communication_priority"]
+            | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          school_id?: string
+          subject_template?: string
+          tags?: string[] | null
+          template_name?: string
+          template_type?: Database["public"]["Enums"]["communication_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      communications: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          attachments: Json | null
+          audience_details: Json | null
+          audience_type: Database["public"]["Enums"]["audience_type"]
+          communication_type: Database["public"]["Enums"]["communication_type"]
+          content: string
+          created_at: string
+          created_by: string
+          delivery_count: number | null
+          id: string
+          metadata: Json | null
+          priority: Database["public"]["Enums"]["communication_priority"]
+          read_count: number | null
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
+          scheduled_for: string | null
+          school_id: string
+          sent_at: string | null
+          status: Database["public"]["Enums"]["communication_status"]
+          tags: string[] | null
+          title: string
+          total_recipients: number | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          attachments?: Json | null
+          audience_details?: Json | null
+          audience_type: Database["public"]["Enums"]["audience_type"]
+          communication_type: Database["public"]["Enums"]["communication_type"]
+          content: string
+          created_at?: string
+          created_by: string
+          delivery_count?: number | null
+          id?: string
+          metadata?: Json | null
+          priority?: Database["public"]["Enums"]["communication_priority"]
+          read_count?: number | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
+          scheduled_for?: string | null
+          school_id: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["communication_status"]
+          tags?: string[] | null
+          title: string
+          total_recipients?: number | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          attachments?: Json | null
+          audience_details?: Json | null
+          audience_type?: Database["public"]["Enums"]["audience_type"]
+          communication_type?: Database["public"]["Enums"]["communication_type"]
+          content?: string
+          created_at?: string
+          created_by?: string
+          delivery_count?: number | null
+          id?: string
+          metadata?: Json | null
+          priority?: Database["public"]["Enums"]["communication_priority"]
+          read_count?: number | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
+          scheduled_for?: string | null
+          school_id?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["communication_status"]
+          tags?: string[] | null
+          title?: string
+          total_recipients?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       company_assets: {
         Row: {
           asset_name: string
@@ -5934,6 +6125,32 @@ export type Database = {
         | "parent"
         | "student"
       approval_status: "pending" | "approved" | "rejected" | "escalated"
+      audience_type:
+        | "entire_school"
+        | "specific_classes"
+        | "specific_teachers"
+        | "specific_parents"
+        | "specific_students"
+        | "year_groups"
+        | "departments"
+        | "custom_list"
+      communication_priority: "low" | "normal" | "high" | "urgent"
+      communication_status:
+        | "draft"
+        | "pending_approval"
+        | "approved"
+        | "rejected"
+        | "sent"
+        | "scheduled"
+      communication_type:
+        | "announcement"
+        | "newsletter"
+        | "emergency_alert"
+        | "event_notification"
+        | "academic_update"
+        | "administrative_notice"
+        | "parent_communication"
+        | "staff_memo"
       complaint_priority: "low" | "medium" | "high" | "urgent"
       complaint_status:
         | "submitted"
@@ -6177,6 +6394,35 @@ export const Constants = {
         "student",
       ],
       approval_status: ["pending", "approved", "rejected", "escalated"],
+      audience_type: [
+        "entire_school",
+        "specific_classes",
+        "specific_teachers",
+        "specific_parents",
+        "specific_students",
+        "year_groups",
+        "departments",
+        "custom_list",
+      ],
+      communication_priority: ["low", "normal", "high", "urgent"],
+      communication_status: [
+        "draft",
+        "pending_approval",
+        "approved",
+        "rejected",
+        "sent",
+        "scheduled",
+      ],
+      communication_type: [
+        "announcement",
+        "newsletter",
+        "emergency_alert",
+        "event_notification",
+        "academic_update",
+        "administrative_notice",
+        "parent_communication",
+        "staff_memo",
+      ],
       complaint_priority: ["low", "medium", "high", "urgent"],
       complaint_status: [
         "submitted",

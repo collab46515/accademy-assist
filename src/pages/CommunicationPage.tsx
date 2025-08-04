@@ -1,393 +1,435 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   MessageSquare, 
-  Search, 
+  Send, 
+  Users, 
+  Clock, 
+  AlertTriangle,
+  Search,
   Plus,
-  Send,
-  Mail,
-  Bell,
-  Users,
-  Clock,
+  FileText,
+  Megaphone,
   CheckCircle,
-  AlertTriangle
-} from "lucide-react";
+  XCircle,
+  Eye,
+  Edit,
+  BarChart3
+} from 'lucide-react';
+import { useCommunicationData } from '@/hooks/useCommunicationData';
+import { CommunicationForm } from '@/components/communication';
+import { CSVReportSection } from '@/components/shared/CSVReportSection';
 
-interface Message {
-  id: string;
-  from: string;
-  to: string;
-  subject: string;
-  content: string;
-  type: "email" | "sms" | "notification" | "announcement";
-  priority: "low" | "medium" | "high" | "urgent";
-  status: "draft" | "sent" | "delivered" | "read";
-  timestamp: string;
-  recipients: number;
-}
+const CommunicationPage: React.FC = () => {
+  const { 
+    communications, 
+    templates, 
+    loading, 
+    getStats, 
+    getFilteredCommunications,
+    approveCommunication,
+    rejectCommunication,
+    sendCommunication
+  } = useCommunicationData();
 
-interface Announcement {
-  id: string;
-  title: string;
-  content: string;
-  author: string;
-  audience: "all" | "parents" | "students" | "staff" | "year-group";
-  yearGroup?: string;
-  publishedAt: string;
-  views: number;
-  status: "draft" | "published" | "archived";
-}
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [showForm, setShowForm] = useState(false);
+  const [editingCommunication, setEditingCommunication] = useState(null);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [rejectReason, setRejectReason] = useState('');
 
-const mockMessages: Message[] = [
-  {
-    id: "1",
-    from: "School Office",
-    to: "Year 7 Parents",
-    subject: "Parent Evening Booking Now Open",
-    content: "Booking for Year 7 Parent Evening is now available online...",
-    type: "email",
-    priority: "medium",
-    status: "sent",
-    timestamp: "2024-01-15 14:30",
-    recipients: 28
-  },
-  {
-    id: "2",
-    from: "Head Teacher",
-    to: "All Parents",
-    subject: "School Closure - Snow Day",
-    content: "Due to severe weather conditions, school will be closed tomorrow...",
-    type: "notification",
-    priority: "urgent",
-    status: "delivered",
-    timestamp: "2024-01-14 16:45",
-    recipients: 847
-  },
-  {
-    id: "3",
-    from: "PE Department",
-    to: "Year 9 Students",
-    subject: "Sports Day Reminder",
-    content: "Reminder: Sports Day is this Friday. Please bring...",
-    type: "sms",
-    priority: "medium",
-    status: "read",
-    timestamp: "2024-01-13 09:15",
-    recipients: 156
-  }
-];
+  const stats = getStats();
 
-const mockAnnouncements: Announcement[] = [
-  {
-    id: "1",
-    title: "New Online Learning Platform",
-    content: "We're excited to announce the launch of our new online learning platform...",
-    author: "IT Department",
-    audience: "all",
-    publishedAt: "2024-01-15",
-    views: 234,
-    status: "published"
-  },
-  {
-    id: "2",
-    title: "Year 11 GCSE Information Evening",
-    content: "Information session for Year 11 parents about GCSE examinations...",
-    author: "Exams Office",
-    audience: "parents",
-    yearGroup: "Year 11",
-    publishedAt: "2024-01-14",
-    views: 67,
-    status: "published"
-  }
-];
-
-const CommunicationPage = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [messages] = useState(mockMessages);
-  const [announcements] = useState(mockAnnouncements);
-
-  const getStatusBadge = (status: Message["status"]) => {
-    switch (status) {
-      case "draft":
-        return <Badge variant="secondary">Draft</Badge>;
-      case "sent":
-        return <Badge className="bg-primary text-primary-foreground"><Send className="h-3 w-3 mr-1" />Sent</Badge>;
-      case "delivered":
-        return <Badge className="bg-success text-success-foreground"><CheckCircle className="h-3 w-3 mr-1" />Delivered</Badge>;
-      case "read":
-        return <Badge variant="outline"><CheckCircle className="h-3 w-3 mr-1" />Read</Badge>;
-    }
-  };
-
-  const getPriorityBadge = (priority: Message["priority"]) => {
-    switch (priority) {
-      case "low":
-        return <Badge variant="outline">Low</Badge>;
-      case "medium":
-        return <Badge variant="secondary">Medium</Badge>;
-      case "high":
-        return <Badge className="bg-warning text-warning-foreground">High</Badge>;
-      case "urgent":
-        return <Badge variant="destructive"><AlertTriangle className="h-3 w-3 mr-1" />Urgent</Badge>;
-    }
-  };
-
-  const getTypeBadge = (type: Message["type"]) => {
-    const icons = {
-      email: Mail,
-      sms: MessageSquare,
-      notification: Bell,
-      announcement: Users
+  // Helper functions for badges
+  const getStatusBadge = (status: string) => {
+    const colors = {
+      draft: 'bg-gray-100 text-gray-800',
+      pending_approval: 'bg-yellow-100 text-yellow-800',
+      approved: 'bg-blue-100 text-blue-800',
+      rejected: 'bg-red-100 text-red-800',
+      sent: 'bg-green-100 text-green-800',
+      scheduled: 'bg-purple-100 text-purple-800'
     };
-    const Icon = icons[type];
     
     return (
-      <Badge variant="outline" className="flex items-center space-x-1">
-        <Icon className="h-3 w-3" />
-        <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
+      <Badge className={colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
+        {status.replace('_', ' ')}
       </Badge>
     );
   };
 
-  const filteredMessages = messages.filter(message =>
-    message.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    message.from.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    message.to.toLowerCase().includes(searchTerm.toLowerCase())
+  const getPriorityBadge = (priority: string) => {
+    const colors = {
+      low: 'bg-gray-100 text-gray-800',
+      normal: 'bg-blue-100 text-blue-800',
+      high: 'bg-orange-100 text-orange-800',
+      urgent: 'bg-red-100 text-red-800'
+    };
+    
+    return (
+      <Badge className={colors[priority as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
+        {priority}
+      </Badge>
+    );
+  };
+
+  const getTypeBadge = (type: string) => {
+    const colors = {
+      announcement: 'bg-blue-100 text-blue-800',
+      newsletter: 'bg-green-100 text-green-800',
+      emergency_alert: 'bg-red-100 text-red-800',
+      event_notification: 'bg-yellow-100 text-yellow-800',
+      academic_update: 'bg-purple-100 text-purple-800',
+      administrative_notice: 'bg-orange-100 text-orange-800',
+      parent_communication: 'bg-pink-100 text-pink-800',
+      staff_memo: 'bg-indigo-100 text-indigo-800'
+    };
+    
+    return (
+      <Badge className={colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
+        {type.replace('_', ' ')}
+      </Badge>
+    );
+  };
+
+  // Filter communications based on search term and status
+  const filteredCommunications = getFilteredCommunications(statusFilter).filter(communication =>
+    communication.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    communication.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalMessages = messages.length;
-  const sentMessages = messages.filter(m => m.status === "sent" || m.status === "delivered" || m.status === "read").length;
-  const totalRecipients = messages.reduce((sum, message) => sum + message.recipients, 0);
-  const urgentMessages = messages.filter(m => m.priority === "urgent").length;
+  const handleApprove = async (id: string) => {
+    try {
+      await approveCommunication(id);
+    } catch (error) {
+      console.error('Error approving communication:', error);
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    try {
+      await rejectCommunication(id, rejectReason || 'No reason provided');
+    } catch (error) {
+      console.error('Error rejecting communication:', error);
+    }
+  };
+
+  const handleSend = async (id: string) => {
+    try {
+      await sendCommunication(id);
+    } catch (error) {
+      console.error('Error sending communication:', error);
+    }
+  };
+
+  const csvData = communications.map(comm => ({
+    Title: comm.title,
+    Type: comm.communication_type,
+    Status: comm.status,
+    Priority: comm.priority,
+    'Audience Type': comm.audience_type,
+    'Total Recipients': comm.total_recipients,
+    'Delivery Count': comm.delivery_count,
+    'Read Count': comm.read_count,
+    'Created Date': new Date(comm.created_at).toLocaleDateString(),
+    'Sent Date': comm.sent_at ? new Date(comm.sent_at).toLocaleDateString() : 'Not sent'
+  }));
+
+  if (loading) {
+    return <div>Loading communications...</div>;
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Communication Hub</h1>
-        <p className="text-muted-foreground">Centralized messaging with broadcast emails, parent-teacher messaging, and emergency alerts</p>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Communication Center</h1>
+          <p className="text-muted-foreground">Manage and send communications to students, parents, and staff</p>
+        </div>
+        <Button 
+          className="flex items-center gap-2"
+          onClick={() => setShowForm(true)}
+        >
+          <Plus className="h-4 w-4" />
+          New Communication
+        </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card className="shadow-[var(--shadow-card)]">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Messages</p>
-                <p className="text-3xl font-bold text-primary">{totalMessages}</p>
-              </div>
-              <MessageSquare className="h-8 w-8 text-primary" />
-            </div>
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setStatusFilter('all')}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Communications</CardTitle>
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalCommunications}</div>
           </CardContent>
         </Card>
-        <Card className="shadow-[var(--shadow-card)]">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Sent</p>
-                <p className="text-3xl font-bold text-success">{sentMessages}</p>
-              </div>
-              <Send className="h-8 w-8 text-success" />
-            </div>
+
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setStatusFilter('pending_approval')}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pending Approval</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.pendingApproval}</div>
           </CardContent>
         </Card>
-        <Card className="shadow-[var(--shadow-card)]">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Recipients</p>
-                <p className="text-3xl font-bold text-primary">{totalRecipients}</p>
-              </div>
-              <Users className="h-8 w-8 text-primary" />
-            </div>
+
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setStatusFilter('sent')}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Sent</CardTitle>
+            <Send className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.sent}</div>
           </CardContent>
         </Card>
-        <Card className="shadow-[var(--shadow-card)]">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Urgent</p>
-                <p className="text-3xl font-bold text-destructive">{urgentMessages}</p>
-              </div>
-              <AlertTriangle className="h-8 w-8 text-destructive" />
-            </div>
+
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setStatusFilter('scheduled')}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Scheduled</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.scheduled}</div>
+          </CardContent>
+        </Card>
+
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setStatusFilter('draft')}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Drafts</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.drafts}</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Main Tabs */}
-      <Tabs defaultValue="messages" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="messages">Messages</TabsTrigger>
-          <TabsTrigger value="announcements">Announcements</TabsTrigger>
-          <TabsTrigger value="templates">Templates</TabsTrigger>
+      {/* Search and Filter Bar */}
+      <div className="flex items-center space-x-2">
+        <Search className="h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search communications..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-sm"
+        />
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="draft">Draft</SelectItem>
+            <SelectItem value="pending_approval">Pending Approval</SelectItem>
+            <SelectItem value="approved">Approved</SelectItem>
+            <SelectItem value="rejected">Rejected</SelectItem>
+            <SelectItem value="sent">Sent</SelectItem>
+            <SelectItem value="scheduled">Scheduled</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Tabs for different communication types */}
+      <Tabs defaultValue="communications" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="communications" className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4" />
+            Communications
+          </TabsTrigger>
+          <TabsTrigger value="templates" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Templates
+          </TabsTrigger>
+          <TabsTrigger value="reports" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Reports
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="messages">
-          <Card className="shadow-[var(--shadow-card)]">
+        <TabsContent value="communications">
+          <Card>
             <CardHeader>
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                  <CardTitle className="flex items-center space-x-2">
-                    <MessageSquare className="h-5 w-5 text-primary" />
-                    <span>Message Center</span>
-                  </CardTitle>
-                  <CardDescription>Send and manage communications to parents, students, and staff</CardDescription>
-                </div>
-                <Button className="shadow-[var(--shadow-elegant)]">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Compose Message
-                </Button>
-              </div>
+              <CardTitle>Communications</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="mb-6">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search messages by subject, sender, or recipient..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>From</TableHead>
-                      <TableHead>To</TableHead>
-                      <TableHead>Subject</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Recipients</TableHead>
-                      <TableHead>Timestamp</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Priority</TableHead>
+                    <TableHead>Audience</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Recipients</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredCommunications.map((communication) => (
+                    <TableRow key={communication.id}>
+                      <TableCell className="font-medium">{communication.title}</TableCell>
+                      <TableCell>{getTypeBadge(communication.communication_type)}</TableCell>
+                      <TableCell>{getPriorityBadge(communication.priority)}</TableCell>
+                      <TableCell>{communication.audience_type.replace('_', ' ')}</TableCell>
+                      <TableCell>{getStatusBadge(communication.status)}</TableCell>
+                      <TableCell>{communication.total_recipients}</TableCell>
+                      <TableCell>{new Date(communication.created_at).toLocaleDateString()}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setEditingCommunication(communication);
+                              setShowForm(true);
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          
+                          {communication.status === 'pending_approval' && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleApprove(communication.id)}
+                                className="text-green-600 hover:text-green-700"
+                              >
+                                <CheckCircle className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleReject(communication.id)}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <XCircle className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                          
+                          {communication.status === 'approved' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleSend(communication.id)}
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <Send className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredMessages.map((message) => (
-                      <TableRow key={message.id}>
-                        <TableCell className="font-medium">{message.from}</TableCell>
-                        <TableCell>{message.to}</TableCell>
-                        <TableCell>{message.subject}</TableCell>
-                        <TableCell>{getTypeBadge(message.type)}</TableCell>
-                        <TableCell>{getPriorityBadge(message.priority)}</TableCell>
-                        <TableCell>{message.recipients}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-1 text-sm">
-                            <Clock className="h-3 w-3" />
-                            <span>{message.timestamp}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>{getStatusBadge(message.status)}</TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">View</Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="announcements">
-          <Card className="shadow-[var(--shadow-card)]">
-            <CardHeader>
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Bell className="h-5 w-5 text-primary" />
-                    <span>Announcements</span>
-                  </CardTitle>
-                  <CardDescription>Publish announcements to school community</CardDescription>
-                </div>
-                <Button className="shadow-[var(--shadow-elegant)]">
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Announcement
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Author</TableHead>
-                      <TableHead>Audience</TableHead>
-                      <TableHead>Published</TableHead>
-                      <TableHead>Views</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {announcements.map((announcement) => (
-                      <TableRow key={announcement.id}>
-                        <TableCell className="font-medium">{announcement.title}</TableCell>
-                        <TableCell>{announcement.author}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">
-                            {announcement.audience}
-                            {announcement.yearGroup && ` - ${announcement.yearGroup}`}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{announcement.publishedAt}</TableCell>
-                        <TableCell>{announcement.views}</TableCell>
-                        <TableCell>
-                          <Badge className={announcement.status === "published" ? "bg-success text-success-foreground" : "bg-secondary text-secondary-foreground"}>
-                            {announcement.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">Edit</Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="templates">
-          <Card className="shadow-[var(--shadow-card)]">
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Mail className="h-5 w-5 text-primary" />
-                <span>Message Templates</span>
-              </CardTitle>
-              <CardDescription>Pre-designed templates for common communications</CardDescription>
+              <div className="flex justify-between items-center">
+                <CardTitle>Communication Templates</CardTitle>
+                <Button 
+                  onClick={() => {
+                    setSelectedTemplate(null);
+                    setShowForm(true);
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Template
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12">
-                <Mail className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Message Templates</h3>
-                <p className="text-muted-foreground">Pre-designed communication templates coming soon</p>
-              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Template Name</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Default Priority</TableHead>
+                    <TableHead>Default Audience</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {templates.map((template) => (
+                    <TableRow key={template.id}>
+                      <TableCell className="font-medium">{template.template_name}</TableCell>
+                      <TableCell>{getTypeBadge(template.template_type)}</TableCell>
+                      <TableCell>{getPriorityBadge(template.default_priority)}</TableCell>
+                      <TableCell>{template.default_audience_type?.replace('_', ' ') || 'Not set'}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedTemplate(template);
+                            setShowForm(true);
+                          }}
+                        >
+                          Use Template
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="reports">
+          <CSVReportSection
+            title="Communication Reports"
+            description="Export communication data for analysis"
+            filename="communications-report"
+            reportTypes={[
+              {
+                name: "All Communications",
+                description: "Complete list of all communications",
+                filters: {}
+              },
+              {
+                name: "Sent Communications", 
+                description: "Communications that have been sent",
+                filters: { status: 'sent' }
+              },
+              {
+                name: "Pending Approval",
+                description: "Communications awaiting approval", 
+                filters: { status: 'pending_approval' }
+              }
+            ]}
+          />
+        </TabsContent>
       </Tabs>
+
+      <CommunicationForm
+        isOpen={showForm}
+        onClose={() => {
+          setShowForm(false);
+          setEditingCommunication(null);
+          setSelectedTemplate(null);
+        }}
+        editingCommunication={editingCommunication}
+        selectedTemplate={selectedTemplate}
+      />
     </div>
   );
 };
