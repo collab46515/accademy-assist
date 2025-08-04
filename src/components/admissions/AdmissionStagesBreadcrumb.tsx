@@ -79,6 +79,7 @@ export function AdmissionStagesBreadcrumb() {
   };
 
   const handleBackToDashboard = () => {
+    console.log('Dashboard View button clicked - navigating to /admissions');
     navigate('/admissions');
   };
 
@@ -91,7 +92,7 @@ export function AdmissionStagesBreadcrumb() {
           size="sm"
           onClick={handleBackToDashboard}
         >
-          Dashboard View
+          Back to Overview
         </Button>
       </div>
       
