@@ -6,8 +6,8 @@ import { useRBAC } from '@/hooks/useRBAC';
 const LessonPlanningPage = () => {
   const { currentSchool, isSchoolAdmin, hasRole } = useRBAC();
   
-  // Check user permissions
-  const canManageLessons = isSchoolAdmin() || hasRole('super_admin') || hasRole('hod') || hasRole('teacher');
+  // Check user permissions - Teachers, HODs, TAs, and Admins can access lesson planning
+  const canManageLessons = isSchoolAdmin() || hasRole('super_admin') || hasRole('hod') || hasRole('teacher') || hasRole('ta');
 
   if (!currentSchool) {
     return (

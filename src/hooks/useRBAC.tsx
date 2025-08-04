@@ -11,7 +11,8 @@ export type AppRole =
   | 'nurse'
   | 'hod'
   | 'parent'
-  | 'student';
+  | 'student'
+  | 'ta';
 
 export type ResourceType = 
   | 'students'

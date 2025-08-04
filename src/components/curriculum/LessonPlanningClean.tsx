@@ -6,70 +6,33 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Search, Calendar, Edit, Copy, List, Download, Filter, SortAsc, Eye, BookOpen, Save, CheckCircle2 } from 'lucide-react';
+import { Plus, Search, Calendar, Edit, Copy, List, Download, Filter, SortAsc, Eye, BookOpen, Save, CheckCircle2, MessageSquare, UserCheck, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-
-// Types
-interface LessonPlan {
-  id: string;
-  title: string;
-  subject: string;
-  year_group: string;
-  form_class?: string;
-  lesson_date: string;
-  duration_minutes: number;
-  status: 'draft' | 'published' | 'completed';
-  curriculum_topic?: {
-    id: string;
-    title: string;
-  };
-}
+import { useLessonPlanningData, type LessonPlan } from '@/hooks/useLessonPlanningData';
+import { useRBAC } from '@/hooks/useRBAC';
 
 interface LessonPlanningProps {
   schoolId: string;
   canEdit?: boolean;
 }
 
-// Mock data
-const mockLessonPlans: LessonPlan[] = [
-  {
-    id: '1',
-    title: 'Introduction to Fractions',
-    subject: 'Mathematics',
-    year_group: 'Year 7',
-    form_class: '7B',
-    lesson_date: '2024-01-15',
-    duration_minutes: 60,
-    status: 'published',
-    curriculum_topic: { id: '1', title: 'Numbers and Operations' }
-  },
-  {
-    id: '2',
-    title: 'Shakespearean Sonnets',
-    subject: 'English',
-    year_group: 'Year 9',
-    form_class: '9A',
-    lesson_date: '2024-01-16',
-    duration_minutes: 50,
-    status: 'draft',
-    curriculum_topic: { id: '2', title: 'Poetry Analysis' }
-  },
-  {
-    id: '3',
-    title: 'Photosynthesis Process',
-    subject: 'Science',
-    year_group: 'Year 8',
-    form_class: '8C',
-    lesson_date: '2024-01-17',
-    duration_minutes: 60,
-    status: 'completed',
-    curriculum_topic: { id: '3', title: 'Plant Biology' }
-  }
-];
-
 export const LessonPlanningClean: React.FC<LessonPlanningProps> = ({ schoolId, canEdit = true }) => {
-  const [lessonPlans, setLessonPlans] = useState<LessonPlan[]>(mockLessonPlans);
+  const { hasRole } = useRBAC();
+  const { 
+    lessonPlans, 
+    loading, 
+    createLessonPlan, 
+    updateLessonPlan, 
+    submitForApproval, 
+    approveLessonPlan, 
+    rejectLessonPlan,
+    addComment,
+    assignToTA,
+    canEdit: canEditPlan,
+    canApprove: canApprovePlan
+  } = useLessonPlanningData(schoolId);
+  
   const [currentView, setCurrentView] = useState<'list' | 'calendar' | 'editor'>('list');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSubject, setFilterSubject] = useState('all');
@@ -92,20 +55,36 @@ export const LessonPlanningClean: React.FC<LessonPlanningProps> = ({ schoolId, c
     setCurrentView('editor');
   };
 
-  const handleDuplicate = (plan: LessonPlan) => {
-    const duplicatedPlan: LessonPlan = {
+  const handleDuplicate = async (plan: LessonPlan) => {
+    const duplicatedPlan = {
       ...plan,
-      id: Date.now().toString(),
       title: `${plan.title} (Copy)`,
-      status: 'draft'
+      status: 'draft' as const
     };
-    setLessonPlans(prev => [duplicatedPlan, ...prev]);
-    toast({ title: "Lesson plan duplicated successfully" });
+    // Remove the fields that will be auto-generated
+    const { id, teacher_id, school_id, created_at, updated_at, ...planData } = duplicatedPlan;
+    await createLessonPlan(planData);
   };
 
   const handleNewLesson = () => {
     setCurrentView('editor');
     setEditingPlan(null);
+  };
+
+  const handleApprove = async (planId: string) => {
+    if (await canApprovePlan(planId)) {
+      await approveLessonPlan(planId);
+    }
+  };
+
+  const handleReject = async (planId: string, reason?: string) => {
+    if (await canApprovePlan(planId)) {
+      await rejectLessonPlan(planId, reason);
+    }
+  };
+
+  const handleSubmitForApproval = async (planId: string) => {
+    await submitForApproval(planId);
   };
 
   return (
@@ -167,6 +146,9 @@ export const LessonPlanningClean: React.FC<LessonPlanningProps> = ({ schoolId, c
                 lessonPlans={filteredPlans}
                 onEdit={handleEdit}
                 onDuplicate={handleDuplicate}
+                onApprove={handleApprove}
+                onReject={handleReject}
+                onSubmitForApproval={handleSubmitForApproval}
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
                 filterSubject={filterSubject}
@@ -174,6 +156,9 @@ export const LessonPlanningClean: React.FC<LessonPlanningProps> = ({ schoolId, c
                 filterStatus={filterStatus}
                 setFilterStatus={setFilterStatus}
                 onNewLesson={handleNewLesson}
+                canEdit={canEdit}
+                hasRole={hasRole}
+                loading={loading}
               />
             )}
             
@@ -189,14 +174,11 @@ export const LessonPlanningClean: React.FC<LessonPlanningProps> = ({ schoolId, c
               <EditorView 
                 editingPlan={editingPlan}
                 onCancel={() => setCurrentView('list')}
-                onSave={(plan: any) => {
+                onSave={async (planData: any) => {
                   if (editingPlan) {
-                    setLessonPlans(prev => prev.map(p => p.id === editingPlan.id ? { ...p, ...plan } : p));
-                    toast({ title: "Lesson plan updated successfully" });
+                    await updateLessonPlan(editingPlan.id, planData);
                   } else {
-                    const newPlan = { ...plan, id: Date.now().toString() };
-                    setLessonPlans(prev => [newPlan, ...prev]);
-                    toast({ title: "Lesson plan created successfully" });
+                    await createLessonPlan(planData);
                   }
                   setCurrentView('list');
                 }}
@@ -214,13 +196,19 @@ function ListView({
   lessonPlans, 
   onEdit, 
   onDuplicate, 
+  onApprove,
+  onReject,
+  onSubmitForApproval,
   searchTerm, 
   setSearchTerm,
   filterSubject,
   setFilterSubject,
   filterStatus,
   setFilterStatus,
-  onNewLesson
+  onNewLesson,
+  canEdit,
+  hasRole,
+  loading
 }: any) {
   return (
     <div className="p-4 space-y-4">
@@ -254,8 +242,9 @@ function ListView({
           <SelectContent className="bg-white border shadow-lg z-50">
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="draft">Draft</SelectItem>
-            <SelectItem value="published">Published</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="submitted">Submitted</SelectItem>
+            <SelectItem value="approved">Approved</SelectItem>
+            <SelectItem value="rejected">Rejected</SelectItem>
           </SelectContent>
         </Select>
         <Button variant="outline" size="sm" className="flex items-center gap-2">
@@ -275,8 +264,9 @@ function ListView({
               </div>
               <Badge 
                 className={
-                  plan.status === 'completed' ? 'bg-green-100 text-green-800' :
-                  plan.status === 'published' ? 'bg-blue-100 text-blue-800' :
+                  plan.status === 'approved' ? 'bg-green-100 text-green-800' :
+                  plan.status === 'submitted' ? 'bg-blue-100 text-blue-800' :
+                  plan.status === 'rejected' ? 'bg-red-100 text-red-800' :
                   'bg-gray-100 text-gray-800'
                 }
               >
@@ -287,7 +277,7 @@ function ListView({
               <span>{format(new Date(plan.lesson_date), 'MMM dd, yyyy')}</span>
               <span>{plan.duration_minutes} mins</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Button variant="outline" size="sm" onClick={() => onEdit(plan)}>
                 <Edit className="h-3 w-3" />
               </Button>
@@ -297,6 +287,21 @@ function ListView({
               <Button variant="outline" size="sm" onClick={() => onEdit(plan)}>
                 <Eye className="h-3 w-3" />
               </Button>
+              {plan.status === 'draft' && (
+                <Button variant="outline" size="sm" onClick={() => onSubmitForApproval(plan.id)}>
+                  <UserCheck className="h-3 w-3" />
+                </Button>
+              )}
+              {plan.status === 'submitted' && hasRole('hod') && (
+                <>
+                  <Button variant="outline" size="sm" onClick={() => onApprove(plan.id)}>
+                    <ThumbsUp className="h-3 w-3" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => onReject(plan.id)}>
+                    <ThumbsDown className="h-3 w-3" />
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         ))}
@@ -340,9 +345,9 @@ function ListView({
                 <TableCell>
                   <div className="max-w-[200px]">
                     <div className="font-medium truncate">{plan.title}</div>
-                    {plan.curriculum_topic && (
+                    {plan.curriculum_topic_id && (
                       <div className="text-xs text-blue-600 truncate">
-                        {plan.curriculum_topic.title}
+                        Topic: {plan.curriculum_topic_id}
                       </div>
                     )}
                   </div>
@@ -350,8 +355,9 @@ function ListView({
                 <TableCell>
                   <Badge 
                     className={
-                      plan.status === 'completed' ? 'bg-green-100 text-green-800' :
-                      plan.status === 'published' ? 'bg-blue-100 text-blue-800' :
+                      plan.status === 'approved' ? 'bg-green-100 text-green-800' :
+                      plan.status === 'submitted' ? 'bg-blue-100 text-blue-800' :
+                      plan.status === 'rejected' ? 'bg-red-100 text-red-800' :
                       'bg-gray-100 text-gray-800'
                     }
                   >
@@ -369,6 +375,21 @@ function ListView({
                     <Button variant="ghost" size="sm" onClick={() => onEdit(plan)} className="hover-scale">
                       <Eye className="h-3 w-3" />
                     </Button>
+                    {plan.status === 'draft' && (
+                      <Button variant="ghost" size="sm" onClick={() => onSubmitForApproval(plan.id)} className="hover-scale" title="Submit for Approval">
+                        <UserCheck className="h-3 w-3" />
+                      </Button>
+                    )}
+                    {plan.status === 'submitted' && hasRole('hod') && (
+                      <>
+                        <Button variant="ghost" size="sm" onClick={() => onApprove(plan.id)} className="hover-scale text-green-600" title="Approve">
+                          <ThumbsUp className="h-3 w-3" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => onReject(plan.id)} className="hover-scale text-red-600" title="Reject">
+                          <ThumbsDown className="h-3 w-3" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
@@ -377,7 +398,14 @@ function ListView({
         </Table>
       </div>
 
-      {lessonPlans.length === 0 && (
+      {loading && (
+        <div className="text-center py-12 animate-fade-in">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="text-gray-600 mt-2">Loading lesson plans...</p>
+        </div>
+      )}
+
+      {!loading && lessonPlans.length === 0 && (
         <div className="text-center py-12 animate-fade-in">
           <BookOpen className="mx-auto h-12 w-12 text-gray-400 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No lesson plans found</h3>
