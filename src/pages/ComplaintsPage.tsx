@@ -3,8 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { MessageSquare, Plus, Clock, CheckCircle, AlertTriangle, Users } from "lucide-react";
+import { useState } from "react";
 
 const ComplaintsPage = () => {
+  const [activeTab, setActiveTab] = useState("active");
+
+  const handleNewComplaint = () => {
+    alert("New Complaint form will be implemented here");
+  };
+
+  const handleViewDetails = (complaintId: string) => {
+    alert(`Viewing details for complaint ${complaintId}`);
+  };
   const mockComplaints = [
     {
       id: "COMP-2024-0001",
@@ -55,7 +65,7 @@ const ComplaintsPage = () => {
             Track and resolve student and parent complaints
           </p>
         </div>
-        <Button onClick={() => console.log('New Complaint button clicked')}>
+        <Button onClick={handleNewComplaint}>
           <Plus className="mr-2 h-4 w-4" />
           New Complaint
         </Button>
@@ -105,12 +115,12 @@ const ComplaintsPage = () => {
         </Card>
       </div>
 
-      <Tabs defaultValue="active" className="space-y-4" onValueChange={(value) => console.log('Complaints tab changed to:', value)}>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
-          <TabsTrigger value="active" onClick={() => console.log('Active complaints tab clicked')}>Active Complaints</TabsTrigger>
-          <TabsTrigger value="all" onClick={() => console.log('All complaints tab clicked')}>All Complaints</TabsTrigger>
-          <TabsTrigger value="analytics" onClick={() => console.log('Analytics tab clicked')}>Analytics</TabsTrigger>
-          <TabsTrigger value="communications" onClick={() => console.log('Communications tab clicked')}>Communications</TabsTrigger>
+          <TabsTrigger value="active">Active Complaints</TabsTrigger>
+          <TabsTrigger value="all">All Complaints</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="communications">Communications</TabsTrigger>
         </TabsList>
 
         <TabsContent value="active" className="space-y-4">
@@ -141,7 +151,7 @@ const ComplaintsPage = () => {
                         Submitted {complaint.submittedDate}
                       </p>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => console.log('View Details clicked for:', complaint.id)}>
+                    <Button variant="outline" size="sm" onClick={() => handleViewDetails(complaint.id)}>
                       View Details
                     </Button>
                   </div>

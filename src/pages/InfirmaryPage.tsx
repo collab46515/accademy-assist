@@ -2,8 +2,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Activity, Plus, Users, Calendar, Pill, FileText } from "lucide-react";
+import { useState } from "react";
 
 const InfirmaryPage = () => {
+  const [activeTab, setActiveTab] = useState("visits");
+
+  const handleNewMedicalVisit = () => {
+    alert("New Medical Visit form will be implemented here");
+  };
+
   return (
     <div className="space-y-6 p-6">
       <div className="flex justify-between items-center">
@@ -13,7 +20,7 @@ const InfirmaryPage = () => {
             Manage student health records and medical visits
           </p>
         </div>
-        <Button onClick={() => console.log('New Medical Visit button clicked')}>
+        <Button onClick={handleNewMedicalVisit}>
           <Plus className="mr-2 h-4 w-4" />
           New Medical Visit
         </Button>
@@ -63,12 +70,12 @@ const InfirmaryPage = () => {
         </Card>
       </div>
 
-      <Tabs defaultValue="visits" className="space-y-4" onValueChange={(value) => console.log('Tab changed to:', value)}>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
-          <TabsTrigger value="visits" onClick={() => console.log('Visits tab clicked')}>Medical Visits</TabsTrigger>
-          <TabsTrigger value="records" onClick={() => console.log('Records tab clicked')}>Medical Records</TabsTrigger>
-          <TabsTrigger value="medicine" onClick={() => console.log('Medicine tab clicked')}>Medicine Administration</TabsTrigger>
-          <TabsTrigger value="appointments" onClick={() => console.log('Appointments tab clicked')}>Appointments</TabsTrigger>
+          <TabsTrigger value="visits">Medical Visits</TabsTrigger>
+          <TabsTrigger value="records">Medical Records</TabsTrigger>
+          <TabsTrigger value="medicine">Medicine Administration</TabsTrigger>
+          <TabsTrigger value="appointments">Appointments</TabsTrigger>
         </TabsList>
 
         <TabsContent value="visits" className="space-y-4">

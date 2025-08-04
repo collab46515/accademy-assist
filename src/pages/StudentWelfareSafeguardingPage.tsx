@@ -3,8 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Shield, Plus, AlertTriangle, Users, Clock, CheckCircle } from "lucide-react";
+import { useState } from "react";
 
 const StudentWelfareSafeguardingPage = () => {
+  const [activeTab, setActiveTab] = useState("concerns");
+
+  const handleReportConcern = () => {
+    alert("Report Safeguarding Concern form will be implemented here");
+  };
+
+  const handleViewDetails = (concernId: string) => {
+    alert(`Viewing details for concern ${concernId}`);
+  };
   const mockConcerns = [
     {
       id: "SF-2024-001",
@@ -56,7 +66,7 @@ const StudentWelfareSafeguardingPage = () => {
             Manage safeguarding concerns and protect student welfare
           </p>
         </div>
-        <Button onClick={() => console.log('Report Concern button clicked')}>
+        <Button onClick={handleReportConcern}>
           <Plus className="mr-2 h-4 w-4" />
           Report Concern
         </Button>
@@ -106,12 +116,12 @@ const StudentWelfareSafeguardingPage = () => {
         </Card>
       </div>
 
-      <Tabs defaultValue="concerns" className="space-y-4" onValueChange={(value) => console.log('Safeguarding tab changed to:', value)}>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
-          <TabsTrigger value="concerns" onClick={() => console.log('Concerns tab clicked')}>Active Concerns</TabsTrigger>
-          <TabsTrigger value="actions" onClick={() => console.log('Actions tab clicked')}>Actions & Plans</TabsTrigger>
-          <TabsTrigger value="reviews" onClick={() => console.log('Reviews tab clicked')}>Reviews</TabsTrigger>
-          <TabsTrigger value="reports" onClick={() => console.log('Reports tab clicked')}>Reports</TabsTrigger>
+          <TabsTrigger value="concerns">Active Concerns</TabsTrigger>
+          <TabsTrigger value="actions">Actions & Plans</TabsTrigger>
+          <TabsTrigger value="reviews">Reviews</TabsTrigger>
+          <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="concerns" className="space-y-4">
@@ -142,7 +152,7 @@ const StudentWelfareSafeguardingPage = () => {
                         Reported {concern.reportedDate} • Last updated {concern.lastUpdate}
                       </p>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => console.log('View Details clicked for:', concern.id)}>
+                    <Button variant="outline" size="sm" onClick={() => handleViewDetails(concern.id)}>
                       View Details
                     </Button>
                   </div>
