@@ -128,15 +128,15 @@ export function TopicManager({
                     Add Topic
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
+                <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+                  <DialogHeader className="flex-shrink-0">
                     <DialogTitle>Add New Topic</DialogTitle>
                     <DialogDescription>
                       Create a new curriculum topic for {framework.name}
                     </DialogDescription>
                   </DialogHeader>
                   
-                  <div className="space-y-4 max-h-96 overflow-y-auto">
+                  <div className="flex-1 overflow-y-auto space-y-4 px-1">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="subject">Subject</Label>
