@@ -124,11 +124,35 @@ export function generateReportCardPDF(report: ReportCard) {
   doc.setFont('helvetica', 'bold');
   doc.text('ACADEMIC PERFORMANCE', 20, yPos);
   
-  // Grading Scale Legend
-  yPos += 10;
+  // Assessment & Grading Information Box
+  yPos += 15;
+  doc.setFillColor(lightBlue[0], lightBlue[1], lightBlue[2]);
+  doc.roundedRect(20, yPos - 5, 170, 35, 3, 3, 'F');
+  
+  doc.setTextColor(schoolBlue[0], schoolBlue[1], schoolBlue[2]);
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('ASSESSMENT & GRADING FRAMEWORK', 25, yPos + 5);
+  
+  doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
   doc.setFontSize(9);
-  doc.setTextColor(mediumGray[0], mediumGray[1], mediumGray[2]);
-  doc.text('Grading Scale: A (Exceptional 90-100%) • B (Proficient 70-89%) • C (Developing 50-69%) • D (Beginning 30-49%)', 20, yPos);
+  doc.setFont('helvetica', 'normal');
+  
+  const gradingInfo = [
+    'Grade A (90-100%): Exceptional - Exceeds expectations, demonstrates mastery and independent application of skills',
+    'Grade B (70-89%): Proficient - Meets expectations, demonstrates solid understanding and application',
+    'Grade C (50-69%): Developing - Approaching expectations, shows understanding with support needed',
+    'Grade D (30-49%): Beginning - Below expectations, requires significant support and intervention',
+    '',
+    'Effort Ratings: Excellent (Consistently exceeds expectations) • Good (Meets expectations) • Needs Improvement (Below expectations)'
+  ];
+  
+  gradingInfo.forEach((line, index) => {
+    if (line) {
+      const wrappedLine = doc.splitTextToSize(line, 165);
+      doc.text(wrappedLine, 25, yPos + 12 + (index * 4));
+    }
+  });
   
   // Performance Table Header
   yPos += 10;
