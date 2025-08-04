@@ -397,25 +397,8 @@ const CommunicationPage: React.FC = () => {
         <TabsContent value="reports">
           <CSVReportSection
             title="Communication Reports"
-            description="Export communication data for analysis"
-            filename="communications-report"
-            reportTypes={[
-              {
-                name: "All Communications",
-                description: "Complete list of all communications",
-                filters: {}
-              },
-              {
-                name: "Sent Communications", 
-                description: "Communications that have been sent",
-                filters: { status: 'sent' }
-              },
-              {
-                name: "Pending Approval",
-                description: "Communications awaiting approval", 
-                filters: { status: 'pending_approval' }
-              }
-            ]}
+            description="Export communication data for analysis and compliance"
+            moduleName="communications"
           />
         </TabsContent>
       </Tabs>
