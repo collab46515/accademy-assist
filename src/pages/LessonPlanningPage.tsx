@@ -1,6 +1,6 @@
 import React from 'react';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { LessonPlanning } from '@/components/curriculum/LessonPlanning';
+import { LessonPlanningClean } from '@/components/curriculum/LessonPlanningClean';
 import { useRBAC } from '@/hooks/useRBAC';
 
 const LessonPlanningPage = () => {
@@ -69,7 +69,7 @@ const LessonPlanningPage = () => {
         ]}
       />
       <div className="container mx-auto px-4 py-8 max-w-7xl pb-16">
-        <LessonPlanning 
+        <LessonPlanningClean 
           schoolId={currentSchool.id}
           canEdit={canManageLessons}
         />

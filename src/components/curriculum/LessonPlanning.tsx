@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Plus, Search, Calendar, Edit, Copy, Trash2, FileText, Clock, User, BookOpen, ChevronDown, Upload, Paperclip, Play, Pause, RotateCcw, Share2, Users, Link, Zap, BarChart3, TrendingUp, X, AlertTriangle, CheckCircle2, Target, BookmarkCheck, UserCheck, TrendingDown } from 'lucide-react';
+import { Plus, Search, Calendar, Edit, Copy, Trash2, FileText, Clock, User, BookOpen, ChevronDown, Upload, Paperclip, Play, Pause, RotateCcw, Share2, Users, Link, Zap, BarChart3, TrendingUp, X, AlertTriangle, CheckCircle2, Target, BookmarkCheck, UserCheck, TrendingDown, List, Grid, Save, Download, Filter, SortAsc, Eye, MoreHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
@@ -525,6 +525,7 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSubject, setFilterSubject] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [currentView, setCurrentView] = useState<'list' | 'calendar' | 'editor'>('list');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<LessonPlan | null>(null);
   const [expandedSections, setExpandedSections] = useState<string[]>(['hook']);
@@ -3641,18 +3642,93 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
               )}
             </div>
           </CardHeader>
-        <CardContent>
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search lesson plans..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+        <CardContent className="p-0">
+          {/* View Navigation */}
+          <div className="border-b bg-white p-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex bg-muted rounded-lg p-1">
+                  <Button
+                    variant={currentView === 'list' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setCurrentView('list')}
+                    className="flex items-center gap-2 h-8"
+                  >
+                    <List className="h-4 w-4" />
+                    <span className="hidden sm:inline">List</span>
+                  </Button>
+                  <Button
+                    variant={currentView === 'calendar' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setCurrentView('calendar')}
+                    className="flex items-center gap-2 h-8"
+                  >
+                    <Calendar className="h-4 w-4" />
+                    <span className="hidden sm:inline">Calendar</span>
+                  </Button>
+                  <Button
+                    variant={currentView === 'editor' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setCurrentView('editor')}
+                    className="flex items-center gap-2 h-8"
+                  >
+                    <Edit className="h-4 w-4" />
+                    <span className="hidden sm:inline">Editor</span>
+                  </Button>
+                </div>
+                
+                {currentView !== 'editor' && (
+                  <Badge className="bg-blue-100 text-blue-800 text-xs hidden sm:inline-flex">
+                    {filteredPlans.length} lessons
+                  </Badge>
+                )}
+              </div>
+
+              {/* Quick Actions */}
+              <div className="flex items-center gap-2">
+                {currentView === 'list' && (
+                  <>
+                    <Button variant="outline" size="sm" className="flex items-center gap-2">
+                      <Download className="h-4 w-4" />
+                      <span className="hidden sm:inline">Export</span>
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex items-center gap-2">
+                      <Filter className="h-4 w-4" />
+                      <span className="hidden sm:inline">Filter</span>
+                    </Button>
+                  </>
+                )}
+                
+                {canEdit && (
+                  <Button 
+                    onClick={() => {
+                      if (currentView === 'editor') {
+                        // Already in editor, just reset form
+                        resetForm();
+                      } else {
+                        setCurrentView('editor');
+                        setIsDialogOpen(false);
+                        setEditingPlan(null);
+                        resetForm();
+                      }
+                    }}
+                    className="flex items-center gap-2 animate-fade-in"
+                  >
+                    <Plus className="h-4 w-4" />
+                    New Lesson
+                  </Button>
+                )}
+              </div>
             </div>
+          </div>
+
+          {/* View Content */}
+          <div className="animate-fade-in">
+            {currentView === 'list' && <ListView />}
+            {currentView === 'calendar' && <CalendarView />}
+            {currentView === 'editor' && <EditorView />}
+          </div>
+        </CardContent>
             <Select value={filterSubject} onValueChange={setFilterSubject}>
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Filter by subject" />
