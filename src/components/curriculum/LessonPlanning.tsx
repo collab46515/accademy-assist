@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Plus, Search, Calendar, Edit, Copy, Trash2, FileText, Clock, User, BookOpen, ChevronDown, Upload, Paperclip, Play, Pause, RotateCcw, Share2, Users, Link, Zap, BarChart3 } from 'lucide-react';
+import { Plus, Search, Calendar, Edit, Copy, Trash2, FileText, Clock, User, BookOpen, ChevronDown, Upload, Paperclip, Play, Pause, RotateCcw, Share2, Users, Link, Zap, BarChart3, TrendingUp, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
@@ -168,6 +168,7 @@ interface LessonPlan {
   sequence: LessonSequence;
   integration: LessonIntegration;
   total_planned_time: number;
+  post_lesson_reflection?: PostLessonReflection;
 }
 
 interface LessonPlanFormData {
@@ -190,14 +191,42 @@ interface LessonPlanFormData {
   sequence: LessonSequence;
   integration: LessonIntegration;
   status: 'draft' | 'completed';
+  post_lesson_reflection?: PostLessonReflection;
 }
 
-// Default collaboration template
+// Post-lesson reflection for professional growth
+interface PostLessonReflection {
+  completed_at?: string;
+  completed_by?: string;
+  actual_duration_minutes?: number;
+  reflection_notes: string;
+  student_feedback?: string;
+  next_steps: string[];
+  what_worked_well: string[];
+  areas_for_improvement: string[];
+  student_engagement_rating: number; // 1-5 scale
+  learning_objectives_met: boolean[];
+  would_teach_again: boolean;
+  modifications_for_next_time: string;
+}
 const createDefaultCollaboration = (): LessonCollaboration => ({
   shared_with: [],
   created_by: 'current-user-id',
   last_modified_by: 'current-user-id',
   modification_history: []
+});
+
+// Default post-lesson reflection
+const createDefaultPostLessonReflection = (): PostLessonReflection => ({
+  reflection_notes: '',
+  student_feedback: '',
+  next_steps: [''],
+  what_worked_well: [''],
+  areas_for_improvement: [''],
+  student_engagement_rating: 3,
+  learning_objectives_met: [],
+  would_teach_again: true,
+  modifications_for_next_time: ''
 });
 
 // Default sequence template
@@ -520,7 +549,8 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
     collaboration: createDefaultCollaboration(),
     sequence: createDefaultSequence(),
     integration: createDefaultIntegration(),
-    status: 'draft'
+    status: 'draft',
+    post_lesson_reflection: createDefaultPostLessonReflection()
   });
 
   const resetForm = () => {
@@ -543,7 +573,8 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
       collaboration: createDefaultCollaboration(),
       sequence: createDefaultSequence(),
       integration: createDefaultIntegration(),
-      status: 'draft'
+      status: 'draft',
+      post_lesson_reflection: createDefaultPostLessonReflection()
     });
     setExpandedSections(['hook']);
   };
@@ -628,7 +659,8 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
       collaboration: plan.collaboration || createDefaultCollaboration(),
       sequence: plan.sequence || createDefaultSequence(),
       integration: plan.integration || createDefaultIntegration(),
-      status: 'draft'
+      status: 'draft',
+      post_lesson_reflection: plan.post_lesson_reflection || createDefaultPostLessonReflection()
     });
     setExpandedSections(['hook']);
     setIsDialogOpen(true);
@@ -2935,6 +2967,355 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
                             </div>
                           </div>
                         </div>
+
+                        {/* Post-Lesson Reflection (Professional Growth) */}
+                        {formData.status === 'completed' && (
+                          <div className="mt-6 p-4 bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-lg">
+                            <div className="flex items-center gap-2 mb-4">
+                              <TrendingUp className="h-5 w-5 text-emerald-600" />
+                              <span className="font-medium text-emerald-800">Post-Lesson Reflection (Professional Growth)</span>
+                              <Badge className="bg-emerald-100 text-emerald-800 text-xs">🔁 Continuous Improvement</Badge>
+                            </div>
+                            
+                            <div className="space-y-4">
+                              {/* Auto-Log */}
+                              <div className="bg-white p-3 rounded border">
+                                <Label className="text-sm font-medium text-gray-700">📊 Auto-Log</Label>
+                                <div className="grid grid-cols-3 gap-4 mt-2 text-sm">
+                                  <div>
+                                    <span className="text-gray-500">Completed by:</span>
+                                    <div className="font-medium">{formData.post_lesson_reflection?.completed_by || 'Current Teacher'}</div>
+                                  </div>
+                                  <div>
+                                    <span className="text-gray-500">Completed at:</span>
+                                    <div className="font-medium">{formData.post_lesson_reflection?.completed_at || new Date().toLocaleString()}</div>
+                                  </div>
+                                  <div>
+                                    <span className="text-gray-500">Actual duration:</span>
+                                    <div className="font-medium">
+                                      {formData.post_lesson_reflection?.actual_duration_minutes || formData.duration_minutes} minutes
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Student Engagement Rating */}
+                              <div>
+                                <Label htmlFor="engagement-rating" className="text-sm font-medium">
+                                  Student Engagement Rating (1-5 scale)
+                                </Label>
+                                <div className="flex items-center gap-3 mt-2">
+                                  <input
+                                    type="range"
+                                    id="engagement-rating"
+                                    min="1"
+                                    max="5"
+                                    value={formData.post_lesson_reflection?.student_engagement_rating || 3}
+                                    onChange={(e) => setFormData(prev => ({
+                                      ...prev,
+                                      post_lesson_reflection: {
+                                        ...prev.post_lesson_reflection!,
+                                        student_engagement_rating: parseInt(e.target.value)
+                                      }
+                                    }))}
+                                    className="flex-1"
+                                  />
+                                  <span className="text-lg font-bold text-emerald-600">
+                                    {formData.post_lesson_reflection?.student_engagement_rating || 3}/5
+                                  </span>
+                                </div>
+                                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                  <span>Low</span>
+                                  <span>High</span>
+                                </div>
+                              </div>
+
+                              {/* Reflection Notes */}
+                              <div>
+                                <Label htmlFor="reflection-notes" className="text-sm font-medium">
+                                  Reflection Notes
+                                </Label>
+                                <textarea
+                                  id="reflection-notes"
+                                  placeholder="e.g., Students struggled with zero in place value, Used too much time on starter..."
+                                  value={formData.post_lesson_reflection?.reflection_notes || ''}
+                                  onChange={(e) => setFormData(prev => ({
+                                    ...prev,
+                                    post_lesson_reflection: {
+                                      ...prev.post_lesson_reflection!,
+                                      reflection_notes: e.target.value
+                                    }
+                                  }))}
+                                  className="w-full p-3 border rounded-md text-sm min-h-[80px] resize-y"
+                                />
+                              </div>
+
+                              {/* Student Feedback */}
+                              <div>
+                                <Label htmlFor="student-feedback" className="text-sm font-medium">
+                                  Student Feedback (Optional)
+                                </Label>
+                                <textarea
+                                  id="student-feedback"
+                                  placeholder="e.g., 3 students asked for more examples, Most enjoyed the hands-on activity..."
+                                  value={formData.post_lesson_reflection?.student_feedback || ''}
+                                  onChange={(e) => setFormData(prev => ({
+                                    ...prev,
+                                    post_lesson_reflection: {
+                                      ...prev.post_lesson_reflection!,
+                                      student_feedback: e.target.value
+                                    }
+                                  }))}
+                                  className="w-full p-3 border rounded-md text-sm min-h-[60px] resize-y"
+                                />
+                              </div>
+
+                              <div className="grid md:grid-cols-2 gap-4">
+                                {/* What Worked Well */}
+                                <div>
+                                  <Label className="text-sm font-medium">What Worked Well ✅</Label>
+                                  <div className="space-y-2 mt-2">
+                                    {formData.post_lesson_reflection?.what_worked_well.map((item, index) => (
+                                      <div key={index} className="flex gap-2">
+                                        <input
+                                          type="text"
+                                          placeholder="e.g., Visual aids helped understanding"
+                                          value={item}
+                                          onChange={(e) => {
+                                            const newItems = [...(formData.post_lesson_reflection?.what_worked_well || [''])];
+                                            newItems[index] = e.target.value;
+                                            setFormData(prev => ({
+                                              ...prev,
+                                              post_lesson_reflection: {
+                                                ...prev.post_lesson_reflection!,
+                                                what_worked_well: newItems
+                                              }
+                                            }));
+                                          }}
+                                          className="flex-1 p-2 border rounded text-sm"
+                                        />
+                                        {index > 0 && (
+                                          <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                              const newItems = formData.post_lesson_reflection?.what_worked_well.filter((_, i) => i !== index) || [];
+                                              setFormData(prev => ({
+                                                ...prev,
+                                                post_lesson_reflection: {
+                                                  ...prev.post_lesson_reflection!,
+                                                  what_worked_well: newItems
+                                                }
+                                              }));
+                                            }}
+                                          >
+                                            <X className="h-3 w-3" />
+                                          </Button>
+                                        )}
+                                      </div>
+                                    ))}
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => setFormData(prev => ({
+                                        ...prev,
+                                        post_lesson_reflection: {
+                                          ...prev.post_lesson_reflection!,
+                                          what_worked_well: [...(prev.post_lesson_reflection?.what_worked_well || []), '']
+                                        }
+                                      }))}
+                                      className="text-xs"
+                                    >
+                                      <Plus className="h-3 w-3 mr-1" />
+                                      Add Success
+                                    </Button>
+                                  </div>
+                                </div>
+
+                                {/* Areas for Improvement */}
+                                <div>
+                                  <Label className="text-sm font-medium">Areas for Improvement 🎯</Label>
+                                  <div className="space-y-2 mt-2">
+                                    {formData.post_lesson_reflection?.areas_for_improvement.map((item, index) => (
+                                      <div key={index} className="flex gap-2">
+                                        <input
+                                          type="text"
+                                          placeholder="e.g., Need more wait time for questions"
+                                          value={item}
+                                          onChange={(e) => {
+                                            const newItems = [...(formData.post_lesson_reflection?.areas_for_improvement || [''])];
+                                            newItems[index] = e.target.value;
+                                            setFormData(prev => ({
+                                              ...prev,
+                                              post_lesson_reflection: {
+                                                ...prev.post_lesson_reflection!,
+                                                areas_for_improvement: newItems
+                                              }
+                                            }));
+                                          }}
+                                          className="flex-1 p-2 border rounded text-sm"
+                                        />
+                                        {index > 0 && (
+                                          <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                              const newItems = formData.post_lesson_reflection?.areas_for_improvement.filter((_, i) => i !== index) || [];
+                                              setFormData(prev => ({
+                                                ...prev,
+                                                post_lesson_reflection: {
+                                                  ...prev.post_lesson_reflection!,
+                                                  areas_for_improvement: newItems
+                                                }
+                                              }));
+                                            }}
+                                          >
+                                            <X className="h-3 w-3" />
+                                          </Button>
+                                        )}
+                                      </div>
+                                    ))}
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => setFormData(prev => ({
+                                        ...prev,
+                                        post_lesson_reflection: {
+                                          ...prev.post_lesson_reflection!,
+                                          areas_for_improvement: [...(prev.post_lesson_reflection?.areas_for_improvement || []), '']
+                                        }
+                                      }))}
+                                      className="text-xs"
+                                    >
+                                      <Plus className="h-3 w-3 mr-1" />
+                                      Add Improvement
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Next Steps */}
+                              <div>
+                                <Label className="text-sm font-medium">Next Steps 🚀</Label>
+                                <div className="space-y-2 mt-2">
+                                  {formData.post_lesson_reflection?.next_steps.map((step, index) => (
+                                    <div key={index} className="flex gap-2">
+                                      <input
+                                        type="text"
+                                        placeholder="e.g., Re-teach on Friday, Move to next topic"
+                                        value={step}
+                                        onChange={(e) => {
+                                          const newSteps = [...(formData.post_lesson_reflection?.next_steps || [''])];
+                                          newSteps[index] = e.target.value;
+                                          setFormData(prev => ({
+                                            ...prev,
+                                            post_lesson_reflection: {
+                                              ...prev.post_lesson_reflection!,
+                                              next_steps: newSteps
+                                            }
+                                          }));
+                                        }}
+                                        className="flex-1 p-2 border rounded text-sm"
+                                      />
+                                      {index > 0 && (
+                                        <Button
+                                          type="button"
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => {
+                                            const newSteps = formData.post_lesson_reflection?.next_steps.filter((_, i) => i !== index) || [];
+                                            setFormData(prev => ({
+                                              ...prev,
+                                              post_lesson_reflection: {
+                                                ...prev.post_lesson_reflection!,
+                                                next_steps: newSteps
+                                              }
+                                            }));
+                                          }}
+                                        >
+                                          <X className="h-3 w-3" />
+                                        </Button>
+                                      )}
+                                    </div>
+                                  ))}
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setFormData(prev => ({
+                                      ...prev,
+                                      post_lesson_reflection: {
+                                        ...prev.post_lesson_reflection!,
+                                        next_steps: [...(prev.post_lesson_reflection?.next_steps || []), '']
+                                      }
+                                    }))}
+                                    className="text-xs"
+                                  >
+                                    <Plus className="h-3 w-3 mr-1" />
+                                    Add Next Step
+                                  </Button>
+                                </div>
+                              </div>
+
+                              {/* Quick Actions */}
+                              <div>
+                                <Label className="text-sm font-medium">Quick Reflection Questions</Label>
+                                <div className="space-y-3 mt-2">
+                                  <div className="flex items-center gap-3">
+                                    <input
+                                      type="checkbox"
+                                      id="would-teach-again"
+                                      checked={formData.post_lesson_reflection?.would_teach_again || false}
+                                      onChange={(e) => setFormData(prev => ({
+                                        ...prev,
+                                        post_lesson_reflection: {
+                                          ...prev.post_lesson_reflection!,
+                                          would_teach_again: e.target.checked
+                                        }
+                                      }))}
+                                      className="rounded text-emerald-600"
+                                    />
+                                    <Label htmlFor="would-teach-again" className="text-sm">
+                                      Would you teach this lesson the same way again?
+                                    </Label>
+                                  </div>
+                                  
+                                  {!formData.post_lesson_reflection?.would_teach_again && (
+                                    <div>
+                                      <Label htmlFor="modifications" className="text-sm font-medium text-orange-700">
+                                        What would you change for next time?
+                                      </Label>
+                                      <textarea
+                                        id="modifications"
+                                        placeholder="Describe the key modifications you would make..."
+                                        value={formData.post_lesson_reflection?.modifications_for_next_time || ''}
+                                        onChange={(e) => setFormData(prev => ({
+                                          ...prev,
+                                          post_lesson_reflection: {
+                                            ...prev.post_lesson_reflection!,
+                                            modifications_for_next_time: e.target.value
+                                          }
+                                        }))}
+                                        className="w-full p-3 border rounded-md text-sm min-h-[60px] resize-y mt-2"
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Professional Growth Summary */}
+                              <div className="bg-emerald-100 p-3 rounded border text-center">
+                                <div className="text-sm text-emerald-800">
+                                  🌟 <strong>Professional Growth Tracker</strong> - This reflection will help you identify patterns and improve your teaching practice over time.
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         <div className="flex justify-end gap-2 pt-4 border-t">
                           <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
