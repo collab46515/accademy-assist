@@ -421,8 +421,14 @@ export function generateReportCardPDF(report: ReportCard) {
     doc.text(target, 20, yPos + (index * 8));
   });
   
-  // Teacher's General Comment
-  yPos += 45;
+  // Teacher's General Comment - check if we need a new page
+  if (yPos + 80 > 250) { // Need at least 80px for comment section + footer space
+    doc.addPage();
+    yPos = 30;
+  } else {
+    yPos += 45;
+  }
+  
   doc.setTextColor(schoolBlue[0], schoolBlue[1], schoolBlue[2]);
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
@@ -435,10 +441,35 @@ export function generateReportCardPDF(report: ReportCard) {
   
   const teacherComment = `${report.student_name} has had an excellent term and should be proud of their achievements. They consistently demonstrate a positive attitude towards learning and show great potential. With continued effort and focus on the development areas identified, I am confident they will achieve even greater success next term. Well done!`;
   const wrappedComment = doc.splitTextToSize(teacherComment, 170);
+  
+  // Check if comment fits on current page
+  const commentHeight = wrappedComment.length * 5; // Approximate line height
+  if (yPos + commentHeight + 60 > 250) { // Need space for comment + signatures + footer
+    doc.addPage();
+    yPos = 30;
+    
+    // Repeat header
+    doc.setTextColor(schoolBlue[0], schoolBlue[1], schoolBlue[2]);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('TEACHER\'S COMMENT', 20, yPos);
+    
+    yPos += 15;
+    doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+  }
+  
   doc.text(wrappedComment, 20, yPos);
   
-  // Signature section
-  yPos += 40;
+  // Signature section - ensure it fits
+  yPos += Math.max(40, wrappedComment.length * 5 + 20);
+  
+  if (yPos + 40 > 250) { // Need space for signatures
+    doc.addPage();
+    yPos = 30;
+  }
+  
   doc.setFontSize(11);
   doc.text('Class Teacher: _______________________', 20, yPos);
   doc.text('Date: _________________', 120, yPos);
