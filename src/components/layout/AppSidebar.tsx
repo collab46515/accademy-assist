@@ -35,8 +35,10 @@ import {
   Bell,
   PenTool,
   ClipboardList,
-  CheckSquare
+  CheckSquare,
+  LogOut
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 import {
   Sidebar,
@@ -320,9 +322,14 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
 export function AppSidebar() {
   const location = useLocation();
   const { state } = useSidebar();
+  const { signOut, user } = useAuth();
   
   const currentModule = getCurrentModule(location.pathname);
   const currentModuleData = erpModules.find(module => module.title === currentModule);
+
+  const handleLogout = async () => {
+    await signOut();
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r">
@@ -371,6 +378,26 @@ export function AppSidebar() {
             defaultOpen={true}
           />
         )}
+        
+        {/* User section */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  onClick={handleLogout}
+                  tooltip={state === "collapsed" ? "Sign Out" : undefined}
+                  className="text-destructive hover:text-destructive"
+                >
+                  <div className="flex items-center gap-3">
+                    <LogOut className="h-4 w-4" />
+                    {state !== "collapsed" && <span>Sign Out</span>}
+                  </div>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
     </Sidebar>
   );
