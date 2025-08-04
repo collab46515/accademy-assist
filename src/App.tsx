@@ -43,6 +43,7 @@ import StudentWelfareSafeguardingPage from "./pages/StudentWelfareSafeguardingPa
 import HODDashboardPage from "./pages/HODDashboardPage";
 import AdminManagementPage from "./pages/AdminManagementPage";
 import AssignmentsPage from "./pages/AssignmentsPage";
+import ReportCardsPage from "./pages/ReportCardsPage";
 import { StudentSubmissionInterface } from "@/components/assignments/StudentSubmissionInterface";
 import Index from "./pages/Index";
 
@@ -85,6 +86,7 @@ const App = () => (
                           <Route path="/academics/assignments/:id" element={<AssignmentsPage />} />
                           <Route path="/academics/assignments/:id/submit" element={<StudentSubmissionInterface />} />
                           <Route path="/academics/gradebook" element={<GradebookPage />} />
+                          <Route path="/academics/reports" element={<ReportCardsPage />} />
                           <Route path="/academics/exams" element={<ExamsPage />} />
                           <Route path="/academics/attendance" element={<AttendancePage />} />
                           <Route path="/attendance" element={<AttendancePage />} />
