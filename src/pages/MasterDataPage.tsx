@@ -790,15 +790,10 @@ export function MasterDataPage() {
 
       <div className="p-6 space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="schools">Schools</TabsTrigger>
-            <TabsTrigger value="subjects">Subjects</TabsTrigger>
-            <TabsTrigger value="students">Students</TabsTrigger>
-            <TabsTrigger value="parents">Parents</TabsTrigger>
-            <TabsTrigger value="fee-management">Fee Management</TabsTrigger>
-            <TabsTrigger value="hr-management">HR Management</TabsTrigger>
-            <TabsTrigger value="accounting">Accounting</TabsTrigger>
+            <TabsTrigger value="academic">Academic Data</TabsTrigger>
+            <TabsTrigger value="business">Business Data</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -914,80 +909,100 @@ export function MasterDataPage() {
             </div>
           </TabsContent>
 
-          {/* Entity Management Tabs */}
-          {['schools', 'subjects', 'students', 'parents'].map((entityType) => (
-            <TabsContent key={entityType} value={entityType} className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2 capitalize">
-                      {entityType === 'schools' && <SchoolIcon className="h-5 w-5" />}
-                      {entityType === 'subjects' && <BookOpen className="h-5 w-5" />}
-                      {entityType === 'students' && <GraduationCap className="h-5 w-5" />}
-                      {entityType === 'parents' && <Home className="h-5 w-5" />}
-                      {entityType} Management
-                    </CardTitle>
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder={`Search ${entityType}...`}
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pl-10 w-64"
-                        />
+          {/* Academic Data Tab */}
+          <TabsContent value="academic" className="space-y-6">
+            <Tabs defaultValue="schools" className="space-y-4">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="schools">Schools</TabsTrigger>
+                <TabsTrigger value="subjects">Subjects</TabsTrigger>
+                <TabsTrigger value="students">Students</TabsTrigger>
+                <TabsTrigger value="parents">Parents</TabsTrigger>
+              </TabsList>
+
+              {/* Academic Entity Management */}
+              {['schools', 'subjects', 'students', 'parents'].map((entityType) => (
+                <TabsContent key={entityType} value={entityType} className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center gap-2 capitalize">
+                          {entityType === 'schools' && <SchoolIcon className="h-5 w-5" />}
+                          {entityType === 'subjects' && <BookOpen className="h-5 w-5" />}
+                          {entityType === 'students' && <GraduationCap className="h-5 w-5" />}
+                          {entityType === 'parents' && <Home className="h-5 w-5" />}
+                          {entityType} Management
+                        </CardTitle>
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              placeholder={`Search ${entityType}...`}
+                              value={searchTerm}
+                              onChange={(e) => setSearchTerm(e.target.value)}
+                              className="pl-10 w-64"
+                            />
+                          </div>
+                          {entityType !== 'parents' && (
+                            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                              <DialogTrigger asChild>
+                                <Button onClick={() => { setEditingItem(null); form.reset(); setActiveTab(entityType); }}>
+                                  <Plus className="h-4 w-4 mr-2" />
+                                  Add {entityType.slice(0, -1)}
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-2xl">
+                                <DialogHeader>
+                                  <DialogTitle>
+                                    {editingItem ? 'Edit' : 'Add New'} {entityType.slice(0, -1)}
+                                  </DialogTitle>
+                                </DialogHeader>
+                                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+                                  {renderEntityForm()}
+                                  <div className="flex justify-end gap-3 pt-4 border-t">
+                                    <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                                      Cancel
+                                    </Button>
+                                    <Button type="submit">
+                                      {editingItem ? 'Update' : 'Add'} {entityType.slice(0, -1)}
+                                    </Button>
+                                  </div>
+                                </form>
+                              </DialogContent>
+                            </Dialog>
+                          )}
+                        </div>
                       </div>
-                      {entityType !== 'parents' && (
-                        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                          <DialogTrigger asChild>
-                            <Button onClick={() => { setEditingItem(null); form.reset(); }}>
-                              <Plus className="h-4 w-4 mr-2" />
-                              Add {entityType.slice(0, -1)}
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>
-                                {editingItem ? 'Edit' : 'Add New'} {entityType.slice(0, -1)}
-                              </DialogTitle>
-                            </DialogHeader>
-                            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                              {renderEntityForm()}
-                              <div className="flex justify-end gap-3">
-                                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                                  Cancel
-                                </Button>
-                                <Button type="submit">
-                                  {editingItem ? 'Update' : 'Add'} {entityType.slice(0, -1)}
-                                </Button>
-                              </div>
-                            </form>
-                          </DialogContent>
-                        </Dialog>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {renderEntityTable(filteredData[entityType as keyof typeof filteredData], entityType)}
-                </CardContent>
-              </Card>
-            </TabsContent>
-          ))}
-
-          {/* Fee Management Tab */}
-          <TabsContent value="fee-management" className="space-y-6">
-            <FeeManagementMasterData />
+                    </CardHeader>
+                    <CardContent>
+                      {renderEntityTable(filteredData[entityType as keyof typeof filteredData], entityType)}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              ))}
+            </Tabs>
           </TabsContent>
 
-          {/* HR Management Tab */}
-          <TabsContent value="hr-management" className="space-y-6">
-            <HRMasterData />
-          </TabsContent>
+          {/* Business Data Tab */}
+          <TabsContent value="business" className="space-y-6">
+            <Tabs defaultValue="fee-management" className="space-y-4">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="fee-management">Fee Management</TabsTrigger>
+                <TabsTrigger value="hr-management">HR Management</TabsTrigger>
+                <TabsTrigger value="accounting">Accounting</TabsTrigger>
+              </TabsList>
 
-          {/* Accounting Tab */}
-          <TabsContent value="accounting" className="space-y-6">
-            <AccountingMasterData />
+              <TabsContent value="fee-management" className="space-y-6">
+                <FeeManagementMasterData />
+              </TabsContent>
+
+              <TabsContent value="hr-management" className="space-y-6">
+                <HRMasterData />
+              </TabsContent>
+
+              <TabsContent value="accounting" className="space-y-6">
+                <AccountingMasterData />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
       </div>

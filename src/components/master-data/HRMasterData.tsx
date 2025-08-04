@@ -369,9 +369,12 @@ export function HRMasterData() {
   const availableItems = totalMasterItems - installedItems;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">HR Master Data Management</h2>
+    <div className="max-w-7xl mx-auto space-y-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold">HR Master Data</h2>
+          <p className="text-muted-foreground">Install essential HR data for your school</p>
+        </div>
         <Button onClick={installMasterData} disabled={installing || availableItems === 0}>
           {installing ? (
             <>
