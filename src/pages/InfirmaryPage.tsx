@@ -5,6 +5,7 @@ import { Activity, Plus, Users, Calendar, Pill, FileText } from "lucide-react";
 import { useState } from "react";
 import { MedicalVisitForm, TodaysVisitsModal, ActiveCasesModal, MedicineGivenModal, AppointmentsModal } from "@/components/infirmary";
 import { CSVReportSection } from "@/components/shared/CSVReportSection";
+import { useInfirmaryData } from "@/hooks/useInfirmaryData";
 
 const InfirmaryPage = () => {
   const [activeTab, setActiveTab] = useState("visits");
@@ -14,8 +15,16 @@ const InfirmaryPage = () => {
   const [showMedicineGiven, setShowMedicineGiven] = useState(false);
   const [showAppointments, setShowAppointments] = useState(false);
 
+  // Get real data from the database
+  const { visits, stats, loading, refreshData } = useInfirmaryData();
+
   const handleNewMedicalVisit = () => {
     setShowMedicalVisitForm(true);
+  };
+
+  const handleVisitCreated = () => {
+    // Refresh all data when a new visit is created
+    refreshData();
   };
 
   return (
@@ -41,7 +50,7 @@ const InfirmaryPage = () => {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8</div>
+            <div className="text-2xl font-bold">{loading ? "..." : stats.todaysVisits}</div>
             <p className="text-xs text-muted-foreground">Students seen today</p>
           </CardContent>
         </Card>
@@ -51,7 +60,7 @@ const InfirmaryPage = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">23</div>
+            <div className="text-2xl font-bold">{loading ? "..." : stats.activeCases}</div>
             <p className="text-xs text-muted-foreground">Ongoing medical needs</p>
           </CardContent>
         </Card>
@@ -61,7 +70,7 @@ const InfirmaryPage = () => {
             <Pill className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">15</div>
+            <div className="text-2xl font-bold">{loading ? "..." : stats.medicineGiven}</div>
             <p className="text-xs text-muted-foreground">Doses administered today</p>
           </CardContent>
         </Card>
@@ -71,7 +80,7 @@ const InfirmaryPage = () => {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">5</div>
+            <div className="text-2xl font-bold">{loading ? "..." : stats.appointments}</div>
             <p className="text-xs text-muted-foreground">Scheduled for today</p>
           </CardContent>
         </Card>
@@ -159,7 +168,8 @@ const InfirmaryPage = () => {
 
       <MedicalVisitForm 
         open={showMedicalVisitForm} 
-        onOpenChange={setShowMedicalVisitForm} 
+        onOpenChange={setShowMedicalVisitForm}
+        onVisitCreated={handleVisitCreated}
       />
       
       <TodaysVisitsModal 

@@ -16,6 +16,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const medicalVisitSchema = z.object({
   studentId: z.string().min(1, "Please select a student"),
@@ -60,6 +61,7 @@ type MedicalVisitFormData = z.infer<typeof medicalVisitSchema>;
 interface MedicalVisitFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onVisitCreated?: () => void; // Callback to refresh data
 }
 
 const visitTypeOptions = [
@@ -80,7 +82,7 @@ const mockStudents = [
   { id: "5", name: "Tom Brown", class: "Year 11B" },
 ];
 
-export function MedicalVisitForm({ open, onOpenChange }: MedicalVisitFormProps) {
+export function MedicalVisitForm({ open, onOpenChange, onVisitCreated }: MedicalVisitFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -97,17 +99,60 @@ export function MedicalVisitForm({ open, onOpenChange }: MedicalVisitFormProps) 
   const onSubmit = async (data: MedicalVisitFormData) => {
     setIsSubmitting(true);
     try {
-      // Here we would save to the database
-      console.log("Medical Visit Data:", data);
-      
+      // Prepare data for database
+      const visitData = {
+        student_id: data.studentId,
+        visit_type: data.visitType,
+        chief_complaint: data.chiefComplaint,
+        symptoms: data.symptoms || null,
+        vital_signs: {
+          temperature: data.temperature || null,
+          blood_pressure: data.bloodPressure || null, 
+          pulse: data.pulse || null,
+          respiratory_rate: data.respiratoryRate || null,
+        },
+        treatment_given: data.treatmentGiven || null,
+        medications_administered: data.medicationsAdministered ? [
+          {
+            medication: data.medicationsAdministered,
+            administered_at: new Date().toISOString(),
+            administered_by: "current_user" // This would come from auth context
+          }
+        ] : null,
+        recommendations: data.recommendations || null,
+        follow_up_required: data.followUpRequired,
+        follow_up_date: data.followUpDate ? data.followUpDate.toISOString() : null,
+        parent_notified: data.parentNotified,
+        parent_notification_time: data.parentNotified ? new Date().toISOString() : null,
+        created_by: "current_user", // This would come from auth context
+      };
+
+      // Save to database
+      const { data: savedVisit, error } = await supabase
+        .from('medical_visits')
+        .insert(visitData)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
       toast({
         title: "Medical Visit Recorded",
-        description: `Visit for ${data.studentName} has been successfully recorded.`,
+        description: `Visit for ${data.studentName} has been successfully recorded with ID ${savedVisit.reference_number}.`,
       });
       
       form.reset();
       onOpenChange(false);
+      
+      // Trigger refresh of parent component data
+      if (onVisitCreated) {
+        onVisitCreated();
+      }
+      
     } catch (error) {
+      console.error('Error saving medical visit:', error);
       toast({
         title: "Error",
         description: "Failed to record medical visit. Please try again.",
