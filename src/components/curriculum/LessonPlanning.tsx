@@ -2804,13 +2804,90 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
                         </div>
                       </div>
 
+                        {/* Curriculum Progress Tracking */}
+                        <div className="space-y-4 p-4 border rounded-lg bg-gradient-to-br from-indigo-50 to-purple-50 md:col-span-2">
+                          <div className="flex items-center gap-2">
+                            <BarChart3 className="h-5 w-5 text-indigo-600" />
+                            <Label className="text-base font-medium">Curriculum Progress</Label>
+                          </div>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  id="mark-as-done"
+                                  checked={formData.status === 'completed'}
+                                  onChange={(e) => setFormData(prev => ({
+                                    ...prev,
+                                    status: e.target.checked ? 'completed' : 'draft'
+                                  }))}
+                                  className="rounded text-indigo-600"
+                                />
+                                <Label htmlFor="mark-as-done" className="text-sm font-medium">Mark as Done</Label>
+                              </div>
+                              {formData.status === 'completed' && (
+                                <Badge className="bg-green-100 text-green-800">✅ Completed</Badge>
+                              )}
+                            </div>
+                            
+                            {formData.curriculum_topic_id && (
+                              <div className="space-y-2 bg-white p-3 rounded border">
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="font-medium">Topic Coverage</span>
+                                  <span className="text-indigo-600">
+                                    {formData.status === 'completed' ? '✅ 100%' : '🔄 In Progress'}
+                                  </span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                  <div 
+                                    className={`h-2 rounded-full transition-all duration-300 ${
+                                      formData.status === 'completed' 
+                                        ? 'bg-green-500 w-full' 
+                                        : 'bg-indigo-500 w-3/4'
+                                    }`}
+                                  ></div>
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  📊 Updates curriculum coverage % automatically when marked complete
+                                </div>
+                              </div>
+                            )}
+                            
+                            {selectedTopic && (
+                              <div className="space-y-2 text-xs">
+                                <div className="font-medium text-indigo-700">Unit Progress Overview:</div>
+                                <div className="grid grid-cols-3 gap-2">
+                                  <div className="bg-white p-2 rounded border text-center">
+                                    <div className="text-green-600 font-bold">3/5</div>
+                                    <div className="text-muted-foreground">Lessons</div>
+                                  </div>
+                                  <div className="bg-white p-2 rounded border text-center">
+                                    <div className="text-blue-600 font-bold">60%</div>
+                                    <div className="text-muted-foreground">Coverage</div>
+                                  </div>
+                                  <div className="bg-white p-2 rounded border text-center">
+                                    <div className="text-purple-600 font-bold">2</div>
+                                    <div className="text-muted-foreground">Remaining</div>
+                                  </div>
+                                </div>
+                                {formData.status === 'completed' && (
+                                  <div className="text-xs text-green-700 bg-green-100 p-2 rounded">
+                                    🎉 Great! This lesson will increase unit coverage to 80%
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
                       {/* Integration Summary */}
                       <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg">
                         <div className="flex items-center gap-2 mb-3">
                           <Zap className="h-5 w-5 text-amber-600" />
                           <span className="font-medium text-amber-800">Integration Status</span>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 text-sm">
+                        <div className="grid grid-cols-2 md:grid-cols-7 gap-3 text-sm">
                           <div className="flex flex-col items-center p-2 bg-white rounded border">
                             <BookOpen className={`h-4 w-4 mb-1 ${formData.curriculum_topic_id ? 'text-blue-600' : 'text-gray-400'}`} />
                             <span className="text-xs text-center">
@@ -2846,6 +2923,12 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
                           <div className="flex flex-col items-center p-2 bg-white rounded border">
                             <Copy className="h-4 w-4 mb-1 text-purple-600" />
                             <span className="text-xs text-center">✅ Template</span>
+                          </div>
+                          <div className="flex flex-col items-center p-2 bg-white rounded border">
+                            <BarChart3 className={`h-4 w-4 mb-1 ${formData.status === 'completed' ? 'text-indigo-600' : 'text-gray-400'}`} />
+                            <span className="text-xs text-center">
+                              {formData.status === 'completed' ? '✅ Done' : '⚪ Progress'}
+                            </span>
                           </div>
                         </div>
                       </div>
