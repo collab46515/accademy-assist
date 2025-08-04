@@ -74,7 +74,9 @@ const CurriculumPage = () => {
   );
 
   const handleFrameworkSelect = (framework: CurriculumFramework) => {
+    console.log('Framework selected:', framework);
     setSelectedFramework(framework);
+    setActiveTab('topics'); // Auto-switch to topics tab when framework is selected
   };
 
   if (loading) {
@@ -113,6 +115,14 @@ const CurriculumPage = () => {
         ]}
       />
       <div className="container mx-auto px-4 py-8 max-w-7xl space-y-8 pb-16">
+        
+        {/* Debug Info */}
+        <div className="bg-muted p-4 rounded-lg text-sm">
+          <div>Selected Framework: {selectedFramework ? selectedFramework.name : 'None'}</div>
+          <div>Can View Progress: {canViewProgress ? 'Yes' : 'No'}</div>
+          <div>Can Manage Curriculum: {canManageCurriculum ? 'Yes' : 'No'}</div>
+          <div>Active Tab: {activeTab}</div>
+        </div>
 
         {/* Stats Cards - Show only if framework is selected */}
         {selectedFramework && (
@@ -171,16 +181,16 @@ const CurriculumPage = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="framework">Framework</TabsTrigger>
-            <TabsTrigger value="topics" disabled={!selectedFramework}>
+            <TabsTrigger value="topics">
               Topics {!selectedFramework && "(Select Framework First)"}
             </TabsTrigger>
-            <TabsTrigger value="progress" disabled={!selectedFramework || !canViewProgress}>
+            <TabsTrigger value="progress">
               Progress {(!selectedFramework || !canViewProgress) && "(Select Framework First)"}
             </TabsTrigger>
-            <TabsTrigger value="reports" disabled={!selectedFramework}>
+            <TabsTrigger value="reports">
               Reports {!selectedFramework && "(Select Framework First)"}
             </TabsTrigger>
-            <TabsTrigger value="import" disabled={!canManageCurriculum}>Import/Export</TabsTrigger>
+            <TabsTrigger value="import">Import/Export</TabsTrigger>
           </TabsList>
 
         <TabsContent value="framework">
