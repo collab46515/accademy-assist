@@ -131,7 +131,7 @@ export function generateReportCardPDF(report: ReportCard) {
   // Assessment & Grading Information Box
   yPos += 15;
   doc.setFillColor(lightBlue[0], lightBlue[1], lightBlue[2]);
-  doc.roundedRect(20, yPos - 5, 170, 55, 3, 3, 'F');
+  doc.roundedRect(20, yPos - 5, 170, 65, 3, 3, 'F');
   
   doc.setTextColor(schoolBlue[0], schoolBlue[1], schoolBlue[2]);
   doc.setFontSize(12);
@@ -159,7 +159,7 @@ export function generateReportCardPDF(report: ReportCard) {
   });
   
   // Performance Table Header
-  yPos += 65;
+  yPos += 75;
   doc.setFillColor(schoolBlue[0], schoolBlue[1], schoolBlue[2]);
   doc.rect(20, yPos, 170, 12, 'F');
   
