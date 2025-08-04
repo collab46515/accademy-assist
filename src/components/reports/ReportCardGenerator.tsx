@@ -44,15 +44,14 @@ export function ReportCardGenerator({ open, onOpenChange, mode }: ReportCardGene
   const fetchStudents = async () => {
     setLoadingStudents(true);
     try {
-      // For now, let's use demo data since we may not have students in the database yet
-      // In a real implementation, you would fetch from the database
+      // For now, let's use demo data with proper UUIDs
       const demoStudents = [
-        { id: 'demo-1', first_name: 'John', last_name: 'Smith', year_group: 'Year 7' },
-        { id: 'demo-2', first_name: 'Emma', last_name: 'Johnson', year_group: 'Year 7' },
-        { id: 'demo-3', first_name: 'Michael', last_name: 'Brown', year_group: 'Year 8' },
-        { id: 'demo-4', first_name: 'Sarah', last_name: 'Wilson', year_group: 'Year 8' },
-        { id: 'demo-5', first_name: 'David', last_name: 'Taylor', year_group: 'Year 9' },
-        { id: 'demo-6', first_name: 'Lucy', last_name: 'Anderson', year_group: 'Year 9' },
+        { id: '550e8400-e29b-41d4-a716-446655440001', first_name: 'John', last_name: 'Smith', year_group: 'Year 7' },
+        { id: '550e8400-e29b-41d4-a716-446655440002', first_name: 'Emma', last_name: 'Johnson', year_group: 'Year 7' },
+        { id: '550e8400-e29b-41d4-a716-446655440003', first_name: 'Michael', last_name: 'Brown', year_group: 'Year 8' },
+        { id: '550e8400-e29b-41d4-a716-446655440004', first_name: 'Sarah', last_name: 'Wilson', year_group: 'Year 8' },
+        { id: '550e8400-e29b-41d4-a716-446655440005', first_name: 'David', last_name: 'Taylor', year_group: 'Year 9' },
+        { id: '550e8400-e29b-41d4-a716-446655440006', first_name: 'Lucy', last_name: 'Anderson', year_group: 'Year 9' },
       ];
       
       // Filter by year group if selected
