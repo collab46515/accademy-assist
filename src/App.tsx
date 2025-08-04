@@ -32,6 +32,7 @@ import { HRManagementPage } from "./pages/HRManagementPage";
 import { AccountingPage } from "./pages/AccountingPage";
 import { MasterDataPage } from "./pages/MasterDataPage";
 import TimetablePage from "./pages/TimetablePage";
+import LessonPlanningPage from "./pages/LessonPlanningPage";
 import AcademicsPage from "./pages/AcademicsPage";
 import NotFound from "./pages/NotFound";
 import StudentWelfarePage from "./pages/StudentWelfarePage";
@@ -77,6 +78,7 @@ const App = () => (
                           <Route path="/academics" element={<AcademicsPage />} />
                           <Route path="/academics/timetable" element={<TimetablePage />} />
                           <Route path="/academics/curriculum" element={<CurriculumPage />} />
+                          <Route path="/academics/lesson-planning" element={<LessonPlanningPage />} />
                           <Route path="/academics/gradebook" element={<GradebookPage />} />
                           <Route path="/academics/exams" element={<ExamsPage />} />
                           <Route path="/academics/attendance" element={<AttendancePage />} />
