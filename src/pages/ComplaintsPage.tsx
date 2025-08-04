@@ -16,6 +16,8 @@ const ComplaintsPage = () => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const { complaints, stats, loading } = useComplaintsData();
 
+  console.log('Complaints data:', { complaints, stats, loading }); // Debug log
+
   const handleNewComplaint = () => {
     setIsFormOpen(true);
   };
@@ -93,7 +95,7 @@ const ComplaintsPage = () => {
 
       {/* Statistics Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab("all")}>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {console.log('Clicked Total'); setActiveTab("all")}}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Complaints</CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
