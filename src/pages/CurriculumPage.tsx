@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Search, Calendar, Users, BookOpen, Clock, Settings, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { CurriculumFrameworkSelector } from '@/components/curriculum/CurriculumFrameworkSelector';
 import { TopicManager } from '@/components/curriculum/TopicManager';
 import { CoverageReporting } from '@/components/curriculum/CoverageReporting';
@@ -78,11 +79,22 @@ const CurriculumPage = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading curriculum data...</p>
+      <div className="min-h-screen bg-background">
+        <PageHeader
+          title="Curriculum Management"
+          description="Manage curriculum frameworks, topics, and track teaching progress across your school"
+          breadcrumbItems={[
+            { label: 'Dashboard', href: '/' },
+            { label: 'Academics', href: '/academics' },
+            { label: 'Curriculum' }
+          ]}
+        />
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading curriculum data...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -90,13 +102,17 @@ const CurriculumPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Universal Curriculum System</h1>
-        <p className="text-muted-foreground">
-          Manage any curriculum framework with configurable grade levels, academic periods, and progress tracking
-        </p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <PageHeader
+        title="Universal Curriculum System"
+        description="Manage any curriculum framework with configurable grade levels, academic periods, and progress tracking"
+        breadcrumbItems={[
+          { label: 'Dashboard', href: '/' },
+          { label: 'Academics', href: '/academics' },
+          { label: 'Curriculum' }
+        ]}
+      />
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
 
       {/* Stats Cards - Show only if framework is selected */}
       {selectedFramework && (
@@ -329,6 +345,7 @@ const CurriculumPage = () => {
           />
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 };

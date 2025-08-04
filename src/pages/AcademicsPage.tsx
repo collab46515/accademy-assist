@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { useAcademicData } from '@/hooks/useAcademicData';
 import { BookOpen, Users, GraduationCap, Plus, Calendar, FileText, Clock } from 'lucide-react';
 
@@ -11,27 +12,42 @@ const AcademicsPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-          <p className="mt-4 text-muted-foreground">Loading academic data...</p>
+      <div className="min-h-screen bg-background">
+        <PageHeader
+          title="Academic Management"
+          description="Manage subjects, classes, and academic structure"
+          breadcrumbItems={[
+            { label: 'Dashboard', href: '/' },
+            { label: 'Academics' }
+          ]}
+        />
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading academic data...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Academic Management</h1>
-          <p className="text-muted-foreground">Manage subjects, classes, and academic structure</p>
-        </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Add New
-        </Button>
-      </div>
+    <div className="min-h-screen bg-background">
+      <PageHeader
+        title="Academic Management"
+        description="Manage subjects, classes, and academic structure"
+        breadcrumbItems={[
+          { label: 'Dashboard', href: '/' },
+          { label: 'Academics' }
+        ]}
+        actions={
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            Add New
+          </Button>
+        }
+      />
+      <div className="p-6 space-y-6">
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -260,6 +276,7 @@ const AcademicsPage = () => {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 };

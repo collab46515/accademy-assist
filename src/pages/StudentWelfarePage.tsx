@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Activity, MessageSquare, Shield, Heart, Users, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -61,13 +62,16 @@ const StudentWelfarePage = () => {
   ];
 
   return (
-    <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Student Welfare</h1>
-        <p className="text-muted-foreground">
-          Comprehensive student welfare management system for health, complaints, and safeguarding
-        </p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <PageHeader
+        title="Student Welfare"
+        description="Comprehensive student welfare management system for health, complaints, and safeguarding"
+        breadcrumbItems={[
+          { label: 'Dashboard', href: '/' },
+          { label: 'Student Welfare' }
+        ]}
+      />
+      <div className="space-y-6 p-6">
 
       {/* Statistics Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -132,7 +136,8 @@ const StudentWelfarePage = () => {
             </Button>
           </div>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 };
