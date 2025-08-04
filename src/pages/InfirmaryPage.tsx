@@ -3,12 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Activity, Plus, Users, Calendar, Pill, FileText } from "lucide-react";
 import { useState } from "react";
+import { MedicalVisitForm } from "@/components/infirmary/MedicalVisitForm";
 
 const InfirmaryPage = () => {
   const [activeTab, setActiveTab] = useState("visits");
+  const [showMedicalVisitForm, setShowMedicalVisitForm] = useState(false);
 
   const handleNewMedicalVisit = () => {
-    alert("New Medical Visit form will be implemented here");
+    setShowMedicalVisitForm(true);
   };
 
   return (
@@ -142,6 +144,11 @@ const InfirmaryPage = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <MedicalVisitForm 
+        open={showMedicalVisitForm} 
+        onOpenChange={setShowMedicalVisitForm} 
+      />
     </div>
   );
 };
