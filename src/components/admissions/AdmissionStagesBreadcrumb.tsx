@@ -87,13 +87,15 @@ export function AdmissionStagesBreadcrumb() {
     <div className="bg-card border rounded-lg p-4 mb-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold">Admission Stages</h3>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={handleBackToDashboard}
-        >
-          Back to Overview
-        </Button>
+        {activeStageId !== null && (
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleBackToDashboard}
+          >
+            Back to Overview
+          </Button>
+        )}
       </div>
       
       <div className="flex items-center space-x-2 overflow-x-auto pb-2">
