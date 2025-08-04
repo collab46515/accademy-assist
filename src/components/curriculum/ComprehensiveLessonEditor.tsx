@@ -307,9 +307,20 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
           <Button variant="outline" onClick={onCancel}>
             Cancel
           </Button>
+          <Button 
+            onClick={(e) => {
+              e.preventDefault();
+              const completedData = { ...formData, status: 'completed' };
+              onSave(completedData);
+            }} 
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+          >
+            <CheckCircle2 className="h-4 w-4" />
+            Save as Completed
+          </Button>
           <Button onClick={handleSubmit} className="flex items-center gap-2">
             <Save className="h-4 w-4" />
-            Save Lesson Plan
+            Save as Draft
           </Button>
         </div>
       </div>
@@ -605,6 +616,23 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                         <p className="text-sm text-green-700 mt-1">
                           Learning objectives, success criteria, and suggested activities will be automatically populated from this curriculum topic.
                         </p>
+                      </div>
+                      
+                      {/* Progress Impact Visualization */}
+                      <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-4">
+                        <h4 className="font-medium text-purple-900 mb-2">Progress Impact</h4>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center justify-between">
+                            <span className="text-purple-700">Current Coverage:</span>
+                            <span className="font-medium text-purple-900">33% (1 of 3 lessons)</span>
+                          </div>
+                          <div className="w-full bg-purple-200 rounded-full h-2">
+                            <div className="bg-purple-600 h-2 rounded-full" style={{ width: '33%' }}></div>
+                          </div>
+                          <div className="text-purple-600 text-xs">
+                            When this lesson is completed → <span className="font-medium">67% coverage</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
