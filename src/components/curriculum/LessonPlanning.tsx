@@ -13,6 +13,15 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
 // Mock data interfaces (will be replaced with actual types after migration)
+interface CurriculumTopic {
+  id: string;
+  title: string;
+  subject: string;
+  grade_level: string;
+  learning_objectives: string[];
+  assessment_criteria: string[];
+}
+
 interface LessonPlan {
   id: string;
   title: string;
@@ -24,8 +33,11 @@ interface LessonPlan {
   duration_minutes: number;
   status: 'draft' | 'published' | 'completed';
   teacher_name: string;
-  curriculum_topic?: string;
-  objectives?: string[];
+  curriculum_topic_id?: string;
+  curriculum_topic?: CurriculumTopic;
+  learning_objectives: string[];
+  success_criteria: string[];
+  objectives_edited: boolean; // Track if teacher has modified the auto-filled objectives
 }
 
 interface LessonPlanFormData {
@@ -36,15 +48,69 @@ interface LessonPlanFormData {
   lesson_date: string;
   period_id?: string;
   duration_minutes: number;
-  curriculum_topic?: string;
-  objectives: string[];
+  curriculum_topic_id?: string;
+  learning_objectives: string[];
+  success_criteria: string[];
+  objectives_edited: boolean;
 }
+
+// Mock curriculum topics with learning objectives
+const mockCurriculumTopics: CurriculumTopic[] = [
+  {
+    id: 'topic-1',
+    title: 'Recognise equivalent fractions',
+    subject: 'Mathematics',
+    grade_level: 'Year 7',
+    learning_objectives: [
+      'I can find fractions that are the same size',
+      'I can identify equivalent fractions using visual representations',
+      'I can simplify fractions to their lowest terms'
+    ],
+    assessment_criteria: [
+      'I can draw 1/2 and 2/4 and explain why they\'re equal',
+      'I can use a fraction wall to find equivalents',
+      'I can explain equivalent fractions using real-world examples'
+    ]
+  },
+  {
+    id: 'topic-2',
+    title: 'Photosynthesis Process',
+    subject: 'Science',
+    grade_level: 'Year 8',
+    learning_objectives: [
+      'I can explain the process of photosynthesis',
+      'I can identify the key components needed for photosynthesis',
+      'I can describe how plants make their own food'
+    ],
+    assessment_criteria: [
+      'I can label the parts of a leaf involved in photosynthesis',
+      'I can write the word equation for photosynthesis',
+      'I can explain why plants need sunlight, water, and carbon dioxide'
+    ]
+  },
+  {
+    id: 'topic-3',
+    title: 'Creative Writing - Character Development',
+    subject: 'English',
+    grade_level: 'Year 7',
+    learning_objectives: [
+      'I can create believable and interesting characters',
+      'I can describe characters using both direct and indirect characterization',
+      'I can develop character arcs throughout a story'
+    ],
+    assessment_criteria: [
+      'I can write a character description that brings them to life',
+      'I can show character traits through actions and dialogue',
+      'I can explain how my character changes in the story'
+    ]
+  }
+];
 
 // Mock data for development
 const mockLessonPlans: LessonPlan[] = [
   {
     id: '1',
-    title: 'Introduction to Algebra',
+    title: 'Introduction to Equivalent Fractions',
     subject: 'Mathematics',
     year_group: 'Year 7',
     form_class: '7A',
@@ -53,12 +119,21 @@ const mockLessonPlans: LessonPlan[] = [
     duration_minutes: 60,
     status: 'published',
     teacher_name: 'Ms. Johnson',
-    curriculum_topic: 'Basic Algebraic Expressions',
-    objectives: ['Understand variables', 'Solve simple equations']
+    curriculum_topic_id: 'topic-1',
+    curriculum_topic: mockCurriculumTopics[0],
+    learning_objectives: [
+      'I can find fractions that are the same size',
+      'I can identify equivalent fractions using visual representations'
+    ],
+    success_criteria: [
+      'I can draw 1/2 and 2/4 and explain why they\'re equal',
+      'I can use a fraction wall to find equivalents'
+    ],
+    objectives_edited: false
   },
   {
     id: '2',
-    title: 'Photosynthesis Process',
+    title: 'How Plants Make Food',
     subject: 'Science',
     year_group: 'Year 8',
     form_class: '8B',
@@ -67,8 +142,17 @@ const mockLessonPlans: LessonPlan[] = [
     duration_minutes: 45,
     status: 'draft',
     teacher_name: 'Mr. Smith',
-    curriculum_topic: 'Plant Biology',
-    objectives: ['Explain photosynthesis', 'Identify key components']
+    curriculum_topic_id: 'topic-2',
+    curriculum_topic: mockCurriculumTopics[1],
+    learning_objectives: [
+      'I can explain the process of photosynthesis',
+      'I can identify the key components needed for photosynthesis'
+    ],
+    success_criteria: [
+      'I can label the parts of a leaf involved in photosynthesis',
+      'I can write the word equation for photosynthesis'
+    ],
+    objectives_edited: true // Teacher has customized the objectives
   }
 ];
 
@@ -105,8 +189,10 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
     lesson_date: '',
     period_id: '',
     duration_minutes: 60,
-    curriculum_topic: '',
-    objectives: ['']
+    curriculum_topic_id: '',
+    learning_objectives: [''],
+    success_criteria: [''],
+    objectives_edited: false
   });
 
   const resetForm = () => {
@@ -118,10 +204,35 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
       lesson_date: '',
       period_id: '',
       duration_minutes: 60,
-      curriculum_topic: '',
-      objectives: ['']
+      curriculum_topic_id: '',
+      learning_objectives: [''],
+      success_criteria: [''],
+      objectives_edited: false
     });
     setEditingPlan(null);
+  };
+
+  // Auto-fill objectives when curriculum topic is selected
+  const handleCurriculumTopicChange = (topicId: string) => {
+    const selectedTopic = mockCurriculumTopics.find(topic => topic.id === topicId);
+    
+    if (selectedTopic) {
+      setFormData(prev => ({
+        ...prev,
+        curriculum_topic_id: topicId,
+        learning_objectives: selectedTopic.learning_objectives,
+        success_criteria: selectedTopic.assessment_criteria,
+        objectives_edited: false // Reset the edited flag when topic changes
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        curriculum_topic_id: '',
+        learning_objectives: [''],
+        success_criteria: [''],
+        objectives_edited: false
+      }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -140,11 +251,13 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
       });
     } else {
       // Create new plan
+      const selectedTopic = mockCurriculumTopics.find(topic => topic.id === formData.curriculum_topic_id);
       const newPlan: LessonPlan = {
         id: Date.now().toString(),
         ...formData,
         status: 'draft',
-        teacher_name: 'Current User'
+        teacher_name: 'Current User',
+        curriculum_topic: selectedTopic
       };
       setLessonPlans(prev => [...prev, newPlan]);
       toast({
@@ -167,8 +280,10 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
       lesson_date: plan.lesson_date,
       period_id: plan.period_id || '',
       duration_minutes: plan.duration_minutes,
-      curriculum_topic: plan.curriculum_topic || '',
-      objectives: plan.objectives || ['']
+      curriculum_topic_id: plan.curriculum_topic_id || '',
+      learning_objectives: plan.learning_objectives || [''],
+      success_criteria: plan.success_criteria || [''],
+      objectives_edited: plan.objectives_edited || false
     });
     setIsDialogOpen(true);
   };
@@ -205,24 +320,48 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
     return matchesSearch && matchesSubject && matchesStatus;
   });
 
-  const addObjective = () => {
+  const addLearningObjective = () => {
     setFormData(prev => ({
       ...prev,
-      objectives: [...prev.objectives, '']
+      learning_objectives: [...prev.learning_objectives, ''],
+      objectives_edited: true
     }));
   };
 
-  const updateObjective = (index: number, value: string) => {
+  const updateLearningObjective = (index: number, value: string) => {
     setFormData(prev => ({
       ...prev,
-      objectives: prev.objectives.map((obj, i) => i === index ? value : obj)
+      learning_objectives: prev.learning_objectives.map((obj, i) => i === index ? value : obj),
+      objectives_edited: true
     }));
   };
 
-  const removeObjective = (index: number) => {
+  const removeLearningObjective = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      objectives: prev.objectives.filter((_, i) => i !== index)
+      learning_objectives: prev.learning_objectives.filter((_, i) => i !== index),
+      objectives_edited: true
+    }));
+  };
+
+  const addSuccessCriteria = () => {
+    setFormData(prev => ({
+      ...prev,
+      success_criteria: [...prev.success_criteria, '']
+    }));
+  };
+
+  const updateSuccessCriteria = (index: number, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      success_criteria: prev.success_criteria.map((criteria, i) => i === index ? value : criteria)
+    }));
+  };
+
+  const removeSuccessCriteria = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      success_criteria: prev.success_criteria.filter((_, i) => i !== index)
     }));
   };
 
@@ -232,6 +371,14 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
     published: lessonPlans.filter(p => p.status === 'published').length,
     completed: lessonPlans.filter(p => p.status === 'completed').length
   };
+
+  // Get available curriculum topics for the selected subject and year group
+  const availableTopics = mockCurriculumTopics.filter(topic => 
+    (!formData.subject || topic.subject === formData.subject) &&
+    (!formData.year_group || topic.grade_level === formData.year_group)
+  );
+
+  const selectedTopic = mockCurriculumTopics.find(topic => topic.id === formData.curriculum_topic_id);
 
   return (
     <div className="space-y-6">
@@ -307,7 +454,7 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
                     New Lesson Plan
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>
                       {editingPlan ? 'Edit Lesson Plan' : 'Create New Lesson Plan'}
@@ -411,34 +558,136 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
 
                     <div className="space-y-2">
                       <Label htmlFor="curriculum_topic">Curriculum Topic</Label>
-                      <Input
-                        id="curriculum_topic"
-                        value={formData.curriculum_topic}
-                        onChange={(e) => setFormData(prev => ({ ...prev, curriculum_topic: e.target.value }))}
-                        placeholder="Link to curriculum topic (optional)"
-                      />
+                      <Select 
+                        value={formData.curriculum_topic_id} 
+                        onValueChange={handleCurriculumTopicChange}
+                        disabled={availableTopics.length === 0}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={
+                            availableTopics.length === 0 
+                              ? "Select subject and year group first" 
+                              : "Select curriculum topic"
+                          } />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableTopics.map(topic => (
+                            <SelectItem key={topic.id} value={topic.id}>
+                              {topic.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {selectedTopic && (
+                        <div className="text-sm text-muted-foreground">
+                          <strong>Topic:</strong> {selectedTopic.title}
+                        </div>
+                      )}
                     </div>
 
-                    <div className="space-y-2">
-                      <Label>Learning Objectives</Label>
-                      {formData.objectives.map((objective, index) => (
-                        <div key={index} className="flex gap-2">
-                          <Input
-                            value={objective}
-                            onChange={(e) => updateObjective(index, e.target.value)}
-                            placeholder={`Objective ${index + 1}`}
-                          />
-                          {formData.objectives.length > 1 && (
-                            <Button type="button" variant="outline" size="sm" onClick={() => removeObjective(index)}>
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
+                    {/* Learning Objectives Section */}
+                    <div className="space-y-4 border-t pt-4">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-base font-semibold">Learning Objectives</Label>
+                        {formData.curriculum_topic_id && (
+                          <div className="flex items-center gap-2">
+                            <Badge variant={formData.objectives_edited ? "secondary" : "default"}>
+                              {formData.objectives_edited ? "Customized" : "Auto-filled"}
+                            </Badge>
+                            {!formData.objectives_edited && selectedTopic && (
+                              <div className="text-sm text-muted-foreground">
+                                From: {selectedTopic.title}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      
+                      {formData.curriculum_topic_id && !formData.objectives_edited && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                          <div className="flex items-start gap-2">
+                            <BookOpen className="h-4 w-4 text-blue-600 mt-1" />
+                            <div className="text-sm text-blue-800">
+                              <strong>Auto-filled from curriculum:</strong> These objectives are linked to your selected topic. 
+                              You can edit them, but the curriculum alignment will be maintained.
+                            </div>
+                          </div>
                         </div>
-                      ))}
-                      <Button type="button" variant="outline" size="sm" onClick={addObjective}>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Objective
-                      </Button>
+                      )}
+
+                      <div className="space-y-2">
+                        {formData.learning_objectives.map((objective, index) => (
+                          <div key={index} className="flex gap-2">
+                            <Input
+                              value={objective}
+                              onChange={(e) => updateLearningObjective(index, e.target.value)}
+                              placeholder={`Learning objective ${index + 1}`}
+                            />
+                            {formData.learning_objectives.length > 1 && (
+                              <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => removeLearningObjective(index)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                        <Button type="button" variant="outline" size="sm" onClick={addLearningObjective}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Learning Objective
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Success Criteria Section */}
+                    <div className="space-y-4 border-t pt-4">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-base font-semibold">Success Criteria (Student-Friendly)</Label>
+                        {selectedTopic && (
+                          <div className="text-sm text-muted-foreground">
+                            Auto-filled from: {selectedTopic.title}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                        <div className="flex items-start gap-2">
+                          <Calendar className="h-4 w-4 text-green-600 mt-1" />
+                          <div className="text-sm text-green-800">
+                            <strong>Student-friendly language:</strong> Write these as "I can..." statements 
+                            that students can understand and self-assess against.
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        {formData.success_criteria.map((criteria, index) => (
+                          <div key={index} className="flex gap-2">
+                            <Input
+                              value={criteria}
+                              onChange={(e) => updateSuccessCriteria(index, e.target.value)}
+                              placeholder={`Success criteria ${index + 1} (I can...)`}
+                            />
+                            {formData.success_criteria.length > 1 && (
+                              <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => removeSuccessCriteria(index)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                        <Button type="button" variant="outline" size="sm" onClick={addSuccessCriteria}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Success Criteria
+                        </Button>
+                      </div>
                     </div>
 
                     <div className="flex justify-end gap-2">
@@ -500,6 +749,7 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
                   <TableHead>Subject</TableHead>
                   <TableHead>Class</TableHead>
                   <TableHead>Date</TableHead>
+                  <TableHead>Curriculum Topic</TableHead>
                   <TableHead>Duration</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Teacher</TableHead>
@@ -508,19 +758,19 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
               </TableHeader>
               <TableBody>
                 {filteredPlans.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={canEdit ? 8 : 7} className="text-center py-8">
-                      <div className="flex flex-col items-center gap-2">
-                        <FileText className="h-8 w-8 text-muted-foreground" />
-                        <p className="text-muted-foreground">No lesson plans found</p>
-                        {canEdit && (
-                          <Button variant="outline" onClick={() => setIsDialogOpen(true)}>
-                            Create your first lesson plan
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                    <TableRow>
+                      <TableCell colSpan={canEdit ? 8 : 7} className="text-center py-8">
+                        <div className="flex flex-col items-center gap-2">
+                          <FileText className="h-8 w-8 text-muted-foreground" />
+                          <p className="text-muted-foreground">No lesson plans found</p>
+                          {canEdit && (
+                            <Button variant="outline" onClick={() => setIsDialogOpen(true)}>
+                              Create your first lesson plan
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
                 ) : (
                   filteredPlans.map((plan) => (
                     <TableRow key={plan.id}>
@@ -528,6 +778,18 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
                       <TableCell>{plan.subject}</TableCell>
                       <TableCell>{plan.year_group}{plan.form_class ? ` ${plan.form_class}` : ''}</TableCell>
                       <TableCell>{format(new Date(plan.lesson_date), 'dd/MM/yyyy')}</TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="font-medium text-sm">
+                            {plan.curriculum_topic?.title || 'No topic selected'}
+                          </div>
+                          {plan.objectives_edited && (
+                            <Badge variant="secondary" className="text-xs">
+                              Customized
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
