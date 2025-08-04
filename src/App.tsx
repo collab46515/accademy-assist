@@ -4,8 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { AuthPage } from "@/components/auth/AuthPage";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import AuthPage from "@/pages/AuthPage";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import Dashboard from "./pages/Dashboard";
@@ -40,6 +40,7 @@ import StudentWelfareSafeguardingPage from "./pages/StudentWelfareSafeguardingPa
 
 import UnifiedAdmissionsPage from "./pages/UnifiedAdmissionsPage";
 import AdminManagementPage from "./pages/AdminManagementPage";
+import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
 
@@ -52,8 +53,9 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/welcome" element={<Index />} />
             <Route path="/*" element={
-              <ProtectedRoute requireAuth={true}>
+              <ProtectedRoute>
                 <SidebarProvider defaultOpen={true}>
                   <div className="flex min-h-screen w-full">
                     <AppSidebar />
@@ -104,7 +106,7 @@ const App = () => (
                           <Route path="/accounting/budget" element={<AccountingPage />} />
                           <Route path="/accounting/settings" element={<AccountingPage />} />
                           <Route path="/user-management" element={
-                            <ProtectedRoute requiredRole="super_admin">
+                            <ProtectedRoute>
                               <UserManagementPage />
                             </ProtectedRoute>
                           } />

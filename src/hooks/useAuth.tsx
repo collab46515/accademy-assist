@@ -25,6 +25,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Update last login time when user signs in
+        if (event === 'SIGNED_IN' && session?.user) {
+          setTimeout(() => {
+            supabase
+              .from('profiles')
+              .update({ last_login: new Date().toISOString() })
+              .eq('user_id', session.user.id)
+              .then(() => {
+                console.log('Last login updated');
+              });
+          }, 0);
+        }
       }
     );
 

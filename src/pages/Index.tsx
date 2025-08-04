@@ -1,11 +1,22 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { School } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-const Index = () => {
+const Index: React.FC = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+      <div className="text-center space-y-6 max-w-md mx-auto p-8">
+        <School className="h-16 w-16 text-primary mx-auto" />
+        <h1 className="text-4xl font-bold">School Management System</h1>
+        <p className="text-lg text-muted-foreground">
+          Welcome to the comprehensive school management platform
+        </p>
+        <div className="space-y-4">
+          <Button size="lg" asChild className="w-full">
+            <Link to="/auth">Sign In to Continue</Link>
+          </Button>
+        </div>
       </div>
     </div>
   );
