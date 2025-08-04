@@ -78,20 +78,23 @@ export function ReportCardGenerator({ open, onOpenChange, mode }: ReportCardGene
           throw new Error('Student not found');
         }
 
+        console.log('Selected student ID:', studentId);
+        console.log('Selected student:', selectedStudent);
+
         // Create report card record directly (skip the RPC for now since we may not have grade data)
         const { error: insertError } = await supabase
           .from('report_cards')
           .insert({
             student_id: studentId,
-            school_id: crypto.randomUUID(), // Temporary - should come from context
+            school_id: '550e8400-e29b-41d4-a716-446655440000', // Temporary valid UUID
             academic_term: academicTerm,
             academic_year: academicYear,
             class_name: yearGroup,
-            teacher_id: crypto.randomUUID(), // Should come from auth
+            teacher_id: '550e8400-e29b-41d4-a716-446655440100', // Temporary valid UUID
             teacher_name: 'Current Teacher',
             student_name: `${selectedStudent.first_name} ${selectedStudent.last_name}`,
             year_group: yearGroup,
-            generated_by: crypto.randomUUID(), // Should come from auth
+            generated_by: '550e8400-e29b-41d4-a716-446655440200', // Temporary valid UUID
             grades_data: [], // Empty for now
             attendance_data: {},
             status: 'draft'
