@@ -172,15 +172,9 @@ const CurriculumPage = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="framework">Framework</TabsTrigger>
-            <TabsTrigger value="topics">
-              {selectedFramework ? `Topics - ${selectedFramework.name}` : "Topics (Select Framework First)"}
-            </TabsTrigger>
-            <TabsTrigger value="progress">
-              {selectedFramework && canViewProgress ? `Progress - ${selectedFramework.name}` : "Progress (Select Framework First)"}
-            </TabsTrigger>
-            <TabsTrigger value="reports">
-              {selectedFramework ? `Reports - ${selectedFramework.name}` : "Reports (Select Framework First)"}
-            </TabsTrigger>
+            <TabsTrigger value="topics">Topics</TabsTrigger>
+            <TabsTrigger value="progress">Progress</TabsTrigger>
+            <TabsTrigger value="reports">Reports</TabsTrigger>
             <TabsTrigger value="import">Import/Export</TabsTrigger>
           </TabsList>
 
