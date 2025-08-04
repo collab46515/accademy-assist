@@ -155,11 +155,77 @@ const GradebookPage = () => {
     }
   };
 
+  const [selectedStatCard, setSelectedStatCard] = useState<string | null>(null);
+
   const handleStatCardClick = (cardType: string) => {
-    toast({
-      title: `${cardType} Details`,
-      description: `Detailed breakdown of ${cardType.toLowerCase()} would be shown here.`,
-    });
+    setSelectedStatCard(cardType);
+  };
+
+  const getStatCardDetails = (cardType: string) => {
+    switch (cardType) {
+      case "Total Grades":
+        const subjectBreakdown = grades.reduce((acc, grade) => {
+          acc[grade.subject] = (acc[grade.subject] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        return {
+          title: "Grades by Subject",
+          data: Object.entries(subjectBreakdown).map(([subject, count]) => ({
+            label: subject,
+            value: count,
+            percentage: Math.round((count / totalGrades) * 100)
+          }))
+        };
+      
+      case "Average Score":
+        const gradeDistribution = grades.reduce((acc, grade) => {
+          const range = grade.score >= 90 ? "90-100%" : 
+                       grade.score >= 80 ? "80-89%" :
+                       grade.score >= 70 ? "70-79%" :
+                       grade.score >= 60 ? "60-69%" : "Below 60%";
+          acc[range] = (acc[range] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        return {
+          title: "Score Distribution",
+          data: Object.entries(gradeDistribution).map(([range, count]) => ({
+            label: range,
+            value: count,
+            percentage: Math.round((count / totalGrades) * 100)
+          }))
+        };
+        
+      case "Excellent Effort":
+        const effortBreakdown = grades.reduce((acc, grade) => {
+          acc[grade.effort] = (acc[grade.effort] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        return {
+          title: "Effort Distribution",
+          data: Object.entries(effortBreakdown).map(([effort, count]) => ({
+            label: effort.charAt(0).toUpperCase() + effort.slice(1),
+            value: count,
+            percentage: Math.round((count / totalGrades) * 100)
+          }))
+        };
+        
+      case "Reports Sent":
+        const reportStatus = reports.reduce((acc, report) => {
+          acc[report.status] = (acc[report.status] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        return {
+          title: "Report Status",
+          data: Object.entries(reportStatus).map(([status, count]) => ({
+            label: status.charAt(0).toUpperCase() + status.slice(1),
+            value: count,
+            percentage: Math.round((count / reports.length) * 100)
+          }))
+        };
+        
+      default:
+        return { title: "", data: [] };
+    }
   };
 
   const handleExportGrades = () => {
@@ -271,6 +337,43 @@ const GradebookPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Statistics Detail Dialog */}
+      <Dialog open={!!selectedStatCard} onOpenChange={(open) => !open && setSelectedStatCard(null)}>
+        <DialogContent className="sm:max-w-[500px]">
+          {selectedStatCard && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{selectedStatCard} Breakdown</DialogTitle>
+                <DialogDescription>
+                  Detailed statistics and distribution
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <h4 className="font-semibold">{getStatCardDetails(selectedStatCard).title}</h4>
+                <div className="space-y-3">
+                  {getStatCardDetails(selectedStatCard).data.map((item, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-medium">{item.label}</span>
+                          <span className="text-sm text-muted-foreground">{item.value} ({item.percentage}%)</span>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-2">
+                          <div 
+                            className="bg-primary h-2 rounded-full transition-all duration-300" 
+                            style={{ width: `${item.percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Main Tabs */}
       <Tabs defaultValue="grades" className="space-y-6">
