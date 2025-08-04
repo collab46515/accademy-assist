@@ -4,11 +4,12 @@ import { ManagementPortal } from './ManagementPortal';
 import { TeacherPortal } from './TeacherPortal';
 import { ParentPortal } from './ParentPortal';
 import { StudentPortal } from './StudentPortal';
+import { HODPortal } from './HODPortal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Shield, Users, GraduationCap, Home, User } from 'lucide-react';
+import { Loader2, Shield, Users, GraduationCap, Home, User, Target } from 'lucide-react';
 
 export function PortalRouter() {
   const { userRoles, loading, isSuperAdmin, isSchoolAdmin } = useRBAC();
@@ -54,10 +55,14 @@ export function PortalRouter() {
 
         <div className="p-6">
           <Tabs value={activePortal} onValueChange={setActivePortal} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="management" className="flex items-center gap-2">
                 <Shield className="h-4 w-4" />
                 Management
+              </TabsTrigger>
+              <TabsTrigger value="hod" className="flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                HOD View
               </TabsTrigger>
               <TabsTrigger value="teacher" className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
@@ -75,6 +80,15 @@ export function PortalRouter() {
 
             <TabsContent value="management" className="mt-0">
               <ManagementPortal />
+            </TabsContent>
+
+            <TabsContent value="hod" className="mt-0">
+              <div className="mb-4 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border">
+                <p className="text-sm text-orange-700 dark:text-orange-300">
+                  <strong>Preview Mode:</strong> This is how the portal appears to Heads of Department
+                </p>
+              </div>
+              <HODPortal />
             </TabsContent>
 
             <TabsContent value="teacher" className="mt-0">
@@ -111,9 +125,15 @@ export function PortalRouter() {
 
   // For non-admin users, determine their specific portal
   const getUserType = () => {
+    // Check for HOD role
+    const hasHODRole = userRoles.some(role => 
+      role.role === 'hod'
+    );
+    if (hasHODRole) return 'hod';
+    
     // Check for teacher role
     const hasTeacherRole = userRoles.some(role => 
-      ['teacher', 'hod'].includes(role.role)
+      ['teacher'].includes(role.role)
     );
     if (hasTeacherRole) return 'teacher';
     
@@ -176,6 +196,8 @@ export function PortalRouter() {
 
   // Render the appropriate portal for non-admin users
   switch (userType) {
+    case 'hod':
+      return <HODPortal />;
     case 'teacher':
       return <TeacherPortal />;
     case 'parent':

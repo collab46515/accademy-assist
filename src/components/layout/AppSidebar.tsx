@@ -82,7 +82,7 @@ const erpModules = [
         url: "/academics", 
         icon: BookOpen,
         subItems: [
-          { title: "Curriculum", url: "/academics/curriculum", icon: BookOpen },
+          { title: "HOD Dashboard", url: "/hod-dashboard", icon: Target },
           { title: "Lesson Planning", url: "/academics/lesson-planning", icon: PenTool },
           { title: "Timetable", url: "/academics/timetable", icon: Clock },
           { title: "Assignments & Homework", url: "/academics/assignments", icon: ClipboardList },

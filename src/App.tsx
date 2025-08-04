@@ -40,7 +40,7 @@ import InfirmaryPage from "./pages/InfirmaryPage";
 import ComplaintsPage from "./pages/ComplaintsPage";
 import StudentWelfareSafeguardingPage from "./pages/StudentWelfareSafeguardingPage";
 
-import UnifiedAdmissionsPage from "./pages/UnifiedAdmissionsPage";
+import HODDashboardPage from "./pages/HODDashboardPage";
 import AdminManagementPage from "./pages/AdminManagementPage";
 import Index from "./pages/Index";
 
@@ -72,7 +72,7 @@ const App = () => (
                         <Routes>
                           <Route path="/" element={<Dashboard />} />
                           <Route path="/students" element={<StudentsPage />} />
-            <Route path="/admissions" element={<UnifiedAdmissionsPage />} />
+            <Route path="/admissions" element={<AdmissionsPage />} />
             <Route path="/legacy-admissions" element={<AdmissionsPage />} />
             <Route path="/admin-management" element={<AdminManagementPage />} />
                           <Route path="/academics" element={<AcademicsPage />} />
@@ -97,7 +97,7 @@ const App = () => (
                           <Route path="/safeguarding" element={<SafeguardingPage />} />
                           <Route path="/student-welfare" element={<StudentWelfarePage />} />
                           <Route path="/student-welfare/infirmary" element={<InfirmaryPage />} />
-                          <Route path="/student-welfare/complaints" element={<ComplaintsPage />} />
+                          <Route path="/hod-dashboard" element={<HODDashboardPage />} />
                           <Route path="/student-welfare/safeguarding" element={<StudentWelfareSafeguardingPage />} />
                           <Route path="/events" element={<EventsPage />} />
                           <Route path="/analytics" element={<AnalyticsPage />} />
