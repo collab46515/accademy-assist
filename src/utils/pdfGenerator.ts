@@ -164,58 +164,117 @@ export function generateReportCardPDF(report: ReportCard) {
   
   // Performance Table Header
   doc.setFillColor(schoolBlue[0], schoolBlue[1], schoolBlue[2]);
-  doc.rect(20, yPos, 170, 12, 'F');
+  doc.rect(20, yPos, 170, 15, 'F');
+  
+  // Header borders
+  doc.setDrawColor(200, 200, 200);
+  doc.setLineWidth(0.5);
+  doc.rect(20, yPos, 170, 15);
+  
+  // Column separators in header
+  doc.line(70, yPos, 70, yPos + 15); // After Subject
+  doc.line(100, yPos, 100, yPos + 15); // After Grade
+  doc.line(130, yPos, 130, yPos + 15); // After Effort
   
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
-  doc.text('SUBJECT', 25, yPos + 3);
-  doc.text('GRADE', 90, yPos + 3);
-  doc.text('EFFORT', 115, yPos + 3);
-  doc.text('TEACHER COMMENTS', 140, yPos + 3);
+  doc.text('SUBJECT', 45, yPos + 9, { align: 'center' });
+  doc.text('GRADE', 85, yPos + 9, { align: 'center' });
+  doc.text('EFFORT', 115, yPos + 9, { align: 'center' });
+  doc.text('TEACHER COMMENTS', 160, yPos + 9, { align: 'center' });
   
-  yPos += 12;
+  yPos += 15;
   doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   
-  // Add grade rows
+  // Add grade rows with proper borders
   grades.forEach((grade, index) => {
     if (yPos > 250) { // Start new page if needed
       doc.addPage();
       yPos = 30;
+      
+      // Repeat header on new page
+      doc.setFillColor(schoolBlue[0], schoolBlue[1], schoolBlue[2]);
+      doc.rect(20, yPos, 170, 15, 'F');
+      doc.setDrawColor(200, 200, 200);
+      doc.rect(20, yPos, 170, 15);
+      doc.line(70, yPos, 70, yPos + 15);
+      doc.line(100, yPos, 100, yPos + 15);
+      doc.line(130, yPos, 130, yPos + 15);
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('SUBJECT', 45, yPos + 9, { align: 'center' });
+      doc.text('GRADE', 85, yPos + 9, { align: 'center' });
+      doc.text('EFFORT', 115, yPos + 9, { align: 'center' });
+      doc.text('TEACHER COMMENTS', 160, yPos + 9, { align: 'center' });
+      
+      yPos += 15;
+      doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
     }
+    
+    const rowHeight = 15;
     
     // Alternate row colors
     if (index % 2 === 0) {
       doc.setFillColor(250, 250, 250);
-      doc.rect(20, yPos - 3, 170, 10, 'F');
+      doc.rect(20, yPos, 170, rowHeight, 'F');
+    } else {
+      doc.setFillColor(255, 255, 255);
+      doc.rect(20, yPos, 170, rowHeight, 'F');
     }
     
-    doc.setFont('helvetica', 'bold');
-    doc.text(grade.subject, 25, yPos + 2);
+    // Row borders
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.3);
+    doc.rect(20, yPos, 170, rowHeight);
     
-    // Grade with colored background
+    // Column separators
+    doc.line(70, yPos, 70, yPos + rowHeight);
+    doc.line(100, yPos, 100, yPos + rowHeight);
+    doc.line(130, yPos, 130, yPos + rowHeight);
+    
+    // Subject column
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+    doc.text(grade.subject, 45, yPos + 9, { align: 'center' });
+    
+    // Grade column with colored background
     const gradeColor = grade.grade.startsWith('A') ? [34, 197, 94] : 
                       grade.grade.startsWith('B') ? [59, 130, 246] : 
                       grade.grade.startsWith('C') ? [245, 158, 11] : [239, 68, 68];
     
     doc.setFillColor(gradeColor[0], gradeColor[1], gradeColor[2]);
-    doc.roundedRect(88, yPos - 2, 15, 6, 1, 1, 'F');
+    doc.roundedRect(77, yPos + 4, 16, 7, 1, 1, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
-    doc.text(grade.grade, 95.5, yPos + 2, { align: 'center' });
+    doc.text(grade.grade, 85, yPos + 9, { align: 'center' });
     
+    // Effort column
     doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
     doc.setFont('helvetica', 'normal');
-    doc.text(grade.effort || 'Good', 115, yPos + 2);
+    doc.text(grade.effort || 'Good', 115, yPos + 9, { align: 'center' });
     
-    // Wrap comment text
+    // Comments column
     const comment = grade.comments || grade.comment || 'Making good progress in this subject.';
-    const wrappedComment = doc.splitTextToSize(comment, 45);
-    doc.text(wrappedComment[0], 140, yPos + 2);
+    const wrappedComment = doc.splitTextToSize(comment, 55);
     
-    yPos += 10;
+    // Center the comment vertically if it's a single line
+    if (wrappedComment.length === 1) {
+      doc.text(wrappedComment[0], 132, yPos + 9);
+    } else {
+      // For multi-line comments, start a bit higher
+      wrappedComment.slice(0, 2).forEach((line, i) => {
+        doc.text(line, 132, yPos + 6 + (i * 4));
+      });
+    }
+    
+    yPos += rowHeight;
   });
   
   // Start new page for additional sections
