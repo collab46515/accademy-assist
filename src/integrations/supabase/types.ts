@@ -1108,6 +1108,152 @@ export type Database = {
           },
         ]
       }
+      complaint_communications: {
+        Row: {
+          attachments: string[] | null
+          communication_date: string
+          communication_type: string
+          complaint_id: string
+          created_at: string | null
+          direction: string
+          id: string
+          logged_by: string
+          participants: string[] | null
+          summary: string
+        }
+        Insert: {
+          attachments?: string[] | null
+          communication_date: string
+          communication_type: string
+          complaint_id: string
+          created_at?: string | null
+          direction: string
+          id?: string
+          logged_by: string
+          participants?: string[] | null
+          summary: string
+        }
+        Update: {
+          attachments?: string[] | null
+          communication_date?: string
+          communication_type?: string
+          complaint_id?: string
+          created_at?: string | null
+          direction?: string
+          id?: string
+          logged_by?: string
+          participants?: string[] | null
+          summary?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "complaint_communications_complaint_id_fkey"
+            columns: ["complaint_id"]
+            isOneToOne: false
+            referencedRelation: "complaints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      complaints: {
+        Row: {
+          actions_taken: string[] | null
+          anonymous: boolean | null
+          assigned_to: string | null
+          complainant_email: string | null
+          complainant_name: string
+          complainant_phone: string | null
+          complainant_relationship: string | null
+          complaint_number: string
+          complaint_type: Database["public"]["Enums"]["complaint_type"]
+          created_at: string | null
+          description: string
+          desired_outcome: string | null
+          escalated_to: string | null
+          evidence_urls: string[] | null
+          id: string
+          incident_date: string | null
+          lessons_learned: string | null
+          location: string | null
+          priority: Database["public"]["Enums"]["complaint_priority"] | null
+          resolution: string | null
+          resolved_at: string | null
+          school_id: string
+          staff_involved: string[] | null
+          status: Database["public"]["Enums"]["record_status"] | null
+          student_involved: string | null
+          submitted_by: string | null
+          target_resolution_date: string | null
+          title: string
+          updated_at: string | null
+          witnesses: string[] | null
+        }
+        Insert: {
+          actions_taken?: string[] | null
+          anonymous?: boolean | null
+          assigned_to?: string | null
+          complainant_email?: string | null
+          complainant_name: string
+          complainant_phone?: string | null
+          complainant_relationship?: string | null
+          complaint_number?: string
+          complaint_type: Database["public"]["Enums"]["complaint_type"]
+          created_at?: string | null
+          description: string
+          desired_outcome?: string | null
+          escalated_to?: string | null
+          evidence_urls?: string[] | null
+          id?: string
+          incident_date?: string | null
+          lessons_learned?: string | null
+          location?: string | null
+          priority?: Database["public"]["Enums"]["complaint_priority"] | null
+          resolution?: string | null
+          resolved_at?: string | null
+          school_id: string
+          staff_involved?: string[] | null
+          status?: Database["public"]["Enums"]["record_status"] | null
+          student_involved?: string | null
+          submitted_by?: string | null
+          target_resolution_date?: string | null
+          title: string
+          updated_at?: string | null
+          witnesses?: string[] | null
+        }
+        Update: {
+          actions_taken?: string[] | null
+          anonymous?: boolean | null
+          assigned_to?: string | null
+          complainant_email?: string | null
+          complainant_name?: string
+          complainant_phone?: string | null
+          complainant_relationship?: string | null
+          complaint_number?: string
+          complaint_type?: Database["public"]["Enums"]["complaint_type"]
+          created_at?: string | null
+          description?: string
+          desired_outcome?: string | null
+          escalated_to?: string | null
+          evidence_urls?: string[] | null
+          id?: string
+          incident_date?: string | null
+          lessons_learned?: string | null
+          location?: string | null
+          priority?: Database["public"]["Enums"]["complaint_priority"] | null
+          resolution?: string | null
+          resolved_at?: string | null
+          school_id?: string
+          staff_involved?: string[] | null
+          status?: Database["public"]["Enums"]["record_status"] | null
+          student_involved?: string | null
+          submitted_by?: string | null
+          target_resolution_date?: string | null
+          title?: string
+          updated_at?: string | null
+          witnesses?: string[] | null
+        }
+        Relationships: []
+      }
       departments: {
         Row: {
           budget: number | null
@@ -3449,6 +3595,198 @@ export type Database = {
           },
         ]
       }
+      medical_incidents: {
+        Row: {
+          created_at: string | null
+          description: string
+          follow_up_notes: string | null
+          follow_up_required: boolean | null
+          hospital_details: Json | null
+          hospital_referral: boolean | null
+          id: string
+          incident_date: string
+          incident_number: string
+          incident_type: Database["public"]["Enums"]["incident_type"]
+          location: string
+          medication_administered: Json | null
+          parent_notification_time: string | null
+          parent_notified: boolean | null
+          reported_by: string
+          reviewed_by: string | null
+          school_id: string
+          severity: Database["public"]["Enums"]["incident_severity"]
+          staff_present: string[] | null
+          status: Database["public"]["Enums"]["record_status"] | null
+          student_id: string
+          symptoms: string[] | null
+          treated_by: string | null
+          treatment_given: string | null
+          updated_at: string | null
+          witnesses: string[] | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          follow_up_notes?: string | null
+          follow_up_required?: boolean | null
+          hospital_details?: Json | null
+          hospital_referral?: boolean | null
+          id?: string
+          incident_date: string
+          incident_number?: string
+          incident_type: Database["public"]["Enums"]["incident_type"]
+          location: string
+          medication_administered?: Json | null
+          parent_notification_time?: string | null
+          parent_notified?: boolean | null
+          reported_by: string
+          reviewed_by?: string | null
+          school_id: string
+          severity?: Database["public"]["Enums"]["incident_severity"]
+          staff_present?: string[] | null
+          status?: Database["public"]["Enums"]["record_status"] | null
+          student_id: string
+          symptoms?: string[] | null
+          treated_by?: string | null
+          treatment_given?: string | null
+          updated_at?: string | null
+          witnesses?: string[] | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          follow_up_notes?: string | null
+          follow_up_required?: boolean | null
+          hospital_details?: Json | null
+          hospital_referral?: boolean | null
+          id?: string
+          incident_date?: string
+          incident_number?: string
+          incident_type?: Database["public"]["Enums"]["incident_type"]
+          location?: string
+          medication_administered?: Json | null
+          parent_notification_time?: string | null
+          parent_notified?: boolean | null
+          reported_by?: string
+          reviewed_by?: string | null
+          school_id?: string
+          severity?: Database["public"]["Enums"]["incident_severity"]
+          staff_present?: string[] | null
+          status?: Database["public"]["Enums"]["record_status"] | null
+          student_id?: string
+          symptoms?: string[] | null
+          treated_by?: string | null
+          treatment_given?: string | null
+          updated_at?: string | null
+          witnesses?: string[] | null
+        }
+        Relationships: []
+      }
+      medical_records: {
+        Row: {
+          allergies: string[] | null
+          created_at: string | null
+          created_by: string
+          dietary_requirements: string | null
+          doctor_details: Json | null
+          emergency_contact_medical: Json | null
+          id: string
+          medical_conditions: string[] | null
+          medical_notes: string | null
+          medications: Json | null
+          school_id: string
+          special_needs: string | null
+          student_id: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          allergies?: string[] | null
+          created_at?: string | null
+          created_by: string
+          dietary_requirements?: string | null
+          doctor_details?: Json | null
+          emergency_contact_medical?: Json | null
+          id?: string
+          medical_conditions?: string[] | null
+          medical_notes?: string | null
+          medications?: Json | null
+          school_id: string
+          special_needs?: string | null
+          student_id: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          allergies?: string[] | null
+          created_at?: string | null
+          created_by?: string
+          dietary_requirements?: string | null
+          doctor_details?: Json | null
+          emergency_contact_medical?: Json | null
+          id?: string
+          medical_conditions?: string[] | null
+          medical_notes?: string | null
+          medications?: Json | null
+          school_id?: string
+          special_needs?: string | null
+          student_id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      medicine_administration: {
+        Row: {
+          administered_by: string
+          administration_time: string
+          consent_document_url: string | null
+          created_at: string | null
+          dosage: string
+          id: string
+          medication_name: string
+          notes: string | null
+          parent_consent: boolean | null
+          reason: string | null
+          school_id: string
+          side_effects: string | null
+          student_id: string
+          witnessed_by: string | null
+        }
+        Insert: {
+          administered_by: string
+          administration_time: string
+          consent_document_url?: string | null
+          created_at?: string | null
+          dosage: string
+          id?: string
+          medication_name: string
+          notes?: string | null
+          parent_consent?: boolean | null
+          reason?: string | null
+          school_id: string
+          side_effects?: string | null
+          student_id: string
+          witnessed_by?: string | null
+        }
+        Update: {
+          administered_by?: string
+          administration_time?: string
+          consent_document_url?: string | null
+          created_at?: string | null
+          dosage?: string
+          id?: string
+          medication_name?: string
+          notes?: string | null
+          parent_consent?: boolean | null
+          reason?: string | null
+          school_id?: string
+          side_effects?: string | null
+          student_id?: string
+          witnessed_by?: string | null
+        }
+        Relationships: []
+      }
       onboarding_progress: {
         Row: {
           buddy_assigned: string | null
@@ -4356,6 +4694,205 @@ export type Database = {
         }
         Relationships: []
       }
+      safeguarding_actions: {
+        Row: {
+          action_description: string
+          action_type: string
+          assigned_to: string
+          completion_date: string | null
+          concern_id: string
+          created_at: string | null
+          created_by: string
+          due_date: string | null
+          evidence_urls: string[] | null
+          id: string
+          outcome: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          action_description: string
+          action_type: string
+          assigned_to: string
+          completion_date?: string | null
+          concern_id: string
+          created_at?: string | null
+          created_by: string
+          due_date?: string | null
+          evidence_urls?: string[] | null
+          id?: string
+          outcome?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          action_description?: string
+          action_type?: string
+          assigned_to?: string
+          completion_date?: string | null
+          concern_id?: string
+          created_at?: string | null
+          created_by?: string
+          due_date?: string | null
+          evidence_urls?: string[] | null
+          id?: string
+          outcome?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safeguarding_actions_concern_id_fkey"
+            columns: ["concern_id"]
+            isOneToOne: false
+            referencedRelation: "safeguarding_concerns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      safeguarding_concerns: {
+        Row: {
+          agencies_contacted: string[] | null
+          case_notes: string | null
+          closed_at: string | null
+          concern_details: string
+          concern_number: string
+          concern_type: Database["public"]["Enums"]["safeguarding_concern_type"]
+          created_at: string | null
+          dsl_assigned: string | null
+          id: string
+          immediate_action_taken: string | null
+          incident_date: string | null
+          location: string | null
+          next_review_date: string | null
+          outcome: string | null
+          parent_notification_details: string | null
+          parents_informed: boolean | null
+          police_involved: boolean | null
+          police_reference: string | null
+          reported_by: string
+          risk_level: Database["public"]["Enums"]["safeguarding_risk_level"]
+          school_id: string
+          social_services_involved: boolean | null
+          social_services_reference: string | null
+          status: Database["public"]["Enums"]["record_status"] | null
+          student_id: string
+          updated_at: string | null
+          witnesses: string[] | null
+        }
+        Insert: {
+          agencies_contacted?: string[] | null
+          case_notes?: string | null
+          closed_at?: string | null
+          concern_details: string
+          concern_number?: string
+          concern_type: Database["public"]["Enums"]["safeguarding_concern_type"]
+          created_at?: string | null
+          dsl_assigned?: string | null
+          id?: string
+          immediate_action_taken?: string | null
+          incident_date?: string | null
+          location?: string | null
+          next_review_date?: string | null
+          outcome?: string | null
+          parent_notification_details?: string | null
+          parents_informed?: boolean | null
+          police_involved?: boolean | null
+          police_reference?: string | null
+          reported_by: string
+          risk_level: Database["public"]["Enums"]["safeguarding_risk_level"]
+          school_id: string
+          social_services_involved?: boolean | null
+          social_services_reference?: string | null
+          status?: Database["public"]["Enums"]["record_status"] | null
+          student_id: string
+          updated_at?: string | null
+          witnesses?: string[] | null
+        }
+        Update: {
+          agencies_contacted?: string[] | null
+          case_notes?: string | null
+          closed_at?: string | null
+          concern_details?: string
+          concern_number?: string
+          concern_type?: Database["public"]["Enums"]["safeguarding_concern_type"]
+          created_at?: string | null
+          dsl_assigned?: string | null
+          id?: string
+          immediate_action_taken?: string | null
+          incident_date?: string | null
+          location?: string | null
+          next_review_date?: string | null
+          outcome?: string | null
+          parent_notification_details?: string | null
+          parents_informed?: boolean | null
+          police_involved?: boolean | null
+          police_reference?: string | null
+          reported_by?: string
+          risk_level?: Database["public"]["Enums"]["safeguarding_risk_level"]
+          school_id?: string
+          social_services_involved?: boolean | null
+          social_services_reference?: string | null
+          status?: Database["public"]["Enums"]["record_status"] | null
+          student_id?: string
+          updated_at?: string | null
+          witnesses?: string[] | null
+        }
+        Relationships: []
+      }
+      safeguarding_reviews: {
+        Row: {
+          attendees: string[] | null
+          concern_id: string
+          conducted_by: string
+          created_at: string | null
+          decisions_made: string[] | null
+          id: string
+          next_actions: string[] | null
+          next_review_date: string | null
+          review_date: string
+          review_notes: string
+          review_type: string
+          risk_assessment: string | null
+        }
+        Insert: {
+          attendees?: string[] | null
+          concern_id: string
+          conducted_by: string
+          created_at?: string | null
+          decisions_made?: string[] | null
+          id?: string
+          next_actions?: string[] | null
+          next_review_date?: string | null
+          review_date: string
+          review_notes: string
+          review_type: string
+          risk_assessment?: string | null
+        }
+        Update: {
+          attendees?: string[] | null
+          concern_id?: string
+          conducted_by?: string
+          created_at?: string | null
+          decisions_made?: string[] | null
+          id?: string
+          next_actions?: string[] | null
+          next_review_date?: string | null
+          review_date?: string
+          review_notes?: string
+          review_type?: string
+          risk_assessment?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safeguarding_reviews_concern_id_fkey"
+            columns: ["concern_id"]
+            isOneToOne: false
+            referencedRelation: "safeguarding_concerns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       school_periods: {
         Row: {
           created_at: string
@@ -5242,6 +5779,15 @@ export type Database = {
         | "parent"
         | "student"
       approval_status: "pending" | "approved" | "rejected" | "escalated"
+      complaint_priority: "low" | "medium" | "high" | "urgent"
+      complaint_type:
+        | "academic"
+        | "behavioral"
+        | "bullying"
+        | "staff_conduct"
+        | "facilities"
+        | "discrimination"
+        | "other"
       enrollment_pathway:
         | "standard_digital"
         | "sibling_automatic"
@@ -5269,6 +5815,14 @@ export type Database = {
         | "on_hold"
         | "requires_override"
       fee_collection_role: "cashier" | "supervisor" | "admin"
+      incident_severity: "minor" | "moderate" | "serious" | "critical"
+      incident_type:
+        | "injury"
+        | "illness"
+        | "accident"
+        | "medication"
+        | "emergency"
+        | "other"
       override_reason:
         | "policy_exception"
         | "emergency_circumstances"
@@ -5277,6 +5831,12 @@ export type Database = {
         | "technical_issue"
         | "data_correction"
       permission_type: "read" | "write" | "delete" | "approve" | "escalate"
+      record_status:
+        | "open"
+        | "in_progress"
+        | "resolved"
+        | "closed"
+        | "escalated"
       resource_type:
         | "students"
         | "grades"
@@ -5290,6 +5850,18 @@ export type Database = {
         | "communications"
         | "timetables"
         | "admissions"
+      safeguarding_concern_type:
+        | "physical_abuse"
+        | "emotional_abuse"
+        | "sexual_abuse"
+        | "neglect"
+        | "bullying"
+        | "self_harm"
+        | "domestic_violence"
+        | "online_safety"
+        | "radicalisation"
+        | "other"
+      safeguarding_risk_level: "low" | "medium" | "high" | "critical"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -5429,6 +6001,16 @@ export const Constants = {
         "student",
       ],
       approval_status: ["pending", "approved", "rejected", "escalated"],
+      complaint_priority: ["low", "medium", "high", "urgent"],
+      complaint_type: [
+        "academic",
+        "behavioral",
+        "bullying",
+        "staff_conduct",
+        "facilities",
+        "discrimination",
+        "other",
+      ],
       enrollment_pathway: [
         "standard_digital",
         "sibling_automatic",
@@ -5458,6 +6040,15 @@ export const Constants = {
         "requires_override",
       ],
       fee_collection_role: ["cashier", "supervisor", "admin"],
+      incident_severity: ["minor", "moderate", "serious", "critical"],
+      incident_type: [
+        "injury",
+        "illness",
+        "accident",
+        "medication",
+        "emergency",
+        "other",
+      ],
       override_reason: [
         "policy_exception",
         "emergency_circumstances",
@@ -5467,6 +6058,7 @@ export const Constants = {
         "data_correction",
       ],
       permission_type: ["read", "write", "delete", "approve", "escalate"],
+      record_status: ["open", "in_progress", "resolved", "closed", "escalated"],
       resource_type: [
         "students",
         "grades",
@@ -5481,6 +6073,19 @@ export const Constants = {
         "timetables",
         "admissions",
       ],
+      safeguarding_concern_type: [
+        "physical_abuse",
+        "emotional_abuse",
+        "sexual_abuse",
+        "neglect",
+        "bullying",
+        "self_harm",
+        "domestic_violence",
+        "online_safety",
+        "radicalisation",
+        "other",
+      ],
+      safeguarding_risk_level: ["low", "medium", "high", "critical"],
     },
   },
 } as const
