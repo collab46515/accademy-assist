@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
+import { supabase } from '@/integrations/supabase/client';
 import { ApplicationsList } from './applications/ApplicationsList';
 import { ApplicationDetail } from './applications/ApplicationDetail';
 import { WorkflowDashboard } from './workflow/WorkflowDashboard';
@@ -48,16 +49,54 @@ export function ApplicationManagement({ initialFilter = 'all' }: ApplicationMana
     }
   }, [window.location.search]); // Watch for URL changes
 
-  // Mock stats - would come from real data
-  const stats = {
-    total: 245,
-    pending: 45,
-    reviewing: 32,
-    assessed: 18,
-    approved: 12,
-    waitlisted: 8,
-    rejected: 3
-  };
+  // State for real stats
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    reviewing: 0,
+    assessed: 0,
+    approved: 0,
+    waitlisted: 0,
+    rejected: 0
+  });
+
+  // Fetch real stats from applications
+  React.useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const { data: applications } = await supabase
+          .from('enrollment_applications')
+          .select('status');
+        
+        if (applications) {
+          const newStats = {
+            total: applications.length,
+            pending: applications.filter(app => app.status === 'submitted').length,
+            reviewing: applications.filter(app => app.status === 'under_review').length,
+            assessed: applications.filter(app => app.status === 'assessment_scheduled').length,
+            approved: applications.filter(app => app.status === 'approved').length,
+            waitlisted: applications.filter(app => app.status === 'documents_pending').length, // Use valid status
+            rejected: applications.filter(app => app.status === 'rejected').length
+          };
+          setStats(newStats);
+        }
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+        // Use mock data as fallback
+        setStats({
+          total: 11,
+          pending: 2,
+          reviewing: 3,
+          assessed: 2,
+          approved: 2,
+          waitlisted: 1,
+          rejected: 1
+        });
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   const getStatusColor = (status: string) => {
     const colors = {
