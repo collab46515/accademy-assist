@@ -128,15 +128,15 @@ export function TopicManager({
                     Add Topic
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-                  <DialogHeader className="flex-shrink-0">
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
                     <DialogTitle>Add New Topic</DialogTitle>
                     <DialogDescription>
                       Create a new curriculum topic for {framework.name}
                     </DialogDescription>
                   </DialogHeader>
                   
-                  <div className="flex-1 overflow-y-auto space-y-4 px-1">
+                  <div className="space-y-4 max-h-96 overflow-y-auto">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="subject">Subject</Label>
@@ -355,11 +355,11 @@ export function TopicManager({
                   
                   return (
                     <TableRow key={topic.id}>
-                       <TableCell className="max-w-xs">
-                         <div className="space-y-1">
-                           <div className="font-medium text-sm">{topic.title}</div>
+                       <TableCell>
+                         <div>
+                           <div className="font-medium">{topic.title}</div>
                            {topic.description && (
-                             <div className="text-xs text-muted-foreground truncate">
+                             <div className="text-sm text-muted-foreground">
                                {topic.description}
                              </div>
                            )}
