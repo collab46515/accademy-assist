@@ -47,6 +47,21 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
   const [curriculumTopics, setCurriculumTopics] = useState<any[]>([]);
   const [selectedTopic, setSelectedTopic] = useState(editingPlan?.curriculum_topic_id || '');
   const [loadingTopics, setLoadingTopics] = useState(false);
+  
+  // Tab navigation state
+  const [activeTab, setActiveTab] = useState('basic');
+  
+  const tabOrder = [
+    { value: 'basic', label: 'Basic' },
+    { value: 'curriculum', label: 'Curriculum' },
+    { value: 'objectives', label: 'Objectives' },
+    { value: 'structure', label: 'Structure' },
+    { value: 'resources', label: 'Resources' },
+    { value: 'assessment', label: 'Assessment' },
+    { value: 'differentiation', label: 'Differentiation' }
+  ];
+  
+  const currentTabIndex = tabOrder.findIndex(tab => tab.value === activeTab);
 
   const [formData, setFormData] = useState(() => ({
     // Basic Information
@@ -259,6 +274,42 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
     });
   };
 
+  // Tab completion validation
+  const isTabCompleted = (tabValue: string): boolean => {
+    switch (tabValue) {
+      case 'basic':
+        return !!(formData.title && formData.subject && formData.year_group && formData.lesson_date);
+      case 'curriculum':
+        return !!(selectedTopic);
+      case 'objectives':
+        return !!(formData.learning_objectives[0] && formData.success_criteria[0]);
+      case 'structure':
+        return formData.lesson_sections.every(section => section.description);
+      case 'resources':
+        return !!(formData.resources.materials[0]);
+      case 'assessment':
+        return !!(formData.assessment.formative[0]);
+      case 'differentiation':
+        return !!(formData.differentiation.support_strategies[0] && formData.differentiation.extension_activities[0]);
+      default:
+        return false;
+    }
+  };
+
+  // Navigation functions
+  const goToNextTab = () => {
+    const nextIndex = Math.min(currentTabIndex + 1, tabOrder.length - 1);
+    setActiveTab(tabOrder[nextIndex].value);
+  };
+
+  const goToPreviousTab = () => {
+    const prevIndex = Math.max(currentTabIndex - 1, 0);
+    setActiveTab(tabOrder[prevIndex].value);
+  };
+
+  const canGoNext = currentTabIndex < tabOrder.length - 1;
+  const canGoPrevious = currentTabIndex > 0;
+
   return (
     <div className="max-w-6xl mx-auto p-4 space-y-6">
       {/* Framework Alignment - Inspection Ready */}
@@ -329,15 +380,57 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
       </div>
 
       <form onSubmit={handleSubmit}>
-        <Tabs defaultValue="basic" className="space-y-6">
+        <Tabs defaultValue="basic" className="space-y-6" value={activeTab} onValueChange={setActiveTab}>
+          {/* Progress Indicator */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-blue-900">Lesson Planning Progress</span>
+              <span className="text-sm text-blue-600">{currentTabIndex + 1} of {tabOrder.length}</span>
+            </div>
+            <div className="w-full bg-blue-100 rounded-full h-2">
+              <div 
+                className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                style={{ width: `${((currentTabIndex + 1) / tabOrder.length) * 100}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between mt-2 text-xs text-blue-600">
+              {tabOrder.map((tab, index) => (
+                <span key={tab.value} className={index <= currentTabIndex ? 'font-medium' : 'opacity-60'}>
+                  {tab.label}
+                </span>
+              ))}
+            </div>
+          </div>
+
           <TabsList className="grid w-full grid-cols-7">
-            <TabsTrigger value="basic">Basic</TabsTrigger>
-            <TabsTrigger value="curriculum">Curriculum</TabsTrigger>
-            <TabsTrigger value="objectives">Objectives</TabsTrigger>
-            <TabsTrigger value="structure">Structure</TabsTrigger>
-            <TabsTrigger value="resources">Resources</TabsTrigger>
-            <TabsTrigger value="assessment">Assessment</TabsTrigger>
-            <TabsTrigger value="differentiation">Differentiation</TabsTrigger>
+            <TabsTrigger value="basic" className="relative">
+              Basic
+              {isTabCompleted('basic') && <CheckCircle2 className="absolute -top-1 -right-1 h-3 w-3 text-green-600" />}
+            </TabsTrigger>
+            <TabsTrigger value="curriculum" className="relative">
+              Curriculum
+              {isTabCompleted('curriculum') && <CheckCircle2 className="absolute -top-1 -right-1 h-3 w-3 text-green-600" />}
+            </TabsTrigger>
+            <TabsTrigger value="objectives" className="relative">
+              Objectives
+              {isTabCompleted('objectives') && <CheckCircle2 className="absolute -top-1 -right-1 h-3 w-3 text-green-600" />}
+            </TabsTrigger>
+            <TabsTrigger value="structure" className="relative">
+              Structure
+              {isTabCompleted('structure') && <CheckCircle2 className="absolute -top-1 -right-1 h-3 w-3 text-green-600" />}
+            </TabsTrigger>
+            <TabsTrigger value="resources" className="relative">
+              Resources
+              {isTabCompleted('resources') && <CheckCircle2 className="absolute -top-1 -right-1 h-3 w-3 text-green-600" />}
+            </TabsTrigger>
+            <TabsTrigger value="assessment" className="relative">
+              Assessment
+              {isTabCompleted('assessment') && <CheckCircle2 className="absolute -top-1 -right-1 h-3 w-3 text-green-600" />}
+            </TabsTrigger>
+            <TabsTrigger value="differentiation" className="relative">
+              Differentiation
+              {isTabCompleted('differentiation') && <CheckCircle2 className="absolute -top-1 -right-1 h-3 w-3 text-green-600" />}
+            </TabsTrigger>
           </TabsList>
 
           {/* Basic Information */}
@@ -436,6 +529,34 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                 </div>
               </CardContent>
             </Card>
+            
+            {/* Navigation Buttons */}
+            <div className="flex justify-between pt-4">
+              <Button 
+                type="button"
+                variant="outline" 
+                onClick={goToPreviousTab}
+                disabled={!canGoPrevious}
+                className="flex items-center gap-2"
+              >
+                <MessageSquare className="h-4 w-4 rotate-180" />
+                Previous: {canGoPrevious ? tabOrder[currentTabIndex - 1]?.label : 'None'}
+              </Button>
+              <div className="flex gap-2">
+                <Badge variant={isTabCompleted('basic') ? 'default' : 'secondary'} className="px-3 py-1">
+                  {isTabCompleted('basic') ? '✓ Complete' : 'Incomplete'}
+                </Badge>
+              </div>
+              <Button 
+                type="button"
+                onClick={goToNextTab}
+                disabled={!canGoNext}
+                className="flex items-center gap-2"
+              >
+                Next: {canGoNext ? tabOrder[currentTabIndex + 1]?.label : 'Finish'}
+                <MessageSquare className="h-4 w-4" />
+              </Button>
+            </div>
           </TabsContent>
 
           {/* Curriculum Section */}
@@ -634,6 +755,34 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                 )}
               </CardContent>
             </Card>
+            
+            {/* Navigation Buttons */}
+            <div className="flex justify-between pt-4">
+              <Button 
+                type="button"
+                variant="outline" 
+                onClick={goToPreviousTab}
+                disabled={!canGoPrevious}
+                className="flex items-center gap-2"
+              >
+                <MessageSquare className="h-4 w-4 rotate-180" />
+                Previous: {canGoPrevious ? tabOrder[currentTabIndex - 1]?.label : 'None'}
+              </Button>
+              <div className="flex gap-2">
+                <Badge variant={isTabCompleted('curriculum') ? 'default' : 'secondary'} className="px-3 py-1">
+                  {isTabCompleted('curriculum') ? '✓ Complete' : 'Incomplete'}
+                </Badge>
+              </div>
+              <Button 
+                type="button"
+                onClick={goToNextTab}
+                disabled={!canGoNext}
+                className="flex items-center gap-2"
+              >
+                Next: {canGoNext ? tabOrder[currentTabIndex + 1]?.label : 'Finish'}
+                <MessageSquare className="h-4 w-4" />
+              </Button>
+            </div>
           </TabsContent>
 
           {/* Learning Objectives */}
@@ -736,6 +885,34 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                 </div>
               </CardContent>
             </Card>
+            
+            {/* Navigation Buttons */}
+            <div className="flex justify-between pt-4">
+              <Button 
+                type="button"
+                variant="outline" 
+                onClick={goToPreviousTab}
+                disabled={!canGoPrevious}
+                className="flex items-center gap-2"
+              >
+                <MessageSquare className="h-4 w-4 rotate-180" />
+                Previous: {canGoPrevious ? tabOrder[currentTabIndex - 1]?.label : 'None'}
+              </Button>
+              <div className="flex gap-2">
+                <Badge variant={isTabCompleted('objectives') ? 'default' : 'secondary'} className="px-3 py-1">
+                  {isTabCompleted('objectives') ? '✓ Complete' : 'Incomplete'}
+                </Badge>
+              </div>
+              <Button 
+                type="button"
+                onClick={goToNextTab}
+                disabled={!canGoNext}
+                className="flex items-center gap-2"
+              >
+                Next: {canGoNext ? tabOrder[currentTabIndex + 1]?.label : 'Finish'}
+                <MessageSquare className="h-4 w-4" />
+              </Button>
+            </div>
           </TabsContent>
 
           {/* Lesson Structure */}
@@ -787,6 +964,34 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                 ))}
               </CardContent>
             </Card>
+            
+            {/* Navigation Buttons */}
+            <div className="flex justify-between pt-4">
+              <Button 
+                type="button"
+                variant="outline" 
+                onClick={goToPreviousTab}
+                disabled={!canGoPrevious}
+                className="flex items-center gap-2"
+              >
+                <MessageSquare className="h-4 w-4 rotate-180" />
+                Previous: {canGoPrevious ? tabOrder[currentTabIndex - 1]?.label : 'None'}
+              </Button>
+              <div className="flex gap-2">
+                <Badge variant={isTabCompleted('structure') ? 'default' : 'secondary'} className="px-3 py-1">
+                  {isTabCompleted('structure') ? '✓ Complete' : 'Incomplete'}
+                </Badge>
+              </div>
+              <Button 
+                type="button"
+                onClick={goToNextTab}
+                disabled={!canGoNext}
+                className="flex items-center gap-2"
+              >
+                Next: {canGoNext ? tabOrder[currentTabIndex + 1]?.label : 'Finish'}
+                <MessageSquare className="h-4 w-4" />
+              </Button>
+            </div>
           </TabsContent>
 
           {/* Resources */}
@@ -842,6 +1047,34 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                 </div>
               </CardContent>
             </Card>
+            
+            {/* Navigation Buttons */}
+            <div className="flex justify-between pt-4">
+              <Button 
+                type="button"
+                variant="outline" 
+                onClick={goToPreviousTab}
+                disabled={!canGoPrevious}
+                className="flex items-center gap-2"
+              >
+                <MessageSquare className="h-4 w-4 rotate-180" />
+                Previous: {canGoPrevious ? tabOrder[currentTabIndex - 1]?.label : 'None'}
+              </Button>
+              <div className="flex gap-2">
+                <Badge variant={isTabCompleted('resources') ? 'default' : 'secondary'} className="px-3 py-1">
+                  {isTabCompleted('resources') ? '✓ Complete' : 'Incomplete'}
+                </Badge>
+              </div>
+              <Button 
+                type="button"
+                onClick={goToNextTab}
+                disabled={!canGoNext}
+                className="flex items-center gap-2"
+              >
+                Next: {canGoNext ? tabOrder[currentTabIndex + 1]?.label : 'Finish'}
+                <MessageSquare className="h-4 w-4" />
+              </Button>
+            </div>
           </TabsContent>
 
           {/* Assessment */}
@@ -897,6 +1130,34 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                 </div>
               </CardContent>
             </Card>
+            
+            {/* Navigation Buttons */}
+            <div className="flex justify-between pt-4">
+              <Button 
+                type="button"
+                variant="outline" 
+                onClick={goToPreviousTab}
+                disabled={!canGoPrevious}
+                className="flex items-center gap-2"
+              >
+                <MessageSquare className="h-4 w-4 rotate-180" />
+                Previous: {canGoPrevious ? tabOrder[currentTabIndex - 1]?.label : 'None'}
+              </Button>
+              <div className="flex gap-2">
+                <Badge variant={isTabCompleted('assessment') ? 'default' : 'secondary'} className="px-3 py-1">
+                  {isTabCompleted('assessment') ? '✓ Complete' : 'Incomplete'}
+                </Badge>
+              </div>
+              <Button 
+                type="button"
+                onClick={goToNextTab}
+                disabled={!canGoNext}
+                className="flex items-center gap-2"
+              >
+                Next: {canGoNext ? tabOrder[currentTabIndex + 1]?.label : 'Finish'}
+                <MessageSquare className="h-4 w-4" />
+              </Button>
+            </div>
           </TabsContent>
 
           {/* Differentiation */}
@@ -970,6 +1231,34 @@ export const ComprehensiveLessonEditor: React.FC<ComprehensiveLessonEditorProps>
                 </div>
               </CardContent>
             </Card>
+            
+            {/* Navigation Buttons */}
+            <div className="flex justify-between pt-4">
+              <Button 
+                type="button"
+                variant="outline" 
+                onClick={goToPreviousTab}
+                disabled={!canGoPrevious}
+                className="flex items-center gap-2"
+              >
+                <MessageSquare className="h-4 w-4 rotate-180" />
+                Previous: {canGoPrevious ? tabOrder[currentTabIndex - 1]?.label : 'None'}
+              </Button>
+              <div className="flex gap-2">
+                <Badge variant={isTabCompleted('differentiation') ? 'default' : 'secondary'} className="px-3 py-1">
+                  {isTabCompleted('differentiation') ? '✓ Complete' : 'Completed'}
+                </Badge>
+                <Button 
+                  type="button"
+                  onClick={handleSubmit}
+                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  Complete Lesson Plan
+                </Button>
+              </div>
+              <div className="opacity-50 text-sm">Final Step</div>
+            </div>
           </TabsContent>
         </Tabs>
       </form>
