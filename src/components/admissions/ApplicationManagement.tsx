@@ -302,24 +302,39 @@ export function ApplicationManagement({ initialFilter = 'all' }: ApplicationMana
           console.log('Tab changed to:', value);
           setActiveTab(value);
         }} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 bg-white border shadow-sm">
-            <TabsTrigger value="applications" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-5 bg-white border shadow-sm h-12 p-1">
+            <TabsTrigger 
+              value="applications" 
+              className="flex items-center gap-2 h-10 rounded-md transition-all data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-blue-50 data-[state=active]:hover:bg-blue-600"
+            >
               <Users className="h-4 w-4" />
               Applications
             </TabsTrigger>
-            <TabsTrigger value="workflow" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="workflow" 
+              className="flex items-center gap-2 h-10 rounded-md transition-all data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-blue-50 data-[state=active]:hover:bg-blue-600"
+            >
               <Clock className="h-4 w-4" />
               Progress Tracking
             </TabsTrigger>
-            <TabsTrigger value="assessments" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="assessments" 
+              className="flex items-center gap-2 h-10 rounded-md transition-all data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-blue-50 data-[state=active]:hover:bg-blue-600"
+            >
               <Calendar className="h-4 w-4" />
               Assessments
             </TabsTrigger>
-            <TabsTrigger value="documents" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="documents" 
+              className="flex items-center gap-2 h-10 rounded-md transition-all data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-blue-50 data-[state=active]:hover:bg-blue-600"
+            >
               <FileText className="h-4 w-4" />
               Documents
             </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="reports" 
+              className="flex items-center gap-2 h-10 rounded-md transition-all data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-blue-50 data-[state=active]:hover:bg-blue-600"
+            >
               <BarChart3 className="h-4 w-4" />
               Reports
             </TabsTrigger>
