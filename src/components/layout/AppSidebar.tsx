@@ -57,7 +57,6 @@ const erpModules = [
     url: "/",
     icon: GraduationCap,
     subItems: [
-      { title: "Students", url: "/students", icon: Users },
       { 
         title: "Admissions", 
         url: "/admissions", 
