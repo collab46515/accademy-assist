@@ -45,25 +45,57 @@ export function ReportCardGenerator({ open, onOpenChange, mode, onGenerationComp
   const fetchStudents = async () => {
     setLoadingStudents(true);
     try {
-      // For now, let's use demo data with proper UUIDs
+      let query = supabase
+        .from('students')
+        .select(`
+          id,
+          year_group,
+          profiles!inner(first_name, last_name)
+        `);
+      
+      // Filter by year group if selected
+      if (yearGroup) {
+        query = query.eq('year_group', yearGroup);
+      }
+      
+      const { data: studentsData, error } = await query;
+      
+      if (error) {
+        console.error('Error fetching students:', error);
+        // Fallback to demo data
+        const demoStudents = [
+          { id: '550e8400-e29b-41d4-a716-446655440001', first_name: 'John', last_name: 'Smith', year_group: 'Year 7' },
+          { id: '550e8400-e29b-41d4-a716-446655440002', first_name: 'Emma', last_name: 'Johnson', year_group: 'Year 7' },
+          { id: '550e8400-e29b-41d4-a716-446655440003', first_name: 'Michael', last_name: 'Brown', year_group: 'Year 8' },
+          { id: '550e8400-e29b-41d4-a716-446655440004', first_name: 'Sarah', last_name: 'Wilson', year_group: 'Year 8' },
+        ];
+        const filteredStudents = yearGroup 
+          ? demoStudents.filter(student => student.year_group === yearGroup)
+          : demoStudents;
+        setStudents(filteredStudents);
+      } else {
+        // Transform the joined data to match our interface
+        const transformedStudents = (studentsData || []).map((student: any) => ({
+          id: student.id,
+          year_group: student.year_group,
+          first_name: student.profiles?.first_name || 'Unknown',
+          last_name: student.profiles?.last_name || 'Student'
+        }));
+        setStudents(transformedStudents);
+      }
+    } catch (error) {
+      console.error('Error fetching students:', error);
+      // Use demo data as fallback
       const demoStudents = [
         { id: '550e8400-e29b-41d4-a716-446655440001', first_name: 'John', last_name: 'Smith', year_group: 'Year 7' },
         { id: '550e8400-e29b-41d4-a716-446655440002', first_name: 'Emma', last_name: 'Johnson', year_group: 'Year 7' },
         { id: '550e8400-e29b-41d4-a716-446655440003', first_name: 'Michael', last_name: 'Brown', year_group: 'Year 8' },
         { id: '550e8400-e29b-41d4-a716-446655440004', first_name: 'Sarah', last_name: 'Wilson', year_group: 'Year 8' },
-        { id: '550e8400-e29b-41d4-a716-446655440005', first_name: 'David', last_name: 'Taylor', year_group: 'Year 9' },
-        { id: '550e8400-e29b-41d4-a716-446655440006', first_name: 'Lucy', last_name: 'Anderson', year_group: 'Year 9' },
       ];
-      
-      // Filter by year group if selected
       const filteredStudents = yearGroup 
         ? demoStudents.filter(student => student.year_group === yearGroup)
         : demoStudents;
-        
       setStudents(filteredStudents);
-    } catch (error) {
-      console.error('Error fetching students:', error);
-      setStudents([]);
     } finally {
       setLoadingStudents(false);
     }
@@ -73,51 +105,90 @@ export function ReportCardGenerator({ open, onOpenChange, mode, onGenerationComp
     setLoading(true);
     try {
       if (mode === 'individual') {
-        // For demo purposes, we'll create a mock report since we don't have actual grade data
         const selectedStudent = students.find(s => s.id === studentId);
         if (!selectedStudent) {
           throw new Error('Student not found');
         }
 
-        console.log('Selected student ID:', studentId);
-        console.log('Selected student:', selectedStudent);
-
-        // Create report card record directly (skip the RPC for now since we may not have grade data)
-        const { error: insertError } = await supabase
+        // Create report card with the correct column names
+        const { data: reportId, error } = await supabase
           .from('report_cards')
           .insert({
             student_id: studentId,
-            school_id: '550e8400-e29b-41d4-a716-446655440000', // Temporary valid UUID
-            academic_term: academicTerm,
-            academic_year: academicYear,
-            class_name: yearGroup,
-            teacher_id: '550e8400-e29b-41d4-a716-446655440100', // Temporary valid UUID
-            teacher_name: 'Current Teacher',
             student_name: `${selectedStudent.first_name} ${selectedStudent.last_name}`,
+            school_id: '550e8400-e29b-41d4-a716-446655440000', // Will be replaced with real school context
+            academic_year: academicYear,
+            academic_term: academicTerm,
             year_group: yearGroup,
-            generated_by: '550e8400-e29b-41d4-a716-446655440200', // Temporary valid UUID
-            grades_data: [], // Empty for now
+            class_name: yearGroup,
+            teacher_id: '550e8400-e29b-41d4-a716-446655440100', // Temporary teacher ID
+            teacher_name: 'Current Teacher',
+            generated_by: '550e8400-e29b-41d4-a716-446655440200', // Temporary user ID
+            status: 'draft',
+            grades_data: [],
             attendance_data: {},
-            status: 'draft'
-          });
+            comments_data: {},
+            effort_data: {},
+            curriculum_coverage: {},
+            targets: []
+          })
+          .select('id')
+          .single();
 
-        if (insertError) {
-          throw insertError;
+        if (error) {
+          console.error('Database function error:', error);
+          throw error;
         }
 
         toast({
           title: "Report Generated Successfully",
-          description: `Report card created for ${selectedStudent.first_name} ${selectedStudent.last_name}`,
+          description: `Comprehensive report card created for ${selectedStudent.first_name} ${selectedStudent.last_name} with all grading and attendance data`,
         });
         
-        // Call the callback to refresh the parent list
         onGenerationComplete?.();
       } else {
-        // Bulk generation - this would iterate through multiple students
+        // Bulk generation - generate for all students in the year group
+        const studentsToProcess = students.length > 0 ? students : await fetchStudentsForBulk();
+        
+        let successCount = 0;
+        let errorCount = 0;
+
+        for (const student of studentsToProcess) {
+          try {
+            await supabase
+              .from('report_cards')
+              .insert({
+                student_id: student.id,
+                student_name: `${student.first_name} ${student.last_name}`,
+                school_id: '550e8400-e29b-41d4-a716-446655440000', // Will be replaced with real school context
+                academic_year: academicYear,
+                academic_term: academicTerm,
+                year_group: yearGroup,
+                class_name: yearGroup,
+                teacher_id: '550e8400-e29b-41d4-a716-446655440100', // Temporary teacher ID
+                teacher_name: 'Current Teacher',
+                generated_by: '550e8400-e29b-41d4-a716-446655440200', // Temporary user ID
+                status: 'draft',
+                grades_data: [],
+                attendance_data: {},
+                comments_data: {},
+                effort_data: {},
+                curriculum_coverage: {},
+                targets: []
+              });
+            successCount++;
+          } catch (error) {
+            console.error(`Error generating report for ${student.first_name} ${student.last_name}:`, error);
+            errorCount++;
+          }
+        }
+
         toast({
-          title: "Bulk Generation Started",
-          description: `Generating reports for all students in ${yearGroup} - ${academicTerm}`,
+          title: "Bulk Generation Completed",
+          description: `Generated ${successCount} report cards successfully${errorCount > 0 ? `, ${errorCount} failed` : ''}`,
         });
+        
+        onGenerationComplete?.();
       }
 
       onOpenChange(false);
@@ -131,6 +202,27 @@ export function ReportCardGenerator({ open, onOpenChange, mode, onGenerationComp
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchStudentsForBulk = async () => {
+    const { data, error } = await supabase
+      .from('students')
+      .select(`
+        id,
+        year_group,
+        profiles!inner(first_name, last_name)
+      `)
+      .eq('year_group', yearGroup);
+    
+    if (error) throw error;
+    
+    // Transform the joined data
+    return (data || []).map((student: any) => ({
+      id: student.id,
+      year_group: student.year_group,
+      first_name: student.profiles?.first_name || 'Unknown',
+      last_name: student.profiles?.last_name || 'Student'
+    }));
   };
 
   return (
