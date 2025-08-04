@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Plus, Search, Calendar, Edit, Copy, Trash2, FileText, Clock, User, BookOpen, ChevronDown, Upload, Paperclip, Play, Pause, RotateCcw } from 'lucide-react';
+import { Plus, Search, Calendar, Edit, Copy, Trash2, FileText, Clock, User, BookOpen, ChevronDown, Upload, Paperclip, Play, Pause, RotateCcw, Share2, Users, Link, Zap, BarChart3 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
@@ -66,6 +66,61 @@ interface LessonAssessment {
   }[];
 }
 
+interface LessonTemplate {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  usage_count: number;
+  created_by: string;
+  is_public: boolean;
+  tags: string[];
+}
+
+interface LessonCollaboration {
+  shared_with: {
+    user_id: string;
+    name: string;
+    role: 'hod' | 'ta' | 'co_teacher';
+    permission: 'view' | 'edit';
+  }[];
+  created_by: string;
+  last_modified_by: string;
+  modification_history: {
+    user_id: string;
+    timestamp: string;
+    changes: string;
+  }[];
+}
+
+interface LessonSequence {
+  is_part_of_sequence: boolean;
+  sequence_id?: string;
+  sequence_title?: string;
+  lesson_number?: number;
+  total_lessons?: number;
+  previous_lesson_id?: string;
+  next_lesson_id?: string;
+  sequence_description?: string;
+}
+
+interface LessonIntegration {
+  timetable_entry_id?: string;
+  class_id?: string;
+  period_info?: {
+    day: string;
+    time: string;
+    duration: number;
+    room: string;
+  };
+  auto_assignment?: {
+    enabled: boolean;
+    title: string;
+    due_date: string;
+    description: string;
+  };
+}
+
 interface LessonDifferentiation {
   support: string[];
   challenge: string[];
@@ -109,6 +164,9 @@ interface LessonPlan {
   resources: LessonResources;
   differentiation: LessonDifferentiation;
   assessment: LessonAssessment;
+  collaboration: LessonCollaboration;
+  sequence: LessonSequence;
+  integration: LessonIntegration;
   total_planned_time: number;
 }
 
@@ -128,7 +186,33 @@ interface LessonPlanFormData {
   resources: LessonResources;
   differentiation: LessonDifferentiation;
   assessment: LessonAssessment;
+  collaboration: LessonCollaboration;
+  sequence: LessonSequence;
+  integration: LessonIntegration;
 }
+
+// Default collaboration template
+const createDefaultCollaboration = (): LessonCollaboration => ({
+  shared_with: [],
+  created_by: 'current-user-id',
+  last_modified_by: 'current-user-id',
+  modification_history: []
+});
+
+// Default sequence template
+const createDefaultSequence = (): LessonSequence => ({
+  is_part_of_sequence: false
+});
+
+// Default integration template
+const createDefaultIntegration = (): LessonIntegration => ({
+  auto_assignment: {
+    enabled: false,
+    title: '',
+    due_date: '',
+    description: ''
+  }
+});
 
 // Default assessment template
 const createDefaultAssessment = (): LessonAssessment => ({
@@ -361,6 +445,31 @@ const mockLessonPlans: LessonPlan[] = [
       skills_assessed: ['Number sense', 'Fraction understanding', 'Mathematical communication'],
       rubrics: []
     },
+    collaboration: createDefaultCollaboration(),
+    sequence: {
+      is_part_of_sequence: true,
+      sequence_id: 'seq-fractions-101',
+      sequence_title: 'Introduction to Fractions',
+      lesson_number: 2,
+      total_lessons: 4,
+      sequence_description: 'Complete introduction to fraction concepts and operations'
+    },
+    integration: {
+      timetable_entry_id: 'tt-001',
+      class_id: 'class-7a',
+      period_info: {
+        day: 'Monday',
+        time: '10:00',
+        duration: 50,
+        room: 'Room 12'
+      },
+      auto_assignment: {
+        enabled: true,
+        title: 'Equivalent Fractions Practice',
+        due_date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        description: 'Complete worksheet on equivalent fractions'
+      }
+    },
     total_planned_time: 50
   }
 ];
@@ -406,7 +515,10 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
     lesson_sections: createDefaultLessonSections(),
     resources: createDefaultResources(),
     differentiation: createDefaultDifferentiation(),
-    assessment: createDefaultAssessment()
+    assessment: createDefaultAssessment(),
+    collaboration: createDefaultCollaboration(),
+    sequence: createDefaultSequence(),
+    integration: createDefaultIntegration()
   });
 
   const resetForm = () => {
@@ -425,7 +537,10 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
       lesson_sections: createDefaultLessonSections(),
       resources: createDefaultResources(),
       differentiation: createDefaultDifferentiation(),
-      assessment: createDefaultAssessment()
+      assessment: createDefaultAssessment(),
+      collaboration: createDefaultCollaboration(),
+      sequence: createDefaultSequence(),
+      integration: createDefaultIntegration()
     });
     setExpandedSections(['hook']);
   };
@@ -506,7 +621,10 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
       lesson_sections: plan.lesson_sections || createDefaultLessonSections(),
       resources: plan.resources || createDefaultResources(),
       differentiation: plan.differentiation || createDefaultDifferentiation(),
-      assessment: plan.assessment || createDefaultAssessment()
+      assessment: plan.assessment || createDefaultAssessment(),
+      collaboration: plan.collaboration || createDefaultCollaboration(),
+      sequence: plan.sequence || createDefaultSequence(),
+      integration: plan.integration || createDefaultIntegration()
     });
     setExpandedSections(['hook']);
     setIsDialogOpen(true);
@@ -2356,6 +2474,378 @@ export const LessonPlanning: React.FC<LessonPlanningProps> = ({ schoolId, canEdi
                               {[...formData.assessment.formative, ...formData.assessment.summative]
                                 .filter(a => a.links_to_gradebook).length} linked
                             </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Integration Features Section - The Power Layer */}
+                    <div className="space-y-6 border-t pt-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <Label className="text-lg font-semibold flex items-center gap-2">
+                            <Zap className="h-5 w-5 text-amber-500" />
+                            Integration Features
+                          </Label>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            The Power Layer - Connect your lesson to curriculum, templates, collaboration, and more
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid gap-6 md:grid-cols-2">
+                        {/* Curriculum Link */}
+                        <div className="space-y-4 p-4 border rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50">
+                          <div className="flex items-center gap-2">
+                            <BookOpen className="h-5 w-5 text-blue-600" />
+                            <Label className="text-base font-medium">Curriculum Link</Label>
+                          </div>
+                          <div className="space-y-3">
+                            <div>
+                              <Label className="text-sm">Selected Topic</Label>
+                              <div className="flex gap-2 mt-1">
+                                <Select
+                                  value={formData.curriculum_topic_id}
+                                  onValueChange={(value) => setFormData(prev => ({ ...prev, curriculum_topic_id: value }))}
+                                >
+                                  <SelectTrigger className="flex-1">
+                                    <SelectValue placeholder="Search and select curriculum topic" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {mockCurriculumTopics.map(topic => (
+                                      <SelectItem key={topic.id} value={topic.id}>
+                                        <div>
+                                          <div className="font-medium">{topic.title}</div>
+                                          <div className="text-xs text-muted-foreground">{topic.subject} • {topic.grade_level}</div>
+                                        </div>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Button type="button" variant="outline" size="sm">
+                                  <Search className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                            {selectedTopic && (
+                              <div className="text-xs text-blue-700 bg-blue-100 p-2 rounded">
+                                <strong>Auto-aligned:</strong> Learning objectives and skills will sync with this curriculum topic
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Template Library */}
+                        <div className="space-y-4 p-4 border rounded-lg bg-gradient-to-br from-purple-50 to-pink-50">
+                          <div className="flex items-center gap-2">
+                            <Copy className="h-5 w-5 text-purple-600" />
+                            <Label className="text-base font-medium">Template Library</Label>
+                          </div>
+                          <div className="space-y-3">
+                            <div className="flex gap-2">
+                              <Button type="button" variant="outline" size="sm" className="flex-1">
+                                <Upload className="h-4 w-4 mr-2" />
+                                Save as Template
+                              </Button>
+                              <Button type="button" variant="outline" size="sm" className="flex-1">
+                                <Copy className="h-4 w-4 mr-2" />
+                                Load Template
+                              </Button>
+                            </div>
+                            <div className="text-xs text-purple-700 space-y-1">
+                              <div className="flex justify-between">
+                                <span>📚 Science Lab</span>
+                                <span className="text-muted-foreground">Used 12x</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>🔢 Math Drill</span>
+                                <span className="text-muted-foreground">Used 8x</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>📖 Reading Circle</span>
+                                <span className="text-muted-foreground">Used 15x</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Collaboration */}
+                        <div className="space-y-4 p-4 border rounded-lg bg-gradient-to-br from-green-50 to-emerald-50">
+                          <div className="flex items-center gap-2">
+                            <Share2 className="h-5 w-5 text-green-600" />
+                            <Label className="text-base font-medium">Collaboration</Label>
+                          </div>
+                          <div className="space-y-3">
+                            <div className="space-y-2">
+                              {formData.collaboration.shared_with.map((person, index) => (
+                                <div key={index} className="flex items-center justify-between text-xs bg-white p-2 rounded border">
+                                  <div className="flex items-center gap-2">
+                                    <Users className="h-3 w-3" />
+                                    <span>{person.name}</span>
+                                    <Badge variant="secondary" className="text-xs">{person.role.toUpperCase()}</Badge>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className={person.permission === 'edit' ? 'text-orange-600' : 'text-gray-600'}>
+                                      {person.permission}
+                                    </span>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        const newShared = formData.collaboration.shared_with.filter((_, i) => i !== index);
+                                        setFormData(prev => ({
+                                          ...prev,
+                                          collaboration: {
+                                            ...prev.collaboration,
+                                            shared_with: newShared
+                                          }
+                                        }));
+                                      }}
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                            <Button type="button" variant="outline" size="sm" className="w-full">
+                              <Plus className="h-4 w-4 mr-2" />
+                              Share with HOD/TA/Co-teacher
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Sequence Planning */}
+                        <div className="space-y-4 p-4 border rounded-lg bg-gradient-to-br from-orange-50 to-red-50">
+                          <div className="flex items-center gap-2">
+                            <BarChart3 className="h-5 w-5 text-orange-600" />
+                            <Label className="text-base font-medium">Sequence Planning</Label>
+                          </div>
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                id="part-of-sequence"
+                                checked={formData.sequence.is_part_of_sequence}
+                                onChange={(e) => setFormData(prev => ({
+                                  ...prev,
+                                  sequence: {
+                                    ...prev.sequence,
+                                    is_part_of_sequence: e.target.checked
+                                  }
+                                }))}
+                                className="rounded"
+                              />
+                              <Label htmlFor="part-of-sequence" className="text-sm">Part of lesson sequence</Label>
+                            </div>
+                            
+                            {formData.sequence.is_part_of_sequence && (
+                              <div className="space-y-2 pl-6 border-l-2 border-orange-200">
+                                <Input
+                                  placeholder="Sequence title"
+                                  value={formData.sequence.sequence_title || ''}
+                                  onChange={(e) => setFormData(prev => ({
+                                    ...prev,
+                                    sequence: {
+                                      ...prev.sequence,
+                                      sequence_title: e.target.value
+                                    }
+                                  }))}
+                                  className="text-sm"
+                                />
+                                <div className="grid grid-cols-2 gap-2">
+                                  <Input
+                                    type="number"
+                                    placeholder="Lesson #"
+                                    value={formData.sequence.lesson_number || ''}
+                                    onChange={(e) => setFormData(prev => ({
+                                      ...prev,
+                                      sequence: {
+                                        ...prev.sequence,
+                                        lesson_number: parseInt(e.target.value) || 1
+                                      }
+                                    }))}
+                                    className="text-sm"
+                                  />
+                                  <Input
+                                    type="number"
+                                    placeholder="of Total"
+                                    value={formData.sequence.total_lessons || ''}
+                                    onChange={(e) => setFormData(prev => ({
+                                      ...prev,
+                                      sequence: {
+                                        ...prev.sequence,
+                                        total_lessons: parseInt(e.target.value) || 1
+                                      }
+                                    }))}
+                                    className="text-sm"
+                                  />
+                                </div>
+                                {formData.sequence.lesson_number && formData.sequence.total_lessons && (
+                                  <div className="text-xs text-orange-700 bg-orange-100 p-2 rounded">
+                                    📋 Auto-suggest: "Lesson {(formData.sequence.lesson_number || 0) + 1} of {formData.sequence.total_lessons}" will be suggested next
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Timetable Link */}
+                        <div className="space-y-4 p-4 border rounded-lg bg-gradient-to-br from-cyan-50 to-blue-50">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-5 w-5 text-cyan-600" />
+                            <Label className="text-base font-medium">Timetable Link</Label>
+                          </div>
+                          <div className="space-y-3">
+                            {formData.integration.period_info ? (
+                              <div className="text-xs space-y-1 bg-white p-3 rounded border">
+                                <div className="font-medium text-cyan-700">📅 Connected to Timetable</div>
+                                <div className="grid grid-cols-2 gap-2 text-muted-foreground">
+                                  <span>Day: {formData.integration.period_info.day}</span>
+                                  <span>Time: {formData.integration.period_info.time}</span>
+                                  <span>Duration: {formData.integration.period_info.duration}min</span>
+                                  <span>Room: {formData.integration.period_info.room}</span>
+                                </div>
+                              </div>
+                            ) : (
+                              <Button type="button" variant="outline" size="sm" className="w-full">
+                                <Link className="h-4 w-4 mr-2" />
+                                Link to Timetable Entry
+                              </Button>
+                            )}
+                            <div className="text-xs text-cyan-700">
+                              🎯 Knows which class is being taught when
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Create Assignment */}
+                        <div className="space-y-4 p-4 border rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50">
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-5 w-5 text-emerald-600" />
+                            <Label className="text-base font-medium">Create Assignment</Label>
+                          </div>
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                id="auto-assignment"
+                                checked={formData.integration.auto_assignment?.enabled || false}
+                                onChange={(e) => setFormData(prev => ({
+                                  ...prev,
+                                  integration: {
+                                    ...prev.integration,
+                                    auto_assignment: {
+                                      ...prev.integration.auto_assignment!,
+                                      enabled: e.target.checked
+                                    }
+                                  }
+                                }))}
+                                className="rounded"
+                              />
+                              <Label htmlFor="auto-assignment" className="text-sm">Auto-create homework assignment</Label>
+                            </div>
+                            
+                            {formData.integration.auto_assignment?.enabled && (
+                              <div className="space-y-2 pl-6 border-l-2 border-emerald-200">
+                                <Input
+                                  placeholder="Assignment title"
+                                  value={formData.integration.auto_assignment.title}
+                                  onChange={(e) => setFormData(prev => ({
+                                    ...prev,
+                                    integration: {
+                                      ...prev.integration,
+                                      auto_assignment: {
+                                        ...prev.integration.auto_assignment!,
+                                        title: e.target.value
+                                      }
+                                    }
+                                  }))}
+                                  className="text-sm"
+                                />
+                                <Input
+                                  type="date"
+                                  value={formData.integration.auto_assignment.due_date}
+                                  onChange={(e) => setFormData(prev => ({
+                                    ...prev,
+                                    integration: {
+                                      ...prev.integration,
+                                      auto_assignment: {
+                                        ...prev.integration.auto_assignment!,
+                                        due_date: e.target.value
+                                      }
+                                    }
+                                  }))}
+                                  className="text-sm"
+                                />
+                                <Textarea
+                                  placeholder="Assignment description"
+                                  value={formData.integration.auto_assignment.description}
+                                  onChange={(e) => setFormData(prev => ({
+                                    ...prev,
+                                    integration: {
+                                      ...prev.integration,
+                                      auto_assignment: {
+                                        ...prev.integration.auto_assignment!,
+                                        description: e.target.value
+                                      }
+                                    }
+                                  }))}
+                                  className="text-sm min-h-[60px]"
+                                />
+                                <div className="text-xs text-emerald-700 bg-emerald-100 p-2 rounded">
+                                  🚀 One-click: Assignment will be created automatically with these details
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Integration Summary */}
+                      <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Zap className="h-5 w-5 text-amber-600" />
+                          <span className="font-medium text-amber-800">Integration Status</span>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 text-sm">
+                          <div className="flex flex-col items-center p-2 bg-white rounded border">
+                            <BookOpen className={`h-4 w-4 mb-1 ${formData.curriculum_topic_id ? 'text-blue-600' : 'text-gray-400'}`} />
+                            <span className="text-xs text-center">
+                              {formData.curriculum_topic_id ? '✅ Linked' : '⚪ Curriculum'}
+                            </span>
+                          </div>
+                          <div className="flex flex-col items-center p-2 bg-white rounded border">
+                            <Share2 className={`h-4 w-4 mb-1 ${formData.collaboration.shared_with.length > 0 ? 'text-green-600' : 'text-gray-400'}`} />
+                            <span className="text-xs text-center">
+                              {formData.collaboration.shared_with.length > 0 ? `✅ ${formData.collaboration.shared_with.length} shared` : '⚪ Solo'}
+                            </span>
+                          </div>
+                          <div className="flex flex-col items-center p-2 bg-white rounded border">
+                            <BarChart3 className={`h-4 w-4 mb-1 ${formData.sequence.is_part_of_sequence ? 'text-orange-600' : 'text-gray-400'}`} />
+                            <span className="text-xs text-center">
+                              {formData.sequence.is_part_of_sequence ? 
+                                `✅ ${formData.sequence.lesson_number}/${formData.sequence.total_lessons}` : 
+                                '⚪ Standalone'}
+                            </span>
+                          </div>
+                          <div className="flex flex-col items-center p-2 bg-white rounded border">
+                            <Calendar className={`h-4 w-4 mb-1 ${formData.integration.period_info ? 'text-cyan-600' : 'text-gray-400'}`} />
+                            <span className="text-xs text-center">
+                              {formData.integration.period_info ? '✅ Scheduled' : '⚪ Timetable'}
+                            </span>
+                          </div>
+                          <div className="flex flex-col items-center p-2 bg-white rounded border">
+                            <FileText className={`h-4 w-4 mb-1 ${formData.integration.auto_assignment?.enabled ? 'text-emerald-600' : 'text-gray-400'}`} />
+                            <span className="text-xs text-center">
+                              {formData.integration.auto_assignment?.enabled ? '✅ Auto-HW' : '⚪ Assignment'}
+                            </span>
+                          </div>
+                          <div className="flex flex-col items-center p-2 bg-white rounded border">
+                            <Copy className="h-4 w-4 mb-1 text-purple-600" />
+                            <span className="text-xs text-center">✅ Template</span>
                           </div>
                         </div>
                       </div>
