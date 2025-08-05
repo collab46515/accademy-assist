@@ -168,13 +168,22 @@ export function UserManuals({ modules }: UserManualsProps) {
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
                       {role.guides.map((guide, guideIndex) => (
-                        <div key={guideIndex} className="flex items-center gap-2 p-2 hover:bg-muted/50 rounded cursor-pointer">
+                        <div 
+                          key={guideIndex} 
+                          className="flex items-center gap-2 p-2 hover:bg-muted/50 rounded cursor-pointer transition-colors"
+                          onClick={() => alert(`Opening guide: ${guide}`)}
+                        >
                           <BookOpen className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm">{guide}</span>
+                          <Badge variant="outline" className="ml-auto text-xs">New</Badge>
                         </div>
                       ))}
                     </div>
-                    <Button variant="outline" className="w-full">
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => alert(`Opening all ${role.name} guides...`)}
+                    >
                       <FileText className="mr-2 h-4 w-4" />
                       View All Guides
                     </Button>
@@ -234,28 +243,41 @@ export function UserManuals({ modules }: UserManualsProps) {
                           "Troubleshooting",
                           "FAQ"
                         ].map((section, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                          <div 
+                            key={index} 
+                            className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                            onClick={() => alert(`Opening ${section} for ${selectedModule.name}...`)}
+                          >
                             <div className="flex items-center gap-2">
                               <FileText className="h-4 w-4 text-muted-foreground" />
                               <span className="text-sm">{section}</span>
                             </div>
-                            <Badge variant="outline" className="text-xs">
-                              {Math.floor(Math.random() * 10) + 5} min read
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs">
+                                {Math.floor(Math.random() * 10) + 5} min read
+                              </Badge>
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                            </div>
                           </div>
                         ))}
                       </div>
                     </div>
 
                     <div className="flex gap-2">
-                      <Button className="flex-1">
+                      <Button className="flex-1" onClick={() => {
+                        // Simulate opening documentation
+                        alert(`Opening ${selectedModule.name} documentation...`);
+                      }}>
                         <BookOpen className="mr-2 h-4 w-4" />
                         Read Documentation
                       </Button>
-                    <Button variant="outline" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                      <BookOpen className="mr-2 h-4 w-4" />
-                      Scroll to Top
-                    </Button>
+                      <Button variant="outline" onClick={() => {
+                        // Simulate downloading PDF
+                        alert(`Downloading ${selectedModule.name} PDF guide...`);
+                      }}>
+                        <Download className="mr-2 h-4 w-4" />
+                        Download PDF
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -280,7 +302,10 @@ export function UserManuals({ modules }: UserManualsProps) {
                       <BookOpen className="h-4 w-4" />
                       <span>{guide.duration}</span>
                     </div>
-                    <Button className="w-full">
+                    <Button 
+                      className="w-full"
+                      onClick={() => alert(`Starting ${guide.title}...`)}
+                    >
                       Start Reading
                     </Button>
                   </CardContent>
@@ -296,7 +321,10 @@ export function UserManuals({ modules }: UserManualsProps) {
                     Our training specialists can provide customized onboarding sessions for your team. 
                     Perfect for schools transitioning from other systems.
                   </p>
-                  <Button size="lg">
+                  <Button 
+                    size="lg"
+                    onClick={() => alert('Opening training session scheduler...')}
+                  >
                     Schedule Training Session
                   </Button>
                 </div>
@@ -310,7 +338,10 @@ export function UserManuals({ modules }: UserManualsProps) {
               {videoTutorials.map((video, index) => (
                 <Card key={index} className="hover:shadow-lg transition-shadow">
                   <CardContent className="p-0">
-                    <div className="aspect-video bg-gradient-to-br from-primary/10 to-secondary/10 rounded-t-lg flex items-center justify-center relative group cursor-pointer">
+                    <div 
+                      className="aspect-video bg-gradient-to-br from-primary/10 to-secondary/10 rounded-t-lg flex items-center justify-center relative group cursor-pointer"
+                      onClick={() => alert(`Playing video: ${video.title}`)}
+                    >
                       <PlayCircle className="h-16 w-16 text-primary group-hover:scale-110 transition-transform" />
                       <Badge className="absolute top-2 right-2">{video.duration}</Badge>
                     </div>
@@ -319,7 +350,10 @@ export function UserManuals({ modules }: UserManualsProps) {
                         <h3 className="font-semibold text-lg mb-2">{video.title}</h3>
                         <p className="text-sm text-muted-foreground">{video.description}</p>
                       </div>
-                      <Button className="w-full">
+                      <Button 
+                        className="w-full"
+                        onClick={() => alert(`Playing video: ${video.title}`)}
+                      >
                         <PlayCircle className="mr-2 h-4 w-4" />
                         Watch Tutorial
                       </Button>
@@ -330,7 +364,11 @@ export function UserManuals({ modules }: UserManualsProps) {
             </div>
 
             <div className="text-center">
-              <Button size="lg" variant="outline">
+              <Button 
+                size="lg" 
+                variant="outline"
+                onClick={() => alert('Opening video tutorial library...')}
+              >
                 <Video className="mr-2 h-5 w-5" />
                 View All Video Tutorials
               </Button>
