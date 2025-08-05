@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useStudentData } from '@/hooks/useStudentData';
 import { useHRData } from '@/hooks/useHRData';
 import { useFeeData } from '@/hooks/useFeeData';
@@ -35,22 +35,28 @@ export default function Dashboard() {
   const { employees, loading: hrLoading } = useHRData();
   const { feeHeads, loading: feesLoading } = useFeeData();
 
-  // Filter students and teachers based on search
-  const filteredStudents = students.filter(student => 
-    `${student.profiles?.first_name} ${student.profiles?.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.student_number.toLowerCase().includes(searchTerm.toLowerCase())
+  // Memoize filtered data to prevent unnecessary recalculations
+  const filteredStudents = useMemo(() => 
+    students.filter(student => 
+      `${student.profiles?.first_name} ${student.profiles?.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.student_number.toLowerCase().includes(searchTerm.toLowerCase())
+    ), [students, searchTerm]
   );
 
-  const filteredTeachers = employees.filter(employee => 
-    `${employee.first_name} ${employee.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    employee.employee_id?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTeachers = useMemo(() => 
+    employees.filter(employee => 
+      `${employee.first_name} ${employee.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.employee_id?.toLowerCase().includes(searchTerm.toLowerCase())
+    ), [employees, searchTerm]
   );
 
-  // Calculate stats
-  const totalStudents = students.length;
-  const totalTeachers = employees.filter(emp => emp.position?.includes('Teacher')).length;
-  const pendingFees = 450; // Mock data
-  const todayAttendance = Math.round((totalStudents * 0.92)); // Mock 92% attendance
+  // Memoize calculated stats to prevent recalculation on every render
+  const { totalStudents, totalTeachers, pendingFees, todayAttendance } = useMemo(() => ({
+    totalStudents: students.length,
+    totalTeachers: employees.filter(emp => emp.position?.includes('Teacher')).length,
+    pendingFees: 450, // Mock data
+    todayAttendance: Math.round((students.length * 0.92)) // Mock 92% attendance
+  }), [students.length, employees]);
 
   const quickStats = [
     { 

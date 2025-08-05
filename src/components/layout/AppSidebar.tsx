@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import React, { useState, useMemo, useCallback } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -285,12 +285,16 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const { signOut, user } = useAuth();
   
-  const currentModule = getCurrentModule(location.pathname);
-  const currentModuleData = erpModules.find(module => module.title === currentModule);
+  // Memoize current module calculation
+  const currentModule = useMemo(() => getCurrentModule(location.pathname), [location.pathname]);
+  const currentModuleData = useMemo(() => 
+    erpModules.find(module => module.title === currentModule), 
+    [currentModule]
+  );
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     await signOut();
-  };
+  }, [signOut]);
 
   return (
     <Sidebar collapsible="icon" className="border-r">
