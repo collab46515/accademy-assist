@@ -126,7 +126,10 @@ export default function AcademicOperationsPage() {
             <Card 
               key={index} 
               className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
-              onClick={() => navigate(module.url)}
+              onClick={() => {
+                console.log('Navigating to:', module.url);
+                navigate(module.url);
+              }}
             >
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
@@ -158,6 +161,7 @@ export default function AcademicOperationsPage() {
                     className="w-full mt-4 bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary"
                     onClick={(e) => {
                       e.stopPropagation();
+                      console.log('Button clicked for:', module.url);
                       navigate(module.url);
                     }}
                   >
