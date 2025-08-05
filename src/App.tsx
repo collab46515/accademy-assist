@@ -141,8 +141,9 @@ const App = () => (
                               <UserManagementPage />
                             </ProtectedRoute>
                           } />
-                          <Route path="/integrations" element={<IntegrationsPage />} />
-                          <Route path="*" element={<NotFound />} />
+                           <Route path="/integrations" element={<IntegrationsPage />} />
+                           <Route path="/portals/*" element={<PortalsPage />} />
+                           <Route path="*" element={<NotFound />} />
                         </Routes>
                       </main>
                     </SidebarInset>
