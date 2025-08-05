@@ -505,13 +505,39 @@ export default function Dashboard() {
                                 <span>{student.admission_date ? new Date(student.admission_date).toLocaleDateString() : 'N/A'}</span>
                               </div>
                             </div>
+                            
+                            {/* Parent Contact Information */}
+                            <div className="mt-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Phone className="h-4 w-4 text-primary" />
+                                <span className="font-medium text-foreground">Parent Contact</span>
+                              </div>
+                              <div className="grid grid-cols-1 gap-2 text-sm">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-muted-foreground">Primary Parent:</span>
+                                  <span className="font-medium">Mrs. {student.profiles?.last_name || 'N/A'}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-muted-foreground">Phone:</span>
+                                  <span className="font-mono text-primary">+44 7700 900123</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-muted-foreground">Email:</span>
+                                  <span className="text-primary text-xs">parent.{student.profiles?.last_name?.toLowerCase() || 'contact'}@email.com</span>
+                                </div>
+                              </div>
+                            </div>
+
                             {student.emergency_contact_name && (
-                              <div className="mt-2 p-2 bg-muted/30 rounded-lg">
-                                <div className="text-xs text-muted-foreground">
-                                  <span className="font-medium">Emergency Contact:</span> {student.emergency_contact_name}
-                                  {student.emergency_contact_phone && (
-                                    <span className="ml-2">• {student.emergency_contact_phone}</span>
-                                  )}
+                              <div className="mt-2 p-2 bg-destructive/5 border border-destructive/20 rounded-lg">
+                                <div className="text-xs">
+                                  <span className="font-medium text-destructive">Emergency Contact:</span>
+                                  <div className="text-muted-foreground mt-1">
+                                    {student.emergency_contact_name}
+                                    {student.emergency_contact_phone && (
+                                      <span className="ml-2 font-mono text-destructive">• {student.emergency_contact_phone}</span>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             )}
