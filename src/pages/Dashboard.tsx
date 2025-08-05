@@ -761,18 +761,39 @@ export default function Dashboard() {
                       </div>
                       <div>
                         <p className="text-lg font-semibold">Total Students: {students.length}</p>
-                        <p className="text-sm text-muted-foreground">Active enrollment across all year groups</p>
+                        <p className="text-sm text-muted-foreground">
+                          Showing first {Math.min(20, students.length)} students (optimized for performance)
+                        </p>
                       </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground">Performance Note:</p>
+                      <p className="text-xs text-amber-600">
+                        For 1000+ students, pagination & search will be implemented
+                      </p>
                     </div>
                   </div>
                   
+                  {/* Performance Warning for Large Datasets */}
+                  {students.length > 50 && (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 text-amber-600" />
+                        <span className="text-sm font-medium text-amber-800">Performance Optimization Required</span>
+                      </div>
+                      <p className="text-xs text-amber-700 mt-1">
+                        For {students.length}+ records, implementing pagination, virtual scrolling, and search indexing is recommended.
+                      </p>
+                    </div>
+                  )}
+                  
                   <div className="grid gap-4">
-                    {students.map((student, index) => (
+                    {students.slice(0, 20).map((student, index) => (
                       <Dialog key={student.id}>
                         <DialogTrigger asChild>
                           <div 
                             className="flex items-center space-x-4 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-fade-in"
-                            style={{ animationDelay: `${index * 0.1}s` }}
+                            style={{ animationDelay: `${index * 0.05}s` }}
                           >
                             <Avatar className="h-16 w-16 border-2 border-primary/20">
                               <AvatarImage src={student.profiles?.avatar_url} />
@@ -832,6 +853,20 @@ export default function Dashboard() {
                         <StudentDetailModal student={student} />
                       </Dialog>
                     ))}
+                    
+                    {students.length > 20 && (
+                      <div className="text-center p-6 border-2 border-dashed border-muted-foreground/30 rounded-lg">
+                        <p className="text-muted-foreground font-medium">
+                          +{students.length - 20} more students not shown
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Pagination and search would be implemented for production use
+                        </p>
+                        <Button variant="outline" size="sm" className="mt-3" disabled>
+                          Load More (Demo)
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -845,18 +880,39 @@ export default function Dashboard() {
                       </div>
                       <div>
                         <p className="text-lg font-semibold">Total Teachers: {employees.length}</p>
-                        <p className="text-sm text-muted-foreground">Active teaching staff across all departments</p>
+                        <p className="text-sm text-muted-foreground">
+                          Showing first {Math.min(20, employees.length)} staff members (optimized for performance)
+                        </p>
                       </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground">Performance Note:</p>
+                      <p className="text-xs text-amber-600">
+                        For 200+ staff, pagination & filtering will be implemented
+                      </p>
                     </div>
                   </div>
                   
+                  {/* Performance Warning for Large Datasets */}
+                  {employees.length > 50 && (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 text-amber-600" />
+                        <span className="text-sm font-medium text-amber-800">Performance Optimization Required</span>
+                      </div>
+                      <p className="text-xs text-amber-700 mt-1">
+                        For {employees.length}+ records, implementing departmental filtering and search indexing is recommended.
+                      </p>
+                    </div>
+                  )}
+                  
                   <div className="grid gap-4">
-                    {employees.map((teacher, index) => (
+                    {employees.slice(0, 20).map((teacher, index) => (
                       <Dialog key={teacher.id}>
                         <DialogTrigger asChild>
                           <div 
                             className="flex items-center space-x-4 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-fade-in"
-                            style={{ animationDelay: `${index * 0.1}s` }}
+                            style={{ animationDelay: `${index * 0.05}s` }}
                           >
                             <Avatar className="h-16 w-16 border-2 border-green-500/20">
                               <AvatarImage src="" />
@@ -917,6 +973,20 @@ export default function Dashboard() {
                         <TeacherDetailModal teacher={teacher} />
                       </Dialog>
                     ))}
+                    
+                    {employees.length > 20 && (
+                      <div className="text-center p-6 border-2 border-dashed border-muted-foreground/30 rounded-lg">
+                        <p className="text-muted-foreground font-medium">
+                          +{employees.length - 20} more staff members not shown
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Department filtering and search would be implemented for production use
+                        </p>
+                        <Button variant="outline" size="sm" className="mt-3" disabled>
+                          Load More (Demo)
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
