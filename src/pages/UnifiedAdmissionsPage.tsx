@@ -22,6 +22,19 @@ const UnifiedAdmissionsPage = () => {
   const [activeTab, setActiveTab] = useState("management");
   const [loading, setLoading] = useState(false);
 
+  // Handle application type selection
+  const handleStartApplication = (applicationType: string) => {
+    console.log(`Starting ${applicationType} application`);
+    // For now, show a toast and navigate to enrollment form
+    toast({
+      title: "Starting Application",
+      description: `Redirecting to ${applicationType} enrollment form...`,
+    });
+    
+    // Navigate to enrollment with application type
+    navigate(`/admissions/enroll?type=${applicationType.toLowerCase().replace(' ', '_')}`);
+  };
+
   // Simple stage detection
   const stageParam = searchParams.get('stage');
   const isStageView = stageParam !== null;
@@ -109,7 +122,10 @@ const UnifiedAdmissionsPage = () => {
                 <p className="text-sm text-muted-foreground mb-4">
                   Standard digital application form for new student admissions
                 </p>
-                <Button className="w-full">
+                <Button 
+                  className="w-full"
+                  onClick={() => handleStartApplication("Online Application")}
+                >
                   Start New Application
                 </Button>
               </CardContent>
@@ -126,7 +142,11 @@ const UnifiedAdmissionsPage = () => {
                 <p className="text-sm text-muted-foreground mb-4">
                   Simplified application for siblings of current students
                 </p>
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => handleStartApplication("Sibling Application")}
+                >
                   Sibling Application
                 </Button>
               </CardContent>
@@ -143,7 +163,11 @@ const UnifiedAdmissionsPage = () => {
                 <p className="text-sm text-muted-foreground mb-4">
                   Create application from phone enquiry or walk-in
                 </p>
-                <Button variant="secondary" className="w-full">
+                <Button 
+                  variant="secondary" 
+                  className="w-full"
+                  onClick={() => handleStartApplication("Phone Enquiry")}
+                >
                   Phone Application
                 </Button>
               </CardContent>
@@ -160,7 +184,11 @@ const UnifiedAdmissionsPage = () => {
                 <p className="text-sm text-muted-foreground mb-4">
                   Specialized pathway for international student applications
                 </p>
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => handleStartApplication("International Student")}
+                >
                   International Application
                 </Button>
               </CardContent>
@@ -177,7 +205,11 @@ const UnifiedAdmissionsPage = () => {
                 <p className="text-sm text-muted-foreground mb-4">
                   Application for mid-year or term-time entry
                 </p>
-                <Button variant="secondary" className="w-full">
+                <Button 
+                  variant="secondary" 
+                  className="w-full"
+                  onClick={() => handleStartApplication("Mid-Year Entry")}
+                >
                   Mid-Year Application
                 </Button>
               </CardContent>
@@ -194,7 +226,11 @@ const UnifiedAdmissionsPage = () => {
                 <p className="text-sm text-muted-foreground mb-4">
                   Import multiple applications from external sources
                 </p>
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => handleStartApplication("Bulk Import")}
+                >
                   Bulk Import
                 </Button>
               </CardContent>
