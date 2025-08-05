@@ -391,52 +391,59 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-primary to-primary-glow text-primary-foreground py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl font-bold mb-4">School Management Dashboard</h1>
-            <p className="text-xl opacity-90 mb-8">
+      <div className="relative bg-gradient-to-r from-primary via-primary-glow to-primary/90 text-primary-foreground py-16 overflow-hidden">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-4xl mx-auto text-center animate-fade-in">
+            <h1 className="text-5xl font-bold mb-6 tracking-tight">School Management Dashboard</h1>
+            <p className="text-xl opacity-90 mb-10 leading-relaxed">
               Complete overview of students, teachers, fees, and school operations
             </p>
             
-            {/* Search Bar */}
-            <div className="max-w-md mx-auto relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search students, teachers, ID numbers..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-background text-foreground"
-              />
+            {/* Enhanced Search Bar */}
+            <div className="max-w-lg mx-auto relative group">
+              <div className="absolute inset-0 bg-white/20 rounded-xl blur-sm group-hover:blur-none transition-all duration-300"></div>
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search students, teachers, ID numbers..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-12 pr-4 py-4 bg-background/95 backdrop-blur-sm text-foreground border-0 rounded-xl shadow-lg text-lg focus:shadow-xl transition-all duration-300"
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-6 py-12 max-w-7xl">
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {quickStats.map((stat, index) => (
-            <Card key={index} className="relative overflow-hidden">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                    <div className="flex items-center space-x-2">
-                      <p className="text-2xl font-bold">{stat.value}</p>
-                      <TrendingUp className="h-4 w-4 text-green-600" />
+            <div key={index} className="animate-fade-in hover-scale" style={{ animationDelay: `${index * 100}ms` }}>
+              <Card className="group relative overflow-hidden bg-card/60 backdrop-blur-sm border-border/50 hover:shadow-xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-2">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <CardContent className="p-8">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{stat.label}</p>
+                      <div className="flex items-center space-x-3">
+                        <p className="text-3xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">{stat.value}</p>
+                        <TrendingUp className="h-5 w-5 text-green-600 group-hover:scale-110 transition-transform duration-300" />
+                      </div>
+                      <p className="text-xs text-muted-foreground font-medium">{stat.trend}</p>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">{stat.trend}</p>
+                    <div className={`p-4 rounded-2xl ${stat.color} group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg`}>
+                      <stat.icon className="h-8 w-8 text-white" />
+                    </div>
                   </div>
-                  <div className={`p-3 rounded-full ${stat.color}`}>
-                    <stat.icon className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           ))}
         </div>
 
