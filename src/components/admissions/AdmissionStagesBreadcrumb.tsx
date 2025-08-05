@@ -112,10 +112,10 @@ export function AdmissionStagesBreadcrumb() {
                 size="sm"
                 onClick={() => handleStageClick(stage.id)}
                 className={cn(
-                  "flex items-center gap-2 min-w-fit px-3 py-2 transition-all",
+                  "flex items-center gap-2 min-w-fit px-3 py-2 transition-all duration-200",
                   isActive && "bg-primary text-primary-foreground shadow-md",
-                  isCompleted && "bg-green-100 text-green-800 hover:bg-green-200",
-                  !isActive && !isCompleted && "hover:bg-muted"
+                  isCompleted && "bg-green-100 text-green-800 hover:bg-green-200 border border-green-200",
+                  !isActive && !isCompleted && "hover:bg-primary/10 hover:border-primary/20 border border-transparent"
                 )}
               >
                 <Icon className="h-4 w-4 flex-shrink-0" />
