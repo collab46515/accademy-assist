@@ -62,67 +62,13 @@ const erpModules = [
     url: "/",
     icon: GraduationCap,
     subItems: [
-      { 
-        title: "Admissions", 
-        url: "/admissions", 
-        icon: UserPlus,
-        subItems: [
-          { title: "New Applications", url: "/admissions/new", icon: UserPlus },
-          { title: "Application Submitted", url: "/admissions?stage=0", icon: Send },
-          { title: "Document Verification", url: "/admissions?stage=1", icon: FileText },
-          { title: "Application Review", url: "/admissions?stage=2", icon: Eye },
-          { title: "Assessment/Interview", url: "/admissions?stage=3", icon: ClipboardCheck },
-          { title: "Admission Decision", url: "/admissions?stage=4", icon: CheckCircle },
-          { title: "Fee Payment", url: "/admissions?stage=5", icon: CreditCard },
-          { title: "Enrollment Confirmation", url: "/admissions?stage=6", icon: UserCheck },
-          { title: "Welcome & Onboarding", url: "/admissions?stage=7", icon: Users },
-        ]
-      },
-      { 
-        title: "Academics", 
-        url: "/academics", 
-        icon: BookOpen,
-        subItems: [
-          { title: "HOD Dashboard", url: "/hod-dashboard", icon: Target },
-          { title: "Lesson Planning", url: "/academics/lesson-planning", icon: PenTool },
-          { title: "Timetable", url: "/academics/timetable", icon: Clock },
-          { title: "Assignments & Homework", url: "/academics/assignments", icon: ClipboardList },
-          { title: "Attendance (by Period)", url: "/academics/attendance", icon: CheckSquare },
-          { title: "Exams", url: "/academics/exams", icon: FileText },
-          { title: "Gradebook", url: "/academics/gradebook", icon: Calculator },
-          { title: "Reports", url: "/academics/reports", icon: BarChart3 },
-        ]
-      },
-      { 
-        title: "Fee Management", 
-        url: "/school-management/fee-management", 
-        icon: CreditCard,
-        subItems: [
-          { title: "Dashboard", url: "/school-management/fee-management", icon: LayoutDashboard },
-          { title: "Collections", url: "/school-management/fee-management/collections", icon: CreditCard },
-          { title: "Invoices", url: "/school-management/fee-management/invoices", icon: FileText },
-          { title: "Payments", url: "/school-management/fee-management/payments", icon: CreditCard },
-          { title: "Installments", url: "/school-management/fee-management/installments", icon: Calendar },
-          { title: "Discounts", url: "/school-management/fee-management/discounts", icon: Receipt },
-          { title: "Outstanding", url: "/school-management/fee-management/outstanding", icon: AlertTriangle },
-          { title: "Reports", url: "/school-management/fee-management/reports", icon: BarChart3 },
-          { title: "Calendar", url: "/school-management/fee-management/calendar", icon: CalendarDays },
-          { title: "Reminders", url: "/school-management/fee-management/reminders", icon: Bell }
-        ]
-      },
-      { 
-        title: "Student Welfare", 
-        url: "/student-welfare", 
-        icon: Shield,
-        subItems: [
-          { title: "Infirmary", url: "/student-welfare/infirmary", icon: Activity },
-          { title: "Complaints", url: "/student-welfare/complaints", icon: MessageSquare },
-          { title: "Safeguarding", url: "/student-welfare/safeguarding", icon: Shield },
-        ]
-      },
+      { title: "Students", url: "/students", icon: Users },
+      { title: "Admissions", url: "/admissions", icon: UserPlus },
+      { title: "Academics", url: "/academics", icon: BookOpen },
+      { title: "Fee Management", url: "/school-management/fee-management", icon: CreditCard },
+      { title: "Student Welfare", url: "/student-welfare", icon: Shield },
       { title: "Communications", url: "/communication", icon: MessageSquare },
-      { title: "Events", url: "/events", icon: Activity },
-      { title: "Activities", url: "/activities", icon: Activity },
+      { title: "Events & Activities", url: "/events", icon: Activity },
       { title: "Portals", url: "/portals", icon: Globe },
     ]
   },
@@ -131,20 +77,12 @@ const erpModules = [
     url: "/hr-management",
     icon: UserCheck,
     subItems: [
-      { title: "Dashboard", url: "/hr-management", icon: LayoutDashboard },
       { title: "Employees", url: "/hr-management?tab=employees", icon: Users },
+      { title: "Recruitment", url: "/hr-management?tab=recruitment", icon: UserPlus },
       { title: "Performance", url: "/hr-management?tab=performance", icon: Target },
-      { title: "Recruitment", url: "/hr-management?tab=recruitment", icon: UserCheck },
-      { title: "Training", url: "/hr-management?tab=training", icon: GraduationCap },
-      { title: "Benefits", url: "/hr-management?tab=benefits", icon: Shield },
-      { title: "Documents", url: "/hr-management?tab=documents", icon: FileText },
-      { title: "Assets", url: "/hr-management?tab=assets", icon: Database },
-      { title: "Time Tracking", url: "/hr-management?tab=timeTracking", icon: Clock },
-      { title: "Expenses", url: "/hr-management?tab=travelExpenses", icon: CreditCard },
-      { title: "Engagement", url: "/hr-management?tab=engagement", icon: MessageSquare },
-      { title: "Payroll", url: "/hr-management?tab=payroll", icon: DollarSign },
-      { title: "Leave", url: "/hr-management?tab=leave", icon: Calendar },
+      { title: "Payroll & Benefits", url: "/hr-management?tab=payroll", icon: DollarSign },
       { title: "Attendance", url: "/hr-management?tab=attendance", icon: Clock },
+      { title: "Leave Management", url: "/hr-management?tab=leave", icon: Calendar },
     ]
   },
   {
