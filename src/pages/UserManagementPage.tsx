@@ -186,6 +186,24 @@ export function UserManagementPage() {
     });
 
     try {
+      // Check if user already has this role in this school
+      const existingRoles = userRoles[selectedUserId] || [];
+      const duplicateRole = existingRoles.find(existingRole => 
+        existingRole.role === role && 
+        existingRole.school_id === schoolId &&
+        existingRole.is_active === true
+      );
+
+      if (duplicateRole) {
+        toast({
+          title: "Role Already Assigned",
+          description: `User already has the ${role.replace('_', ' ')} role in this school.`,
+          variant: "destructive"
+        });
+        setIsCreating(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('user_roles')
         .insert({
