@@ -6899,6 +6899,10 @@ export type Database = {
         Args: { student_data: Json; school_id: string; created_by?: string }
         Returns: Json
       }
+      generate_comprehensive_demo_data: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_receipt_number: {
         Args: Record<PropertyKey, never>
         Returns: string
