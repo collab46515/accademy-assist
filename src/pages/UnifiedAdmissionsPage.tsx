@@ -482,9 +482,9 @@ const UnifiedAdmissionsPage = () => {
         <p className="text-lg">Stage Param: "{stageParam}" | Current Stage: {currentStage} | Is Stage View: {isStageView ? 'YES' : 'NO'}</p>
       </div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Unified Admissions System</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-2">🔥 TEST - Unified Admissions System 🔥</h1>
         <p className="text-muted-foreground">
-          Complete admissions management with 6 enrollment pathways, workflow automation, and approval processes
+          🚨 If you see fire emojis, the code is updating! Complete admissions management with 6 enrollment pathways, workflow automation, and approval processes
         </p>
         
         {/* Admission Stages Breadcrumb */}
