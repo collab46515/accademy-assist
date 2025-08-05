@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { WorkflowDashboard } from '@/components/admissions/workflow/WorkflowDashboard';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 import { 
   Settings, 
   Users, 
@@ -29,6 +30,7 @@ export default function AdminManagementPage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [quickSetupOpen, setQuickSetupOpen] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const systemStats = {
     totalUsers: 2847,
@@ -94,10 +96,64 @@ export default function AdminManagementPage() {
   };
 
   const handleQuickAction = (action: string) => {
-    toast({
-      title: "Action Initiated",
-      description: `${action} has been started. Redirecting to the appropriate module...`,
-    });
+    // Navigate to appropriate pages based on action
+    switch (action) {
+      case "Create Workflow":
+        setActiveTab('workflows');
+        break;
+      case "Add User":
+      case "Add New User":
+        navigate('/user-management');
+        break;
+      case "Setup School":
+      case "Manage Schools":
+        navigate('/master-data');
+        break;
+      case "Edit Template":
+      case "Email Templates":
+      case "Manage All Templates":
+        toast({
+          title: "Feature Coming Soon",
+          description: "Template management is under development.",
+        });
+        break;
+      case "School Configuration":
+        navigate('/master-data');
+        break;
+      case "User Roles Setup":
+      case "Manage Roles":
+        navigate('/user-management');
+        break;
+      case "Academic Structure":
+      case "Year Groups":
+      case "Subjects Setup":
+        navigate('/master-data');
+        break;
+      case "Fee Structure":
+      case "Fee Categories":
+        navigate('/school-management/fee-management');
+        break;
+      case "View All Users":
+        navigate('/user-management');
+        break;
+      case "Configure All Master Data":
+        navigate('/master-data');
+        break;
+      case "General Settings":
+      case "Security Settings":
+      case "Advanced Configuration":
+        toast({
+          title: "Settings",
+          description: `Opening ${action}...`,
+        });
+        setActiveTab('settings');
+        break;
+      default:
+        toast({
+          title: "Action Initiated",
+          description: `${action} feature is being prepared...`,
+        });
+    }
   };
 
   const quickSetupSteps = [
