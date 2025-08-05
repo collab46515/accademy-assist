@@ -47,6 +47,8 @@ import AssignmentsPage from "./pages/AssignmentsPage";
 import ReportCardsPage from "./pages/ReportCardsPage";
 import NewApplicationsPage from "./pages/NewApplicationsPage";
 import EnrollmentPage from "./pages/EnrollmentPage";
+import LibraryPage from "./pages/LibraryPage";
+import TransportPage from "./pages/TransportPage";
 import { StudentSubmissionInterface } from "@/components/assignments/StudentSubmissionInterface";
 import Index from "./pages/Index";
 
@@ -103,7 +105,8 @@ const App = () => (
                           <Route path="/staff" element={<StaffPage />} />
                           <Route path="/school-management/fee-management/*" element={<FeeManagementPage />} />
                           <Route path="/communication" element={<CommunicationPage />} />
-                          <Route path="/portals" element={<PortalsPage />} />
+                            <Route path="/library/*" element={<LibraryPage />} />
+                            <Route path="/transport/*" element={<TransportPage />} />
                           <Route path="/finance" element={<FinancePage />} />
                           <Route path="/activities" element={<ActivitiesPage />} />
                           <Route path="/safeguarding" element={<SafeguardingPage />} />
