@@ -719,84 +719,203 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Drill-down Modals */}
+        {/* Enhanced Modal for detailed view with animations */}
         {activeModal && (
           <Dialog open={!!activeModal} onOpenChange={() => setActiveModal(null)}>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {activeModal === 'students' && 'All Students'}
-                  {activeModal === 'teachers' && 'All Teachers'}
-                  {activeModal === 'attendance' && 'Attendance Overview'}
-                  {activeModal === 'fees' && 'Fee Management'}
+            <DialogContent className="max-w-6xl max-h-[85vh] overflow-hidden animate-scale-in">
+              <DialogHeader className="animate-fade-in">
+                <DialogTitle className="text-2xl font-bold flex items-center gap-3">
+                  {activeModal === 'students' && (
+                    <>
+                      <Users className="h-6 w-6 text-primary" />
+                      All Students ({students.length})
+                    </>
+                  )}
+                  {activeModal === 'teachers' && (
+                    <>
+                      <GraduationCap className="h-6 w-6 text-primary" />
+                      All Teachers ({employees.length})
+                    </>
+                  )}
+                  {activeModal === 'attendance' && (
+                    <>
+                      <UserCheck className="h-6 w-6 text-primary" />
+                      Attendance Overview
+                    </>
+                  )}
+                  {activeModal === 'fees' && (
+                    <>
+                      <Banknote className="h-6 w-6 text-primary" />
+                      Fee Management
+                    </>
+                  )}
                 </DialogTitle>
               </DialogHeader>
               
               {activeModal === 'students' && (
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <p className="text-muted-foreground">Total: {students.length} students</p>
-                  </div>
-                  <div className="grid gap-4 max-h-96 overflow-y-auto">
-                    {students.map((student) => (
-                      <div key={student.id} className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-muted">
-                        <Avatar className="h-12 w-12">
-                          <AvatarImage src={student.profiles?.avatar_url} />
-                          <AvatarFallback>
-                            {student.profiles?.first_name?.[0]}{student.profiles?.last_name?.[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <h4 className="font-semibold">
-                            {student.profiles?.first_name} {student.profiles?.last_name}
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            {student.student_number} • {student.year_group} • {student.form_class}
-                          </p>
-                          {student.emergency_contact_name && (
-                            <p className="text-xs text-muted-foreground">
-                              Emergency: {student.emergency_contact_name} - {student.emergency_contact_phone}
-                            </p>
-                          )}
-                        </div>
-                        <Badge variant={student.is_enrolled ? "default" : "secondary"}>
-                          {student.is_enrolled ? "Active" : "Inactive"}
-                        </Badge>
+                <div className="space-y-6 animate-fade-in overflow-y-auto max-h-[60vh]">
+                  <div className="flex justify-between items-center p-4 bg-gradient-to-r from-primary/5 to-primary-glow/5 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-primary/10 rounded-full">
+                        <Users className="h-5 w-5 text-primary" />
                       </div>
+                      <div>
+                        <p className="text-lg font-semibold">Total Students: {students.length}</p>
+                        <p className="text-sm text-muted-foreground">Active enrollment across all year groups</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid gap-4">
+                    {students.map((student, index) => (
+                      <Dialog key={student.id}>
+                        <DialogTrigger asChild>
+                          <div 
+                            className="flex items-center space-x-4 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-fade-in"
+                            style={{ animationDelay: `${index * 0.1}s` }}
+                          >
+                            <Avatar className="h-16 w-16 border-2 border-primary/20">
+                              <AvatarImage src={student.profiles?.avatar_url} />
+                              <AvatarFallback className="text-lg font-semibold bg-primary/10">
+                                {student.profiles?.first_name?.[0]}{student.profiles?.last_name?.[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="text-lg font-semibold text-foreground">
+                                  {student.profiles?.first_name} {student.profiles?.last_name}
+                                </h4>
+                                <Badge variant={student.is_enrolled ? "default" : "secondary"} className="shrink-0">
+                                  {student.is_enrolled ? "Active" : "Inactive"}
+                                </Badge>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">ID:</span>
+                                  <span className="font-mono">{student.student_number}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">Year:</span>
+                                  <span>{student.year_group}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">Class:</span>
+                                  <span>{student.form_class}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">Joined:</span>
+                                  <span>{student.admission_date ? new Date(student.admission_date).toLocaleDateString() : 'N/A'}</span>
+                                </div>
+                              </div>
+                              
+                              {student.emergency_contact_name && (
+                                <div className="mt-3 p-3 bg-destructive/5 border border-destructive/20 rounded-md">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <AlertCircle className="h-4 w-4 text-destructive" />
+                                    <span className="font-medium text-destructive text-sm">Emergency Contact</span>
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    <span className="font-medium">{student.emergency_contact_name}</span>
+                                    {student.emergency_contact_phone && (
+                                      <span className="ml-2 font-mono text-destructive">• {student.emergency_contact_phone}</span>
+                                    )}
+                                    <div className="text-xs text-muted-foreground mt-1 italic">
+                                      * Mock data - would be from enrollment records in real system
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </DialogTrigger>
+                        <StudentDetailModal student={student} />
+                      </Dialog>
                     ))}
                   </div>
                 </div>
               )}
               
               {activeModal === 'teachers' && (
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <p className="text-muted-foreground">Total: {employees.length} staff members</p>
-                  </div>
-                  <div className="grid gap-4 max-h-96 overflow-y-auto">
-                    {employees.map((teacher) => (
-                      <div key={teacher.id} className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-muted">
-                        <Avatar className="h-12 w-12">
-                          <AvatarImage src="" />
-                          <AvatarFallback>
-                            {teacher.first_name?.[0]}{teacher.last_name?.[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <h4 className="font-semibold">
-                            {teacher.first_name} {teacher.last_name}
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            {teacher.employee_id} • {teacher.position}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {teacher.department_name} • {teacher.email} • {teacher.phone}
-                          </p>
-                        </div>
-                        <Badge variant={teacher.status === 'active' ? "default" : "secondary"}>
-                          {teacher.status === 'active' ? "Active" : "Inactive"}
-                        </Badge>
+                <div className="space-y-6 animate-fade-in overflow-y-auto max-h-[60vh]">
+                  <div className="flex justify-between items-center p-4 bg-gradient-to-r from-green-500/5 to-green-400/5 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-green-500/10 rounded-full">
+                        <GraduationCap className="h-5 w-5 text-green-600" />
                       </div>
+                      <div>
+                        <p className="text-lg font-semibold">Total Teachers: {employees.length}</p>
+                        <p className="text-sm text-muted-foreground">Active teaching staff across all departments</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid gap-4">
+                    {employees.map((teacher, index) => (
+                      <Dialog key={teacher.id}>
+                        <DialogTrigger asChild>
+                          <div 
+                            className="flex items-center space-x-4 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-fade-in"
+                            style={{ animationDelay: `${index * 0.1}s` }}
+                          >
+                            <Avatar className="h-16 w-16 border-2 border-green-500/20">
+                              <AvatarImage src="" />
+                              <AvatarFallback className="text-lg font-semibold bg-green-500/10">
+                                {teacher.first_name?.[0]}{teacher.last_name?.[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="text-lg font-semibold text-foreground">
+                                  {teacher.first_name} {teacher.last_name}
+                                </h4>
+                                <Badge variant={teacher.status === 'active' ? "default" : "secondary"} className="shrink-0">
+                                  {teacher.status === 'active' ? "Active" : "Inactive"}
+                                </Badge>
+                              </div>
+                              
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">ID:</span>
+                                  <span className="font-mono">{teacher.employee_id}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">Position:</span>
+                                  <span className="truncate">{teacher.position}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">Department:</span>
+                                  <span className="truncate">{teacher.department_name}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">Started:</span>
+                                  <span>{new Date(teacher.start_date).toLocaleDateString()}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Mail className="h-3 w-3 text-muted-foreground" />
+                                  <span className="truncate text-primary">{teacher.email}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Phone className="h-3 w-3 text-muted-foreground" />
+                                  <span className="font-mono text-primary">{teacher.phone}</span>
+                                </div>
+                              </div>
+                              
+                              <div className="mt-3 p-3 bg-primary/5 border border-primary/20 rounded-md">
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="text-muted-foreground">Work Type:</span>
+                                  <span className="font-medium capitalize">{teacher.work_type?.replace('_', ' ')}</span>
+                                </div>
+                                <div className="flex items-center justify-between text-sm mt-1">
+                                  <span className="text-muted-foreground">Salary:</span>
+                                  <span className="font-medium">£{teacher.salary?.toLocaleString()}/year</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </DialogTrigger>
+                        <TeacherDetailModal teacher={teacher} />
+                      </Dialog>
                     ))}
                   </div>
                 </div>
