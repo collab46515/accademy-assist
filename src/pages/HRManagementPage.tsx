@@ -745,13 +745,13 @@ export function HRManagementPage() {
     </div>
   );
 
-  const renderContent = () => {
+  const renderActiveTab = () => {
     switch (activeTab) {
       case 'dashboard':
         return renderDashboard();
       case 'employees':
         return renderEmployees();
-      case 'timesheet':
+      case 'timeTracking':
         return renderTimesheet();
       case 'attendance':
         return renderAttendance();
@@ -775,86 +775,111 @@ export function HRManagementPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/5 to-background">
       <PageHeader
-        title="HR Management"
-        description="Complete human resources management system"
-        showBackButton={true}
-        breadcrumbItems={[
-          { label: 'Dashboard', href: '/' },
-          { label: 'HR Management' }
-        ]}
+        title="Human Resources"
+        description="Comprehensive HR management system"
       />
-      <div className="p-8 space-y-8">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
-              HR Management
-            </h1>
-            <p className="text-lg text-muted-foreground">Complete human resources management system</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Badge variant="secondary" className="px-3 py-1">
-              {stats.totalEmployees} Employees
-            </Badge>
-            <Button className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary shadow-lg" onClick={() => setShowEmployeeForm(true)}>
-              <UserPlus className="h-4 w-4 mr-2" />
-              Add Employee
-            </Button>
-          </div>
-        </div>
+      
+      <div className="px-6 py-6 max-w-7xl mx-auto space-y-6">
 
         {/* Navigation Tabs */}
         <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80 mb-6">
           <CardContent className="p-2">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10 h-auto p-1">
-                <TabsTrigger value="dashboard" className="flex items-center gap-2 p-3">
+            <Tabs 
+              value={activeTab} 
+              onValueChange={(value) => {
+                setActiveTab(value);
+                setSearchParams({ tab: value });
+              }} 
+              className="w-full"
+            >
+              <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10 h-auto p-1 bg-transparent gap-1">
+                <TabsTrigger 
+                  value="dashboard" 
+                  className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
+                >
                   <BarChart3 className="h-4 w-4" />
-                  <span className="hidden sm:inline">Dashboard</span>
+                  <span className="text-xs font-medium">Dashboard</span>
                 </TabsTrigger>
-                <TabsTrigger value="employees" className="flex items-center gap-2 p-3">
+                
+                <TabsTrigger 
+                  value="employees" 
+                  className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
+                >
                   <Users className="h-4 w-4" />
-                  <span className="hidden sm:inline">Employees</span>
+                  <span className="text-xs font-medium">Employees</span>
                 </TabsTrigger>
-                <TabsTrigger value="timesheet" className="flex items-center gap-2 p-3">
+                
+                <TabsTrigger 
+                  value="timeTracking" 
+                  className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
+                >
                   <Timer className="h-4 w-4" />
-                  <span className="hidden sm:inline">Timesheet</span>
+                  <span className="text-xs font-medium">Timesheet</span>
                 </TabsTrigger>
-                <TabsTrigger value="attendance" className="flex items-center gap-2 p-3">
+                
+                <TabsTrigger 
+                  value="attendance" 
+                  className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
+                >
                   <ClipboardList className="h-4 w-4" />
-                  <span className="hidden sm:inline">Attendance</span>
+                  <span className="text-xs font-medium">Attendance</span>
                 </TabsTrigger>
-                <TabsTrigger value="leave" className="flex items-center gap-2 p-3">
+                
+                <TabsTrigger 
+                  value="leave" 
+                  className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
+                >
                   <CalendarIcon className="h-4 w-4" />
-                  <span className="hidden sm:inline">Leave</span>
+                  <span className="text-xs font-medium">Leave</span>
                 </TabsTrigger>
-                <TabsTrigger value="recruitment" className="flex items-center gap-2 p-3">
+                
+                <TabsTrigger 
+                  value="recruitment" 
+                  className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
+                >
                   <UserPlus className="h-4 w-4" />
-                  <span className="hidden sm:inline">Recruitment</span>
+                  <span className="text-xs font-medium">Recruitment</span>
                 </TabsTrigger>
-                <TabsTrigger value="performance" className="flex items-center gap-2 p-3">
+                
+                <TabsTrigger 
+                  value="performance" 
+                  className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
+                >
                   <Target className="h-4 w-4" />
-                  <span className="hidden sm:inline">Performance</span>
+                  <span className="text-xs font-medium">Performance</span>
                 </TabsTrigger>
-                <TabsTrigger value="training" className="flex items-center gap-2 p-3">
+                
+                <TabsTrigger 
+                  value="training" 
+                  className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
+                >
                   <BookOpen className="h-4 w-4" />
-                  <span className="hidden sm:inline">Training</span>
+                  <span className="text-xs font-medium">Training</span>
                 </TabsTrigger>
-                <TabsTrigger value="payroll" className="flex items-center gap-2 p-3">
+                
+                <TabsTrigger 
+                  value="payroll" 
+                  className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
+                >
                   <DollarSign className="h-4 w-4" />
-                  <span className="hidden sm:inline">Payroll</span>
+                  <span className="text-xs font-medium">Payroll</span>
                 </TabsTrigger>
-                <TabsTrigger value="benefits" className="flex items-center gap-2 p-3">
+                
+                <TabsTrigger 
+                  value="benefits" 
+                  className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
+                >
                   <Award className="h-4 w-4" />
-                  <span className="hidden sm:inline">Benefits</span>
+                  <span className="text-xs font-medium">Benefits</span>
                 </TabsTrigger>
               </TabsList>
             </Tabs>
           </CardContent>
         </Card>
 
-        {renderContent()}
+        {renderActiveTab()}
       </div>
 
       {/* Employee Form Modal */}
