@@ -86,6 +86,7 @@ const erpModules = [
       { title: "Exams & Assessment", url: "/exams", icon: ClipboardCheck },
       { title: "Assignments", url: "/academics/assignments", icon: ClipboardList },
       { title: "Report Cards", url: "/academics/reports", icon: FileText },
+      { title: "Gradebook", url: "/gradebook", icon: BookOpenCheck },
       { title: "HOD Dashboard", url: "/hod-dashboard", icon: Target },
     ]
   },
@@ -100,6 +101,9 @@ const erpModules = [
       { title: "Library Services", url: "/library", icon: Library },
       { title: "Transport Management", url: "/transport", icon: Truck },
       { title: "Student Welfare", url: "/student-welfare", icon: Heart },
+      { title: "Infirmary", url: "/student-welfare/infirmary", icon: Plus },
+      { title: "Complaints", url: "/student-welfare/complaints", icon: AlertTriangle },
+      { title: "Safeguarding", url: "/safeguarding", icon: Shield },
       { title: "Activities & Events", url: "/activities", icon: Calendar },
       { title: "Communication", url: "/communication", icon: MessageSquare },
     ]
@@ -171,7 +175,8 @@ function getCurrentModule(pathname: string) {
       pathname.startsWith('/attendance') || 
       pathname.startsWith('/library') || 
       pathname.startsWith('/transport') || 
-      pathname.startsWith('/student-welfare') || 
+      pathname.startsWith('/student-welfare') ||
+      pathname.startsWith('/safeguarding') || 
       pathname.startsWith('/activities') || 
       pathname.startsWith('/communication')) return 'Student Services';
   
