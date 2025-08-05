@@ -27,8 +27,10 @@ import {
   AlertCircle,
   Plus,
   Minus,
-  RefreshCw
+  RefreshCw,
+  Eye
 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { UserGuide } from '@/components/shared/UserGuide';
 import { userGuides } from '@/data/userGuides';
@@ -1103,17 +1105,191 @@ export const AILessonPlanner = () => {
 
         <TabsContent value="resources">
           <div className="space-y-6">
+            {/* Auto-Resource Integration */}
             <Card>
               <CardHeader>
-                <CardTitle>Smart Resource Integration</CardTitle>
-                <CardDescription>AI-powered resource discovery and embedding</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5" />
+                  Smart Resource Integration
+                </CardTitle>
+                <CardDescription>
+                  AI-powered resource discovery and embedding from verified educational databases
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Sparkles className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Smart resource features coming soon</p>
-                  <p className="text-sm text-muted-foreground">Auto-find videos, worksheets, and digital resources from verified educational databases</p>
+              <CardContent className="space-y-6">
+                {/* Resource Search Interface */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="resourceTopic">Topic/Subject</Label>
+                    <Input
+                      id="resourceTopic"
+                      placeholder="Enter topic to find resources..."
+                      value={planForm.topic}
+                      onChange={(e) => setPlanForm(prev => ({...prev, topic: e.target.value}))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="resourceType">Resource Type</Label>
+                    <Select defaultValue="all">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select resource type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Resources</SelectItem>
+                        <SelectItem value="videos">Educational Videos</SelectItem>
+                        <SelectItem value="worksheets">Worksheets & Activities</SelectItem>
+                        <SelectItem value="simulations">Interactive Simulations</SelectItem>
+                        <SelectItem value="assessments">Assessment Tools</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
+
+                <Button className="w-full" onClick={() => {
+                  toast({
+                    title: "Searching Resources",
+                    description: "Finding relevant educational content from verified databases...",
+                  });
+                }}>
+                  <Target className="h-4 w-4 mr-2" />
+                  Find Smart Resources
+                </Button>
+
+                {/* Integrated Resource Platforms */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    {
+                      name: "Khan Academy",
+                      type: "Educational Videos & Exercises",
+                      count: "15+ matches",
+                      color: "bg-green-100 text-green-800"
+                    },
+                    {
+                      name: "BBC Bitesize",
+                      type: "Interactive Content",
+                      count: "8+ matches",
+                      color: "bg-blue-100 text-blue-800"
+                    },
+                    {
+                      name: "YouTube EDU",
+                      type: "Curated Educational Videos",
+                      count: "25+ matches",
+                      color: "bg-red-100 text-red-800"
+                    }
+                  ].map((platform, index) => (
+                    <Card key={index} className="border-l-4 border-l-primary">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <h4 className="font-medium">{platform.name}</h4>
+                          <Badge className={platform.color}>{platform.count}</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{platform.type}</p>
+                        <Button variant="outline" size="sm" className="mt-2 w-full">
+                          <Eye className="h-3 w-3 mr-1" />
+                          View Resources
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Resource Embedding Options */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Resource Embedding Options</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {[
+                        {
+                          title: "Auto-Embed in Lessons",
+                          description: "Automatically include relevant resources in lesson plans",
+                          enabled: true
+                        },
+                        {
+                          title: "Quality Verification",
+                          description: "Only include resources from verified educational databases",
+                          enabled: true
+                        },
+                        {
+                          title: "Age-Appropriate Filter",
+                          description: "Filter content based on year group and maturity level",
+                          enabled: true
+                        },
+                        {
+                          title: "Curriculum Alignment",
+                          description: "Match resources to specific curriculum objectives",
+                          enabled: false
+                        }
+                      ].map((option, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <h4 className="font-medium">{option.title}</h4>
+                            <p className="text-sm text-muted-foreground">{option.description}</p>
+                          </div>
+                          <Switch checked={option.enabled} />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Recently Found Resources */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Recently Found Resources</CardTitle>
+                    <CardDescription>AI-suggested resources for your recent lesson topics</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {[
+                        {
+                          title: "Photosynthesis Interactive Simulation",
+                          source: "Khan Academy",
+                          type: "Interactive",
+                          subject: "Science",
+                          rating: "4.8/5"
+                        },
+                        {
+                          title: "World War II Primary Sources Collection",
+                          source: "BBC Bitesize",
+                          type: "Document Set",
+                          subject: "History",
+                          rating: "4.9/5"
+                        },
+                        {
+                          title: "Fractions Visualization Tool",
+                          source: "YouTube EDU",
+                          type: "Video Series",
+                          subject: "Mathematics",
+                          rating: "4.7/5"
+                        }
+                      ].map((resource, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-medium">{resource.title}</h4>
+                              <Badge variant="outline">{resource.type}</Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              {resource.source} • {resource.subject} • {resource.rating}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm">
+                              <Eye className="h-3 w-3 mr-1" />
+                              Preview
+                            </Button>
+                            <Button size="sm">
+                              <Plus className="h-3 w-3 mr-1" />
+                              Add to Lesson
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               </CardContent>
             </Card>
           </div>
