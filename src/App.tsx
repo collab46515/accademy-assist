@@ -54,6 +54,11 @@ import { StudentSubmissionInterface } from "@/components/assignments/StudentSubm
 import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
 import StudentExitPage from "./pages/StudentExitPage";
+import AcademicOperationsPage from "./pages/AcademicOperationsPage";
+import StudentServicesPage from "./pages/StudentServicesPage";
+import StaffHRPage from "./pages/StaffHRPage";
+import FinanceOperationsPage from "./pages/FinanceOperationsPage";
+import AdministrationPage from "./pages/AdministrationPage";
 
 const queryClient = new QueryClient();
 
@@ -84,6 +89,11 @@ const App = () => (
                       <main className="flex-1 overflow-y-auto p-6 bg-background">
                         <Routes>
                           <Route path="/dashboard" element={<Dashboard />} />
+                          <Route path="/academic-operations" element={<AcademicOperationsPage />} />
+                          <Route path="/student-services" element={<StudentServicesPage />} />
+                          <Route path="/staff-hr" element={<StaffHRPage />} />
+                          <Route path="/finance-operations" element={<FinanceOperationsPage />} />
+                          <Route path="/administration" element={<AdministrationPage />} />
                           <Route path="/students" element={<StudentsPage />} />
              <Route path="/admissions" element={<UnifiedAdmissionsPage />} />
              <Route path="/admissions/new" element={<NewApplicationsPage />} />
