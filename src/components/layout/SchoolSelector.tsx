@@ -10,8 +10,6 @@ export function SchoolSelector() {
     return null;
   }
 
-  const currentRoles = getCurrentSchoolRoles();
-
   return (
     <div className="flex items-center gap-2">
       <Building2 className="h-4 w-4 text-muted-foreground" />
@@ -38,18 +36,6 @@ export function SchoolSelector() {
           ))}
         </SelectContent>
       </Select>
-      
-      {currentRoles.length > 0 && (
-        <div className="flex gap-1">
-          {currentRoles.map((userRole, index) => (
-            <Badge key={index} variant="secondary" className="text-xs">
-              {userRole.role.replace('_', ' ').toUpperCase()}
-              {userRole.department && ` - ${userRole.department}`}
-              {userRole.year_group && ` - Year ${userRole.year_group}`}
-            </Badge>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import { useAuth } from "@/hooks/useAuth";
+import { useRBAC } from "@/hooks/useRBAC";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { LogOut, User } from "lucide-react";
 import {
   DropdownMenu,
@@ -11,6 +13,9 @@ import {
 
 export function UserMenu() {
   const { user, signOut } = useAuth();
+  const { getCurrentSchoolRoles } = useRBAC();
+  
+  const currentRoles = getCurrentSchoolRoles();
 
   const handleLogout = async () => {
     await signOut();
@@ -23,11 +28,24 @@ export function UserMenu() {
 
   return (
     <div className="flex items-center gap-3">
-      {/* Display username directly */}
+      {/* Display username and roles */}
       <div className="hidden sm:flex flex-col items-end">
-        <span className="text-sm font-medium text-foreground">
-          {user?.email?.split('@')[0] || 'User'}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-foreground">
+            {user?.email?.split('@')[0] || 'User'}
+          </span>
+          {currentRoles.length > 0 && (
+            <div className="flex gap-1">
+              {currentRoles.map((userRole, index) => (
+                <Badge key={index} variant="secondary" className="text-xs">
+                  {userRole.role.replace('_', ' ').toUpperCase()}
+                  {userRole.department && ` - ${userRole.department}`}
+                  {userRole.year_group && ` - Year ${userRole.year_group}`}
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
         <span className="text-xs text-muted-foreground">
           {user?.email || 'user@example.com'}
         </span>
