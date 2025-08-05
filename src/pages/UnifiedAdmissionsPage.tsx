@@ -436,21 +436,37 @@ const UnifiedAdmissionsPage = () => {
   }
 
   // If viewing a specific workflow stage, show the StageWorkflowManager
-  if (currentStage !== null) {
-    console.log('Rendering StageWorkflowManager for stage:', currentStage);
+  if (currentStage !== null && currentStage >= 0) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="mb-6">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/admissions')}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Admissions Dashboard
-          </Button>
+      <div className="min-h-screen bg-background">
+        {/* Stage Header */}
+        <div className="bg-card border-b sticky top-0 z-10">
+          <div className="container mx-auto px-4 py-4 max-w-7xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => navigate('/admissions')}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Admissions Dashboard
+                </Button>
+                <div>
+                  <h1 className="text-2xl font-bold">Stage {currentStage + 1}: Application Management</h1>
+                  <p className="text-sm text-muted-foreground">
+                    Managing applications in this workflow stage
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <StageWorkflowManager currentStage={currentStage} />
+
+        {/* Stage Content */}
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <StageWorkflowManager currentStage={currentStage} />
+        </div>
       </div>
     );
   }
