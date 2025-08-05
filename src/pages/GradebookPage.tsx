@@ -205,6 +205,27 @@ const GradebookPage = () => {
   const averageScore = grades.length > 0 ? Math.round(grades.reduce((sum, grade) => sum + grade.score, 0) / grades.length) : 0;
   const excellentEffort = grades.filter(g => g.effort === "excellent").length;
 
+  console.log('Grades data:', grades, 'Loading:', loading, 'Total grades:', totalGrades);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Gradebook & Reporting</h1>
+          <p className="text-muted-foreground">Loading grading data...</p>
+        </div>
+        <div className="animate-pulse space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[1,2,3,4].map(i => (
+              <div key={i} className="h-24 bg-muted rounded-lg"></div>
+            ))}
+          </div>
+          <div className="h-96 bg-muted rounded-lg"></div>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="mb-8">
@@ -536,7 +557,7 @@ const GradebookPage = () => {
                         <TableCell>{report.term}</TableCell>
                         <TableCell>
                           <Badge variant="outline" className="font-bold">
-                            {report.average_grade}%
+                            {report.average_grade}
                           </Badge>
                         </TableCell>
                         <TableCell>{report.subject_count}</TableCell>
