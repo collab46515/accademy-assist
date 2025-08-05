@@ -1,4 +1,4 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { LibraryDashboard } from "@/components/library/LibraryDashboard";
 import { BookCatalog } from "@/components/library/BookCatalog";
 import { BorrowingReturns } from "@/components/library/BorrowingReturns";
@@ -17,50 +17,17 @@ export default function LibraryPage() {
         description="Manage books, digital resources, and library operations"
       />
       
-      <Tabs defaultValue="dashboard" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-8">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="catalog">Catalog</TabsTrigger>
-          <TabsTrigger value="borrowing">Borrowing</TabsTrigger>
-          <TabsTrigger value="reservations">Reservations</TabsTrigger>
-          <TabsTrigger value="digital">Digital</TabsTrigger>
-          <TabsTrigger value="fines">Fines</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
-          <TabsTrigger value="search">Search</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="dashboard">
-          <LibraryDashboard />
-        </TabsContent>
-
-        <TabsContent value="catalog">
-          <BookCatalog />
-        </TabsContent>
-
-        <TabsContent value="borrowing">
-          <BorrowingReturns />
-        </TabsContent>
-
-        <TabsContent value="reservations">
-          <BookReservations />
-        </TabsContent>
-
-        <TabsContent value="digital">
-          <DigitalResources />
-        </TabsContent>
-
-        <TabsContent value="fines">
-          <LibraryFines />
-        </TabsContent>
-
-        <TabsContent value="reports">
-          <LibraryReports />
-        </TabsContent>
-
-        <TabsContent value="search">
-          <BookSearch />
-        </TabsContent>
-      </Tabs>
+      <Routes>
+        <Route path="/" element={<Navigate to="/library/dashboard" replace />} />
+        <Route path="/dashboard" element={<LibraryDashboard />} />
+        <Route path="/catalog" element={<BookCatalog />} />
+        <Route path="/borrowing" element={<BorrowingReturns />} />
+        <Route path="/reservations" element={<BookReservations />} />
+        <Route path="/digital" element={<DigitalResources />} />
+        <Route path="/fines" element={<LibraryFines />} />
+        <Route path="/reports" element={<LibraryReports />} />
+        <Route path="/search" element={<BookSearch />} />
+      </Routes>
     </div>
   );
 }

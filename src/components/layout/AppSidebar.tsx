@@ -133,7 +133,7 @@ const erpModules = [
         url: "/library",
         icon: Library,
         subItems: [
-          { title: "Dashboard", url: "/library", icon: LayoutDashboard },
+          { title: "Dashboard", url: "/library/dashboard", icon: LayoutDashboard },
           { title: "Catalog", url: "/library/catalog", icon: BookOpenCheck },
           { title: "Borrowing & Returns", url: "/library/borrowing", icon: BookOpen },
           { title: "Reservations", url: "/library/reservations", icon: Bookmark },
@@ -148,7 +148,7 @@ const erpModules = [
         url: "/transport",
         icon: Truck,
         subItems: [
-          { title: "Dashboard", url: "/transport", icon: LayoutDashboard },
+          { title: "Dashboard", url: "/transport/dashboard", icon: LayoutDashboard },
           { title: "Routes & Schedules", url: "/transport/routes", icon: Route },
           { title: "Vehicle Management", url: "/transport/vehicles", icon: Truck },
           { title: "Driver Management", url: "/transport/drivers", icon: UserCheck },
