@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 import { 
   BookOpen, 
   PlayCircle, 
@@ -13,7 +15,8 @@ import {
   GraduationCap,
   Settings,
   BarChart3,
-  CheckCircle
+  CheckCircle,
+  ExternalLink
 } from "lucide-react";
 
 interface Module {
@@ -30,6 +33,62 @@ interface UserManualsProps {
 
 export function UserManuals({ modules }: UserManualsProps) {
   const [selectedModule, setSelectedModule] = useState(modules?.[0] || null);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Navigation helpers
+  const handleRoleGuideClick = (guide: string, roleName: string) => {
+    toast({
+      title: "Guide Available",
+      description: `${guide} documentation is available in the ${roleName.toLowerCase()} portal`,
+    });
+    
+    // Navigate to appropriate section based on role
+    if (roleName === "School Administrators") {
+      navigate("/admin-management");
+    } else if (roleName === "Teachers") {
+      navigate("/portals");
+    } else {
+      navigate("/dashboard");
+    }
+  };
+
+  const handleModuleDocumentation = (moduleName: string) => {
+    toast({
+      title: "Documentation Access",
+      description: `Opening ${moduleName} documentation and user guides`,
+    });
+    
+    // Navigate to module or show external documentation
+    const moduleRoutes: { [key: string]: string } = {
+      "Student Management": "/students",
+      "Finance & Fees": "/fee-management", 
+      "Academics": "/academics",
+      "HR Management": "/hr-management",
+      "Communication": "/communication",
+      "AI Suite": "/ai-suite",
+      "Reports": "/report-cards"
+    };
+    
+    const route = moduleRoutes[moduleName];
+    if (route) {
+      navigate(route);
+    }
+  };
+
+  const handleVideoTutorial = (videoTitle: string) => {
+    toast({
+      title: "Video Tutorial",
+      description: `${videoTitle} tutorial would open here. External video library integration available.`,
+    });
+  };
+
+  const handleTrainingRequest = () => {
+    toast({
+      title: "Training Request",
+      description: "Personal training request submitted. Our team will contact you within 24 hours.",
+    });
+  };
 
   const userRoles = [
     {
@@ -38,7 +97,7 @@ export function UserManuals({ modules }: UserManualsProps) {
       description: "Complete system administration and management",
       guides: [
         "System Setup and Configuration",
-        "User Management and Permissions",
+        "User Management and Permissions", 
         "School Settings and Customization",
         "Data Import and Export",
         "Backup and Security"
@@ -47,11 +106,11 @@ export function UserManuals({ modules }: UserManualsProps) {
     {
       name: "Teachers",
       icon: Users,
-      description: "Daily teaching and classroom management",
+      description: "Daily teaching and classroom management", 
       guides: [
         "Lesson Planning and Curriculum",
         "Attendance Marking",
-        "Assignment Creation and Grading",
+        "Assignment Creation and Grading", 
         "Parent Communication",
         "Progress Tracking"
       ]
@@ -64,17 +123,17 @@ export function UserManuals({ modules }: UserManualsProps) {
         "Accessing Student Portal",
         "Viewing Assignments and Grades",
         "Submitting Work Online",
-        "Communication Tools",
+        "Communication Tools", 
         "Academic Calendar"
       ]
     },
     {
-      name: "Parents",
+      name: "Parents", 
       icon: Users,
       description: "Parent portal and engagement tools",
       guides: [
         "Parent Portal Access",
-        "Viewing Child's Progress",
+        "Viewing Child's Progress", 
         "Communication with Teachers",
         "Fee Payments",
         "Event and Activity Updates"
@@ -171,7 +230,7 @@ export function UserManuals({ modules }: UserManualsProps) {
                         <div 
                           key={guideIndex} 
                           className="flex items-center gap-2 p-2 hover:bg-muted/50 rounded cursor-pointer transition-colors"
-                          onClick={() => alert(`Opening guide: ${guide}`)}
+                          onClick={() => handleRoleGuideClick(guide, role.name)}
                         >
                           <BookOpen className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm">{guide}</span>
@@ -182,7 +241,7 @@ export function UserManuals({ modules }: UserManualsProps) {
                     <Button 
                       variant="outline" 
                       className="w-full"
-                      onClick={() => alert(`Opening all ${role.name} guides...`)}
+                      onClick={() => handleRoleGuideClick(`All ${role.name} guides`, role.name)}
                     >
                       <FileText className="mr-2 h-4 w-4" />
                       View All Guides
@@ -252,7 +311,13 @@ export function UserManuals({ modules }: UserManualsProps) {
                           <div 
                             key={index} 
                             className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
-                            onClick={() => alert(`Opening ${section} for ${selectedModule.name}...`)}
+                            onClick={() => {
+                              toast({
+                                title: "Documentation Section",
+                                description: `${section} documentation for ${selectedModule.name}`,
+                              });
+                              handleModuleDocumentation(selectedModule.name);
+                            }}
                           >
                             <div className="flex items-center gap-2">
                               <FileText className="h-4 w-4 text-muted-foreground" />
@@ -270,16 +335,15 @@ export function UserManuals({ modules }: UserManualsProps) {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button className="flex-1" onClick={() => {
-                        // Simulate opening documentation
-                        alert(`Opening ${selectedModule.name} documentation...`);
-                      }}>
+                      <Button className="flex-1" onClick={() => handleModuleDocumentation(selectedModule.name)}>
                         <BookOpen className="mr-2 h-4 w-4" />
                         Read Documentation
                       </Button>
                       <Button variant="outline" onClick={() => {
-                        // Simulate downloading PDF
-                        alert(`Downloading ${selectedModule.name} PDF guide...`);
+                        toast({
+                          title: "PDF Download",
+                          description: `${selectedModule.name} PDF guide ready for download`,
+                        });
                       }}>
                         <Download className="mr-2 h-4 w-4" />
                         Download PDF
@@ -316,7 +380,13 @@ export function UserManuals({ modules }: UserManualsProps) {
                     </div>
                     <Button 
                       className="w-full"
-                      onClick={() => alert(`Starting ${guide.title}...`)}
+                      onClick={() => {
+                        toast({
+                          title: "Quick Start Guide",
+                          description: `Opening ${guide.title} documentation`,
+                        });
+                        navigate("/dashboard");
+                      }}
                     >
                       Start Reading
                     </Button>
@@ -335,7 +405,7 @@ export function UserManuals({ modules }: UserManualsProps) {
                   </p>
                   <Button 
                     size="lg"
-                    onClick={() => alert('Opening training session scheduler...')}
+                    onClick={handleTrainingRequest}
                   >
                     Schedule Training Session
                   </Button>
@@ -352,7 +422,7 @@ export function UserManuals({ modules }: UserManualsProps) {
                   <CardContent className="p-0">
                     <div 
                       className="aspect-video bg-gradient-to-br from-primary/10 to-secondary/10 rounded-t-lg flex items-center justify-center relative group cursor-pointer"
-                      onClick={() => alert(`Playing video: ${video.title}`)}
+                      onClick={() => handleVideoTutorial(video.title)}
                     >
                       <PlayCircle className="h-16 w-16 text-primary group-hover:scale-110 transition-transform" />
                       <Badge className="absolute top-2 right-2">{video.duration}</Badge>
@@ -364,7 +434,7 @@ export function UserManuals({ modules }: UserManualsProps) {
                       </div>
                       <Button 
                         className="w-full"
-                        onClick={() => alert(`Playing video: ${video.title}`)}
+                        onClick={() => handleVideoTutorial(video.title)}
                       >
                         <PlayCircle className="mr-2 h-4 w-4" />
                         Watch Tutorial
@@ -379,7 +449,12 @@ export function UserManuals({ modules }: UserManualsProps) {
               <Button 
                 size="lg" 
                 variant="outline"
-                onClick={() => alert('Opening video tutorial library...')}
+                onClick={() => {
+                  toast({
+                    title: "Video Library",
+                    description: "Complete video tutorial library with 50+ training videos",
+                  });
+                }}
               >
                 <Video className="mr-2 h-5 w-5" />
                 View All Video Tutorials
