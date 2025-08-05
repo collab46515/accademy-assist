@@ -64,7 +64,36 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
       { period: 7, subject: 'English', teacher: 'Mr. Smith', room: 'Room 102', time: '12:00-12:45' },
       { period: 8, subject: 'Art', teacher: 'Ms. Turner', room: 'Art Studio', time: '12:45-13:30' },
     ],
-    // Add other days...
+    Wednesday: [
+      { period: 1, subject: 'Biology', teacher: 'Dr. White', room: 'Biology Lab', time: '08:00-08:45' },
+      { period: 2, subject: 'French', teacher: 'Mme. Martin', room: 'Room 104', time: '08:45-09:30' },
+      { period: 3, subject: 'Break', teacher: '', room: '', time: '09:30-09:45' },
+      { period: 4, subject: 'Mathematics', teacher: 'Ms. Johnson', room: 'Room 101', time: '09:45-10:30' },
+      { period: 5, subject: 'Chemistry', teacher: 'Dr. Lee', room: 'Chemistry Lab', time: '10:30-11:15' },
+      { period: 6, subject: 'Lunch', teacher: '', room: '', time: '11:15-12:00' },
+      { period: 7, subject: 'History', teacher: 'Ms. Davis', room: 'Room 103', time: '12:00-12:45' },
+      { period: 8, subject: 'PE', teacher: 'Mr. Wilson', room: 'Gymnasium', time: '12:45-13:30' },
+    ],
+    Thursday: [
+      { period: 1, subject: 'English', teacher: 'Mr. Smith', room: 'Room 102', time: '08:00-08:45' },
+      { period: 2, subject: 'Physics', teacher: 'Dr. Brown', room: 'Physics Lab', time: '08:45-09:30' },
+      { period: 3, subject: 'Break', teacher: '', room: '', time: '09:30-09:45' },
+      { period: 4, subject: 'Art', teacher: 'Ms. Turner', room: 'Art Studio', time: '09:45-10:30' },
+      { period: 5, subject: 'French', teacher: 'Mme. Martin', room: 'Room 104', time: '10:30-11:15' },
+      { period: 6, subject: 'Lunch', teacher: '', room: '', time: '11:15-12:00' },
+      { period: 7, subject: 'Geography', teacher: 'Mr. Green', room: 'Room 105', time: '12:00-12:45' },
+      { period: 8, subject: 'Mathematics', teacher: 'Ms. Johnson', room: 'Room 101', time: '12:45-13:30' },
+    ],
+    Friday: [
+      { period: 1, subject: 'History', teacher: 'Ms. Davis', room: 'Room 103', time: '08:00-08:45' },
+      { period: 2, subject: 'PE', teacher: 'Mr. Wilson', room: 'Gymnasium', time: '08:45-09:30' },
+      { period: 3, subject: 'Break', teacher: '', room: '', time: '09:30-09:45' },
+      { period: 4, subject: 'English', teacher: 'Mr. Smith', room: 'Room 102', time: '09:45-10:30' },
+      { period: 5, subject: 'Physics', teacher: 'Dr. Brown', room: 'Physics Lab', time: '10:30-11:15' },
+      { period: 6, subject: 'Lunch', teacher: '', room: '', time: '11:15-12:00' },
+      { period: 7, subject: 'Chemistry', teacher: 'Dr. Lee', room: 'Chemistry Lab', time: '12:00-12:45' },
+      { period: 8, subject: 'Biology', teacher: 'Dr. White', room: 'Biology Lab', time: '12:45-13:30' },
+    ],
   };
 
   const generationStats = {
@@ -257,7 +286,122 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
               </div>
             </TabsContent>
             
-            {/* Add other day tabs with similar content */}
+            <TabsContent value="Wednesday" className="mt-6">
+              <div className="space-y-2">
+                {mockTimetable.Wednesday.map((period) => (
+                  <div key={period.period} className="flex items-center space-x-4 p-3 border rounded-lg">
+                    <div className="w-12 text-center">
+                      <span className="text-sm font-medium">P{period.period}</span>
+                    </div>
+                    <div className="flex-1">
+                      {period.subject === 'Break' || period.subject === 'Lunch' ? (
+                        <div className="flex items-center space-x-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium text-muted-foreground">{period.subject}</span>
+                          <span className="text-sm text-muted-foreground">{period.time}</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-4">
+                          <Badge className={`${getSubjectColor(period.subject)} border`}>
+                            {period.subject}
+                          </Badge>
+                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                            <Users className="h-3 w-3" />
+                            <span>{period.teacher}</span>
+                          </div>
+                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                            <MapPin className="h-3 w-3" />
+                            <span>{period.room}</span>
+                          </div>
+                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            <span>{period.time}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="Thursday" className="mt-6">
+              <div className="space-y-2">
+                {mockTimetable.Thursday.map((period) => (
+                  <div key={period.period} className="flex items-center space-x-4 p-3 border rounded-lg">
+                    <div className="w-12 text-center">
+                      <span className="text-sm font-medium">P{period.period}</span>
+                    </div>
+                    <div className="flex-1">
+                      {period.subject === 'Break' || period.subject === 'Lunch' ? (
+                        <div className="flex items-center space-x-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium text-muted-foreground">{period.subject}</span>
+                          <span className="text-sm text-muted-foreground">{period.time}</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-4">
+                          <Badge className={`${getSubjectColor(period.subject)} border`}>
+                            {period.subject}
+                          </Badge>
+                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                            <Users className="h-3 w-3" />
+                            <span>{period.teacher}</span>
+                          </div>
+                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                            <MapPin className="h-3 w-3" />
+                            <span>{period.room}</span>
+                          </div>
+                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            <span>{period.time}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="Friday" className="mt-6">
+              <div className="space-y-2">
+                {mockTimetable.Friday.map((period) => (
+                  <div key={period.period} className="flex items-center space-x-4 p-3 border rounded-lg">
+                    <div className="w-12 text-center">
+                      <span className="text-sm font-medium">P{period.period}</span>
+                    </div>
+                    <div className="flex-1">
+                      {period.subject === 'Break' || period.subject === 'Lunch' ? (
+                        <div className="flex items-center space-x-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium text-muted-foreground">{period.subject}</span>
+                          <span className="text-sm text-muted-foreground">{period.time}</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-4">
+                          <Badge className={`${getSubjectColor(period.subject)} border`}>
+                            {period.subject}
+                          </Badge>
+                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                            <Users className="h-3 w-3" />
+                            <span>{period.teacher}</span>
+                          </div>
+                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                            <MapPin className="h-3 w-3" />
+                            <span>{period.room}</span>
+                          </div>
+                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            <span>{period.time}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
