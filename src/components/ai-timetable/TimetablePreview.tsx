@@ -14,8 +14,14 @@ import {
   Grid3X3,
   Clock,
   Users,
-  MapPin
+  MapPin,
+  Zap,
+  Edit
 } from "lucide-react";
+import { InteractiveTimetableEditor } from './InteractiveTimetableEditor';
+import { SubstitutionPlanner } from './live-usage/SubstitutionPlanner';
+import { ConflictDetector } from './live-usage/ConflictDetector';
+import { AutoRegeneration } from './live-usage/AutoRegeneration';
 
 interface TimetablePreviewProps {
   onBack: () => void;
@@ -25,6 +31,7 @@ interface TimetablePreviewProps {
 
 export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePreviewProps) {
   const [selectedClass, setSelectedClass] = useState('10A');
+  const [showEditor, setShowEditor] = useState(false);
   
   // Mock timetable data
   const mockTimetable = {
@@ -253,6 +260,11 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
         </Button>
         
         <div className="flex items-center space-x-3">
+          <Button variant="outline" onClick={() => setShowEditor(true)}>
+            <Edit className="h-4 w-4 mr-2" />
+            Edit Timetable
+          </Button>
+          
           <Button variant="outline" onClick={onRegenerate}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Regenerate
@@ -269,6 +281,61 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
           </Button>
         </div>
       </div>
+
+      {/* Interactive Timetable Editor */}
+      {showEditor && (
+        <InteractiveTimetableEditor
+          timetableData={mockTimetable}
+          onClose={() => setShowEditor(false)}
+          onSave={(data) => {
+            console.log('Saving updated timetable:', data);
+            setShowEditor(false);
+          }}
+        />
+      )}
+
+      {/* Live Usage Features */}
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="h-5 w-5" />
+            Live Usage Features
+          </CardTitle>
+          <CardDescription>
+            Manage day-to-day operations after timetable deployment
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="substitution" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="substitution" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Substitutions
+              </TabsTrigger>
+              <TabsTrigger value="conflicts" className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Conflict Monitor
+              </TabsTrigger>
+              <TabsTrigger value="regeneration" className="flex items-center gap-2">
+                <RefreshCw className="h-4 w-4" />
+                Auto-Regeneration
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="substitution" className="mt-6">
+              <SubstitutionPlanner />
+            </TabsContent>
+            
+            <TabsContent value="conflicts" className="mt-6">
+              <ConflictDetector />
+            </TabsContent>
+            
+            <TabsContent value="regeneration" className="mt-6">
+              <AutoRegeneration />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 }

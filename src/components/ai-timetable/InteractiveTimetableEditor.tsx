@@ -77,14 +77,18 @@ const nodeTypes: NodeTypes = {
 };
 
 interface TimetableEditorProps {
+  timetableData?: any;
   initialTimetable?: any;
   onSave?: (timetable: any) => void;
+  onClose?: () => void;
   onValidationChange?: (isValid: boolean, issues: any[]) => void;
 }
 
 export function InteractiveTimetableEditor({ 
+  timetableData,
   initialTimetable, 
   onSave, 
+  onClose,
   onValidationChange 
 }: TimetableEditorProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);

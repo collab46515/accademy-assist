@@ -37,6 +37,9 @@ import { TimetableGenerationPanel } from "./TimetableGenerationPanel";
 import { ConstraintsManager } from "./ConstraintsManager";
 import { TimetablePreview } from "./TimetablePreview";
 import { GenerationProgress } from "./GenerationProgress";
+import { SubstitutionPlanner } from "./live-usage/SubstitutionPlanner";
+import { ConflictDetector } from "./live-usage/ConflictDetector";
+import { AutoRegeneration } from "./live-usage/AutoRegeneration";
 
 interface AITimetableGeneratorProps {
   onClose?: () => void;
