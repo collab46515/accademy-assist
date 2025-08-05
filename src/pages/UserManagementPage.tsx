@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface User {
   id: string;
+  user_id: string; // Add user_id field
   email: string;
   first_name: string;
   last_name: string;
@@ -353,19 +354,19 @@ export function UserManagementPage() {
                       </div>
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {(userRoles[user.id] || []).map((role, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {role.role.replace('_', ' ').toUpperCase()}
-                            {role.school_name && ` @ ${role.school_name}`}
-                          </Badge>
-                        ))}
-                        {(!userRoles[user.id] || userRoles[user.id].length === 0) && (
-                          <Badge variant="outline">No roles assigned</Badge>
-                        )}
-                      </div>
-                    </TableCell>
+                     <TableCell>
+                       <div className="flex flex-wrap gap-1">
+                         {(userRoles[user.user_id] || []).map((role, index) => (
+                           <Badge key={index} variant="secondary" className="text-xs">
+                             {role.role.replace('_', ' ').toUpperCase()}
+                             {role.school_name && ` @ ${role.school_name}`}
+                           </Badge>
+                         ))}
+                         {(!userRoles[user.user_id] || userRoles[user.user_id].length === 0) && (
+                           <Badge variant="outline">No roles assigned</Badge>
+                         )}
+                       </div>
+                     </TableCell>
                     <TableCell>
                       <Badge variant={user.is_active ? "default" : "secondary"}>
                         {user.is_active ? "Active" : "Inactive"}
@@ -377,7 +378,7 @@ export function UserManagementPage() {
                           size="sm"
                           variant="outline"
                           onClick={() => {
-                            setSelectedUserId(user.id);
+                            setSelectedUserId(user.user_id); // Use user_id instead of id
                             setAssignRoleOpen(true);
                           }}
                         >
@@ -387,7 +388,7 @@ export function UserManagementPage() {
                         <Button
                           size="sm"
                           variant={user.is_active ? "destructive" : "default"}
-                          onClick={() => toggleUserStatus(user.id, user.is_active)}
+                          onClick={() => toggleUserStatus(user.user_id, user.is_active)}
                         >
                           {user.is_active ? "Deactivate" : "Activate"}
                         </Button>
