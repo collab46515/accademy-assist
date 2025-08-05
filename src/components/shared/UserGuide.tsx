@@ -230,7 +230,7 @@ export function UserGuide({ moduleName, sections, quickActions = [] }: UserGuide
                       size="sm" 
                       className="w-full"
                       onClick={() => {
-                        // Execute the actual action based on the action title
+                        // Execute the actual action based on the action title and content
                         if (action.title === 'Record New Payment') {
                           window.location.href = '/school-management/fee-management';
                           toast({
@@ -254,6 +254,32 @@ export function UserGuide({ moduleName, sections, quickActions = [] }: UserGuide
                           toast({
                             title: "Outstanding Fees",
                             description: "Opening Fee Management module",
+                          });
+                        } 
+                        // Academic actions
+                        else if (action.title === 'Create Lesson Plan') {
+                          // We're already on the lesson planner, so just show a message
+                          toast({
+                            title: "Creating New Lesson Plan",
+                            description: "Use the AI Lesson Planner tab to generate new lesson plans",
+                          });
+                        } else if (action.title === 'View Curriculum Progress') {
+                          window.location.href = '/academics/curriculum';
+                          toast({
+                            title: "Curriculum Progress",
+                            description: "Opening Curriculum Management module",
+                          });
+                        } else if (action.title === 'Topic Manager') {
+                          window.location.href = '/academics/curriculum';
+                          toast({
+                            title: "Topic Management",
+                            description: "Opening Curriculum Topic Manager",
+                          });
+                        } else if (action.title === 'Generate Report') {
+                          window.location.href = '/academics/reports';
+                          toast({
+                            title: "Academic Reports",
+                            description: "Opening Reports module",
                           });
                         } else {
                           toast({
