@@ -25,6 +25,7 @@ import {
   Plus
 } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { FinancialDashboard } from '@/components/finance/FinancialDashboard';
 
 export default function FinanceOperationsPage() {
   const navigate = useNavigate();
@@ -171,35 +172,8 @@ export default function FinanceOperationsPage() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              {financeStats.map((stat, index) => (
-                <Card key={index} className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80 hover:shadow-xl transition-all duration-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                        <p className="text-3xl font-bold">{stat.value}</p>
-                        <div className="flex items-center gap-1">
-                          {stat.trendType === 'up' ? (
-                            <TrendingUp className="h-3 w-3 text-success" />
-                          ) : (
-                            <TrendingDown className="h-3 w-3 text-destructive" />
-                          )}
-                          <p className={`text-xs ${stat.trendType === 'up' ? 'text-success' : 'text-destructive'}`}>
-                            {stat.trend}
-                          </p>
-                        </div>
-                        <p className="text-xs text-muted-foreground">{stat.description}</p>
-                      </div>
-                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                        <stat.icon className="h-6 w-6 text-primary" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            {/* Interactive Financial Dashboard */}
+            <FinancialDashboard />
 
             {/* Quick Actions */}
             <Card className="border-0 shadow-lg">
