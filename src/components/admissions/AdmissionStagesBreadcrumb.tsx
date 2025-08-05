@@ -75,6 +75,7 @@ export function AdmissionStagesBreadcrumb() {
   const activeStageId = currentStageId !== null ? parseInt(currentStageId) : null;
 
   const handleStageClick = (stageId: number) => {
+    console.log(`Stage ${stageId} clicked - navigating to /admissions?stage=${stageId}`);
     navigate(`/admissions?stage=${stageId}`);
   };
 
