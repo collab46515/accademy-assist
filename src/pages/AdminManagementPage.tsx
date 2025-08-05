@@ -383,87 +383,333 @@ export default function AdminManagementPage() {
           </TabsContent>
 
           <TabsContent value="users">
-            <Card>
-              <CardHeader>
-                <CardTitle>User & Role Management</CardTitle>
-                <CardDescription>Manage system users, roles, and permissions</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-center py-12">
-                  <div className="text-center">
-                    <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">User Management</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Add users, assign roles, and configure permissions across schools
-                    </p>
-                    <Button>Manage Users</Button>
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>User & Role Management</CardTitle>
+                  <CardDescription>Manage system users, roles, and permissions</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex flex-col items-center justify-center gap-2"
+                        onClick={() => handleQuickAction("Add New User")}
+                      >
+                        <Users className="h-5 w-5" />
+                        <span className="text-sm">Add User</span>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex flex-col items-center justify-center gap-2"
+                        onClick={() => handleQuickAction("Manage Roles")}
+                      >
+                        <Shield className="h-5 w-5" />
+                        <span className="text-sm">Manage Roles</span>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex flex-col items-center justify-center gap-2"
+                        onClick={() => handleQuickAction("User Permissions")}
+                      >
+                        <Settings className="h-5 w-5" />
+                        <span className="text-sm">Permissions</span>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex flex-col items-center justify-center gap-2"
+                        onClick={() => handleQuickAction("Bulk Import Users")}
+                      >
+                        <Database className="h-5 w-5" />
+                        <span className="text-sm">Bulk Import</span>
+                      </Button>
+                    </div>
+                    <Button 
+                      className="w-full" 
+                      onClick={() => handleQuickAction("View All Users")}
+                    >
+                      <Users className="mr-2 h-4 w-4" />
+                      View All Users
+                    </Button>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent User Activity</CardTitle>
+                  <CardDescription>Latest user management activities</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { action: "New teacher added", user: "John Smith", time: "2 hours ago" },
+                      { action: "Role updated", user: "Sarah Wilson", time: "4 hours ago" },
+                      { action: "Permission granted", user: "Mike Johnson", time: "1 day ago" },
+                      { action: "User deactivated", user: "Lisa Brown", time: "2 days ago" }
+                    ].map((activity, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <p className="text-sm font-medium">{activity.action}</p>
+                          <p className="text-xs text-muted-foreground">{activity.user}</p>
+                        </div>
+                        <span className="text-xs text-muted-foreground">{activity.time}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="masterdata">
-            <Card>
-              <CardHeader>
-                <CardTitle>Master Data Management</CardTitle>
-                <CardDescription>Configure system-wide data and settings</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-center py-12">
-                  <div className="text-center">
-                    <Database className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">Master Data</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Manage schools, year groups, subjects, and other core data
-                    </p>
-                    <Button>Configure Data</Button>
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Master Data Management</CardTitle>
+                  <CardDescription>Configure system-wide data and settings</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex flex-col items-center justify-center gap-2"
+                        onClick={() => handleQuickAction("Manage Schools")}
+                      >
+                        <School className="h-5 w-5" />
+                        <span className="text-sm">Schools</span>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex flex-col items-center justify-center gap-2"
+                        onClick={() => handleQuickAction("Year Groups")}
+                      >
+                        <Calendar className="h-5 w-5" />
+                        <span className="text-sm">Year Groups</span>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex flex-col items-center justify-center gap-2"
+                        onClick={() => handleQuickAction("Subjects Setup")}
+                      >
+                        <FileText className="h-5 w-5" />
+                        <span className="text-sm">Subjects</span>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex flex-col items-center justify-center gap-2"
+                        onClick={() => handleQuickAction("Fee Categories")}
+                      >
+                        <Database className="h-5 w-5" />
+                        <span className="text-sm">Fee Categories</span>
+                      </Button>
+                    </div>
+                    <Button 
+                      className="w-full" 
+                      onClick={() => handleQuickAction("Configure All Master Data")}
+                    >
+                      <Database className="mr-2 h-4 w-4" />
+                      Configure All Data
+                    </Button>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Data Statistics</CardTitle>
+                  <CardDescription>Overview of configured master data</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { label: "Schools Configured", value: "15", color: "text-blue-600" },
+                      { label: "Year Groups", value: "12", color: "text-green-600" },
+                      { label: "Subjects", value: "45", color: "text-purple-600" },
+                      { label: "Fee Categories", value: "8", color: "text-amber-600" }
+                    ].map((stat, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                        <span className="font-medium">{stat.label}</span>
+                        <span className={`text-xl font-bold ${stat.color}`}>{stat.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="templates">
-            <Card>
-              <CardHeader>
-                <CardTitle>Template Management</CardTitle>
-                <CardDescription>Manage document templates and communication templates</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-center py-12">
-                  <div className="text-center">
-                    <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">Templates</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Create and edit email templates, document templates, and forms
-                    </p>
-                    <Button>Manage Templates</Button>
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Template Management</CardTitle>
+                  <CardDescription>Manage document templates and communication templates</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex flex-col items-center justify-center gap-2"
+                        onClick={() => handleQuickAction("Email Templates")}
+                      >
+                        <Mail className="h-5 w-5" />
+                        <span className="text-sm">Email Templates</span>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex flex-col items-center justify-center gap-2"
+                        onClick={() => handleQuickAction("Document Templates")}
+                      >
+                        <FileText className="h-5 w-5" />
+                        <span className="text-sm">Documents</span>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex flex-col items-center justify-center gap-2"
+                        onClick={() => handleQuickAction("Report Templates")}
+                      >
+                        <BarChart3 className="h-5 w-5" />
+                        <span className="text-sm">Reports</span>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex flex-col items-center justify-center gap-2"
+                        onClick={() => handleQuickAction("Form Templates")}
+                      >
+                        <Database className="h-5 w-5" />
+                        <span className="text-sm">Forms</span>
+                      </Button>
+                    </div>
+                    <Button 
+                      className="w-full" 
+                      onClick={() => handleQuickAction("Manage All Templates")}
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+                      Manage All Templates
+                    </Button>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Template Library</CardTitle>
+                  <CardDescription>Available templates and recent changes</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { name: "Admission Letter", type: "Document", updated: "2 days ago" },
+                      { name: "Welcome Email", type: "Email", updated: "1 week ago" },
+                      { name: "Report Card", type: "Report", updated: "3 days ago" },
+                      { name: "Fee Invoice", type: "Document", updated: "5 days ago" }
+                    ].map((template, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <p className="text-sm font-medium">{template.name}</p>
+                          <p className="text-xs text-muted-foreground">{template.type}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">{template.updated}</p>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleQuickAction(`Edit ${template.name}`)}
+                          >
+                            Edit
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="settings">
-            <Card>
-              <CardHeader>
-                <CardTitle>System Settings</CardTitle>
-                <CardDescription>Global system configuration and preferences</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-center py-12">
-                  <div className="text-center">
-                    <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">System Configuration</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Configure system-wide settings, integrations, and preferences
-                    </p>
-                    <Button>Configure Settings</Button>
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>System Settings</CardTitle>
+                  <CardDescription>Global system configuration and preferences</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex flex-col items-center justify-center gap-2"
+                        onClick={() => handleQuickAction("General Settings")}
+                      >
+                        <Settings className="h-5 w-5" />
+                        <span className="text-sm">General</span>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex flex-col items-center justify-center gap-2"
+                        onClick={() => handleQuickAction("Security Settings")}
+                      >
+                        <Shield className="h-5 w-5" />
+                        <span className="text-sm">Security</span>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex flex-col items-center justify-center gap-2"
+                        onClick={() => handleQuickAction("Integration Settings")}
+                      >
+                        <Activity className="h-5 w-5" />
+                        <span className="text-sm">Integrations</span>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex flex-col items-center justify-center gap-2"
+                        onClick={() => handleQuickAction("Backup Settings")}
+                      >
+                        <Database className="h-5 w-5" />
+                        <span className="text-sm">Backup</span>
+                      </Button>
+                    </div>
+                    <Button 
+                      className="w-full" 
+                      onClick={() => handleQuickAction("Advanced Configuration")}
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      Advanced Configuration
+                    </Button>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>System Information</CardTitle>
+                  <CardDescription>Current system configuration and status</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { label: "System Version", value: "v2.4.1", status: "success" },
+                      { label: "Database Version", value: "PostgreSQL 14", status: "success" },
+                      { label: "Last Backup", value: "2 hours ago", status: "success" },
+                      { label: "Security Scan", value: "Clean", status: "success" }
+                    ].map((info, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                        <span className="font-medium">{info.label}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">{info.value}</span>
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
