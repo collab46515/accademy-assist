@@ -212,9 +212,7 @@ const erpModules = [
     title: "Analytics",
     url: "/analytics", 
     icon: BarChart3,
-    subItems: [
-      { title: "Dashboard", url: "/analytics", icon: BarChart3 },
-    ]
+    subItems: []
   },
   {
     title: "System",
