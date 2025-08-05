@@ -85,6 +85,7 @@ const erpModules = [
       { title: "AI Suite", url: "/ai-suite", icon: Bot },
       { title: "Exams & Assessment", url: "/exams", icon: ClipboardCheck },
       { title: "Assignments", url: "/academics/assignments", icon: ClipboardList },
+      { title: "Report Cards", url: "/academics/reports", icon: FileText },
       { title: "HOD Dashboard", url: "/hod-dashboard", icon: Target },
     ]
   },
