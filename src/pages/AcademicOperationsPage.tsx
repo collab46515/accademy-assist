@@ -103,16 +103,38 @@ export default function AcademicOperationsPage() {
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {academicStats.map((stat, index) => (
-            <Card key={index} className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80">
+            <Card 
+              key={index} 
+              className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
+              onClick={() => {
+                console.log('Stat card clicked:', stat.label);
+                switch(stat.label) {
+                  case "Total Students":
+                    navigate('/students');
+                    break;
+                  case "Active Courses":
+                    navigate('/curriculum');
+                    break;
+                  case "Completion Rate":
+                    navigate('/analytics');
+                    break;
+                  case "This Term":
+                    navigate('/academics');
+                    break;
+                  default:
+                    console.log('No navigation defined for:', stat.label);
+                }
+              }}
+            >
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                    <p className="text-3xl font-bold">{stat.value}</p>
+                    <p className="text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors duration-300">{stat.label}</p>
+                    <p className="text-3xl font-bold group-hover:text-primary transition-colors duration-300">{stat.value}</p>
                     <p className="text-xs text-success">{stat.trend}</p>
                   </div>
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <stat.icon className="h-6 w-6 text-primary" />
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-300">
+                    <stat.icon className="h-6 w-6 text-primary group-hover:scale-110 transition-transform duration-300" />
                   </div>
                 </div>
               </CardContent>
