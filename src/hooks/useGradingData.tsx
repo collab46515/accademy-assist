@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 // Mock data structures for now - will be replaced with real data once migration is confirmed
 export interface Grade {
@@ -59,7 +60,7 @@ export interface ReportCard {
   student_id: string;
   term: string;
   year: string;
-  average_grade: number;
+  average_grade: string;
   subject_count: number;
   status: string;
   generated_date: string;
@@ -177,7 +178,7 @@ const mockReports: ReportCard[] = [
     student_id: 'STU001',
     term: 'Term 1',
     year: '2024',
-    average_grade: 85,
+    average_grade: 'A-',
     subject_count: 8,
     status: 'generated',
     generated_date: '2024-01-25'
@@ -188,7 +189,7 @@ const mockReports: ReportCard[] = [
     student_id: 'STU002',
     term: 'Term 1',
     year: '2024',
-    average_grade: 88,
+    average_grade: 'A',
     subject_count: 8,
     status: 'sent',
     generated_date: '2024-01-25'
@@ -199,18 +200,23 @@ export function useGradingData(schoolId?: string) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  const [grades, setGrades] = useState<Grade[]>(mockGrades);
-  const [gradingRubrics, setGradingRubrics] = useState<GradingRubric[]>(mockRubrics);
-  const [gradeBoundaries, setGradeBoundaries] = useState<GradeBoundary[]>(mockGradeBoundaries);
-  const [reports, setReports] = useState<ReportCard[]>(mockReports);
+  const [grades, setGrades] = useState<Grade[]>([]);
+  const [gradingRubrics, setGradingRubrics] = useState<GradingRubric[]>([]);
+  const [gradeBoundaries, setGradeBoundaries] = useState<GradeBoundary[]>([]);
+  const [reports, setReports] = useState<ReportCard[]>([]);
 
-  // Simulate data loading
+  // Initialize with mock data for now
   useEffect(() => {
     setLoading(true);
+    // Simulate loading
     setTimeout(() => {
+      setGrades(mockGrades);
+      setGradingRubrics(mockRubrics);
+      setGradeBoundaries(mockGradeBoundaries);
+      setReports(mockReports);
       setLoading(false);
     }, 1000);
-  }, []);
+  }, [schoolId]);
 
   // Create/Update grade
   const createGrade = async (gradeData: Omit<Grade, 'id'>) => {
@@ -296,6 +302,23 @@ export function useGradingData(schoolId?: string) {
     }
   };
 
+  // Refresh data
+  const refreshData = async () => {
+    setLoading(true);
+    // Simulate refresh
+    setTimeout(() => {
+      setGrades([...mockGrades]);
+      setGradingRubrics([...mockRubrics]);
+      setGradeBoundaries([...mockGradeBoundaries]);
+      setReports([...mockReports]);
+      setLoading(false);
+      toast({
+        title: "Data Refreshed",
+        description: "All grading data has been updated",
+      });
+    }, 1000);
+  };
+
   return {
     loading,
     grades,
@@ -306,12 +329,6 @@ export function useGradingData(schoolId?: string) {
     updateGrade,
     calculateGrade,
     generateAnalytics,
-    refreshData: () => {
-      // Refresh mock data
-      setGrades([...mockGrades]);
-      setGradingRubrics([...mockRubrics]);
-      setGradeBoundaries([...mockGradeBoundaries]);
-      setReports([...mockReports]);
-    }
+    refreshData
   };
 }

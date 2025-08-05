@@ -32,6 +32,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { GradeForm } from "@/components/gradebook/GradeForm";
 
 // Remove duplicate interfaces - using ones from the hook
 
@@ -339,6 +340,7 @@ const GradebookPage = () => {
                   <CardDescription>Manage individual assessment grades and feedback</CardDescription>
                 </div>
                 <div className="flex space-x-2">
+                  <GradeForm onSuccess={() => refreshData()} />
                   <Dialog open={isAICommentDialogOpen} onOpenChange={setIsAICommentDialogOpen}>
                     <DialogTrigger asChild>
                       <Button variant="outline" size="sm">
