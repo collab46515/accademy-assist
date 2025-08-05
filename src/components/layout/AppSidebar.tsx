@@ -401,7 +401,7 @@ export function AppSidebar() {
       
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="px-3 py-2 text-base font-semibold text-foreground/80 mb-3">
+          <SidebarGroupLabel className="px-3 py-2 text-lg font-semibold text-foreground/80 mb-3">
             Modules
           </SidebarGroupLabel>
           <SidebarGroupContent>
