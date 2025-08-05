@@ -34,6 +34,8 @@ serve(async (req) => {
       throw new Error('Invalid authentication');
     }
 
+    console.log('Checking user permissions for user:', user.id);
+    
     // Check if user has proper role to use AI features
     const { data: userRoles, error: roleError } = await supabase
       .from('user_roles')
@@ -41,7 +43,10 @@ serve(async (req) => {
       .eq('user_id', user.id)
       .eq('is_active', true);
 
+    console.log('User roles query result:', { userRoles, roleError });
+
     if (roleError) {
+      console.error('Error checking user permissions:', roleError);
       throw new Error('Error checking user permissions');
     }
 
@@ -49,7 +54,10 @@ serve(async (req) => {
       ['super_admin', 'school_admin', 'hod', 'teacher'].includes(role.role)
     );
 
+    console.log('Permission check result:', hasPermission);
+
     if (!hasPermission) {
+      console.error('User lacks required permissions. User roles:', userRoles);
       throw new Error('Insufficient permissions to use AI features');
     }
 
