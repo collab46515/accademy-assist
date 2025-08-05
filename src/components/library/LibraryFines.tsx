@@ -129,7 +129,7 @@ export function LibraryFines() {
             <Clock className="h-8 w-8 text-blue-600 mr-3" />
             <div>
               <p className="text-2xl font-bold">5</p>
-              <p className="text-sm text-muted-foreground">Overdue > 7 days</p>
+              <p className="text-sm text-muted-foreground">Overdue {'>'}7 days</p>
             </div>
           </CardContent>
         </Card>
