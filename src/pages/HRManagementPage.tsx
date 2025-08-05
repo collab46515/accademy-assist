@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Calendar, 
   Clock, 
@@ -49,7 +50,8 @@ import {
   Plane,
   Timer,
   Folder,
-  Package
+  Package,
+  ClipboardList
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useHRData } from '@/hooks/useHRData';
@@ -580,12 +582,179 @@ export function HRManagementPage() {
     </div>
   );
 
+  // Render Timesheet Management
+  const renderTimesheet = () => (
+    <div className="space-y-6">
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80">
+        <CardHeader className="border-b border-border/50">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <CardTitle className="text-xl">Time Tracking & Timesheets</CardTitle>
+              <CardDescription>Track employee hours and manage timesheets</CardDescription>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Export Timesheets
+              </Button>
+              <Button size="sm" className="bg-gradient-to-r from-primary to-primary-glow">
+                <Timer className="h-4 w-4 mr-2" />
+                Add Time Entry
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <Clock className="h-8 w-8 text-primary" />
+                  <div>
+                    <p className="text-2xl font-bold">168</p>
+                    <p className="text-sm text-muted-foreground">Hours This Week</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <Users className="h-8 w-8 text-success" />
+                  <div>
+                    <p className="text-2xl font-bold">24</p>
+                    <p className="text-sm text-muted-foreground">Active Projects</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="h-8 w-8 text-warning" />
+                  <div>
+                    <p className="text-2xl font-bold">12</p>
+                    <p className="text-sm text-muted-foreground">Pending Approvals</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Recent Time Entries</h3>
+            {timeEntries.slice(0, 5).map((entry) => (
+              <div key={entry.id} className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors border">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback>
+                      {entry.employee_id?.slice(0, 2).toUpperCase() || 'EE'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{entry.task_description}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date().toISOString().split('T')[0]} • {entry.hours_worked} hours
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge variant={entry.status === 'approved' ? 'default' : 'secondary'}>
+                    {entry.status}
+                  </Badge>
+                  <Button variant="ghost" size="sm">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  // Render Attendance Management
+  const renderAttendance = () => (
+    <div className="space-y-6">
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80">
+        <CardHeader>
+          <CardTitle className="text-xl">Attendance Management</CardTitle>
+          <CardDescription>Track and manage employee attendance</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-success">95%</p>
+                  <p className="text-sm text-muted-foreground">Average Attendance</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold">{stats.activeEmployees}</p>
+                  <p className="text-sm text-muted-foreground">Present Today</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-warning">3</p>
+                  <p className="text-sm text-muted-foreground">Late Arrivals</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-destructive">2</p>
+                  <p className="text-sm text-muted-foreground">Absent Today</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Today's Attendance</h3>
+            {employees.slice(0, 6).map((employee) => (
+              <div key={employee.id} className="flex items-center justify-between p-4 rounded-lg bg-muted/30 border">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback>{employee.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{employee.name}</p>
+                    <p className="text-sm text-muted-foreground">{employee.position}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge variant={Math.random() > 0.2 ? 'default' : 'destructive'}>
+                    {Math.random() > 0.2 ? 'Present' : 'Absent'}
+                  </Badge>
+                  <span className="text-sm text-muted-foreground">09:15 AM</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
         return renderDashboard();
       case 'employees':
         return renderEmployees();
+      case 'timesheet':
+        return renderTimesheet();
+      case 'attendance':
+        return renderAttendance();
       case 'recruitment':
         return <RecruitmentDashboard />;
       case 'employee-exit':
@@ -596,6 +765,8 @@ export function HRManagementPage() {
         return renderComingSoon('Training & Development', 'Employee learning and development programs', BookOpen, 'Add Training Course');
       case 'benefits':
         return renderComingSoon('Benefits Management', 'Employee benefits and compensation packages', Award, 'Add Benefits Plan');
+      case 'leave':
+        return renderComingSoon('Leave Management', 'Manage employee leave requests and approvals', CalendarIcon, 'Process Leave Request');
       case 'payroll':
         return renderComingSoon('Payroll Management', 'Payroll processing and management', DollarSign, 'Process Payroll');
       default:
@@ -632,6 +803,56 @@ export function HRManagementPage() {
             </Button>
           </div>
         </div>
+
+        {/* Navigation Tabs */}
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80 mb-6">
+          <CardContent className="p-2">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10 h-auto p-1">
+                <TabsTrigger value="dashboard" className="flex items-center gap-2 p-3">
+                  <BarChart3 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Dashboard</span>
+                </TabsTrigger>
+                <TabsTrigger value="employees" className="flex items-center gap-2 p-3">
+                  <Users className="h-4 w-4" />
+                  <span className="hidden sm:inline">Employees</span>
+                </TabsTrigger>
+                <TabsTrigger value="timesheet" className="flex items-center gap-2 p-3">
+                  <Timer className="h-4 w-4" />
+                  <span className="hidden sm:inline">Timesheet</span>
+                </TabsTrigger>
+                <TabsTrigger value="attendance" className="flex items-center gap-2 p-3">
+                  <ClipboardList className="h-4 w-4" />
+                  <span className="hidden sm:inline">Attendance</span>
+                </TabsTrigger>
+                <TabsTrigger value="leave" className="flex items-center gap-2 p-3">
+                  <CalendarIcon className="h-4 w-4" />
+                  <span className="hidden sm:inline">Leave</span>
+                </TabsTrigger>
+                <TabsTrigger value="recruitment" className="flex items-center gap-2 p-3">
+                  <UserPlus className="h-4 w-4" />
+                  <span className="hidden sm:inline">Recruitment</span>
+                </TabsTrigger>
+                <TabsTrigger value="performance" className="flex items-center gap-2 p-3">
+                  <Target className="h-4 w-4" />
+                  <span className="hidden sm:inline">Performance</span>
+                </TabsTrigger>
+                <TabsTrigger value="training" className="flex items-center gap-2 p-3">
+                  <BookOpen className="h-4 w-4" />
+                  <span className="hidden sm:inline">Training</span>
+                </TabsTrigger>
+                <TabsTrigger value="payroll" className="flex items-center gap-2 p-3">
+                  <DollarSign className="h-4 w-4" />
+                  <span className="hidden sm:inline">Payroll</span>
+                </TabsTrigger>
+                <TabsTrigger value="benefits" className="flex items-center gap-2 p-3">
+                  <Award className="h-4 w-4" />
+                  <span className="hidden sm:inline">Benefits</span>
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </CardContent>
+        </Card>
 
         {renderContent()}
       </div>
