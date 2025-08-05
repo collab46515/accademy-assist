@@ -18,7 +18,13 @@ export function UserMenu() {
   const currentRoles = getCurrentSchoolRoles();
 
   const handleLogout = async () => {
-    await signOut();
+    try {
+      await signOut();
+      // Force redirect to auth page
+      window.location.href = '/auth';
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   const getUserInitials = (email: string) => {
