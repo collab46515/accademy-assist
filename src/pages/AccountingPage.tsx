@@ -1496,49 +1496,428 @@ export function AccountingPage() {
 
         {/* Reports View */}
         {currentView === 'reports' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Financial Reports
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Financial Reports</h3>
-                <p className="text-muted-foreground mb-4">
-                  Comprehensive financial reporting with multi-currency consolidation and analysis.
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-                  <Button variant="outline" className="h-24 flex-col gap-2">
-                    <PieChart className="h-6 w-6" />
-                    Profit & Loss
+          <div className="space-y-6">
+            {/* Report Overview Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200 dark:from-blue-900/20 dark:to-blue-800/20 dark:border-blue-800">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Reports Generated</CardTitle>
+                  <FileText className="h-4 w-4 text-blue-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">127</div>
+                  <p className="text-xs text-muted-foreground mt-1">This month</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-green-50 to-green-100/50 border-green-200 dark:from-green-900/20 dark:to-green-800/20 dark:border-green-800">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Most Viewed Report</CardTitle>
+                  <Eye className="h-4 w-4 text-green-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-lg font-bold">Profit & Loss</div>
+                  <p className="text-xs text-muted-foreground mt-1">45 views this month</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-200 dark:from-purple-900/20 dark:to-purple-800/20 dark:border-purple-800">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Last Generated</CardTitle>
+                  <Clock className="h-4 w-4 text-purple-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-lg font-bold">2 hours ago</div>
+                  <p className="text-xs text-muted-foreground mt-1">Balance Sheet</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Financial Reports */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    Financial Reports
+                  </CardTitle>
+                  <div className="flex items-center gap-3">
+                    <Select defaultValue="current-month">
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="Select period" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="current-month">Current Month</SelectItem>
+                        <SelectItem value="last-month">Last Month</SelectItem>
+                        <SelectItem value="current-quarter">Current Quarter</SelectItem>
+                        <SelectItem value="current-year">Current Year</SelectItem>
+                        <SelectItem value="custom">Custom Range</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button variant="outline" size="sm">
+                      <Download className="h-4 w-4 mr-2" />
+                      Export All
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="h-32 flex-col gap-3 hover:bg-primary hover:text-primary-foreground transition-all">
+                        <PieChart className="h-8 w-8" />
+                        <div className="text-center">
+                          <div className="font-semibold">Profit & Loss</div>
+                          <div className="text-xs text-muted-foreground">Revenue vs Expenses</div>
+                        </div>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Profit & Loss Statement</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <h3 className="text-lg font-semibold">Period: January 2024</h3>
+                          <Button size="sm" variant="outline">
+                            <Download className="h-4 w-4 mr-2" />
+                            Download PDF
+                          </Button>
+                        </div>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Account</TableHead>
+                              <TableHead className="text-right">Amount</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            <TableRow>
+                              <TableCell className="font-semibold">REVENUE</TableCell>
+                              <TableCell></TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="pl-4">Tuition Fees</TableCell>
+                              <TableCell className="text-right">£425,600</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="pl-4">Activity Fees</TableCell>
+                              <TableCell className="text-right">£45,200</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-semibold">Total Revenue</TableCell>
+                              <TableCell className="text-right font-semibold">£470,800</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-semibold pt-4">EXPENSES</TableCell>
+                              <TableCell></TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="pl-4">Staff Salaries</TableCell>
+                              <TableCell className="text-right">£185,000</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="pl-4">Utilities</TableCell>
+                              <TableCell className="text-right">£25,400</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="pl-4">Supplies</TableCell>
+                              <TableCell className="text-right">£15,600</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-semibold">Total Expenses</TableCell>
+                              <TableCell className="text-right font-semibold">£226,000</TableCell>
+                            </TableRow>
+                            <TableRow className="border-t-2">
+                              <TableCell className="font-bold text-lg">NET PROFIT</TableCell>
+                              <TableCell className="text-right font-bold text-lg text-green-600">£244,800</TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="h-32 flex-col gap-3 hover:bg-primary hover:text-primary-foreground transition-all">
+                        <BarChart3 className="h-8 w-8" />
+                        <div className="text-center">
+                          <div className="font-semibold">Balance Sheet</div>
+                          <div className="text-xs text-muted-foreground">Assets vs Liabilities</div>
+                        </div>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Balance Sheet</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <h3 className="text-lg font-semibold">As of January 31, 2024</h3>
+                          <Button size="sm" variant="outline">
+                            <Download className="h-4 w-4 mr-2" />
+                            Download PDF
+                          </Button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <h4 className="font-semibold mb-4">ASSETS</h4>
+                            <Table>
+                              <TableBody>
+                                <TableRow>
+                                  <TableCell className="font-semibold">Current Assets</TableCell>
+                                  <TableCell></TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell className="pl-4">Cash & Bank</TableCell>
+                                  <TableCell className="text-right">£450,000</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell className="pl-4">Accounts Receivable</TableCell>
+                                  <TableCell className="text-right">£285,000</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell className="font-semibold">Fixed Assets</TableCell>
+                                  <TableCell></TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell className="pl-4">Buildings</TableCell>
+                                  <TableCell className="text-right">£2,500,000</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell className="pl-4">Equipment</TableCell>
+                                  <TableCell className="text-right">£350,000</TableCell>
+                                </TableRow>
+                                <TableRow className="border-t">
+                                  <TableCell className="font-bold">Total Assets</TableCell>
+                                  <TableCell className="text-right font-bold">£3,585,000</TableCell>
+                                </TableRow>
+                              </TableBody>
+                            </Table>
+                          </div>
+                          <div>
+                            <h4 className="font-semibold mb-4">LIABILITIES & EQUITY</h4>
+                            <Table>
+                              <TableBody>
+                                <TableRow>
+                                  <TableCell className="font-semibold">Current Liabilities</TableCell>
+                                  <TableCell></TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell className="pl-4">Accounts Payable</TableCell>
+                                  <TableCell className="text-right">£125,000</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell className="pl-4">Accrued Expenses</TableCell>
+                                  <TableCell className="text-right">£65,000</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell className="font-semibold">Long-term Liabilities</TableCell>
+                                  <TableCell></TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell className="pl-4">Mortgage</TableCell>
+                                  <TableCell className="text-right">£1,200,000</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell className="font-semibold">Equity</TableCell>
+                                  <TableCell></TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell className="pl-4">Retained Earnings</TableCell>
+                                  <TableCell className="text-right">£2,195,000</TableCell>
+                                </TableRow>
+                                <TableRow className="border-t">
+                                  <TableCell className="font-bold">Total Liab. & Equity</TableCell>
+                                  <TableCell className="text-right font-bold">£3,585,000</TableCell>
+                                </TableRow>
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="h-32 flex-col gap-3 hover:bg-primary hover:text-primary-foreground transition-all">
+                        <TrendingUp className="h-8 w-8" />
+                        <div className="text-center">
+                          <div className="font-semibold">Cash Flow</div>
+                          <div className="text-xs text-muted-foreground">Money In vs Out</div>
+                        </div>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Cash Flow Statement</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <h3 className="text-lg font-semibold">Period: January 2024</h3>
+                          <Button size="sm" variant="outline">
+                            <Download className="h-4 w-4 mr-2" />
+                            Download PDF
+                          </Button>
+                        </div>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Cash Flow Activity</TableHead>
+                              <TableHead className="text-right">Amount</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            <TableRow>
+                              <TableCell className="font-semibold">Operating Activities</TableCell>
+                              <TableCell></TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="pl-4">Cash from Operations</TableCell>
+                              <TableCell className="text-right text-green-600">£385,600</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="pl-4">Cash paid to Suppliers</TableCell>
+                              <TableCell className="text-right text-red-600">-£165,000</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-semibold">Net Operating Cash Flow</TableCell>
+                              <TableCell className="text-right font-semibold text-green-600">£220,600</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-semibold pt-4">Investing Activities</TableCell>
+                              <TableCell></TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="pl-4">Equipment Purchase</TableCell>
+                              <TableCell className="text-right text-red-600">-£45,000</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-semibold">Net Investing Cash Flow</TableCell>
+                              <TableCell className="text-right font-semibold text-red-600">-£45,000</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-semibold pt-4">Financing Activities</TableCell>
+                              <TableCell></TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="pl-4">Loan Repayment</TableCell>
+                              <TableCell className="text-right text-red-600">-£25,000</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-semibold">Net Financing Cash Flow</TableCell>
+                              <TableCell className="text-right font-semibold text-red-600">-£25,000</TableCell>
+                            </TableRow>
+                            <TableRow className="border-t-2">
+                              <TableCell className="font-bold text-lg">Net Change in Cash</TableCell>
+                              <TableCell className="text-right font-bold text-lg text-green-600">£150,600</TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  <Button variant="outline" className="h-32 flex-col gap-3 hover:bg-primary hover:text-primary-foreground transition-all">
+                    <Receipt className="h-8 w-8" />
+                    <div className="text-center">
+                      <div className="font-semibold">A/R Aging</div>
+                      <div className="text-xs text-muted-foreground">Outstanding Receivables</div>
+                    </div>
                   </Button>
-                  <Button variant="outline" className="h-24 flex-col gap-2">
-                    <BarChart3 className="h-6 w-6" />
-                    Balance Sheet
+
+                  <Button variant="outline" className="h-32 flex-col gap-3 hover:bg-primary hover:text-primary-foreground transition-all">
+                    <CreditCard className="h-8 w-8" />
+                    <div className="text-center">
+                      <div className="font-semibold">A/P Aging</div>
+                      <div className="text-xs text-muted-foreground">Outstanding Payables</div>
+                    </div>
                   </Button>
-                  <Button variant="outline" className="h-24 flex-col gap-2">
-                    <TrendingUp className="h-6 w-6" />
-                    Cash Flow
-                  </Button>
-                  <Button variant="outline" className="h-24 flex-col gap-2">
-                    <Receipt className="h-6 w-6" />
-                    A/R Aging
-                  </Button>
-                  <Button variant="outline" className="h-24 flex-col gap-2">
-                    <CreditCard className="h-6 w-6" />
-                    A/P Aging
-                  </Button>
-                  <Button variant="outline" className="h-24 flex-col gap-2">
-                    <Target className="h-6 w-6" />
-                    Budget Variance
+
+                  <Button variant="outline" className="h-32 flex-col gap-3 hover:bg-primary hover:text-primary-foreground transition-all">
+                    <Target className="h-8 w-8" />
+                    <div className="text-center">
+                      <div className="font-semibold">Budget Variance</div>
+                      <div className="text-xs text-muted-foreground">Budget vs Actual</div>
+                    </div>
                   </Button>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            {/* Recent Reports */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recently Generated Reports</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Report Name</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Generated</TableHead>
+                      <TableHead>Period</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="font-medium">Balance Sheet - January 2024</TableCell>
+                      <TableCell><Badge variant="outline">Balance Sheet</Badge></TableCell>
+                      <TableCell>2 hours ago</TableCell>
+                      <TableCell>Jan 2024</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" variant="outline">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Profit & Loss - January 2024</TableCell>
+                      <TableCell><Badge variant="outline">P&L</Badge></TableCell>
+                      <TableCell>1 day ago</TableCell>
+                      <TableCell>Jan 2024</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" variant="outline">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Cash Flow - Q4 2023</TableCell>
+                      <TableCell><Badge variant="outline">Cash Flow</Badge></TableCell>
+                      <TableCell>3 days ago</TableCell>
+                      <TableCell>Q4 2023</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" variant="outline">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {/* Settings View */}
