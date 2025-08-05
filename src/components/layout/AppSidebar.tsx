@@ -306,29 +306,30 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
-                          <SidebarMenu className="ml-4 border-l border-sidebar-border">
+                          <SidebarMenu className="ml-4 border-l border-sidebar-border space-y-1 py-2">
                             {item.subItems.map((subItem) => (
-                              <SidebarMenuItem key={subItem.title}>
-                                <SidebarMenuButton 
-                                  asChild={!subItem.url.includes('?')}
-                                  isActive={isActive(subItem.url)}
-                                  tooltip={state === "collapsed" ? subItem.title : undefined}
-                                  onClick={subItem.url.includes('?') ? () => navigate(subItem.url) : undefined}
-                                  size="sm"
-                                >
-                                  {subItem.url.includes('?') ? (
-                                    <div className="flex items-center gap-3">
-                                      <subItem.icon className="h-3 w-3" />
+                               <SidebarMenuItem key={subItem.title} className="pl-2">
+                                 <SidebarMenuButton 
+                                   asChild={!subItem.url.includes('?')}
+                                   isActive={isActive(subItem.url)}
+                                   tooltip={state === "collapsed" ? subItem.title : undefined}
+                                   onClick={subItem.url.includes('?') ? () => navigate(subItem.url) : undefined}
+                                   size="sm"
+                                   className="h-8"
+                                 >
+                                   {subItem.url.includes('?') ? (
+                                     <div className="flex items-center gap-2 py-1">
+                                       <subItem.icon className="h-3 w-3" />
                                        <span className="text-sm">{subItem.title}</span>
-                                    </div>
-                                  ) : (
-                                    <NavLink to={subItem.url} className="flex items-center gap-3">
-                                      <subItem.icon className="h-3 w-3" />
-                                      <span className="text-sm">{subItem.title}</span>
-                                    </NavLink>
-                                  )}
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                                     </div>
+                                   ) : (
+                                     <NavLink to={subItem.url} className="flex items-center gap-2 py-1">
+                                       <subItem.icon className="h-3 w-3" />
+                                       <span className="text-sm">{subItem.title}</span>
+                                     </NavLink>
+                                   )}
+                                 </SidebarMenuButton>
+                               </SidebarMenuItem>
                             ))}
                           </SidebarMenu>
                         </CollapsibleContent>
