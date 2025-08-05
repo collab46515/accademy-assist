@@ -672,12 +672,12 @@ function DrillDownContent({ metric, data }: { metric: FinancialMetric, data: any
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>
-                  <Select value={filters.status} onValueChange={(value) => setFilters({...filters, status: value})}>
+                  <Select value={filters.status} onValueChange={(value) => setFilters({...filters, status: value === 'all' ? '' : value})}>
                     <SelectTrigger>
                       <SelectValue placeholder="All statuses" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All statuses</SelectItem>
+                      <SelectItem value="all">All statuses</SelectItem>
                       <SelectItem value="paid">Paid</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="overdue">Overdue</SelectItem>
@@ -698,12 +698,12 @@ function DrillDownContent({ metric, data }: { metric: FinancialMetric, data: any
 
                 <div className="space-y-2">
                   <Label htmlFor="amount">Amount Range (£)</Label>
-                  <Select value={filters.amountRange} onValueChange={(value) => setFilters({...filters, amountRange: value})}>
+                  <Select value={filters.amountRange} onValueChange={(value) => setFilters({...filters, amountRange: value === 'all' ? '' : value})}>
                     <SelectTrigger>
                       <SelectValue placeholder="All amounts" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All amounts</SelectItem>
+                      <SelectItem value="all">All amounts</SelectItem>
                       <SelectItem value="0-100">£0 - £100</SelectItem>
                       <SelectItem value="100-500">£100 - £500</SelectItem>
                       <SelectItem value="500-1000">£500 - £1,000</SelectItem>
