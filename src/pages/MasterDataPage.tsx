@@ -40,6 +40,7 @@ import { AccountingMasterData } from '@/components/master-data/AccountingMasterD
 export function MasterDataPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
+  const [activeEntityTab, setActiveEntityTab] = useState('schools');
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -362,7 +363,7 @@ export function MasterDataPage() {
     try {
       if (editingItem) {
         // Update existing item
-        switch (activeTab) {
+        switch (activeEntityTab) {
           case 'schools':
             await updateSchool(editingItem.id, data);
             break;
@@ -375,7 +376,7 @@ export function MasterDataPage() {
         }
       } else {
         // Create new item
-        switch (activeTab) {
+        switch (activeEntityTab) {
           case 'schools':
             await createSchool({ ...data, is_active: true, settings: {} });
             break;
@@ -441,7 +442,7 @@ export function MasterDataPage() {
   };
 
   const renderEntityForm = () => {
-    switch (activeTab) {
+    switch (activeEntityTab) {
       case 'schools':
         return (
           <div className="space-y-4">
@@ -911,7 +912,7 @@ export function MasterDataPage() {
 
           {/* Academic Data Tab */}
           <TabsContent value="academic" className="space-y-6">
-            <Tabs defaultValue="schools" className="space-y-4">
+            <Tabs value={activeEntityTab} onValueChange={setActiveEntityTab} className="space-y-4">
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="schools">Schools</TabsTrigger>
                 <TabsTrigger value="subjects">Subjects</TabsTrigger>
@@ -945,7 +946,7 @@ export function MasterDataPage() {
                           {entityType !== 'parents' && (
                             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                               <DialogTrigger asChild>
-                                <Button onClick={() => { setEditingItem(null); form.reset(); setActiveTab(entityType); }}>
+                                <Button onClick={() => { setEditingItem(null); form.reset(); setActiveEntityTab(entityType); }}>
                                   <Plus className="h-4 w-4 mr-2" />
                                   Add {entityType.slice(0, -1)}
                                 </Button>
