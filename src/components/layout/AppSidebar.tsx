@@ -395,7 +395,7 @@ export function AppSidebar() {
                 >
                   <div className="flex items-center gap-3 px-4 py-3">
                     <LogOut className="h-5 w-5" />
-                    {state !== "collapsed" && <span className="font-semibold">Sign Out</span>}
+                    {state !== "collapsed" && <span className="font-semibold text-base text-foreground">Sign Out</span>}
                   </div>
                 </SidebarMenuButton>
               </SidebarMenuItem>
