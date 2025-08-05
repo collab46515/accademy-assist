@@ -455,92 +455,150 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Search Results */}
+        {/* Enhanced Search Results */}
         {searchTerm && (
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <div className="grid md:grid-cols-2 gap-8 mb-12">
             {/* Students Results */}
-            <Card>
+            <Card className="bg-card/60 backdrop-blur-sm border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5" />
-                  Students ({filteredStudents.length})
+                  Students ({filteredStudents.length} found)
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {filteredStudents.slice(0, 5).map((student) => (
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {filteredStudents.slice(0, 8).map((student) => (
                     <Dialog key={student.id}>
                       <DialogTrigger asChild>
-                        <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted cursor-pointer">
-                          <Avatar className="h-10 w-10">
+                        <div className="flex items-start space-x-4 p-4 rounded-xl border border-border/50 hover:bg-muted/50 cursor-pointer transition-all duration-200 hover:shadow-md">
+                          <Avatar className="h-14 w-14 border-2 border-primary/20">
                             <AvatarImage src={student.profiles?.avatar_url} />
-                            <AvatarFallback>
+                            <AvatarFallback className="text-lg font-semibold bg-primary/10">
                               {student.profiles?.first_name?.[0]}{student.profiles?.last_name?.[0]}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="flex-1">
-                            <p className="font-medium">
-                              {student.profiles?.first_name} {student.profiles?.last_name}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {student.student_number} • {student.year_group}
-                            </p>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-semibold text-lg">
+                                {student.profiles?.first_name} {student.profiles?.last_name}
+                              </h4>
+                              <Badge variant={student.is_enrolled ? "default" : "secondary"} className="ml-2">
+                                {student.is_enrolled ? "Active" : "Inactive"}
+                              </Badge>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-1">
+                                <span className="font-medium">ID:</span>
+                                <span>{student.student_number}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span className="font-medium">Year:</span>
+                                <span>{student.year_group}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span className="font-medium">Class:</span>
+                                <span>{student.form_class || 'Not assigned'}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span className="font-medium">Joined:</span>
+                                <span>{student.admission_date ? new Date(student.admission_date).toLocaleDateString() : 'N/A'}</span>
+                              </div>
+                            </div>
+                            {student.emergency_contact_name && (
+                              <div className="mt-2 p-2 bg-muted/30 rounded-lg">
+                                <div className="text-xs text-muted-foreground">
+                                  <span className="font-medium">Emergency Contact:</span> {student.emergency_contact_name}
+                                  {student.emergency_contact_phone && (
+                                    <span className="ml-2">• {student.emergency_contact_phone}</span>
+                                  )}
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          <Badge variant={student.is_enrolled ? "default" : "secondary"}>
-                            {student.is_enrolled ? "Active" : "Inactive"}
-                          </Badge>
                         </div>
                       </DialogTrigger>
                       <StudentDetailModal student={student} />
                     </Dialog>
                   ))}
-                  {filteredStudents.length > 5 && (
-                    <p className="text-sm text-muted-foreground text-center">
-                      +{filteredStudents.length - 5} more students
-                    </p>
+                  {filteredStudents.length > 8 && (
+                    <div className="text-center p-4 text-muted-foreground">
+                      <p className="text-sm">+{filteredStudents.length - 8} more students</p>
+                      <Button variant="outline" size="sm" className="mt-2">View All Students</Button>
+                    </div>
                   )}
                 </div>
               </CardContent>
             </Card>
 
             {/* Teachers Results */}
-            <Card>
+            <Card className="bg-card/60 backdrop-blur-sm border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <GraduationCap className="h-5 w-5" />
-                  Teachers ({filteredTeachers.length})
+                  Teachers ({filteredTeachers.length} found)
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {filteredTeachers.slice(0, 5).map((teacher) => (
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {filteredTeachers.slice(0, 8).map((teacher) => (
                     <Dialog key={teacher.id}>
                       <DialogTrigger asChild>
-                        <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted cursor-pointer">
-                          <Avatar className="h-10 w-10">
+                        <div className="flex items-start space-x-4 p-4 rounded-xl border border-border/50 hover:bg-muted/50 cursor-pointer transition-all duration-200 hover:shadow-md">
+                          <Avatar className="h-14 w-14 border-2 border-primary/20">
                             <AvatarImage src="" />
-                            <AvatarFallback>
+                            <AvatarFallback className="text-lg font-semibold bg-primary/10">
                               {teacher.first_name?.[0]}{teacher.last_name?.[0]}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="flex-1">
-                            <p className="font-medium">{teacher.first_name} {teacher.last_name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {teacher.employee_id} • {teacher.position}
-                            </p>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-semibold text-lg">
+                                {teacher.first_name} {teacher.last_name}
+                              </h4>
+                              <Badge variant={teacher.status === 'active' ? "default" : "secondary"} className="ml-2">
+                                {teacher.status === 'active' ? "Active" : "Inactive"}
+                              </Badge>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-1">
+                                <span className="font-medium">ID:</span>
+                                <span>{teacher.employee_id}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span className="font-medium">Position:</span>
+                                <span>{teacher.position}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span className="font-medium">Email:</span>
+                                <span className="truncate">{teacher.email}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span className="font-medium">Started:</span>
+                                <span>{teacher.start_date ? new Date(teacher.start_date).toLocaleDateString() : 'N/A'}</span>
+                              </div>
+                            </div>
+                            <div className="mt-2 flex items-center gap-4 text-xs">
+                              <div className="flex items-center gap-1">
+                                <Phone className="h-3 w-3" />
+                                <span>{teacher.phone || 'No phone'}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                <span className="capitalize">{teacher.work_type?.replace('_', ' ') || 'Full time'}</span>
+                              </div>
+                            </div>
                           </div>
-                          <Badge variant={teacher.status === 'active' ? "default" : "secondary"}>
-                            {teacher.status === 'active' ? "Active" : "Inactive"}
-                          </Badge>
                         </div>
                       </DialogTrigger>
                       <TeacherDetailModal teacher={teacher} />
                     </Dialog>
                   ))}
-                  {filteredTeachers.length > 5 && (
-                    <p className="text-sm text-muted-foreground text-center">
-                      +{filteredTeachers.length - 5} more teachers
-                    </p>
+                  {filteredTeachers.length > 8 && (
+                    <div className="text-center p-4 text-muted-foreground">
+                      <p className="text-sm">+{filteredTeachers.length - 8} more teachers</p>
+                      <Button variant="outline" size="sm" className="mt-2">View All Teachers</Button>
+                    </div>
                   )}
                 </div>
               </CardContent>
