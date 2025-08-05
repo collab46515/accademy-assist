@@ -232,36 +232,28 @@ export function UserGuide({ moduleName, sections, quickActions = [] }: UserGuide
                       onClick={() => {
                         // Execute the actual action based on the action title
                         if (action.title === 'Record New Payment') {
-                          // Scroll to payment collection section
-                          const paymentSection = document.querySelector('[data-section="payment-collection"]');
-                          paymentSection?.scrollIntoView({ behavior: 'smooth' });
+                          window.location.href = '/school-management/fee-management';
                           toast({
                             title: "Payment Collection",
-                            description: "Navigated to payment recording section",
+                            description: "Opening Fee Management module",
                           });
                         } else if (action.title === 'Generate Invoice') {
-                          // Scroll to invoice generation section
-                          const invoiceSection = document.querySelector('[data-section="invoice-generation"]');
-                          invoiceSection?.scrollIntoView({ behavior: 'smooth' });
+                          window.location.href = '/accounting';
                           toast({
                             title: "Invoice Generation",
-                            description: "Navigated to invoice generation section",
+                            description: "Opening Accounting module",
                           });
                         } else if (action.title === 'View Financial Reports') {
-                          // Scroll to reports section
-                          const reportsSection = document.querySelector('[data-section="reports"]');
-                          reportsSection?.scrollIntoView({ behavior: 'smooth' });
+                          window.location.href = '/accounting/reports';
                           toast({
                             title: "Financial Reports",
-                            description: "Navigated to reports section",
+                            description: "Opening Reports module",
                           });
                         } else if (action.title === 'Check Outstanding Fees') {
-                          // Scroll to outstanding fees section
-                          const feesSection = document.querySelector('[data-section="outstanding-fees"]');
-                          feesSection?.scrollIntoView({ behavior: 'smooth' });
+                          window.location.href = '/school-management/fee-management';
                           toast({
                             title: "Outstanding Fees",
-                            description: "Navigated to outstanding fees section",
+                            description: "Opening Fee Management module",
                           });
                         } else {
                           toast({
