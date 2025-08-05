@@ -28,7 +28,9 @@ import {
   Plus,
   Minus,
   RefreshCw,
-  Eye
+  Eye,
+  TrendingUp,
+  AlertTriangle
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
@@ -1096,11 +1098,131 @@ export const AILessonPlanner = () => {
         </TabsContent>
 
         <TabsContent value="analytics">
-          <UserGuide 
-            moduleName={userGuides.academics.moduleName}
-            sections={userGuides.academics.sections}
-            quickActions={userGuides.academics.quickActions}
-          />
+          <div className="space-y-6">
+            {/* Predictive Analytics Header */}
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500/20 to-blue-500/10 rounded-full mb-4">
+                <Brain className="h-8 w-8 text-purple-600" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Predictive Analytics</h2>
+              <p className="text-muted-foreground">AI-powered insights for lesson planning optimization</p>
+            </div>
+
+            {/* Quick Insights */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-2xl font-bold text-green-600">87%</p>
+                      <p className="text-sm text-muted-foreground">Student Engagement Score</p>
+                    </div>
+                    <TrendingUp className="h-8 w-8 text-green-600" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-2xl font-bold text-blue-600">73%</p>
+                      <p className="text-sm text-muted-foreground">Concept Mastery Prediction</p>
+                    </div>
+                    <Target className="h-8 w-8 text-blue-600" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-2xl font-bold text-orange-600">12</p>
+                      <p className="text-sm text-muted-foreground">At-Risk Students</p>
+                    </div>
+                    <AlertTriangle className="h-8 w-8 text-orange-600" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Learning Predictions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="h-5 w-5" />
+                  Learning Outcome Predictions
+                </CardTitle>
+                <CardDescription>AI predictions for upcoming lesson topics</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {[
+                    { topic: "Quadratic Equations", difficulty: "High", prediction: "68% mastery", risk: "Medium", recommendation: "Add visual examples" },
+                    { topic: "Photosynthesis", difficulty: "Medium", prediction: "82% mastery", risk: "Low", recommendation: "Continue current approach" },
+                    { topic: "World War II", difficulty: "Medium", prediction: "75% mastery", risk: "Low", recommendation: "Include primary sources" },
+                    { topic: "Chemical Bonding", difficulty: "High", prediction: "61% mastery", risk: "High", recommendation: "Extend practice time" }
+                  ].map((item, index) => (
+                    <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <h4 className="font-medium">{item.topic}</h4>
+                        <p className="text-sm text-muted-foreground">Difficulty: {item.difficulty}</p>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm">
+                        <div className="text-center">
+                          <p className="font-medium">{item.prediction}</p>
+                          <p className="text-muted-foreground">Expected Mastery</p>
+                        </div>
+                        <Badge variant={item.risk === 'High' ? 'destructive' : item.risk === 'Medium' ? 'secondary' : 'default'}>
+                          {item.risk} Risk
+                        </Badge>
+                        <div className="max-w-48">
+                          <p className="text-muted-foreground">{item.recommendation}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Student Performance Insights */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Student Performance Insights
+                </CardTitle>
+                <CardDescription>Individual student predictions and recommendations</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {[
+                    { name: "Sarah Johnson", class: "Year 9A", risk: "High", strength: "Visual Learning", weakness: "Abstract Concepts", suggestion: "Use more diagrams and real-world examples" },
+                    { name: "Michael Chen", class: "Year 9B", risk: "Medium", strength: "Problem Solving", weakness: "Reading Comprehension", suggestion: "Provide shorter, clearer instructions" },
+                    { name: "Emma Watson", class: "Year 9A", risk: "Low", strength: "Critical Thinking", weakness: "Time Management", suggestion: "Offer additional practice with timed exercises" }
+                  ].map((student, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex-1">
+                        <h4 className="font-medium">{student.name}</h4>
+                        <p className="text-sm text-muted-foreground">{student.class}</p>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm">
+                        <Badge variant={student.risk === 'High' ? 'destructive' : student.risk === 'Medium' ? 'secondary' : 'default'}>
+                          {student.risk} Risk
+                        </Badge>
+                        <div className="max-w-64">
+                          <p className="font-medium">Strength: {student.strength}</p>
+                          <p className="text-muted-foreground">Suggestion: {student.suggestion}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="resources">
@@ -1295,6 +1417,15 @@ export const AILessonPlanner = () => {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* User Guide Section */}
+      <div className="mt-12">
+        <UserGuide 
+          moduleName={userGuides.academics.moduleName}
+          sections={userGuides.academics.sections}
+          quickActions={userGuides.academics.quickActions}
+        />
+      </div>
     </div>
   );
 };
