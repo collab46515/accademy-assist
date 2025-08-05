@@ -139,6 +139,8 @@ const UnifiedAdmissionsPage = () => {
   // Check if we're viewing a specific stage
   const stageParam = searchParams.get('stage');
   const currentStage = stageParam ? parseInt(stageParam) : null;
+  
+  console.log('Stage URL param:', stageParam, 'Parsed currentStage:', currentStage);
 
   // Mock data for development
   const mockApplications = [
@@ -435,6 +437,7 @@ const UnifiedAdmissionsPage = () => {
 
   // If viewing a specific workflow stage, show the StageWorkflowManager
   if (currentStage !== null) {
+    console.log('Rendering StageWorkflowManager for stage:', currentStage);
     return (
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="mb-6">
