@@ -25,7 +25,13 @@ import {
   Stethoscope,
   Car,
   Bell,
-  Clock
+  Clock,
+  Wand2,
+  Target,
+  AlertCircle,
+  RefreshCw,
+  Sparkles,
+  Brain
 } from 'lucide-react';
 
 export const financeUserGuide = {
@@ -1089,33 +1095,164 @@ export const attendanceUserGuide = {
 };
 
 export const timetableUserGuide = {
-  moduleName: "Timetable Management",
+  moduleName: "AI Timetable Generator",
   sections: [
     {
-      title: "Timetable Creation",
-      description: "Build and manage school timetables",
-      difficulty: "Intermediate" as const,
+      title: "Getting Started with AI Timetable",
+      description: "Set up and configure your AI-powered timetable system",
+      difficulty: "Beginner" as const,
       steps: [
         {
-          title: "Configure Academic Structure",
-          description: "Set up periods, subjects, and classroom assignments",
+          title: "Academic Structure Setup",
+          description: "Configure your school's basic academic framework including terms, periods, and breaks",
           icon: Calendar,
-          action: "Define timetable framework",
+          action: "Go to Data Setup → Academic Structure",
           tips: [
-            "Plan period timings carefully",
-            "Consider break and lunch schedules",
-            "Account for specialist room requirements"
+            "Define clear start and end times for each period",
+            "Include break times and lunch periods",
+            "Set up different day types (full days, half days, etc.)",
+            "Consider transition time between periods"
           ]
         },
         {
-          title: "AI Timetable Generation",
-          description: "Use AI tools to optimize timetable creation",
-          icon: Settings,
-          action: "Generate optimized timetables",
+          title: "Subject Configuration",
+          description: "Set up subjects with their specific requirements and constraints",
+          icon: BookOpen,
+          action: "Configure subjects in Subject Configuration",
           tips: [
-            "Set clear constraints and preferences",
-            "Review AI suggestions carefully",
-            "Make manual adjustments as needed"
+            "Specify room type requirements (lab, gym, classroom)",
+            "Set frequency requirements per week",
+            "Define double periods where needed",
+            "Add subject-specific timing preferences"
+          ]
+        },
+        {
+          title: "Teacher & Room Management",
+          description: "Configure teacher availability and classroom assignments",
+          icon: Users,
+          action: "Set up teachers and rooms in Data Setup",
+          tips: [
+            "Mark teacher availability periods",
+            "Assign subjects to qualified teachers",
+            "Set room capacities and equipment",
+            "Define special room requirements"
+          ]
+        }
+      ]
+    },
+    {
+      title: "AI Timetable Generation",
+      description: "Use AI to automatically create optimized timetables",
+      difficulty: "Intermediate" as const,
+      steps: [
+        {
+          title: "Set Generation Constraints",
+          description: "Define rules and preferences for the AI timetable generator",
+          icon: Settings,
+          action: "Access Constraints Manager",
+          tips: [
+            "Set core subject distribution preferences",
+            "Define teacher workload limits",
+            "Specify room utilization goals",
+            "Add scheduling conflict rules"
+          ]
+        },
+        {
+          title: "Run AI Generation",
+          description: "Execute the AI timetable generation process",
+          icon: Wand2,
+          action: "Click Generate Timetable",
+          tips: [
+            "Monitor generation progress in real-time",
+            "Review constraint satisfaction scores",
+            "Check for any unresolved conflicts",
+            "Save multiple generation attempts for comparison"
+          ]
+        },
+        {
+          title: "Review & Optimize",
+          description: "Evaluate and fine-tune the generated timetable",
+          icon: Target,
+          action: "Use Interactive Timetable Editor",
+          tips: [
+            "Review teacher workload distribution",
+            "Check room utilization efficiency",
+            "Verify no scheduling conflicts exist",
+            "Make manual adjustments where needed"
+          ]
+        }
+      ]
+    },
+    {
+      title: "Live Timetable Management",
+      description: "Manage real-time timetable operations and changes",
+      difficulty: "Advanced" as const,
+      steps: [
+        {
+          title: "Conflict Detection",
+          description: "Monitor and resolve timetable conflicts as they arise",
+          icon: AlertCircle,
+          action: "Use Conflict Detector",
+          tips: [
+            "Set up automatic conflict alerts",
+            "Review daily conflict reports",
+            "Resolve clashes quickly to minimize disruption",
+            "Document resolution decisions"
+          ]
+        },
+        {
+          title: "Substitution Planning",
+          description: "Handle teacher absences and emergency schedule changes",
+          icon: RefreshCw,
+          action: "Access Substitution Planner",
+          tips: [
+            "Maintain updated cover teacher list",
+            "Plan substitutions in advance where possible",
+            "Communicate changes to affected parties",
+            "Track substitution patterns for planning"
+          ]
+        },
+        {
+          title: "Auto-Regeneration",
+          description: "Use AI to automatically adjust timetables for changes",
+          icon: Sparkles,
+          action: "Enable Auto-Regeneration",
+          tips: [
+            "Set regeneration triggers and thresholds",
+            "Review auto-generated changes before implementation",
+            "Maintain backup versions of stable timetables",
+            "Monitor system performance during regeneration"
+          ]
+        }
+      ]
+    },
+    {
+      title: "Analytics & Optimization",
+      description: "Use data insights to continuously improve your timetable",
+      difficulty: "Advanced" as const,
+      steps: [
+        {
+          title: "Performance Analytics",
+          description: "Analyze timetable effectiveness and utilization",
+          icon: BarChart3,
+          action: "View Analytics Dashboard",
+          tips: [
+            "Monitor room utilization rates",
+            "Track teacher workload distribution",
+            "Analyze student movement patterns",
+            "Review constraint satisfaction metrics"
+          ]
+        },
+        {
+          title: "AI Learning Optimization",
+          description: "Help the AI learn from your preferences and decisions",
+          icon: Brain,
+          action: "Review AI Learning Dashboard",
+          tips: [
+            "Provide feedback on generated timetables",
+            "Rate the quality of different solutions",
+            "Update constraints based on experience",
+            "Document successful timetable patterns"
           ]
         }
       ]
@@ -1123,16 +1260,34 @@ export const timetableUserGuide = {
   ],
   quickActions: [
     {
-      title: "View Timetable",
-      description: "Check class schedules",
+      title: "Generate New Timetable",
+      description: "Start AI timetable generation",
+      icon: Wand2,
+      action: "Quick Generate"
+    },
+    {
+      title: "View Current Timetable",
+      description: "Check active schedules",
       icon: Calendar,
       action: "View Schedule"
     },
     {
-      title: "Generate Timetable",
-      description: "Create new timetable",
-      icon: Plus,
-      action: "AI Generation"
+      title: "Manage Substitutions",
+      description: "Handle teacher coverage",
+      icon: RefreshCw,
+      action: "Substitution Planner"
+    },
+    {
+      title: "Export Timetables",
+      description: "Download schedule files",
+      icon: Download,
+      action: "Export Manager"
+    },
+    {
+      title: "Conflict Resolution",
+      description: "Fix scheduling issues",
+      icon: AlertCircle,
+      action: "Resolve Conflicts"
     }
   ]
 };

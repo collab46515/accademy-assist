@@ -327,24 +327,45 @@ export const AILessonPlanner = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="planner" className="flex items-center gap-2">
-            <BookOpen className="h-4 w-4" />
-            Lesson Planner
-          </TabsTrigger>
-          <TabsTrigger value="assignments" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Assignment Generator
-          </TabsTrigger>
-          <TabsTrigger value="generated" className="flex items-center gap-2">
-            <Clock className="h-4 w-4" />
-            Generated Content
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            AI Settings
-          </TabsTrigger>
-        </TabsList>
+        <div className="relative">
+          <TabsList className="grid w-full grid-cols-5 relative overflow-x-auto scrollbar-hide">
+            <TabsTrigger 
+              value="planner" 
+              className="flex items-center gap-2 relative data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary data-[state=active]:after:rounded-t-full transition-all duration-200"
+            >
+              <BookOpen className="h-4 w-4" />
+              Smart Planner
+            </TabsTrigger>
+            <TabsTrigger 
+              value="assignments" 
+              className="flex items-center gap-2 relative data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary data-[state=active]:after:rounded-t-full transition-all duration-200"
+            >
+              <FileText className="h-4 w-4" />
+              AI Assignments
+            </TabsTrigger>
+            <TabsTrigger 
+              value="generated" 
+              className="flex items-center gap-2 relative data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary data-[state=active]:after:rounded-t-full transition-all duration-200"
+            >
+              <Clock className="h-4 w-4" />
+              Generated Content
+            </TabsTrigger>
+            <TabsTrigger 
+              value="analytics" 
+              className="flex items-center gap-2 relative data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary data-[state=active]:after:rounded-t-full transition-all duration-200"
+            >
+              <Brain className="h-4 w-4" />
+              Predictive Analytics
+            </TabsTrigger>
+            <TabsTrigger 
+              value="resources" 
+              className="flex items-center gap-2 relative data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary data-[state=active]:after:rounded-t-full transition-all duration-200"
+            >
+              <Sparkles className="h-4 w-4" />
+              Smart Resources
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="planner">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
