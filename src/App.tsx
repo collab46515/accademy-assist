@@ -53,6 +53,7 @@ import TransportPage from "./pages/TransportPage";
 import { StudentSubmissionInterface } from "@/components/assignments/StudentSubmissionInterface";
 import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
+import StudentExitPage from "./pages/StudentExitPage";
 
 const queryClient = new QueryClient();
 
@@ -84,10 +85,11 @@ const App = () => (
                         <Routes>
                           <Route path="/dashboard" element={<Dashboard />} />
                           <Route path="/students" element={<StudentsPage />} />
-            <Route path="/admissions" element={<UnifiedAdmissionsPage />} />
-            <Route path="/admissions/new" element={<NewApplicationsPage />} />
-            <Route path="/admissions/enroll" element={<EnrollmentPage />} />
-            <Route path="/legacy-admissions" element={<AdmissionsPage />} />
+             <Route path="/admissions" element={<UnifiedAdmissionsPage />} />
+             <Route path="/admissions/new" element={<NewApplicationsPage />} />
+             <Route path="/admissions/enroll" element={<EnrollmentPage />} />
+             <Route path="/admissions/exit/*" element={<StudentExitPage />} />
+             <Route path="/legacy-admissions" element={<AdmissionsPage />} />
             <Route path="/admin-management" element={<AdminManagementPage />} />
                           <Route path="/academics" element={<AcademicsPage />} />
                           <Route path="/academics/timetable" element={<TimetablePage />} />
