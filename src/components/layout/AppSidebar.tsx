@@ -111,6 +111,7 @@ const erpModules = [
       { title: "Employee Management", url: "/hr-management", icon: Users },
       { title: "Staff Directory", url: "/staff", icon: UserCheck },
       { title: "Recruitment", url: "/hr-management?tab=recruitment", icon: UserPlus },
+      { title: "Employee Exit", url: "/hr-management?tab=employee-exit", icon: UserMinus },
       { title: "Performance & Training", url: "/hr-management?tab=performance", icon: Target },
       { title: "Payroll & Benefits", url: "/hr-management?tab=payroll", icon: DollarSign },
       { title: "Time & Attendance", url: "/hr-management?tab=timeTracking", icon: Clock },

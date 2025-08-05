@@ -56,6 +56,7 @@ import { useHRData } from '@/hooks/useHRData';
 import { useComprehensiveHR } from '@/hooks/useComprehensiveHR';
 import { RecruitmentDashboard } from '@/components/recruitment/RecruitmentDashboard';
 import { EmployeeForm } from '@/components/hr/EmployeeForm';
+import { EmployeeExit } from '@/components/hr/EmployeeExit';
 import { PageHeader } from '@/components/layout/PageHeader';
 
 export function HRManagementPage() {
@@ -587,6 +588,8 @@ export function HRManagementPage() {
         return renderEmployees();
       case 'recruitment':
         return <RecruitmentDashboard />;
+      case 'employee-exit':
+        return <EmployeeExit employees={employees} />;
       case 'performance':
         return renderComingSoon('Performance Management', 'Track and manage employee performance reviews and goals', Target, 'Add Performance Review');
       case 'training':
