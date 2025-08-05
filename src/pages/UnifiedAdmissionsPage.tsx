@@ -136,12 +136,10 @@ const UnifiedAdmissionsPage = () => {
   const [currentApplicationData, setCurrentApplicationData] = useState<any>(null);
   const [applicationProgress, setApplicationProgress] = useState(0);
 
-  // Check if we're viewing a specific stage
+  // Check if we're viewing a specific stage - SIMPLIFIED VERSION
   const stageParam = searchParams.get('stage');
-  const currentStage = stageParam ? parseInt(stageParam) : null;
-  
-  // Force stage view to show when stage parameter exists
-  const isStageView = stageParam !== null && !isNaN(parseInt(stageParam));
+  const isStageView = stageParam !== null;
+  const currentStage = isStageView ? parseInt(stageParam) : null;
 
   // Mock data for development
   const mockApplications = [
@@ -437,37 +435,24 @@ const UnifiedAdmissionsPage = () => {
   }
 
   // If viewing a specific workflow stage, show the StageWorkflowManager
-  if (isStageView && currentStage !== null) {
+  // STAGE VIEW - This should show when you click stage buttons
+  if (isStageView) {
     return (
-      <div className="min-h-screen bg-red-50">
-        {/* Debug Header - Red background to make it obvious */}
-        <div className="bg-red-500 text-white p-4">
-          <h1 className="text-2xl font-bold">🔥 STAGE VIEW ACTIVE 🔥</h1>
-          <p>You are viewing Stage {currentStage} (URL param: {stageParam})</p>
+      <div className="min-h-screen bg-blue-50">
+        <div className="bg-blue-600 text-white p-6">
+          <h1 className="text-3xl font-bold">Stage View Active!</h1>
+          <p className="text-xl">You clicked a stage button - this is the stage view for Stage {currentStage}</p>
+          <Button 
+            variant="secondary" 
+            onClick={() => navigate('/admissions')}
+            className="mt-4"
+          >
+            ← Back to Main Admissions
+          </Button>
         </div>
-        
-        <div className="container mx-auto px-4 py-8 max-w-7xl">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-4">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => navigate('/admissions')}
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Admissions Dashboard
-                </Button>
-                <div>
-                  <h2 className="text-2xl font-bold">Stage {currentStage + 1}: Application Management</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Managing applications in this workflow stage
-                  </p>
-                </div>
-              </div>
-            </div>
-            <StageWorkflowManager currentStage={currentStage} />
-          </div>
+        <div className="p-8">
+          <h2 className="text-2xl font-bold mb-4">Applications for Stage {currentStage}</h2>
+          <p>This would show applications specific to this stage.</p>
         </div>
       </div>
     );
