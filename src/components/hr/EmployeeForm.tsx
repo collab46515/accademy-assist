@@ -18,7 +18,7 @@ const employeeSchema = z.object({
   phone: z.string().optional(),
   department_id: z.string().min(1, 'Department is required'),
   position: z.string().min(1, 'Position is required'),
-  manager_id: z.string().optional(),
+  manager_id: z.string().optional().transform(val => val === 'none' ? undefined : val),
   start_date: z.string().min(1, 'Start date is required'),
   salary: z.number().min(0, 'Salary must be positive'),
   status: z.enum(['active', 'inactive', 'terminated']),
@@ -57,7 +57,7 @@ export function EmployeeForm({
       phone: employee.phone || '',
       department_id: employee.department_id,
       position: employee.position,
-      manager_id: employee.manager_id || '',
+      manager_id: employee.manager_id || 'none',
       start_date: employee.start_date,
       salary: employee.salary,
       status: employee.status,
@@ -73,7 +73,7 @@ export function EmployeeForm({
       phone: '',
       department_id: '',
       position: '',
-      manager_id: '',
+      manager_id: 'none',
       start_date: '',
       salary: 0,
       status: 'active',
@@ -85,7 +85,12 @@ export function EmployeeForm({
   });
 
   const handleSubmit = async (data: EmployeeFormData) => {
-    await onSubmit(data);
+    // Transform 'none' back to undefined for the API
+    const submitData = {
+      ...data,
+      manager_id: data.manager_id === 'none' ? undefined : data.manager_id
+    };
+    await onSubmit(submitData);
   };
 
   return (
@@ -237,7 +242,7 @@ export function EmployeeForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">No Manager</SelectItem>
+                    <SelectItem value="none">No Manager</SelectItem>
                     {employees.filter(emp => emp.id !== employee?.id).map((emp) => (
                       <SelectItem key={emp.id} value={emp.id}>
                         {emp.first_name} {emp.last_name}
