@@ -23,8 +23,11 @@ import {
   Clock,
   CheckCircle,
   Zap,
-  Target
+  Target,
+  Grid3X3,
+  Wand2
 } from "lucide-react";
+import { AITimetableGenerator } from "@/components/ai-timetable/AITimetableGenerator";
 
 interface AIFeature {
   id: string;
@@ -264,8 +267,9 @@ const AISuitePage = () => {
 
       {/* Main Tabs */}
       <Tabs defaultValue="features" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="features">AI Features</TabsTrigger>
+          <TabsTrigger value="timetable">Timetable Generator</TabsTrigger>
           <TabsTrigger value="comments">Comment Generator</TabsTrigger>
           <TabsTrigger value="insights">Predictive Insights</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
@@ -334,6 +338,10 @@ const AISuitePage = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="timetable">
+          <AITimetableGenerator />
         </TabsContent>
 
         <TabsContent value="comments">
