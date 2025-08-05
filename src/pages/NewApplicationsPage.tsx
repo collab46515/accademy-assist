@@ -1,11 +1,27 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { toast } from '@/hooks/use-toast';
 import { Plus, UserPlus, FileText, Calendar, Clock, Users } from 'lucide-react';
 
 export default function NewApplicationsPage() {
+  const navigate = useNavigate();
+
+  // Handle application type selection
+  const handleStartApplication = (applicationType: string) => {
+    console.log(`Starting ${applicationType} application`);
+    toast({
+      title: "Starting Application",
+      description: `Redirecting to ${applicationType} enrollment form...`,
+    });
+    
+    // Navigate to enrollment with application type
+    navigate(`/admissions/enroll?type=${applicationType.toLowerCase().replace(' ', '_')}`);
+  };
+
   const stats = [
     { label: "Draft Applications", value: "12", icon: FileText, color: "bg-blue-500" },
     { label: "Today's Submissions", value: "5", icon: Calendar, color: "bg-green-500" },
@@ -66,7 +82,10 @@ export default function NewApplicationsPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Button className="h-16 flex flex-col gap-2">
+            <Button 
+              className="h-16 flex flex-col gap-2"
+              onClick={() => handleStartApplication("Online Application")}
+            >
               <UserPlus className="h-5 w-5" />
               <span>Start New Application</span>
             </Button>
