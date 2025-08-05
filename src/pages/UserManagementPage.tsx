@@ -176,8 +176,16 @@ export function UserManagementPage() {
     const department = formData.get('department') as string;
     const yearGroup = formData.get('yearGroup') as string;
 
+    console.log('Attempting to assign role:', {
+      user_id: selectedUserId,
+      role,
+      school_id: schoolId,
+      department: department || null,
+      year_group: yearGroup || null
+    });
+
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('user_roles')
         .insert({
           user_id: selectedUserId,
@@ -186,7 +194,10 @@ export function UserManagementPage() {
           department: department || null,
           year_group: yearGroup || null,
           is_active: true
-        });
+        })
+        .select();
+
+      console.log('Role assignment result:', { data, error });
 
       if (error) throw error;
 
@@ -198,6 +209,7 @@ export function UserManagementPage() {
       setAssignRoleOpen(false);
       fetchUsers();
     } catch (error: any) {
+      console.error('Role assignment error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to assign role",
