@@ -24,6 +24,10 @@ import { ConflictDetector } from './live-usage/ConflictDetector';
 import { AutoRegeneration } from './live-usage/AutoRegeneration';
 import { ExportManager } from './export/ExportManager';
 import { RoleBasedTimetableView } from './views/RoleBasedTimetableView';
+import { MultiSchoolManagement } from '../enterprise/MultiSchoolManagement';
+import { InternationalizationManager, I18nProvider } from '../enterprise/InternationalizationManager';
+import { SISERPIntegrations } from '../enterprise/SISERPIntegrations';
+import { Building2 } from 'lucide-react';
 
 interface TimetablePreviewProps {
   onBack: () => void;
@@ -309,14 +313,18 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="export" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="export" className="flex items-center gap-2">
                 <Download className="h-4 w-4" />
                 Export
               </TabsTrigger>
               <TabsTrigger value="views" className="flex items-center gap-2">
                 <Eye className="h-4 w-4" />
-                Role Views
+                Views
+              </TabsTrigger>
+              <TabsTrigger value="enterprise" className="flex items-center gap-2">
+                <Building2 className="h-4 w-4" />
+                Enterprise
               </TabsTrigger>
               <TabsTrigger value="substitution" className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
@@ -351,6 +359,27 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
                 </TabsContent>
                 <TabsContent value="student">
                   <RoleBasedTimetableView role="student" />
+                </TabsContent>
+              </Tabs>
+            </TabsContent>
+            
+            <TabsContent value="enterprise" className="mt-6">
+              <Tabs defaultValue="multi-school" className="w-full">
+                <TabsList>
+                  <TabsTrigger value="multi-school">Multi-School</TabsTrigger>
+                  <TabsTrigger value="i18n">Languages</TabsTrigger>
+                  <TabsTrigger value="integrations">Integrations</TabsTrigger>
+                </TabsList>
+                <TabsContent value="multi-school">
+                  <MultiSchoolManagement />
+                </TabsContent>
+                <TabsContent value="i18n">
+                  <I18nProvider>
+                    <InternationalizationManager />
+                  </I18nProvider>
+                </TabsContent>
+                <TabsContent value="integrations">
+                  <SISERPIntegrations />
                 </TabsContent>
               </Tabs>
             </TabsContent>
