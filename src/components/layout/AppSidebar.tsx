@@ -82,6 +82,7 @@ const erpModules = [
       { title: "Admissions Workflow", url: "/admissions", icon: UserPlus },
       { title: "Curriculum & Lessons", url: "/curriculum", icon: BookOpen },
       { title: "Timetable Management", url: "/timetable", icon: Clock },
+      { title: "AI Suite", url: "/ai-suite", icon: Bot },
       { title: "Exams & Assessment", url: "/exams", icon: ClipboardCheck },
       { title: "Assignments", url: "/academics/assignments", icon: ClipboardList },
       { title: "HOD Dashboard", url: "/hod-dashboard", icon: Target },
@@ -159,6 +160,7 @@ function getCurrentModule(pathname: string) {
       pathname.startsWith('/admissions') || 
       pathname.startsWith('/curriculum') || 
       pathname.startsWith('/timetable') || 
+      pathname.startsWith('/ai-suite') ||
       pathname.startsWith('/exams') || 
       pathname.startsWith('/academics') ||
       pathname.startsWith('/hod-dashboard')) return 'Academic Operations';
