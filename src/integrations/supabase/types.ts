@@ -895,6 +895,39 @@ export type Database = {
           },
         ]
       }
+      class_analytics: {
+        Row: {
+          analytics_data: Json
+          assignment_id: string
+          class_id: string
+          created_at: string
+          generated_at: string
+          id: string
+          insights: Json | null
+          school_id: string
+        }
+        Insert: {
+          analytics_data?: Json
+          assignment_id: string
+          class_id: string
+          created_at?: string
+          generated_at?: string
+          id?: string
+          insights?: Json | null
+          school_id: string
+        }
+        Update: {
+          analytics_data?: Json
+          assignment_id?: string
+          class_id?: string
+          created_at?: string
+          generated_at?: string
+          id?: string
+          insights?: Json | null
+          school_id?: string
+        }
+        Relationships: []
+      }
       class_schedules: {
         Row: {
           created_at: string
@@ -3377,6 +3410,108 @@ export type Database = {
           supporting_documents?: string[] | null
           updated_at?: string
           waived_amount?: number
+        }
+        Relationships: []
+      }
+      grading_results: {
+        Row: {
+          assignment_id: string | null
+          class_analytics: Json | null
+          created_at: string
+          feedback: Json | null
+          graded_by: string
+          grading_type: string
+          id: string
+          max_marks: number | null
+          overall_grade: string | null
+          question_grades: Json | null
+          rubric_id: string | null
+          rubric_scores: Json | null
+          school_id: string
+          submission_id: string
+          total_marks: number | null
+          updated_at: string
+        }
+        Insert: {
+          assignment_id?: string | null
+          class_analytics?: Json | null
+          created_at?: string
+          feedback?: Json | null
+          graded_by: string
+          grading_type?: string
+          id?: string
+          max_marks?: number | null
+          overall_grade?: string | null
+          question_grades?: Json | null
+          rubric_id?: string | null
+          rubric_scores?: Json | null
+          school_id: string
+          submission_id: string
+          total_marks?: number | null
+          updated_at?: string
+        }
+        Update: {
+          assignment_id?: string | null
+          class_analytics?: Json | null
+          created_at?: string
+          feedback?: Json | null
+          graded_by?: string
+          grading_type?: string
+          id?: string
+          max_marks?: number | null
+          overall_grade?: string | null
+          question_grades?: Json | null
+          rubric_id?: string | null
+          rubric_scores?: Json | null
+          school_id?: string
+          submission_id?: string
+          total_marks?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      grading_rubrics: {
+        Row: {
+          created_at: string
+          created_by: string
+          criteria: Json
+          description: string | null
+          id: string
+          is_active: boolean
+          is_template: boolean
+          point_scale: Json
+          school_id: string
+          subject: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          criteria?: Json
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_template?: boolean
+          point_scale?: Json
+          school_id: string
+          subject: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          criteria?: Json
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_template?: boolean
+          point_scale?: Json
+          school_id?: string
+          subject?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -6169,6 +6304,57 @@ export type Database = {
           parent_id?: string
           relationship?: string
           student_id?: string
+        }
+        Relationships: []
+      }
+      student_submissions: {
+        Row: {
+          assignment_id: string | null
+          content: string | null
+          created_at: string
+          file_urls: Json | null
+          id: string
+          metadata: Json | null
+          processed_content: string | null
+          processing_status: string | null
+          school_id: string
+          student_id: string
+          submission_type: string
+          submitted_at: string
+          submitted_by: string
+          updated_at: string
+        }
+        Insert: {
+          assignment_id?: string | null
+          content?: string | null
+          created_at?: string
+          file_urls?: Json | null
+          id?: string
+          metadata?: Json | null
+          processed_content?: string | null
+          processing_status?: string | null
+          school_id: string
+          student_id: string
+          submission_type?: string
+          submitted_at?: string
+          submitted_by: string
+          updated_at?: string
+        }
+        Update: {
+          assignment_id?: string | null
+          content?: string | null
+          created_at?: string
+          file_urls?: Json | null
+          id?: string
+          metadata?: Json | null
+          processed_content?: string | null
+          processing_status?: string | null
+          school_id?: string
+          student_id?: string
+          submission_type?: string
+          submitted_at?: string
+          submitted_by?: string
+          updated_at?: string
         }
         Relationships: []
       }
