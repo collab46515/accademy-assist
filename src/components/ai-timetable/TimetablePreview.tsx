@@ -22,6 +22,8 @@ import { InteractiveTimetableEditor } from './InteractiveTimetableEditor';
 import { SubstitutionPlanner } from './live-usage/SubstitutionPlanner';
 import { ConflictDetector } from './live-usage/ConflictDetector';
 import { AutoRegeneration } from './live-usage/AutoRegeneration';
+import { ExportManager } from './export/ExportManager';
+import { RoleBasedTimetableView } from './views/RoleBasedTimetableView';
 
 interface TimetablePreviewProps {
   onBack: () => void;
@@ -306,21 +308,52 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="substitution" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+          <Tabs defaultValue="export" className="w-full">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="export" className="flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                Export
+              </TabsTrigger>
+              <TabsTrigger value="views" className="flex items-center gap-2">
+                <Eye className="h-4 w-4" />
+                Role Views
+              </TabsTrigger>
               <TabsTrigger value="substitution" className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
                 Substitutions
               </TabsTrigger>
               <TabsTrigger value="conflicts" className="flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4" />
-                Conflict Monitor
+                Conflicts
               </TabsTrigger>
               <TabsTrigger value="regeneration" className="flex items-center gap-2">
                 <RefreshCw className="h-4 w-4" />
-                Auto-Regeneration
+                Auto-Regen
               </TabsTrigger>
             </TabsList>
+            
+            <TabsContent value="export" className="mt-6">
+              <ExportManager />
+            </TabsContent>
+            
+            <TabsContent value="views" className="mt-6">
+              <Tabs defaultValue="admin" className="w-full">
+                <TabsList>
+                  <TabsTrigger value="admin">Admin View</TabsTrigger>
+                  <TabsTrigger value="teacher">Teacher View</TabsTrigger>
+                  <TabsTrigger value="student">Student View</TabsTrigger>
+                </TabsList>
+                <TabsContent value="admin">
+                  <RoleBasedTimetableView role="admin" />
+                </TabsContent>
+                <TabsContent value="teacher">
+                  <RoleBasedTimetableView role="teacher" />
+                </TabsContent>
+                <TabsContent value="student">
+                  <RoleBasedTimetableView role="student" />
+                </TabsContent>
+              </Tabs>
+            </TabsContent>
             
             <TabsContent value="substitution" className="mt-6">
               <SubstitutionPlanner />
