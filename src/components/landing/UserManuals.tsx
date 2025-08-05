@@ -29,7 +29,7 @@ interface UserManualsProps {
 }
 
 export function UserManuals({ modules }: UserManualsProps) {
-  const [selectedModule, setSelectedModule] = useState(modules[0]);
+  const [selectedModule, setSelectedModule] = useState(modules?.[0] || null);
 
   const userRoles = [
     {
@@ -195,42 +195,48 @@ export function UserManuals({ modules }: UserManualsProps) {
 
           {/* Module Documentation */}
           <TabsContent value="modules" className="space-y-8">
-            <div className="grid gap-8 lg:grid-cols-3">
-              <div className="space-y-2">
-                <h3 className="font-semibold mb-4">Select Module</h3>
-                {modules.map((module, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedModule(module)}
-                    className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                      selectedModule.name === module.name 
-                        ? 'border-primary bg-primary/5' 
-                        : 'hover:bg-muted/50'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded ${module.color} flex items-center justify-center`}>
-                        <module.icon className="h-4 w-4 text-white" />
-                      </div>
-                      <span className="font-medium text-sm">{module.name}</span>
-                    </div>
-                  </button>
-                ))}
+            {!modules || modules.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No modules available for documentation.</p>
               </div>
+            ) : (
+              <div className="grid gap-8 lg:grid-cols-3">
+                <div className="space-y-2">
+                  <h3 className="font-semibold mb-4">Select Module</h3>
+                  {modules.map((module, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedModule(module)}
+                      className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                        selectedModule?.name === module.name 
+                          ? 'border-primary bg-primary/5' 
+                          : 'hover:bg-muted/50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded ${module.color} flex items-center justify-center`}>
+                          <module.icon className="h-4 w-4 text-white" />
+                        </div>
+                        <span className="font-medium text-sm">{module.name}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
 
-              <div className="lg:col-span-2">
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <div className={`w-12 h-12 rounded-lg ${selectedModule.color} flex items-center justify-center`}>
-                        <selectedModule.icon className="h-6 w-6 text-white" />
-                      </div>
-                      <div>
-                        <CardTitle>{selectedModule.name}</CardTitle>
-                        <CardDescription>{selectedModule.description}</CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
+                <div className="lg:col-span-2">
+                  {selectedModule ? (
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className={`w-12 h-12 rounded-lg ${selectedModule.color} flex items-center justify-center`}>
+                            <selectedModule.icon className="h-6 w-6 text-white" />
+                          </div>
+                          <div>
+                            <CardTitle>{selectedModule.name}</CardTitle>
+                            <CardDescription>{selectedModule.description}</CardDescription>
+                          </div>
+                        </div>
+                      </CardHeader>
                   <CardContent className="space-y-6">
                     <div>
                       <h4 className="font-semibold mb-3">Documentation Sections</h4>
@@ -281,8 +287,14 @@ export function UserManuals({ modules }: UserManualsProps) {
                     </div>
                   </CardContent>
                 </Card>
+                  ) : (
+                    <div className="flex items-center justify-center h-64 text-muted-foreground">
+                      <p>Select a module to view documentation</p>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </TabsContent>
 
           {/* Quick Start Guides */}
