@@ -9,342 +9,247 @@ import {
   CalendarDays,
   BookOpen,
   Calculator,
-  BarChart3,
-  MessageSquare,
   CreditCard,
-  FileText,
-  Shield,
-  Globe,
+  MessageSquare,
+  Heart,
+  UserCheck,
+  BarChart3,
   Settings,
-  Bot,
+  Library,
+  Truck,
+  Shield,
+  Target,
+  FileText,
+  DollarSign,
   Database,
-  Activity,
+  Globe,
+  ExternalLink,
+  UserCog,
+  CheckSquare,
+  ClipboardList,
+  ClipboardCheck,
+  Clock,
+  Receipt,
   Building2,
+  PieChart,
+  Building,
+  Route,
+  MapPin,
+  BookOpenCheck,
+  Bookmark,
   ChevronDown,
   ChevronRight,
-  Send,
-  Clock,
-  CheckCircle,
-  AlertTriangle,
-  Eye,
-  ClipboardCheck,
-  UserCheck,
-  Target,
-  DollarSign,
-  Receipt,
-  Bell,
-  PenTool,
-  ClipboardList,
-  CheckSquare,
   LogOut,
-  BookOpenCheck,
-  Library,
-  Bookmark,
-  Search,
-  CreditCard as LibraryCard,
-  Truck,
-  MapPin,
-  Route,
+  Send,
+  Eye,
+  CheckCircle,
   UserMinus,
-  FileMinus,
-  Archive,
-  HandCoins,
-  ClipboardX,
-  Zap
+  PenTool,
+  Plus,
+  AlertTriangle,
+  Monitor,
+  Bot,
+  ShoppingCart
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
+import { 
+  Sidebar, 
+  SidebarContent, 
+  SidebarGroup, 
+  SidebarGroupContent, 
+  SidebarHeader, 
+  SidebarMenu, 
+  SidebarMenuButton, 
+  SidebarMenuItem, 
+  useSidebar 
 } from "@/components/ui/sidebar";
-import { SchoolSelector } from "@/components/layout/SchoolSelector";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-// ERP Module Structure
+// Logical Business-Focused ERP Module Structure
 const erpModules = [
   {
-    title: "School Management",
-    url: "/",
+    title: "Academic Operations",
+    url: "/academic-operations",
     icon: GraduationCap,
     subItems: [
-      { 
-        title: "Admissions", 
-        url: "/admissions", 
-        icon: UserPlus,
-        subItems: [
-          { title: "New Applications", url: "/admissions/new", icon: UserPlus },
-          { title: "Application Submitted", url: "/admissions?stage=0", icon: Send },
-          { title: "Document Verification", url: "/admissions?stage=1", icon: FileText },
-          { title: "Application Review", url: "/admissions?stage=2", icon: Eye },
-          { title: "Assessment/Interview", url: "/admissions?stage=3", icon: ClipboardCheck },
-          { title: "Admission Decision", url: "/admissions?stage=4", icon: CheckCircle },
-          { title: "Fee Payment", url: "/admissions?stage=5", icon: CreditCard },
-          { title: "Enrollment Confirmation", url: "/admissions?stage=6", icon: UserCheck },
-          { title: "Welcome & Onboarding", url: "/admissions?stage=7", icon: Users },
-          { title: "Student Exit Process", url: "/admissions/exit", icon: UserMinus },
-        ]
-      },
-      { 
-        title: "Academics", 
-        url: "/academics", 
-        icon: BookOpen,
-        subItems: [
-          { title: "HOD Dashboard", url: "/hod-dashboard", icon: Target },
-          { title: "Lesson Planning", url: "/academics/lesson-planning", icon: PenTool },
-          { title: "Timetable", url: "/academics/timetable", icon: Clock },
-          { title: "Assignments & Homework", url: "/academics/assignments", icon: ClipboardList },
-          { title: "Attendance (by Period)", url: "/academics/attendance", icon: CheckSquare },
-          { title: "Exams", url: "/academics/exams", icon: FileText },
-          { title: "Gradebook", url: "/academics/gradebook", icon: Calculator },
-          { title: "Reports", url: "/academics/reports", icon: BarChart3 },
-        ]
-      },
-      { 
-        title: "Fee Management", 
-        url: "/school-management/fee-management", 
-        icon: CreditCard,
-        subItems: [
-          { title: "Dashboard", url: "/school-management/fee-management", icon: LayoutDashboard },
-          { title: "Collections", url: "/school-management/fee-management/collections", icon: CreditCard },
-          { title: "Invoices", url: "/school-management/fee-management/invoices", icon: FileText },
-          { title: "Payments", url: "/school-management/fee-management/payments", icon: CreditCard },
-          { title: "Installments", url: "/school-management/fee-management/installments", icon: Calendar },
-          { title: "Discounts", url: "/school-management/fee-management/discounts", icon: Receipt },
-          { title: "Outstanding", url: "/school-management/fee-management/outstanding", icon: AlertTriangle },
-          { title: "Reports", url: "/school-management/fee-management/reports", icon: BarChart3 },
-          { title: "Calendar", url: "/school-management/fee-management/calendar", icon: CalendarDays },
-          { title: "Reminders", url: "/school-management/fee-management/reminders", icon: Bell }
-        ]
-      },
-      { 
-        title: "Library Management",
-        url: "/library",
-        icon: Library,
-        subItems: [
-          { title: "Dashboard", url: "/library/dashboard", icon: LayoutDashboard },
-          { title: "Catalog", url: "/library/catalog", icon: BookOpenCheck },
-          { title: "Borrowing & Returns", url: "/library/borrowing", icon: BookOpen },
-          { title: "Reservations", url: "/library/reservations", icon: Bookmark },
-          { title: "Digital Resources", url: "/library/digital", icon: Globe },
-          { title: "Fines & Penalties", url: "/library/fines", icon: Receipt },
-          { title: "Reports", url: "/library/reports", icon: BarChart3 },
-          { title: "Search", url: "/library/search", icon: Search },
-        ]
-      },
-      { 
-        title: "Transport Management", 
-        url: "/transport",
-        icon: Truck,
-        subItems: [
-          { title: "Dashboard", url: "/transport/dashboard", icon: LayoutDashboard },
-          { title: "Routes & Schedules", url: "/transport/routes", icon: Route },
-          { title: "Vehicle Management", url: "/transport/vehicles", icon: Truck },
-          { title: "Driver Management", url: "/transport/drivers", icon: UserCheck },
-          { title: "Student Assignments", url: "/transport/assignments", icon: Users },
-          { title: "Tracking", url: "/transport/tracking", icon: MapPin },
-          { title: "Notifications", url: "/transport/notifications", icon: Bell },
-          { title: "Reports", url: "/transport/reports", icon: BarChart3 },
-        ]
-      },
-      { 
-        title: "Student Welfare", 
-        url: "/student-welfare", 
-        icon: Shield,
-        subItems: [
-          { title: "Infirmary", url: "/student-welfare/infirmary", icon: Activity },
-          { title: "Complaints", url: "/student-welfare/complaints", icon: MessageSquare },
-          { title: "Safeguarding", url: "/student-welfare/safeguarding", icon: Shield },
-        ]
-      },
-      { title: "Communications", url: "/communication", icon: MessageSquare },
-      { title: "Events", url: "/events", icon: Calendar },
-      { title: "Activities", url: "/activities", icon: Zap },
-      { title: "Portals", url: "/portals", icon: Globe },
+      { title: "Dashboard", url: "/academic-operations", icon: LayoutDashboard },
+      { title: "Admissions Workflow", url: "/admissions", icon: UserPlus },
+      { title: "Curriculum & Lessons", url: "/curriculum", icon: BookOpen },
+      { title: "Timetable Management", url: "/timetable", icon: Clock },
+      { title: "Exams & Assessment", url: "/exams", icon: ClipboardCheck },
+      { title: "Assignments", url: "/academics/assignments", icon: ClipboardList },
+      { title: "HOD Dashboard", url: "/hod-dashboard", icon: Target },
     ]
   },
   {
-    title: "HR Management",
-    url: "/hr-management",
+    title: "Student Services",
+    url: "/student-services",
+    icon: Users,
+    subItems: [
+      { title: "Dashboard", url: "/student-services", icon: LayoutDashboard },
+      { title: "Student Directory", url: "/students", icon: Users },
+      { title: "Attendance Tracking", url: "/attendance", icon: CheckSquare },
+      { title: "Library Services", url: "/library", icon: Library },
+      { title: "Transport Management", url: "/transport", icon: Truck },
+      { title: "Student Welfare", url: "/student-welfare", icon: Heart },
+      { title: "Activities & Events", url: "/activities", icon: Calendar },
+      { title: "Communication", url: "/communication", icon: MessageSquare },
+    ]
+  },
+  {
+    title: "Staff & HR",
+    url: "/staff-hr",
     icon: UserCheck,
     subItems: [
-      { title: "Dashboard", url: "/hr-management", icon: LayoutDashboard },
-      { title: "Employees", url: "/hr-management?tab=employees", icon: Users },
-      { title: "Performance", url: "/hr-management?tab=performance", icon: Target },
-      { title: "Recruitment", url: "/hr-management?tab=recruitment", icon: UserCheck },
-      { title: "Training", url: "/hr-management?tab=training", icon: GraduationCap },
-      { title: "Benefits", url: "/hr-management?tab=benefits", icon: Shield },
-      { title: "Documents", url: "/hr-management?tab=documents", icon: FileText },
-      { title: "Assets", url: "/hr-management?tab=assets", icon: Database },
-      { title: "Time Tracking", url: "/hr-management?tab=timeTracking", icon: Clock },
-      { title: "Expenses", url: "/hr-management?tab=travelExpenses", icon: CreditCard },
-      { title: "Engagement", url: "/hr-management?tab=engagement", icon: MessageSquare },
-      { title: "Payroll", url: "/hr-management?tab=payroll", icon: DollarSign },
-      { title: "Leave", url: "/hr-management?tab=leave", icon: Calendar },
-      { title: "Attendance", url: "/hr-management?tab=attendance", icon: Clock },
+      { title: "Dashboard", url: "/staff-hr", icon: LayoutDashboard },
+      { title: "Employee Management", url: "/hr-management", icon: Users },
+      { title: "Staff Directory", url: "/staff", icon: UserCheck },
+      { title: "Recruitment", url: "/hr-management?tab=recruitment", icon: UserPlus },
+      { title: "Performance & Training", url: "/hr-management?tab=performance", icon: Target },
+      { title: "Payroll & Benefits", url: "/hr-management?tab=payroll", icon: DollarSign },
+      { title: "Time & Attendance", url: "/hr-management?tab=timeTracking", icon: Clock },
     ]
   },
   {
-    title: "Accounting",
-    url: "/accounting",
+    title: "Finance & Operations",
+    url: "/finance-operations",
     icon: Calculator,
     subItems: [
-      { title: "Dashboard", url: "/accounting", icon: LayoutDashboard },
-      { title: "Invoices", url: "/accounting/invoices", icon: FileText },
-      { title: "Bills", url: "/accounting/bills", icon: Receipt },
-      { title: "Vendors", url: "/accounting/vendors", icon: Building2 },
-      { title: "Purchase Orders", url: "/accounting/purchase-orders", icon: FileText },
-      { title: "Reports", url: "/accounting/reports", icon: BarChart3 },
-      { title: "Accounts", url: "/accounting/accounts", icon: Database },
-      { title: "Budget", url: "/accounting/budget", icon: Target },
-      { title: "Settings", url: "/accounting/settings", icon: Settings },
+      { title: "Dashboard", url: "/finance-operations", icon: LayoutDashboard },
+      { title: "Fee Management", url: "/school-management/fee-management", icon: CreditCard },
+      { title: "Accounting", url: "/accounting", icon: Calculator },
+      { title: "Financial Reports", url: "/accounting/reports", icon: BarChart3 },
+      { title: "Budget Planning", url: "/accounting/budget", icon: Target },
+      { title: "Vendor Management", url: "/accounting/vendors", icon: Building2 },
+      { title: "Purchase Orders", url: "/accounting/purchase-orders", icon: ShoppingCart },
     ]
   },
   {
-    title: "Analytics",
-    url: "/analytics", 
+    title: "Analytics & Reports",
+    url: "/analytics",
     icon: BarChart3,
     subItems: []
   },
   {
-    title: "System",
-    url: "/admin-management",
+    title: "Administration",
+    url: "/administration",
     icon: Settings,
     subItems: [
-      { title: "Admin", url: "/admin-management", icon: Shield },
-      { title: "AI Suite", url: "/ai-suite", icon: Bot },
-      { title: "Integrations", url: "/integrations", icon: Settings },
-      { title: "Users", url: "/user-management", icon: Users },
+      { title: "Dashboard", url: "/administration", icon: LayoutDashboard },
+      { title: "User Management", url: "/user-management", icon: UserCog },
+      { title: "System Settings", url: "/admin-management", icon: Settings },
       { title: "Master Data", url: "/master-data", icon: Database },
+      { title: "Integrations", url: "/integrations", icon: Globe },
+      { title: "Portals", url: "/portals", icon: ExternalLink },
     ]
-  }
+  },
 ];
 
 function getCurrentModule(pathname: string) {
-  if (pathname.startsWith('/hr-management')) return 'HR Management';
-  if (pathname.startsWith('/accounting')) return 'Accounting';
-  if (pathname.startsWith('/analytics')) return 'Analytics';
-  if (pathname.startsWith('/admin-management') || pathname.startsWith('/ai-suite') || 
-      pathname.startsWith('/integrations') || pathname.startsWith('/user-management') || 
-      pathname.startsWith('/master-data')) return 'System';
-  return 'School Management';
+  if (pathname.startsWith('/academic-operations') || 
+      pathname.startsWith('/admissions') || 
+      pathname.startsWith('/curriculum') || 
+      pathname.startsWith('/timetable') || 
+      pathname.startsWith('/exams') || 
+      pathname.startsWith('/academics') ||
+      pathname.startsWith('/hod-dashboard')) return 'Academic Operations';
+  
+  if (pathname.startsWith('/student-services') || 
+      pathname.startsWith('/students') || 
+      pathname.startsWith('/attendance') || 
+      pathname.startsWith('/library') || 
+      pathname.startsWith('/transport') || 
+      pathname.startsWith('/student-welfare') || 
+      pathname.startsWith('/activities') || 
+      pathname.startsWith('/communication')) return 'Student Services';
+  
+  if (pathname.startsWith('/staff-hr') || 
+      pathname.startsWith('/hr-management') || 
+      pathname.startsWith('/staff')) return 'Staff & HR';
+  
+  if (pathname.startsWith('/finance-operations') || 
+      pathname.startsWith('/school-management/fee-management') || 
+      pathname.startsWith('/accounting')) return 'Finance & Operations';
+  
+  if (pathname.startsWith('/analytics')) return 'Analytics & Reports';
+  
+  if (pathname.startsWith('/administration') || 
+      pathname.startsWith('/admin-management') || 
+      pathname.startsWith('/user-management') || 
+      pathname.startsWith('/master-data') || 
+      pathname.startsWith('/integrations') || 
+      pathname.startsWith('/portals')) return 'Administration';
+  
+  return 'Academic Operations';
 }
 
 interface SidebarGroupItemsProps {
   title: string;
-  items: Array<{ title: string; url: string; icon: any; subItems?: Array<{ title: string; url: string; icon: any }> }>;
+  items: Array<{
+    title: string;
+    url: string;
+    icon: any;
+    subItems?: Array<{
+      title: string;
+      url: string;
+      icon: any;
+    }>;
+  }>;
   defaultOpen?: boolean;
 }
 
 function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupItemsProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const location = useLocation();
-  const navigate = useNavigate();
-  const { state } = useSidebar();
-  
-  const isActive = (url: string) => url.includes('?') 
-    ? location.pathname + location.search === url
-    : location.pathname === url;
 
   return (
     <SidebarGroup>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
-          <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/70 rounded-lg px-2 py-1.5 transition-colors flex items-center justify-between text-lg font-medium text-foreground bg-primary/10 border-l-4 border-primary">
-            <span>{title}</span>
-            {state !== "collapsed" && (
-              isOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />
-            )}
-          </SidebarGroupLabel>
+          <SidebarMenuButton className="group/collapsible text-sm font-medium text-muted-foreground hover:text-foreground">
+            {title}
+            <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+          </SidebarMenuButton>
         </CollapsibleTrigger>
         <CollapsibleContent>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-3">
+            <SidebarMenu className="ml-4 space-y-1">
               {items.map((item) => {
-                const itemActive = isActive(item.url);
-
-                if (item.subItems) {
-                  const hasActiveSubItem = item.subItems.some(subItem => isActive(subItem.url));
-                  const shouldExpand = itemActive || hasActiveSubItem;
-
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <Collapsible defaultOpen={shouldExpand}>
-                        <CollapsibleTrigger asChild>
-                          <SidebarMenuButton 
-                            asChild={!item.url.includes('?')}
-                            isActive={itemActive}
-                            tooltip={state === "collapsed" ? item.title : undefined}
-                            onClick={item.url.includes('?') ? () => navigate(item.url) : undefined}
-                          >
-                            {item.url.includes('?') ? (
-                              <div className="flex items-center gap-3 w-full">
-                                <item.icon className="h-4 w-4" />
-                                 <span className="flex-1 text-sm" style={{ fontSize: '15px' }}>{item.title}</span>
-                                <ChevronRight className="h-3 w-3 transition-transform ui-expanded:rotate-90" />
-                              </div>
-                            ) : (
-                              <NavLink to={item.url} className="flex items-center gap-3 w-full">
-                                <item.icon className="h-4 w-4" />
-                                <span className="flex-1 text-sm" style={{ fontSize: '15px' }}>{item.title}</span>
-                                <ChevronRight className="h-3 w-3 transition-transform ui-expanded:rotate-90" />
-                              </NavLink>
-                            )}
-                          </SidebarMenuButton>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <SidebarMenu className="ml-4 border-l border-sidebar-border space-y-1 py-2">
-                            {item.subItems.map((subItem) => (
-                               <SidebarMenuItem key={subItem.title} className="pl-2">
-                                 <SidebarMenuButton 
-                                   asChild={!subItem.url.includes('?')}
-                                   isActive={isActive(subItem.url)}
-                                   tooltip={state === "collapsed" ? subItem.title : undefined}
-                                   onClick={subItem.url.includes('?') ? () => navigate(subItem.url) : undefined}
-                                   size="sm"
-                                   className="h-8"
-                                 >
-                                   {subItem.url.includes('?') ? (
-                                     <div className="flex items-center gap-2 py-1">
-                                       <subItem.icon className="h-3 w-3" />
-                                        <span className="text-xs" style={{ fontSize: '14px' }}>{subItem.title}</span>
-                                     </div>
-                                   ) : (
-                                     <NavLink to={subItem.url} className="flex items-center gap-2 py-1">
-                                       <subItem.icon className="h-3 w-3" />
-                                       <span className="text-xs" style={{ fontSize: '14px' }}>{subItem.title}</span>
-                                     </NavLink>
-                                   )}
-                                 </SidebarMenuButton>
-                               </SidebarMenuItem>
-                            ))}
-                          </SidebarMenu>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    </SidebarMenuItem>
-                  );
-                }
+                const isActive = location.pathname === item.url || 
+                  (item.subItems && item.subItems.some(subItem => location.pathname === subItem.url));
                 
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
-                      asChild={!item.url.includes('?')}
-                      isActive={itemActive}
-                      tooltip={state === "collapsed" ? item.title : undefined}
-                      onClick={item.url.includes('?') ? () => navigate(item.url) : undefined}
+                      asChild 
+                      isActive={isActive}
+                      className="text-sm hover:bg-accent/80 hover:text-accent-foreground"
                     >
-                      {item.url.includes('?') ? (
-                        <div className="flex items-center gap-3">
-                          <item.icon className="h-4 w-4" />
-                           <span className="text-sm" style={{ fontSize: '15px' }}>{item.title}</span>
+                      {item.subItems && item.subItems.length > 0 ? (
+                        <div className="w-full">
+                          <Collapsible>
+                            <CollapsibleTrigger asChild>
+                              <div className="flex items-center gap-3 w-full cursor-pointer">
+                                <item.icon className="h-4 w-4" />
+                                <span className="text-sm flex-1">{item.title}</span>
+                                <ChevronDown className="h-3 w-3" />
+                              </div>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <div className="ml-6 mt-2 space-y-1">
+                                {item.subItems.map((subItem) => (
+                                  <NavLink 
+                                    key={subItem.title} 
+                                    to={subItem.url} 
+                                    className="flex items-center gap-2 p-2 text-xs text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors"
+                                  >
+                                    <subItem.icon className="h-3 w-3" />
+                                    {subItem.title}
+                                  </NavLink>
+                                ))}
+                              </div>
+                            </CollapsibleContent>
+                          </Collapsible>
                         </div>
                       ) : (
                         <NavLink to={item.url} className="flex items-center gap-3">
@@ -381,7 +286,7 @@ export function AppSidebar() {
       <SidebarHeader className="border-b bg-gradient-to-r from-primary/5 to-primary-glow/5">
         <div className="flex items-center gap-3 px-3 py-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-glow">
-            <Building2 className="h-5 w-5 text-primary-foreground" />
+            <Building className="h-5 w-5 text-primary-foreground" />
           </div>
           {state !== "collapsed" && (
             <div className="flex flex-col">
@@ -418,7 +323,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {currentModuleData && (
+        {currentModuleData && currentModuleData.subItems.length > 0 && (
           <SidebarGroupItems 
             title="Features"
             items={currentModuleData.subItems}
