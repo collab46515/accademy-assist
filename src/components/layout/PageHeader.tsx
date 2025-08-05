@@ -135,21 +135,22 @@ export function PageHeader({
   const breadcrumbs = breadcrumbItems || generateBreadcrumbs(location.pathname);
 
   return (
-    <div className="flex flex-col gap-4 p-6 border-b bg-gradient-to-r from-background to-muted/20">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+    <div className="flex flex-col gap-4 p-4 md:p-6 border-b bg-gradient-to-r from-background to-muted/20">
+      {/* Mobile-optimized navigation bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto">
           {showBackButton && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleBack}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground mobile-touch-target"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Back
+                <span className="hidden sm:inline">Back</span>
               </Button>
-              <div className="w-px h-6 bg-border" />
+              <div className="hidden sm:block w-px h-6 bg-border" />
             </div>
           )}
           
@@ -157,54 +158,56 @@ export function PageHeader({
             variant="ghost"
             size="sm"
             onClick={handleHomeClick}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground mobile-touch-target shrink-0"
           >
             <Home className="h-4 w-4" />
-            Home
+            <span className="hidden sm:inline">Home</span>
           </Button>
         </div>
         
         {actions && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 overflow-x-auto">
             {actions}
           </div>
         )}
       </div>
 
-      {/* Breadcrumbs */}
+      {/* Mobile-optimized breadcrumbs */}
       {breadcrumbs.length > 1 && (
-        <Breadcrumb>
-          <BreadcrumbList>
-            {breadcrumbs.map((crumb, index) => (
-              <div key={`breadcrumb-${index}`}>
-                <BreadcrumbItem>
-                  {crumb.href ? (
-                    <BreadcrumbLink 
-                      onClick={() => navigate(crumb.href!)}
-                      className="cursor-pointer hover:text-foreground"
-                    >
-                      {crumb.label}
-                    </BreadcrumbLink>
-                  ) : (
-                    <BreadcrumbPage className="font-medium">{crumb.label}</BreadcrumbPage>
+        <div className="hidden sm:block">
+          <Breadcrumb>
+            <BreadcrumbList>
+              {breadcrumbs.map((crumb, index) => (
+                <div key={`breadcrumb-${index}`}>
+                  <BreadcrumbItem>
+                    {crumb.href ? (
+                      <BreadcrumbLink 
+                        onClick={() => navigate(crumb.href!)}
+                        className="cursor-pointer hover:text-foreground"
+                      >
+                        {crumb.label}
+                      </BreadcrumbLink>
+                    ) : (
+                      <BreadcrumbPage className="font-medium">{crumb.label}</BreadcrumbPage>
+                    )}
+                  </BreadcrumbItem>
+                  {index < breadcrumbs.length - 1 && (
+                    <BreadcrumbSeparator>
+                      <ChevronRight className="h-4 w-4" />
+                    </BreadcrumbSeparator>
                   )}
-                </BreadcrumbItem>
-                {index < breadcrumbs.length - 1 && (
-                  <BreadcrumbSeparator>
-                    <ChevronRight className="h-4 w-4" />
-                  </BreadcrumbSeparator>
-                )}
-              </div>
-            ))}
-          </BreadcrumbList>
-        </Breadcrumb>
+                </div>
+              ))}
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
       )}
 
-      {/* Page Title and Description */}
+      {/* Mobile-optimized page title and description */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight break-words">{title}</h1>
         {description && (
-          <p className="text-muted-foreground mt-2">{description}</p>
+          <p className="text-sm md:text-base text-muted-foreground mt-2 break-words">{description}</p>
         )}
       </div>
     </div>

@@ -1,6 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Mobile-first responsive design optimizations */
+html {
+  overflow-x: hidden; /* Prevent horizontal scroll */
+  -webkit-text-size-adjust: 100%; /* Prevent zoom on mobile inputs */
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
@@ -189,3 +202,42 @@ All colors MUST be HSL.
 
 /* Import AI Timetable Editor Styles */
 @import url('./components/ai-timetable/timetable-editor.css');
+
+/* Mobile-specific optimizations */
+@layer components {
+  /* Touch-friendly button sizes */
+  .mobile-touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* Mobile-optimized cards */
+  .mobile-card {
+    @apply rounded-lg shadow-sm border-0 bg-card;
+  }
+  
+  /* Mobile-friendly form inputs */
+  .mobile-input {
+    @apply text-base; /* Prevents zoom on iOS */
+  }
+  
+  /* Responsive grid adjustments */
+  .mobile-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
+  
+  /* Mobile navigation improvements */
+  .mobile-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-background border-t z-50 md:hidden;
+  }
+}
+
+/* Safe area support for mobile devices */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-area-top {
+    padding-top: env(safe-area-top);
+  }
+}

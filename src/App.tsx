@@ -76,17 +76,17 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/*" element={
               <ProtectedRoute>
-                <SidebarProvider defaultOpen={true}>
+                <SidebarProvider defaultOpen={false}>
                   <div className="flex min-h-screen w-full bg-background">
                     <AppSidebar />
                     <SidebarInset className="flex flex-col w-full">
                       <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
                         <SidebarTrigger className="-ml-1" />
-                         <div className="flex items-center gap-4 ml-auto">
-                           <UserMenu />
+                        <div className="flex items-center gap-4 ml-auto">
+                          <UserMenu />
                         </div>
                       </header>
-                      <main className="flex-1 overflow-y-auto p-6 bg-background">
+                      <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-background">
                         <Routes>
                           <Route path="/dashboard" element={<Dashboard />} />
                           <Route path="/academic-operations" element={<AcademicOperationsPage />} />
