@@ -272,7 +272,7 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
         </CollapsibleTrigger>
         <CollapsibleContent>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-3">
               {items.map((item) => {
                 const itemActive = isActive(item.url);
 
@@ -404,7 +404,7 @@ export function AppSidebar() {
             Modules
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-3">
+            <SidebarMenu className="space-y-1">
               {erpModules.map((module) => (
                 <SidebarMenuItem key={module.title}>
                   <SidebarMenuButton 
