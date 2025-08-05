@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -52,6 +53,7 @@ interface UserGuideProps {
 export function UserGuide({ moduleName, sections, quickActions = [] }: UserGuideProps) {
   const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
   const [activeSection, setActiveSection] = useState(0);
+  const { toast } = useToast();
 
   const toggleStepComplete = (stepId: string) => {
     const newCompleted = new Set(completedSteps);
@@ -228,10 +230,10 @@ export function UserGuide({ moduleName, sections, quickActions = [] }: UserGuide
                       size="sm" 
                       className="w-full"
                       onClick={() => {
-                        // You can customize this action per module
-                        console.log(`Quick action: ${action.title}`);
-                        // For now, show a toast notification
-                        alert(`${action.title} feature will be available soon!`);
+                        toast({
+                          title: action.title,
+                          description: `${action.action} feature will be available soon!`,
+                        });
                       }}
                     >
                       <Play className="h-3 w-3 mr-1" />
