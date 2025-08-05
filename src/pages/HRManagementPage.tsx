@@ -233,7 +233,10 @@ export function HRManagementPage() {
     <div className="space-y-8">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80 hover:shadow-xl transition-all duration-300">
+        <Card 
+          className="border-2 border-border/40 shadow-lg bg-gradient-to-br from-card to-card/80 hover:shadow-xl hover:border-primary/50 transition-all duration-300 cursor-pointer" 
+          onClick={() => setSearchParams({ tab: 'employees' })}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-2">
@@ -248,7 +251,10 @@ export function HRManagementPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80 hover:shadow-xl transition-all duration-300">
+        <Card 
+          className="border-2 border-border/40 shadow-lg bg-gradient-to-br from-card to-card/80 hover:shadow-xl hover:border-success/50 transition-all duration-300 cursor-pointer" 
+          onClick={() => setSearchParams({ tab: 'employees' })}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-2">
@@ -263,7 +269,10 @@ export function HRManagementPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80 hover:shadow-xl transition-all duration-300">
+        <Card 
+          className="border-2 border-border/40 shadow-lg bg-gradient-to-br from-card to-card/80 hover:shadow-xl hover:border-warning/50 transition-all duration-300 cursor-pointer" 
+          onClick={() => setSearchParams({ tab: 'leave' })}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-2">
@@ -278,7 +287,10 @@ export function HRManagementPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80 hover:shadow-xl transition-all duration-300">
+        <Card 
+          className="border-2 border-border/40 shadow-lg bg-gradient-to-br from-card to-card/80 hover:shadow-xl hover:border-info/50 transition-all duration-300 cursor-pointer" 
+          onClick={() => setSearchParams({ tab: 'performance' })}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-2">
