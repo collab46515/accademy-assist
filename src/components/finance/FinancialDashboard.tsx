@@ -600,11 +600,33 @@ function DrillDownContent({ metric, data }: { metric: FinancialMetric, data: any
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              // Filter functionality - could open a filter modal
+              alert(`Filter applied for ${metric.label}`);
+            }}
+          >
             <Filter className="h-4 w-4 mr-2" />
             Filter
           </Button>
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              // Export functionality
+              const csvContent = `data:text/csv;charset=utf-8,${encodeURIComponent(
+                `Category,Amount,Status\n${data.data.map((item: any) => 
+                  `${item.category || item.vendor || item.department || item.id},${item.amount},${item.status || 'N/A'}`
+                ).join('\n')}`
+              )}`;
+              const link = document.createElement('a');
+              link.href = csvContent;
+              link.download = `${metric.label.replace(/\s+/g, '_')}_export.csv`;
+              link.click();
+            }}
+          >
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
