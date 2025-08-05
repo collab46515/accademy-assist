@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useStudentData } from '@/hooks/useStudentData';
 import { 
   Users, 
   CheckSquare, 
@@ -20,6 +21,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 
 export default function StudentServicesPage() {
   const navigate = useNavigate();
+  const { students, loading } = useStudentData();
 
   const studentServiceModules = [
     {
@@ -27,7 +29,7 @@ export default function StudentServicesPage() {
       description: "Complete student information management and profiles",
       icon: Users,
       url: "/students",
-      stats: "1,247 active students",
+      stats: loading ? "Loading..." : `${students.length} active students`,
       color: "bg-blue-500",
       features: ["Student Profiles", "Contact Management", "Academic History", "Parent Information"]
     },
@@ -88,7 +90,12 @@ export default function StudentServicesPage() {
   ];
 
   const serviceStats = [
-    { label: "Active Students", value: "1,247", trend: "+3.2%", icon: Users },
+    { 
+      label: "Active Students", 
+      value: loading ? "..." : students.length.toLocaleString(), 
+      trend: loading ? "..." : `${students.length} enrolled`, 
+      icon: Users 
+    },
     { label: "Attendance Rate", value: "94.2%", trend: "+1.8%", icon: CheckSquare },
     { label: "Library Usage", value: "89%", trend: "+5.1%", icon: Library },
     { label: "Transport Coverage", value: "78%", trend: "+2.3%", icon: Truck },
