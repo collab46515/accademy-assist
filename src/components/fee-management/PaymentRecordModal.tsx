@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { useStudentData } from '@/hooks/useStudentData';
 import { supabase } from '@/integrations/supabase/client';
 
 interface PaymentRecordModalProps {
@@ -16,7 +17,7 @@ interface PaymentRecordModalProps {
 
 export function PaymentRecordModal({ open, onOpenChange, onPaymentRecorded }: PaymentRecordModalProps) {
   const [formData, setFormData] = useState({
-    studentName: '',
+    studentId: '',
     amount: '',
     paymentMethod: 'cash',
     referenceNumber: '',
@@ -24,6 +25,7 @@ export function PaymentRecordModal({ open, onOpenChange, onPaymentRecorded }: Pa
   });
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { students, loading: studentsLoading } = useStudentData();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +37,7 @@ export function PaymentRecordModal({ open, onOpenChange, onPaymentRecorded }: Pa
         .from('payment_records')
         .insert({
           school_id: '1e109f61-4780-4071-acf0-aa746ab119ca', // Mock school ID
-          student_id: crypto.randomUUID(), // Mock student ID
+          student_id: formData.studentId,
           amount: parseFloat(formData.amount),
           payment_method: formData.paymentMethod,
           reference_number: formData.referenceNumber,
@@ -52,7 +54,7 @@ export function PaymentRecordModal({ open, onOpenChange, onPaymentRecorded }: Pa
 
       // Reset form
       setFormData({
-        studentName: '',
+        studentId: '',
         amount: '',
         paymentMethod: 'cash',
         referenceNumber: '',
@@ -85,14 +87,28 @@ export function PaymentRecordModal({ open, onOpenChange, onPaymentRecorded }: Pa
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="studentName">Student Name</Label>
-            <Input
-              id="studentName"
-              value={formData.studentName}
-              onChange={(e) => setFormData({ ...formData, studentName: e.target.value })}
-              placeholder="Enter student name"
-              required
-            />
+            <Label htmlFor="student">Student</Label>
+            <Select 
+              value={formData.studentId} 
+              onValueChange={(value) => setFormData({ ...formData, studentId: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={studentsLoading ? "Loading students..." : "Select student"} />
+              </SelectTrigger>
+              <SelectContent className="bg-background border border-border z-50">
+                {studentsLoading ? (
+                  <SelectItem value="loading" disabled>Loading students...</SelectItem>
+                ) : students.length > 0 ? (
+                  students.map((student) => (
+                    <SelectItem key={student.id} value={student.id}>
+                      {student.profiles?.first_name} {student.profiles?.last_name} ({student.student_number}) - {student.year_group}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="no-students" disabled>No students found</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
