@@ -439,11 +439,16 @@ const UnifiedAdmissionsPage = () => {
   // If viewing a specific workflow stage, show the StageWorkflowManager
   if (isStageView && currentStage !== null) {
     return (
-      <div className="min-h-screen bg-background">
-        {/* Stage Header */}
-        <div className="bg-card border-b sticky top-0 z-10">
-          <div className="container mx-auto px-4 py-4 max-w-7xl">
-            <div className="flex items-center justify-between">
+      <div className="min-h-screen bg-red-50">
+        {/* Debug Header - Red background to make it obvious */}
+        <div className="bg-red-500 text-white p-4">
+          <h1 className="text-2xl font-bold">🔥 STAGE VIEW ACTIVE 🔥</h1>
+          <p>You are viewing Stage {currentStage} (URL param: {stageParam})</p>
+        </div>
+        
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-4">
                 <Button 
                   variant="outline" 
@@ -454,19 +459,15 @@ const UnifiedAdmissionsPage = () => {
                   Back to Admissions Dashboard
                 </Button>
                 <div>
-                  <h1 className="text-2xl font-bold">Stage {currentStage + 1}: Application Management</h1>
+                  <h2 className="text-2xl font-bold">Stage {currentStage + 1}: Application Management</h2>
                   <p className="text-sm text-muted-foreground">
                     Managing applications in this workflow stage
                   </p>
                 </div>
               </div>
             </div>
+            <StageWorkflowManager currentStage={currentStage} />
           </div>
-        </div>
-
-        {/* Stage Content */}
-        <div className="container mx-auto px-4 py-8 max-w-7xl">
-          <StageWorkflowManager currentStage={currentStage} />
         </div>
       </div>
     );
