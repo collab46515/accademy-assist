@@ -35,6 +35,14 @@ export default function LandingPage() {
 
   const modules = [
     {
+      name: "AI Timetable Generator",
+      icon: Brain,
+      description: "Revolutionary AI-powered timetable generation with intelligent optimization",
+      features: ["Smart Scheduling", "Conflict Resolution", "Resource Optimization", "Real-time Updates", "Teacher Preferences"],
+      color: "bg-gradient-to-r from-purple-600 to-blue-600",
+      highlight: true
+    },
+    {
       name: "Admissions Management",
       icon: GraduationCap,
       description: "Complete admissions workflow from application to enrollment",
@@ -110,13 +118,6 @@ export default function LandingPage() {
       description: "Complete student welfare and safeguarding system",
       features: ["Infirmary Management", "Safeguarding", "Complaints System", "Incident Tracking", "Reporting"],
       color: "bg-cyan-500"
-    },
-    {
-      name: "AI Suite",
-      icon: Brain,
-      description: "AI-powered analytics and automation",
-      features: ["Predictive Analytics", "Automated Insights", "Performance Forecasting", "Risk Assessment", "Smart Recommendations"],
-      color: "bg-violet-500"
     }
   ];
 
@@ -180,6 +181,73 @@ export default function LandingPage() {
         {activeSection === "home" && (
           <>
             <HeroSection onGetStarted={() => setActiveSection("auth")} />
+            
+            {/* AI Timetable Generator Highlight Section */}
+            <section className="py-20 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
+              <div className="container mx-auto px-4">
+                <div className="text-center mb-12">
+                  <Badge className="mb-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+                    🚀 Featured Innovation
+                  </Badge>
+                  <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                    AI Timetable Generator
+                  </h2>
+                  <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                    Revolutionary artificial intelligence that creates perfect timetables in minutes, not hours. 
+                    Automatically resolves conflicts, optimizes resources, and adapts to your school's unique requirements.
+                  </p>
+                </div>
+                
+                <div className="grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
+                  <Card className="border-2 border-purple-200 shadow-lg hover:shadow-xl transition-shadow">
+                    <CardHeader>
+                      <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center mb-4">
+                        <Brain className="h-6 w-6 text-white" />
+                      </div>
+                      <CardTitle>Intelligent Scheduling</CardTitle>
+                      <CardDescription>
+                        AI analyzes teacher availability, room capacity, and subject requirements to create optimal schedules
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                  
+                  <Card className="border-2 border-blue-200 shadow-lg hover:shadow-xl transition-shadow">
+                    <CardHeader>
+                      <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mb-4">
+                        <Calendar className="h-6 w-6 text-white" />
+                      </div>
+                      <CardTitle>Conflict Resolution</CardTitle>
+                      <CardDescription>
+                        Automatically detects and resolves scheduling conflicts, ensuring every class has the right teacher, room, and time
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                  
+                  <Card className="border-2 border-purple-200 shadow-lg hover:shadow-xl transition-shadow">
+                    <CardHeader>
+                      <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center mb-4">
+                        <CheckCircle className="h-6 w-6 text-white" />
+                      </div>
+                      <CardTitle>Real-time Updates</CardTitle>
+                      <CardDescription>
+                        Instantly adapts to changes in staff availability, room bookings, or curriculum adjustments
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                </div>
+                
+                <div className="text-center mt-12">
+                  <Button 
+                    size="lg" 
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3"
+                    onClick={() => setActiveSection("auth")}
+                  >
+                    Try AI Timetable Generator
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </div>
+              </div>
+            </section>
             
             {/* Stats Section */}
             <section className="py-16 bg-primary/5">

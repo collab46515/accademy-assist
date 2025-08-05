@@ -9,6 +9,7 @@ interface Module {
   description: string;
   features: string[];
   color: string;
+  highlight?: boolean;
 }
 
 interface FeaturesGridProps {
@@ -35,7 +36,19 @@ export function FeaturesGrid({ modules }: FeaturesGridProps) {
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {modules.slice(0, 6).map((module, index) => (
-            <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md">
+            <Card 
+              key={index} 
+              className={`group hover:shadow-lg transition-all duration-300 border-0 shadow-md relative ${
+                module.highlight ? 'border-2 border-purple-200 shadow-xl bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20' : ''
+              }`}
+            >
+              {module.highlight && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+                    ⭐ Featured
+                  </Badge>
+                </div>
+              )}
               <CardHeader className="space-y-4">
                 <div className={`w-12 h-12 rounded-lg ${module.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                   <module.icon className="h-6 w-6 text-white" />
@@ -54,8 +67,15 @@ export function FeaturesGrid({ modules }: FeaturesGridProps) {
                     </div>
                   ))}
                 </div>
-                <Button variant="ghost" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  Learn More
+                <Button 
+                  variant="ghost" 
+                  className={`w-full transition-colors ${
+                    module.highlight 
+                      ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700' 
+                      : 'group-hover:bg-primary group-hover:text-primary-foreground'
+                  }`}
+                >
+                  {module.highlight ? 'Try AI Generator' : 'Learn More'}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </CardContent>
