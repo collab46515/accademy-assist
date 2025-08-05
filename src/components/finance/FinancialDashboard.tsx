@@ -298,7 +298,6 @@ export function FinancialDashboard() {
             <DialogTrigger asChild>
               <Card 
                 className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group"
-                onClick={() => console.log(`Clicked on ${metric.label}`)}
               >
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
