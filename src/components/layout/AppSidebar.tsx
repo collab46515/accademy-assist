@@ -395,7 +395,7 @@ export function AppSidebar() {
             </div>
           )}
         </div>
-        {state !== "collapsed" && <SchoolSelector />}
+        
       </SidebarHeader>
       
       <SidebarContent>
