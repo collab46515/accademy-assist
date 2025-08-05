@@ -140,7 +140,8 @@ const UnifiedAdmissionsPage = () => {
   const stageParam = searchParams.get('stage');
   const currentStage = stageParam ? parseInt(stageParam) : null;
   
-  console.log('Stage URL param:', stageParam, 'Parsed currentStage:', currentStage);
+  // Force stage view to show when stage parameter exists
+  const isStageView = stageParam !== null && !isNaN(parseInt(stageParam));
 
   // Mock data for development
   const mockApplications = [
@@ -436,7 +437,7 @@ const UnifiedAdmissionsPage = () => {
   }
 
   // If viewing a specific workflow stage, show the StageWorkflowManager
-  if (currentStage !== null && currentStage >= 0) {
+  if (isStageView && currentStage !== null) {
     return (
       <div className="min-h-screen bg-background">
         {/* Stage Header */}
