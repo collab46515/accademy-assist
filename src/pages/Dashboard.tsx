@@ -429,23 +429,23 @@ export default function Dashboard() {
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {quickStats.map((stat, index) => (
-            <div key={index} className="animate-fade-in hover-scale" style={{ animationDelay: `${index * 100}ms` }}>
+            <div key={index} className="animate-fade-in hover-scale h-full" style={{ animationDelay: `${index * 100}ms` }}>
               <Card 
-                className="group relative overflow-hidden bg-card/60 backdrop-blur-sm border-border/50 hover:shadow-xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-2 cursor-pointer"
+                className="group relative overflow-hidden bg-card/60 backdrop-blur-sm border-border/50 hover:shadow-xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-2 cursor-pointer h-full"
                 onClick={stat.action}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between gap-4">
+                <CardContent className="p-6 h-full">
+                  <div className="flex items-center justify-between h-full">
                     <div className="space-y-3 flex-1 min-w-0">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider leading-tight">{stat.label}</p>
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider leading-tight line-clamp-2">{stat.label}</p>
                       <div className="flex items-center space-x-2">
                         <p className="text-2xl sm:text-3xl font-bold text-foreground group-hover:text-primary transition-colors duration-300 leading-none">{stat.value}</p>
                         <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 group-hover:scale-110 transition-transform duration-300 flex-shrink-0" />
                       </div>
-                      <p className="text-xs text-muted-foreground font-medium leading-tight truncate">{stat.trend}</p>
+                      <p className="text-xs text-muted-foreground font-medium leading-tight line-clamp-1">{stat.trend}</p>
                     </div>
-                    <div className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl ${stat.color} group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg flex-shrink-0`}>
+                    <div className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl ${stat.color} group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg flex-shrink-0 self-center`}>
                       <stat.icon className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                     </div>
                   </div>
