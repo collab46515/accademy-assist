@@ -6,10 +6,11 @@ import { Mail, Calendar, ShoppingBag, Users } from 'lucide-react';
 
 interface WelcomeOnboardingStageProps {
   applicationId: string;
-  onComplete: () => void;
+  applicationData?: any;
+  onMoveToNext: () => void;
 }
 
-export function WelcomeOnboardingStage({ applicationId, onComplete }: WelcomeOnboardingStageProps) {
+export function WelcomeOnboardingStage({ applicationId, onMoveToNext }: WelcomeOnboardingStageProps) {
   return (
     <div className="space-y-6">
       <Card>
@@ -34,7 +35,7 @@ export function WelcomeOnboardingStage({ applicationId, onComplete }: WelcomeOnb
               <Badge variant="secondary">Pending</Badge>
             </div>
           </div>
-          <Button onClick={onComplete} className="mt-4 w-full">
+          <Button onClick={onMoveToNext} className="mt-4 w-full">
             Complete Admission Process
           </Button>
         </CardContent>

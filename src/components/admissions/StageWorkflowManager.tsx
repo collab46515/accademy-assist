@@ -160,7 +160,6 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
           applicationId={selectedApplication.id}
           applicationData={selectedApplication}
           onMoveToNext={handleNextStage}
-          onComplete={handleNextStage}
         />
       </div>
     );
