@@ -1,367 +1,625 @@
-import { ModuleCard } from "@/components/dashboard/ModuleCard";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useState } from "react";
+import React, { useState } from 'react';
+import { useStudentData } from '@/hooks/useStudentData';
+import { useHRData } from '@/hooks/useHRData';
+import { useFeeData } from '@/hooks/useFeeData';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  Database,
-  UserPlus,
-  User,
-  Clock,
+  Search, 
+  Users, 
+  GraduationCap, 
+  UserCheck, 
+  Banknote, 
   Calendar,
-  BarChart3,
-  FileText,
-  Trophy,
-  Shield,
-  MessageSquare,
-  CreditCard,
-  Users,
-  CalendarDays,
-  TrendingUp,
-  Bot,
-  Settings,
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
+  DollarSign,
   AlertCircle,
-  CheckCircle,
-  Activity,
-  ChevronDown,
-  ChevronRight,
-  GraduationCap,
-  Building2
-} from "lucide-react";
-import heroImage from "@/assets/hero-education.jpg";
+  TrendingUp
+} from 'lucide-react';
 
-const schoolManagementModules = [
-  {
-    title: "Student Information System",
-    description: "Central database for all student data, demographics, enrollment history, and family links with UK-styled Student IDs.",
-    icon: Database,
-    href: "/students",
-    stats: [{ label: "Students", value: "2,847" }, { label: "Active", value: "2,791" }]
-  },
-  {
-    title: "Admissions & Applications",
-    description: "End-to-end digital admissions with e-signatures, document upload, interview scheduling, and waitlist management.",
-    icon: UserPlus,
-    href: "/admissions",
-    stats: [{ label: "Applications", value: "156" }, { label: "Pending", value: "23" }]
-  },
-  {
-    title: "Dynamic Student Profiles",
-    description: "Unified, real-time view of each student including academic records, behavior, medical info, and safeguarding notes.",
-    icon: User,
-    href: "/students",
-    stats: [{ label: "Profiles", value: "2,847" }, { label: "Updated", value: "2,791" }]
-  },
-  {
-    title: "Attendance & Registration",
-    description: "Real-time tracking with QR codes, biometric options, automated roll call, and KCSIE-compliant reporting.",
-    icon: Clock,
-    href: "/attendance",
-    stats: [{ label: "Attendance", value: "94.2%" }, { label: "Alerts", value: "12" }]
-  },
-  {
-    title: "Curriculum & Timetabling",
-    description: "AI-powered scheduling for British curriculum with auto-generation, option blocks, and exam timetable builder.",
-    icon: Calendar,
-    href: "/timetable",
-    stats: [{ label: "Subjects", value: "47" }, { label: "Classes", value: "284" }]
-  },
-  {
-    title: "Academic Tracking",
-    description: "Manage ENC standards and assessment levels with curriculum mapping and progress tracking across terms.",
-    icon: BarChart3,
-    href: "/assessment",
-    stats: [{ label: "Assessments", value: "1,247" }, { label: "Overdue", value: "8" }]
-  },
-  {
-    title: "Gradebook & Reporting",
-    description: "Termly reports with UK-style comments, AI-assisted generation, and parent portal access.",
-    icon: FileText,
-    href: "/gradebook",
-    status: "active" as const
-  },
-  {
-    title: "Exams & Qualifications",
-    description: "Full exam board lifecycle with entry management, access arrangements, and results tracking.",
-    icon: Trophy,
-    href: "/exams",
-    status: "active" as const
-  },
-  {
-    title: "Communication Hub",
-    description: "Centralized messaging with broadcast emails, parent-teacher messaging, and emergency alerts.",
-    icon: MessageSquare,
-    href: "/communication",
-    status: "active" as const
-  },
-  {
-    title: "Parent & Student Portals",
-    description: "Mobile-first engagement with real-time grades, attendance, assignments, and fee payments.",
-    icon: User,
-    href: "/portals",
-    status: "active" as const
-  },
-  {
-    title: "Fee Management",
-    description: "Complete fee management with fee structures, payment tracking, invoicing, and multi-currency support.",
-    icon: CreditCard,
-    href: "/school-management/fee-management",
-    status: "active" as const
-  },
-  {
-    title: "Extracurricular Activities",
-    description: "Track co-curricular engagement, DofE, house points, and trip participation.",
-    icon: Trophy,
-    href: "/activities",
-    status: "active" as const
-  },
-  {
-    title: "Safeguarding & Pastoral",
-    description: "KCSIE-compliant DSL tools with incident logging, risk assessments, and welfare tracking.",
-    icon: Shield,
-    href: "/safeguarding",
-    status: "active" as const
-  },
-  {
-    title: "Calendar & Events",
-    description: "Unified school calendar with academic dates, parent evenings, and booking systems.",
-    icon: CalendarDays,
-    href: "/events",
-    status: "active" as const
-  },
-  {
-    title: "Data Analytics & Insights",
-    description: "Turn data into action with attendance dashboards, at-risk alerts, and custom reports.",
-    icon: TrendingUp,
-    href: "/analytics",
-    status: "active" as const
-  }
-];
+export default function Dashboard() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStudent, setSelectedStudent] = useState<any>(null);
+  const [selectedTeacher, setSelectedTeacher] = useState<any>(null);
+  
+  const { students, loading: studentsLoading } = useStudentData();
+  const { employees, loading: hrLoading } = useHRData();
+  const { feeHeads, loading: feesLoading } = useFeeData();
 
-const hrManagementModules = [
-  {
-    title: "Staff Management",
-    description: "Complete HR management for academic and non-academic staff with contracts and performance tracking.",
-    icon: Users,
-    href: "/staff",
-    stats: [{ label: "Staff", value: "284" }, { label: "Active", value: "276" }]
-  },
-  {
-    title: "Recruitment",
-    description: "End-to-end recruitment process with job postings, applications, interviews, and onboarding.",
-    icon: UserPlus,
-    href: "/staff?tab=recruitment",
-    stats: [{ label: "Open Roles", value: "12" }, { label: "Candidates", value: "47" }]
-  },
-  {
-    title: "Professional Development",
-    description: "CPD tracking, training programs, and professional growth planning for all staff members.",
-    icon: GraduationCap,
-    href: "/staff?tab=cpd",
-    status: "active" as const
-  },
-  {
-    title: "Performance Management",
-    description: "Staff appraisals, performance reviews, and goal setting with automated reminders.",
-    icon: BarChart3,
-    href: "/staff?tab=performance",
-    status: "active" as const
-  }
-];
+  // Filter students and teachers based on search
+  const filteredStudents = students.filter(student => 
+    `${student.profiles?.first_name} ${student.profiles?.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.student_number.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-const systemModules = [
-  {
-    title: "AI & Automation Suite",
-    description: "Smart features with AI-generated comments, predictive analytics, and automated scheduling.",
-    icon: Bot,
-    href: "/ai-suite",
-    status: "beta" as const
-  },
-  {
-    title: "Integration & API Platform",
-    description: "Connect with external tools via SSO, LMS integration, and third-party app marketplace.",
-    icon: Settings,
-    href: "/integrations",
-    status: "active" as const
-  }
-];
+  const filteredTeachers = employees.filter(employee => 
+    `${employee.first_name} ${employee.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    employee.employee_id?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-const quickStats = [
-  { label: "Total Students", value: "2,847", icon: User, color: "text-primary" },
-  { label: "Active Staff", value: "284", icon: Users, color: "text-success" },
-  { label: "Today's Attendance", value: "94.2%", icon: CheckCircle, color: "text-success" },
-  { label: "Pending Tasks", value: "23", icon: AlertCircle, color: "text-warning" }
-];
+  // Calculate stats
+  const totalStudents = students.length;
+  const totalTeachers = employees.filter(emp => emp.position?.includes('Teacher')).length;
+  const pendingFees = 450; // Mock data
+  const todayAttendance = Math.round((totalStudents * 0.92)); // Mock 92% attendance
 
-const Dashboard = () => {
-  const [isSchoolOpen, setIsSchoolOpen] = useState(true);
-  const [isHROpen, setIsHROpen] = useState(true);
-  const [isSystemOpen, setIsSystemOpen] = useState(true);
+  const quickStats = [
+    { 
+      label: "Total Students", 
+      value: totalStudents.toString(), 
+      icon: Users, 
+      color: "bg-blue-500",
+      trend: "+12 this month"
+    },
+    { 
+      label: "Teachers", 
+      value: totalTeachers.toString(), 
+      icon: GraduationCap, 
+      color: "bg-green-500",
+      trend: "5 new hires"
+    },
+    { 
+      label: "Today's Attendance", 
+      value: `${todayAttendance}/${totalStudents}`, 
+      icon: UserCheck, 
+      color: "bg-purple-500",
+      trend: "92% present"
+    },
+    { 
+      label: "Pending Fees", 
+      value: `£${pendingFees}k`, 
+      icon: Banknote, 
+      color: "bg-orange-500",
+      trend: "£23k collected today"
+    }
+  ];
+
+  const StudentDetailModal = ({ student }: { student: any }) => (
+    <DialogContent className="max-w-2xl">
+      <DialogHeader>
+        <DialogTitle>Student Details</DialogTitle>
+      </DialogHeader>
+      <div className="space-y-6">
+        {/* Student Header */}
+        <div className="flex items-center space-x-4">
+          <Avatar className="h-20 w-20">
+            <AvatarImage src={student.profiles?.avatar_url} />
+            <AvatarFallback className="text-lg">
+              {student.profiles?.first_name?.[0]}{student.profiles?.last_name?.[0]}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <h3 className="text-xl font-semibold">
+              {student.profiles?.first_name} {student.profiles?.last_name}
+            </h3>
+            <p className="text-muted-foreground">Student ID: {student.student_number}</p>
+            <Badge variant={student.is_enrolled ? "default" : "secondary"}>
+              {student.is_enrolled ? "Enrolled" : "Not Enrolled"}
+            </Badge>
+          </div>
+        </div>
+
+        <Tabs defaultValue="personal" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="personal">Personal</TabsTrigger>
+            <TabsTrigger value="academic">Academic</TabsTrigger>
+            <TabsTrigger value="fees">Fees</TabsTrigger>
+            <TabsTrigger value="attendance">Attendance</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="personal" className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Year Group</label>
+                <p>{student.year_group}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Form Class</label>
+                <p>{student.form_class || 'Not assigned'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Date of Birth</label>
+                <p>{student.date_of_birth || 'Not provided'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Admission Date</label>
+                <p>{student.admission_date || 'Not provided'}</p>
+              </div>
+            </div>
+            
+            {student.emergency_contact_name && (
+              <div>
+                <label className="text-sm font-medium">Emergency Contact</label>
+                <p>{student.emergency_contact_name}</p>
+                <p className="text-sm text-muted-foreground">{student.emergency_contact_phone}</p>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="academic">
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">Current GPA</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">3.7</div>
+                    <p className="text-xs text-muted-foreground">
+                      +0.2 from last term
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">Subjects</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">8</div>
+                    <p className="text-xs text-muted-foreground">
+                      Active courses
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="fees">
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">Outstanding</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-red-600">£450</div>
+                    <p className="text-xs text-muted-foreground">
+                      Due in 5 days
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">Paid This Term</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-green-600">£2,150</div>
+                    <p className="text-xs text-muted-foreground">
+                      On time
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="attendance">
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">This Month</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">95%</div>
+                    <p className="text-xs text-muted-foreground">
+                      18/19 days
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">This Term</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">92%</div>
+                    <p className="text-xs text-muted-foreground">
+                      88/96 days
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">Lates</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">3</div>
+                    <p className="text-xs text-muted-foreground">
+                      This month
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </DialogContent>
+  );
+
+  const TeacherDetailModal = ({ teacher }: { teacher: any }) => (
+    <DialogContent className="max-w-2xl">
+      <DialogHeader>
+        <DialogTitle>Teacher Details</DialogTitle>
+      </DialogHeader>
+      <div className="space-y-6">
+        {/* Teacher Header */}
+        <div className="flex items-center space-x-4">
+          <Avatar className="h-20 w-20">
+            <AvatarImage src="" />
+            <AvatarFallback className="text-lg">
+              {teacher.first_name?.[0]}{teacher.last_name?.[0]}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <h3 className="text-xl font-semibold">{teacher.first_name} {teacher.last_name}</h3>
+            <p className="text-muted-foreground">ID: {teacher.employee_id}</p>
+            <Badge variant={teacher.status === 'active' ? "default" : "secondary"}>
+              {teacher.status === 'active' ? "Active" : "Inactive"}
+            </Badge>
+          </div>
+        </div>
+
+        <Tabs defaultValue="profile" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="schedule">Schedule</TabsTrigger>
+            <TabsTrigger value="leave">Leave</TabsTrigger>
+            <TabsTrigger value="performance">Performance</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="profile" className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Position</label>
+                <p>{teacher.position}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Department</label>
+                <p>{teacher.department_name || 'Not assigned'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Start Date</label>
+                <p>{teacher.start_date || 'Not provided'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Work Type</label>
+                <p className="capitalize">{teacher.work_type?.replace('_', ' ')}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-4 text-sm">
+              <div className="flex items-center space-x-1">
+                <Mail className="h-4 w-4" />
+                <span>{teacher.email || 'No email'}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <Phone className="h-4 w-4" />
+                <span>{teacher.phone || 'No phone'}</span>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="schedule">
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">Current week teaching schedule</p>
+              <div className="grid gap-2">
+                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map(day => (
+                  <Card key={day}>
+                    <CardContent className="p-3">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">{day}</span>
+                        <span className="text-sm text-muted-foreground">6 periods</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="leave">
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">Available</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">18</div>
+                    <p className="text-xs text-muted-foreground">days left</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">Used</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">7</div>
+                    <p className="text-xs text-muted-foreground">this year</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">Pending</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">1</div>
+                    <p className="text-xs text-muted-foreground">request</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="performance">
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">Student Rating</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">4.7/5</div>
+                    <p className="text-xs text-muted-foreground">Based on feedback</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">Classes</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">8</div>
+                    <p className="text-xs text-muted-foreground">teaching load</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </DialogContent>
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div 
-        className="relative bg-cover bg-center h-80 flex items-center justify-center overflow-hidden"
-        style={{ backgroundImage: `url(${heroImage})` }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/70 via-primary/80 to-primary/90"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-        <div className="relative text-center text-primary-foreground z-10 animate-fade-in">
-          <h1 className="text-5xl font-bold mb-4 tracking-tight">Student Information System</h1>
-          <p className="text-xl opacity-90 max-w-2xl mx-auto">Complete Education Management Platform for Modern Schools</p>
+      <div className="relative bg-gradient-to-r from-primary to-primary-glow text-primary-foreground py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl font-bold mb-4">School Management Dashboard</h1>
+            <p className="text-xl opacity-90 mb-8">
+              Complete overview of students, teachers, fees, and school operations
+            </p>
+            
+            {/* Search Bar */}
+            <div className="max-w-md mx-auto relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search students, teachers, ID numbers..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-background text-foreground"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-12 max-w-7xl space-y-12">
+      <div className="container mx-auto px-4 py-8">
         {/* Quick Stats */}
-        <section className="animate-fade-in">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {quickStats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <Card key={index} className="group hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1 bg-card/60 backdrop-blur-sm border-border/50">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                        <p className="text-3xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">{stat.value}</p>
-                      </div>
-                      <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110">
-                        <Icon className={`h-6 w-6 ${stat.color} group-hover:text-primary transition-colors duration-300`} />
-                      </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {quickStats.map((stat, index) => (
+            <Card key={index} className="relative overflow-hidden">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                    <div className="flex items-center space-x-2">
+                      <p className="text-2xl font-bold">{stat.value}</p>
+                      <TrendingUp className="h-4 w-4 text-green-600" />
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* System Status */}
-        <section className="animate-fade-in">
-          <Card className="bg-card/60 backdrop-blur-sm border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center space-x-3 text-xl">
-                <div className="p-2 bg-success/10 rounded-lg">
-                  <Activity className="h-5 w-5 text-success" />
+                    <p className="text-xs text-muted-foreground mt-1">{stat.trend}</p>
+                  </div>
+                  <div className={`p-3 rounded-full ${stat.color}`}>
+                    <stat.icon className="h-6 w-6 text-white" />
+                  </div>
                 </div>
-                <span>System Status</span>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Search Results */}
+        {searchTerm && (
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            {/* Students Results */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Students ({filteredStudents.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {filteredStudents.slice(0, 5).map((student) => (
+                    <Dialog key={student.id}>
+                      <DialogTrigger asChild>
+                        <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted cursor-pointer">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={student.profiles?.avatar_url} />
+                            <AvatarFallback>
+                              {student.profiles?.first_name?.[0]}{student.profiles?.last_name?.[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <p className="font-medium">
+                              {student.profiles?.first_name} {student.profiles?.last_name}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {student.student_number} • {student.year_group}
+                            </p>
+                          </div>
+                          <Badge variant={student.is_enrolled ? "default" : "secondary"}>
+                            {student.is_enrolled ? "Active" : "Inactive"}
+                          </Badge>
+                        </div>
+                      </DialogTrigger>
+                      <StudentDetailModal student={student} />
+                    </Dialog>
+                  ))}
+                  {filteredStudents.length > 5 && (
+                    <p className="text-sm text-muted-foreground text-center">
+                      +{filteredStudents.length - 5} more students
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Teachers Results */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <GraduationCap className="h-5 w-5" />
+                  Teachers ({filteredTeachers.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {filteredTeachers.slice(0, 5).map((teacher) => (
+                    <Dialog key={teacher.id}>
+                      <DialogTrigger asChild>
+                        <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted cursor-pointer">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src="" />
+                            <AvatarFallback>
+                              {teacher.first_name?.[0]}{teacher.last_name?.[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <p className="font-medium">{teacher.first_name} {teacher.last_name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {teacher.employee_id} • {teacher.position}
+                            </p>
+                          </div>
+                          <Badge variant={teacher.status === 'active' ? "default" : "secondary"}>
+                            {teacher.status === 'active' ? "Active" : "Inactive"}
+                          </Badge>
+                        </div>
+                      </DialogTrigger>
+                      <TeacherDetailModal teacher={teacher} />
+                    </Dialog>
+                  ))}
+                  {filteredTeachers.length > 5 && (
+                    <p className="text-sm text-muted-foreground text-center">
+                      +{filteredTeachers.length - 5} more teachers
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Recent Activity & Alerts */}
+        <div className="grid md:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5" />
+                Recent Alerts
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-3">
-                <Badge variant="default" className="bg-success/90 text-success-foreground border-success/20 px-3 py-1">
-                  All Systems Operational
-                </Badge>
-                <Badge variant="secondary" className="px-3 py-1">
-                  18 Modules Active
-                </Badge>
-                <Badge variant="outline" className="px-3 py-1">
-                  Last Updated: 2 minutes ago
-                </Badge>
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium text-sm">Fee Payment Overdue</p>
+                    <p className="text-xs text-muted-foreground">5 students have overdue payments</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium text-sm">Low Attendance</p>
+                    <p className="text-xs text-muted-foreground">3 students below 80% this month</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium text-sm">Leave Requests</p>
+                    <p className="text-xs text-muted-foreground">2 pending teacher leave requests</p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
-        </section>
 
-        {/* School Management Modules */}
-        <section className="animate-fade-in space-y-6">
-          <Collapsible open={isSchoolOpen} onOpenChange={setIsSchoolOpen}>
-            <CollapsibleTrigger className="w-full">
-              <Card className="bg-card/60 backdrop-blur-sm border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-pointer">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center justify-between text-2xl">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-3 bg-primary/10 rounded-xl">
-                        <Building2 className="h-6 w-6 text-primary" />
-                      </div>
-                      <span>School Management</span>
-                      <Badge variant="secondary" className="ml-2">{schoolManagementModules.length} modules</Badge>
-                    </div>
-                    {isSchoolOpen ? <ChevronDown className="h-5 w-5 text-muted-foreground" /> : <ChevronRight className="h-5 w-5 text-muted-foreground" />}
-                  </CardTitle>
-                  <CardDescription className="text-left">Complete education management functionality for modern schools</CardDescription>
-                </CardHeader>
-              </Card>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {schoolManagementModules.map((module, index) => (
-                  <div key={index} className="animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
-                    <ModuleCard {...module} />
-                  </div>
-                ))}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Today's Schedule
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Morning Assembly</span>
+                  <span className="text-xs text-muted-foreground">8:30 AM</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Staff Meeting</span>
+                  <span className="text-xs text-muted-foreground">3:30 PM</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Parent Evening</span>
+                  <span className="text-xs text-muted-foreground">6:00 PM</span>
+                </div>
               </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </section>
+            </CardContent>
+          </Card>
 
-        {/* HR Management Modules */}
-        <section className="animate-fade-in space-y-6">
-          <Collapsible open={isHROpen} onOpenChange={setIsHROpen}>
-            <CollapsibleTrigger className="w-full">
-              <Card className="bg-card/60 backdrop-blur-sm border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-pointer">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center justify-between text-2xl">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-3 bg-primary/10 rounded-xl">
-                        <Users className="h-6 w-6 text-primary" />
-                      </div>
-                      <span>HR Management</span>
-                      <Badge variant="secondary" className="ml-2">{hrManagementModules.length} modules</Badge>
-                    </div>
-                    {isHROpen ? <ChevronDown className="h-5 w-5 text-muted-foreground" /> : <ChevronRight className="h-5 w-5 text-muted-foreground" />}
-                  </CardTitle>
-                  <CardDescription className="text-left">Human resources and staff management tools</CardDescription>
-                </CardHeader>
-              </Card>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {hrManagementModules.map((module, index) => (
-                  <div key={index} className="animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
-                    <ModuleCard {...module} />
-                  </div>
-                ))}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Financial Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Today's Collections</span>
+                  <span className="font-medium text-green-600">£23,450</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">This Month</span>
+                  <span className="font-medium">£125,890</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Outstanding</span>
+                  <span className="font-medium text-red-600">£45,230</span>
+                </div>
               </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </section>
-
-        {/* System & Integration Modules */}
-        <section className="animate-fade-in space-y-6">
-          <Collapsible open={isSystemOpen} onOpenChange={setIsSystemOpen}>
-            <CollapsibleTrigger className="w-full">
-              <Card className="bg-card/60 backdrop-blur-sm border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-pointer">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center justify-between text-2xl">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-3 bg-primary/10 rounded-xl">
-                        <Settings className="h-6 w-6 text-primary" />
-                      </div>
-                      <span>System & Integration</span>
-                      <Badge variant="secondary" className="ml-2">{systemModules.length} modules</Badge>
-                    </div>
-                    {isSystemOpen ? <ChevronDown className="h-5 w-5 text-muted-foreground" /> : <ChevronRight className="h-5 w-5 text-muted-foreground" />}
-                  </CardTitle>
-                  <CardDescription className="text-left">AI automation and third-party integrations</CardDescription>
-                </CardHeader>
-              </Card>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {systemModules.map((module, index) => (
-                  <div key={index} className="animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
-                    <ModuleCard {...module} />
-                  </div>
-                ))}
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </section>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
-};
-
-export default Dashboard;
+}
