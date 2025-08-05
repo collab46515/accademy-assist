@@ -312,10 +312,14 @@ export const AILessonPlanner = () => {
   };
 
   const handleGenerateRecap = async (lesson: LessonPlan) => {
+    console.log('Starting recap generation for lesson:', lesson);
     setGeneratingRecap(lesson.id);
     
     try {
+      console.log('Getting session...');
       const { data: session } = await supabase.auth.getSession();
+      console.log('Session data:', session);
+      
       if (!session.session) {
         throw new Error('Please log in to generate recaps');
       }
@@ -334,6 +338,9 @@ export const AILessonPlanner = () => {
         language: 'English'
       };
 
+      console.log('Recap data prepared:', recapData);
+
+      console.log('Invoking edge function...');
       const { data, error } = await supabase.functions.invoke('generate-lesson-recap', {
         body: recapData,
         headers: {
@@ -341,11 +348,19 @@ export const AILessonPlanner = () => {
         }
       });
 
-      if (error) throw error;
+      console.log('Edge function response:', { data, error });
+
+      if (error) {
+        console.error('Edge function error:', error);
+        throw error;
+      }
 
       if (data?.error) {
+        console.error('Data error:', data.error);
         throw new Error(data.error);
       }
+
+      console.log('Recap generated successfully:', data.recap);
 
       // Update lesson plan with generated recap
       setLessonPlans(prev => prev.map(plan => 
@@ -361,6 +376,11 @@ export const AILessonPlanner = () => {
 
     } catch (error: any) {
       console.error('Error generating recap:', error);
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
       toast({
         title: "Failed to Generate Recap",
         description: error.message || "Please check your API key configuration and try again",
