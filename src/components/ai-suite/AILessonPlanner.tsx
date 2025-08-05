@@ -30,6 +30,8 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { UserGuide } from '@/components/shared/UserGuide';
+import { userGuides } from '@/data/userGuides';
 
 interface LessonPlan {
   id: string;
@@ -1089,6 +1091,32 @@ export const AILessonPlanner = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          <UserGuide 
+            moduleName={userGuides.academics.moduleName}
+            sections={userGuides.academics.sections}
+            quickActions={userGuides.academics.quickActions}
+          />
+        </TabsContent>
+
+        <TabsContent value="resources">
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Smart Resource Integration</CardTitle>
+                <CardDescription>AI-powered resource discovery and embedding</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Sparkles className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">Smart resource features coming soon</p>
+                  <p className="text-sm text-muted-foreground">Auto-find videos, worksheets, and digital resources from verified educational databases</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

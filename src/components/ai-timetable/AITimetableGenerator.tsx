@@ -40,6 +40,8 @@ import { GenerationProgress } from "./GenerationProgress";
 import { SubstitutionPlanner } from "./live-usage/SubstitutionPlanner";
 import { ConflictDetector } from "./live-usage/ConflictDetector";
 import { AutoRegeneration } from "./live-usage/AutoRegeneration";
+import { UserGuide } from '@/components/shared/UserGuide';
+import { userGuides } from '@/data/userGuides';
 
 interface AITimetableGeneratorProps {
   onClose?: () => void;
@@ -413,6 +415,15 @@ export function AITimetableGenerator({ onClose }: AITimetableGeneratorProps) {
             }}
           />
         )}
+      </div>
+
+      {/* User Guide Section */}
+      <div className="mt-12">
+        <UserGuide 
+          moduleName={userGuides.timetable.moduleName}
+          sections={userGuides.timetable.sections}
+          quickActions={userGuides.timetable.quickActions}
+        />
       </div>
     </div>
   );
