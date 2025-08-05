@@ -77,6 +77,7 @@ const App = () => (
                       <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
                         <SidebarTrigger className="-ml-1" />
                         <div className="flex items-center gap-4 ml-auto">
+                          <span className="text-sm text-muted-foreground">School Management System</span>
                           <UserMenu />
                         </div>
                       </header>
