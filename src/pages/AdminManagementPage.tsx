@@ -3,7 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { WorkflowDashboard } from '@/components/admissions/workflow/WorkflowDashboard';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Settings, 
   Users, 
@@ -18,11 +20,15 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
-  Plus
+  Plus,
+  Activity,
+  Zap
 } from 'lucide-react';
 
 export default function AdminManagementPage() {
   const [activeTab, setActiveTab] = useState('overview');
+  const [quickSetupOpen, setQuickSetupOpen] = useState(false);
+  const { toast } = useToast();
 
   const systemStats = {
     totalUsers: 2847,
@@ -87,6 +93,21 @@ export default function AdminManagementPage() {
     }
   };
 
+  const handleQuickAction = (action: string) => {
+    toast({
+      title: "Action Initiated",
+      description: `${action} has been started. Redirecting to the appropriate module...`,
+    });
+  };
+
+  const quickSetupSteps = [
+    { id: 1, title: "School Configuration", description: "Set up basic school information and settings", completed: true },
+    { id: 2, title: "User Roles Setup", description: "Define user roles and permissions", completed: true },
+    { id: 3, title: "Academic Structure", description: "Configure year groups, subjects, and classes", completed: false },
+    { id: 4, title: "Fee Structure", description: "Set up fee categories and payment schedules", completed: false },
+    { id: 5, title: "Communication Templates", description: "Configure email and SMS templates", completed: false },
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -100,15 +121,52 @@ export default function AdminManagementPage() {
               System configuration, workflows, master data, and user management
             </p>
           </div>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Quick Setup
-          </Button>
+          <Dialog open={quickSetupOpen} onOpenChange={setQuickSetupOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Quick Setup
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>System Quick Setup</DialogTitle>
+                <DialogDescription>
+                  Complete these essential setup steps to get your system running smoothly
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                {quickSetupSteps.map((step, index) => (
+                  <div key={step.id} className="flex items-center gap-4 p-4 border rounded-lg">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      step.completed ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-400'
+                    }`}>
+                      {step.completed ? <CheckCircle className="h-4 w-4" /> : <span>{step.id}</span>}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium">{step.title}</h3>
+                      <p className="text-sm text-muted-foreground">{step.description}</p>
+                    </div>
+                    <Button 
+                      variant={step.completed ? "outline" : "default"} 
+                      size="sm"
+                      onClick={() => handleQuickAction(step.title)}
+                    >
+                      {step.completed ? "Review" : "Setup"}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* System Health Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0">
+          <Card 
+            className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0 cursor-pointer hover:shadow-lg transition-all duration-200"
+            onClick={() => toast({ title: "System Health", description: `Current system health: ${systemStats.systemHealth}%. All services running optimally.` })}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -120,7 +178,10 @@ export default function AdminManagementPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
+          <Card 
+            className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 cursor-pointer hover:shadow-lg transition-all duration-200"
+            onClick={() => toast({ title: "Active Schools", description: `${systemStats.activeSchools} schools are currently active in the system.` })}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -132,7 +193,10 @@ export default function AdminManagementPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0">
+          <Card 
+            className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 cursor-pointer hover:shadow-lg transition-all duration-200"
+            onClick={() => toast({ title: "Total Users", description: `${systemStats.totalUsers} users are registered across all schools.` })}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -144,7 +208,10 @@ export default function AdminManagementPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-amber-500 to-amber-600 text-white border-0">
+          <Card 
+            className="bg-gradient-to-br from-amber-500 to-amber-600 text-white border-0 cursor-pointer hover:shadow-lg transition-all duration-200"
+            onClick={() => toast({ title: "Pending Approvals", description: `${systemStats.pendingApprovals} items require your attention.` })}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -227,19 +294,35 @@ export default function AdminManagementPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
-                    <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      className="h-20 flex flex-col items-center justify-center gap-2 hover:bg-primary/5 transition-colors"
+                      onClick={() => handleQuickAction("Create Workflow")}
+                    >
                       <GitBranch className="h-6 w-6" />
                       <span className="text-sm">Create Workflow</span>
                     </Button>
-                    <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      className="h-20 flex flex-col items-center justify-center gap-2 hover:bg-primary/5 transition-colors"
+                      onClick={() => handleQuickAction("Add User")}
+                    >
                       <Users className="h-6 w-6" />
                       <span className="text-sm">Add User</span>
                     </Button>
-                    <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      className="h-20 flex flex-col items-center justify-center gap-2 hover:bg-primary/5 transition-colors"
+                      onClick={() => handleQuickAction("Setup School")}
+                    >
                       <School className="h-6 w-6" />
                       <span className="text-sm">Setup School</span>
                     </Button>
-                    <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      className="h-20 flex flex-col items-center justify-center gap-2 hover:bg-primary/5 transition-colors"
+                      onClick={() => handleQuickAction("Edit Template")}
+                    >
                       <FileText className="h-6 w-6" />
                       <span className="text-sm">Edit Template</span>
                     </Button>
