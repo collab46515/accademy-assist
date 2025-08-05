@@ -257,21 +257,35 @@ export function useHRData() {
     }
   };
 
-  // Create new employee
+  // Create new employee with proper user setup
   const createEmployee = async (employeeData: Omit<Employee, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       const { data, error } = await supabase
-        .from('employees')
-        .insert([employeeData])
-        .select()
-        .single();
+        .rpc('create_employee_with_user', {
+          employee_data: {
+            employee_id: employeeData.employee_id,
+            first_name: employeeData.first_name,
+            last_name: employeeData.last_name,
+            email: employeeData.email,
+            phone: employeeData.phone,
+            department_id: employeeData.department_id,
+            position: employeeData.position,
+            manager_id: employeeData.manager_id,
+            start_date: employeeData.start_date,
+            salary: employeeData.salary,
+            work_type: employeeData.work_type,
+            location: employeeData.location,
+            emergency_contact_name: employeeData.emergency_contact_name,
+            emergency_contact_phone: employeeData.emergency_contact_phone
+          }
+        });
 
       if (error) throw error;
 
-      setEmployees(prev => [data as Employee, ...prev]);
+      await fetchHRData(); // Refresh the list
       toast({
-        title: "Success",
-        description: "Employee created successfully.",
+        title: "Success", 
+        description: "Employee created successfully with login credentials.",
       });
 
       return data;

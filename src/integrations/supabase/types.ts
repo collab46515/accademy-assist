@@ -6891,6 +6891,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      create_employee_with_user: {
+        Args: { employee_data: Json; created_by?: string }
+        Returns: Json
+      }
+      create_student_with_user: {
+        Args: { student_data: Json; school_id: string; created_by?: string }
+        Returns: Json
+      }
       generate_receipt_number: {
         Args: Record<PropertyKey, never>
         Returns: string

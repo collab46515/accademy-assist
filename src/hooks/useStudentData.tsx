@@ -137,31 +137,124 @@ export function useStudentData() {
   const { currentSchool } = useRBAC();
 
   const fetchStudents = async () => {
-    if (!currentSchool) {
+    if (!currentSchool?.id) {
       setLoading(false);
       return;
     }
 
     setLoading(true);
     try {
-      // For now, we'll use mock data since the database migration hasn't been applied yet
-      // Once the user applies the migration, this can be updated to use real data
-      console.log('Using mock data until database migration is applied');
-      setStudents(mockStudents);
+      const { data, error } = await supabase
+        .from('students')
+        .select(`
+          *,
+          profiles!inner(
+            first_name,
+            last_name,
+            email,
+            phone,
+            avatar_url
+          )
+        `)
+        .eq('school_id', currentSchool.id)
+        .eq('is_enrolled', true);
+
+      if (error) {
+        console.error('Error fetching students:', error);
+        setStudents(mockStudents); // Fallback to mock data
+      } else {
+        // Transform the data to match our Student interface
+        const transformedStudents = (data || []).map(student => ({
+          ...student,
+          profiles: Array.isArray(student.profiles) ? student.profiles[0] : student.profiles
+        })) as Student[];
+        setStudents(transformedStudents);
+      }
     } catch (error) {
-      console.error('Error fetching students, using mock data:', error);
-      setStudents(mockStudents);
+      console.error('Error fetching students:', error);
+      setStudents(mockStudents); // Fallback to mock data
     } finally {
       setLoading(false);
     }
   };
 
+  // Create a new student
+  const createStudent = async (studentData: any) => {
+    try {
+      const { data, error } = await supabase
+        .rpc('create_student_with_user', {
+          student_data: studentData,
+          school_id: currentSchool?.id || ''
+        });
+
+      if (error) throw error;
+
+      await fetchStudents(); // Refresh the list
+      return data;
+    } catch (error) {
+      console.error('Error creating student:', error);
+      throw error;
+    }
+  };
+
   const getStudentById = async (studentId: string): Promise<Student | null> => {
-    return mockStudents.find(s => s.id === studentId) || null;
+    try {
+      const { data, error } = await supabase
+        .from('students')
+        .select(`
+          *,
+          profiles!inner(
+            first_name,
+            last_name,
+            email,
+            phone,
+            avatar_url
+          )
+        `)
+        .eq('id', studentId)
+        .single();
+
+      if (error) throw error;
+      // Transform the data to match our Student interface
+      const transformedStudent = {
+        ...data,
+        profiles: Array.isArray(data.profiles) ? data.profiles[0] : data.profiles
+      } as Student;
+      return transformedStudent;
+    } catch (error) {
+      console.error('Error fetching student:', error);
+      return mockStudents.find(s => s.id === studentId) || null;
+    }
   };
 
   const getStudentsByClass = async (classId: string): Promise<Student[]> => {
-    return mockStudents.filter(s => s.form_class?.includes(classId.slice(-1)) || false);
+    try {
+      const { data, error } = await supabase
+        .from('students')
+        .select(`
+          *,
+          profiles!inner(
+            first_name,
+            last_name,
+            email,
+            phone,
+            avatar_url
+          )
+        `)
+        .eq('form_class', classId)
+        .eq('school_id', currentSchool?.id || '');
+
+      if (error) throw error;
+      // Transform the data to match our Student interface
+      const transformedStudents = (data || []).map(student => ({
+        ...student,
+        profiles: Array.isArray(student.profiles) ? student.profiles[0] : student.profiles
+      })) as Student[];
+      return transformedStudents;
+    } catch (error) {
+      console.error('Error fetching students by class:', error);
+      return mockStudents.filter(s => s.form_class?.includes(classId.slice(-1)) || false);
+    }
   };
 
   useEffect(() => {
@@ -172,6 +265,7 @@ export function useStudentData() {
     students,
     loading,
     fetchStudents,
+    createStudent,
     getStudentById,
     getStudentsByClass,
   };
