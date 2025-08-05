@@ -223,7 +223,17 @@ export function UserGuide({ moduleName, sections, quickActions = [] }: UserGuide
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <Button variant="outline" size="sm" className="w-full">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full"
+                      onClick={() => {
+                        // You can customize this action per module
+                        console.log(`Quick action: ${action.title}`);
+                        // For now, show a toast notification
+                        alert(`${action.title} feature will be available soon!`);
+                      }}
+                    >
                       <Play className="h-3 w-3 mr-1" />
                       {action.action}
                     </Button>
