@@ -5200,6 +5200,8 @@ export type Database = {
           is_active: boolean
           last_login: string | null
           last_name: string
+          must_change_password: boolean | null
+          password_reset_at: string | null
           phone: string | null
           updated_at: string
           user_id: string
@@ -5213,6 +5215,8 @@ export type Database = {
           is_active?: boolean
           last_login?: string | null
           last_name: string
+          must_change_password?: boolean | null
+          password_reset_at?: string | null
           phone?: string | null
           updated_at?: string
           user_id: string
@@ -5226,6 +5230,8 @@ export type Database = {
           is_active?: boolean
           last_login?: string | null
           last_name?: string
+          must_change_password?: boolean | null
+          password_reset_at?: string | null
           phone?: string | null
           updated_at?: string
           user_id?: string
@@ -6877,6 +6883,14 @@ export type Database = {
         Args: { lesson_plan_id: string; user_id?: string }
         Returns: boolean
       }
+      check_must_change_password: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      clear_password_change_requirement: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       generate_receipt_number: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -6909,6 +6923,10 @@ export type Database = {
       }
       is_super_admin: {
         Args: { user_uuid: string }
+        Returns: boolean
+      }
+      request_password_reset: {
+        Args: { target_user_id: string }
         Returns: boolean
       }
     }
