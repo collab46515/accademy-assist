@@ -26,6 +26,8 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { FinancialDashboard } from '@/components/finance/FinancialDashboard';
+import { UserGuide } from '@/components/shared/UserGuide';
+import { financeUserGuide } from '@/data/userGuides';
 
 export default function FinanceOperationsPage() {
   const navigate = useNavigate();
@@ -146,6 +148,11 @@ export default function FinanceOperationsPage() {
         description="Complete financial management and operational excellence platform"
         actions={
           <div className="flex items-center gap-3">
+            <UserGuide 
+              moduleName={financeUserGuide.moduleName}
+              sections={financeUserGuide.sections}
+              quickActions={financeUserGuide.quickActions}
+            />
             <Button variant="outline" size="sm">
               <Download className="h-4 w-4 mr-2" />
               Export Data
