@@ -6,12 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Calendar, Clock, Users, FileText, Search, Plus, Download, Filter } from "lucide-react";
 import { useExamData } from "@/hooks/useExamData";
 import { format } from "date-fns";
 
 export default function ExamsPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState("schedule");
   const { exams, examResults, loading } = useExamData();
 
   // Filter exams based on search term
@@ -70,16 +73,42 @@ export default function ExamsPage() {
           { label: "Exams" }
         ]}
         actions={
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Schedule Exam
-          </Button>
+          <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Schedule Exam
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Schedule New Exam</DialogTitle>
+                <DialogDescription>
+                  Create a new examination session for your students.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="text-center py-4">
+                <p className="text-muted-foreground">Exam scheduling form will be implemented here.</p>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => setShowScheduleDialog(false)}>
+                  Schedule Exam
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         }
       />
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow" 
+          onClick={() => setActiveTab("schedule")}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Exams</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
@@ -87,11 +116,17 @@ export default function ExamsPage() {
           <CardContent>
             <div className="text-2xl font-bold">{exams.length}</div>
             <p className="text-xs text-muted-foreground">
-              Active exams
+              Click to view all exams
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow" 
+          onClick={() => {
+            setActiveTab("schedule");
+            setSearchTerm("internal");
+          }}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Internal Exams</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -101,11 +136,17 @@ export default function ExamsPage() {
               {exams.filter(e => e.exam_type === "internal").length}
             </div>
             <p className="text-xs text-muted-foreground">
-              This term
+              Click to filter internal exams
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow" 
+          onClick={() => {
+            setActiveTab("schedule");
+            setSearchTerm("external");
+          }}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">External Exams</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
@@ -115,11 +156,14 @@ export default function ExamsPage() {
               {exams.filter(e => e.exam_type === "external").length}
             </div>
             <p className="text-xs text-muted-foreground">
-              This term
+              Click to filter external exams
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow" 
+          onClick={() => setActiveTab("results")}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Results</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -129,13 +173,13 @@ export default function ExamsPage() {
               {examResults.length}
             </div>
             <p className="text-xs text-muted-foreground">
-              Recorded results
+              Click to view results
             </p>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs defaultValue="schedule" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="schedule">Exam Schedule</TabsTrigger>
           <TabsTrigger value="results">Results</TabsTrigger>
