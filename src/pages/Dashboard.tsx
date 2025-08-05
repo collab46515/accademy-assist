@@ -402,28 +402,40 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-primary via-primary-glow to-primary/90 text-primary-foreground py-16 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/50 to-muted/30">
+      {/* Enhanced Hero Section */}
+      <div className="relative bg-gradient-to-r from-primary via-primary to-primary-glow text-primary-foreground py-20 overflow-hidden">
+        {/* Animated background pattern */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.08%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40 animate-pulse"></div>
+        
+        {/* Floating orbs */}
+        <div className="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-24 h-24 bg-white/5 rounded-full blur-xl animate-pulse delay-300"></div>
+        <div className="absolute top-1/2 left-1/3 w-16 h-16 bg-white/8 rounded-full blur-lg animate-pulse delay-700"></div>
+        
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center animate-fade-in">
-            <h1 className="text-5xl font-bold mb-6 tracking-tight">School Management Dashboard</h1>
-            <p className="text-xl opacity-90 mb-10 leading-relaxed">
-              Complete overview of students, teachers, fees, and school operations
-            </p>
+          <div className="max-w-5xl mx-auto text-center">
+            <div className="animate-fade-in">
+              <h1 className="text-6xl md:text-7xl font-bold mb-8 tracking-tight bg-gradient-to-r from-white via-white to-white/90 bg-clip-text text-transparent">
+                School Management Dashboard
+              </h1>
+              <p className="text-xl md:text-2xl opacity-95 mb-12 leading-relaxed max-w-3xl mx-auto">
+                Complete overview and control of your educational institution with real-time insights and powerful tools
+              </p>
+            </div>
             
-            {/* Enhanced Search Bar */}
-            <div className="max-w-lg mx-auto relative group">
-              <div className="absolute inset-0 bg-white/20 rounded-xl blur-sm group-hover:blur-none transition-all duration-300"></div>
+            {/* Enhanced Search Bar with Glass Morphism */}
+            <div className="max-w-2xl mx-auto relative group animate-scale-in delay-300">
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/10 to-white/20 rounded-2xl blur-sm group-hover:blur-none transition-all duration-500"></div>
+              <div className="absolute inset-0 bg-white/5 rounded-2xl backdrop-blur-sm border border-white/10"></div>
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 h-6 w-6 text-white/70 group-hover:text-white transition-colors" />
                 <Input
                   type="text"
                   placeholder="Search students, teachers, ID numbers..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-12 pr-4 py-4 bg-background/95 backdrop-blur-sm text-foreground border-0 rounded-xl shadow-lg text-lg focus:shadow-xl transition-all duration-300"
+                  className="pl-16 pr-6 py-6 bg-transparent text-white placeholder:text-white/60 border-0 rounded-2xl text-lg focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-300"
                 />
               </div>
             </div>
