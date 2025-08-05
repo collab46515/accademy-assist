@@ -7,6 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Download, FileText, Table, Calendar, Smartphone, Users, GraduationCap, UserCheck } from "lucide-react";
+import jsPDF from 'jspdf';
+import { useToast } from "@/hooks/use-toast";
 
 interface ExportOptions {
   format: 'pdf' | 'excel' | 'ical' | 'google_calendar';
@@ -20,6 +22,7 @@ interface ExportOptions {
 }
 
 export function ExportManager() {
+  const { toast } = useToast();
   const [exportOptions, setExportOptions] = useState<ExportOptions>({
     format: 'pdf',
     viewType: 'admin',
@@ -31,6 +34,45 @@ export function ExportManager() {
 
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
+
+  // Mock timetable data for export
+  const mockTimetableData = {
+    Monday: [
+      { period: 1, subject: 'Mathematics', teacher: 'Ms. Johnson', room: 'Room 101', time: '08:00-08:45', class: 'Year 10A' },
+      { period: 2, subject: 'English', teacher: 'Mr. Smith', room: 'Room 102', time: '08:45-09:30', class: 'Year 10A' },
+      { period: 3, subject: 'Break', teacher: '', room: '', time: '09:30-09:45', class: '' },
+      { period: 4, subject: 'Physics', teacher: 'Dr. Brown', room: 'Physics Lab', time: '09:45-10:30', class: 'Year 10A' },
+      { period: 5, subject: 'History', teacher: 'Ms. Davis', room: 'Room 103', time: '10:30-11:15', class: 'Year 10A' },
+    ],
+    Tuesday: [
+      { period: 1, subject: 'Chemistry', teacher: 'Dr. Lee', room: 'Chemistry Lab', time: '08:00-08:45', class: 'Year 10A' },
+      { period: 2, subject: 'Mathematics', teacher: 'Ms. Johnson', room: 'Room 101', time: '08:45-09:30', class: 'Year 10A' },
+      { period: 3, subject: 'Break', teacher: '', room: '', time: '09:30-09:45', class: '' },
+      { period: 4, subject: 'Geography', teacher: 'Mr. Green', room: 'Room 105', time: '09:45-10:30', class: 'Year 10A' },
+      { period: 5, subject: 'Biology', teacher: 'Dr. White', room: 'Biology Lab', time: '10:30-11:15', class: 'Year 10A' },
+    ],
+    Wednesday: [
+      { period: 1, subject: 'Biology', teacher: 'Dr. White', room: 'Biology Lab', time: '08:00-08:45', class: 'Year 10A' },
+      { period: 2, subject: 'French', teacher: 'Mme. Martin', room: 'Room 104', time: '08:45-09:30', class: 'Year 10A' },
+      { period: 3, subject: 'Break', teacher: '', room: '', time: '09:30-09:45', class: '' },
+      { period: 4, subject: 'Mathematics', teacher: 'Ms. Johnson', room: 'Room 101', time: '09:45-10:30', class: 'Year 10A' },
+      { period: 5, subject: 'Chemistry', teacher: 'Dr. Lee', room: 'Chemistry Lab', time: '10:30-11:15', class: 'Year 10A' },
+    ],
+    Thursday: [
+      { period: 1, subject: 'English', teacher: 'Mr. Smith', room: 'Room 102', time: '08:00-08:45', class: 'Year 10A' },
+      { period: 2, subject: 'Physics', teacher: 'Dr. Brown', room: 'Physics Lab', time: '08:45-09:30', class: 'Year 10A' },
+      { period: 3, subject: 'Break', teacher: '', room: '', time: '09:30-09:45', class: '' },
+      { period: 4, subject: 'Art', teacher: 'Ms. Turner', room: 'Art Studio', time: '09:45-10:30', class: 'Year 10A' },
+      { period: 5, subject: 'French', teacher: 'Mme. Martin', room: 'Room 104', time: '10:30-11:15', class: 'Year 10A' },
+    ],
+    Friday: [
+      { period: 1, subject: 'History', teacher: 'Ms. Davis', room: 'Room 103', time: '08:00-08:45', class: 'Year 10A' },
+      { period: 2, subject: 'PE', teacher: 'Mr. Wilson', room: 'Gymnasium', time: '08:45-09:30', class: 'Year 10A' },
+      { period: 3, subject: 'Break', teacher: '', room: '', time: '09:30-09:45', class: '' },
+      { period: 4, subject: 'English', teacher: 'Mr. Smith', room: 'Room 102', time: '09:45-10:30', class: 'Year 10A' },
+      { period: 5, subject: 'Physics', teacher: 'Dr. Brown', room: 'Physics Lab', time: '10:30-11:15', class: 'Year 10A' },
+    ]
+  };
 
   const formatOptions = [
     { value: 'pdf', label: 'PDF Document', icon: FileText, description: 'Professional printable format' },
@@ -63,20 +105,192 @@ export function ExportManager() {
     }, 200);
   };
 
-  const downloadFile = () => {
-    // Mock download - in real implementation would generate actual files
-    const filename = `timetable_${exportOptions.viewType}_${Date.now()}.${exportOptions.format === 'google_calendar' ? 'ics' : exportOptions.format}`;
-    console.log(`Downloading: ${filename}`);
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.width;
+    let yPosition = 20;
     
-    // For demo, create a simple blob and download
-    const content = `Timetable Export - ${exportOptions.viewType} view\nFormat: ${exportOptions.format}\nGenerated: ${new Date().toISOString()}`;
-    const blob = new Blob([content], { type: 'text/plain' });
+    // Title
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('School Timetable', pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 10;
+    
+    // Subtitle
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${exportOptions.viewType.toUpperCase()} VIEW - ${exportOptions.dateRange.replace('_', ' ').toUpperCase()}`, pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 20;
+    
+    // Table headers
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    const headers = ['Day', 'Time', 'Subject', 'Teacher'];
+    if (exportOptions.includeRooms) headers.push('Room');
+    
+    const colWidth = pageWidth / headers.length;
+    headers.forEach((header, index) => {
+      doc.text(header, 10 + (index * colWidth), yPosition);
+    });
+    yPosition += 8;
+    
+    // Draw line under headers
+    doc.line(10, yPosition, pageWidth - 10, yPosition);
+    yPosition += 5;
+    
+    // Table content
+    doc.setFont('helvetica', 'normal');
+    Object.entries(mockTimetableData).forEach(([day, periods]) => {
+      periods.forEach((period) => {
+        if (!exportOptions.includeBreaks && (period.subject === 'Break' || period.subject === 'Lunch')) {
+          return;
+        }
+        
+        if (yPosition > 250) { // Check if we need a new page
+          doc.addPage();
+          yPosition = 20;
+        }
+        
+        const rowData = [day, period.time, period.subject, period.teacher];
+        if (exportOptions.includeRooms) rowData.push(period.room);
+        
+        rowData.forEach((data, index) => {
+          doc.text(data || '', 10 + (index * colWidth), yPosition);
+        });
+        yPosition += 6;
+        
+        // Only show day name for first period of each day
+        day = '';
+      });
+    });
+    
+    // Save the PDF
+    const filename = `timetable_${exportOptions.viewType}_${Date.now()}.pdf`;
+    doc.save(filename);
+    
+    toast({
+      title: "Success",
+      description: `PDF exported successfully: ${filename}`,
+    });
+  };
+
+  const generateExcel = () => {
+    // Create CSV content (simple Excel alternative)
+    let csvContent = 'Day,Time,Subject,Teacher';
+    if (exportOptions.includeRooms) csvContent += ',Room';
+    csvContent += '\n';
+    
+    Object.entries(mockTimetableData).forEach(([day, periods]) => {
+      periods.forEach((period) => {
+        if (!exportOptions.includeBreaks && (period.subject === 'Break' || period.subject === 'Lunch')) {
+          return;
+        }
+        
+        let row = `${day},${period.time},${period.subject},${period.teacher}`;
+        if (exportOptions.includeRooms) row += `,${period.room}`;
+        csvContent += row + '\n';
+        
+        // Only show day name for first period of each day
+        day = '';
+      });
+    });
+    
+    // Create and download CSV file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `timetable_${exportOptions.viewType}_${Date.now()}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Success",
+      description: "Excel file exported successfully!",
+    });
+  };
+
+  const generateICalendar = () => {
+    let icalContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//School//Timetable//EN',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH'
+    ];
+    
+    const now = new Date();
+    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 1)); // Monday
+    
+    Object.entries(mockTimetableData).forEach(([day, periods], dayIndex) => {
+      periods.forEach((period) => {
+        if (!exportOptions.includeBreaks && (period.subject === 'Break' || period.subject === 'Lunch')) {
+          return;
+        }
+        
+        const eventDate = new Date(startOfWeek);
+        eventDate.setDate(startOfWeek.getDate() + dayIndex);
+        
+        const [startTime, endTime] = period.time.split('-');
+        const startDateTime = new Date(`${eventDate.toDateString()} ${startTime}`);
+        const endDateTime = new Date(`${eventDate.toDateString()} ${endTime}`);
+        
+        const formatDate = (date: Date) => {
+          return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        };
+        
+        icalContent.push(
+          'BEGIN:VEVENT',
+          `UID:${period.subject}-${dayIndex}-${period.period}@school.edu`,
+          `DTSTART:${formatDate(startDateTime)}`,
+          `DTEND:${formatDate(endDateTime)}`,
+          `SUMMARY:${period.subject}`,
+          `DESCRIPTION:Teacher: ${period.teacher}${exportOptions.includeRooms ? `\\nRoom: ${period.room}` : ''}`,
+          `LOCATION:${period.room}`,
+          'END:VEVENT'
+        );
+      });
+    });
+    
+    icalContent.push('END:VCALENDAR');
+    
+    const blob = new Blob([icalContent.join('\n')], { type: 'text/calendar;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `timetable_${exportOptions.viewType}_${Date.now()}.ics`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Success",
+      description: "iCalendar file exported successfully!",
+    });
+  };
+
+  const downloadFile = () => {
+    switch (exportOptions.format) {
+      case 'pdf':
+        generatePDF();
+        break;
+      case 'excel':
+        generateExcel();
+        break;
+      case 'ical':
+      case 'google_calendar':
+        generateICalendar();
+        break;
+      default:
+        toast({
+          title: "Error",
+          description: "Unsupported export format",
+          variant: "destructive"
+        });
+    }
   };
 
   const getFormatIcon = (format: string) => {
