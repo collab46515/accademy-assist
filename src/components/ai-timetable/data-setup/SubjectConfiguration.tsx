@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { BookOpen, Plus, Edit2, Trash2, Lab, Computer, Clock } from "lucide-react";
+import { BookOpen, Plus, Edit2, Trash2, FlaskConical, Computer, Clock } from "lucide-react";
 import { useTimetableData } from "@/hooks/useTimetableData";
 
 interface SubjectConfigurationProps {
@@ -255,7 +255,7 @@ export function SubjectConfiguration({ onNext, onBack }: SubjectConfigurationPro
                     onCheckedChange={(checked) => updateEditingSubject('requiresLab', checked)}
                   />
                   <Label htmlFor="requires-lab" className="flex items-center space-x-2">
-                    <Lab className="h-4 w-4" />
+                    <FlaskConical className="h-4 w-4" />
                     <span>Requires Laboratory</span>
                   </Label>
                 </div>
