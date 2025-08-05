@@ -283,7 +283,10 @@ export function FinancialDashboard() {
         {metrics.map((metric, index) => (
           <Dialog key={index}>
             <DialogTrigger asChild>
-              <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group">
+              <Card 
+                className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group"
+                onClick={() => console.log(`Clicked on ${metric.label}`)}
+              >
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div className="space-y-2">
@@ -307,7 +310,15 @@ export function FinancialDashboard() {
                       <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                         <metric.icon className="h-6 w-6 text-primary" />
                       </div>
-                      <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log(`Details button clicked for ${metric.label}`);
+                        }}
+                      >
                         <Eye className="h-3 w-3 mr-1" />
                         Details
                       </Button>
