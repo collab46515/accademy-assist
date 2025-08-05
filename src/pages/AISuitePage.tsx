@@ -28,6 +28,7 @@ import {
   Wand2
 } from "lucide-react";
 import { AITimetableGenerator } from "@/components/ai-timetable/AITimetableGenerator";
+import { AILessonPlanner } from "@/components/ai-suite/AILessonPlanner";
 
 interface AIFeature {
   id: string;
@@ -267,9 +268,10 @@ const AISuitePage = () => {
 
       {/* Main Tabs */}
       <Tabs defaultValue="features" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="features">AI Features</TabsTrigger>
           <TabsTrigger value="timetable">Timetable Generator</TabsTrigger>
+          <TabsTrigger value="lesson-planner">Lesson Planner</TabsTrigger>
           <TabsTrigger value="comments">Comment Generator</TabsTrigger>
           <TabsTrigger value="insights">Predictive Insights</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
@@ -342,6 +344,10 @@ const AISuitePage = () => {
 
         <TabsContent value="timetable">
           <AITimetableGenerator />
+        </TabsContent>
+
+        <TabsContent value="lesson-planner">
+          <AILessonPlanner />
         </TabsContent>
 
         <TabsContent value="comments">
