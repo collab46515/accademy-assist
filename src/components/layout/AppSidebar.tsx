@@ -67,6 +67,7 @@ const erpModules = [
         url: "/admissions", 
         icon: UserPlus,
         subItems: [
+          { title: "New Applications", url: "/admissions/new", icon: UserPlus },
           { title: "Application Submitted", url: "/admissions?stage=0", icon: Send },
           { title: "Document Verification", url: "/admissions?stage=1", icon: FileText },
           { title: "Application Review", url: "/admissions?stage=2", icon: Eye },
