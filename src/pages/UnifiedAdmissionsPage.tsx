@@ -13,7 +13,7 @@ import { StageDetailBreakdown } from "@/components/admissions/StageDetailBreakdo
 import { ApplicationTaskManager } from "@/components/admissions/ApplicationTaskManager";
 import { StageWorkflowManager } from "@/components/admissions/StageWorkflowManager";
 import { AdmissionStagesBreadcrumb } from "@/components/admissions/AdmissionStagesBreadcrumb";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, UserPlus, FileText, Phone, Globe, Calendar, Upload } from "lucide-react";
 
 const UnifiedAdmissionsPage = () => {
   const location = useLocation();
@@ -97,14 +97,109 @@ const UnifiedAdmissionsPage = () => {
 
         {/* New Applications Tab */}
         <TabsContent value="pathways" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>New Application Pathways</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>Application creation functionality will be implemented here.</p>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <UserPlus className="h-5 w-5" />
+                  Online Application
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Standard digital application form for new student admissions
+                </p>
+                <Button className="w-full">
+                  Start New Application
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Sibling Application
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Simplified application for siblings of current students
+                </p>
+                <Button variant="outline" className="w-full">
+                  Sibling Application
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Phone className="h-5 w-5" />
+                  Phone Enquiry
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Create application from phone enquiry or walk-in
+                </p>
+                <Button variant="secondary" className="w-full">
+                  Phone Application
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  International Student
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Specialized pathway for international student applications
+                </p>
+                <Button variant="outline" className="w-full">
+                  International Application
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Mid-Year Entry
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Application for mid-year or term-time entry
+                </p>
+                <Button variant="secondary" className="w-full">
+                  Mid-Year Application
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Upload className="h-5 w-5" />
+                  Bulk Import
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Import multiple applications from external sources
+                </p>
+                <Button variant="outline" className="w-full">
+                  Bulk Import
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* Reports Tab */}
