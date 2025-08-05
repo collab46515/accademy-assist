@@ -5,6 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { 
   PoundSterling, 
   TrendingUp, 
@@ -60,6 +63,13 @@ export function FinancialDashboard() {
   const { user } = useAuth();
   const { feeHeads, feeStructures, invoices, loading } = useFeeData();
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    status: '',
+    category: '',
+    dateRange: '',
+    amountRange: ''
+  });
 
   // Calculate real metrics from data with better logic
   const totalRevenue = invoices
@@ -596,28 +606,132 @@ export function FinancialDashboard() {
 }
 
 function DrillDownContent({ metric, data }: { metric: FinancialMetric, data: any }) {
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    status: '',
+    category: '',
+    dateRange: '',
+    amountRange: ''
+  });
+
+  const [filteredData, setFilteredData] = useState(data.data);
+
+  const applyFilters = () => {
+    let filtered = data.data;
+
+    if (filters.status) {
+      filtered = filtered.filter((item: any) => 
+        item.status?.toLowerCase().includes(filters.status.toLowerCase())
+      );
+    }
+
+    if (filters.category) {
+      filtered = filtered.filter((item: any) => 
+        (item.category?.toLowerCase().includes(filters.category.toLowerCase()) ||
+         item.vendor?.toLowerCase().includes(filters.category.toLowerCase()) ||
+         item.department?.toLowerCase().includes(filters.category.toLowerCase()))
+      );
+    }
+
+    if (filters.amountRange) {
+      const [min, max] = filters.amountRange.split('-').map(Number);
+      filtered = filtered.filter((item: any) => {
+        const amount = item.amount || item.budgeted || 0;
+        return (!min || amount >= min) && (!max || amount <= max);
+      });
+    }
+
+    setFilteredData(filtered);
+    setIsFilterOpen(false);
+  };
+
+  const resetFilters = () => {
+    setFilters({ status: '', category: '', dateRange: '', amountRange: '' });
+    setFilteredData(data.data);
+    setIsFilterOpen(false);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => {
-              // Filter functionality - could open a filter modal
-              alert(`Filter applied for ${metric.label}`);
-            }}
-          >
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
-          </Button>
+          <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Filter className="h-4 w-4 mr-2" />
+                Filter ({Object.values(filters).filter(Boolean).length})
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Filter {metric.label}</DialogTitle>
+                <DialogDescription>
+                  Apply filters to narrow down the results
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status</Label>
+                  <Select value={filters.status} onValueChange={(value) => setFilters({...filters, status: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All statuses" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All statuses</SelectItem>
+                      <SelectItem value="paid">Paid</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="overdue">Overdue</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="category">Category/Department</Label>
+                  <Input
+                    id="category"
+                    placeholder="Enter category or department"
+                    value={filters.category}
+                    onChange={(e) => setFilters({...filters, category: e.target.value})}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="amount">Amount Range (£)</Label>
+                  <Select value={filters.amountRange} onValueChange={(value) => setFilters({...filters, amountRange: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All amounts" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All amounts</SelectItem>
+                      <SelectItem value="0-100">£0 - £100</SelectItem>
+                      <SelectItem value="100-500">£100 - £500</SelectItem>
+                      <SelectItem value="500-1000">£500 - £1,000</SelectItem>
+                      <SelectItem value="1000-5000">£1,000 - £5,000</SelectItem>
+                      <SelectItem value="5000-">£5,000+</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <Button onClick={applyFilters} className="flex-1">
+                    Apply Filters
+                  </Button>
+                  <Button variant="outline" onClick={resetFilters}>
+                    Reset
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          
           <Button 
             variant="outline" 
             size="sm"
             onClick={() => {
               // Export functionality
               const csvContent = `data:text/csv;charset=utf-8,${encodeURIComponent(
-                `Category,Amount,Status\n${data.data.map((item: any) => 
+                `Category,Amount,Status\n${filteredData.map((item: any) => 
                   `${item.category || item.vendor || item.department || item.id},${item.amount},${item.status || 'N/A'}`
                 ).join('\n')}`
               )}`;
@@ -635,7 +749,7 @@ function DrillDownContent({ metric, data }: { metric: FinancialMetric, data: any
 
       {metric.label === "Monthly Revenue" && (
         <div className="space-y-3">
-          {data.data.map((item: any, index: number) => (
+          {filteredData.map((item: any, index: number) => (
             <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
               <div>
                 <p className="font-medium">{item.category}</p>
@@ -652,7 +766,7 @@ function DrillDownContent({ metric, data }: { metric: FinancialMetric, data: any
 
       {metric.label === "Outstanding Fees" && (
         <div className="space-y-3">
-          {data.data.map((item: any, index: number) => (
+          {filteredData.map((item: any, index: number) => (
             <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
               <div>
                 <p className="font-medium">{item.id}</p>
@@ -671,7 +785,7 @@ function DrillDownContent({ metric, data }: { metric: FinancialMetric, data: any
 
       {metric.label === "Budget Utilization" && (
         <div className="space-y-3">
-          {data.data.map((item: any, index: number) => (
+          {filteredData.map((item: any, index: number) => (
             <div key={index} className="space-y-2 p-4 border rounded-lg">
               <div className="flex items-center justify-between">
                 <p className="font-medium">{item.department}</p>
@@ -691,7 +805,7 @@ function DrillDownContent({ metric, data }: { metric: FinancialMetric, data: any
 
       {metric.label === "Vendor Payments" && (
         <div className="space-y-3">
-          {data.data.map((item: any, index: number) => (
+          {filteredData.map((item: any, index: number) => (
             <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
               <div>
                 <p className="font-medium">{item.vendor}</p>
