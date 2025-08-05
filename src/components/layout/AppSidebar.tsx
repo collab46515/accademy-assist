@@ -355,22 +355,26 @@ export function AppSidebar() {
             Modules
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
-              {erpModules.map((module) => (
-                <SidebarMenuItem key={module.title}>
-                  <SidebarMenuButton 
-                    asChild 
-                    isActive={module.title === currentModule}
-                    tooltip={state === "collapsed" ? module.title : undefined}
-                    className="h-11 rounded-lg border-l-3 border-l-primary/20 hover:border-l-primary hover:bg-primary/5 transition-all duration-200"
-                  >
-                    <NavLink to={module.url} className="flex items-center gap-3 px-3 py-2">
-                      <module.icon className="h-4 w-4 text-foreground/70" />
-                      <span className="font-medium text-foreground">{module.title}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+            <SidebarMenu className="space-y-2">
+              {erpModules.map((module, index) => {
+                const colors = ['bg-blue-100 text-blue-700 hover:bg-blue-200', 'bg-green-100 text-green-700 hover:bg-green-200', 'bg-purple-100 text-purple-700 hover:bg-purple-200', 'bg-orange-100 text-orange-700 hover:bg-orange-200', 'bg-pink-100 text-pink-700 hover:bg-pink-200'];
+                const colorClass = colors[index % colors.length];
+                return (
+                  <SidebarMenuItem key={module.title}>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={module.title === currentModule}
+                      tooltip={state === "collapsed" ? module.title : undefined}
+                      className={`h-10 rounded-full px-4 transition-all duration-200 ${colorClass}`}
+                    >
+                      <NavLink to={module.url} className="flex items-center gap-3">
+                        <module.icon className="h-4 w-4" />
+                        <span className="font-medium text-sm">{module.title}</span>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
