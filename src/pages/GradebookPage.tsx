@@ -20,118 +20,45 @@ import {
   TrendingDown,
   Target,
   Bot,
-  Star
+  Star,
+  Plus,
+  Edit,
+  BarChart3
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useGradingData, type Grade } from "@/hooks/useGradingData";
+import { useStudentData } from "@/hooks/useStudentData";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-interface Grade {
-  id: string;
-  studentId: string;
-  studentName: string;
-  subject: string;
-  assessment: string;
-  score: number;
-  maxScore: number;
-  grade: string;
-  term: string;
-  effort: "excellent" | "good" | "satisfactory" | "needs improvement";
-  comments?: string;
-}
+// Remove duplicate interfaces - using ones from the hook
 
-interface Report {
-  id: string;
-  studentId: string;
-  studentName: string;
-  term: string;
-  year: string;
-  averageGrade: string;
-  subjects: number;
-  status: "draft" | "completed" | "sent";
-  generatedAt: string;
-}
-
-const mockGrades: Grade[] = [
-  {
-    id: "1",
-    studentId: "STU001",
-    studentName: "Emma Thompson",
-    subject: "Mathematics",
-    assessment: "Algebra Test",
-    score: 85,
-    maxScore: 100,
-    grade: "A-",
-    term: "Autumn",
-    effort: "excellent",
-    comments: "Excellent understanding of algebraic concepts"
-  },
-  {
-    id: "2",
-    studentId: "STU002",
-    studentName: "James Wilson",
-    subject: "English Literature",
-    assessment: "Essay Analysis",
-    score: 78,
-    maxScore: 100,
-    grade: "B+",
-    term: "Autumn",
-    effort: "good",
-    comments: "Good analytical skills, needs to work on structure"
-  },
-  {
-    id: "3",
-    studentId: "STU003",
-    studentName: "Sophie Chen",
-    subject: "Physics",
-    assessment: "Lab Report",
-    score: 92,
-    maxScore: 100,
-    grade: "A*",
-    term: "Autumn",
-    effort: "excellent",
-    comments: "Outstanding practical work and scientific reasoning"
-  }
-];
-
-const mockReports: Report[] = [
-  {
-    id: "1",
-    studentId: "STU001",
-    studentName: "Emma Thompson",
-    term: "Autumn Term",
-    year: "Year 7",
-    averageGrade: "A-",
-    subjects: 8,
-    status: "completed",
-    generatedAt: "2024-01-15"
-  },
-  {
-    id: "2",
-    studentId: "STU002", 
-    studentName: "James Wilson",
-    term: "Autumn Term",
-    year: "Year 8",
-    averageGrade: "B+",
-    subjects: 9,
-    status: "sent",
-    generatedAt: "2024-01-14"
-  }
-];
+// Remove mock data - using data from the hook
 
 const GradebookPage = () => {
+  const { toast } = useToast();
+  const { students } = useStudentData();
+  const { 
+    loading, 
+    grades, 
+    gradingRubrics, 
+    gradeBoundaries, 
+    reports,
+    createGrade,
+    updateGrade,
+    calculateGrade,
+    generateAnalytics
+  } = useGradingData();
+  
   const [searchTerm, setSearchTerm] = useState("");
-  const [grades] = useState(mockGrades);
-  const [reports] = useState(mockReports);
   const [selectedGrade, setSelectedGrade] = useState<Grade | null>(null);
   const [isAICommentDialogOpen, setIsAICommentDialogOpen] = useState(false);
   const [isGeneratingComment, setIsGeneratingComment] = useState(false);
   const [generatedComment, setGeneratedComment] = useState("");
-  const { toast } = useToast();
 
-  const getEffortBadge = (effort: Grade["effort"]) => {
+  const getEffortBadge = (effort: string) => {
     switch (effort) {
       case "excellent":
         return <Badge className="bg-success text-success-foreground"><Star className="h-3 w-3 mr-1" />Excellent</Badge>;
@@ -141,17 +68,22 @@ const GradebookPage = () => {
         return <Badge variant="secondary">Satisfactory</Badge>;
       case "needs improvement":
         return <Badge variant="destructive">Needs Improvement</Badge>;
+      default:
+        return <Badge variant="outline">Not Set</Badge>;
     }
   };
 
-  const getStatusBadge = (status: Report["status"]) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case "draft":
         return <Badge variant="secondary">Draft</Badge>;
       case "completed":
-        return <Badge className="bg-success text-success-foreground">Completed</Badge>;
+      case "generated":
+        return <Badge className="bg-success text-success-foreground">Generated</Badge>;
       case "sent":
         return <Badge variant="outline">Sent</Badge>;
+      default:
+        return <Badge variant="outline">Unknown</Badge>;
     }
   };
 
@@ -250,9 +182,9 @@ const GradebookPage = () => {
     // Simulate AI comment generation
     setTimeout(() => {
       const comments = [
-        `${grade.studentName} demonstrates excellent understanding in ${grade.subject}. The ${grade.score}% score on ${grade.assessment} reflects consistent effort and strong grasp of concepts. Continue encouraging analytical thinking and problem-solving skills.`,
-        `Strong performance by ${grade.studentName} in ${grade.subject}. The ${grade.grade} grade on ${grade.assessment} shows good progress. Focus on developing deeper understanding and application of key concepts.`,
-        `${grade.studentName} shows promising potential in ${grade.subject}. With continued effort and focus on fundamental concepts, there is excellent scope for improvement. The current ${grade.effort} effort level is commendable.`
+        `${grade.student_name} demonstrates excellent understanding in ${grade.subject}. The ${grade.score}% score on ${grade.assessment_name} reflects consistent effort and strong grasp of concepts. Continue encouraging analytical thinking and problem-solving skills.`,
+        `Strong performance by ${grade.student_name} in ${grade.subject}. The ${grade.grade} grade on ${grade.assessment_name} shows good progress. Focus on developing deeper understanding and application of key concepts.`,
+        `${grade.student_name} shows promising potential in ${grade.subject}. With continued effort and focus on fundamental concepts, there is excellent scope for improvement. The current ${grade.effort} effort level is commendable.`
       ];
       
       const randomComment = comments[Math.floor(Math.random() * comments.length)];
@@ -262,13 +194,13 @@ const GradebookPage = () => {
   };
 
   const filteredGrades = grades.filter(grade =>
-    grade.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    grade.student_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     grade.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    grade.assessment.toLowerCase().includes(searchTerm.toLowerCase())
+    grade.assessment_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalGrades = grades.length;
-  const averageScore = Math.round(grades.reduce((sum, grade) => sum + grade.score, 0) / grades.length);
+  const averageScore = grades.length > 0 ? Math.round(grades.reduce((sum, grade) => sum + grade.score, 0) / grades.length) : 0;
   const excellentEffort = grades.filter(g => g.effort === "excellent").length;
 
   return (
@@ -418,7 +350,7 @@ const GradebookPage = () => {
                             <SelectContent>
                               {grades.map((grade) => (
                                 <SelectItem key={grade.id} value={grade.id}>
-                                  {grade.studentName} - {grade.subject} ({grade.grade})
+                                  {grade.student_name} - {grade.subject} ({grade.grade})
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -427,9 +359,9 @@ const GradebookPage = () => {
                         {selectedGrade && (
                           <div className="p-4 bg-muted rounded-lg">
                             <h4 className="font-semibold mb-2">Selected Grade Details:</h4>
-                            <p><strong>Student:</strong> {selectedGrade.studentName}</p>
+                            <p><strong>Student:</strong> {selectedGrade.student_name}</p>
                             <p><strong>Subject:</strong> {selectedGrade.subject}</p>
-                            <p><strong>Assessment:</strong> {selectedGrade.assessment}</p>
+                            <p><strong>Assessment:</strong> {selectedGrade.assessment_name}</p>
                             <p><strong>Score:</strong> {selectedGrade.score}% ({selectedGrade.grade})</p>
                             <p><strong>Effort:</strong> {selectedGrade.effort}</p>
                           </div>
@@ -508,12 +440,12 @@ const GradebookPage = () => {
                   <TableBody>
                     {filteredGrades.map((grade) => (
                       <TableRow key={grade.id}>
-                        <TableCell className="font-medium">{grade.studentName}</TableCell>
+                        <TableCell className="font-medium">{grade.student_name}</TableCell>
                         <TableCell>{grade.subject}</TableCell>
-                        <TableCell>{grade.assessment}</TableCell>
+                        <TableCell>{grade.assessment_name}</TableCell>
                         <TableCell>
                           <div className="flex items-center space-x-1">
-                            <span>{grade.score}/{grade.maxScore}</span>
+                            <span>{grade.score}/{grade.max_score}</span>
                             {grade.score >= 85 ? (
                               <TrendingUp className="h-4 w-4 text-success" />
                             ) : grade.score < 70 ? (
@@ -584,16 +516,16 @@ const GradebookPage = () => {
                   <TableBody>
                     {reports.map((report) => (
                       <TableRow key={report.id}>
-                        <TableCell className="font-medium">{report.studentName}</TableCell>
+                        <TableCell className="font-medium">{report.student_name}</TableCell>
                         <TableCell>{report.year}</TableCell>
                         <TableCell>{report.term}</TableCell>
                         <TableCell>
                           <Badge variant="outline" className="font-bold">
-                            {report.averageGrade}
+                            {report.average_grade}%
                           </Badge>
                         </TableCell>
-                        <TableCell>{report.subjects}</TableCell>
-                        <TableCell>{report.generatedAt}</TableCell>
+                        <TableCell>{report.subject_count}</TableCell>
+                        <TableCell>{report.generated_date}</TableCell>
                         <TableCell>{getStatusBadge(report.status)}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex space-x-1 justify-end">
