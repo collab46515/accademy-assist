@@ -85,9 +85,9 @@ export function AdmissionStagesBreadcrumb() {
   };
 
   return (
-    <div className="bg-card border rounded-lg p-4 mb-6">
+    <div className="bg-red-500 text-white border rounded-lg p-4 mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">Admission Stages</h3>
+        <h3 className="text-lg font-semibold">🚨 BREADCRUMB TEST - STAGE BUTTONS SHOULD WORK 🚨</h3>
         {activeStageId !== null && (
           <Button 
             variant="outline" 
