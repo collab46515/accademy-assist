@@ -133,7 +133,9 @@ export function useMasterData() {
         studentsResponse,
         parentsResponse,
         staffResponse,
-        departmentsResponse
+        departmentsResponse,
+        yearGroupsResponse,
+        housesResponse
       ] = await Promise.all([
         supabase.from('schools').select('*').order('name'),
         supabase.from('subjects').select('*').order('subject_name'),
@@ -145,7 +147,9 @@ export function useMasterData() {
           created_at
         `),
         supabase.from('staff').select('*').order('last_name'),
-        supabase.from('departments').select('*').order('name')
+        supabase.from('departments').select('*').order('name'),
+        supabase.from('year_groups' as any).select('*').order('sort_order'),
+        supabase.from('houses' as any).select('*').order('house_name')
       ]);
 
       if (schoolsResponse.error) throw schoolsResponse.error;
@@ -158,6 +162,14 @@ export function useMasterData() {
       setStudents(studentsResponse.data as Student[] || []);
       setStaff(staffResponse.data as Staff[] || []);
       setDepartments(departmentsResponse.data as DBDepartment[] || []);
+      
+      // Handle new tables that might not be in types yet
+      if (!yearGroupsResponse.error && yearGroupsResponse.data) {
+        setYearGroups((yearGroupsResponse.data as unknown) as YearGroup[] || []);
+      }
+      if (!housesResponse.error && housesResponse.data) {
+        setHouses((housesResponse.data as unknown) as House[] || []);
+      }
       
       // Process parent relationships to show meaningful data
       const parentRelationships = parentsResponse.data?.map((rel: any) => ({
