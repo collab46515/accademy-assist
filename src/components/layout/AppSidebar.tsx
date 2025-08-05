@@ -68,6 +68,12 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 // Logical Business-Focused ERP Module Structure
 const erpModules = [
   {
+    title: "Global Dashboard",
+    url: "/dashboard",
+    icon: LayoutDashboard,
+    subItems: []
+  },
+  {
     title: "Academic Operations",
     url: "/academic-operations",
     icon: GraduationCap,
@@ -146,6 +152,8 @@ const erpModules = [
 ];
 
 function getCurrentModule(pathname: string) {
+  if (pathname === '/dashboard') return 'Global Dashboard';
+  
   if (pathname.startsWith('/academic-operations') || 
       pathname.startsWith('/admissions') || 
       pathname.startsWith('/curriculum') || 
@@ -180,7 +188,7 @@ function getCurrentModule(pathname: string) {
       pathname.startsWith('/integrations') || 
       pathname.startsWith('/portals')) return 'Administration';
   
-  return 'Academic Operations';
+  return 'Global Dashboard';
 }
 
 interface SidebarGroupItemsProps {
