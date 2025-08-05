@@ -131,22 +131,26 @@ export function UserManagementPage() {
     const password = formData.get('password') as string;
 
     try {
-      // Create user account
-      const { data, error } = await supabase.auth.admin.createUser({
+      // Use regular signup instead of admin API
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        user_metadata: {
-          first_name: firstName,
-          last_name: lastName
-        },
-        email_confirm: true
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            first_name: firstName,
+            last_name: lastName
+          }
+        }
       });
 
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: `User ${email} created successfully`,
+        title: "Success", 
+        description: `User ${email} created successfully. They will receive a confirmation email.`,
       });
 
       setCreateUserOpen(false);
