@@ -33,6 +33,7 @@ import { AILessonPlannerPage } from "./pages/AILessonPlannerPage";
 import { AICommentGeneratorPage } from "./pages/AICommentGeneratorPage";
 import { AIPredictiveInsightsPage } from "./pages/AIPredictiveInsightsPage";
 import { AISettingsPage } from "./pages/AISettingsPage";
+import { AIGradingPage } from "./pages/AIGradingPage";
 import IntegrationsPage from "./pages/IntegrationsPage";
 import { UserManagementPage } from "./pages/UserManagementPage";
 import { HRManagementPage } from "./pages/HRManagementPage";
@@ -141,6 +142,7 @@ const App = () => (
                           <Route path="/ai-suite" element={<AISuitePage />} />
                           <Route path="/ai-suite/timetable" element={<AITimetablePage />} />
                           <Route path="/ai-suite/lesson-planner" element={<AILessonPlannerPage />} />
+                          <Route path="/ai-suite/grading" element={<AIGradingPage />} />
                           <Route path="/ai-suite/comments" element={<AICommentGeneratorPage />} />
                           <Route path="/ai-suite/insights" element={<AIPredictiveInsightsPage />} />
                           <Route path="/ai-suite/settings" element={<AISettingsPage />} />

@@ -124,6 +124,27 @@ const AISuitePage = () => {
           </CardContent>
         </Card>
 
+        <Card className="shadow-[var(--shadow-card)] hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/ai-suite/grading'}>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Target className="h-5 w-5 text-primary" />
+              <span>AI Grading Assistant</span>
+            </CardTitle>
+            <CardDescription>Intelligent feedback and grading suggestions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-success">12</p>
+                <p className="text-sm text-muted-foreground">Submissions graded</p>
+              </div>
+              <Button variant="outline" size="sm">
+                Grade Work
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card className="shadow-[var(--shadow-card)] hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/ai-suite/comments'}>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
