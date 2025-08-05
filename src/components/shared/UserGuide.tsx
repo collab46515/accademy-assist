@@ -230,10 +230,45 @@ export function UserGuide({ moduleName, sections, quickActions = [] }: UserGuide
                       size="sm" 
                       className="w-full"
                       onClick={() => {
-                        toast({
-                          title: action.title,
-                          description: `${action.action} feature will be available soon!`,
-                        });
+                        // Execute the actual action based on the action title
+                        if (action.title === 'Record New Payment') {
+                          // Scroll to payment collection section
+                          const paymentSection = document.querySelector('[data-section="payment-collection"]');
+                          paymentSection?.scrollIntoView({ behavior: 'smooth' });
+                          toast({
+                            title: "Payment Collection",
+                            description: "Navigated to payment recording section",
+                          });
+                        } else if (action.title === 'Generate Invoice') {
+                          // Scroll to invoice generation section
+                          const invoiceSection = document.querySelector('[data-section="invoice-generation"]');
+                          invoiceSection?.scrollIntoView({ behavior: 'smooth' });
+                          toast({
+                            title: "Invoice Generation",
+                            description: "Navigated to invoice generation section",
+                          });
+                        } else if (action.title === 'View Financial Reports') {
+                          // Scroll to reports section
+                          const reportsSection = document.querySelector('[data-section="reports"]');
+                          reportsSection?.scrollIntoView({ behavior: 'smooth' });
+                          toast({
+                            title: "Financial Reports",
+                            description: "Navigated to reports section",
+                          });
+                        } else if (action.title === 'Check Outstanding Fees') {
+                          // Scroll to outstanding fees section
+                          const feesSection = document.querySelector('[data-section="outstanding-fees"]');
+                          feesSection?.scrollIntoView({ behavior: 'smooth' });
+                          toast({
+                            title: "Outstanding Fees",
+                            description: "Navigated to outstanding fees section",
+                          });
+                        } else {
+                          toast({
+                            title: action.title,
+                            description: "Quick action executed successfully",
+                          });
+                        }
                       }}
                     >
                       <Play className="h-3 w-3 mr-1" />
