@@ -355,18 +355,18 @@ export function AppSidebar() {
             Modules
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-2">
+            <SidebarMenu className="space-y-3">
               {erpModules.map((module) => (
                 <SidebarMenuItem key={module.title}>
                   <SidebarMenuButton 
                     asChild 
                     isActive={module.title === currentModule}
                     tooltip={state === "collapsed" ? module.title : undefined}
-                    className="h-11 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 hover:border-white/30 transition-all duration-200"
+                    className="h-12 rounded-xl bg-gradient-to-r from-primary/20 via-primary-glow/20 to-primary/20 hover:from-primary/30 hover:via-primary-glow/30 hover:to-primary/30 border-0 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
                   >
-                    <NavLink to={module.url} className="flex items-center gap-3 px-3 py-2">
-                      <module.icon className="h-4 w-4 text-foreground/80" />
-                      <span className="font-medium text-foreground">{module.title}</span>
+                    <NavLink to={module.url} className="flex items-center gap-3 px-4 py-3">
+                      <module.icon className="h-5 w-5 text-primary" />
+                      <span className="font-semibold text-foreground">{module.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
