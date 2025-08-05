@@ -141,25 +141,25 @@ export default function LandingPage() {
             <div className="hidden md:flex items-center gap-6">
               <button 
                 onClick={() => setActiveSection("home")}
-                className="text-sm hover:text-primary transition-colors"
+                className={`text-sm hover:text-primary transition-colors ${activeSection === "home" ? "text-primary font-medium" : ""}`}
               >
                 Home
               </button>
               <button 
                 onClick={() => setActiveSection("modules")}
-                className="text-sm hover:text-primary transition-colors"
+                className={`text-sm hover:text-primary transition-colors ${activeSection === "modules" ? "text-primary font-medium" : ""}`}
               >
                 Modules
               </button>
               <button 
                 onClick={() => setActiveSection("manuals")}
-                className="text-sm hover:text-primary transition-colors"
+                className={`text-sm hover:text-primary transition-colors ${activeSection === "manuals" ? "text-primary font-medium" : ""}`}
               >
                 User Guides
               </button>
               <button 
                 onClick={() => setActiveSection("auth")}
-                className="text-sm hover:text-primary transition-colors"
+                className={`text-sm hover:text-primary transition-colors ${activeSection === "auth" ? "text-primary font-medium" : ""}`}
               >
                 Login
               </button>

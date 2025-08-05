@@ -252,10 +252,10 @@ export function UserManuals({ modules }: UserManualsProps) {
                         <BookOpen className="mr-2 h-4 w-4" />
                         Read Documentation
                       </Button>
-                      <Button variant="outline">
-                        <Download className="mr-2 h-4 w-4" />
-                        Download PDF
-                      </Button>
+                    <Button variant="outline" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                      <BookOpen className="mr-2 h-4 w-4" />
+                      Scroll to Top
+                    </Button>
                     </div>
                   </CardContent>
                 </Card>
