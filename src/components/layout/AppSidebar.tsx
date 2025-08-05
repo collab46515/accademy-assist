@@ -202,7 +202,6 @@ interface SidebarGroupItemsProps {
 }
 
 function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupItemsProps) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
   const location = useLocation();
   const navigate = useNavigate();
   const { state } = useSidebar();
@@ -213,130 +212,111 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
 
   return (
     <SidebarGroup>
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger asChild>
-          <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/70 rounded-lg px-2 py-2 transition-colors flex items-center justify-between text-sm font-bold text-foreground uppercase tracking-wider">
-            <span>{title}</span>
-            {state !== "collapsed" && (
-              isOpen ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />
-            )}
-          </SidebarGroupLabel>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => {
-                const itemActive = isActive(item.url);
+      <SidebarGroupLabel className="px-2 py-2 text-sm font-bold text-foreground uppercase tracking-wider">
+        <span>{title}</span>
+      </SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {items.map((item) => {
+            const itemActive = isActive(item.url);
 
-                if (item.subItems) {
-                  const hasActiveSubItem = item.subItems.some(subItem => isActive(subItem.url));
-                  const shouldExpand = itemActive || hasActiveSubItem;
-
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <Collapsible defaultOpen={shouldExpand}>
-                        <CollapsibleTrigger asChild>
-                          <SidebarMenuButton 
-                            asChild={!item.url.includes('?')}
-                            isActive={itemActive}
-                            tooltip={state === "collapsed" ? item.title : undefined}
-                            onClick={item.url.includes('?') ? () => navigate(item.url) : undefined}
-                          >
-                            {item.url.includes('?') ? (
-                              <div className="flex items-center gap-3 w-full py-2">
-                                <item.icon className="h-6 w-6" />
-                                <span className="flex-1 text-sm font-semibold">{item.title}</span>
-                                <ChevronRight className="h-5 w-5 transition-transform ui-expanded:rotate-90" />
-                              </div>
-                            ) : (
-                              <NavLink 
-                                to={item.url} 
-                                className={({ isActive }) => `flex items-center gap-3 w-full py-2 rounded-md transition-colors ${
-                                  isActive 
-                                    ? 'bg-primary text-primary-foreground font-semibold shadow-sm' 
-                                    : 'hover:bg-sidebar-accent/70'
-                                }`}
-                              >
-                                <item.icon className="h-6 w-6" />
-                                <span className="flex-1 text-sm font-semibold">{item.title}</span>
-                                <ChevronRight className="h-5 w-5 transition-transform ui-expanded:rotate-90" />
-                              </NavLink>
-                            )}
-                          </SidebarMenuButton>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <SidebarMenu className="ml-4 border-l border-sidebar-border">
-                            {item.subItems.map((subItem) => (
-                              <SidebarMenuItem key={subItem.title}>
-                                <SidebarMenuButton 
-                                  asChild={!subItem.url.includes('?')}
-                                  isActive={isActive(subItem.url)}
-                                  tooltip={state === "collapsed" ? subItem.title : undefined}
-                                  onClick={subItem.url.includes('?') ? () => navigate(subItem.url) : undefined}
-                                  size="sm"
-                                >
-                                  {subItem.url.includes('?') ? (
-                                    <div className="flex items-center gap-3 py-1.5">
-                                      <subItem.icon className="h-5 w-5" />
-                                      <span className="text-sm font-medium">{subItem.title}</span>
-                                    </div>
-                                  ) : (
-                                    <NavLink 
-                                      to={subItem.url} 
-                                      className={({ isActive }) => `flex items-center gap-3 py-1.5 rounded-md transition-colors ${
-                                        isActive 
-                                          ? 'bg-primary/20 text-primary font-semibold border-l-2 border-primary pl-2' 
-                                          : 'hover:bg-sidebar-accent/50 pl-2'
-                                      }`}
-                                    >
-                                      <subItem.icon className="h-5 w-5" />
-                                      <span className="text-sm font-medium">{subItem.title}</span>
-                                    </NavLink>
-                                  )}
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
-                            ))}
-                          </SidebarMenu>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    </SidebarMenuItem>
-                  );
-                }
-                
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      asChild={!item.url.includes('?')}
-                      isActive={itemActive}
-                      tooltip={state === "collapsed" ? item.title : undefined}
-                      onClick={item.url.includes('?') ? () => navigate(item.url) : undefined}
-                    >
-                      {item.url.includes('?') ? (
-                        <div className="flex items-center gap-3 py-2">
-                          <item.icon className="h-6 w-6" />
-                          <span className="text-sm font-semibold">{item.title}</span>
-                        </div>
-                      ) : (
-                        <NavLink 
-                          to={item.url} 
-                          className={({ isActive }) => `flex items-center gap-3 py-2 rounded-md transition-colors ${
-                            isActive 
-                              ? 'bg-primary text-primary-foreground font-semibold shadow-sm' 
-                              : 'hover:bg-sidebar-accent/70'
-                          }`}
+            if (item.subItems) {
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton 
+                    asChild={!item.url.includes('?')}
+                    isActive={itemActive}
+                    tooltip={state === "collapsed" ? item.title : undefined}
+                    onClick={item.url.includes('?') ? () => navigate(item.url) : undefined}
+                  >
+                    {item.url.includes('?') ? (
+                      <div className="flex items-center gap-3 w-full py-2">
+                        <item.icon className="h-6 w-6" />
+                        <span className="flex-1 text-sm font-semibold">{item.title}</span>
+                      </div>
+                    ) : (
+                      <NavLink 
+                        to={item.url} 
+                        className={({ isActive }) => `flex items-center gap-3 w-full py-2 rounded-md transition-colors ${
+                          isActive 
+                            ? 'bg-primary text-primary-foreground font-semibold shadow-sm' 
+                            : 'hover:bg-sidebar-accent/70'
+                        }`}
+                      >
+                        <item.icon className="h-6 w-6" />
+                        <span className="flex-1 text-sm font-semibold">{item.title}</span>
+                      </NavLink>
+                    )}
+                  </SidebarMenuButton>
+                  
+                  <SidebarMenu className="ml-4 border-l border-sidebar-border">
+                    {item.subItems.map((subItem) => (
+                      <SidebarMenuItem key={subItem.title}>
+                        <SidebarMenuButton 
+                          asChild={!subItem.url.includes('?')}
+                          isActive={isActive(subItem.url)}
+                          tooltip={state === "collapsed" ? subItem.title : undefined}
+                          onClick={subItem.url.includes('?') ? () => navigate(subItem.url) : undefined}
+                          size="sm"
                         >
-                          <item.icon className="h-6 w-6" />
-                          <span className="text-sm font-semibold">{item.title}</span>
-                        </NavLink>
-                      )}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </CollapsibleContent>
-      </Collapsible>
+                          {subItem.url.includes('?') ? (
+                            <div className="flex items-center gap-3 py-1.5">
+                              <subItem.icon className="h-5 w-5" />
+                              <span className="text-sm font-medium">{subItem.title}</span>
+                            </div>
+                          ) : (
+                            <NavLink 
+                              to={subItem.url} 
+                              className={({ isActive }) => `flex items-center gap-3 py-1.5 rounded-md transition-colors ${
+                                isActive 
+                                  ? 'bg-primary/20 text-primary font-semibold border-l-2 border-primary pl-2' 
+                                  : 'hover:bg-sidebar-accent/50 pl-2'
+                              }`}
+                            >
+                              <subItem.icon className="h-5 w-5" />
+                              <span className="text-sm font-medium">{subItem.title}</span>
+                            </NavLink>
+                          )}
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarMenuItem>
+              );
+            }
+            
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton 
+                  asChild={!item.url.includes('?')}
+                  isActive={itemActive}
+                  tooltip={state === "collapsed" ? item.title : undefined}
+                  onClick={item.url.includes('?') ? () => navigate(item.url) : undefined}
+                >
+                  {item.url.includes('?') ? (
+                    <div className="flex items-center gap-3 py-2">
+                      <item.icon className="h-6 w-6" />
+                      <span className="text-sm font-semibold">{item.title}</span>
+                    </div>
+                  ) : (
+                    <NavLink 
+                      to={item.url} 
+                      className={({ isActive }) => `flex items-center gap-3 py-2 rounded-md transition-colors ${
+                        isActive 
+                          ? 'bg-primary text-primary-foreground font-semibold shadow-sm' 
+                          : 'hover:bg-sidebar-accent/70'
+                      }`}
+                    >
+                      <item.icon className="h-6 w-6" />
+                      <span className="text-sm font-semibold">{item.title}</span>
+                    </NavLink>
+                  )}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
+      </SidebarGroupContent>
     </SidebarGroup>
   );
 }
