@@ -517,10 +517,30 @@ export function HRManagementPage() {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="ghost" size="sm" className="hover:bg-primary/5">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="hover:bg-primary/5"
+                          onClick={() => {
+                            console.log('Viewing employee:', employee.name);
+                            toast({
+                              title: "View Employee",
+                              description: `Viewing details for ${employee.name}`,
+                            });
+                          }}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" className="hover:bg-primary/5">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="hover:bg-primary/5"
+                          onClick={() => {
+                            console.log('Editing employee:', employee.name);
+                            setEditingEmployee(employee);
+                            setShowEmployeeForm(true);
+                          }}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
                       </div>
