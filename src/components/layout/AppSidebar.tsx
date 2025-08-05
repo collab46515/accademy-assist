@@ -409,6 +409,37 @@ export function AppSidebar() {
           />
         )}
         
+        {/* Bottom Modules section - duplicate for easy access */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-sm font-bold text-foreground uppercase tracking-wider px-2 py-2">Quick Access</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {erpModules.map((module) => (
+                <SidebarMenuItem key={`bottom-${module.title}`}>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={module.title === currentModule}
+                    tooltip={state === "collapsed" ? module.title : undefined}
+                    className="py-2"
+                  >
+                    <NavLink 
+                      to={module.url} 
+                      className={({ isActive }) => `flex items-center gap-3 w-full py-2 rounded-md transition-colors ${
+                        module.title === currentModule 
+                          ? 'bg-primary text-primary-foreground font-bold shadow-lg scale-105' 
+                          : 'hover:bg-sidebar-accent/70'
+                      }`}
+                    >
+                      <module.icon className="h-5 w-5" />
+                      <span className="text-sm font-semibold">{module.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        
         {/* User section */}
         <SidebarGroup>
           <SidebarGroupContent>
