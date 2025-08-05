@@ -293,13 +293,13 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
                             {item.url.includes('?') ? (
                               <div className="flex items-center gap-3 w-full">
                                 <item.icon className="h-4 w-4" />
-                                 <span className="flex-1 text-base">{item.title}</span>
+                                 <span className="flex-1 text-sm">{item.title}</span>
                                 <ChevronRight className="h-3 w-3 transition-transform ui-expanded:rotate-90" />
                               </div>
                             ) : (
                               <NavLink to={item.url} className="flex items-center gap-3 w-full">
                                 <item.icon className="h-4 w-4" />
-                                <span className="flex-1 text-base">{item.title}</span>
+                                <span className="flex-1 text-sm">{item.title}</span>
                                 <ChevronRight className="h-3 w-3 transition-transform ui-expanded:rotate-90" />
                               </NavLink>
                             )}
@@ -349,12 +349,12 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
                       {item.url.includes('?') ? (
                         <div className="flex items-center gap-3">
                           <item.icon className="h-4 w-4" />
-                           <span className="text-base">{item.title}</span>
+                           <span className="text-sm">{item.title}</span>
                         </div>
                       ) : (
                         <NavLink to={item.url} className="flex items-center gap-3">
                           <item.icon className="h-4 w-4" />
-                          <span className="text-base">{item.title}</span>
+                          <span className="text-sm">{item.title}</span>
                         </NavLink>
                       )}
                     </SidebarMenuButton>
