@@ -36,7 +36,20 @@ import {
   PenTool,
   ClipboardList,
   CheckSquare,
-  LogOut
+  LogOut,
+  BookOpenCheck,
+  Library,
+  Bookmark,
+  Search,
+  CreditCard as LibraryCard,
+  Truck,
+  MapPin,
+  Route,
+  UserMinus,
+  FileMinus,
+  Archive,
+  HandCoins,
+  ClipboardX
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -76,6 +89,11 @@ const erpModules = [
           { title: "Fee Payment", url: "/admissions?stage=5", icon: CreditCard },
           { title: "Enrollment Confirmation", url: "/admissions?stage=6", icon: UserCheck },
           { title: "Welcome & Onboarding", url: "/admissions?stage=7", icon: Users },
+          { title: "Student Exit Process", url: "/admissions/exit", icon: UserMinus },
+          { title: "Exit Applications", url: "/admissions/exit/applications", icon: FileMinus },
+          { title: "Clearance Process", url: "/admissions/exit/clearance", icon: ClipboardX },
+          { title: "Document Generation", url: "/admissions/exit/documents", icon: Archive },
+          { title: "Final Settlement", url: "/admissions/exit/settlement", icon: HandCoins },
         ]
       },
       { 
@@ -124,6 +142,36 @@ const erpModules = [
       { title: "Events", url: "/events", icon: Activity },
       { title: "Activities", url: "/activities", icon: Activity },
       { title: "Portals", url: "/portals", icon: Globe },
+    ]
+  },
+  {
+    title: "Library Management",
+    url: "/library",
+    icon: Library,
+    subItems: [
+      { title: "Dashboard", url: "/library", icon: LayoutDashboard },
+      { title: "Catalog", url: "/library/catalog", icon: BookOpenCheck },
+      { title: "Borrowing & Returns", url: "/library/borrowing", icon: BookOpen },
+      { title: "Reservations", url: "/library/reservations", icon: Bookmark },
+      { title: "Digital Resources", url: "/library/digital", icon: Globe },
+      { title: "Fines & Penalties", url: "/library/fines", icon: Receipt },
+      { title: "Reports", url: "/library/reports", icon: BarChart3 },
+      { title: "Search", url: "/library/search", icon: Search },
+    ]
+  },
+  {
+    title: "Transport Management", 
+    url: "/transport",
+    icon: Truck,
+    subItems: [
+      { title: "Dashboard", url: "/transport", icon: LayoutDashboard },
+      { title: "Routes & Schedules", url: "/transport/routes", icon: Route },
+      { title: "Vehicle Management", url: "/transport/vehicles", icon: Truck },
+      { title: "Driver Management", url: "/transport/drivers", icon: UserCheck },
+      { title: "Student Assignments", url: "/transport/assignments", icon: Users },
+      { title: "Tracking", url: "/transport/tracking", icon: MapPin },
+      { title: "Notifications", url: "/transport/notifications", icon: Bell },
+      { title: "Reports", url: "/transport/reports", icon: BarChart3 },
     ]
   },
   {
@@ -189,6 +237,8 @@ function getCurrentModule(pathname: string) {
   if (pathname.startsWith('/hr-management')) return 'HR Management';
   if (pathname.startsWith('/accounting')) return 'Accounting';
   if (pathname.startsWith('/analytics')) return 'Analytics';
+  if (pathname.startsWith('/library')) return 'Library Management';
+  if (pathname.startsWith('/transport')) return 'Transport Management';
   if (pathname.startsWith('/admin-management') || pathname.startsWith('/ai-suite') || 
       pathname.startsWith('/integrations') || pathname.startsWith('/user-management') || 
       pathname.startsWith('/master-data')) return 'System';
