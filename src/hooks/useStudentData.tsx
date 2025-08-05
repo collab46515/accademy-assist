@@ -148,7 +148,7 @@ export function useStudentData() {
         .from('students')
         .select(`
           *,
-          profiles!inner(
+          profiles(
             first_name,
             last_name,
             email,
@@ -166,7 +166,7 @@ export function useStudentData() {
         // Transform the data to match our Student interface
         const transformedStudents = (data || []).map(student => ({
           ...student,
-          profiles: Array.isArray(student.profiles) ? student.profiles[0] : student.profiles
+          profiles: student.profiles || undefined
         })) as Student[];
         setStudents(transformedStudents);
       }
@@ -203,7 +203,7 @@ export function useStudentData() {
         .from('students')
         .select(`
           *,
-          profiles!inner(
+          profiles(
             first_name,
             last_name,
             email,
@@ -212,13 +212,15 @@ export function useStudentData() {
           )
         `)
         .eq('id', studentId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) return null;
+      
       // Transform the data to match our Student interface
       const transformedStudent = {
         ...data,
-        profiles: Array.isArray(data.profiles) ? data.profiles[0] : data.profiles
+        profiles: data.profiles || undefined
       } as Student;
       return transformedStudent;
     } catch (error) {
@@ -233,7 +235,7 @@ export function useStudentData() {
         .from('students')
         .select(`
           *,
-          profiles!inner(
+          profiles(
             first_name,
             last_name,
             email,
@@ -248,7 +250,7 @@ export function useStudentData() {
       // Transform the data to match our Student interface
       const transformedStudents = (data || []).map(student => ({
         ...student,
-        profiles: Array.isArray(student.profiles) ? student.profiles[0] : student.profiles
+        profiles: student.profiles || undefined
       })) as Student[];
       return transformedStudents;
     } catch (error) {
