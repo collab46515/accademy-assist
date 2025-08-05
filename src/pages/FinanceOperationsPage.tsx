@@ -161,7 +161,7 @@ export default function FinanceOperationsPage() {
               <Settings className="h-4 w-4 mr-2" />
               Settings
             </Button>
-            <Button size="sm">
+            <Button size="sm" onClick={() => navigate('/accounting/transactions/new')}>
               <Plus className="h-4 w-4 mr-2" />
               New Transaction
             </Button>
