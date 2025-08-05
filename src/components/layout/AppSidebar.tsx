@@ -143,11 +143,11 @@ const erpModules = [
     icon: Bot,
     subItems: [
       { title: "Dashboard", url: "/ai-suite", icon: LayoutDashboard },
-      { title: "AI Timetable Generator", url: "/ai-suite?tab=timetable", icon: Clock },
-      { title: "Lesson Planner", url: "/ai-suite?tab=lesson-planner", icon: BookOpen },
-      { title: "Comment Generator", url: "/ai-suite?tab=comments", icon: PenTool },
-      { title: "Predictive Analytics", url: "/ai-suite?tab=insights", icon: BarChart3 },
-      { title: "AI Settings", url: "/ai-suite?tab=settings", icon: Settings },
+      { title: "AI Timetable Generator", url: "/ai-suite/timetable", icon: Clock },
+      { title: "Lesson Planner", url: "/ai-suite/lesson-planner", icon: BookOpen },
+      { title: "Comment Generator", url: "/ai-suite/comments", icon: PenTool },
+      { title: "Predictive Analytics", url: "/ai-suite/insights", icon: BarChart3 },
+      { title: "AI Settings", url: "/ai-suite/settings", icon: Settings },
     ]
   },
   {

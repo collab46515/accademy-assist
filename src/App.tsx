@@ -28,6 +28,11 @@ import SafeguardingPage from "./pages/SafeguardingPage";
 import EventsPage from "./pages/EventsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import AISuitePage from "./pages/AISuitePage";
+import { AITimetablePage } from "./pages/AITimetablePage";
+import { AILessonPlannerPage } from "./pages/AILessonPlannerPage";
+import { AICommentGeneratorPage } from "./pages/AICommentGeneratorPage";
+import { AIPredictiveInsightsPage } from "./pages/AIPredictiveInsightsPage";
+import { AISettingsPage } from "./pages/AISettingsPage";
 import IntegrationsPage from "./pages/IntegrationsPage";
 import { UserManagementPage } from "./pages/UserManagementPage";
 import { HRManagementPage } from "./pages/HRManagementPage";
@@ -134,6 +139,11 @@ const App = () => (
                           <Route path="/events" element={<EventsPage />} />
                           <Route path="/analytics" element={<AnalyticsPage />} />
                           <Route path="/ai-suite" element={<AISuitePage />} />
+                          <Route path="/ai-suite/timetable" element={<AITimetablePage />} />
+                          <Route path="/ai-suite/lesson-planner" element={<AILessonPlannerPage />} />
+                          <Route path="/ai-suite/comments" element={<AICommentGeneratorPage />} />
+                          <Route path="/ai-suite/insights" element={<AIPredictiveInsightsPage />} />
+                          <Route path="/ai-suite/settings" element={<AISettingsPage />} />
                           <Route path="/hr-management" element={<HRManagementPage />} />
                           <Route path="/master-data" element={<MasterDataPage />} />
                           <Route path="/accounting" element={<AccountingPage />} />

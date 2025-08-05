@@ -2,210 +2,24 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
 import { 
   Bot, 
   Brain,
   Sparkles,
-  FileText,
   Calendar,
   BarChart3,
-  MessageSquare,
   Clock,
-  CheckCircle,
   Zap,
   Target,
   Grid3X3,
   Wand2
 } from "lucide-react";
-import { AITimetableGenerator } from "@/components/ai-timetable/AITimetableGenerator";
-import { AILessonPlanner } from "@/components/ai-suite/AILessonPlanner";
-
-interface AIFeature {
-  id: string;
-  name: string;
-  description: string;
-  category: "comments" | "scheduling" | "analytics" | "communication";
-  status: "active" | "beta" | "coming-soon";
-  usageCount: number;
-  accuracy: number;
-}
-
-interface GeneratedComment {
-  id: string;
-  studentName: string;
-  subject: string;
-  generatedText: string;
-  status: "generated" | "approved" | "edited";
-  confidence: number;
-  timestamp: string;
-}
-
-interface PredictiveInsight {
-  id: string;
-  type: "attendance" | "performance" | "behaviour";
-  title: string;
-  prediction: string;
-  confidence: number;
-  actionRequired: boolean;
-  affectedStudents: number;
-}
-
-const mockAIFeatures: AIFeature[] = [
-  {
-    id: "1",
-    name: "Comment Generator",
-    description: "Generate personalized student comments for reports",
-    category: "comments",
-    status: "active",
-    usageCount: 247,
-    accuracy: 94.2
-  },
-  {
-    id: "2",
-    name: "Smart Scheduling",
-    description: "AI-powered timetable optimization",
-    category: "scheduling",
-    status: "beta",
-    usageCount: 56,
-    accuracy: 87.5
-  },
-  {
-    id: "3",
-    name: "Predictive Analytics",
-    description: "Early warning system for at-risk students",
-    category: "analytics",
-    status: "active",
-    usageCount: 189,
-    accuracy: 91.8
-  },
-  {
-    id: "4",
-    name: "Auto-Response",
-    description: "Automated parent inquiry responses",
-    category: "communication",
-    status: "coming-soon",
-    usageCount: 0,
-    accuracy: 0
-  }
-];
-
-const mockComments: GeneratedComment[] = [
-  {
-    id: "1",
-    studentName: "Emma Thompson",
-    subject: "Mathematics",
-    generatedText: "Emma has shown excellent progress in algebra this term. Her problem-solving skills have improved significantly, and she demonstrates strong analytical thinking. She actively participates in class discussions and helps her peers understand complex concepts.",
-    status: "approved",
-    confidence: 94,
-    timestamp: "2024-01-15 14:30"
-  },
-  {
-    id: "2",
-    studentName: "James Wilson",
-    subject: "English Literature",
-    generatedText: "James has made good progress in his essay writing this term. His analysis of character development has improved, though he would benefit from more detailed textual evidence in his arguments. His creative writing shows imagination and flair.",
-    status: "edited",
-    confidence: 89,
-    timestamp: "2024-01-15 15:45"
-  }
-];
-
-const mockInsights: PredictiveInsight[] = [
-  {
-    id: "1",
-    type: "attendance",
-    title: "Attendance Drop Prediction",
-    prediction: "15 Year 9 students likely to have attendance issues in next 2 weeks",
-    confidence: 87,
-    actionRequired: true,
-    affectedStudents: 15
-  },
-  {
-    id: "2",
-    type: "performance",
-    title: "Grade Decline Alert",
-    prediction: "8 students in Year 11 Mathematics at risk of grade drop",
-    confidence: 92,
-    actionRequired: true,
-    affectedStudents: 8
-  },
-  {
-    id: "3",
-    type: "behaviour",
-    title: "Behavioral Pattern Detection",
-    prediction: "Increased disruption likely during Friday Period 5 classes",
-    confidence: 76,
-    actionRequired: false,
-    affectedStudents: 0
-  }
-];
 
 const AISuitePage = () => {
-  const [features] = useState(mockAIFeatures);
-  const [comments] = useState(mockComments);
-  const [insights] = useState(mockInsights);
-  const [commentPrompt, setCommentPrompt] = useState("");
-
-  const getStatusBadge = (status: AIFeature["status"]) => {
-    switch (status) {
-      case "active":
-        return <Badge className="bg-success text-success-foreground"><CheckCircle className="h-3 w-3 mr-1" />Active</Badge>;
-      case "beta":
-        return <Badge className="bg-warning text-warning-foreground"><Sparkles className="h-3 w-3 mr-1" />Beta</Badge>;
-      case "coming-soon":
-        return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />Coming Soon</Badge>;
-    }
-  };
-
-  const getCategoryIcon = (category: AIFeature["category"]) => {
-    switch (category) {
-      case "comments":
-        return <FileText className="h-4 w-4" />;
-      case "scheduling":
-        return <Calendar className="h-4 w-4" />;
-      case "analytics":
-        return <BarChart3 className="h-4 w-4" />;
-      case "communication":
-        return <MessageSquare className="h-4 w-4" />;
-    }
-  };
-
-  const getCommentStatusBadge = (status: GeneratedComment["status"]) => {
-    switch (status) {
-      case "generated":
-        return <Badge variant="secondary">Generated</Badge>;
-      case "approved":
-        return <Badge className="bg-success text-success-foreground">Approved</Badge>;
-      case "edited":
-        return <Badge className="bg-warning text-warning-foreground">Edited</Badge>;
-    }
-  };
-
-  const getInsightIcon = (type: PredictiveInsight["type"]) => {
-    switch (type) {
-      case "attendance":
-        return <Clock className="h-4 w-4 text-blue-500" />;
-      case "performance":
-        return <BarChart3 className="h-4 w-4 text-green-500" />;
-      case "behaviour":
-        return <Target className="h-4 w-4 text-purple-500" />;
-    }
-  };
-
-  const activeFeatures = features.filter(f => f.status === "active").length;
-  const totalUsage = features.reduce((sum, f) => sum + f.usageCount, 0);
-  const avgAccuracy = Math.round(features.filter(f => f.accuracy > 0).reduce((sum, f) => sum + f.accuracy, 0) / features.filter(f => f.accuracy > 0).length);
-  const criticalInsights = insights.filter(i => i.actionRequired).length;
+  const criticalInsights = 2;
+  const activeFeatures = 3;
+  const totalUsage = 492;
+  const avgAccuracy = 91;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -266,240 +80,184 @@ const AISuitePage = () => {
         </Card>
       </div>
 
-      {/* Main Tabs */}
-      <Tabs defaultValue="features" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="features">AI Features</TabsTrigger>
-          <TabsTrigger value="timetable">Timetable Generator</TabsTrigger>
-          <TabsTrigger value="comments">Comment Generator</TabsTrigger>
-          <TabsTrigger value="lesson-planner">Lesson Planner</TabsTrigger>
-          <TabsTrigger value="insights">Predictive Insights</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="features">
-          <Card className="shadow-[var(--shadow-card)]">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Bot className="h-5 w-5 text-primary" />
-                <span>AI Feature Overview</span>
-              </CardTitle>
-              <CardDescription>Manage and monitor AI-powered automation features</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Feature</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Usage Count</TableHead>
-                      <TableHead>Accuracy</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {features.map((feature) => (
-                      <TableRow key={feature.id}>
-                        <TableCell className="font-medium">{feature.name}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-2">
-                            {getCategoryIcon(feature.category)}
-                            <span className="capitalize">{feature.category}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="max-w-xs">{feature.description}</TableCell>
-                        <TableCell>{feature.usageCount}</TableCell>
-                        <TableCell>
-                          {feature.accuracy > 0 ? (
-                            <div className="flex items-center space-x-2">
-                              <span>{feature.accuracy}%</span>
-                              <div className="w-16 bg-gray-200 rounded-full h-2">
-                                <div 
-                                  className="h-2 bg-primary rounded-full"
-                                  style={{ width: `${feature.accuracy}%` }}
-                                ></div>
-                              </div>
-                            </div>
-                          ) : (
-                            "-"
-                          )}
-                        </TableCell>
-                        <TableCell>{getStatusBadge(feature.status)}</TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm" disabled={feature.status === "coming-soon"}>
-                            {feature.status === "coming-soon" ? "Unavailable" : "Configure"}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+      {/* Quick Access Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Card className="shadow-[var(--shadow-card)] hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/ai-suite/timetable'}>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Calendar className="h-5 w-5 text-primary" />
+              <span>AI Timetable Generator</span>
+            </CardTitle>
+            <CardDescription>Automated scheduling with AI optimization</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-primary">87%</p>
+                <p className="text-sm text-muted-foreground">Optimization rate</p>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              <Button variant="outline" size="sm">
+                Open Generator
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="timetable">
-          <AITimetableGenerator />
-        </TabsContent>
+        <Card className="shadow-[var(--shadow-card)] hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/ai-suite/lesson-planner'}>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Wand2 className="h-5 w-5 text-primary" />
+              <span>Lesson Planner</span>
+            </CardTitle>
+            <CardDescription>AI-powered lesson planning and assignments</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-success">23</p>
+                <p className="text-sm text-muted-foreground">Plans generated</p>
+              </div>
+              <Button variant="outline" size="sm">
+                Create Lesson
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="lesson-planner">
-          <AILessonPlanner />
-        </TabsContent>
+        <Card className="shadow-[var(--shadow-card)] hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/ai-suite/comments'}>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <span>Comment Generator</span>
+            </CardTitle>
+            <CardDescription>AI-generated student report comments</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-primary">156</p>
+                <p className="text-sm text-muted-foreground">Comments created</p>
+              </div>
+              <Button variant="outline" size="sm">
+                Generate Comment
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="comments">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="shadow-[var(--shadow-card)]">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                  <span>Generate Comment</span>
-                </CardTitle>
-                <CardDescription>AI-powered student comment generation</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+        <Card className="shadow-[var(--shadow-card)] hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/ai-suite/insights'}>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Brain className="h-5 w-5 text-primary" />
+              <span>Predictive Insights</span>
+            </CardTitle>
+            <CardDescription>Early warning system and analytics</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-destructive">{criticalInsights}</p>
+                <p className="text-sm text-muted-foreground">Critical insights</p>
+              </div>
+              <Button variant="outline" size="sm">
+                View Insights
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-[var(--shadow-card)] hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/ai-suite/settings'}>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Grid3X3 className="h-5 w-5 text-primary" />
+              <span>AI Settings</span>
+            </CardTitle>
+            <CardDescription>Configure AI models and preferences</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-primary">5</p>
+                <p className="text-sm text-muted-foreground">Models configured</p>
+              </div>
+              <Button variant="outline" size="sm">
+                Manage Settings
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-[var(--shadow-card)] border-dashed border-2">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2 text-muted-foreground">
+              <Zap className="h-5 w-5" />
+              <span>More AI Features</span>
+            </CardTitle>
+            <CardDescription>Additional AI capabilities coming soon</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground mb-3">
+                Voice assistants, image generation, and more AI-powered tools in development
+              </p>
+              <Badge variant="outline">Coming Soon</Badge>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Activity */}
+      <Card className="shadow-[var(--shadow-card)] mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Clock className="h-5 w-5 text-primary" />
+            <span>Recent AI Activity</span>
+          </CardTitle>
+          <CardDescription>Latest AI-generated content and activities</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 border rounded-lg">
+              <div className="flex items-center space-x-3">
+                <div className="h-8 w-8 bg-primary/10 rounded-full flex items-center justify-center">
+                  <Wand2 className="h-4 w-4 text-primary" />
+                </div>
                 <div>
-                  <label className="text-sm font-medium">Comment prompt:</label>
-                  <Textarea
-                    placeholder="Enter details about the student's performance, behavior, or achievements..."
-                    value={commentPrompt}
-                    onChange={(e) => setCommentPrompt(e.target.value)}
-                    rows={4}
-                  />
+                  <p className="font-medium">Lesson plan generated</p>
+                  <p className="text-sm text-muted-foreground">Mathematics - Year 7 Fractions</p>
                 </div>
-                <Button className="w-full shadow-[var(--shadow-elegant)]">
-                  <Brain className="h-4 w-4 mr-2" />
-                  Generate Comment
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-[var(--shadow-card)]">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <FileText className="h-5 w-5 text-primary" />
-                  <span>Recent Comments</span>
-                </CardTitle>
-                <CardDescription>AI-generated comments awaiting review</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {comments.map((comment) => (
-                    <div key={comment.id} className="border rounded-lg p-4 space-y-2">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium">{comment.studentName}</p>
-                          <p className="text-sm text-muted-foreground">{comment.subject}</p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm">{comment.confidence}%</span>
-                          {getCommentStatusBadge(comment.status)}
-                        </div>
-                      </div>
-                      <p className="text-sm">{comment.generatedText}</p>
-                      <div className="flex space-x-2">
-                        <Button size="sm" variant="outline">Edit</Button>
-                        <Button size="sm">Approve</Button>
-                      </div>
-                    </div>
-                  ))}
+              </div>
+              <span className="text-sm text-muted-foreground">2 hours ago</span>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 border rounded-lg">
+              <div className="flex items-center space-x-3">
+                <div className="h-8 w-8 bg-green-500/10 rounded-full flex items-center justify-center">
+                  <Sparkles className="h-4 w-4 text-green-600" />
                 </div>
-              </CardContent>
-            </Card>
+                <div>
+                  <p className="font-medium">5 comments generated</p>
+                  <p className="text-sm text-muted-foreground">Year 9 Science reports</p>
+                </div>
+              </div>
+              <span className="text-sm text-muted-foreground">4 hours ago</span>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 border rounded-lg">
+              <div className="flex items-center space-x-3">
+                <div className="h-8 w-8 bg-blue-500/10 rounded-full flex items-center justify-center">
+                  <BarChart3 className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <p className="font-medium">Predictive insight generated</p>
+                  <p className="text-sm text-muted-foreground">Attendance warning for 8 students</p>
+                </div>
+              </div>
+              <span className="text-sm text-muted-foreground">1 day ago</span>
+            </div>
           </div>
-        </TabsContent>
-
-        <TabsContent value="insights">
-          <Card className="shadow-[var(--shadow-card)]">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Brain className="h-5 w-5 text-primary" />
-                <span>Predictive Insights</span>
-              </CardTitle>
-              <CardDescription>AI-powered early warning system and predictions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Insight</TableHead>
-                      <TableHead>Prediction</TableHead>
-                      <TableHead>Confidence</TableHead>
-                      <TableHead>Affected Students</TableHead>
-                      <TableHead>Action Required</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {insights.map((insight) => (
-                      <TableRow key={insight.id}>
-                        <TableCell>
-                          <div className="flex items-center space-x-2">
-                            {getInsightIcon(insight.type)}
-                            <span className="capitalize">{insight.type}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-medium">{insight.title}</TableCell>
-                        <TableCell className="max-w-xs">{insight.prediction}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-2">
-                            <span>{insight.confidence}%</span>
-                            <div className="w-16 bg-gray-200 rounded-full h-2">
-                              <div 
-                                className="h-2 bg-primary rounded-full"
-                                style={{ width: `${insight.confidence}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {insight.affectedStudents > 0 ? insight.affectedStudents : "-"}
-                        </TableCell>
-                        <TableCell>
-                          {insight.actionRequired ? (
-                            <Badge variant="destructive">Required</Badge>
-                          ) : (
-                            <Badge variant="outline">Optional</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">
-                            {insight.actionRequired ? "Take Action" : "View Details"}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="settings">
-          <Card className="shadow-[var(--shadow-card)]">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Bot className="h-5 w-5 text-primary" />
-                <span>AI Configuration</span>
-              </CardTitle>
-              <CardDescription>Configure AI models and automation settings</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <Bot className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">AI Settings</h3>
-                <p className="text-muted-foreground">Advanced AI configuration and model training settings coming soon</p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };
