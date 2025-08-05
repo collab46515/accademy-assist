@@ -443,6 +443,8 @@ const ManualPaymentForm = ({ onCancel }: { onCancel: () => void }) => {
   const { students, loading: studentsLoading } = useStudentData();
   const { feeHeads } = useFeeData();
 
+  console.log('PaymentCollection - Students:', students, 'Loading:', studentsLoading);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle manual payment recording
