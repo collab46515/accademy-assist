@@ -391,11 +391,11 @@ export function AppSidebar() {
                 <SidebarMenuButton 
                   onClick={handleLogout}
                   tooltip={state === "collapsed" ? "Sign Out" : undefined}
-                  className="text-destructive hover:text-destructive"
+                  className="h-12 rounded-xl bg-gradient-to-r from-destructive/20 via-red-500/20 to-destructive/20 hover:from-destructive/30 hover:via-red-500/30 hover:to-destructive/30 border-0 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 text-destructive hover:text-destructive"
                 >
-                  <div className="flex items-center gap-3">
-                    <LogOut className="h-4 w-4" />
-                    {state !== "collapsed" && <span>Sign Out</span>}
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    <LogOut className="h-5 w-5" />
+                    {state !== "collapsed" && <span className="font-semibold">Sign Out</span>}
                   </div>
                 </SidebarMenuButton>
               </SidebarMenuItem>
