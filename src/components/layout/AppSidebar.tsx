@@ -215,10 +215,10 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
     <SidebarGroup>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
-          <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/70 rounded-lg px-2 py-1.5 transition-colors flex items-center justify-between text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/70 rounded-lg px-2 py-2 transition-colors flex items-center justify-between text-sm font-bold text-foreground uppercase tracking-wider">
             <span>{title}</span>
             {state !== "collapsed" && (
-              isOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />
+              isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />
             )}
           </SidebarGroupLabel>
         </CollapsibleTrigger>
@@ -243,16 +243,23 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
                             onClick={item.url.includes('?') ? () => navigate(item.url) : undefined}
                           >
                             {item.url.includes('?') ? (
-                              <div className="flex items-center gap-3 w-full">
-                                <item.icon className="h-4 w-4" />
-                                <span className="flex-1">{item.title}</span>
-                                <ChevronRight className="h-3 w-3 transition-transform ui-expanded:rotate-90" />
+                              <div className="flex items-center gap-3 w-full py-2">
+                                <item.icon className="h-5 w-5" />
+                                <span className="flex-1 text-sm font-medium">{item.title}</span>
+                                <ChevronRight className="h-4 w-4 transition-transform ui-expanded:rotate-90" />
                               </div>
                             ) : (
-                              <NavLink to={item.url} className="flex items-center gap-3 w-full">
-                                <item.icon className="h-4 w-4" />
-                                <span className="flex-1">{item.title}</span>
-                                <ChevronRight className="h-3 w-3 transition-transform ui-expanded:rotate-90" />
+                              <NavLink 
+                                to={item.url} 
+                                className={({ isActive }) => `flex items-center gap-3 w-full py-2 rounded-md transition-colors ${
+                                  isActive 
+                                    ? 'bg-primary text-primary-foreground font-semibold shadow-sm' 
+                                    : 'hover:bg-sidebar-accent/70'
+                                }`}
+                              >
+                                <item.icon className="h-5 w-5" />
+                                <span className="flex-1 text-sm font-medium">{item.title}</span>
+                                <ChevronRight className="h-4 w-4 transition-transform ui-expanded:rotate-90" />
                               </NavLink>
                             )}
                           </SidebarMenuButton>
@@ -269,14 +276,21 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
                                   size="sm"
                                 >
                                   {subItem.url.includes('?') ? (
-                                    <div className="flex items-center gap-3">
-                                      <subItem.icon className="h-3 w-3" />
-                                      <span className="text-xs">{subItem.title}</span>
+                                    <div className="flex items-center gap-3 py-1.5">
+                                      <subItem.icon className="h-4 w-4" />
+                                      <span className="text-sm font-medium">{subItem.title}</span>
                                     </div>
                                   ) : (
-                                    <NavLink to={subItem.url} className="flex items-center gap-3">
-                                      <subItem.icon className="h-3 w-3" />
-                                      <span className="text-xs">{subItem.title}</span>
+                                    <NavLink 
+                                      to={subItem.url} 
+                                      className={({ isActive }) => `flex items-center gap-3 py-1.5 rounded-md transition-colors ${
+                                        isActive 
+                                          ? 'bg-primary/20 text-primary font-semibold border-l-2 border-primary pl-2' 
+                                          : 'hover:bg-sidebar-accent/50 pl-2'
+                                      }`}
+                                    >
+                                      <subItem.icon className="h-4 w-4" />
+                                      <span className="text-sm font-medium">{subItem.title}</span>
                                     </NavLink>
                                   )}
                                 </SidebarMenuButton>
@@ -298,14 +312,21 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
                       onClick={item.url.includes('?') ? () => navigate(item.url) : undefined}
                     >
                       {item.url.includes('?') ? (
-                        <div className="flex items-center gap-3">
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
+                        <div className="flex items-center gap-3 py-2">
+                          <item.icon className="h-5 w-5" />
+                          <span className="text-sm font-medium">{item.title}</span>
                         </div>
                       ) : (
-                        <NavLink to={item.url} className="flex items-center gap-3">
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
+                        <NavLink 
+                          to={item.url} 
+                          className={({ isActive }) => `flex items-center gap-3 py-2 rounded-md transition-colors ${
+                            isActive 
+                              ? 'bg-primary text-primary-foreground font-semibold shadow-sm' 
+                              : 'hover:bg-sidebar-accent/70'
+                          }`}
+                        >
+                          <item.icon className="h-5 w-5" />
+                          <span className="text-sm font-medium">{item.title}</span>
                         </NavLink>
                       )}
                     </SidebarMenuButton>
@@ -351,7 +372,7 @@ export function AppSidebar() {
       
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Modules</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sm font-bold text-foreground uppercase tracking-wider px-2 py-2">Modules</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {erpModules.map((module) => (
@@ -360,10 +381,18 @@ export function AppSidebar() {
                     asChild 
                     isActive={module.title === currentModule}
                     tooltip={state === "collapsed" ? module.title : undefined}
+                    className="py-3"
                   >
-                    <NavLink to={module.url} className="flex items-center gap-3">
-                      <module.icon className="h-4 w-4" />
-                      <span>{module.title}</span>
+                    <NavLink 
+                      to={module.url} 
+                      className={({ isActive }) => `flex items-center gap-3 w-full py-2 rounded-md transition-colors ${
+                        module.title === currentModule 
+                          ? 'bg-primary text-primary-foreground font-bold shadow-lg scale-105' 
+                          : 'hover:bg-sidebar-accent/70'
+                      }`}
+                    >
+                      <module.icon className="h-5 w-5" />
+                      <span className="text-sm font-semibold">{module.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -388,11 +417,11 @@ export function AppSidebar() {
                 <SidebarMenuButton 
                   onClick={handleLogout}
                   tooltip={state === "collapsed" ? "Sign Out" : undefined}
-                  className="text-destructive hover:text-destructive"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 py-2"
                 >
                   <div className="flex items-center gap-3">
-                    <LogOut className="h-4 w-4" />
-                    {state !== "collapsed" && <span>Sign Out</span>}
+                    <LogOut className="h-5 w-5" />
+                    {state !== "collapsed" && <span className="text-sm font-medium">Sign Out</span>}
                   </div>
                 </SidebarMenuButton>
               </SidebarMenuItem>
