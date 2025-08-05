@@ -56,6 +56,7 @@ import { useHRData } from '@/hooks/useHRData';
 import { useComprehensiveHR } from '@/hooks/useComprehensiveHR';
 import { RecruitmentDashboard } from '@/components/recruitment/RecruitmentDashboard';
 import { EmployeeForm } from '@/components/hr/EmployeeForm';
+import { PageHeader } from '@/components/layout/PageHeader';
 
 export function HRManagementPage() {
   const { toast } = useToast();
@@ -581,6 +582,15 @@ export function HRManagementPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
+      <PageHeader
+        title="HR Management"
+        description="Complete human resources management system"
+        showBackButton={true}
+        breadcrumbItems={[
+          { label: 'Dashboard', href: '/' },
+          { label: 'HR Management' }
+        ]}
+      />
       <div className="p-8 space-y-8">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
