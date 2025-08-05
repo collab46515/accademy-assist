@@ -30,12 +30,15 @@ import {
   RefreshCw,
   Eye,
   TrendingUp,
-  AlertTriangle
+  AlertTriangle,
+  MessageSquare,
+  Share2
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { UserGuide } from '@/components/shared/UserGuide';
 import { userGuides } from '@/data/userGuides';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LessonPlan {
   id: string;
@@ -54,6 +57,7 @@ interface LessonPlan {
   };
   generatedAt: string;
   status: 'draft' | 'generated' | 'reviewed';
+  recap?: string;
 }
 
 interface LessonSection {
@@ -89,6 +93,7 @@ export const AILessonPlanner = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('planner');
   const [generating, setGenerating] = useState(false);
+  const [generatingRecap, setGeneratingRecap] = useState<string | null>(null);
   const [lessonPlans, setLessonPlans] = useState<LessonPlan[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   
@@ -303,6 +308,82 @@ export const AILessonPlanner = () => {
       });
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handleGenerateRecap = async (lesson: LessonPlan) => {
+    setGeneratingRecap(lesson.id);
+    
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session) {
+        throw new Error('Please log in to generate recaps');
+      }
+
+      // Prepare recap data
+      const recapData = {
+        lesson_topic: lesson.title.split(' - ')[0],
+        subject: lesson.subject,
+        grade: lesson.yearGroup,
+        learning_objectives: lesson.learningObjectives.join(', '),
+        lesson_points: lesson.lessonStructure.map(section => 
+          `${section.name}: ${section.description}`
+        ).join('; '),
+        homework: lesson.assessment.join(', '),
+        lesson_date: new Date().toLocaleDateString(),
+        language: 'English'
+      };
+
+      const { data, error } = await supabase.functions.invoke('generate-lesson-recap', {
+        body: recapData,
+        headers: {
+          Authorization: `Bearer ${session.session.access_token}`,
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      // Update lesson plan with generated recap
+      setLessonPlans(prev => prev.map(plan => 
+        plan.id === lesson.id 
+          ? { ...plan, recap: data.recap }
+          : plan
+      ));
+
+      toast({
+        title: "Lesson Recap Generated!",
+        description: "Student-friendly recap created successfully",
+      });
+
+    } catch (error: any) {
+      console.error('Error generating recap:', error);
+      toast({
+        title: "Failed to Generate Recap",
+        description: error.message || "Please check your API key configuration and try again",
+        variant: "destructive"
+      });
+    } finally {
+      setGeneratingRecap(null);
+    }
+  };
+
+  const handleCopyRecap = async (recap: string) => {
+    try {
+      await navigator.clipboard.writeText(recap);
+      toast({
+        title: "Copied to Clipboard",
+        description: "Lesson recap copied successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Copy Failed",
+        description: "Unable to copy to clipboard",
+        variant: "destructive"
+      });
     }
   };
 
@@ -840,6 +921,19 @@ export const AILessonPlanner = () => {
                             <Button
                               size="sm"
                               variant="outline"
+                              onClick={() => handleGenerateRecap(lesson)}
+                              disabled={generatingRecap === lesson.id}
+                            >
+                              {generatingRecap === lesson.id ? (
+                                <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                              ) : (
+                                <MessageSquare className="h-3 w-3 mr-1" />
+                              )}
+                              {lesson.recap ? 'Regenerate Recap' : 'Generate Recap'}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
                               onClick={() => handleGenerateAssignment(lesson)}
                               disabled={generating}
                             >
@@ -884,6 +978,37 @@ export const AILessonPlanner = () => {
                             </ul>
                           </div>
                         </div>
+                        
+                        {lesson.recap && (
+                          <div className="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                            <div className="flex items-center justify-between mb-2">
+                              <p className="font-medium text-sm text-primary flex items-center gap-2">
+                                <MessageSquare className="h-4 w-4" />
+                                Student Lesson Recap
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleCopyRecap(lesson.recap!)}
+                                >
+                                  <Copy className="h-3 w-3 mr-1" />
+                                  Copy
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                >
+                                  <Share2 className="h-3 w-3 mr-1" />
+                                  Share
+                                </Button>
+                              </div>
+                            </div>
+                            <div className="text-sm whitespace-pre-wrap font-mono bg-background/50 p-3 rounded border">
+                              {lesson.recap}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

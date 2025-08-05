@@ -1,1 +1,4 @@
 project_id = "iosceukdfokpptvqfirp"
+
+[functions.generate-lesson-recap]
+verify_jwt = true
