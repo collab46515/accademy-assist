@@ -49,7 +49,8 @@ import {
   FileMinus,
   Archive,
   HandCoins,
-  ClipboardX
+  ClipboardX,
+  Zap
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -169,8 +170,8 @@ const erpModules = [
         ]
       },
       { title: "Communications", url: "/communication", icon: MessageSquare },
-      { title: "Events", url: "/events", icon: Activity },
-      { title: "Activities", url: "/activities", icon: Activity },
+      { title: "Events", url: "/events", icon: Calendar },
+      { title: "Activities", url: "/activities", icon: Zap },
       { title: "Portals", url: "/portals", icon: Globe },
     ]
   },
