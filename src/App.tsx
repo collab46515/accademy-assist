@@ -70,16 +70,16 @@ const App = () => (
             <Route path="/*" element={
               <ProtectedRoute>
                 <SidebarProvider defaultOpen={true}>
-                  <div className="flex min-h-screen w-full">
+                  <div className="flex min-h-screen w-full bg-background">
                     <AppSidebar />
-                    <SidebarInset>
-                      <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
+                    <SidebarInset className="flex flex-col w-full">
+                      <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
                         <SidebarTrigger className="-ml-1" />
                         <div className="ml-auto">
                           <span className="text-sm text-muted-foreground">School Management System</span>
                         </div>
                       </header>
-                      <main className="flex-1 overflow-y-auto max-h-screen">
+                      <main className="flex-1 overflow-y-auto p-6 bg-background">
                         <Routes>
                           <Route path="/dashboard" element={<Dashboard />} />
                           <Route path="/students" element={<StudentsPage />} />
