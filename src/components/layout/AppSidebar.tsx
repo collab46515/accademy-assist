@@ -320,12 +320,12 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
                                    {subItem.url.includes('?') ? (
                                      <div className="flex items-center gap-2 py-1">
                                        <subItem.icon className="h-3 w-3" />
-                                        <span className="text-xs" style={{ fontSize: '13px' }}>{subItem.title}</span>
+                                        <span className="text-xs" style={{ fontSize: '14px' }}>{subItem.title}</span>
                                      </div>
                                    ) : (
                                      <NavLink to={subItem.url} className="flex items-center gap-2 py-1">
                                        <subItem.icon className="h-3 w-3" />
-                                       <span className="text-xs" style={{ fontSize: '13px' }}>{subItem.title}</span>
+                                       <span className="text-xs" style={{ fontSize: '14px' }}>{subItem.title}</span>
                                      </NavLink>
                                    )}
                                  </SidebarMenuButton>
