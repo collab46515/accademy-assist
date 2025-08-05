@@ -3,11 +3,12 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AuthPage from "@/pages/AuthPage";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
+import { UserMenu } from "@/components/layout/UserMenu";
 import Dashboard from "./pages/Dashboard";
 import StudentsPage from "./pages/StudentsPage";
 import AdmissionsPage from "./pages/AdmissionsPage";
@@ -75,8 +76,9 @@ const App = () => (
                     <SidebarInset className="flex flex-col w-full">
                       <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
                         <SidebarTrigger className="-ml-1" />
-                        <div className="ml-auto">
+                        <div className="flex items-center gap-4 ml-auto">
                           <span className="text-sm text-muted-foreground">School Management System</span>
+                          <UserMenu />
                         </div>
                       </header>
                       <main className="flex-1 overflow-y-auto p-6 bg-background">
