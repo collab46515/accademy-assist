@@ -98,10 +98,13 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
 
   const generationStats = {
     totalClasses: 12,
-    conflictsResolved: 15,
+    totalTeachers: 24,
+    totalRooms: 15,
+    conflictsResolved: 47, // Across all classes
     optimizationScore: 94.2,
     teacherSatisfaction: 87,
-    roomUtilization: 91
+    roomUtilization: 91,
+    totalPeriods: 960 // 12 classes × 8 periods × 10 days (2 weeks)
   };
 
   const getSubjectColor = (subject: string) => {
@@ -126,17 +129,33 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
         <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-success/20 to-success/10 rounded-full mb-4">
           <CheckCircle className="h-10 w-10 text-success" />
         </div>
-        <h2 className="text-2xl font-bold mb-2">Timetable Generated Successfully!</h2>
-        <p className="text-muted-foreground">Review your AI-generated timetable and make any final adjustments</p>
+        <h2 className="text-2xl font-bold mb-2">School-Wide Timetable Generated Successfully!</h2>
+        <p className="text-muted-foreground">AI generated optimized timetables for all {generationStats.totalClasses} classes, {24} teachers, and {15} rooms</p>
       </div>
 
       {/* Generation Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
         <Card>
           <CardContent className="p-4 text-center">
             <Grid3X3 className="h-6 w-6 text-primary mx-auto mb-2" />
             <p className="text-sm text-muted-foreground">Classes</p>
             <p className="text-xl font-bold">{generationStats.totalClasses}</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4 text-center">
+            <Users className="h-6 w-6 text-primary mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">Teachers</p>
+            <p className="text-xl font-bold">{generationStats.totalTeachers}</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4 text-center">
+            <MapPin className="h-6 w-6 text-primary mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">Rooms</p>
+            <p className="text-xl font-bold">{generationStats.totalRooms}</p>
           </CardContent>
         </Card>
         
@@ -158,17 +177,9 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
         
         <Card>
           <CardContent className="p-4 text-center">
-            <Users className="h-6 w-6 text-primary mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">Teacher Satisfaction</p>
-            <p className="text-xl font-bold">{generationStats.teacherSatisfaction}%</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4 text-center">
-            <MapPin className="h-6 w-6 text-primary mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">Room Utilization</p>
-            <p className="text-xl font-bold">{generationStats.roomUtilization}%</p>
+            <Clock className="h-6 w-6 text-primary mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">Total Periods</p>
+            <p className="text-xl font-bold">{generationStats.totalPeriods}</p>
           </CardContent>
         </Card>
       </div>
@@ -180,12 +191,15 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
             <div>
               <CardTitle className="flex items-center space-x-2">
                 <Eye className="h-5 w-5" />
-                <span>Timetable Preview - Class {selectedClass}</span>
+                <span>School Timetable Preview - Class {selectedClass}</span>
               </CardTitle>
-              <CardDescription>Generated timetable with AI optimization</CardDescription>
+              <CardDescription>AI-generated school-wide timetable with conflict resolution across all classes and teachers</CardDescription>
             </div>
             <div className="flex items-center space-x-2">
-              <select 
+              <Badge variant="outline" className="text-xs">
+                {generationStats.totalClasses} Classes Generated
+              </Badge>
+              <select
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
                 className="px-3 py-1 border rounded-md text-sm"
