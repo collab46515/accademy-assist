@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   DollarSign, 
   TrendingUp, 
@@ -18,8 +19,13 @@ import {
   Building2,
   Users,
   Calendar,
-  BarChart3
+  BarChart3,
+  Eye,
+  Download,
+  Filter
 } from 'lucide-react';
+import { useFeeData } from '@/hooks/useFeeData';
+import { useAuth } from '@/hooks/useAuth';
 
 interface FinancialMetric {
   label: string;
@@ -51,38 +57,63 @@ interface OutstandingFee {
 }
 
 export function FinancialDashboard() {
+  const { user } = useAuth();
+  const { feeHeads, feeStructures, invoices, loading } = useFeeData();
+  const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
+
+  // Calculate real metrics from data
+  const totalRevenue = invoices
+    .filter(inv => inv.status === 'paid')
+    .reduce((sum, inv) => sum + inv.paid_amount, 0);
+
+  const outstandingFeesAmount = invoices
+    .filter(inv => inv.status === 'pending' || inv.status === 'overdue')
+    .reduce((sum, inv) => sum + (inv.amount - inv.paid_amount), 0);
+
+  const collectionRate = invoices.length > 0 
+    ? (invoices.filter(inv => inv.status === 'paid').length / invoices.length) * 100
+    : 0;
+
+  const activeInvoices = invoices.filter(inv => inv.status !== 'paid').length;
+
+  // Calculate trends (mock data for now - would need historical data)
+  const revenueChange = "+12.5%";
+  const outstandingChange = "-8.2%";
+  const collectionChange = "+2.1%";
+  const invoiceChange = "+5.3%";
+
   const metrics: FinancialMetric[] = [
     {
-      label: "Total Revenue",
-      value: "£2,450,000",
-      change: "+12.5%",
+      label: "Monthly Revenue",
+      value: `£${(totalRevenue / 1000).toFixed(1)}K`,
+      change: revenueChange,
       changeType: "positive",
       icon: DollarSign,
-      description: "Annual revenue YTD"
+      description: "Total revenue this month"
     },
     {
       label: "Outstanding Fees",
-      value: "£285,420",
-      change: "-8.2%",
+      value: `£${(outstandingFeesAmount / 1000).toFixed(1)}K`,
+      change: outstandingChange,
       changeType: "positive",
       icon: AlertTriangle,
       description: "Pending student payments"
     },
     {
-      label: "Collection Rate",
-      value: "94.2%",
-      change: "+2.1%",
+      label: "Budget Utilization",
+      value: "87%",
+      change: "+5.1%",
       changeType: "positive",
       icon: Target,
-      description: "Monthly collection efficiency"
+      description: "Annual budget consumed"
     },
     {
-      label: "Active Invoices",
-      value: "1,247",
-      change: "+5.3%",
+      label: "Vendor Payments",
+      value: "£125K",
+      change: "+3.8%",
       changeType: "positive",
-      icon: FileText,
-      description: "Outstanding invoices"
+      icon: Building2,
+      description: "Monthly supplier payments"
     }
   ];
 
@@ -134,7 +165,7 @@ export function FinancialDashboard() {
     }
   ];
 
-  const outstandingFees: OutstandingFee[] = [
+  const outstandingFeesList: OutstandingFee[] = [
     {
       id: '1',
       studentName: 'Emma Thompson',
@@ -196,37 +227,108 @@ export function FinancialDashboard() {
     }
   };
 
+  const getMetricDrillDown = (metricLabel: string) => {
+    switch (metricLabel) {
+      case "Monthly Revenue":
+        return {
+          title: "Monthly Revenue Breakdown",
+          data: feeHeads.map(head => ({
+            category: head.name,
+            amount: head.amount,
+            count: Math.floor(Math.random() * 50) + 10
+          }))
+        };
+      case "Outstanding Fees":
+        return {
+          title: "Outstanding Fees by Category",
+          data: invoices
+            .filter(inv => inv.status === 'pending' || inv.status === 'overdue')
+            .slice(0, 10)
+            .map(inv => ({
+              id: inv.invoice_number,
+              amount: inv.amount - inv.paid_amount,
+              dueDate: inv.due_date,
+              status: inv.status
+            }))
+        };
+      case "Budget Utilization":
+        return {
+          title: "Budget Utilization by Department",
+          data: [
+            { department: "Teaching & Learning", budgeted: 150000, spent: 135000, utilization: 90 },
+            { department: "Facilities", budgeted: 80000, spent: 72000, utilization: 90 },
+            { department: "Technology", budgeted: 45000, spent: 38000, utilization: 84 },
+            { department: "Administration", budgeted: 35000, spent: 28000, utilization: 80 }
+          ]
+        };
+      case "Vendor Payments":
+        return {
+          title: "Vendor Payments This Month",
+          data: [
+            { vendor: "Office Supplies Ltd", amount: 12500, category: "Supplies", status: "Paid" },
+            { vendor: "Tech Solutions Inc", amount: 45000, category: "Technology", status: "Pending" },
+            { vendor: "Cleaning Services Co", amount: 8500, category: "Facilities", status: "Paid" },
+            { vendor: "Food Services UK", amount: 15000, category: "Catering", status: "Processing" }
+          ]
+        };
+      default:
+        return { title: "Data", data: [] };
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Financial Metrics Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {metrics.map((metric, index) => (
-          <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">{metric.label}</p>
-                  <p className="text-3xl font-bold">{metric.value}</p>
-                  <div className="flex items-center gap-1">
-                    {metric.changeType === 'positive' ? (
-                      <TrendingUp className="h-3 w-3 text-success" />
-                    ) : (
-                      <TrendingDown className="h-3 w-3 text-destructive" />
-                    )}
-                    <p className={`text-xs ${
-                      metric.changeType === 'positive' ? 'text-success' : 'text-destructive'
-                    }`}>
-                      {metric.change}
-                    </p>
+          <Dialog key={index}>
+            <DialogTrigger asChild>
+              <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-muted-foreground">{metric.label}</p>
+                      <p className="text-3xl font-bold">{metric.value}</p>
+                      <div className="flex items-center gap-1">
+                        {metric.changeType === 'positive' ? (
+                          <TrendingUp className="h-3 w-3 text-success" />
+                        ) : (
+                          <TrendingDown className="h-3 w-3 text-destructive" />
+                        )}
+                        <p className={`text-xs ${
+                          metric.changeType === 'positive' ? 'text-success' : 'text-destructive'
+                        }`}>
+                          {metric.change}
+                        </p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{metric.description}</p>
+                    </div>
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                        <metric.icon className="h-6 w-6 text-primary" />
+                      </div>
+                      <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Eye className="h-3 w-3 mr-1" />
+                        Details
+                      </Button>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">{metric.description}</p>
-                </div>
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <metric.icon className="h-6 w-6 text-primary" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <metric.icon className="h-5 w-5" />
+                  {getMetricDrillDown(metric.label).title}
+                </DialogTitle>
+                <DialogDescription>
+                  Detailed breakdown and analysis for {metric.label.toLowerCase()}
+                </DialogDescription>
+              </DialogHeader>
+              <DrillDownContent metric={metric} data={getMetricDrillDown(metric.label)} />
+            </DialogContent>
+          </Dialog>
         ))}
       </div>
 
@@ -366,8 +468,8 @@ export function FinancialDashboard() {
               <CardDescription>Overdue payments requiring attention</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {outstandingFees.map((fee) => (
+               <div className="space-y-3">
+                 {outstandingFeesList.map((fee) => (
                   <div key={fee.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                     <div className="flex items-center gap-3">
                       <div className="space-y-1">
@@ -466,6 +568,103 @@ export function FinancialDashboard() {
           </div>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function DrillDownContent({ metric, data }: { metric: FinancialMetric, data: any }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm">
+            <Filter className="h-4 w-4 mr-2" />
+            Filter
+          </Button>
+          <Button variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+        </div>
+      </div>
+
+      {metric.label === "Monthly Revenue" && (
+        <div className="space-y-3">
+          {data.data.map((item: any, index: number) => (
+            <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+              <div>
+                <p className="font-medium">{item.category}</p>
+                <p className="text-sm text-muted-foreground">{item.count} transactions</p>
+              </div>
+              <div className="text-right">
+                <p className="font-semibold text-green-600">£{item.amount.toLocaleString()}</p>
+                <p className="text-sm text-muted-foreground">Per unit</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {metric.label === "Outstanding Fees" && (
+        <div className="space-y-3">
+          {data.data.map((item: any, index: number) => (
+            <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+              <div>
+                <p className="font-medium">{item.id}</p>
+                <p className="text-sm text-muted-foreground">Due: {new Date(item.dueDate).toLocaleDateString()}</p>
+              </div>
+              <div className="text-right">
+                <p className="font-semibold text-red-600">£{item.amount.toLocaleString()}</p>
+                <Badge variant={item.status === 'overdue' ? 'destructive' : 'secondary'}>
+                  {item.status}
+                </Badge>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {metric.label === "Budget Utilization" && (
+        <div className="space-y-3">
+          {data.data.map((item: any, index: number) => (
+            <div key={index} className="space-y-2 p-4 border rounded-lg">
+              <div className="flex items-center justify-between">
+                <p className="font-medium">{item.department}</p>
+                <p className="text-sm text-muted-foreground">{item.utilization}% utilized</p>
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span>Budgeted: £{item.budgeted.toLocaleString()}</span>
+                  <span>Spent: £{item.spent.toLocaleString()}</span>
+                </div>
+                <Progress value={item.utilization} className="h-2" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {metric.label === "Vendor Payments" && (
+        <div className="space-y-3">
+          {data.data.map((item: any, index: number) => (
+            <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+              <div>
+                <p className="font-medium">{item.vendor}</p>
+                <p className="text-sm text-muted-foreground">{item.category}</p>
+              </div>
+              <div className="text-right">
+                <p className="font-semibold">£{item.amount.toLocaleString()}</p>
+                <Badge variant={
+                  item.status === 'Paid' ? 'default' : 
+                  item.status === 'Pending' ? 'secondary' : 'outline'
+                }>
+                  {item.status}
+                </Badge>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
