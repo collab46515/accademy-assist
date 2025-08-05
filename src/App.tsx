@@ -50,6 +50,7 @@ import EnrollmentPage from "./pages/EnrollmentPage";
 import LibraryPage from "./pages/LibraryPage";
 import TransportPage from "./pages/TransportPage";
 import { StudentSubmissionInterface } from "@/components/assignments/StudentSubmissionInterface";
+import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
@@ -63,7 +64,9 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/landing" element={<LandingPage />} />
             <Route path="/welcome" element={<Index />} />
+            <Route path="/" element={<Index />} />
             <Route path="/*" element={
               <ProtectedRoute>
                 <SidebarProvider defaultOpen={true}>
@@ -78,7 +81,7 @@ const App = () => (
                       </header>
                       <main className="flex-1 overflow-y-auto max-h-screen">
                         <Routes>
-                          <Route path="/" element={<Dashboard />} />
+                          <Route path="/dashboard" element={<Dashboard />} />
                           <Route path="/students" element={<StudentsPage />} />
             <Route path="/admissions" element={<UnifiedAdmissionsPage />} />
             <Route path="/admissions/new" element={<NewApplicationsPage />} />
