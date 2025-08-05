@@ -49,7 +49,8 @@ const GradebookPage = () => {
     createGrade,
     updateGrade,
     calculateGrade,
-    generateAnalytics
+    generateAnalytics,
+    refreshData
   } = useGradingData();
   
   const [searchTerm, setSearchTerm] = useState("");
@@ -207,7 +208,19 @@ const GradebookPage = () => {
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-2">Gradebook & Reporting</h1>
-        <p className="text-muted-foreground">Termly reports with UK-style comments, AI-assisted generation, and parent portal access</p>
+        <p className="text-muted-foreground">Comprehensive grading system with rubrics, boundaries, and analytics</p>
+        
+        {/* Quick Actions */}
+        <div className="flex gap-4 mt-4">
+          <Button onClick={() => generateAnalytics()} variant="outline">
+            <BarChart3 className="mr-2 h-4 w-4" />
+            Generate Analytics
+          </Button>
+          <Button onClick={() => refreshData()} variant="outline">
+            <TrendingUp className="mr-2 h-4 w-4" />
+            Refresh Data
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
