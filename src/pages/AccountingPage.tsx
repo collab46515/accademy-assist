@@ -171,6 +171,78 @@ export function AccountingPage() {
       </div>
 
       <div className="p-6 space-y-6">
+        {/* Navigation Tabs for Dashboard View */}
+        {currentView === 'dashboard' && (
+          <div className="mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              <Button 
+                variant="outline" 
+                className="h-20 flex-col gap-2 hover:bg-primary hover:text-primary-foreground transition-all"
+                onClick={() => window.location.href = '/accounting/student-fees'}
+              >
+                <Users className="h-6 w-6" />
+                <span className="text-xs">Student Fees</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-20 flex-col gap-2 hover:bg-primary hover:text-primary-foreground transition-all"
+                onClick={() => window.location.href = '/accounting/invoices'}
+              >
+                <FileText className="h-6 w-6" />
+                <span className="text-xs">Invoices</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-20 flex-col gap-2 hover:bg-primary hover:text-primary-foreground transition-all"
+                onClick={() => window.location.href = '/accounting/bills'}
+              >
+                <Receipt className="h-6 w-6" />
+                <span className="text-xs">Bills</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-20 flex-col gap-2 hover:bg-primary hover:text-primary-foreground transition-all"
+                onClick={() => window.location.href = '/accounting/vendors'}
+              >
+                <Building2 className="h-6 w-6" />
+                <span className="text-xs">Vendors</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-20 flex-col gap-2 hover:bg-primary hover:text-primary-foreground transition-all"
+                onClick={() => window.location.href = '/accounting/purchase-orders'}
+              >
+                <ShoppingCart className="h-6 w-6" />
+                <span className="text-xs">Purchase Orders</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-20 flex-col gap-2 hover:bg-primary hover:text-primary-foreground transition-all"
+                onClick={() => window.location.href = '/accounting/accounts'}
+              >
+                <PieChart className="h-6 w-6" />
+                <span className="text-xs">Chart of Accounts</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-20 flex-col gap-2 hover:bg-primary hover:text-primary-foreground transition-all"
+                onClick={() => window.location.href = '/accounting/budget'}
+              >
+                <Target className="h-6 w-6" />
+                <span className="text-xs">Budget</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-20 flex-col gap-2 hover:bg-primary hover:text-primary-foreground transition-all"
+                onClick={() => window.location.href = '/accounting/reports'}
+              >
+                <BarChart3 className="h-6 w-6" />
+                <span className="text-xs">Reports</span>
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Dashboard View */}
         {currentView === 'dashboard' && (
           <div className="space-y-6">
