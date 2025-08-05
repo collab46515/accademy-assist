@@ -16,7 +16,9 @@ import {
   Users,
   MapPin,
   Zap,
-  Edit
+  Edit,
+  Building2,
+  Brain
 } from "lucide-react";
 import { InteractiveTimetableEditor } from './InteractiveTimetableEditor';
 import { SubstitutionPlanner } from './live-usage/SubstitutionPlanner';
@@ -27,7 +29,8 @@ import { RoleBasedTimetableView } from './views/RoleBasedTimetableView';
 import { MultiSchoolManagement } from '../enterprise/MultiSchoolManagement';
 import { InternationalizationManager, I18nProvider } from '../enterprise/InternationalizationManager';
 import { SISERPIntegrations } from '../enterprise/SISERPIntegrations';
-import { Building2 } from 'lucide-react';
+import { AILearningOptimization } from './ai-learning/AILearningOptimization';
+
 
 interface TimetablePreviewProps {
   onBack: () => void;
@@ -313,7 +316,7 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="export" className="w-full">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-7">
               <TabsTrigger value="export" className="flex items-center gap-2">
                 <Download className="h-4 w-4" />
                 Export
@@ -337,6 +340,10 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
               <TabsTrigger value="regeneration" className="flex items-center gap-2">
                 <RefreshCw className="h-4 w-4" />
                 Auto-Regen
+              </TabsTrigger>
+              <TabsTrigger value="ai-learning" className="flex items-center gap-2">
+                <Brain className="h-4 w-4" />
+                AI Learning
               </TabsTrigger>
             </TabsList>
             
@@ -394,6 +401,10 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
             
             <TabsContent value="regeneration" className="mt-6">
               <AutoRegeneration />
+            </TabsContent>
+            
+            <TabsContent value="ai-learning" className="mt-6">
+              <AILearningOptimization />
             </TabsContent>
           </Tabs>
         </CardContent>
