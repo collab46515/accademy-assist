@@ -475,6 +475,15 @@ const UnifiedAdmissionsPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
+      {/* DEBUG: Always show this info */}
+      <div className="bg-yellow-100 border border-yellow-400 p-4 mb-4 rounded">
+        <p><strong>DEBUG INFO:</strong></p>
+        <p>URL Stage Param: "{stageParam}"</p>
+        <p>Parsed Current Stage: {currentStage}</p>
+        <p>Is Stage View: {isStageView ? 'YES' : 'NO'}</p>
+        <p>Current URL: {window.location.href}</p>
+      </div>
+      
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-2">Unified Admissions System</h1>
         <p className="text-muted-foreground">
