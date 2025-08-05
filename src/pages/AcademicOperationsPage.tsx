@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useStudentData } from '@/hooks/useStudentData';
 import { 
   GraduationCap, 
   UserPlus, 
@@ -20,6 +21,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 
 export default function AcademicOperationsPage() {
   const navigate = useNavigate();
+  const { students, loading } = useStudentData();
 
   const academicModules = [
     {
@@ -79,7 +81,12 @@ export default function AcademicOperationsPage() {
   ];
 
   const academicStats = [
-    { label: "Total Students", value: "1,247", trend: "+5.2%", icon: Users },
+    { 
+      label: "Total Students", 
+      value: loading ? "..." : students.length.toLocaleString(), 
+      trend: loading ? "..." : `${students.length} enrolled`, 
+      icon: Users 
+    },
     { label: "Active Courses", value: "45", trend: "+2.1%", icon: BookOpenCheck },
     { label: "Completion Rate", value: "94.8%", trend: "+1.3%", icon: TrendingUp },
     { label: "This Term", value: "Term 2", trend: "2024-25", icon: Calendar },
