@@ -29,6 +29,7 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [selectedTeacher, setSelectedTeacher] = useState<any>(null);
+  const [activeModal, setActiveModal] = useState<string | null>(null);
   
   const { students, loading: studentsLoading } = useStudentData();
   const { employees, loading: hrLoading } = useHRData();
@@ -57,28 +58,32 @@ export default function Dashboard() {
       value: totalStudents.toString(), 
       icon: Users, 
       color: "bg-blue-500",
-      trend: "+12 this month"
+      trend: "+12 this month",
+      action: () => setActiveModal('students')
     },
     { 
       label: "Teachers", 
       value: totalTeachers.toString(), 
       icon: GraduationCap, 
       color: "bg-green-500",
-      trend: "5 new hires"
+      trend: "5 new hires",
+      action: () => setActiveModal('teachers')
     },
     { 
       label: "Today's Attendance", 
       value: `${todayAttendance}/${totalStudents}`, 
       icon: UserCheck, 
       color: "bg-purple-500",
-      trend: "92% present"
+      trend: "92% present",
+      action: () => setActiveModal('attendance')
     },
     { 
       label: "Pending Fees", 
       value: `£${pendingFees}k`, 
       icon: Banknote, 
       color: "bg-orange-500",
-      trend: "£23k collected today"
+      trend: "£23k collected today",
+      action: () => setActiveModal('fees')
     }
   ];
 
@@ -425,19 +430,22 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {quickStats.map((stat, index) => (
             <div key={index} className="animate-fade-in hover-scale" style={{ animationDelay: `${index * 100}ms` }}>
-              <Card className="group relative overflow-hidden bg-card/60 backdrop-blur-sm border-border/50 hover:shadow-xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-2">
+              <Card 
+                className="group relative overflow-hidden bg-card/60 backdrop-blur-sm border-border/50 hover:shadow-xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-2 cursor-pointer"
+                onClick={stat.action}
+              >
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <CardContent className="p-8">
                   <div className="flex items-center justify-between">
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{stat.label}</p>
+                    <div className="space-y-2 flex-1 min-w-0">
+                      <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider truncate">{stat.label}</p>
                       <div className="flex items-center space-x-3">
-                        <p className="text-3xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">{stat.value}</p>
-                        <TrendingUp className="h-5 w-5 text-green-600 group-hover:scale-110 transition-transform duration-300" />
+                        <p className="text-3xl font-bold text-foreground group-hover:text-primary transition-colors duration-300 truncate">{stat.value}</p>
+                        <TrendingUp className="h-5 w-5 text-green-600 group-hover:scale-110 transition-transform duration-300 flex-shrink-0" />
                       </div>
-                      <p className="text-xs text-muted-foreground font-medium">{stat.trend}</p>
+                      <p className="text-xs text-muted-foreground font-medium truncate">{stat.trend}</p>
                     </div>
-                    <div className={`p-4 rounded-2xl ${stat.color} group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg`}>
+                    <div className={`p-4 rounded-2xl ${stat.color} group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg flex-shrink-0 ml-4`}>
                       <stat.icon className="h-8 w-8 text-white" />
                     </div>
                   </div>
@@ -626,6 +634,169 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Drill-down Modals */}
+        {activeModal && (
+          <Dialog open={!!activeModal} onOpenChange={() => setActiveModal(null)}>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  {activeModal === 'students' && 'All Students'}
+                  {activeModal === 'teachers' && 'All Teachers'}
+                  {activeModal === 'attendance' && 'Attendance Overview'}
+                  {activeModal === 'fees' && 'Fee Management'}
+                </DialogTitle>
+              </DialogHeader>
+              
+              {activeModal === 'students' && (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <p className="text-muted-foreground">Total: {students.length} students</p>
+                    <Button>Add New Student</Button>
+                  </div>
+                  <div className="grid gap-4 max-h-96 overflow-y-auto">
+                    {students.map((student) => (
+                      <div key={student.id} className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-muted">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={student.profiles?.avatar_url} />
+                          <AvatarFallback>
+                            {student.profiles?.first_name?.[0]}{student.profiles?.last_name?.[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="font-medium">{student.profiles?.first_name} {student.profiles?.last_name}</p>
+                          <p className="text-sm text-muted-foreground">{student.student_number} • {student.year_group}</p>
+                        </div>
+                        <Badge variant={student.is_enrolled ? "default" : "secondary"}>
+                          {student.is_enrolled ? "Active" : "Inactive"}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {activeModal === 'teachers' && (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <p className="text-muted-foreground">Total: {employees.length} staff members</p>
+                    <Button>Add New Staff</Button>
+                  </div>
+                  <div className="grid gap-4 max-h-96 overflow-y-auto">
+                    {employees.map((teacher) => (
+                      <div key={teacher.id} className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-muted">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src="" />
+                          <AvatarFallback>
+                            {teacher.first_name?.[0]}{teacher.last_name?.[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="font-medium">{teacher.first_name} {teacher.last_name}</p>
+                          <p className="text-sm text-muted-foreground">{teacher.employee_id} • {teacher.position}</p>
+                        </div>
+                        <Badge variant={teacher.status === 'active' ? "default" : "secondary"}>
+                          {teacher.status === 'active' ? "Active" : "Inactive"}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {activeModal === 'attendance' && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-3 gap-4">
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm">Today's Rate</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">92%</div>
+                        <p className="text-xs text-muted-foreground">
+                          {todayAttendance}/{totalStudents} present
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm">This Week</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">89%</div>
+                        <p className="text-xs text-muted-foreground">
+                          Average attendance
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm">Alerts</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold text-red-600">12</div>
+                        <p className="text-xs text-muted-foreground">
+                          Low attendance warnings
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              )}
+              
+              {activeModal === 'fees' && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-3 gap-4">
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm">Outstanding</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold text-red-600">£{pendingFees}k</div>
+                        <p className="text-xs text-muted-foreground">
+                          From 156 students
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm">Collected Today</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold text-green-600">£23k</div>
+                        <p className="text-xs text-muted-foreground">
+                          45 payments received
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm">This Month</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">£125k</div>
+                        <p className="text-xs text-muted-foreground">
+                          Total collections
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Recent Overdue Fees</h4>
+                    <div className="grid gap-2">
+                      {['John Smith - £450 (5 days overdue)', 'Emma Wilson - £280 (2 days overdue)', 'Alex Johnson - £320 (7 days overdue)'].map((fee, index) => (
+                        <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
+                          <span className="text-sm">{fee}</span>
+                          <Button size="sm" variant="outline">Send Reminder</Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );
