@@ -24,6 +24,8 @@ import {
   Filter
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useStudentData } from '@/hooks/useStudentData';
+import { useFeeData } from '@/hooks/useFeeData';
 
 interface Payment {
   id: string;
@@ -438,6 +440,9 @@ const ManualPaymentForm = ({ onCancel }: { onCancel: () => void }) => {
     notes: ''
   });
 
+  const { students, loading: studentsLoading } = useStudentData();
+  const { feeHeads } = useFeeData();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle manual payment recording
@@ -450,12 +455,20 @@ const ManualPaymentForm = ({ onCancel }: { onCancel: () => void }) => {
         <Label htmlFor="student">Student</Label>
         <Select value={formData.studentId} onValueChange={(value) => setFormData(prev => ({ ...prev, studentId: value }))}>
           <SelectTrigger>
-            <SelectValue placeholder="Select student" />
+            <SelectValue placeholder={studentsLoading ? "Loading students..." : "Select student"} />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="1">Alice Johnson (ADM001)</SelectItem>
-            <SelectItem value="2">Bob Smith (ADM002)</SelectItem>
-            <SelectItem value="3">Charlie Brown (ADM003)</SelectItem>
+          <SelectContent className="bg-background border border-border z-50">
+            {studentsLoading ? (
+              <SelectItem value="loading" disabled>Loading students...</SelectItem>
+            ) : students.length > 0 ? (
+              students.map((student) => (
+                <SelectItem key={student.id} value={student.id}>
+                  {student.profiles?.first_name} {student.profiles?.last_name} ({student.student_number}) - {student.year_group}
+                </SelectItem>
+              ))
+            ) : (
+              <SelectItem value="no-students" disabled>No students found</SelectItem>
+            )}
           </SelectContent>
         </Select>
       </div>
