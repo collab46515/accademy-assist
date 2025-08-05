@@ -34,11 +34,22 @@ serve(async (req) => {
       throw new Error('Invalid authentication');
     }
 
-    // Check if user can use API keys
-    const { data: canUse, error: permError } = await supabase
-      .rpc('can_use_api_keys', { user_id: user.id });
+    // Check if user has proper role to use AI features
+    const { data: userRoles, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('is_active', true);
 
-    if (permError || !canUse) {
+    if (roleError) {
+      throw new Error('Error checking user permissions');
+    }
+
+    const hasPermission = userRoles && userRoles.some(role => 
+      ['super_admin', 'school_admin', 'hod', 'teacher'].includes(role.role)
+    );
+
+    if (!hasPermission) {
       throw new Error('Insufficient permissions to use AI features');
     }
 
