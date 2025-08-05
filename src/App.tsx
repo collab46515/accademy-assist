@@ -11,6 +11,7 @@ import { AppSidebar } from "@/components/layout/AppSidebar";
 import Dashboard from "./pages/Dashboard";
 import StudentsPage from "./pages/StudentsPage";
 import AdmissionsPage from "./pages/AdmissionsPage";
+import UnifiedAdmissionsPage from "./pages/UnifiedAdmissionsPage";
 import AttendancePage from "./pages/AttendancePage";
 import CurriculumPage from "./pages/CurriculumPage";
 import AssessmentPage from "./pages/AssessmentPage";
@@ -76,7 +77,7 @@ const App = () => (
                         <Routes>
                           <Route path="/" element={<Dashboard />} />
                           <Route path="/students" element={<StudentsPage />} />
-            <Route path="/admissions" element={<AdmissionsPage />} />
+            <Route path="/admissions" element={<UnifiedAdmissionsPage />} />
             <Route path="/admissions/new" element={<NewApplicationsPage />} />
             <Route path="/legacy-admissions" element={<AdmissionsPage />} />
             <Route path="/admin-management" element={<AdminManagementPage />} />
