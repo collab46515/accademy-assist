@@ -91,10 +91,6 @@ const erpModules = [
           { title: "Enrollment Confirmation", url: "/admissions?stage=6", icon: UserCheck },
           { title: "Welcome & Onboarding", url: "/admissions?stage=7", icon: Users },
           { title: "Student Exit Process", url: "/admissions/exit", icon: UserMinus },
-          { title: "Exit Applications", url: "/admissions/exit/applications", icon: FileMinus },
-          { title: "Clearance Process", url: "/admissions/exit/clearance", icon: ClipboardX },
-          { title: "Document Generation", url: "/admissions/exit/documents", icon: Archive },
-          { title: "Final Settlement", url: "/admissions/exit/settlement", icon: HandCoins },
         ]
       },
       { 
