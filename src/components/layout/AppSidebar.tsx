@@ -101,9 +101,6 @@ const erpModules = [
       { title: "Library Services", url: "/library", icon: Library },
       { title: "Transport Management", url: "/transport", icon: Truck },
       { title: "Student Welfare", url: "/student-welfare", icon: Heart },
-      { title: "Infirmary", url: "/student-welfare/infirmary", icon: Plus },
-      { title: "Complaints", url: "/student-welfare/complaints", icon: AlertTriangle },
-      { title: "Safeguarding", url: "/safeguarding", icon: Shield },
       { title: "Activities & Events", url: "/activities", icon: Calendar },
       { title: "Communication", url: "/communication", icon: MessageSquare },
     ]
