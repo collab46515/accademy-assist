@@ -215,7 +215,7 @@ function SidebarGroupItems({ title, items, defaultOpen = false }: SidebarGroupIt
     <SidebarGroup>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
-          <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/70 rounded-lg px-2 py-1.5 transition-colors flex items-center justify-between text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/70 rounded-lg px-2 py-1.5 transition-colors flex items-center justify-between text-sm font-medium text-foreground">
             <span>{title}</span>
             {state !== "collapsed" && (
               isOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />
