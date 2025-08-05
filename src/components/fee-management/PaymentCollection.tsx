@@ -189,7 +189,10 @@ export const PaymentCollection = () => {
           </Button>
           <Dialog open={showManualPayment} onOpenChange={setShowManualPayment}>
             <DialogTrigger asChild>
-              <Button>
+              <Button onClick={() => {
+                console.log('Record Payment button clicked');
+                setShowManualPayment(true);
+              }}>
                 <Plus className="h-4 w-4 mr-2" />
                 Record Manual Payment
               </Button>
