@@ -35,6 +35,9 @@ const mockStudents: Student[] = [
     year_group: 'Year 7',
     form_class: '7A',
     is_enrolled: true,
+    admission_date: '2024-09-01',
+    emergency_contact_name: 'Sarah Thompson',
+    emergency_contact_phone: '+44 7700 900456',
     profiles: {
       first_name: 'Emma',
       last_name: 'Thompson',
@@ -49,6 +52,9 @@ const mockStudents: Student[] = [
     year_group: 'Year 8',
     form_class: '8B',
     is_enrolled: true,
+    admission_date: '2023-09-01',
+    emergency_contact_name: 'Michael Wilson',
+    emergency_contact_phone: '+44 7700 900789',
     profiles: {
       first_name: 'James',
       last_name: 'Wilson',
@@ -63,10 +69,64 @@ const mockStudents: Student[] = [
     year_group: 'Year 9',
     form_class: '9A',
     is_enrolled: true,
+    admission_date: '2022-09-01',
+    emergency_contact_name: 'Lisa Chen',
+    emergency_contact_phone: '+44 7700 900321',
     profiles: {
       first_name: 'Sophie',
       last_name: 'Chen',
       email: 'sophie.chen@email.com',
+    }
+  },
+  {
+    id: '4',
+    user_id: 'user4',
+    student_number: 'STU2024004',
+    school_id: 'school1',
+    year_group: 'Year 10',
+    form_class: '10C',
+    is_enrolled: true,
+    admission_date: '2021-09-01',
+    emergency_contact_name: 'Andrei Dominic',
+    emergency_contact_phone: '+44 7700 900654',
+    profiles: {
+      first_name: 'Svetlana',
+      last_name: 'Dominic',
+      email: 'svetlana.dominic@email.com',
+    }
+  },
+  {
+    id: '5',
+    user_id: 'user5',
+    student_number: 'STU2024005',
+    school_id: 'school1',
+    year_group: 'Year 11',
+    form_class: '11A',
+    is_enrolled: true,
+    admission_date: '2020-09-01',
+    emergency_contact_name: 'David Brown',
+    emergency_contact_phone: '+44 7700 900987',
+    profiles: {
+      first_name: 'Oliver',
+      last_name: 'Brown',
+      email: 'oliver.brown@email.com',
+    }
+  },
+  {
+    id: '6',
+    user_id: 'user6',
+    student_number: 'STU2024006',
+    school_id: 'school1',
+    year_group: 'Year 12',
+    form_class: '12B',
+    is_enrolled: true,
+    admission_date: '2019-09-01',
+    emergency_contact_name: 'Rachel Davis',
+    emergency_contact_phone: '+44 7700 900246',
+    profiles: {
+      first_name: 'Amelia',
+      last_name: 'Davis',
+      email: 'amelia.davis@email.com',
     }
   }
 ];

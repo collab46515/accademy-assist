@@ -736,7 +736,6 @@ export default function Dashboard() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <p className="text-muted-foreground">Total: {students.length} students</p>
-                    <Button>Add New Student</Button>
                   </div>
                   <div className="grid gap-4 max-h-96 overflow-y-auto">
                     {students.map((student) => (
@@ -748,8 +747,17 @@ export default function Dashboard() {
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                          <p className="font-medium">{student.profiles?.first_name} {student.profiles?.last_name}</p>
-                          <p className="text-sm text-muted-foreground">{student.student_number} • {student.year_group}</p>
+                          <h4 className="font-semibold">
+                            {student.profiles?.first_name} {student.profiles?.last_name}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            {student.student_number} • {student.year_group} • {student.form_class}
+                          </p>
+                          {student.emergency_contact_name && (
+                            <p className="text-xs text-muted-foreground">
+                              Emergency: {student.emergency_contact_name} - {student.emergency_contact_phone}
+                            </p>
+                          )}
                         </div>
                         <Badge variant={student.is_enrolled ? "default" : "secondary"}>
                           {student.is_enrolled ? "Active" : "Inactive"}
@@ -764,7 +772,6 @@ export default function Dashboard() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <p className="text-muted-foreground">Total: {employees.length} staff members</p>
-                    <Button>Add New Staff</Button>
                   </div>
                   <div className="grid gap-4 max-h-96 overflow-y-auto">
                     {employees.map((teacher) => (
@@ -776,8 +783,15 @@ export default function Dashboard() {
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                          <p className="font-medium">{teacher.first_name} {teacher.last_name}</p>
-                          <p className="text-sm text-muted-foreground">{teacher.employee_id} • {teacher.position}</p>
+                          <h4 className="font-semibold">
+                            {teacher.first_name} {teacher.last_name}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            {teacher.employee_id} • {teacher.position}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {teacher.department_name} • {teacher.email} • {teacher.phone}
+                          </p>
                         </div>
                         <Badge variant={teacher.status === 'active' ? "default" : "secondary"}>
                           {teacher.status === 'active' ? "Active" : "Inactive"}
