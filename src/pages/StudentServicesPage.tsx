@@ -15,9 +15,12 @@ import {
   TrendingUp,
   Shield,
   Activity,
-  MapPin
+  MapPin,
+  HelpCircle
 } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { UserGuide } from '@/components/shared/UserGuide';
+import { studentServicesUserGuide } from '@/data/userGuides';
 
 export default function StudentServicesPage() {
   const navigate = useNavigate();
@@ -106,6 +109,13 @@ export default function StudentServicesPage() {
       <PageHeader 
         title="Student Services" 
         description="Comprehensive student support and service management"
+        actions={
+          <UserGuide 
+            moduleName={studentServicesUserGuide.moduleName}
+            sections={studentServicesUserGuide.sections}
+            quickActions={studentServicesUserGuide.quickActions}
+          />
+        }
       />
       
       <div className="p-6 space-y-8">
