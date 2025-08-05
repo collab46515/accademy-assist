@@ -1,0 +1,213 @@
+-- Create comprehensive timetable system tables
+
+-- Schools/Institutions table
+CREATE TABLE public.institutions (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  address TEXT,
+  contact_email TEXT,
+  contact_phone TEXT,
+  academic_year TEXT,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+-- Time slots table (periods in a day)
+CREATE TABLE public.time_slots (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  institution_id UUID NOT NULL REFERENCES public.institutions(id) ON DELETE CASCADE,
+  name TEXT NOT NULL, -- e.g., "Period 1", "Morning Assembly"
+  start_time TIME NOT NULL,
+  end_time TIME NOT NULL,
+  slot_order INTEGER NOT NULL,
+  is_break BOOLEAN DEFAULT false,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+-- Days of week
+CREATE TABLE public.weekdays (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  institution_id UUID NOT NULL REFERENCES public.institutions(id) ON DELETE CASCADE,
+  name TEXT NOT NULL, -- Monday, Tuesday, etc.
+  day_order INTEGER NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+-- Subjects table
+CREATE TABLE public.subjects (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  institution_id UUID NOT NULL REFERENCES public.institutions(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  code TEXT,
+  color_hex TEXT DEFAULT '#3B82F6',
+  periods_per_week INTEGER DEFAULT 1,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+-- Teachers table
+CREATE TABLE public.teachers (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  institution_id UUID NOT NULL REFERENCES public.institutions(id) ON DELETE CASCADE,
+  employee_id TEXT,
+  first_name TEXT NOT NULL,
+  last_name TEXT NOT NULL,
+  email TEXT,
+  phone TEXT,
+  specialization TEXT[],
+  max_periods_per_day INTEGER DEFAULT 6,
+  max_periods_per_week INTEGER DEFAULT 30,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+-- Classes/Sections table
+CREATE TABLE public.classes (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  institution_id UUID NOT NULL REFERENCES public.institutions(id) ON DELETE CASCADE,
+  name TEXT NOT NULL, -- e.g., "Grade 5A", "Class 10B"
+  grade_level INTEGER,
+  section TEXT,
+  student_count INTEGER DEFAULT 0,
+  classroom_id UUID,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+-- Classrooms table
+CREATE TABLE public.classrooms (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  institution_id UUID NOT NULL REFERENCES public.institutions(id) ON DELETE CASCADE,
+  name TEXT NOT NULL, -- e.g., "Room 101", "Science Lab A"
+  room_type TEXT DEFAULT 'regular', -- regular, lab, auditorium, library
+  capacity INTEGER DEFAULT 30,
+  equipment TEXT[], -- Available equipment
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+-- Teacher availability constraints
+CREATE TABLE public.teacher_availability (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  teacher_id UUID NOT NULL REFERENCES public.teachers(id) ON DELETE CASCADE,
+  weekday_id UUID NOT NULL REFERENCES public.weekdays(id) ON DELETE CASCADE,
+  time_slot_id UUID NOT NULL REFERENCES public.time_slots(id) ON DELETE CASCADE,
+  is_available BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  UNIQUE(teacher_id, weekday_id, time_slot_id)
+);
+
+-- Subject-Teacher assignments
+CREATE TABLE public.subject_teachers (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  subject_id UUID NOT NULL REFERENCES public.subjects(id) ON DELETE CASCADE,
+  teacher_id UUID NOT NULL REFERENCES public.teachers(id) ON DELETE CASCADE,
+  class_id UUID NOT NULL REFERENCES public.classes(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  UNIQUE(subject_id, teacher_id, class_id)
+);
+
+-- Main timetable entries
+CREATE TABLE public.timetable_entries (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  institution_id UUID NOT NULL REFERENCES public.institutions(id) ON DELETE CASCADE,
+  class_id UUID NOT NULL REFERENCES public.classes(id) ON DELETE CASCADE,
+  subject_id UUID REFERENCES public.subjects(id) ON DELETE SET NULL,
+  teacher_id UUID REFERENCES public.teachers(id) ON DELETE SET NULL,
+  classroom_id UUID REFERENCES public.classrooms(id) ON DELETE SET NULL,
+  weekday_id UUID NOT NULL REFERENCES public.weekdays(id) ON DELETE CASCADE,
+  time_slot_id UUID NOT NULL REFERENCES public.time_slots(id) ON DELETE CASCADE,
+  entry_type TEXT DEFAULT 'class', -- class, break, assembly, exam
+  notes TEXT,
+  is_generated BOOLEAN DEFAULT false, -- Was this generated by AI?
+  is_locked BOOLEAN DEFAULT false, -- Prevent AI from changing this
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  UNIQUE(class_id, weekday_id, time_slot_id)
+);
+
+-- AI generation sessions and settings
+CREATE TABLE public.timetable_generation_sessions (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  institution_id UUID NOT NULL REFERENCES public.institutions(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  status TEXT DEFAULT 'draft', -- draft, generating, completed, failed
+  constraints_config JSONB DEFAULT '{}',
+  ai_parameters JSONB DEFAULT '{}',
+  generation_log TEXT[],
+  progress_percentage INTEGER DEFAULT 0,
+  started_at TIMESTAMP WITH TIME ZONE,
+  completed_at TIMESTAMP WITH TIME ZONE,
+  created_by TEXT, -- user id
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+-- Constraint violations tracking
+CREATE TABLE public.constraint_violations (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  session_id UUID NOT NULL REFERENCES public.timetable_generation_sessions(id) ON DELETE CASCADE,
+  violation_type TEXT NOT NULL, -- teacher_conflict, room_conflict, preference_violation
+  severity TEXT DEFAULT 'medium', -- low, medium, high, critical
+  description TEXT NOT NULL,
+  affected_entries UUID[], -- Array of timetable_entry IDs
+  resolved BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+-- Enable Row Level Security
+ALTER TABLE public.institutions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.time_slots ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.weekdays ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.subjects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.teachers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.classes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.classrooms ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.teacher_availability ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.subject_teachers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.timetable_entries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.timetable_generation_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.constraint_violations ENABLE ROW LEVEL SECURITY;
+
+-- Create RLS policies (for now, allow all authenticated users to access)
+-- In production, you'd want more granular policies based on institution membership
+
+CREATE POLICY "Allow all for authenticated users" ON public.institutions FOR ALL TO authenticated USING (true);
+CREATE POLICY "Allow all for authenticated users" ON public.time_slots FOR ALL TO authenticated USING (true);
+CREATE POLICY "Allow all for authenticated users" ON public.weekdays FOR ALL TO authenticated USING (true);
+CREATE POLICY "Allow all for authenticated users" ON public.subjects FOR ALL TO authenticated USING (true);
+CREATE POLICY "Allow all for authenticated users" ON public.teachers FOR ALL TO authenticated USING (true);
+CREATE POLICY "Allow all for authenticated users" ON public.classes FOR ALL TO authenticated USING (true);
+CREATE POLICY "Allow all for authenticated users" ON public.classrooms FOR ALL TO authenticated USING (true);
+CREATE POLICY "Allow all for authenticated users" ON public.teacher_availability FOR ALL TO authenticated USING (true);
+CREATE POLICY "Allow all for authenticated users" ON public.subject_teachers FOR ALL TO authenticated USING (true);
+CREATE POLICY "Allow all for authenticated users" ON public.timetable_entries FOR ALL TO authenticated USING (true);
+CREATE POLICY "Allow all for authenticated users" ON public.timetable_generation_sessions FOR ALL TO authenticated USING (true);
+CREATE POLICY "Allow all for authenticated users" ON public.constraint_violations FOR ALL TO authenticated USING (true);
+
+-- Create indexes for better performance
+CREATE INDEX idx_timetable_entries_class_day ON public.timetable_entries(class_id, weekday_id);
+CREATE INDEX idx_timetable_entries_teacher_day ON public.timetable_entries(teacher_id, weekday_id);
+CREATE INDEX idx_timetable_entries_room_day ON public.timetable_entries(classroom_id, weekday_id);
+CREATE INDEX idx_teacher_availability_lookup ON public.teacher_availability(teacher_id, weekday_id, time_slot_id);
+
+-- Create function to update timestamps
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Add update triggers
+CREATE TRIGGER update_institutions_updated_at
+  BEFORE UPDATE ON public.institutions
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER update_timetable_entries_updated_at
+  BEFORE UPDATE ON public.timetable_entries
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_updated_at_column();
