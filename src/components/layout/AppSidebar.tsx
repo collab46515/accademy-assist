@@ -129,6 +129,36 @@ const erpModules = [
         ]
       },
       { 
+        title: "Library Management",
+        url: "/library",
+        icon: Library,
+        subItems: [
+          { title: "Dashboard", url: "/library", icon: LayoutDashboard },
+          { title: "Catalog", url: "/library/catalog", icon: BookOpenCheck },
+          { title: "Borrowing & Returns", url: "/library/borrowing", icon: BookOpen },
+          { title: "Reservations", url: "/library/reservations", icon: Bookmark },
+          { title: "Digital Resources", url: "/library/digital", icon: Globe },
+          { title: "Fines & Penalties", url: "/library/fines", icon: Receipt },
+          { title: "Reports", url: "/library/reports", icon: BarChart3 },
+          { title: "Search", url: "/library/search", icon: Search },
+        ]
+      },
+      { 
+        title: "Transport Management", 
+        url: "/transport",
+        icon: Truck,
+        subItems: [
+          { title: "Dashboard", url: "/transport", icon: LayoutDashboard },
+          { title: "Routes & Schedules", url: "/transport/routes", icon: Route },
+          { title: "Vehicle Management", url: "/transport/vehicles", icon: Truck },
+          { title: "Driver Management", url: "/transport/drivers", icon: UserCheck },
+          { title: "Student Assignments", url: "/transport/assignments", icon: Users },
+          { title: "Tracking", url: "/transport/tracking", icon: MapPin },
+          { title: "Notifications", url: "/transport/notifications", icon: Bell },
+          { title: "Reports", url: "/transport/reports", icon: BarChart3 },
+        ]
+      },
+      { 
         title: "Student Welfare", 
         url: "/student-welfare", 
         icon: Shield,
@@ -142,36 +172,6 @@ const erpModules = [
       { title: "Events", url: "/events", icon: Activity },
       { title: "Activities", url: "/activities", icon: Activity },
       { title: "Portals", url: "/portals", icon: Globe },
-    ]
-  },
-  {
-    title: "Library Management",
-    url: "/library",
-    icon: Library,
-    subItems: [
-      { title: "Dashboard", url: "/library", icon: LayoutDashboard },
-      { title: "Catalog", url: "/library/catalog", icon: BookOpenCheck },
-      { title: "Borrowing & Returns", url: "/library/borrowing", icon: BookOpen },
-      { title: "Reservations", url: "/library/reservations", icon: Bookmark },
-      { title: "Digital Resources", url: "/library/digital", icon: Globe },
-      { title: "Fines & Penalties", url: "/library/fines", icon: Receipt },
-      { title: "Reports", url: "/library/reports", icon: BarChart3 },
-      { title: "Search", url: "/library/search", icon: Search },
-    ]
-  },
-  {
-    title: "Transport Management", 
-    url: "/transport",
-    icon: Truck,
-    subItems: [
-      { title: "Dashboard", url: "/transport", icon: LayoutDashboard },
-      { title: "Routes & Schedules", url: "/transport/routes", icon: Route },
-      { title: "Vehicle Management", url: "/transport/vehicles", icon: Truck },
-      { title: "Driver Management", url: "/transport/drivers", icon: UserCheck },
-      { title: "Student Assignments", url: "/transport/assignments", icon: Users },
-      { title: "Tracking", url: "/transport/tracking", icon: MapPin },
-      { title: "Notifications", url: "/transport/notifications", icon: Bell },
-      { title: "Reports", url: "/transport/reports", icon: BarChart3 },
     ]
   },
   {
@@ -237,8 +237,6 @@ function getCurrentModule(pathname: string) {
   if (pathname.startsWith('/hr-management')) return 'HR Management';
   if (pathname.startsWith('/accounting')) return 'Accounting';
   if (pathname.startsWith('/analytics')) return 'Analytics';
-  if (pathname.startsWith('/library')) return 'Library Management';
-  if (pathname.startsWith('/transport')) return 'Transport Management';
   if (pathname.startsWith('/admin-management') || pathname.startsWith('/ai-suite') || 
       pathname.startsWith('/integrations') || pathname.startsWith('/user-management') || 
       pathname.startsWith('/master-data')) return 'System';
