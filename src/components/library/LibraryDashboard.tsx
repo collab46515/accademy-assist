@@ -27,7 +27,7 @@ export function LibraryDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-6">
       {/* Quick Actions */}
       <div className="flex gap-3 flex-wrap">
         <Button className="gap-2">
@@ -63,14 +63,14 @@ export function LibraryDashboard() {
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Recent Activity */}
-        <Card>
+        <Card className="h-fit">
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
             <CardDescription>Latest library transactions</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {recentActivity.map((activity, index) => (
-              <div key={index} className="flex items-center justify-between border-b pb-2 last:border-0">
+              <div key={index} className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0">
                 <div className="space-y-1">
                   <p className="text-sm font-medium">{activity.action}</p>
                   <p className="text-xs text-muted-foreground">{activity.item}</p>
@@ -83,7 +83,7 @@ export function LibraryDashboard() {
         </Card>
 
         {/* Popular Books */}
-        <Card>
+        <Card className="h-fit">
           <CardHeader>
             <CardTitle>Most Popular Books</CardTitle>
             <CardDescription>Books with highest circulation</CardDescription>
@@ -106,7 +106,7 @@ export function LibraryDashboard() {
       </div>
 
       {/* Digital Resources Preview */}
-      <Card>
+      <Card className="mt-6">
         <CardHeader>
           <CardTitle>Digital Library Access</CardTitle>
           <CardDescription>Quick access to online resources and e-books</CardDescription>
