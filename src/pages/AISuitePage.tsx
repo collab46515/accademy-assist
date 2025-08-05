@@ -271,8 +271,8 @@ const AISuitePage = () => {
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="features">AI Features</TabsTrigger>
           <TabsTrigger value="timetable">Timetable Generator</TabsTrigger>
-          <TabsTrigger value="lesson-planner">Lesson Planner</TabsTrigger>
           <TabsTrigger value="comments">Comment Generator</TabsTrigger>
+          <TabsTrigger value="lesson-planner">Lesson Planner</TabsTrigger>
           <TabsTrigger value="insights">Predictive Insights</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
