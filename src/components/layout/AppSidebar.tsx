@@ -82,7 +82,7 @@ const erpModules = [
       { title: "Admissions Workflow", url: "/admissions", icon: UserPlus },
       { title: "Curriculum & Lessons", url: "/curriculum", icon: BookOpen },
       { title: "Timetable Management", url: "/timetable", icon: Clock },
-      { title: "AI Suite", url: "/ai-suite", icon: Bot },
+      
       { title: "Exams & Assessment", url: "/exams", icon: ClipboardCheck },
       { title: "Assignments", url: "/academics/assignments", icon: ClipboardList },
       { title: "Report Cards", url: "/academics/reports", icon: FileText },
@@ -138,6 +138,17 @@ const erpModules = [
     ]
   },
   {
+    title: "AI Suite",
+    url: "/ai-suite",
+    icon: Bot,
+    subItems: [
+      { title: "Dashboard", url: "/ai-suite", icon: LayoutDashboard },
+      { title: "AI Timetable Generator", url: "/ai-suite?tab=timetable", icon: Clock },
+      { title: "AI Comment Generation", url: "/ai-suite?tab=comments", icon: PenTool },
+      { title: "Predictive Analytics", url: "/ai-suite?tab=analytics", icon: BarChart3 },
+    ]
+  },
+  {
     title: "Analytics & Reports",
     url: "/analytics",
     icon: BarChart3,
@@ -165,7 +176,6 @@ function getCurrentModule(pathname: string) {
       pathname.startsWith('/admissions') || 
       pathname.startsWith('/curriculum') || 
       pathname.startsWith('/timetable') || 
-      pathname.startsWith('/ai-suite') ||
       pathname.startsWith('/exams') || 
       pathname.startsWith('/academics') ||
       pathname.startsWith('/hod-dashboard')) return 'Academic Operations';
@@ -187,6 +197,8 @@ function getCurrentModule(pathname: string) {
   if (pathname.startsWith('/finance-operations') || 
       pathname.startsWith('/school-management/fee-management') || 
       pathname.startsWith('/accounting')) return 'Finance & Operations';
+  
+  if (pathname.startsWith('/ai-suite')) return 'AI Suite';
   
   if (pathname.startsWith('/analytics')) return 'Analytics & Reports';
   
