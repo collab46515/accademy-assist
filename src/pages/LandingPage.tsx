@@ -135,10 +135,10 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Simple Navigation - No Fixed Header */}
-      <div className="container mx-auto px-4 -my-22">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" className="h-80 w-80" />
+      <div className="container mx-auto px-4 py-0 -mt-20 -mb-20">
+        <div className="flex justify-between items-center -my-10">
+          <div className="flex items-center -my-8">
+            <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" className="h-40 w-40 -my-4" />
           </div>
           
           <div className="hidden md:flex items-center gap-6">
