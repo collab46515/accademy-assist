@@ -322,8 +322,14 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r">
       <SidebarHeader className="border-b bg-gradient-to-r from-primary/5 to-primary-glow/5 h-20 overflow-hidden">
-        <div className="flex items-center justify-center px-1 py-2 h-full">
-          <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" className="h-16 w-full object-contain" />
+        <div className="flex items-center gap-3 px-3 py-3 h-full">
+          <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" className="h-12 w-12" />
+          {state !== "collapsed" && (
+            <div className="flex flex-col">
+              <span className="text-base font-bold">Pappaya AI Suite</span>
+              <span className="text-sm text-muted-foreground">{currentModule}</span>
+            </div>
+          )}
         </div>
         
       </SidebarHeader>
