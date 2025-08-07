@@ -1,0 +1,405 @@
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Brain, 
+  FileText, 
+  Download, 
+  Settings, 
+  Wand2, 
+  BarChart3, 
+  Target,
+  Clock,
+  CheckCircle,
+  BookOpen,
+  GraduationCap,
+  Sparkles,
+  Eye,
+  Edit
+} from "lucide-react";
+import { toast } from "sonner";
+
+const QryptaPage = () => {
+  const [selectedSubject, setSelectedSubject] = useState("");
+  const [selectedClass, setSelectedClass] = useState("");
+  const [questionCount, setQuestionCount] = useState(20);
+  const [examDuration, setExamDuration] = useState(60);
+  const [difficulty, setDifficulty] = useState("balanced");
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const subjects = [
+    "Mathematics", "English", "Science", "Social Studies", "Physics", 
+    "Chemistry", "Biology", "History", "Geography", "Computer Science"
+  ];
+
+  const classes = [
+    "Class 6", "Class 7", "Class 8", "Class 9", "Class 10",
+    "Class 11", "Class 12"
+  ];
+
+  const difficultyLevels = [
+    { value: "easy", label: "Easy (70% Easy, 20% Medium, 10% Hard)" },
+    { value: "balanced", label: "Balanced (30% Easy, 50% Medium, 20% Hard)" },
+    { value: "challenging", label: "Challenging (20% Easy, 30% Medium, 50% Hard)" }
+  ];
+
+  const handleGenerateQuestionPaper = async () => {
+    if (!selectedSubject || !selectedClass) {
+      toast.error("Please select subject and class");
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      toast.success("Question paper generated successfully!");
+    } catch (error) {
+      toast.error("Failed to generate question paper");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const recentGenerations = [
+    { id: 1, subject: "Mathematics", class: "Class 10", date: "2024-12-07", status: "Completed" },
+    { id: 2, subject: "English", class: "Class 9", date: "2024-12-06", status: "Completed" },
+    { id: 3, subject: "Science", class: "Class 8", date: "2024-12-05", status: "Completed" }
+  ];
+
+  return (
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-foreground mb-2 flex items-center space-x-3">
+              <Brain className="h-10 w-10 text-violet-600" />
+              <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                Qrypta - AI Question Paper Generator
+              </span>
+              <Badge className="bg-gradient-to-r from-violet-600 to-purple-600 text-white">
+                WORLD'S FIRST
+              </Badge>
+            </h1>
+            <p className="text-lg text-muted-foreground">
+              Revolutionary AI-powered automatic question paper generation with intelligent difficulty balancing
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <Card className="border-violet-200 shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Papers Generated</p>
+                <p className="text-3xl font-bold text-violet-600">1,247</p>
+              </div>
+              <FileText className="h-8 w-8 text-violet-600" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-purple-200 shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Subjects Covered</p>
+                <p className="text-3xl font-bold text-purple-600">15+</p>
+              </div>
+              <BookOpen className="h-8 w-8 text-purple-600" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-violet-200 shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Time Saved</p>
+                <p className="text-3xl font-bold text-violet-600">85%</p>
+              </div>
+              <Clock className="h-8 w-8 text-violet-600" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-purple-200 shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Accuracy Rate</p>
+                <p className="text-3xl font-bold text-purple-600">98%</p>
+              </div>
+              <Target className="h-8 w-8 text-purple-600" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Tabs defaultValue="generator" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="generator">Question Generator</TabsTrigger>
+          <TabsTrigger value="history">Generation History</TabsTrigger>
+          <TabsTrigger value="settings">AI Settings</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="generator" className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* Generation Form */}
+            <Card className="shadow-lg border-violet-200">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Wand2 className="h-5 w-5 text-violet-600" />
+                  <span>Generate Question Paper</span>
+                </CardTitle>
+                <CardDescription>
+                  Configure your question paper parameters for AI generation
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="subject">Subject</Label>
+                    <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select subject" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {subjects.map(subject => (
+                          <SelectItem key={subject} value={subject}>{subject}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="class">Class</Label>
+                    <Select value={selectedClass} onValueChange={setSelectedClass}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select class" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {classes.map(cls => (
+                          <SelectItem key={cls} value={cls}>{cls}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="questions">Number of Questions</Label>
+                    <Input 
+                      type="number" 
+                      value={questionCount} 
+                      onChange={(e) => setQuestionCount(parseInt(e.target.value))}
+                      min="5"
+                      max="100"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="duration">Exam Duration (minutes)</Label>
+                    <Input 
+                      type="number" 
+                      value={examDuration} 
+                      onChange={(e) => setExamDuration(parseInt(e.target.value))}
+                      min="30"
+                      max="180"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="difficulty">Difficulty Distribution</Label>
+                  <Select value={difficulty} onValueChange={setDifficulty}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {difficultyLevels.map(level => (
+                        <SelectItem key={level.value} value={level.value}>
+                          {level.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="topics">Specific Topics (Optional)</Label>
+                  <Textarea 
+                    placeholder="Enter specific topics to focus on, separated by commas..."
+                    className="resize-none"
+                  />
+                </div>
+
+                <Button 
+                  onClick={handleGenerateQuestionPaper}
+                  disabled={isGenerating}
+                  className="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+                  size="lg"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Brain className="h-4 w-4 mr-2 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Generate Question Paper
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Features Showcase */}
+            <Card className="shadow-lg border-purple-200">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <BarChart3 className="h-5 w-5 text-purple-600" />
+                  <span>AI Features</span>
+                </CardTitle>
+                <CardDescription>
+                  Advanced AI capabilities for intelligent question generation
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-start space-x-3">
+                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium">Auto Question Generation</h4>
+                      <p className="text-sm text-muted-foreground">
+                        AI creates diverse question types automatically aligned to curriculum
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium">Difficulty Balancing</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Smart algorithms ensure perfect distribution of question difficulties
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium">Learning Objectives Mapping</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Every question mapped to specific learning objectives
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium">Multiple Formats</h4>
+                      <p className="text-sm text-muted-foreground">
+                        MCQ, Short Answer, Long Answer, Practical Questions
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium">Instant Export</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Download in PDF, Word, or custom school formats
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium">Curriculum Compliance</h4>
+                      <p className="text-sm text-muted-foreground">
+                        100% aligned with national and international curricula
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="history" className="space-y-6">
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle>Recent Generations</CardTitle>
+              <CardDescription>
+                View and manage your previously generated question papers
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentGenerations.map(paper => (
+                  <div key={paper.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center space-x-4">
+                      <FileText className="h-8 w-8 text-violet-600" />
+                      <div>
+                        <h4 className="font-medium">{paper.subject} - {paper.class}</h4>
+                        <p className="text-sm text-muted-foreground">Generated on {paper.date}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="secondary">{paper.status}</Badge>
+                      <Button variant="outline" size="sm">
+                        <Eye className="h-4 w-4 mr-1" />
+                        View
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Download className="h-4 w-4 mr-1" />
+                        Download
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-6">
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Settings className="h-5 w-5" />
+                <span>AI Configuration</span>
+              </CardTitle>
+              <CardDescription>
+                Configure AI models and generation preferences
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-center py-8">
+                <Brain className="h-16 w-16 text-violet-600 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold">AI Settings Panel</h3>
+                <p className="text-muted-foreground">
+                  Advanced AI configuration options coming soon
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
+
+export default QryptaPage;

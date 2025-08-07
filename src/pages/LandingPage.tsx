@@ -41,8 +41,16 @@ export default function LandingPage() {
 
   const modules = [
     {
-      name: "AI Timetable Generator",
+      name: "Qrypta - AI Question Paper Generator",
       icon: Brain,
+      description: "Revolutionary AI-powered automatic question paper generation with intelligent difficulty balancing",
+      features: ["Auto Question Generation", "Difficulty Balancing", "Curriculum Alignment", "Multiple Question Types", "Instant Export", "Learning Objectives Mapping"],
+      color: "bg-gradient-to-r from-violet-600 to-purple-600",
+      highlight: true
+    },
+    {
+      name: "AI Timetable Generator",
+      icon: Calendar,
       description: "Revolutionary AI-powered timetable generation with intelligent optimization",
       features: ["Smart Scheduling", "Conflict Resolution", "Resource Optimization", "Real-time Updates", "Teacher Preferences"],
       color: "bg-gradient-to-r from-purple-600 to-blue-600",
@@ -219,55 +227,56 @@ export default function LandingPage() {
           <>
             <HeroSection onGetStarted={() => setIsSignInModalOpen(true)} />
             
-            {/* AI Timetable Generator Highlight Section */}
-            <section className="py-20 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
+            {/* AI ERP First of its Kind Highlight Section */}
+            <section className="py-20 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20">
               <div className="container mx-auto px-4">
                 <div className="text-center mb-12">
-                  <Badge className="mb-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
-                    🚀 Featured Innovation
+                  <Badge className="mb-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white text-lg px-6 py-2">
+                    🚀 WORLD'S FIRST AI ERP FOR SCHOOLS
                   </Badge>
-                  <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                    AI Timetable Generator
+                  <h2 className="text-5xl font-bold mb-4 bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                    Qrypta - AI Question Paper Generator
                   </h2>
-                  <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                    Revolutionary artificial intelligence that creates perfect timetables in minutes, not hours. 
-                    Automatically resolves conflicts, optimizes resources, and adapts to your school's unique requirements.
+                  <p className="text-xl text-muted-foreground max-w-4xl mx-auto">
+                    Revolutionary AI that automatically generates complete question papers with perfect difficulty balancing, 
+                    curriculum alignment, and learning objectives mapping. The first intelligent question paper generator 
+                    that understands your educational needs.
                   </p>
                 </div>
                 
                 <div className="grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
-                  <Card className="border-2 border-purple-200 shadow-lg hover:shadow-xl transition-shadow">
+                  <Card className="border-2 border-violet-200 shadow-lg hover:shadow-xl transition-shadow">
                     <CardHeader>
-                      <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center mb-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-violet-600 to-purple-600 rounded-lg flex items-center justify-center mb-4">
                         <Brain className="h-6 w-6 text-white" />
                       </div>
-                      <CardTitle>Intelligent Scheduling</CardTitle>
+                      <CardTitle>Auto Question Generation</CardTitle>
                       <CardDescription>
-                        AI analyzes teacher availability, room capacity, and subject requirements to create optimal schedules
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
-                  
-                  <Card className="border-2 border-blue-200 shadow-lg hover:shadow-xl transition-shadow">
-                    <CardHeader>
-                      <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mb-4">
-                        <Calendar className="h-6 w-6 text-white" />
-                      </div>
-                      <CardTitle>Conflict Resolution</CardTitle>
-                      <CardDescription>
-                        Automatically detects and resolves scheduling conflicts, ensuring every class has the right teacher, room, and time
+                        AI creates diverse questions types automatically - MCQs, short answers, essays, and practical questions aligned to curriculum standards
                       </CardDescription>
                     </CardHeader>
                   </Card>
                   
                   <Card className="border-2 border-purple-200 shadow-lg hover:shadow-xl transition-shadow">
                     <CardHeader>
-                      <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center mb-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-violet-600 rounded-lg flex items-center justify-center mb-4">
+                        <BarChart3 className="h-6 w-6 text-white" />
+                      </div>
+                      <CardTitle>Intelligent Difficulty Balancing</CardTitle>
+                      <CardDescription>
+                        Smart algorithms ensure perfect distribution of easy, medium, and difficult questions for optimal assessment
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                  
+                  <Card className="border-2 border-violet-200 shadow-lg hover:shadow-xl transition-shadow">
+                    <CardHeader>
+                      <div className="w-12 h-12 bg-gradient-to-r from-violet-600 to-purple-600 rounded-lg flex items-center justify-center mb-4">
                         <CheckCircle className="h-6 w-6 text-white" />
                       </div>
-                      <CardTitle>Real-time Updates</CardTitle>
+                      <CardTitle>Learning Objectives Mapping</CardTitle>
                       <CardDescription>
-                        Instantly adapts to changes in staff availability, room bookings, or curriculum adjustments
+                        Every question is intelligently mapped to specific learning objectives and curriculum standards for comprehensive assessment
                       </CardDescription>
                     </CardHeader>
                   </Card>
@@ -276,10 +285,10 @@ export default function LandingPage() {
                 <div className="text-center mt-12">
                   <Button 
                     size="lg" 
-                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3"
+                    className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white px-8 py-3 text-lg"
                     onClick={() => setIsSignInModalOpen(true)}
                   >
-                    Try AI Timetable Generator
+                    Try Qrypta AI Question Generator
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </div>

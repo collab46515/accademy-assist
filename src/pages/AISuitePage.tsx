@@ -242,6 +242,28 @@ const AISuitePage = () => {
           <span>AI Tools & Generators</span>
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Card className="shadow-[var(--shadow-card)] hover:shadow-lg transition-shadow cursor-pointer border-violet-200" onClick={() => window.location.href = '/ai-suite/qrypta'}>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Brain className="h-5 w-5 text-violet-600" />
+              <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">Qrypta - AI Question Generator</span>
+              <Badge className="bg-gradient-to-r from-violet-600 to-purple-600 text-white text-xs">WORLD'S FIRST</Badge>
+            </CardTitle>
+            <CardDescription>Revolutionary automatic question paper generation</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-violet-600">1,247</p>
+                <p className="text-sm text-muted-foreground">Papers generated</p>
+              </div>
+              <Button variant="outline" size="sm" className="border-violet-600 text-violet-600 hover:bg-violet-50">
+                Generate Paper
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card className="shadow-[var(--shadow-card)] hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/ai-suite/timetable'}>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
