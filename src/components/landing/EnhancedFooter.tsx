@@ -51,7 +51,7 @@ const defaultFooterContent: FooterContent = {
     {
       category: "Support",
       items: [
-        { label: "User Guides", url: "/guides" },
+        { label: "Workflows", url: "/workflows" },
         { label: "Help Center", url: "/help" },
         { label: "Contact Support", url: "/support" }
       ]

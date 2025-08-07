@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 
 import { ModuleShowcase } from "@/components/landing/ModuleShowcase";
-import { UserManuals } from "@/components/landing/UserManuals";
+import { WorkflowDiagrams } from "@/components/landing/WorkflowDiagrams";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { FeaturesGrid } from "@/components/landing/FeaturesGrid";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
@@ -191,10 +191,10 @@ export default function LandingPage() {
               Modules
             </button>
             <button 
-              onClick={() => setActiveSection("manuals")}
-              className={`text-sm hover:text-primary transition-colors ${activeSection === "manuals" ? "text-primary font-medium" : ""}`}
+              onClick={() => setActiveSection("workflows")}
+              className={`text-sm hover:text-primary transition-colors ${activeSection === "workflows" ? "text-primary font-medium" : ""}`}
             >
-              User Guides
+              Workflows
             </button>
             <button 
               onClick={() => setIsSignInModalOpen(true)}
@@ -299,8 +299,8 @@ export default function LandingPage() {
           <ModuleShowcase modules={modules} />
         )}
 
-        {activeSection === "manuals" && (
-          <UserManuals modules={modules} />
+        {activeSection === "workflows" && (
+          <WorkflowDiagrams modules={modules} />
         )}
 
       </div>
