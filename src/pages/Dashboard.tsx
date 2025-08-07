@@ -2,6 +2,8 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useStudentData } from '@/hooks/useStudentData';
 import { useHRData } from '@/hooks/useHRData';
 import { useFeeData } from '@/hooks/useFeeData';
+import { useAttendanceData } from '@/hooks/useAttendanceData';
+import { useAcademicData } from '@/hooks/useAcademicData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -9,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AISchoolAssistant } from '@/components/shared/AISchoolAssistant';
 import { 
   Search, 
   Users, 
@@ -22,7 +25,10 @@ import {
   Clock,
   DollarSign,
   AlertCircle,
-  TrendingUp
+  TrendingUp,
+  Bot,
+  Sparkles,
+  MessageSquare
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -30,10 +36,13 @@ export default function Dashboard() {
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [selectedTeacher, setSelectedTeacher] = useState<any>(null);
   const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
   
   const { students, loading: studentsLoading } = useStudentData();
   const { employees, loading: hrLoading } = useHRData();
   const { feeHeads, loading: feesLoading } = useFeeData();
+  const { attendanceRecords } = useAttendanceData();
+  const { subjects } = useAcademicData();
 
   // Memoize filtered data to prevent unnecessary recalculations
   const filteredStudents = useMemo(() => 
@@ -424,6 +433,58 @@ export default function Dashboard() {
               </p>
             </div>
             
+            {/* AI Assistant CTA - Prominent Position */}
+            <div className="mb-12 animate-scale-in">
+              <Card className="bg-white/10 backdrop-blur-lg border-white/20 hover:bg-white/15 transition-all duration-300 shadow-2xl hover:shadow-primary/20 group cursor-pointer transform hover:scale-105 max-w-2xl mx-auto"
+                    onClick={() => setShowAIAssistant(true)}>
+                <CardContent className="p-8">
+                  <div className="flex items-center justify-center space-x-4 mb-4">
+                    <div className="relative">
+                      <div className="h-16 w-16 rounded-full bg-gradient-to-br from-white/30 to-white/10 flex items-center justify-center backdrop-blur-sm border border-white/30 group-hover:shadow-2xl group-hover:shadow-white/20 transition-all duration-300">
+                        <Bot className="h-8 w-8 text-white group-hover:animate-pulse" />
+                      </div>
+                      <div className="absolute -top-1 -right-1 h-6 w-6 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
+                        <Sparkles className="h-3 w-3 text-white animate-pulse" />
+                      </div>
+                    </div>
+                    <div className="text-center flex-1">
+                      <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-yellow-100 transition-colors">
+                        🚀 AI School Management Assistant
+                      </h3>
+                      <p className="text-white/80 text-lg leading-relaxed">
+                        Your intelligent companion for comprehensive school management insights, analytics, and decision support
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-center space-x-6 text-sm text-white/70 mb-6">
+                    <div className="flex items-center space-x-2">
+                      <Users className="h-4 w-4" />
+                      <span>Student Analytics</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <DollarSign className="h-4 w-4" />
+                      <span>Financial Insights</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <TrendingUp className="h-4 w-4" />
+                      <span>Performance Tracking</span>
+                    </div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <Button 
+                      className="bg-white/20 hover:bg-white/30 text-white border border-white/30 px-8 py-3 rounded-full font-semibold group-hover:shadow-lg transition-all duration-300 hover:scale-105"
+                      size="lg"
+                    >
+                      <MessageSquare className="h-5 w-5 mr-2" />
+                      Start Conversation
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             {/* Enhanced Search Bar with Glass Morphism */}
             <div className="max-w-2xl mx-auto relative group animate-scale-in delay-300">
               <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/10 to-white/20 rounded-2xl blur-sm group-hover:blur-none transition-all duration-500"></div>
@@ -1102,6 +1163,19 @@ export default function Dashboard() {
             </DialogContent>
           </Dialog>
         )}
+        
+        {/* AI School Management Assistant */}
+        <AISchoolAssistant
+          studentData={students}
+          feeData={feeHeads}
+          staffData={employees}
+          attendanceData={attendanceRecords}
+          academicData={subjects}
+          context="School Management Dashboard - Comprehensive Analytics and Insights"
+          queryType="dashboard"
+          isOpen={showAIAssistant}
+          onClose={() => setShowAIAssistant(false)}
+        />
       </div>
     </div>
   );
