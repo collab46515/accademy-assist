@@ -19,7 +19,7 @@ export function OfferLetterForm() {
     position: '',
     startDate: '',
     baseSalary: '',
-    currency: 'OMR',
+    currency: 'GBP',
     employmentType: 'full-time',
     probationPeriod: '6',
     workingHours: '37.5',
@@ -180,7 +180,6 @@ export function OfferLetterForm() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="OMR">OMR (ر.ع.)</SelectItem>
                       <SelectItem value="GBP">GBP (£)</SelectItem>
                       <SelectItem value="USD">USD ($)</SelectItem>
                       <SelectItem value="EUR">EUR (€)</SelectItem>

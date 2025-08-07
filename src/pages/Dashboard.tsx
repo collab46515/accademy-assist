@@ -85,10 +85,10 @@ export default function Dashboard() {
     },
     { 
       label: "Pending Fees", 
-      value: `ر.ع.${Math.round(pendingFees * 0.4)}k`, // Converted to OMR 
+      value: `£${pendingFees}k`, 
       icon: Banknote, 
       color: "bg-orange-500",
-      trend: "ر.ع.9k collected today", // Converted to OMR
+      trend: "£23k collected today",
       action: () => setActiveModal('fees')
     }
   ];
@@ -192,7 +192,7 @@ export default function Dashboard() {
                     <CardTitle className="text-sm">Outstanding</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-red-600">ر.ع.180</div>
+                    <div className="text-2xl font-bold text-red-600">£450</div>
                     <p className="text-xs text-muted-foreground">
                       Due in 5 days
                     </p>
@@ -203,7 +203,7 @@ export default function Dashboard() {
                     <CardTitle className="text-sm">Paid This Term</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-green-600">ر.ع.860</div>
+                    <div className="text-2xl font-bold text-green-600">£2,150</div>
                     <p className="text-xs text-muted-foreground">
                       On time
                     </p>
@@ -722,15 +722,15 @@ export default function Dashboard() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Today's Collections</span>
-                  <span className="font-medium text-green-600">ر.ع.9,380</span> {/* Converted to OMR */}
+                  <span className="font-medium text-green-600">£23,450</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">This Month</span>
-                  <span className="font-medium">ر.ع.50,356</span> {/* Converted to OMR */}
+                  <span className="font-medium">£125,890</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Outstanding</span>
-                  <span className="font-medium text-red-600">ر.ع.18,092</span> {/* Converted to OMR */}
+                  <span className="font-medium text-red-600">£45,230</span>
                 </div>
               </div>
             </CardContent>
@@ -982,7 +982,7 @@ export default function Dashboard() {
                                 </div>
                                 <div className="flex items-center justify-between text-sm mt-1">
                                   <span className="text-muted-foreground">Salary:</span>
-                                  <span className="font-medium">ر.ع.{Math.round((teacher.salary || 0) * 0.4).toLocaleString()}/year</span> {/* Converted to OMR */}
+                                  <span className="font-medium">£{teacher.salary?.toLocaleString()}/year</span>
                                 </div>
                               </div>
                             </div>
@@ -1057,7 +1057,7 @@ export default function Dashboard() {
                         <CardTitle className="text-sm">Outstanding</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold text-red-600">ر.ع.{Math.round(pendingFees * 0.4)}k</div> {/* Converted to OMR */}
+                        <div className="text-2xl font-bold text-red-600">£{pendingFees}k</div>
                         <p className="text-xs text-muted-foreground">
                           From 156 students
                         </p>
@@ -1068,7 +1068,7 @@ export default function Dashboard() {
                         <CardTitle className="text-sm">Collected Today</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold text-green-600">ر.ع.9k</div> {/* Converted to OMR */}
+                        <div className="text-2xl font-bold text-green-600">£23k</div>
                         <p className="text-xs text-muted-foreground">
                           45 payments received
                         </p>
@@ -1079,7 +1079,7 @@ export default function Dashboard() {
                         <CardTitle className="text-sm">This Month</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">ر.ع.50k</div> {/* Converted to OMR */}
+                        <div className="text-2xl font-bold">£125k</div>
                         <p className="text-xs text-muted-foreground">
                           Total collections
                         </p>
@@ -1089,7 +1089,7 @@ export default function Dashboard() {
                   <div className="space-y-2">
                     <h4 className="font-medium">Recent Overdue Fees</h4>
                     <div className="grid gap-2">
-                      {['John Smith - ر.ع.180 (5 days overdue)', 'Emma Wilson - ر.ع.112 (2 days overdue)', 'Alex Johnson - ر.ع.128 (7 days overdue)'].map((fee, index) => (
+                      {['John Smith - £450 (5 days overdue)', 'Emma Wilson - £280 (2 days overdue)', 'Alex Johnson - £320 (7 days overdue)'].map((fee, index) => (
                         <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
                           <span className="text-sm">{fee}</span>
                           <Button size="sm" variant="outline">Send Reminder</Button>
