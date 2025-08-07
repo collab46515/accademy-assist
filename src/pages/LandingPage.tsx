@@ -47,6 +47,46 @@ export default function LandingPage() {
       highlight: true
     },
     {
+      name: "AI Lesson Planner",
+      icon: BookOpen,
+      description: "AI-powered lesson planning with intelligent content generation",
+      features: ["Smart Lesson Creation", "Standards Alignment", "Resource Suggestions", "Assessment Integration", "Collaboration Tools"],
+      color: "bg-gradient-to-r from-blue-600 to-purple-600",
+      highlight: true
+    },
+    {
+      name: "AI Grading Assistant",
+      icon: CheckCircle,
+      description: "Intelligent grading and feedback system with AI recommendations",
+      features: ["Auto Grading", "Smart Feedback", "Rubric Analysis", "Progress Tracking", "Bias Detection"],
+      color: "bg-gradient-to-r from-green-600 to-blue-600",
+      highlight: true
+    },
+    {
+      name: "AI Comment Generator",
+      icon: FileText,
+      description: "Generate personalized student report comments with AI",
+      features: ["Personalized Comments", "Multiple Tones", "Grade-specific Language", "Behavior Integration", "Parent-friendly"],
+      color: "bg-gradient-to-r from-orange-600 to-red-600",
+      highlight: true
+    },
+    {
+      name: "AI Predictive Insights",
+      icon: BarChart3,
+      description: "Early warning system with predictive analytics",
+      features: ["Risk Analysis", "Performance Predictions", "Intervention Alerts", "Trend Analysis", "Data Visualization"],
+      color: "bg-gradient-to-r from-red-600 to-pink-600",
+      highlight: true
+    },
+    {
+      name: "AI Knowledge Base",
+      icon: Brain,
+      description: "Comprehensive educational intelligence and best practices",
+      features: ["Educational Guidance", "Policy Information", "Curriculum Support", "Teaching Methods", "Research Access"],
+      color: "bg-gradient-to-r from-indigo-600 to-purple-600",
+      highlight: true
+    },
+    {
       name: "Admissions Management",
       icon: GraduationCap,
       description: "Complete admissions workflow from application to enrollment",
@@ -70,7 +110,7 @@ export default function LandingPage() {
     {
       name: "Curriculum & Lesson Planning",
       icon: BookOpen,
-      description: "AI-powered curriculum planning and lesson management",
+      description: "Traditional curriculum planning and lesson management",
       features: ["Lesson Planning", "Coverage Tracking", "Gap Analysis", "Standards Alignment", "Collaboration"],
       color: "bg-orange-500"
     },
@@ -78,7 +118,7 @@ export default function LandingPage() {
       name: "Assignments & Assessment",
       icon: ClipboardCheck,
       description: "Digital assignment management and grading system",
-      features: ["Assignment Creation", "Online Submission", "Auto Grading", "Feedback System", "Analytics"],
+      features: ["Assignment Creation", "Online Submission", "Manual Grading", "Feedback System", "Analytics"],
       color: "bg-red-500"
     },
     {
@@ -125,12 +165,6 @@ export default function LandingPage() {
     }
   ];
 
-  const stats = [
-    { label: "Active Schools", value: "500+", icon: GraduationCap },
-    { label: "Students Managed", value: "50,000+", icon: Users },
-    { label: "Teachers Supported", value: "5,000+", icon: UserCheck },
-    { label: "Parents Connected", value: "40,000+", icon: MessageSquare }
-  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -246,25 +280,6 @@ export default function LandingPage() {
                     Try AI Timetable Generator
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
-                </div>
-              </div>
-            </section>
-            
-            {/* Stats Section */}
-            <section className="py-16 bg-primary/5">
-              <div className="container mx-auto px-4">
-                <div className="grid gap-8 md:grid-cols-4">
-                  {stats.map((stat, index) => (
-                    <div key={index} className="text-center">
-                      <div className="flex justify-center mb-4">
-                        <div className="p-3 bg-primary rounded-full">
-                          <stat.icon className="h-6 w-6 text-primary-foreground" />
-                        </div>
-                      </div>
-                      <div className="text-3xl font-bold text-primary mb-2">{stat.value}</div>
-                      <div className="text-muted-foreground">{stat.label}</div>
-                    </div>
-                  ))}
                 </div>
               </div>
             </section>
