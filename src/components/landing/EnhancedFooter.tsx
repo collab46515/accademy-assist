@@ -52,7 +52,6 @@ const defaultFooterContent: FooterContent = {
       category: "Support",
       items: [
         { label: "User Guides", url: "/guides" },
-        { label: "Video Tutorials", url: "/tutorials" },
         { label: "Help Center", url: "/help" },
         { label: "Contact Support", url: "/support" }
       ]

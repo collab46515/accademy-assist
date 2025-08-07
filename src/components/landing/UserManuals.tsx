@@ -10,8 +10,7 @@ import {
   PlayCircle, 
   Download, 
   FileText, 
-  Video, 
-  Users, 
+  Users,
   GraduationCap,
   Settings,
   BarChart3,
@@ -76,18 +75,6 @@ export function UserManuals({ modules }: UserManualsProps) {
     }
   };
 
-  const handleVideoTutorial = (videoTitle: string, videoId?: string) => {
-    if (videoId) {
-      // Open YouTube video in a new tab
-      window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
-    } else {
-      // For demo purposes, show a message that video content would be available
-      toast({
-        title: "Video Tutorial Available",
-        description: `${videoTitle} - Professional video content available with full platform implementation.`,
-      });
-    }
-  };
 
   const handleTrainingRequest = () => {
     toast({
@@ -168,27 +155,6 @@ export function UserManuals({ modules }: UserManualsProps) {
     }
   ];
 
-  const videoTutorials = [
-    {
-      title: "Complete System Overview",
-      duration: "15 minutes",
-      description: "Comprehensive walkthrough of all major features",
-      thumbnail: "overview",
-      videoId: "dQw4w9WgXcQ" // Demo YouTube video ID
-    },
-    {
-      title: "Student Management Deep Dive",
-      duration: "12 minutes", 
-      description: "Advanced student management features and workflows",
-      thumbnail: "students"
-    },
-    {
-      title: "Setting Up Your First Academic Year",
-      duration: "18 minutes",
-      description: "Step-by-step guide to configure your academic calendar",
-      thumbnail: "academic"
-    }
-  ];
 
   return (
     <section className="py-24 min-h-screen">
@@ -202,17 +168,16 @@ export function UserManuals({ modules }: UserManualsProps) {
             <span className="text-primary block">Training Materials</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Comprehensive documentation, video tutorials, and step-by-step guides to help you 
+            Comprehensive documentation and step-by-step guides to help you 
             master every aspect of the school management system.
           </p>
         </div>
 
         <Tabs defaultValue="role-guides" className="space-y-8">
-          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4">
+          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3">
             <TabsTrigger value="role-guides">Role Guides</TabsTrigger>
             <TabsTrigger value="modules">Module Manuals</TabsTrigger>
             <TabsTrigger value="quick-start">Quick Start</TabsTrigger>
-            <TabsTrigger value="videos">Video Tutorials</TabsTrigger>
           </TabsList>
 
           {/* Role-based Guides */}
@@ -421,53 +386,6 @@ export function UserManuals({ modules }: UserManualsProps) {
             </Card>
           </TabsContent>
 
-          {/* Video Tutorials */}
-          <TabsContent value="videos" className="space-y-8">
-            <div className="grid gap-6 md:grid-cols-3">
-              {videoTutorials.map((video, index) => (
-                <Card key={index} className="hover:shadow-lg transition-shadow">
-                  <CardContent className="p-0">
-                    <div 
-                      className="aspect-video bg-gradient-to-br from-primary/10 to-secondary/10 rounded-t-lg flex items-center justify-center relative group cursor-pointer"
-                      onClick={() => handleVideoTutorial(video.title, video.videoId)}
-                    >
-                      <PlayCircle className="h-16 w-16 text-primary group-hover:scale-110 transition-transform" />
-                      <Badge className="absolute top-2 right-2">{video.duration}</Badge>
-                    </div>
-                    <div className="p-6 space-y-4">
-                      <div>
-                        <h3 className="font-semibold text-lg mb-2">{video.title}</h3>
-                        <p className="text-sm text-muted-foreground">{video.description}</p>
-                      </div>
-                      <Button 
-                        className="w-full"
-                        onClick={() => handleVideoTutorial(video.title, video.videoId)}
-                      >
-                        <PlayCircle className="mr-2 h-4 w-4" />
-                        Watch Tutorial
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <div className="text-center">
-              <Button 
-                size="lg" 
-                variant="outline"
-                onClick={() => {
-                  toast({
-                    title: "Video Library Coming Soon",
-                    description: "Complete video tutorial library with 50+ professional training videos will be available with full implementation.",
-                  });
-                }}
-              >
-                <Video className="mr-2 h-5 w-5" />
-                View All Video Tutorials
-              </Button>
-            </div>
-          </TabsContent>
         </Tabs>
       </div>
     </section>
