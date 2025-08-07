@@ -157,6 +157,7 @@ const App = () => (
                           <Route path="/accounting/reports" element={<AccountingPage />} />
                           <Route path="/accounting/accounts" element={<AccountingPage />} />
                           <Route path="/accounting/budget" element={<AccountingPage />} />
+                          <Route path="/accounting/transactions/new" element={<AccountingPage />} />
                           <Route path="/accounting/settings" element={<AccountingPage />} />
                           <Route path="/user-management" element={
                             <ProtectedRoute>

@@ -126,7 +126,7 @@ export default function FinanceOperationsPage() {
 
   const quickActions = [
     { icon: FileText, label: "Create Invoice", action: () => navigate('/accounting/invoices') },
-    { icon: Receipt, label: "Record Payment", action: () => navigate('/school-management/fee-management/payments') },
+    { icon: Receipt, label: "Record Payment", action: () => navigate('/school-management/fee-management') },
     { icon: ShoppingCart, label: "New Purchase Order", action: () => navigate('/accounting/purchase-orders') },
     { icon: Building2, label: "Add Vendor", action: () => navigate('/accounting/vendors') },
     { icon: Calculator, label: "Chart of Accounts", action: () => navigate('/accounting/accounts') },
