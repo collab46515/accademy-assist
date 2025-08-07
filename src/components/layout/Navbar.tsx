@@ -95,10 +95,13 @@ export const Navbar = () => {
   return (
     <nav className="bg-card border-b border-border shadow-[var(--shadow-card)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-32">
+        <div className="flex justify-between h-40">
           <div className="flex items-center w-full">
             <Link to="/" className="flex items-center">
-              <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" style={{ height: '120px', width: '600px' }} className="object-contain" />
+              <div 
+                className="bg-contain bg-no-repeat bg-center min-w-[800px] h-32"
+                style={{ backgroundImage: 'url(/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png)' }}
+              />
             </Link>
             <SchoolSelector />
           </div>
