@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { GraduationCap, Mail, Phone, MapPin, ExternalLink, Linkedin, Twitter, Facebook } from "lucide-react";
+import { GraduationCap, Mail, Phone, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
@@ -16,12 +16,6 @@ interface FooterContent {
     email: string;
     phone: string;
     website: string;
-  };
-  socialLinks: {
-    facebook?: string;
-    twitter?: string;
-    linkedin?: string;
-    instagram?: string;
   };
   links: {
     category: string;
@@ -43,11 +37,6 @@ const defaultFooterContent: FooterContent = {
     email: "support@pappaya.co.uk",
     phone: "+44 (0) 1932 123 456",
     website: "www.pappaya.co.uk"
-  },
-  socialLinks: {
-    linkedin: "https://linkedin.com/company/pappaya",
-    twitter: "https://twitter.com/pappaya",
-    facebook: "https://facebook.com/pappaya"
   },
   links: [
     {
@@ -97,18 +86,6 @@ export function EnhancedFooter() {
     }
   }, []);
 
-  const getSocialIcon = (platform: string) => {
-    switch (platform) {
-      case 'linkedin':
-        return <Linkedin className="h-5 w-5" />;
-      case 'twitter':
-        return <Twitter className="h-5 w-5" />;
-      case 'facebook':
-        return <Facebook className="h-5 w-5" />;
-      default:
-        return <ExternalLink className="h-5 w-5" />;
-    }
-  };
 
   return (
     <footer className="bg-muted/30 border-t">
@@ -163,29 +140,6 @@ export function EnhancedFooter() {
               </div>
             </div>
 
-            {/* Social Links */}
-            <div className="flex gap-3">
-              {Object.entries(content.socialLinks).map(([platform, url]) => (
-                url && (
-                  <Button
-                    key={platform}
-                    variant="outline"
-                    size="sm"
-                    asChild
-                    className="hover:bg-primary hover:text-primary-foreground"
-                  >
-                    <a 
-                      href={url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      aria-label={`Follow us on ${platform}`}
-                    >
-                      {getSocialIcon(platform)}
-                    </a>
-                  </Button>
-                )
-              ))}
-            </div>
           </div>
 
           {/* Navigation Links */}
