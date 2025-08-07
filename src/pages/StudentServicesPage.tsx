@@ -1,9 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useStudentData } from '@/hooks/useStudentData';
+import { useHRData } from '@/hooks/useHRData';
+import { useFeeData } from '@/hooks/useFeeData';
+import { useAttendanceData } from '@/hooks/useAttendanceData';
+import { useAcademicData } from '@/hooks/useAcademicData';
+import { AISchoolAssistant } from '@/components/shared/AISchoolAssistant';
+import { AISystemAdminAssistant } from '@/components/shared/AISystemAdminAssistant';
 import { 
   Users, 
   CheckSquare, 
@@ -16,7 +22,10 @@ import {
   Shield,
   Activity,
   MapPin,
-  HelpCircle
+  HelpCircle,
+  Bot,
+  Settings,
+  Sparkles
 } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { UserGuide } from '@/components/shared/UserGuide';
@@ -25,6 +34,12 @@ import { studentServicesUserGuide } from '@/data/userGuides';
 export default function StudentServicesPage() {
   const navigate = useNavigate();
   const { students, loading } = useStudentData();
+  const { employees } = useHRData();
+  const { feeHeads } = useFeeData();
+  const { attendanceRecords } = useAttendanceData();
+  const { subjects } = useAcademicData();
+  const [showManagementAssistant, setShowManagementAssistant] = useState(false);
+  const [showSystemAdmin, setShowSystemAdmin] = useState(false);
 
   const studentServiceModules = [
     {
@@ -231,6 +246,112 @@ export default function StudentServicesPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* AI Assistants Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Management Assistant */}
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-primary/5 to-primary-glow/5 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
+                onClick={() => setShowManagementAssistant(true)}>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Bot className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                    📊 Management Assistant
+                  </CardTitle>
+                  <CardDescription>
+                    Data analysis and strategic recommendations
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Users className="h-4 w-4" />
+                  <span>Student Performance Reports</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <TrendingUp className="h-4 w-4" />
+                  <span>Service Analytics & Insights</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Shield className="h-4 w-4" />
+                  <span>Operational Recommendations</span>
+                </div>
+                <Button className="w-full mt-4 bg-gradient-to-r from-primary to-primary-glow">
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Request Analysis
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* System Admin Assistant */}
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-destructive/5 to-destructive/10 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
+                onClick={() => setShowSystemAdmin(true)}>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-destructive to-destructive/80 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Settings className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg group-hover:text-destructive transition-colors">
+                    🔧 System Administrator
+                  </CardTitle>
+                  <CardDescription>
+                    Technical management and system operations
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Users className="h-4 w-4" />
+                  <span>User Account Management</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Settings className="h-4 w-4" />
+                  <span>System Configuration</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Shield className="h-4 w-4" />
+                  <span>Security & Compliance</span>
+                </div>
+                <Button className="w-full mt-4 bg-gradient-to-r from-destructive to-destructive/80">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Access Admin Console
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* AI Assistant Components */}
+        <AISchoolAssistant
+          studentData={students}
+          feeData={feeHeads}
+          staffData={employees}
+          attendanceData={attendanceRecords}
+          academicData={subjects}
+          context="Student Services Management - Comprehensive Support Operations"
+          queryType="student_services"
+          isOpen={showManagementAssistant}
+          onClose={() => setShowManagementAssistant(false)}
+        />
+
+        <AISystemAdminAssistant
+          systemData={[...students, ...employees]}
+          userData={employees}
+          databaseStats={{ totalStudents: students.length, totalStaff: employees.length }}
+          context="Student Services ERP System Administration"
+          queryType="system_admin"
+          isOpen={showSystemAdmin}
+          onClose={() => setShowSystemAdmin(false)}
+        />
       </div>
     </div>
   );
