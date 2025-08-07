@@ -47,10 +47,10 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
   const mapPathwayToDatabase = useCallback((frontendPathway: PathwayType): string => {
     const pathwayMapping: Record<PathwayType, string> = {
       'standard': 'standard_digital',
-      'sen': 'sen_digital',
-      'staff_child': 'staff_child_digital',
+      'sen': 'standard_digital', // SEN uses standard digital pathway
+      'staff_child': 'staff_child',
       'emergency': 'emergency_safeguarding',
-      'bulk_import': 'bulk_import',
+      'bulk_import': 'standard_digital', // Bulk import uses standard digital
       'internal_progression': 'internal_progression',
     };
     
