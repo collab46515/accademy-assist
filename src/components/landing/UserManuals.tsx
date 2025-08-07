@@ -83,6 +83,22 @@ export function UserManuals({ modules }: UserManualsProps) {
     });
   };
 
+  const handlePDFDownload = (title: string, filename: string) => {
+    // For demo purposes, show message that PDF would be downloaded
+    toast({
+      title: "PDF Download Ready",
+      description: `${title} PDF guide would be downloaded. Professional documentation available with full implementation.`,
+    });
+  };
+
+  const handleQuickStartGuide = (guide: any) => {
+    // For demo purposes, show that guide would open
+    toast({
+      title: "Quick Start Guide",
+      description: `${guide.title} - Professional quick start documentation available with full implementation.`,
+    });
+  };
+
   const userRoles = [
     {
       name: "School Administrators",
@@ -311,12 +327,7 @@ export function UserManuals({ modules }: UserManualsProps) {
                         <BookOpen className="mr-2 h-4 w-4" />
                         Read Documentation
                       </Button>
-                      <Button variant="outline" onClick={() => {
-                        toast({
-                          title: "PDF Download",
-                          description: `${selectedModule.name} PDF guide ready for download`,
-                        });
-                      }}>
+                      <Button variant="outline" onClick={() => handlePDFDownload(selectedModule.name, `${selectedModule.name.toLowerCase().replace(/\s+/g, '-')}-guide.pdf`)}>
                         <Download className="mr-2 h-4 w-4" />
                         Download PDF
                       </Button>
@@ -352,15 +363,10 @@ export function UserManuals({ modules }: UserManualsProps) {
                     </div>
                     <Button 
                       className="w-full"
-                      onClick={() => {
-                        toast({
-                          title: "Quick Start Guide",
-                          description: `Opening ${guide.title} documentation`,
-                        });
-                        navigate("/dashboard");
-                      }}
+                      onClick={() => handleQuickStartGuide(guide)}
                     >
-                      Start Reading
+                      <Download className="mr-2 h-4 w-4" />
+                      Download Guide
                     </Button>
                   </CardContent>
                 </Card>
