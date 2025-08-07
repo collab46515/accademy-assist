@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import mermaid from 'mermaid';
+
 
 interface Message {
   id: string;
@@ -75,42 +75,12 @@ export function EnhancedKnowledgeBase({ schoolData, context, isOpen, onClose }: 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  // Initialize Mermaid
-  useEffect(() => {
-    mermaid.initialize({ 
-      startOnLoad: true,
-      theme: 'default',
-      securityLevel: 'loose'
-    });
-  }, []);
 
   // Scroll to bottom when new messages are added
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Render Mermaid diagrams after messages update
-  useEffect(() => {
-    const renderMermaidDiagrams = async () => {
-      const mermaidElements = document.querySelectorAll('.mermaid-diagram');
-      for (const element of mermaidElements) {
-        if (!element.hasAttribute('data-processed')) {
-          try {
-            const graphDefinition = element.textContent || '';
-            const { svg } = await mermaid.render(`mermaid-${Date.now()}`, graphDefinition);
-            element.innerHTML = svg;
-            element.setAttribute('data-processed', 'true');
-          } catch (error) {
-            console.error('Error rendering Mermaid diagram:', error);
-            element.innerHTML = '<p class="text-red-500 text-sm">Error rendering diagram</p>';
-          }
-        }
-      }
-    };
-
-    const timeoutId = setTimeout(renderMermaidDiagrams, 100);
-    return () => clearTimeout(timeoutId);
-  }, [messages]);
 
   const knowledgeCategories = [
     { value: 'general', label: 'General Education', icon: BookOpen, color: 'bg-blue-500' },
@@ -232,46 +202,11 @@ export function EnhancedKnowledgeBase({ schoolData, context, isOpen, onClose }: 
   };
 
   const renderMessageContent = (message: Message) => {
-    let content = message.content;
-    
-    // Extract and render Mermaid diagrams
-    const mermaidRegex = /```mermaid\n([\s\S]*?)\n```/g;
-    const parts = [];
-    let lastIndex = 0;
-    let match;
-
-    while ((match = mermaidRegex.exec(content)) !== null) {
-      // Add text before the diagram
-      if (match.index > lastIndex) {
-        parts.push(
-          <div key={`text-${lastIndex}`} className="whitespace-pre-wrap">
-            {content.slice(lastIndex, match.index)}
-          </div>
-        );
-      }
-
-      // Add the Mermaid diagram
-      parts.push(
-        <div key={`mermaid-${match.index}`} className="my-4 p-4 bg-gray-50 rounded-lg border">
-          <div className="mermaid-diagram text-center" style={{ minHeight: '200px' }}>
-            {match[1]}
-          </div>
-        </div>
-      );
-
-      lastIndex = match.index + match[0].length;
-    }
-
-    // Add remaining text
-    if (lastIndex < content.length) {
-      parts.push(
-        <div key={`text-${lastIndex}`} className="whitespace-pre-wrap">
-          {content.slice(lastIndex)}
-        </div>
-      );
-    }
-
-    return parts.length > 0 ? parts : <div className="whitespace-pre-wrap">{content}</div>;
+    return (
+      <div className="whitespace-pre-wrap">
+        {message.content}
+      </div>
+    );
   };
 
   if (!isOpen) return null;
