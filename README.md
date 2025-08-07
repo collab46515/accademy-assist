@@ -1,22 +1,26 @@
-# Welcome to your Lovable project
+# Pappaya Academy - School Management System
 
-## Project info
+## Project Overview
 
-**URL**: https://lovable.dev/projects/043e5de6-0e75-40f4-bd46-c34c0ce43ff7
+A comprehensive school management system featuring AI-powered tools for timetabling, grading, lesson planning, and complete educational administration.
 
-## How can I edit this code?
+## Project Features
 
-There are several ways of editing your application.
+- AI-powered timetable generation
+- Smart grading assistant
+- Comprehensive lesson planning
+- Student information management
+- Fee management system
+- Communication tools
+- Reporting and analytics
 
-**Use Lovable**
+## How to edit this code?
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/043e5de6-0e75-40f4-bd46-c34c0ce43ff7) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
+There are several ways to edit your application:
 
 **Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+If you want to work locally using your own IDE, you can clone this repo and push changes.
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
@@ -50,7 +54,7 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## What technologies are used for this project?
+## Technologies Used
 
 This project is built with:
 
@@ -59,15 +63,30 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- Supabase (Backend & Database)
 
-## How can I deploy this project?
+## Deployment
 
-Simply open [Lovable](https://lovable.dev/projects/043e5de6-0e75-40f4-bd46-c34c0ce43ff7) and click on Share -> Publish.
+You can deploy this project using various hosting platforms such as:
 
-## Can I connect a custom domain to my Lovable project?
+- Vercel
+- Netlify  
+- Firebase Hosting
+- Or any other static hosting service
 
-Yes, you can!
+## Database Setup
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+This project uses Supabase as the backend. Make sure to:
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+1. Set up your Supabase project
+2. Configure the database schema
+3. Update the environment variables
+4. Run any necessary migrations
+
+## Important Note
+
+After removing Lovable references, you'll need to manually copy the logo images:
+
+1. Copy `public/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png` to `public/assets/logo.png`
+2. Copy `public/lovable-uploads/e3097ebb-81b4-43c3-9c06-5e7eaad0330b.png` to `public/assets/favicon.png`
+3. You can then delete the `public/lovable-uploads/` directory if desired
