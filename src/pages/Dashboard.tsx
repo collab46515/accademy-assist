@@ -430,10 +430,10 @@ export default function Dashboard() {
           <div className="max-w-5xl mx-auto text-center">
             <div className="animate-fade-in">
               <h1 className="text-6xl md:text-7xl font-bold mb-8 tracking-tight bg-gradient-to-r from-white via-white to-white/90 bg-clip-text text-transparent">
-                School Management Dashboard
+                Pappaya Academy Dashboard
               </h1>
               <p className="text-xl md:text-2xl opacity-95 mb-12 leading-relaxed max-w-3xl mx-auto">
-                Complete overview and control of your educational institution with real-time insights and powerful tools
+                Complete overview and control of your educational institution with real-time insights and powerful AI-powered tools
               </p>
             </div>
             

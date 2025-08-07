@@ -323,12 +323,10 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r">
       <SidebarHeader className="border-b bg-gradient-to-r from-primary/5 to-primary-glow/5">
         <div className="flex items-center gap-3 px-3 py-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-glow">
-            <Building className="h-5 w-5 text-primary-foreground" />
-          </div>
+          <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" className="h-8 w-8" />
           {state !== "collapsed" && (
             <div className="flex flex-col">
-              <span className="text-base font-bold">ERP System</span>
+              <span className="text-base font-bold">Pappaya Academy</span>
               <span className="text-sm text-muted-foreground">{currentModule}</span>
             </div>
           )}
