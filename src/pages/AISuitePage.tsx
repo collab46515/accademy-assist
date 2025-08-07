@@ -9,7 +9,7 @@ import { useAttendanceData } from '@/hooks/useAttendanceData';
 import { useAcademicData } from '@/hooks/useAcademicData';
 import { AISchoolAssistant } from '@/components/shared/AISchoolAssistant';
 import { AISystemAdminAssistant } from '@/components/shared/AISystemAdminAssistant';
-import { AIKnowledgeBase } from '@/components/shared/AIKnowledgeBase';
+import { EnhancedKnowledgeBase } from '@/components/shared/EnhancedKnowledgeBase';
 import { 
   Bot, 
   Brain,
@@ -389,7 +389,7 @@ const AISuitePage = () => {
       </div>
 
       {/* AI Assistant Components */}
-      <AIKnowledgeBase
+      <EnhancedKnowledgeBase
         schoolData={{ students, staff: employees, totalStudents: students.length }}
         context="AI Suite Educational Knowledge Base"
         isOpen={showKnowledgeBase}
