@@ -67,7 +67,7 @@ export function AuthSection() {
               <span className="text-primary block">School Management System</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Sign in to your existing account or create a new one to start managing your educational institution.
+              Sign in to your existing account to start managing your educational institution.
             </p>
           </div>
 
