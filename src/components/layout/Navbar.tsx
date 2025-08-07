@@ -100,7 +100,7 @@ export const Navbar = () => {
             <Link to="/" className="flex items-center">
               <div 
                 className="bg-contain bg-no-repeat bg-center min-w-[800px] h-32"
-                style={{ backgroundImage: 'url(/assets/logo.png)' }}
+                style={{ backgroundImage: 'url(/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png)' }}
               />
             </Link>
             <SchoolSelector />
