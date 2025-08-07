@@ -79,7 +79,7 @@ export function AuthSection() {
                   <GraduationCap className="h-8 w-8 text-primary-foreground" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl">Welcome to EduFlow Pro</CardTitle>
+                  <CardTitle className="text-2xl">Welcome to Pappaya</CardTitle>
                   <CardDescription className="text-base">
                     Sign in to access your school management dashboard
                   </CardDescription>

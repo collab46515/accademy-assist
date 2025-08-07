@@ -168,7 +168,7 @@ export function UserManuals({ modules }: UserManualsProps) {
 
   const quickStartGuides = [
     {
-      title: "Getting Started with EduFlow Pro",
+      title: "Getting Started with Pappaya",
       duration: "5 min read",
       type: "Quick Start",
       description: "Essential first steps to set up your school management system"
