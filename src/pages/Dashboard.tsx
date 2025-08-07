@@ -453,10 +453,10 @@ export default function Dashboard() {
                     </div>
                     <div className="text-center flex-1">
                       <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-yellow-100 transition-colors">
-                        🚀 AI School Management Assistant
+                        📊 Management Assistant & Deputy
                       </h3>
                       <p className="text-white/80 text-lg leading-relaxed">
-                        Your intelligent companion for comprehensive school management insights, analytics, and decision support
+                        Your analytical deputy providing data insights, reports, and strategic recommendations
                       </p>
                     </div>
                   </div>
@@ -464,15 +464,15 @@ export default function Dashboard() {
                   <div className="flex items-center justify-center space-x-6 text-sm text-white/70 mb-6">
                     <div className="flex items-center space-x-2">
                       <Users className="h-4 w-4" />
-                      <span>Student Analytics</span>
+                      <span>Performance Reports</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <DollarSign className="h-4 w-4" />
-                      <span>Financial Insights</span>
+                      <span>Financial Analysis</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <TrendingUp className="h-4 w-4" />
-                      <span>Performance Tracking</span>
+                      <span>Strategic Insights</span>
                     </div>
                   </div>
                   
@@ -482,7 +482,7 @@ export default function Dashboard() {
                       size="lg"
                     >
                       <MessageSquare className="h-5 w-5 mr-2" />
-                      Start Conversation
+                      Request Report & Analysis
                     </Button>
                   </div>
                 </CardContent>
