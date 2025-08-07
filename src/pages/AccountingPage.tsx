@@ -41,7 +41,7 @@ import {
   Settings,
   Bot
 } from 'lucide-react';
-import { AIFeeAssistant } from '@/components/finance/AIFeeAssistant';
+import { AISchoolAssistant } from '@/components/shared/AISchoolAssistant';
 
 export function AccountingPage() {
   const location = useLocation();
@@ -462,7 +462,7 @@ export function AccountingPage() {
                       className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary"
                     >
                       <Bot className="h-4 w-4 mr-2" />
-                      AI Assistant
+                      AI Management Assistant
                     </Button>
                   </div>
                 </div>
@@ -537,10 +537,12 @@ export function AccountingPage() {
               </CardContent>
             </Card>
 
-            {/* AI Assistant Component */}
-            <AIFeeAssistant 
+            {/* AI School Management Assistant */}
+            <AISchoolAssistant 
               studentData={filteredStudents}
               feeData={mockStudents}
+              context="Student Fee Management Section"
+              queryType="finance"
               isOpen={showAIAssistant}
               onClose={() => setShowAIAssistant(false)}
             />

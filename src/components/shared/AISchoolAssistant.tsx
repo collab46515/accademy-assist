@@ -24,19 +24,24 @@ interface Message {
   timestamp: Date;
 }
 
-interface AIFeeAssistantProps {
+interface AISchoolAssistantProps {
   studentData?: any[];
   feeData?: any[];
+  staffData?: any[];
+  attendanceData?: any[];
+  academicData?: any[];
+  context?: string;
+  queryType?: string;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function AIFeeAssistant({ studentData, feeData, isOpen, onClose }: AIFeeAssistantProps) {
+export function AISchoolAssistant({ studentData, feeData, staffData, attendanceData, academicData, context, queryType, isOpen, onClose }: AISchoolAssistantProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       role: 'assistant',
-      content: 'Hello! I\'m your AI Fee Management Assistant. I can help you with questions about student fees, payment plans, outstanding balances, and more. How can I assist you today?',
+      content: 'Hello! I\'m your AI School Management Assistant. I can help you with anything related to running your school - from student performance and staff management to finances, academics, operations, and strategic planning. What would you like to know or discuss today?',
       timestamp: new Date()
     }
   ]);
@@ -67,12 +72,16 @@ export function AIFeeAssistant({ studentData, feeData, isOpen, onClose }: AIFeeA
     try {
       console.log('Sending message to AI assistant:', inputValue);
       
-      const { data, error } = await supabase.functions.invoke('ai-fee-assistant', {
+      const { data, error } = await supabase.functions.invoke('ai-school-assistant', {
         body: {
           message: inputValue,
-          studentData: studentData?.slice(0, 5), // Limit data size
+          studentData: studentData?.slice(0, 10),
           feeData: feeData?.slice(0, 10),
-          context: 'Student Fee Management System - Omani School'
+          staffData: staffData?.slice(0, 5),
+          attendanceData: attendanceData?.slice(0, 20),
+          academicData: academicData?.slice(0, 15),
+          context: context || 'Comprehensive School Management System - Omani School',
+          queryType: queryType || 'general'
         }
       });
 
@@ -121,11 +130,14 @@ export function AIFeeAssistant({ studentData, feeData, isOpen, onClose }: AIFeeA
   };
 
   const suggestedQuestions = [
-    "What are the current fee structures?",
-    "How can I check outstanding balances?",
-    "What payment methods are available?",
-    "When are fees due this term?",
-    "Can I set up a payment plan?"
+    "What's the overall school performance this term?",
+    "Who are the top performing students?",
+    "Which students need academic intervention?",
+    "Show me staff attendance patterns",
+    "What are our financial KPIs this month?",
+    "Any safeguarding concerns I should know about?",
+    "How's curriculum delivery progressing?",
+    "What operational issues need attention?"
   ];
 
   if (!isOpen) return null;
@@ -140,8 +152,8 @@ export function AIFeeAssistant({ studentData, feeData, isOpen, onClose }: AIFeeA
                 <Bot className="h-6 w-6" />
               </div>
               <div className="min-w-0">
-                <CardTitle className="text-white text-lg">AI Fee Assistant</CardTitle>
-                <p className="text-white/80 text-sm">Intelligent fee management support</p>
+                <CardTitle className="text-white text-lg">AI School Assistant</CardTitle>
+                <p className="text-white/80 text-sm">Your intelligent school management companion</p>
               </div>
             </div>
             <Button 
@@ -242,7 +254,7 @@ export function AIFeeAssistant({ studentData, feeData, isOpen, onClose }: AIFeeA
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Ask about fees, payments, or student accounts..."
+                placeholder="Ask me anything about your school - academics, staff, finances, operations..."
                 disabled={isLoading}
                 className="flex-1"
               />
