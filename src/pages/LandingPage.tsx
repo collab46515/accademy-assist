@@ -29,6 +29,8 @@ import { UserManuals } from "@/components/landing/UserManuals";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { FeaturesGrid } from "@/components/landing/FeaturesGrid";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
+import { EnhancedFooter } from "@/components/landing/EnhancedFooter";
+import { CallToActionSection } from "@/components/landing/CallToActionSection";
 
 export default function LandingPage() {
   const [activeSection, setActiveSection] = useState("home");
@@ -136,7 +138,7 @@ export default function LandingPage() {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <GraduationCap className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold">EduFlow Pro</span>
+              <span className="text-xl font-bold">Academy Assist</span>
             </div>
             
             <div className="hidden md:flex items-center gap-6">
@@ -270,6 +272,7 @@ export default function LandingPage() {
 
             <FeaturesGrid modules={modules} />
             <TestimonialsSection />
+            <CallToActionSection onGetStarted={() => setActiveSection("auth")} />
           </>
         )}
 
@@ -286,55 +289,7 @@ export default function LandingPage() {
         )}
       </div>
 
-      {/* Footer */}
-      <footer className="bg-muted py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid gap-8 md:grid-cols-4">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <GraduationCap className="h-6 w-6 text-primary" />
-                <span className="text-lg font-bold">EduFlow Pro</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Complete school management system designed for modern educational institutions.
-              </p>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold mb-4">Modules</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>Student Management</li>
-                <li>Admissions</li>
-                <li>Fee Management</li>
-                <li>Library System</li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold mb-4">Support</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>User Guides</li>
-                <li>Video Tutorials</li>
-                <li>Help Center</li>
-                <li>Contact Support</li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold mb-4">Contact</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>support@eduflowpro.com</li>
-                <li>+44 (0) 20 1234 5678</li>
-                <li>Live Chat Support</li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-            © 2024 EduFlow Pro. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <EnhancedFooter />
     </div>
   );
 }

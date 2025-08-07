@@ -45,6 +45,7 @@ import AcademicsPage from "./pages/AcademicsPage";
 import NotFound from "./pages/NotFound";
 import StudentWelfarePage from "./pages/StudentWelfarePage";
 import BehaviorTrackingPage from "./pages/BehaviorTrackingPage";
+import FooterCMSPage from "./pages/FooterCMSPage";
 import InfirmaryPage from "./pages/InfirmaryPage";
 import ComplaintsPage from "./pages/ComplaintsPage";
 import StudentWelfareSafeguardingPage from "./pages/StudentWelfareSafeguardingPage";
@@ -134,6 +135,7 @@ const App = () => (
                           <Route path="/activities" element={<ActivitiesPage />} />
                           <Route path="/safeguarding" element={<SafeguardingPage />} />
           <Route path="/behavior-tracking" element={<BehaviorTrackingPage />} />
+          <Route path="/footer-cms" element={<FooterCMSPage />} />
           <Route path="/student-welfare" element={<StudentWelfarePage />} />
                           <Route path="/student-welfare/infirmary" element={<InfirmaryPage />} />
                           <Route path="/student-welfare/complaints" element={<ComplaintsPage />} />
