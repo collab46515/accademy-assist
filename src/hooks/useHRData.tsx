@@ -240,7 +240,9 @@ export function useHRData() {
       ];
 
       setEmployees(mockEmployees);
-      setDepartments([]);
+      
+      // Use the actual departments data from the database if available
+      setDepartments(departmentsData as Department[] || []);
       setLeaveRequests([]);
       setAttendanceRecords([]);
       setPayrollRecords(payrollData as PayrollRecord[] || []);
