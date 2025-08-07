@@ -68,7 +68,7 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
             <div className="aspect-square bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl p-8 backdrop-blur-sm border border-primary/10">
               <div className="h-full w-full bg-background rounded-2xl shadow-2xl flex items-center justify-center p-8">
                 <div className="text-center space-y-4">
-                  <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" className="h-60 w-auto mx-auto" />
+                  <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" className="h-96 w-auto mx-auto" />
                   <h3 className="text-xl font-semibold">Pappaya Academy</h3>
                   <p className="text-muted-foreground">Complete School Management System</p>
                 </div>
