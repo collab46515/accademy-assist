@@ -175,6 +175,55 @@ export const PaymentCollection = () => {
     p.paidAt.toDateString() === new Date().toDateString()
   ).length;
 
+  const generateReceipt = async (payment: Payment) => {
+    try {
+      // Create receipt content
+      const receiptContent = `
+        PAPPAYA SCHOOL SYSTEM
+        PAYMENT RECEIPT
+        
+        Receipt No: RCP-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}
+        Date: ${new Date().toLocaleDateString()}
+        
+        Student: ${payment.studentName}
+        Admission No: ${payment.admissionNumber}
+        Invoice No: ${payment.invoiceNumber}
+        
+        Amount Paid: £${payment.amount.toLocaleString()}
+        Payment Method: ${payment.paymentMethod.replace('_', ' ').toUpperCase()}
+        Transaction ID: ${payment.transactionId || 'N/A'}
+        
+        Fee Type: ${payment.feeType}
+        Status: ${payment.status.toUpperCase()}
+        
+        Thank you for your payment.
+      `;
+
+      // Create and download receipt as text file
+      const blob = new Blob([receiptContent], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `receipt-${payment.admissionNumber}-${payment.invoiceNumber}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: "Receipt generated and downloaded successfully",
+      });
+    } catch (error) {
+      console.error('Error generating receipt:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate receipt",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -352,7 +401,12 @@ export const PaymentCollection = () => {
                           </Badge>
                         </div>
                         
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => generateReceipt(payment)}
+                          title="Generate Receipt"
+                        >
                           <Receipt className="h-4 w-4" />
                         </Button>
                       </div>

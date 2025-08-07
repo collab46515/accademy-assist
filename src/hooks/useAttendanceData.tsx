@@ -263,21 +263,39 @@ export function useAttendanceData() {
     if (!currentSchool || !user) return;
 
     try {
-      const { data, error } = await supabase
+      // First fetch class schedules without the problematic join
+      const { data: scheduleData, error: scheduleError } = await supabase
         .from('class_schedules')
-        .select(`
-          *,
-          period:school_periods(*)
-        `)
+        .select('*')
         .eq('school_id', currentSchool.id)
         .eq('teacher_id', user.id)
         .eq('is_active', true);
 
-      if (error) throw error;
+      if (scheduleError) throw scheduleError;
 
-      setClassSchedules((data as any[]) || []);
+      // Then fetch school periods separately
+      const { data: periodsData, error: periodsError } = await supabase
+        .from('school_periods')
+        .select('*')
+        .eq('school_id', currentSchool.id)
+        .eq('is_active', true);
+
+      if (periodsError) throw periodsError;
+
+      // Manually join the data
+      const scheduleWithPeriods = (scheduleData || []).map(schedule => {
+        const period = (periodsData || []).find(p => p.id === schedule.period_id);
+        return {
+          ...schedule,
+          period: period || null
+        };
+      });
+
+      setClassSchedules(scheduleWithPeriods as any[]);
     } catch (error: any) {
       console.error('Error fetching class schedules:', error);
+      // Set empty array to avoid pending state
+      setClassSchedules([]);
     }
   };
 
