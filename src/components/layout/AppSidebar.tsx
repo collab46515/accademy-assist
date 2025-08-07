@@ -49,7 +49,8 @@ import {
   AlertTriangle,
   Monitor,
   Bot,
-  ShoppingCart
+  ShoppingCart,
+  Brain
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { 
@@ -140,6 +141,9 @@ const erpModules = [
     icon: Bot,
     subItems: [
       { title: "Dashboard", url: "/ai-suite", icon: LayoutDashboard },
+      { title: "Knowledge Base AI", url: "/ai-suite", icon: Brain },
+      { title: "Management Assistant", url: "/ai-suite", icon: Bot },
+      { title: "System Administrator", url: "/ai-suite", icon: Settings },
       { title: "AI Timetable Generator", url: "/ai-suite/timetable", icon: Clock },
       { title: "Lesson Planner", url: "/ai-suite/lesson-planner", icon: BookOpen },
       { title: "AI Grading Assistant", url: "/ai-suite/grading", icon: CheckCircle },
