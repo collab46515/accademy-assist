@@ -164,7 +164,7 @@ export function MasterDataPage() {
         periods: 'Period Number,Start Time,End Time,Day of Week\n1,09:00,09:45,Monday',
         departments: 'Name,Description,Cost Center\nMathematics,Mathematics Department,MATH001',
         staff: 'Employee ID,First Name,Last Name,Email,Position,Department,Start Date\nEMP001,John,Smith,j.smith@school.edu,Head Teacher,Administration,2020-09-01',
-        'fee-heads': 'Fee Name,Description,Category,Default Amount,Currency,Is Mandatory,Is Recurring,Recurrence Frequency,Applicable Classes,Applicable Genders\nTuition Fee,Main academic tuition fees,Tuition,1500,GBP,true,true,termly,,'
+        'fee-heads': 'Fee Name,Description,Category,Default Amount,Currency,Is Mandatory,Is Recurring,Recurrence Frequency,Applicable Classes,Applicable Genders\nTuition Fee,Main academic tuition fees,Tuition,600,OMR,true,true,termly,,'
       };
       
       const template = templates[type as keyof typeof templates];

@@ -105,15 +105,15 @@ export function AccountingPage() {
 
   // Mock data for dashboard overview - would be calculated from real data
   const mockDashboardData = {
-    totalRevenue: { amount: 2450000, currency: 'GBP' },
-    totalExpenses: { amount: 1850000, currency: 'GBP' },
-    netProfit: { amount: 600000, currency: 'GBP' },
-    outstandingFees: { amount: 285000, currency: 'GBP' },
+    totalRevenue: { amount: 980000, currency: 'OMR' }, // Converted from GBP to OMR
+    totalExpenses: { amount: 740000, currency: 'OMR' }, // Converted from GBP to OMR
+    netProfit: { amount: 240000, currency: 'OMR' }, // Converted from GBP to OMR
+    outstandingFees: { amount: 114000, currency: 'OMR' }, // Converted from GBP to OMR
     recentTransactions: [
-      { id: '1', date: '2024-01-15', description: 'Tuition Fee - Year 7', amount: 1200, currency: 'GBP', type: 'income', status: 'completed' },
-      { id: '2', date: '2024-01-14', description: 'Office Supplies', amount: -150, currency: 'GBP', type: 'expense', status: 'completed' },
-      { id: '3', date: '2024-01-13', description: 'Lunch Fee - Student ID: ST001', amount: 25, currency: 'GBP', type: 'income', status: 'pending' },
-      { id: '4', date: '2024-01-12', description: 'Utilities Payment', amount: -850, currency: 'GBP', type: 'expense', status: 'completed' }
+      { id: '1', date: '2024-01-15', description: 'Tuition Fee - Year 7', amount: 480, currency: 'OMR', type: 'income', status: 'completed' },
+      { id: '2', date: '2024-01-14', description: 'Office Supplies', amount: -60, currency: 'OMR', type: 'expense', status: 'completed' },
+      { id: '3', date: '2024-01-13', description: 'Lunch Fee - Student ID: ST001', amount: 10, currency: 'OMR', type: 'income', status: 'pending' },
+      { id: '4', date: '2024-01-12', description: 'Utilities Payment', amount: -340, currency: 'OMR', type: 'expense', status: 'completed' }
     ]
   };
 
