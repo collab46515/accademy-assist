@@ -45,6 +45,7 @@ export function AccountingPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStudent, setSelectedStudent] = useState(null);
   const form = useForm();
   
   const {
@@ -117,6 +118,21 @@ export function AccountingPage() {
       { id: '4', date: '2024-01-12', description: 'Utilities Payment', amount: -850, currency: 'GBP', type: 'expense', status: 'completed' }
     ]
   };
+
+  // Mock student data for fees management
+  const mockStudents = [
+    { id: 'ST001', name: 'Emma Thompson', class: 'Year 9', outstandingFees: 2400, lastPayment: '2024-01-10', status: 'Overdue' },
+    { id: 'ST002', name: 'James Wilson', class: 'Year 8', outstandingFees: 150, lastPayment: '2024-01-15', status: 'Current' },
+    { id: 'ST003', name: 'Sophie Chen', class: 'Year 10', outstandingFees: 0, lastPayment: '2024-01-20', status: 'Paid' },
+    { id: 'ST004', name: 'Oliver Smith', class: 'Year 7', outstandingFees: 300, lastPayment: '2024-01-12', status: 'Pending' },
+    { id: 'ST005', name: 'Mia Johnson', class: 'Year 11', outstandingFees: 1200, lastPayment: '2024-01-08', status: 'Overdue' }
+  ];
+
+  const filteredStudents = mockStudents.filter(student => 
+    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.class.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const filteredVendors = vendors.filter(vendor => 
     vendor.vendor_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -430,27 +446,83 @@ export function AccountingPage() {
                         className="pl-10 w-64"
                       />
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => console.log('Filter clicked with search term:', searchTerm)}>
+                    <Button variant="outline" size="sm" onClick={() => {
+                      console.log('Filter clicked with search term:', searchTerm);
+                      console.log('Filtered students:', filteredStudents);
+                    }}>
                       <Filter className="h-4 w-4 mr-2" />
-                      Filter
+                      Filter ({filteredStudents.length})
                     </Button>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12">
-                  <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Student Fee Management</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Comprehensive student fee tracking, payment processing, and account management will be available here.
-                  </p>
-                  <div className="space-y-2 text-sm text-muted-foreground">
-                    <p>• Track student payments and outstanding balances</p>
-                    <p>• Generate fee statements and invoices</p>
-                    <p>• Manage payment plans and installments</p>
-                    <p>• Send automated payment reminders</p>
+                {filteredStudents.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No students found</h3>
+                    <p className="text-muted-foreground">Try adjusting your search terms.</p>
                   </div>
-                </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Student ID</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Class</TableHead>
+                        <TableHead>Outstanding Fees</TableHead>
+                        <TableHead>Last Payment</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredStudents.map((student) => (
+                        <TableRow key={student.id} className="hover:bg-muted/50">
+                          <TableCell className="font-mono">{student.id}</TableCell>
+                          <TableCell className="font-medium">{student.name}</TableCell>
+                          <TableCell>{student.class}</TableCell>
+                          <TableCell className="font-semibold">
+                            {student.outstandingFees > 0 
+                              ? `OMR ${student.outstandingFees.toLocaleString()}` 
+                              : 'OMR 0'}
+                          </TableCell>
+                          <TableCell>{student.lastPayment}</TableCell>
+                          <TableCell>
+                            <Badge variant={
+                              student.status === 'Paid' ? 'default' :
+                              student.status === 'Current' ? 'secondary' :
+                              student.status === 'Pending' ? 'outline' : 'destructive'
+                            }>
+                              {student.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedStudent(student);
+                                  console.log('Viewing student:', student);
+                                }}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => console.log('Sending reminder to:', student.name)}
+                              >
+                                <Send className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </div>
