@@ -23,7 +23,7 @@ import {
   CheckCircle,
   PlayCircle
 } from "lucide-react";
-import { AuthSection } from "@/components/landing/AuthSection";
+
 import { ModuleShowcase } from "@/components/landing/ModuleShowcase";
 import { UserManuals } from "@/components/landing/UserManuals";
 import { HeroSection } from "@/components/landing/HeroSection";
@@ -31,9 +31,11 @@ import { FeaturesGrid } from "@/components/landing/FeaturesGrid";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { EnhancedFooter } from "@/components/landing/EnhancedFooter";
 import { CallToActionSection } from "@/components/landing/CallToActionSection";
+import { SignInModal } from "@/components/auth/SignInModal";
 
 export default function LandingPage() {
   const [activeSection, setActiveSection] = useState("home");
+  const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
 
   const modules = [
     {
@@ -161,15 +163,15 @@ export default function LandingPage() {
                 User Guides
               </button>
               <button 
-                onClick={() => setActiveSection("auth")}
-                className={`text-sm hover:text-primary transition-colors ${activeSection === "auth" ? "text-primary font-medium" : ""}`}
+                onClick={() => setIsSignInModalOpen(true)}
+                className="text-sm hover:text-primary transition-colors"
               >
                 Login
               </button>
             </div>
 
             <Button 
-              onClick={() => setActiveSection("auth")}
+              onClick={() => setIsSignInModalOpen(true)}
               className="md:hidden"
             >
               Login
@@ -182,7 +184,7 @@ export default function LandingPage() {
       <div className="pt-20">
         {activeSection === "home" && (
           <>
-            <HeroSection onGetStarted={() => setActiveSection("auth")} />
+            <HeroSection onGetStarted={() => setIsSignInModalOpen(true)} />
             
             {/* AI Timetable Generator Highlight Section */}
             <section className="py-20 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
@@ -242,7 +244,7 @@ export default function LandingPage() {
                   <Button 
                     size="lg" 
                     className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3"
-                    onClick={() => setActiveSection("auth")}
+                    onClick={() => setIsSignInModalOpen(true)}
                   >
                     Try AI Timetable Generator
                     <ArrowRight className="ml-2 h-5 w-5" />
@@ -272,7 +274,7 @@ export default function LandingPage() {
 
             <FeaturesGrid modules={modules} />
             <TestimonialsSection />
-            <CallToActionSection onGetStarted={() => setActiveSection("auth")} />
+            <CallToActionSection onGetStarted={() => setIsSignInModalOpen(true)} />
           </>
         )}
 
@@ -284,12 +286,14 @@ export default function LandingPage() {
           <UserManuals modules={modules} />
         )}
 
-        {activeSection === "auth" && (
-          <AuthSection />
-        )}
       </div>
 
       <EnhancedFooter />
+      
+      <SignInModal 
+        isOpen={isSignInModalOpen} 
+        onClose={() => setIsSignInModalOpen(false)} 
+      />
     </div>
   );
 }
