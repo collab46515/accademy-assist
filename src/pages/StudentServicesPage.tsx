@@ -16,7 +16,8 @@ import {
   Shield,
   Activity,
   MapPin,
-  HelpCircle
+  HelpCircle,
+  Target
 } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { UserGuide } from '@/components/shared/UserGuide';
@@ -62,6 +63,15 @@ export default function StudentServicesPage() {
       stats: "12 routes active",
       color: "bg-orange-500",
       features: ["Route Planning", "Vehicle Tracking", "Driver Management", "Safety Monitoring"]
+    },
+    {
+      title: "Behavior Tracking",
+      description: "Student behavior management and intervention system",
+      icon: Target,
+      url: "/behavior-tracking",
+      stats: "23 incidents this month",
+      color: "bg-amber-500",
+      features: ["Incident Logging", "Merit/Demerit System", "Detention Management", "Intervention Plans"]
     },
     {
       title: "Student Welfare",
