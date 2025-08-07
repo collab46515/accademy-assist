@@ -123,7 +123,7 @@ export function EmployeeForm({
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="bg-background border border-border z-50">
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="inactive">Inactive</SelectItem>
                     <SelectItem value="terminated">Terminated</SelectItem>
@@ -202,12 +202,16 @@ export function EmployeeForm({
                       <SelectValue placeholder="Select department" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
-                    {departments.map((dept) => (
-                      <SelectItem key={dept.id} value={dept.id}>
-                        {dept.name}
-                      </SelectItem>
-                    ))}
+                  <SelectContent className="bg-background border border-border z-50">
+                    {departments.length === 0 ? (
+                      <SelectItem value="" disabled>No departments available</SelectItem>
+                    ) : (
+                      departments.map((dept) => (
+                        <SelectItem key={dept.id} value={dept.id}>
+                          {dept.name}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -241,7 +245,7 @@ export function EmployeeForm({
                       <SelectValue placeholder="Select manager" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="bg-background border border-border z-50">
                     <SelectItem value="none">No Manager</SelectItem>
                     {employees.filter(emp => emp.id !== employee?.id).map((emp) => (
                       <SelectItem key={emp.id} value={emp.id}>
@@ -267,7 +271,7 @@ export function EmployeeForm({
                       <SelectValue placeholder="Select work type" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="bg-background border border-border z-50">
                     <SelectItem value="full_time">Full Time</SelectItem>
                     <SelectItem value="part_time">Part Time</SelectItem>
                     <SelectItem value="contract">Contract</SelectItem>
