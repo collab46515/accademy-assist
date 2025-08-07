@@ -37,7 +37,7 @@ export function CallToActionSection({ onGetStarted }: CallToActionSectionProps) 
     {
       icon: Award,
       title: "Proven Results",
-      description: "Trusted by 500+ schools across the UK with 99.9% uptime."
+      description: "Comprehensive solution designed for educational excellence."
     }
   ];
 
@@ -83,27 +83,6 @@ export function CallToActionSection({ onGetStarted }: CallToActionSectionProps) 
             ))}
           </div>
 
-          {/* Stats Bar */}
-          <div className="bg-background/50 backdrop-blur-sm border rounded-2xl p-8">
-            <div className="grid gap-8 md:grid-cols-4 text-center">
-              <div>
-                <div className="text-3xl font-bold text-primary mb-2">500+</div>
-                <div className="text-muted-foreground text-sm">Schools Trust Us</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-primary mb-2">50,000+</div>
-                <div className="text-muted-foreground text-sm">Students Managed</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-primary mb-2">99.9%</div>
-                <div className="text-muted-foreground text-sm">System Uptime</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-primary mb-2">24/7</div>
-                <div className="text-muted-foreground text-sm">Support Available</div>
-              </div>
-            </div>
-          </div>
 
           {/* Call to Action */}
           <div className="space-y-6">

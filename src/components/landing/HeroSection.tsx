@@ -46,21 +46,6 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
               </Button>
             </div>
 
-            {/* Quick Stats */}
-            <div className="flex gap-8 pt-8">
-              <div>
-                <div className="text-2xl font-bold text-primary">12+</div>
-                <div className="text-sm text-muted-foreground">Core Modules</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-primary">500+</div>
-                <div className="text-sm text-muted-foreground">Schools</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-primary">99.9%</div>
-                <div className="text-sm text-muted-foreground">Uptime</div>
-              </div>
-            </div>
           </div>
 
           {/* Visual */}

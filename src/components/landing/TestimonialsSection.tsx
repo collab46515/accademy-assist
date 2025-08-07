@@ -98,8 +98,8 @@ export function TestimonialsSection() {
               ))}
             </div>
             <div className="text-left">
-              <div className="font-semibold">Join 500+ Schools</div>
-              <div className="text-sm text-muted-foreground">Already using EduFlow Pro</div>
+              <div className="font-semibold">Join Our Community</div>
+              <div className="text-sm text-muted-foreground">Transform your school today</div>
             </div>
           </div>
         </div>
