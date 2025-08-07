@@ -95,7 +95,7 @@ export const Navbar = () => {
   return (
     <nav className="bg-card border-b border-border shadow-[var(--shadow-card)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between h-28">
           <div className="flex items-center space-x-4">
             <Link to="/" className="flex items-center">
               <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" className="h-24 w-24" />
