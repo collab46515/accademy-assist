@@ -15,9 +15,10 @@ import {
 
 interface CallToActionSectionProps {
   onGetStarted: () => void;
+  onScheduleDemo: () => void;
 }
 
-export function CallToActionSection({ onGetStarted }: CallToActionSectionProps) {
+export function CallToActionSection({ onGetStarted, onScheduleDemo }: CallToActionSectionProps) {
   const benefits = [
     {
       icon: Clock,
@@ -99,6 +100,7 @@ export function CallToActionSection({ onGetStarted }: CallToActionSectionProps) 
               <Button 
                 variant="outline" 
                 size="lg"
+                onClick={onScheduleDemo}
                 className="text-lg px-8 py-4 border-primary/20 hover:bg-primary/5"
               >
                 <Calendar className="mr-2 h-5 w-5" />

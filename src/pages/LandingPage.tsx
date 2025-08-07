@@ -32,10 +32,12 @@ import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { EnhancedFooter } from "@/components/landing/EnhancedFooter";
 import { CallToActionSection } from "@/components/landing/CallToActionSection";
 import { SignInModal } from "@/components/auth/SignInModal";
+import { ScheduleDemoModal } from "@/components/landing/ScheduleDemoModal";
 
 export default function LandingPage() {
   const [activeSection, setActiveSection] = useState("home");
   const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
 
   const modules = [
     {
@@ -286,7 +288,10 @@ export default function LandingPage() {
 
             <FeaturesGrid modules={modules} />
             <TestimonialsSection />
-            <CallToActionSection onGetStarted={() => setIsSignInModalOpen(true)} />
+            <CallToActionSection 
+              onGetStarted={() => setIsSignInModalOpen(true)}
+              onScheduleDemo={() => setIsDemoModalOpen(true)}
+            />
           </>
         )}
 
@@ -305,6 +310,11 @@ export default function LandingPage() {
       <SignInModal 
         isOpen={isSignInModalOpen} 
         onClose={() => setIsSignInModalOpen(false)} 
+      />
+      
+      <ScheduleDemoModal
+        isOpen={isDemoModalOpen}
+        onClose={() => setIsDemoModalOpen(false)}
       />
     </div>
   );
