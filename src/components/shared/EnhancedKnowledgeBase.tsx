@@ -150,11 +150,22 @@ export function EnhancedKnowledgeBase({ schoolData, context, isOpen, onClose }: 
 
       console.log('Enhanced knowledge base response received:', data);
 
-      // Generate images if requested
+      // Generate images if requested (including diagrams as images)
       let generatedImages: string[] = [];
       if (data.visualContent?.hasImages && data.visualContent.imageRequests.length > 0) {
         for (const imageRequest of data.visualContent.imageRequests) {
           const imageUrl = await generateImage(imageRequest);
+          if (imageUrl) {
+            generatedImages.push(imageUrl);
+          }
+        }
+      }
+      
+      // Generate diagram images if requested
+      if (data.visualContent?.hasDiagrams && data.visualContent.chartRequests?.length > 0) {
+        for (const chartRequest of data.visualContent.chartRequests) {
+          const diagramPrompt = `Create a clear, educational diagram: ${chartRequest}. Style: clean, professional, educational illustration with labels and clear visual hierarchy.`;
+          const imageUrl = await generateImage(diagramPrompt);
           if (imageUrl) {
             generatedImages.push(imageUrl);
           }
