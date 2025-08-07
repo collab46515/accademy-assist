@@ -319,7 +319,7 @@ export default function FinanceOperationsPage() {
                       <span className="font-bold text-green-600">£60,000</span>
                     </div>
                   </div>
-                  <Button variant="outline" className="w-full mt-4">
+                  <Button variant="outline" className="w-full mt-4" onClick={() => navigate('/accounting/reports')}>
                     View Full Report
                   </Button>
                 </CardContent>
@@ -348,7 +348,7 @@ export default function FinanceOperationsPage() {
                       <span className="font-bold text-blue-600">90.4%</span>
                     </div>
                   </div>
-                  <Button variant="outline" className="w-full mt-4">
+                  <Button variant="outline" className="w-full mt-4" onClick={() => navigate('/school-management/fee-management')}>
                     View Collection Details
                   </Button>
                 </CardContent>
@@ -377,7 +377,7 @@ export default function FinanceOperationsPage() {
                       <span className="font-bold text-green-600">£65,000</span>
                     </div>
                   </div>
-                  <Button variant="outline" className="w-full mt-4">
+                  <Button variant="outline" className="w-full mt-4" onClick={() => navigate('/accounting/budget')}>
                     View Budget Details
                   </Button>
                 </CardContent>
