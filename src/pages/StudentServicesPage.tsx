@@ -10,6 +10,7 @@ import { useAttendanceData } from '@/hooks/useAttendanceData';
 import { useAcademicData } from '@/hooks/useAcademicData';
 import { AISchoolAssistant } from '@/components/shared/AISchoolAssistant';
 import { AISystemAdminAssistant } from '@/components/shared/AISystemAdminAssistant';
+import { AIKnowledgeBase } from '@/components/shared/AIKnowledgeBase';
 import { 
   Users, 
   CheckSquare, 
@@ -25,7 +26,9 @@ import {
   HelpCircle,
   Bot,
   Settings,
-  Sparkles
+  Sparkles,
+  Brain,
+  BookOpen
 } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { UserGuide } from '@/components/shared/UserGuide';
@@ -40,6 +43,7 @@ export default function StudentServicesPage() {
   const { subjects } = useAcademicData();
   const [showManagementAssistant, setShowManagementAssistant] = useState(false);
   const [showSystemAdmin, setShowSystemAdmin] = useState(false);
+  const [showKnowledgeBase, setShowKnowledgeBase] = useState(false);
 
   const studentServiceModules = [
     {
@@ -248,7 +252,46 @@ export default function StudentServicesPage() {
         </Card>
 
         {/* AI Assistants Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Knowledge Base AI */}
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-purple-50 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
+                onClick={() => setShowKnowledgeBase(true)}>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Brain className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg group-hover:text-blue-600 transition-colors">
+                    🧠 Knowledge Base AI
+                  </CardTitle>
+                  <CardDescription>
+                    Comprehensive educational intelligence
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <BookOpen className="h-4 w-4" />
+                  <span>Educational Best Practices</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Brain className="h-4 w-4" />
+                  <span>Curriculum & Pedagogy</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Shield className="h-4 w-4" />
+                  <span>Policy & Compliance</span>
+                </div>
+                <Button className="w-full mt-4 bg-gradient-to-r from-blue-600 to-purple-600">
+                  <Brain className="h-4 w-4 mr-2" />
+                  Access Knowledge Base
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
           {/* Management Assistant */}
           <Card className="border-0 shadow-lg bg-gradient-to-br from-primary/5 to-primary-glow/5 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
                 onClick={() => setShowManagementAssistant(true)}>
@@ -331,6 +374,13 @@ export default function StudentServicesPage() {
         </div>
 
         {/* AI Assistant Components */}
+        <AIKnowledgeBase
+          schoolData={{ students, staff: employees, totalStudents: students.length }}
+          context="Student Services Educational Knowledge Base"
+          isOpen={showKnowledgeBase}
+          onClose={() => setShowKnowledgeBase(false)}
+        />
+
         <AISchoolAssistant
           studentData={students}
           feeData={feeHeads}
