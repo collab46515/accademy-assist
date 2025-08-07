@@ -37,10 +37,11 @@ export function ScheduleDemoModal({ isOpen, onClose }: ScheduleDemoModalProps) {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/send-demo-request', {
+      const response = await fetch('https://iosceukdfokpptvqfirp.supabase.co/functions/v1/send-demo-request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlvc2NldWtkZm9rcHB0dnFmaXJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMTU0NTAsImV4cCI6MjA2OTc5MTQ1MH0.WPkORWUMRfMEAVlkl6--r8rZ85YFXeJlXFkKya1PLuI`,
         },
         body: JSON.stringify(formData),
       });
