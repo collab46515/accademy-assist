@@ -43,6 +43,20 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
     }));
   }, []);
 
+  // Helper function to map frontend pathway types to database enum values
+  const mapPathwayToDatabase = useCallback((frontendPathway: PathwayType): string => {
+    const pathwayMapping: Record<PathwayType, string> = {
+      'standard': 'standard_digital',
+      'sen': 'sen_digital',
+      'staff_child': 'staff_child_digital',
+      'emergency': 'emergency_safeguarding',
+      'bulk_import': 'bulk_import',
+      'internal_progression': 'internal_progression',
+    };
+    
+    return pathwayMapping[frontendPathway] || 'standard_digital';
+  }, []);
+
   // Helper function to safely extract common fields from any pathway
   const extractCommonFields = useCallback((data: any) => {
     // Try to extract student name from different pathway structures
@@ -93,7 +107,7 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
       const mappedData = {
         // Required fields for database
         application_number: `DRAFT-${Date.now()}`,
-        pathway: pathway as any,
+        pathway: mapPathwayToDatabase(pathway) as any,
         school_id: currentSchool.id,
         
         // Map extracted common fields
@@ -156,7 +170,7 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
     } finally {
       setIsSaving(false);
     }
-  }, [currentSchool, currentStep, totalSteps, pathway, applicationId, toast, extractCommonFields]);
+  }, [currentSchool, currentStep, totalSteps, pathway, applicationId, toast, extractCommonFields, mapPathwayToDatabase]);
 
   // Watch for form changes and trigger auto-save
   useEffect(() => {
@@ -243,7 +257,7 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
       const applicationData = {
         // Required fields for database
         application_number: `APP-${Date.now()}`,
-        pathway: pathway as any,
+        pathway: mapPathwayToDatabase(pathway) as any,
         school_id: currentSchool.id,
         
         // Map extracted common fields
@@ -305,7 +319,7 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
     } finally {
       setIsLoading(false);
     }
-  }, [currentSchool, applicationId, totalSteps, config.name, toast, extractCommonFields, pathway]);
+  }, [currentSchool, applicationId, totalSteps, config.name, toast, extractCommonFields, pathway, mapPathwayToDatabase]);
 
   // Get field validation status
   const getFieldErrors = useCallback((fieldPath: string) => {
