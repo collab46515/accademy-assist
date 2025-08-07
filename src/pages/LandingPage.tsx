@@ -134,53 +134,51 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex justify-between items-center min-h-[6rem]">
-            <div className="flex items-center">
-              <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" className="h-80 w-80" />
-            </div>
-            
-            <div className="hidden md:flex items-center gap-6">
-              <button 
-                onClick={() => setActiveSection("home")}
-                className={`text-sm hover:text-primary transition-colors ${activeSection === "home" ? "text-primary font-medium" : ""}`}
-              >
-                Home
-              </button>
-              <button 
-                onClick={() => setActiveSection("modules")}
-                className={`text-sm hover:text-primary transition-colors ${activeSection === "modules" ? "text-primary font-medium" : ""}`}
-              >
-                Modules
-              </button>
-              <button 
-                onClick={() => setActiveSection("manuals")}
-                className={`text-sm hover:text-primary transition-colors ${activeSection === "manuals" ? "text-primary font-medium" : ""}`}
-              >
-                User Guides
-              </button>
-              <button 
-                onClick={() => setIsSignInModalOpen(true)}
-                className="text-sm hover:text-primary transition-colors"
-              >
-                Login
-              </button>
-            </div>
-
-            <Button 
+      {/* Simple Navigation - No Fixed Header */}
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center">
+            <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" className="h-80 w-80" />
+          </div>
+          
+          <div className="hidden md:flex items-center gap-6">
+            <button 
+              onClick={() => setActiveSection("home")}
+              className={`text-sm hover:text-primary transition-colors ${activeSection === "home" ? "text-primary font-medium" : ""}`}
+            >
+              Home
+            </button>
+            <button 
+              onClick={() => setActiveSection("modules")}
+              className={`text-sm hover:text-primary transition-colors ${activeSection === "modules" ? "text-primary font-medium" : ""}`}
+            >
+              Modules
+            </button>
+            <button 
+              onClick={() => setActiveSection("manuals")}
+              className={`text-sm hover:text-primary transition-colors ${activeSection === "manuals" ? "text-primary font-medium" : ""}`}
+            >
+              User Guides
+            </button>
+            <button 
               onClick={() => setIsSignInModalOpen(true)}
-              className="md:hidden"
+              className="text-sm hover:text-primary transition-colors"
             >
               Login
-            </Button>
+            </button>
           </div>
+
+          <Button 
+            onClick={() => setIsSignInModalOpen(true)}
+            className="md:hidden"
+          >
+            Login
+          </Button>
         </div>
-      </nav>
+      </div>
 
       {/* Content Sections */}
-      <div className="pt-[8rem]">
+      <div>
         {activeSection === "home" && (
           <>
             <HeroSection onGetStarted={() => setIsSignInModalOpen(true)} />
