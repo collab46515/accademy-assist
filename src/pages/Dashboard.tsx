@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useStudentData } from '@/hooks/useStudentData';
 import { useHRData } from '@/hooks/useHRData';
 import { useFeeData } from '@/hooks/useFeeData';
@@ -35,6 +36,7 @@ import {
 } from 'lucide-react';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [selectedTeacher, setSelectedTeacher] = useState<any>(null);
@@ -941,27 +943,57 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center gap-2"
+                  onClick={() => navigate('/attendance')}
+                >
                   <UserCheck className="h-4 w-4" />
                   Mark Attendance
                 </Button>
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center gap-2"
+                  onClick={() => navigate('/school-management/fee-management')}
+                >
                   <DollarSign className="h-4 w-4" />
                   Process Fees
                 </Button>
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center gap-2"
+                  onClick={() => navigate('/communication')}
+                >
                   <MessageSquare className="h-4 w-4" />
                   Send Notice
                 </Button>
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center gap-2"
+                  onClick={() => navigate('/events')}
+                >
                   <Calendar className="h-4 w-4" />
                   Schedule Event
                 </Button>
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center gap-2"
+                  onClick={() => navigate('/admissions/new')}
+                >
                   <Users className="h-4 w-4" />
                   New Student
                 </Button>
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center gap-2"
+                  onClick={() => navigate('/staff')}
+                >
                   <GraduationCap className="h-4 w-4" />
                   Staff Report
                 </Button>
