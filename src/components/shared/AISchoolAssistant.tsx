@@ -41,7 +41,7 @@ export function AISchoolAssistant({ studentData, feeData, staffData, attendanceD
     {
       id: '1',
       role: 'assistant',
-      content: 'Hello! I\'m your AI School Management Assistant. I can help you with anything related to running your school - from student performance and staff management to finances, academics, operations, and strategic planning. What would you like to know or discuss today?',
+      content: 'Good morning! I\'m the Principal here, and I\'ve got my finger on the pulse of everything happening in our school. Whether you want to know how our students are performing, what\'s happening with our budget, which teachers need support, or any strategic decisions we should be making - just ask! I\'m here to chat about whatever\'s on your mind regarding our school community.',
       timestamp: new Date()
     }
   ]);
@@ -130,14 +130,14 @@ export function AISchoolAssistant({ studentData, feeData, staffData, attendanceD
   };
 
   const suggestedQuestions = [
-    "What's the overall school performance this term?",
-    "Who are the top performing students?",
-    "Which students need academic intervention?",
-    "Show me staff attendance patterns",
-    "What are our financial KPIs this month?",
-    "Any safeguarding concerns I should know about?",
-    "How's curriculum delivery progressing?",
-    "What operational issues need attention?"
+    "How are our students doing this term?",
+    "Who should I be keeping an eye on academically?",
+    "What's our financial situation looking like?",
+    "Any staff I should check in with?",
+    "How's our curriculum delivery going?",
+    "What operational issues need my attention?",
+    "Any safeguarding concerns on my radar?",
+    "What strategic priorities should we focus on?"
   ];
 
   if (!isOpen) return null;
@@ -152,8 +152,8 @@ export function AISchoolAssistant({ studentData, feeData, staffData, attendanceD
                 <Bot className="h-6 w-6" />
               </div>
               <div className="min-w-0">
-                <CardTitle className="text-white text-lg">AI School Assistant</CardTitle>
-                <p className="text-white/80 text-sm">Your intelligent school management companion</p>
+                <CardTitle className="text-white text-lg">Principal's Office - AI Assistant</CardTitle>
+                <p className="text-white/80 text-sm">Your experienced principal, always ready to discuss school matters</p>
               </div>
             </div>
             <Button 
@@ -254,7 +254,7 @@ export function AISchoolAssistant({ studentData, feeData, staffData, attendanceD
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Ask me anything about your school - academics, staff, finances, operations..."
+                placeholder="What's on your mind about our school today? Ask me anything - academics, staff, finances, you name it..."
                 disabled={isLoading}
                 className="flex-1"
               />
