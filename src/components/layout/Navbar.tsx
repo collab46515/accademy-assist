@@ -98,7 +98,7 @@ export const Navbar = () => {
         <div className="flex justify-between h-20">
           <div className="flex items-center space-x-4">
             <Link to="/" className="flex items-center">
-              <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" className="h-16 w-48" />
+              <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" className="h-16 w-80" />
             </Link>
             <SchoolSelector />
           </div>
