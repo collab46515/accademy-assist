@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import jsPDF from 'jspdf';
 import { 
   BookOpen, 
   Download, 
@@ -40,31 +41,243 @@ export function UserGuidesSection() {
   };
 
   const handleViewAllGuides = (roleName: string) => {
-    toast({
-      title: "Complete Guide Set",
-      description: `All ${roleName} guides are now available for download`,
+    // Create a proper PDF with actual content
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(20);
+    doc.text(`${roleName} Complete Guide`, 20, 30);
+    
+    // Add subtitle
+    doc.setFontSize(14);
+    doc.text('Pappaya School Management System', 20, 45);
+    
+    // Add content based on role
+    doc.setFontSize(12);
+    let yPosition = 65;
+    
+    const roleContent = getRoleContent(roleName);
+    roleContent.forEach((section, index) => {
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 30;
+      }
+      
+      // Section title
+      doc.setFontSize(14);
+      doc.text(section.title, 20, yPosition);
+      yPosition += 15;
+      
+      // Section content
+      doc.setFontSize(10);
+      const lines = doc.splitTextToSize(section.content, 170);
+      doc.text(lines, 20, yPosition);
+      yPosition += lines.length * 5 + 10;
     });
     
-    // Create a mock PDF download
-    const link = document.createElement('a');
-    link.href = 'data:application/pdf;base64,JVBERi0xLjMKJcTl8uXrp/Og0MTGCjQgMCBvYmoKPDwKL1R5cGUgL0NhdGFsb2cKL091dGxpbmVzIDIgMCBSCi9QYWdlcyAzIDAgUgo+PgplbmRvYmoKMiAwIG9iago8PAovVHlwZSAvT3V0bGluZXMKL0NvdW50IDAKPD4KZW5kb2JqCjMgMCBvYmoKPDwKL1R5cGUgL1BhZ2VzCi9Db3VudCAxCi9LaWRzIFs0IDAgUl0KPj4KZW5kb2JqCjQgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAzIDAgUgovUmVzb3VyY2VzIDw8Ci9Gb250IDw8Ci9GMSA5IDAgUgo+Pgo+PgovTWVkaWFCb3ggWzAgMCA2MTIgNzkyXQovQ29udGVudHMgNSAwIFIKPj4KZW5kb2JqCjUgMCBvYmoKPDwKL0xlbmd0aCA0NAo+PgpzdHJlYW0KQlQKL0YxIDEyIFRmCjcyIDcyMCBUZAooSGVsbG8gV29ybGQhKSBUagpFVApzdHJlYW0KZW5kb2JqCjkgMCBvYmoKPDwKL1R5cGUgL0ZvbnQKL1N1YnR5cGUgL1R5cGUxCi9OYW1lIC9GMQovQmFzZUZvbnQgL0hlbHZldGljYQovRW5jb2RpbmcgL01hY1JvbWFuRW5jb2RpbmcKPj4KZW5kb2JqCnhyZWYKMCAxMAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMDkgMDAwMDAgbiAKMDAwMDAwMDA3NCAwMDAwMCBuIAowMDAwMDAwMTIwIDAwMDAwIG4gCjAwMDAwMDAxNzggMDAwMDAgbiAKMDAwMDAwMDQ0NyAwMDAwMCBuIAowMDAwMDAwNTQzIDAwMDAwIG4gCjAwMDAwMDA2MjIgMDAwMDAgbiAKMDAwMDAwMDY1NCAwMDAwMCBuIAowMDAwMDAwNzI4IDAwMDAwIG4gCnRyYWlsZXIKPDwKL1NpemUgMTAKL1Jvb3QgMSAwIFIKPj4Kc3RhcnR4cmVmCjgzNgolJUVPRg==';
-    link.download = `${roleName.toLowerCase().replace(/\s+/g, '-')}-complete-guide.pdf`;
-    link.click();
+    // Save the PDF
+    doc.save(`${roleName.toLowerCase().replace(/\s+/g, '-')}-complete-guide.pdf`);
+    
+    toast({
+      title: "Guide Downloaded",
+      description: `Complete ${roleName} guide has been downloaded as PDF`,
+    });
+  };
+
+  const getRoleContent = (roleName: string) => {
+    const content = {
+      "School Administrators": [
+        {
+          title: "1. System Setup and Configuration",
+          content: "Learn how to configure your school's basic settings, academic years, terms, and organizational structure. This section covers initial system setup, school profile configuration, and essential administrative settings."
+        },
+        {
+          title: "2. User Management and Permissions",
+          content: "Comprehensive guide to creating user accounts, assigning roles, and managing permissions. Learn how to set up teachers, students, parents, and staff accounts with appropriate access levels."
+        },
+        {
+          title: "3. Academic Structure Setup",
+          content: "Configure classes, subjects, sections, and academic calendar. Set up grading systems, assessment periods, and curriculum framework to match your school's academic structure."
+        },
+        {
+          title: "4. Data Import and Migration",
+          content: "Step-by-step instructions for importing existing student data, staff records, and academic information from other systems. Includes data validation and cleanup procedures."
+        },
+        {
+          title: "5. Reports and Analytics",
+          content: "Generate comprehensive reports for academic performance, attendance, financial data, and administrative analytics. Learn to create custom reports and automated report scheduling."
+        }
+      ],
+      "Teachers": [
+        {
+          title: "1. Getting Started with Teacher Portal",
+          content: "Navigate your teacher dashboard, understand the interface, and access key features. Learn how to customize your workspace and set up your teaching preferences."
+        },
+        {
+          title: "2. Lesson Planning and Curriculum",
+          content: "Create detailed lesson plans, map curriculum objectives, and track teaching progress. Use built-in templates and collaborate with other teachers on curriculum development."
+        },
+        {
+          title: "3. Attendance Management",
+          content: "Mark daily attendance, handle late arrivals and early departures, generate attendance reports, and communicate with parents about attendance issues."
+        },
+        {
+          title: "4. Assignment and Assessment",
+          content: "Create assignments, set due dates, collect submissions, provide feedback, and grade student work. Learn to use rubrics and automated grading features."
+        },
+        {
+          title: "5. Parent Communication",
+          content: "Send messages to parents, schedule parent-teacher conferences, share student progress updates, and maintain professional communication records."
+        }
+      ],
+      "Students": [
+        {
+          title: "1. Accessing Your Student Portal",
+          content: "Log in to your student account, navigate the dashboard, and understand available features. Learn how to update your profile and manage account settings."
+        },
+        {
+          title: "2. Viewing Academic Information",
+          content: "Check your grades, view report cards, track academic progress, and access curriculum information. Understand how to read your academic reports and transcripts."
+        },
+        {
+          title: "3. Assignment Submission",
+          content: "Submit assignments online, check due dates, track submission status, and view teacher feedback. Learn about different submission formats and requirements."
+        },
+        {
+          title: "4. Communication Tools",
+          content: "Message teachers, participate in class discussions, join study groups, and access announcements. Learn proper online communication etiquette."
+        },
+        {
+          title: "5. Resources and Support",
+          content: "Access digital textbooks, library resources, study materials, and help documentation. Learn how to get technical support and academic assistance."
+        }
+      ],
+      "Parents": [
+        {
+          title: "1. Parent Portal Setup",
+          content: "Create your parent account, link to your children's profiles, and configure notification preferences. Learn how to manage multiple children in one account."
+        },
+        {
+          title: "2. Monitoring Child's Progress",
+          content: "View grades, attendance records, behavior reports, and academic progress. Understand how to interpret report cards and assessment results."
+        },
+        {
+          title: "3. Communication with School",
+          content: "Message teachers and staff, respond to school communications, schedule conferences, and participate in school events. Learn about communication protocols."
+        },
+        {
+          title: "4. Fee Management",
+          content: "View fee statements, make online payments, track payment history, and set up automatic payments. Understand fee structures and payment policies."
+        },
+        {
+          title: "5. School Engagement",
+          content: "Access school calendar, register for events, volunteer for activities, and stay informed about school policies and announcements."
+        }
+      ]
+    };
+    
+    return content[roleName as keyof typeof content] || [];
   };
 
   const handleQuickStartDownload = (guide: any) => {
-    toast({
-      title: "Guide Downloaded",
-      description: `${guide.title} has been downloaded`,
+    // Create a proper PDF for quick start guides
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(18);
+    doc.text(guide.title, 20, 30);
+    
+    // Add subtitle
+    doc.setFontSize(12);
+    doc.text('Pappaya School Management System', 20, 45);
+    doc.text(`Duration: ${guide.duration}`, 20, 55);
+    
+    // Add content
+    doc.setFontSize(11);
+    const content = getQuickStartContent(guide.title);
+    let yPosition = 75;
+    
+    content.forEach((section) => {
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 30;
+      }
+      
+      // Section title
+      doc.setFontSize(13);
+      doc.text(section.title, 20, yPosition);
+      yPosition += 12;
+      
+      // Section content
+      doc.setFontSize(10);
+      const lines = doc.splitTextToSize(section.content, 170);
+      doc.text(lines, 20, yPosition);
+      yPosition += lines.length * 4 + 10;
     });
     
-    // Create a mock markdown download
-    const content = `# ${guide.title}\n\n${guide.description}\n\nThis comprehensive guide contains step-by-step instructions for ${guide.title.toLowerCase()}.\n\n## Getting Started\n\n1. System Overview\n2. Initial Setup\n3. Basic Operations\n4. Advanced Features\n5. Best Practices\n6. Troubleshooting\n\n## Support\n\nFor additional help, contact our support team or visit the help center.`;
-    const blob = new Blob([content], { type: 'text/markdown' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `${guide.title.toLowerCase().replace(/\s+/g, '-')}.md`;
-    link.click();
+    // Save the PDF
+    doc.save(`${guide.title.toLowerCase().replace(/\s+/g, '-')}.pdf`);
+    
+    toast({
+      title: "Guide Downloaded",
+      description: `${guide.title} has been downloaded as PDF`,
+    });
+  };
+
+  const getQuickStartContent = (title: string) => {
+    const content = {
+      "Getting Started with Pappaya": [
+        {
+          title: "Welcome to Pappaya",
+          content: "Pappaya is a comprehensive school management system designed to streamline all aspects of educational administration. This guide will help you get started quickly."
+        },
+        {
+          title: "System Requirements",
+          content: "Pappaya works on any modern web browser including Chrome, Firefox, Safari, and Edge. Ensure you have a stable internet connection for the best experience."
+        },
+        {
+          title: "First Login",
+          content: "Use the credentials provided by your system administrator. Change your password on first login for security. Complete your profile information to get started."
+        },
+        {
+          title: "Dashboard Overview",
+          content: "The dashboard provides an overview of all key metrics and quick access to frequently used features. Customize your dashboard widgets based on your role and preferences."
+        },
+        {
+          title: "Getting Help",
+          content: "Access help documentation, video tutorials, and live support through the help menu. Join training sessions for hands-on learning and best practices."
+        }
+      ],
+      "First Week Setup Checklist": [
+        {
+          title: "Day 1: System Configuration",
+          content: "Set up basic school information, academic year settings, and organizational structure. Configure user roles and permissions for different staff members."
+        },
+        {
+          title: "Day 2-3: User Accounts",
+          content: "Create user accounts for all staff, teachers, students, and parents. Send login credentials and conduct basic training sessions for key users."
+        },
+        {
+          title: "Day 4-5: Academic Setup",
+          content: "Configure classes, subjects, sections, and academic calendar. Set up grading systems and assessment periods to match your school's structure."
+        },
+        {
+          title: "Day 6-7: Data Import",
+          content: "Import existing student data, staff records, and historical academic information. Verify data accuracy and complete any missing information."
+        },
+        {
+          title: "Week 1 Review",
+          content: "Conduct system testing, user feedback collection, and address any initial issues. Plan for expanded rollout and advanced feature training."
+        }
+      ]
+    };
+    
+    return content[title as keyof typeof content] || [
+      {
+        title: "Guide Content",
+        content: `This is a comprehensive guide for ${title}. It contains detailed instructions and best practices to help you make the most of the Pappaya school management system.`
+      }
+    ];
   };
 
   const handleTrainingRequest = () => {
