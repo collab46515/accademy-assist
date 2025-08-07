@@ -12,9 +12,15 @@ import {
   Shield,
   Users,
   Activity,
-  Server
+  Server,
+  BookOpen,
+  Monitor,
+  School,
+  GraduationCap,
+  UserCheck
 } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { UserGuidesSection } from '@/components/admin/UserGuidesSection';
 
 export default function AdministrationPage() {
   const navigate = useNavigate();
@@ -46,6 +52,45 @@ export default function AdministrationPage() {
       stats: "8 data sets",
       color: "bg-purple-500",
       features: ["Academic Data", "Fee Structures", "HR Master Data", "System References"]
+    }
+  ];
+
+  const portalModules = [
+    {
+      title: "Teacher Portal",
+      description: "Dedicated workspace for teachers with lesson planning and grading tools",
+      icon: Users,
+      url: "/portals",
+      stats: "156 active teachers",
+      color: "bg-blue-500",
+      features: ["Lesson Planning", "Grade Management", "Attendance", "Parent Communication"]
+    },
+    {
+      title: "Student Portal",
+      description: "Student-focused interface for assignments, grades, and resources",
+      icon: GraduationCap,
+      url: "/portals",
+      stats: "2,840 active students",
+      color: "bg-green-500",
+      features: ["Assignment Submission", "Grade Viewing", "Schedule Access", "Resources"]
+    },
+    {
+      title: "Parent Portal",
+      description: "Parent engagement platform for monitoring child's progress",
+      icon: UserCheck,
+      url: "/portals",
+      stats: "1,920 parent accounts",
+      color: "bg-purple-500",
+      features: ["Progress Monitoring", "Communication", "Fee Payments", "Event Updates"]
+    },
+    {
+      title: "Management Portal",
+      description: "Executive dashboard for leadership team and administrators",
+      icon: Monitor,
+      url: "/portals",
+      stats: "24 management users",
+      color: "bg-orange-500",
+      features: ["Analytics Dashboard", "Strategic Reports", "Performance Metrics", "Decision Support"]
     }
   ];
 
@@ -127,6 +172,79 @@ export default function AdministrationPage() {
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        {/* Portals Section */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-primary to-primary-glow flex items-center justify-center">
+              <Monitor className="h-4 w-4 text-white" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold">Portal Access</h3>
+              <p className="text-muted-foreground">Role-based portals for different user types</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {portalModules.map((portal, index) => (
+              <Card 
+                key={index} 
+                className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
+                onClick={() => navigate(portal.url)}
+              >
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <div className={`h-10 w-10 rounded-lg ${portal.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                      <portal.icon className="h-5 w-5 text-white" />
+                    </div>
+                    <Badge variant="secondary" className="text-xs">{portal.stats}</Badge>
+                  </div>
+                  <CardTitle className="text-lg group-hover:text-primary transition-colors duration-300">
+                    {portal.title}
+                  </CardTitle>
+                  <CardDescription className="text-xs">{portal.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-2">
+                    <div className="space-y-1">
+                      {portal.features.slice(0, 3).map((feature, featureIndex) => (
+                        <div key={featureIndex} className="flex items-center gap-2">
+                          <div className="h-1 w-1 rounded-full bg-primary/60"></div>
+                          <span className="text-xs text-muted-foreground">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <Button 
+                      size="sm"
+                      className="w-full mt-3 bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(portal.url);
+                      }}
+                    >
+                      Open Portal
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* User Guides Section */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-primary to-primary-glow flex items-center justify-center">
+              <BookOpen className="h-4 w-4 text-white" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold">User Guides & Documentation</h3>
+              <p className="text-muted-foreground">Comprehensive training materials and help resources</p>
+            </div>
+          </div>
+
+          <UserGuidesSection />
         </div>
       </div>
     </div>
