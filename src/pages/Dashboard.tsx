@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AISchoolAssistant } from '@/components/shared/AISchoolAssistant';
+import { AISystemAdminAssistant } from '@/components/shared/AISystemAdminAssistant';
 import { 
   Search, 
   Users, 
@@ -28,7 +29,9 @@ import {
   TrendingUp,
   Bot,
   Sparkles,
-  MessageSquare
+  MessageSquare,
+  Settings,
+  Shield
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -37,6 +40,7 @@ export default function Dashboard() {
   const [selectedTeacher, setSelectedTeacher] = useState<any>(null);
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [showSystemAdmin, setShowSystemAdmin] = useState(false);
   
   const { students, loading: studentsLoading } = useStudentData();
   const { employees, loading: hrLoading } = useHRData();
@@ -1175,6 +1179,17 @@ export default function Dashboard() {
           queryType="dashboard"
           isOpen={showAIAssistant}
           onClose={() => setShowAIAssistant(false)}
+        />
+
+        {/* AI System Admin Assistant */}
+        <AISystemAdminAssistant
+          systemData={[...students, ...employees]} // Combined system data
+          userData={employees}
+          databaseStats={{ totalStudents: students.length, totalStaff: employees.length }}
+          context="School ERP System Administration"
+          queryType="system_admin"
+          isOpen={showSystemAdmin}
+          onClose={() => setShowSystemAdmin(false)}
         />
       </div>
     </div>

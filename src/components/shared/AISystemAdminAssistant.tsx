@@ -1,0 +1,297 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Settings, 
+  User, 
+  Send, 
+  Loader2, 
+  MessageSquare,
+  Shield,
+  Database,
+  Clock,
+  X,
+  AlertTriangle,
+  Users,
+  Server,
+  FileCheck
+} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+}
+
+interface AISystemAdminAssistantProps {
+  systemData?: any[];
+  userData?: any[];
+  databaseStats?: any;
+  context?: string;
+  queryType?: string;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function AISystemAdminAssistant({ 
+  systemData, 
+  userData, 
+  databaseStats, 
+  context, 
+  queryType, 
+  isOpen, 
+  onClose 
+}: AISystemAdminAssistantProps) {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      role: 'assistant',
+      content: 'System Administrator here. I\'m your technical backbone for managing this ERP system. Whether you need user account management, data corrections, bulk operations, system health checks, or any technical administration tasks - I\'m here to help. What system issue can I assist you with today?',
+      timestamp: new Date()
+    }
+  ]);
+  const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+
+  // Scroll to bottom when new messages are added
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSendMessage = async () => {
+    if (!inputValue.trim() || isLoading) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: inputValue,
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    setIsLoading(true);
+
+    try {
+      console.log('Sending system admin query:', inputValue);
+      
+      const { data, error } = await supabase.functions.invoke('ai-system-admin', {
+        body: {
+          message: inputValue,
+          systemData: systemData?.slice(0, 10),
+          userData: userData?.slice(0, 10),
+          databaseStats: databaseStats,
+          context: context || 'School ERP System Administration',
+          queryType: queryType || 'system_admin'
+        }
+      });
+
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(error.message || 'Failed to get AI response');
+      }
+
+      console.log('AI response received:', data);
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: data.response || 'I apologize, but I encountered an issue processing your request. Please try again.',
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to get AI response. Please try again.",
+        variant: "destructive",
+      });
+
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'I apologize, but I\'m having trouble connecting right now. Please try again in a moment.',
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const suggestedQuestions = [
+    "Check system health and performance",
+    "Review user account permissions",
+    "Identify data integrity issues",
+    "Show me bulk operation options",
+    "System security audit status",
+    "Database optimization recommendations",
+    "User management best practices",
+    "Backup and recovery procedures"
+  ];
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <Card className="w-full max-w-2xl max-h-[80vh] flex flex-col border shadow-2xl bg-background">
+        <CardHeader className="border-b bg-gradient-to-r from-destructive to-destructive/80 text-destructive-foreground flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                <Settings className="h-6 w-6" />
+              </div>
+              <div className="min-w-0">
+                <CardTitle className="text-white text-lg">System Administrator - AI Assistant</CardTitle>
+                <p className="text-white/80 text-sm">Technical system management and ERP administration</p>
+              </div>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onClose}
+              className="text-white hover:bg-white/20 flex-shrink-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardHeader>
+
+        <div className="flex flex-col flex-1 min-h-0">
+          {/* Chat Messages */}
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="space-y-4">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex gap-3 max-w-full ${
+                    message.role === 'user' ? 'justify-end' : 'justify-start'
+                  }`}
+                >
+                  {message.role === 'assistant' && (
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-destructive to-destructive/80 flex items-center justify-center flex-shrink-0 mt-1">
+                      <Settings className="h-4 w-4 text-white" />
+                    </div>
+                  )}
+                  
+                  <div
+                    className={`max-w-[75%] rounded-lg p-3 break-words ${
+                      message.role === 'user'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-foreground'
+                    }`}
+                  >
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                    <div className="flex items-center gap-1 mt-2">
+                      <Clock className="h-3 w-3 text-muted-foreground opacity-60" />
+                      <span className="text-xs text-muted-foreground opacity-60">
+                        {message.timestamp.toLocaleTimeString()}
+                      </span>
+                    </div>
+                  </div>
+
+                  {message.role === 'user' && (
+                    <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0 mt-1">
+                      <User className="h-4 w-4" />
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {isLoading && (
+                <div className="flex gap-3 justify-start max-w-full">
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-destructive to-destructive/80 flex items-center justify-center flex-shrink-0 mt-1">
+                    <Settings className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="bg-muted rounded-lg p-3 flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-sm text-muted-foreground">Processing system request...</span>
+                  </div>
+                </div>
+              )}
+              
+              {/* Invisible div for scroll target */}
+              <div ref={messagesEndRef} />
+            </div>
+          </div>
+
+          {/* Suggested Questions */}
+          {messages.length === 1 && (
+            <div className="p-4 border-t bg-muted/30 flex-shrink-0">
+              <p className="text-sm font-medium mb-3 flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                System administration options:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {suggestedQuestions.map((question, index) => (
+                  <Badge
+                    key={index}
+                    variant="outline"
+                    className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors text-xs py-1"
+                    onClick={() => setInputValue(question)}
+                  >
+                    {question}
+                  </Badge>
+                ))}
+              </div>
+              
+              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-center gap-2 text-yellow-800">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span className="text-xs font-medium">System Admin Notice</span>
+                </div>
+                <p className="text-xs text-yellow-700 mt-1">
+                  You have administrative privileges. Please review all system changes carefully and ensure backups are current.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Input Area */}
+          <div className="p-4 border-t bg-background flex-shrink-0">
+            <div className="flex gap-2">
+              <Input
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="System administration query - user management, data issues, system config..."
+                disabled={isLoading}
+                className="flex-1"
+              />
+              <Button 
+                onClick={handleSendMessage}
+                disabled={!inputValue.trim() || isLoading}
+                size="sm"
+                className="flex-shrink-0"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
