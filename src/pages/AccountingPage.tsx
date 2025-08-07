@@ -38,14 +38,17 @@ import {
   Globe,
   Save,
   Trash,
-  Settings
+  Settings,
+  Bot
 } from 'lucide-react';
+import { AIFeeAssistant } from '@/components/finance/AIFeeAssistant';
 
 export function AccountingPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
   const form = useForm();
   
   const {
@@ -453,6 +456,14 @@ export function AccountingPage() {
                       <Filter className="h-4 w-4 mr-2" />
                       Filter ({filteredStudents.length})
                     </Button>
+                    <Button 
+                      size="sm" 
+                      onClick={() => setShowAIAssistant(true)}
+                      className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary"
+                    >
+                      <Bot className="h-4 w-4 mr-2" />
+                      AI Assistant
+                    </Button>
                   </div>
                 </div>
               </CardHeader>
@@ -525,6 +536,14 @@ export function AccountingPage() {
                 )}
               </CardContent>
             </Card>
+
+            {/* AI Assistant Component */}
+            <AIFeeAssistant 
+              studentData={filteredStudents}
+              feeData={mockStudents}
+              isOpen={showAIAssistant}
+              onClose={() => setShowAIAssistant(false)}
+            />
           </div>
         )}
 
