@@ -664,62 +664,185 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Recent Activity & Alerts */}
-        <div className="grid md:grid-cols-3 gap-6">
-          <Card>
+        {/* Professional Analytics Section */}
+        <div className="grid md:grid-cols-4 gap-6">
+          {/* Recent Alerts - Enhanced */}
+          <Card className="md:col-span-1">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5" />
-                Recent Alerts
+                <AlertCircle className="h-5 w-5 text-red-500" />
+                Priority Alerts
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-start space-x-3">
+                <div className="flex items-start space-x-3 p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
                   <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
                   <div>
-                    <p className="font-medium text-sm">Fee Payment Overdue</p>
-                    <p className="text-xs text-muted-foreground">5 students have overdue payments</p>
+                    <p className="font-medium text-sm text-red-800">Critical: Fee Payment Overdue</p>
+                    <p className="text-xs text-red-600">5 students have payments overdue &gt;30 days</p>
+                    <Badge variant="destructive" className="mt-1 text-xs">High Priority</Badge>
                   </div>
                 </div>
-                <div className="flex items-start space-x-3">
+                <div className="flex items-start space-x-3 p-3 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
                   <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
                   <div>
-                    <p className="font-medium text-sm">Low Attendance</p>
-                    <p className="text-xs text-muted-foreground">3 students below 80% this month</p>
+                    <p className="font-medium text-sm text-yellow-800">Low Attendance Warning</p>
+                    <p className="text-xs text-yellow-600">3 students below 80% this month</p>
+                    <Badge variant="secondary" className="mt-1 text-xs">Medium</Badge>
                   </div>
                 </div>
-                <div className="flex items-start space-x-3">
+                <div className="flex items-start space-x-3 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
                   <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
                   <div>
-                    <p className="font-medium text-sm">Leave Requests</p>
-                    <p className="text-xs text-muted-foreground">2 pending teacher leave requests</p>
+                    <p className="font-medium text-sm text-blue-800">Pending Approvals</p>
+                    <p className="text-xs text-blue-600">2 leave requests + 4 course changes</p>
+                    <Badge variant="outline" className="mt-1 text-xs">Action Required</Badge>
                   </div>
+                </div>
+                <div className="text-center pt-2">
+                  <Button variant="outline" size="sm" className="w-full">
+                    View All Alerts
+                  </Button>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          {/* Today's Schedule - Enhanced */}
+          <Card className="md:col-span-1">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
+                <Calendar className="h-5 w-5 text-blue-500" />
                 Today's Schedule
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Morning Assembly</span>
-                  <span className="text-xs text-muted-foreground">8:30 AM</span>
+                <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+                  <div>
+                    <span className="text-sm font-medium text-blue-800">Morning Assembly</span>
+                    <p className="text-xs text-blue-600">Main Hall - All Years</p>
+                  </div>
+                  <span className="text-xs text-blue-700 font-mono bg-blue-200 px-2 py-1 rounded">8:30 AM</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Staff Meeting</span>
-                  <span className="text-xs text-muted-foreground">3:30 PM</span>
+                <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
+                  <div>
+                    <span className="text-sm font-medium text-green-800">Staff Meeting</span>
+                    <p className="text-xs text-green-600">Conference Room A</p>
+                  </div>
+                  <span className="text-xs text-green-700 font-mono bg-green-200 px-2 py-1 rounded">3:30 PM</span>
                 </div>
+                <div className="flex justify-between items-center p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg">
+                  <div>
+                    <span className="text-sm font-medium text-purple-800">Parent Evening</span>
+                    <p className="text-xs text-purple-600">Year 11 Parents</p>
+                  </div>
+                  <span className="text-xs text-purple-700 font-mono bg-purple-200 px-2 py-1 rounded">6:00 PM</span>
+                </div>
+                <div className="text-center pt-2">
+                  <Button variant="outline" size="sm" className="w-full">
+                    View Full Calendar
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Financial Dashboard - Enhanced */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-green-500" />
+                Financial Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-green-800">Today's Collections</span>
+                      <TrendingUp className="h-4 w-4 text-green-600" />
+                    </div>
+                    <p className="text-2xl font-bold text-green-700">£23,450</p>
+                    <p className="text-xs text-green-600">+8.5% vs yesterday</p>
+                  </div>
+                  <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-blue-800">This Month</span>
+                      <Calendar className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <p className="text-2xl font-bold text-blue-700">£125,890</p>
+                    <p className="text-xs text-blue-600">78% of monthly target</p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="p-4 bg-gradient-to-r from-red-50 to-red-100 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-red-800">Outstanding</span>
+                      <AlertCircle className="h-4 w-4 text-red-600" />
+                    </div>
+                    <p className="text-2xl font-bold text-red-700">£45,230</p>
+                    <p className="text-xs text-red-600">32 students affected</p>
+                  </div>
+                  <div className="p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-purple-800">Annual Target</span>
+                      <TrendingUp className="h-4 w-4 text-purple-600" />
+                    </div>
+                    <p className="text-2xl font-bold text-purple-700">82%</p>
+                    <p className="text-xs text-purple-600">£1.2M of £1.46M target</p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 pt-4 border-t">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm">Parent Evening</span>
-                  <span className="text-xs text-muted-foreground">6:00 PM</span>
+                  <Button variant="outline" size="sm">Detailed Report</Button>
+                  <Button variant="outline" size="sm">Export Data</Button>
+                  <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                    Process Payments
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Academic Performance & Analytics */}
+        <div className="grid md:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-blue-500" />
+                Academic Performance
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-green-800">Overall GPA</span>
+                    <Badge variant="default" className="bg-green-600">Excellent</Badge>
+                  </div>
+                  <p className="text-xl font-bold text-green-700">3.74</p>
+                  <p className="text-xs text-green-600">+0.12 vs last term</p>
+                </div>
+                <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-blue-800">Pass Rate</span>
+                    <Badge variant="default" className="bg-blue-600">Strong</Badge>
+                  </div>
+                  <p className="text-xl font-bold text-blue-700">94.2%</p>
+                  <p className="text-xs text-blue-600">Above national average</p>
+                </div>
+                <div className="p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-purple-800">At Risk Students</span>
+                    <Badge variant="secondary">Monitor</Badge>
+                  </div>
+                  <p className="text-xl font-bold text-purple-700">8</p>
+                  <p className="text-xs text-purple-600">Intervention required</p>
                 </div>
               </div>
             </CardContent>
@@ -728,23 +851,155 @@ export default function Dashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                Financial Summary
+                <Users className="h-5 w-5 text-purple-500" />
+                Student Welfare
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-blue-800">Attendance Rate</span>
+                    <UserCheck className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <p className="text-xl font-bold text-blue-700">96.8%</p>
+                  <p className="text-xs text-blue-600">Above target (95%)</p>
+                </div>
+                <div className="p-3 bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-yellow-800">Behavioral Incidents</span>
+                    <Shield className="h-4 w-4 text-yellow-600" />
+                  </div>
+                  <p className="text-xl font-bold text-yellow-700">3</p>
+                  <p className="text-xs text-yellow-600">This week (resolved)</p>
+                </div>
+                <div className="p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-green-800">Support Cases</span>
+                    <MessageSquare className="h-4 w-4 text-green-600" />
+                  </div>
+                  <p className="text-xl font-bold text-green-700">12</p>
+                  <p className="text-xs text-green-600">Active support plans</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bot className="h-5 w-5 text-purple-500" />
+                AI Insights
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border-l-4 border-purple-500">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Sparkles className="h-4 w-4 text-purple-600" />
+                    <span className="text-sm font-medium text-purple-800">Prediction</span>
+                  </div>
+                  <p className="text-xs text-purple-700">
+                    Based on current trends, end-of-term GPA projected to reach 3.82 (+0.08)
+                  </p>
+                </div>
+                <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border-l-4 border-blue-500">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-800">Recommendation</span>
+                  </div>
+                  <p className="text-xs text-blue-700">
+                    Consider additional Math support for Year 9 - performance dip detected
+                  </p>
+                </div>
+                <div className="p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border-l-4 border-green-500">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm font-medium text-green-800">Opportunity</span>
+                  </div>
+                  <p className="text-xs text-green-700">
+                    15 students showing excellence potential - consider advanced programs
+                  </p>
+                </div>
+                <Button variant="outline" size="sm" className="w-full mt-4">
+                  <Bot className="h-4 w-4 mr-2" />
+                  View AI Dashboard
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions & System Health */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-gray-500" />
+                Quick Actions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3">
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <UserCheck className="h-4 w-4" />
+                  Mark Attendance
+                </Button>
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  Process Fees
+                </Button>
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  Send Notice
+                </Button>
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Schedule Event
+                </Button>
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  New Student
+                </Button>
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <GraduationCap className="h-4 w-4" />
+                  Staff Report
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-green-500" />
+                System Health
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm">Today's Collections</span>
-                  <span className="font-medium text-green-600">£23,450</span>
+                  <span className="text-sm">Server Status</span>
+                  <Badge variant="default" className="bg-green-600">Online</Badge>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm">This Month</span>
-                  <span className="font-medium">£125,890</span>
+                  <span className="text-sm">Database Performance</span>
+                  <Badge variant="default" className="bg-green-600">Optimal</Badge>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm">Outstanding</span>
-                  <span className="font-medium text-red-600">£45,230</span>
+                  <span className="text-sm">AI Services</span>
+                  <Badge variant="default" className="bg-green-600">Active</Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Backup Status</span>
+                  <Badge variant="default" className="bg-blue-600">Daily</Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Security Scan</span>
+                  <Badge variant="default" className="bg-green-600">Clean</Badge>
+                </div>
+                <div className="pt-2 border-t">
+                  <p className="text-xs text-muted-foreground">Last updated: 2 minutes ago</p>
                 </div>
               </div>
             </CardContent>
