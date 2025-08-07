@@ -1,8 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
 import { 
   BookOpen, 
   Download, 
@@ -11,10 +13,66 @@ import {
   GraduationCap,
   Settings,
   Video,
-  Star
+  Star,
+  ExternalLink
 } from 'lucide-react';
 
 export function UserGuidesSection() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleRoleGuideClick = (guide: string, roleName: string) => {
+    toast({
+      title: "Guide Available",
+      description: `${guide} documentation is ready to view`,
+    });
+    
+    // Navigate to appropriate section based on role
+    if (roleName === "School Administrators") {
+      navigate("/admin-management");
+    } else if (roleName === "Teachers") {
+      navigate("/portals");
+    } else if (roleName === "Students") {
+      navigate("/portals");
+    } else if (roleName === "Parents") {
+      navigate("/portals");
+    }
+  };
+
+  const handleViewAllGuides = (roleName: string) => {
+    toast({
+      title: "Complete Guide Set",
+      description: `All ${roleName} guides are now available for download`,
+    });
+    
+    // Create a mock PDF download
+    const link = document.createElement('a');
+    link.href = 'data:application/pdf;base64,JVBERi0xLjMKJcTl8uXrp/Og0MTGCjQgMCBvYmoKPDwKL1R5cGUgL0NhdGFsb2cKL091dGxpbmVzIDIgMCBSCi9QYWdlcyAzIDAgUgo+PgplbmRvYmoKMiAwIG9iago8PAovVHlwZSAvT3V0bGluZXMKL0NvdW50IDAKPD4KZW5kb2JqCjMgMCBvYmoKPDwKL1R5cGUgL1BhZ2VzCi9Db3VudCAxCi9LaWRzIFs0IDAgUl0KPj4KZW5kb2JqCjQgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAzIDAgUgovUmVzb3VyY2VzIDw8Ci9Gb250IDw8Ci9GMSA5IDAgUgo+Pgo+PgovTWVkaWFCb3ggWzAgMCA2MTIgNzkyXQovQ29udGVudHMgNSAwIFIKPj4KZW5kb2JqCjUgMCBvYmoKPDwKL0xlbmd0aCA0NAo+PgpzdHJlYW0KQlQKL0YxIDEyIFRmCjcyIDcyMCBUZAooSGVsbG8gV29ybGQhKSBUagpFVApzdHJlYW0KZW5kb2JqCjkgMCBvYmoKPDwKL1R5cGUgL0ZvbnQKL1N1YnR5cGUgL1R5cGUxCi9OYW1lIC9GMQovQmFzZUZvbnQgL0hlbHZldGljYQovRW5jb2RpbmcgL01hY1JvbWFuRW5jb2RpbmcKPj4KZW5kb2JqCnhyZWYKMCAxMAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMDkgMDAwMDAgbiAKMDAwMDAwMDA3NCAwMDAwMCBuIAowMDAwMDAwMTIwIDAwMDAwIG4gCjAwMDAwMDAxNzggMDAwMDAgbiAKMDAwMDAwMDQ0NyAwMDAwMCBuIAowMDAwMDAwNTQzIDAwMDAwIG4gCjAwMDAwMDA2MjIgMDAwMDAgbiAKMDAwMDAwMDY1NCAwMDAwMCBuIAowMDAwMDAwNzI4IDAwMDAwIG4gCnRyYWlsZXIKPDwKL1NpemUgMTAKL1Jvb3QgMSAwIFIKPj4Kc3RhcnR4cmVmCjgzNgolJUVPRg==';
+    link.download = `${roleName.toLowerCase().replace(/\s+/g, '-')}-complete-guide.pdf`;
+    link.click();
+  };
+
+  const handleQuickStartDownload = (guide: any) => {
+    toast({
+      title: "Guide Downloaded",
+      description: `${guide.title} has been downloaded`,
+    });
+    
+    // Create a mock markdown download
+    const content = `# ${guide.title}\n\n${guide.description}\n\nThis comprehensive guide contains step-by-step instructions for ${guide.title.toLowerCase()}.\n\n## Getting Started\n\n1. System Overview\n2. Initial Setup\n3. Basic Operations\n4. Advanced Features\n5. Best Practices\n6. Troubleshooting\n\n## Support\n\nFor additional help, contact our support team or visit the help center.`;
+    const blob = new Blob([content], { type: 'text/markdown' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${guide.title.toLowerCase().replace(/\s+/g, '-')}.md`;
+    link.click();
+  };
+
+  const handleTrainingRequest = () => {
+    toast({
+      title: "Training Request Submitted",
+      description: "Our team will contact you within 24 hours to schedule your training session",
+    });
+  };
   const userRoles = [
     {
       name: "School Administrators",
@@ -134,6 +192,7 @@ export function UserGuidesSection() {
                       <div 
                         key={guideIndex} 
                         className="flex items-center gap-2 p-2 hover:bg-muted/50 rounded cursor-pointer transition-colors"
+                        onClick={() => handleRoleGuideClick(guide, role.name)}
                       >
                         <BookOpen className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">{guide}</span>
@@ -141,7 +200,11 @@ export function UserGuidesSection() {
                       </div>
                     ))}
                   </div>
-                  <Button variant="outline" className="w-full">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => handleViewAllGuides(role.name)}
+                  >
                     <FileText className="mr-2 h-4 w-4" />
                     View All Guides
                   </Button>
@@ -171,7 +234,10 @@ export function UserGuidesSection() {
                     <BookOpen className="h-4 w-4" />
                     <span>{guide.duration}</span>
                   </div>
-                  <Button className="w-full">
+                  <Button 
+                    className="w-full"
+                    onClick={() => handleQuickStartDownload(guide)}
+                  >
                     <Download className="mr-2 h-4 w-4" />
                     Download Guide
                   </Button>
@@ -188,7 +254,10 @@ export function UserGuidesSection() {
                   Our training specialists can provide customized onboarding sessions for your team. 
                   Perfect for schools transitioning from other systems.
                 </p>
-                <Button size="lg">
+                <Button 
+                  size="lg"
+                  onClick={handleTrainingRequest}
+                >
                   <Video className="mr-2 h-4 w-4" />
                   Schedule Training Session
                 </Button>
