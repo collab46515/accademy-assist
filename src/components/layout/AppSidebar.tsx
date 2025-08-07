@@ -101,6 +101,7 @@ const erpModules = [
       { title: "Attendance Tracking", url: "/attendance", icon: CheckSquare },
       { title: "Library Services", url: "/library", icon: Library },
       { title: "Transport Management", url: "/transport", icon: Truck },
+      { title: "Behavior Tracking", url: "/behavior-tracking", icon: Target },
       { title: "Student Welfare", url: "/student-welfare", icon: Heart },
       { title: "Activities & Events", url: "/activities", icon: Calendar },
       { title: "Communication", url: "/communication", icon: MessageSquare },
