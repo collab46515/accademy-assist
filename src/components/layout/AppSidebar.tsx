@@ -327,7 +327,7 @@ export function AppSidebar() {
           {state !== "collapsed" && (
             <div className="flex flex-col">
               <span className="text-base font-bold">Pappaya AI Suite</span>
-              <span className="text-sm text-muted-foreground">{currentModule}</span>
+              <span className="text-sm text-muted-foreground font-bold">{currentModule}</span>
             </div>
           )}
         </div>
