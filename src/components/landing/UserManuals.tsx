@@ -76,11 +76,17 @@ export function UserManuals({ modules }: UserManualsProps) {
     }
   };
 
-  const handleVideoTutorial = (videoTitle: string) => {
-    toast({
-      title: "Video Tutorial",
-      description: `${videoTitle} tutorial would open here. External video library integration available.`,
-    });
+  const handleVideoTutorial = (videoTitle: string, videoId?: string) => {
+    if (videoId) {
+      // Open YouTube video in a new tab
+      window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
+    } else {
+      // For demo purposes, show a message that video content would be available
+      toast({
+        title: "Video Tutorial Available",
+        description: `${videoTitle} - Professional video content available with full platform implementation.`,
+      });
+    }
   };
 
   const handleTrainingRequest = () => {
@@ -167,7 +173,8 @@ export function UserManuals({ modules }: UserManualsProps) {
       title: "Complete System Overview",
       duration: "15 minutes",
       description: "Comprehensive walkthrough of all major features",
-      thumbnail: "overview"
+      thumbnail: "overview",
+      videoId: "dQw4w9WgXcQ" // Demo YouTube video ID
     },
     {
       title: "Student Management Deep Dive",
@@ -422,7 +429,7 @@ export function UserManuals({ modules }: UserManualsProps) {
                   <CardContent className="p-0">
                     <div 
                       className="aspect-video bg-gradient-to-br from-primary/10 to-secondary/10 rounded-t-lg flex items-center justify-center relative group cursor-pointer"
-                      onClick={() => handleVideoTutorial(video.title)}
+                      onClick={() => handleVideoTutorial(video.title, video.videoId)}
                     >
                       <PlayCircle className="h-16 w-16 text-primary group-hover:scale-110 transition-transform" />
                       <Badge className="absolute top-2 right-2">{video.duration}</Badge>
@@ -434,7 +441,7 @@ export function UserManuals({ modules }: UserManualsProps) {
                       </div>
                       <Button 
                         className="w-full"
-                        onClick={() => handleVideoTutorial(video.title)}
+                        onClick={() => handleVideoTutorial(video.title, video.videoId)}
                       >
                         <PlayCircle className="mr-2 h-4 w-4" />
                         Watch Tutorial
@@ -451,8 +458,8 @@ export function UserManuals({ modules }: UserManualsProps) {
                 variant="outline"
                 onClick={() => {
                   toast({
-                    title: "Video Library",
-                    description: "Complete video tutorial library with 50+ training videos",
+                    title: "Video Library Coming Soon",
+                    description: "Complete video tutorial library with 50+ professional training videos will be available with full implementation.",
                   });
                 }}
               >
