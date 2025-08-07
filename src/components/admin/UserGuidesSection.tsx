@@ -41,26 +41,52 @@ export function UserGuidesSection() {
   };
 
   const handleViewAllGuides = (roleName: string) => {
-    // Create a proper PDF with actual content
+    // Create a proper PDF with actual content and logo
     const doc = new jsPDF();
+    
+    // Add logo (we'll use a placeholder since we can't easily load external images in jsPDF without additional setup)
+    // For now, we'll create a branded header
+    doc.setFillColor(59, 130, 246); // Primary blue color
+    doc.rect(0, 0, 210, 25, 'F'); // Header background
+    
+    // Add school name/logo text in header
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(16);
+    doc.text('PAPPAYA', 20, 15);
+    doc.setFontSize(10);
+    doc.text('School Management System', 20, 20);
+    
+    // Reset text color for content
+    doc.setTextColor(0, 0, 0);
     
     // Add title
     doc.setFontSize(20);
-    doc.text(`${roleName} Complete Guide`, 20, 30);
+    doc.text(`${roleName} Complete Guide`, 20, 45);
     
-    // Add subtitle
-    doc.setFontSize(14);
-    doc.text('Pappaya School Management System', 20, 45);
+    // Add subtitle with date
+    doc.setFontSize(12);
+    doc.text('Comprehensive User Documentation', 20, 58);
+    doc.setFontSize(10);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 68);
     
     // Add content based on role
     doc.setFontSize(12);
-    let yPosition = 65;
+    let yPosition = 85;
     
     const roleContent = getRoleContent(roleName);
     roleContent.forEach((section, index) => {
-      if (yPosition > 250) {
+      if (yPosition > 270) {
         doc.addPage();
-        yPosition = 30;
+        // Add header to new page
+        doc.setFillColor(59, 130, 246);
+        doc.rect(0, 0, 210, 25, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(16);
+        doc.text('PAPPAYA', 20, 15);
+        doc.setFontSize(10);
+        doc.text('School Management System', 20, 20);
+        doc.setTextColor(0, 0, 0);
+        yPosition = 40;
       }
       
       // Section title
@@ -180,27 +206,52 @@ export function UserGuidesSection() {
   };
 
   const handleQuickStartDownload = (guide: any) => {
-    // Create a proper PDF for quick start guides
+    // Create a proper PDF for quick start guides with branding
     const doc = new jsPDF();
+    
+    // Add branded header
+    doc.setFillColor(59, 130, 246); // Primary blue color
+    doc.rect(0, 0, 210, 25, 'F'); // Header background
+    
+    // Add school name/logo text in header
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(16);
+    doc.text('PAPPAYA', 20, 15);
+    doc.setFontSize(10);
+    doc.text('School Management System', 20, 20);
+    
+    // Reset text color for content
+    doc.setTextColor(0, 0, 0);
     
     // Add title
     doc.setFontSize(18);
-    doc.text(guide.title, 20, 30);
+    doc.text(guide.title, 20, 45);
     
-    // Add subtitle
+    // Add metadata
     doc.setFontSize(12);
-    doc.text('Pappaya School Management System', 20, 45);
-    doc.text(`Duration: ${guide.duration}`, 20, 55);
+    doc.text('Quick Start Guide', 20, 58);
+    doc.setFontSize(10);
+    doc.text(`Duration: ${guide.duration}`, 20, 68);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 75);
     
     // Add content
     doc.setFontSize(11);
     const content = getQuickStartContent(guide.title);
-    let yPosition = 75;
+    let yPosition = 90;
     
     content.forEach((section) => {
-      if (yPosition > 250) {
+      if (yPosition > 270) {
         doc.addPage();
-        yPosition = 30;
+        // Add header to new page
+        doc.setFillColor(59, 130, 246);
+        doc.rect(0, 0, 210, 25, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(16);
+        doc.text('PAPPAYA', 20, 15);
+        doc.setFontSize(10);
+        doc.text('School Management System', 20, 20);
+        doc.setTextColor(0, 0, 0);
+        yPosition = 40;
       }
       
       // Section title
