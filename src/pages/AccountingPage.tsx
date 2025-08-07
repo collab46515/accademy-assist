@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useForm } from 'react-hook-form';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAccountingData } from '@/hooks/useAccountingData';
 import { 
   DollarSign, 
@@ -43,6 +43,7 @@ import {
 
 export function AccountingPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const form = useForm();
   
@@ -178,7 +179,7 @@ export function AccountingPage() {
               <Button 
                 variant="outline" 
                 className="h-20 flex-col gap-2 hover:bg-primary hover:text-primary-foreground transition-all"
-                onClick={() => window.location.href = '/accounting/student-fees'}
+                onClick={() => navigate('/accounting/student-fees')}
               >
                 <Users className="h-6 w-6" />
                 <span className="text-xs">Student Fees</span>
@@ -186,7 +187,7 @@ export function AccountingPage() {
               <Button 
                 variant="outline" 
                 className="h-20 flex-col gap-2 hover:bg-primary hover:text-primary-foreground transition-all"
-                onClick={() => window.location.href = '/accounting/invoices'}
+                onClick={() => navigate('/accounting/invoices')}
               >
                 <FileText className="h-6 w-6" />
                 <span className="text-xs">Invoices</span>
@@ -194,7 +195,7 @@ export function AccountingPage() {
               <Button 
                 variant="outline" 
                 className="h-20 flex-col gap-2 hover:bg-primary hover:text-primary-foreground transition-all"
-                onClick={() => window.location.href = '/accounting/bills'}
+                onClick={() => navigate('/accounting/bills')}
               >
                 <Receipt className="h-6 w-6" />
                 <span className="text-xs">Bills</span>
@@ -202,7 +203,7 @@ export function AccountingPage() {
               <Button 
                 variant="outline" 
                 className="h-20 flex-col gap-2 hover:bg-primary hover:text-primary-foreground transition-all"
-                onClick={() => window.location.href = '/accounting/vendors'}
+                onClick={() => navigate('/accounting/vendors')}
               >
                 <Building2 className="h-6 w-6" />
                 <span className="text-xs">Vendors</span>
@@ -210,7 +211,7 @@ export function AccountingPage() {
               <Button 
                 variant="outline" 
                 className="h-20 flex-col gap-2 hover:bg-primary hover:text-primary-foreground transition-all"
-                onClick={() => window.location.href = '/accounting/purchase-orders'}
+                onClick={() => navigate('/accounting/purchase-orders')}
               >
                 <ShoppingCart className="h-6 w-6" />
                 <span className="text-xs">Purchase Orders</span>
@@ -218,7 +219,7 @@ export function AccountingPage() {
               <Button 
                 variant="outline" 
                 className="h-20 flex-col gap-2 hover:bg-primary hover:text-primary-foreground transition-all"
-                onClick={() => window.location.href = '/accounting/accounts'}
+                onClick={() => navigate('/accounting/accounts')}
               >
                 <PieChart className="h-6 w-6" />
                 <span className="text-xs">Chart of Accounts</span>
@@ -226,7 +227,7 @@ export function AccountingPage() {
               <Button 
                 variant="outline" 
                 className="h-20 flex-col gap-2 hover:bg-primary hover:text-primary-foreground transition-all"
-                onClick={() => window.location.href = '/accounting/budget'}
+                onClick={() => navigate('/accounting/budget')}
               >
                 <Target className="h-6 w-6" />
                 <span className="text-xs">Budget</span>
@@ -234,7 +235,7 @@ export function AccountingPage() {
               <Button 
                 variant="outline" 
                 className="h-20 flex-col gap-2 hover:bg-primary hover:text-primary-foreground transition-all"
-                onClick={() => window.location.href = '/accounting/reports'}
+                onClick={() => navigate('/accounting/reports')}
               >
                 <BarChart3 className="h-6 w-6" />
                 <span className="text-xs">Reports</span>
@@ -338,19 +339,19 @@ export function AccountingPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
-                    <Button variant="outline" className="h-20 flex-col gap-2">
+                    <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => navigate('/accounting/invoices')}>
                       <Send className="h-6 w-6" />
                       Send Invoice
                     </Button>
-                    <Button variant="outline" className="h-20 flex-col gap-2">
+                    <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => navigate('/school-management/fee-management')}>
                       <CreditCard className="h-6 w-6" />
                       Record Payment
                     </Button>
-                    <Button variant="outline" className="h-20 flex-col gap-2">
+                    <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => navigate('/accounting/purchase-orders')}>
                       <ShoppingCart className="h-6 w-6" />
                       Create PO
                     </Button>
-                    <Button variant="outline" className="h-20 flex-col gap-2">
+                    <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => navigate('/accounting/vendors')}>
                       <Building2 className="h-6 w-6" />
                       Add Vendor
                     </Button>
@@ -429,7 +430,7 @@ export function AccountingPage() {
                         className="pl-10 w-64"
                       />
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => console.log('Filter clicked with search term:', searchTerm)}>
                       <Filter className="h-4 w-4 mr-2" />
                       Filter
                     </Button>
