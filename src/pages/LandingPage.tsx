@@ -32,12 +32,12 @@ import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { EnhancedFooter } from "@/components/landing/EnhancedFooter";
 import { CallToActionSection } from "@/components/landing/CallToActionSection";
 import { SignInModal } from "@/components/auth/SignInModal";
-import { ScheduleDemoModal } from "@/components/landing/ScheduleDemoModal";
+import { ContactModal } from "@/components/landing/ContactModal";
 
 export default function LandingPage() {
   const [activeSection, setActiveSection] = useState("home");
   const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
-  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   const modules = [
     {
@@ -290,7 +290,7 @@ export default function LandingPage() {
             <TestimonialsSection />
             <CallToActionSection 
               onGetStarted={() => setIsSignInModalOpen(true)}
-              onScheduleDemo={() => setIsDemoModalOpen(true)}
+              onScheduleDemo={() => setIsContactModalOpen(true)}
             />
           </>
         )}
@@ -312,9 +312,9 @@ export default function LandingPage() {
         onClose={() => setIsSignInModalOpen(false)} 
       />
       
-      <ScheduleDemoModal
-        isOpen={isDemoModalOpen}
-        onClose={() => setIsDemoModalOpen(false)}
+      <ContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
       />
     </div>
   );

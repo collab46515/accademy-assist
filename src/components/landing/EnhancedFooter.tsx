@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { GraduationCap, Mail, Phone, MapPin } from "lucide-react";
+import { GraduationCap, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
@@ -117,26 +117,6 @@ export function EnhancedFooter() {
                   <div>{content.address.city}, {content.address.postalCode}</div>
                   <div>{content.address.country}</div>
                 </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <Mail className="h-5 w-5 text-primary flex-shrink-0" />
-                <a 
-                  href={`mailto:${content.contact.email}`}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  {content.contact.email}
-                </a>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <Phone className="h-5 w-5 text-primary flex-shrink-0" />
-                <a 
-                  href={`tel:${content.contact.phone.replace(/\s/g, '')}`}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  {content.contact.phone}
-                </a>
               </div>
             </div>
 
