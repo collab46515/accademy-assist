@@ -38,7 +38,7 @@ interface FooterContent {
 }
 
 const defaultFooterContent: FooterContent = {
-  companyName: "Pappaya",
+  companyName: "Pappaya Academy",
   description: "Comprehensive school management system for academic operations, student services, and administration. Transforming education through innovative technology solutions.",
   address: {
     street: "St Anns Hill Road",

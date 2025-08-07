@@ -61,7 +61,7 @@ export function CallToActionSection({ onGetStarted }: CallToActionSectionProps) 
             </h2>
             
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Join hundreds of schools already using Pappaya to streamline operations, 
+              Join hundreds of schools already using Pappaya Academy to streamline operations, 
               improve communication, and enhance the educational experience for everyone.
             </p>
           </div>

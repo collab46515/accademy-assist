@@ -31,7 +31,7 @@ interface FooterContent {
 }
 
 const defaultFooterContent: FooterContent = {
-  companyName: "Pappaya",
+  companyName: "Pappaya Academy",
   description: "Comprehensive school management system for academic operations, student services, and administration. Transforming education through innovative technology solutions.",
   address: {
     street: "St Anns Hill Road",
@@ -119,9 +119,7 @@ export function EnhancedFooter() {
           <div className="lg:col-span-2 space-y-6">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary rounded-lg">
-                  <GraduationCap className="h-6 w-6 text-primary-foreground" />
-                </div>
+                <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" className="h-8 w-8" />
                 <div>
                   <h3 className="text-xl font-bold">{content.companyName}</h3>
                   <p className="text-sm text-muted-foreground">School Management System</p>
