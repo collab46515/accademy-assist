@@ -138,9 +138,8 @@ export default function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" className="h-16 w-16" />
-              <span className="text-xl font-bold">Pappaya Academy</span>
+            <div className="flex items-center">
+              <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" className="h-80 w-80" />
             </div>
             
             <div className="hidden md:flex items-center gap-6">
