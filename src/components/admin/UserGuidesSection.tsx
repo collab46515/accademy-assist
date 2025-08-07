@@ -279,46 +279,72 @@ export function UserGuidesSection() {
     const content = {
       "Getting Started with Pappaya": [
         {
-          title: "Welcome to Pappaya",
-          content: "Pappaya is a comprehensive school management system designed to streamline all aspects of educational administration. This guide will help you get started quickly."
+          title: "📋 Pre-Setup Checklist",
+          content: "Before you begin:\n• Ensure stable internet connection\n• Have your admin credentials ready\n• Gather school basic information\n• Prepare staff and student lists\n• Review your current academic structure"
         },
         {
-          title: "System Requirements",
-          content: "Pappaya works on any modern web browser including Chrome, Firefox, Safari, and Edge. Ensure you have a stable internet connection for the best experience."
+          title: "🚀 Step 1: First Login & Profile Setup",
+          content: "WORKFLOW:\n1. Open your web browser and navigate to your Pappaya URL\n2. Enter your admin credentials (provided by your IT team)\n3. Complete the mandatory password change for security\n4. Fill in your personal profile information\n5. Set your timezone and language preferences\n\nExpected time: 10 minutes"
         },
         {
-          title: "First Login",
-          content: "Use the credentials provided by your system administrator. Change your password on first login for security. Complete your profile information to get started."
+          title: "🏫 Step 2: School Configuration",
+          content: "WORKFLOW:\n1. Navigate to Administration → School Settings\n2. Enter school name, address, and contact details\n3. Upload school logo and configure branding\n4. Set academic year dates and term structure\n5. Configure school holidays and working days\n6. Save and verify all settings\n\nExpected time: 20 minutes"
         },
         {
-          title: "Dashboard Overview",
-          content: "The dashboard provides an overview of all key metrics and quick access to frequently used features. Customize your dashboard widgets based on your role and preferences."
+          title: "👥 Step 3: User Management Setup",
+          content: "WORKFLOW:\n1. Go to Administration → User Management\n2. Create user roles (Admin, Teacher, Student, Parent)\n3. Set permissions for each role\n4. Create initial admin and teacher accounts\n5. Send login credentials to key staff members\n6. Test login with different user types\n\nExpected time: 30 minutes"
         },
         {
-          title: "Getting Help",
-          content: "Access help documentation, video tutorials, and live support through the help menu. Join training sessions for hands-on learning and best practices."
+          title: "📚 Step 4: Academic Structure",
+          content: "WORKFLOW:\n1. Navigate to Academics → Curriculum\n2. Create classes/grades (e.g., Grade 1, Grade 2, etc.)\n3. Add subjects for each class\n4. Create sections/divisions if needed\n5. Set up grading scales and assessment periods\n6. Configure academic calendar\n\nExpected time: 25 minutes"
+        },
+        {
+          title: "✅ Step 5: Verification & Testing",
+          content: "WORKFLOW:\n1. Test student enrollment process\n2. Create a sample class and subject\n3. Test teacher assignment to classes\n4. Verify parent portal access\n5. Check all notification systems\n6. Run a complete system backup\n\nExpected time: 15 minutes\n\nTotal Setup Time: Approximately 1.5-2 hours"
         }
       ],
       "First Week Setup Checklist": [
         {
-          title: "Day 1: System Configuration",
-          content: "Set up basic school information, academic year settings, and organizational structure. Configure user roles and permissions for different staff members."
+          title: "📅 Day 1: Foundation Setup",
+          content: "MORNING TASKS (9 AM - 12 PM):\n• Complete system configuration from Quick Start Guide\n• Set up basic user accounts for key staff\n• Configure school branding and basic settings\n\nAFTERNOON TASKS (1 PM - 5 PM):\n• Import existing student data (if available)\n• Create teacher accounts and assign permissions\n• Test basic functionality with sample data\n\nEVENING REVIEW:\n• Document any issues encountered\n• Prepare materials for tomorrow's staff training"
         },
         {
-          title: "Day 2-3: User Accounts",
-          content: "Create user accounts for all staff, teachers, students, and parents. Send login credentials and conduct basic training sessions for key users."
+          title: "📅 Day 2-3: Staff Onboarding",
+          content: "DAY 2 WORKFLOW:\n1. Conduct teacher orientation session (2 hours)\n2. Hands-on training for core features\n3. Create individual teacher accounts\n4. Test lesson planning and gradebook features\n\nDAY 3 WORKFLOW:\n1. Administrative staff training (2 hours)\n2. Student enrollment process training\n3. Fee management system overview\n4. Parent communication tools setup\n\nDELIVERABLES:\n• All teachers can log in and navigate\n• Basic lesson plans created\n• Student enrollment tested"
         },
         {
-          title: "Day 4-5: Academic Setup",
-          content: "Configure classes, subjects, sections, and academic calendar. Set up grading systems and assessment periods to match your school's structure."
+          title: "📅 Day 4-5: Data Migration & Setup",
+          content: "DAY 4 WORKFLOW:\n1. Import historical student records\n2. Set up current academic year data\n3. Configure fee structures and payment plans\n4. Test attendance marking system\n\nDAY 5 WORKFLOW:\n1. Parent account creation and portal setup\n2. Communication system configuration\n3. Library and transport module setup (if applicable)\n4. Generate first set of reports\n\nVERIFICATION CHECKLIST:\n• All student data correctly imported\n• Parents can access portals\n• Fee collection system operational"
         },
         {
-          title: "Day 6-7: Data Import",
-          content: "Import existing student data, staff records, and historical academic information. Verify data accuracy and complete any missing information."
+          title: "📅 Day 6-7: Go-Live Preparation",
+          content: "DAY 6 WORKFLOW:\n1. Final system testing with real data\n2. User acceptance testing by key staff\n3. Performance and security checks\n4. Backup and disaster recovery testing\n\nDAY 7 WORKFLOW:\n1. Staff refresher training session\n2. Parent orientation and portal demo\n3. Student account setup and testing\n4. Go-live decision and announcement\n\nGO-LIVE CHECKLIST:\n• All critical functions tested\n• Support procedures documented\n• Emergency contacts established\n• Communication plan activated"
         },
         {
-          title: "Week 1 Review",
-          content: "Conduct system testing, user feedback collection, and address any initial issues. Plan for expanded rollout and advanced feature training."
+          title: "🎯 Week 1 Success Metrics",
+          content: "TECHNICAL METRICS:\n• 100% user login success rate\n• All core modules functional\n• Data integrity verified\n• System performance acceptable\n\nUSER ADOPTION METRICS:\n• 80% of teachers actively using system\n• 60% of parents registered and active\n• 90% of students able to access portal\n• Support tickets under 10 per day\n\nNEXT STEPS:\n• Plan Week 2 advanced feature rollout\n• Schedule user feedback sessions\n• Document lessons learned\n• Prepare for full production launch"
+        }
+      ],
+      "User Onboarding Best Practices": [
+        {
+          title: "🎯 Onboarding Strategy Overview",
+          content: "PHASED APPROACH:\nPhase 1: Core Admin Team (Week 1)\nPhase 2: Teaching Staff (Week 2)\nPhase 3: Students & Parents (Week 3)\nPhase 4: Full School Community (Week 4)\n\nSUCCESS FACTORS:\n• Role-based training materials\n• Hands-on practice sessions\n• Peer mentoring system\n• Continuous support availability"
+        },
+        {
+          title: "👨‍💼 Administrator Onboarding Workflow",
+          content: "WEEK 1 SCHEDULE:\nDay 1-2: System Administration Training\n• User management and permissions\n• School configuration settings\n• Data import and export procedures\n• Security and backup protocols\n\nDay 3-4: Academic Management\n• Curriculum setup and management\n• Grading systems configuration\n• Report generation and analytics\n• Integration with existing systems\n\nDay 5: Testing and Validation\n• End-to-end system testing\n• Security audit and compliance check\n• Performance optimization\n• Go-live decision criteria"
+        },
+        {
+          title: "👩‍🏫 Teacher Onboarding Workflow",
+          content: "TRAINING SCHEDULE (2-week program):\n\nWEEK 1: Core Features\n• Portal navigation and dashboard\n• Student information management\n• Attendance marking procedures\n• Basic gradebook operations\n\nWEEK 2: Advanced Features\n• Lesson planning and curriculum mapping\n• Assignment creation and grading\n• Parent communication tools\n• Report generation and analytics\n\nSUPPORT STRUCTURE:\n• Buddy system with experienced users\n• Daily Q&A sessions during first week\n• Quick reference guides and video tutorials\n• Dedicated support chat during transition"
+        },
+        {
+          title: "👨‍👩‍👧‍👦 Parent & Student Onboarding",
+          content: "COMMUNICATION STRATEGY:\n\nPre-Launch (1 week before):\n• Send welcome email with portal information\n• Provide step-by-step setup instructions\n• Schedule optional orientation sessions\n• Create FAQ document for common questions\n\nLaunch Week:\n• Live demonstration sessions (optional)\n• Phone/email support for login issues\n• Peer ambassador program\n• Quick wins focus (viewing grades, messaging)\n\nPost-Launch (2 weeks after):\n• Usage analytics review\n• Feedback collection and improvements\n• Advanced feature introduction\n• Success story sharing"
+        },
+        {
+          title: "📊 Measuring Onboarding Success",
+          content: "KEY PERFORMANCE INDICATORS:\n\nUSER ADOPTION:\n• Login frequency by user type\n• Feature utilization rates\n• Time-to-first-value metrics\n• User satisfaction scores\n\nSYSTEM PERFORMANCE:\n• Support ticket volume and resolution time\n• Error rates and system stability\n• Data accuracy and completeness\n• Integration success rates\n\nBUSINESS IMPACT:\n• Administrative time savings\n• Communication efficiency improvements\n• Academic performance insights\n• Parent engagement increases\n\nCONTINUOUS IMPROVEMENT:\n• Monthly user feedback surveys\n• Quarterly training refreshers\n• Annual system optimization review\n• Feature request prioritization"
         }
       ]
     };
