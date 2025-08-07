@@ -326,7 +326,6 @@ export function AppSidebar() {
           <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" className="h-8 w-8" />
           {state !== "collapsed" && (
             <div className="flex flex-col">
-              <span className="text-base font-bold">Pappaya Academy</span>
               <span className="text-sm text-muted-foreground">{currentModule}</span>
             </div>
           )}
