@@ -138,7 +138,7 @@ export default function LandingPage() {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <GraduationCap className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold">Academy Assist</span>
+              <span className="text-xl font-bold">Pappaya</span>
             </div>
             
             <div className="hidden md:flex items-center gap-6">

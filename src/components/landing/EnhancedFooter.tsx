@@ -31,7 +31,7 @@ interface FooterContent {
 }
 
 const defaultFooterContent: FooterContent = {
-  companyName: "Academy Assist",
+  companyName: "Pappaya",
   description: "Comprehensive school management system for academic operations, student services, and administration. Transforming education through innovative technology solutions.",
   address: {
     street: "St Anns Hill Road",
@@ -40,14 +40,14 @@ const defaultFooterContent: FooterContent = {
     country: "United Kingdom"
   },
   contact: {
-    email: "support@academyassist.co.uk",
+    email: "support@pappaya.co.uk",
     phone: "+44 (0) 1932 123 456",
-    website: "www.academyassist.co.uk"
+    website: "www.pappaya.co.uk"
   },
   socialLinks: {
-    linkedin: "https://linkedin.com/company/academy-assist",
-    twitter: "https://twitter.com/academyassist",
-    facebook: "https://facebook.com/academyassist"
+    linkedin: "https://linkedin.com/company/pappaya",
+    twitter: "https://twitter.com/pappaya",
+    facebook: "https://facebook.com/pappaya"
   },
   links: [
     {
@@ -78,7 +78,7 @@ const defaultFooterContent: FooterContent = {
       ]
     }
   ],
-  copyright: `© ${new Date().getFullYear()} Academy Assist, a division of Pappaya Global Limited. All rights reserved.`
+  copyright: `© ${new Date().getFullYear()} Pappaya (Pappaya Global Limited). All rights reserved.`
 };
 
 export function EnhancedFooter() {
