@@ -44,6 +44,7 @@ import LessonPlanningPage from "./pages/LessonPlanningPage";
 import AcademicsPage from "./pages/AcademicsPage";
 import NotFound from "./pages/NotFound";
 import StudentWelfarePage from "./pages/StudentWelfarePage";
+import BehaviorTrackingPage from "./pages/BehaviorTrackingPage";
 import InfirmaryPage from "./pages/InfirmaryPage";
 import ComplaintsPage from "./pages/ComplaintsPage";
 import StudentWelfareSafeguardingPage from "./pages/StudentWelfareSafeguardingPage";
