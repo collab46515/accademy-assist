@@ -322,8 +322,8 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r">
       <SidebarHeader className="border-b bg-gradient-to-r from-primary/5 to-primary-glow/5">
-        <div className="flex items-center justify-center px-3 py-6">
-          <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" className="h-24 w-48 object-contain" />
+        <div className="flex items-center justify-center px-1 py-1">
+          <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" className="h-6 w-full object-contain" />
         </div>
         
       </SidebarHeader>
