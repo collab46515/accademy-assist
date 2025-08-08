@@ -66,49 +66,60 @@ export function EnhancedVideoConference({
   
   // Refs
   const localVideoRef = useRef<HTMLVideoElement>(null);
-  const workingVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
   const audioRecorderRef = useRef<MediaRecorder | null>(null);
   const transcriptChunksRef = useRef<string[]>([]);
 
-  // Simple working video setup with proper ref timing
+  // Working video setup with proper cleanup to prevent AbortError
+  const workingVideoRef = useRef<HTMLVideoElement>(null);
   const [workingStream, setWorkingStream] = useState<MediaStream | null>(null);
   
-  const handleVideoRef = useCallback(async (video: HTMLVideoElement | null) => {
-    if (!video) return;
+  useEffect(() => {
+    let isActive = true;
     
-    console.log('WorkingVideo: Video element mounted, starting setup...');
-    
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: true, 
-        audio: true 
-      });
+    const setupVideo = async () => {
+      if (!workingVideoRef.current || workingStream) return;
       
-      console.log('WorkingVideo: Got stream:', stream);
-      console.log('WorkingVideo: Video tracks:', stream.getVideoTracks());
-      
-      video.srcObject = stream;
-      setWorkingStream(stream);
-      console.log('WorkingVideo: Set srcObject on video element');
-      
-      // Add event listeners
-      video.onloadedmetadata = () => console.log('WorkingVideo: Metadata loaded');
-      video.oncanplay = () => console.log('WorkingVideo: Can play');
-      video.onplaying = () => console.log('WorkingVideo: Playing event fired');
-      video.onerror = (e) => console.error('WorkingVideo: Error event:', e);
+      console.log('WorkingVideo: Setting up video (once only)...');
       
       try {
-        console.log('WorkingVideo: Attempting to play...');
-        await video.play();
-        console.log('WorkingVideo: Play() completed successfully!');
-      } catch (e) {
-        console.error('WorkingVideo: Play failed:', e);
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: true, 
+          audio: true 
+        });
+        
+        if (!isActive) {
+          // Component unmounted, cleanup
+          stream.getTracks().forEach(track => track.stop());
+          return;
+        }
+        
+        console.log('WorkingVideo: Got stream, setting up...');
+        
+        const video = workingVideoRef.current;
+        if (video) {
+          video.srcObject = stream;
+          setWorkingStream(stream);
+          
+          video.onplaying = () => console.log('WorkingVideo: Playing!');
+          
+          await video.play();
+          console.log('WorkingVideo: Successfully playing!');
+        }
+      } catch (error) {
+        console.error('WorkingVideo: Setup failed:', error);
       }
-    } catch (error) {
-      console.error('WorkingVideo: Error getting camera:', error);
-    }
-  }, []);
+    };
+    
+    setupVideo();
+    
+    return () => {
+      isActive = false;
+      if (workingStream) {
+        workingStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []); // Only run once
 
   useEffect(() => {
     console.log('EnhancedVideoConference: Component mounted, starting initialization');
@@ -422,18 +433,15 @@ export function EnhancedVideoConference({
             backgroundColor: 'blue'
           }}>
             <video 
-              ref={handleVideoRef}
+              ref={workingVideoRef}
               autoPlay
               muted
               playsInline
               style={{
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover',
-                backgroundColor: 'red'
+                objectFit: 'cover'
               }}
-              onLoadedData={() => console.log('WorkingVideo: Data loaded')}
-              onLoadedMetadata={() => console.log('WorkingVideo: Metadata loaded (inline)')}
             />
             
             <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded">
