@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AnnouncementsManager } from './AnnouncementsManager';
 
 interface Announcement {
   id: string;
@@ -78,6 +80,7 @@ const priorityConfig = {
 export function DigitalNoticeBoard() {
   const [announcements, setAnnouncements] = useState<Announcement[]>(mockAnnouncements);
   const [activeTab, setActiveTab] = useState('all');
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   const markAsRead = (announcementId: string) => {
     setAnnouncements(prev => 
@@ -161,7 +164,14 @@ export function DigitalNoticeBoard() {
           <Badge variant="secondary">
             {unreadCount} unread
           </Badge>
-          <Button size="sm" variant="outline">
+          <Button 
+            size="sm" 
+            variant="outline"
+            onClick={() => {
+              console.log('New Announcement button clicked');
+              setShowCreateDialog(true);
+            }}
+          >
             <Plus className="h-4 w-4 mr-1" />
             New Announcement
           </Button>
@@ -194,6 +204,16 @@ export function DigitalNoticeBoard() {
           </ScrollArea>
         </TabsContent>
       </Tabs>
+
+      {/* New Announcement Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle>Create New Announcement</DialogTitle>
+          </DialogHeader>
+          <AnnouncementsManager />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
