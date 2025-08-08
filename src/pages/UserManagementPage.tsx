@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Plus, UserPlus, Edit, Trash2, Users } from 'lucide-react';
+import { Loader2, Plus, UserPlus, Edit, Trash2, Users, Shield, Settings, Key, Crown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface User {
@@ -55,6 +55,7 @@ export function UserManagementPage() {
   const [assignRoleOpen, setAssignRoleOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [isCreating, setIsCreating] = useState(false);
+  const [activeTab, setActiveTab] = useState<'users' | 'roles' | 'permissions'>('users');
 
   useEffect(() => {
     fetchUsers();
@@ -335,12 +336,91 @@ export function UserManagementPage() {
         </div>
       </div>
 
+      {/* Quick Action Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('users')}>
+          <CardContent className="flex items-center gap-4 p-6">
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <Users className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold">Manage Users</h3>
+              <p className="text-sm text-muted-foreground">Create and manage user accounts</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('roles')}>
+          <CardContent className="flex items-center gap-4 p-6">
+            <div className="p-3 bg-green-100 rounded-lg">
+              <Crown className="h-6 w-6 text-green-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold">User Roles</h3>
+              <p className="text-sm text-muted-foreground">Assign roles to users</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('permissions')}>
+          <CardContent className="flex items-center gap-4 p-6">
+            <div className="p-3 bg-purple-100 rounded-lg">
+              <Shield className="h-6 w-6 text-purple-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold">Permissions</h3>
+              <p className="text-sm text-muted-foreground">Configure role permissions</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="flex border-b border-border mb-6">
+        <button
+          onClick={() => setActiveTab('users')}
+          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+            activeTab === 'users'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Users className="h-4 w-4 inline mr-2" />
+          Users ({users.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('roles')}
+          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+            activeTab === 'roles'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Crown className="h-4 w-4 inline mr-2" />
+          Role Management
+        </button>
+        <button
+          onClick={() => setActiveTab('permissions')}
+          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+            activeTab === 'permissions'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Shield className="h-4 w-4 inline mr-2" />
+          Permissions
+        </button>
+      </div>
+
       {loading ? (
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       ) : (
-        <Card>
+        <>
+          {/* Users Tab */}
+          {activeTab === 'users' && (
+            <Card>
           <CardHeader>
             <CardTitle>Users ({users.length})</CardTitle>
             <CardDescription>
@@ -418,6 +498,200 @@ export function UserManagementPage() {
             </Table>
           </CardContent>
         </Card>
+          )}
+
+          {/* Role Management Tab */}
+          {activeTab === 'roles' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Crown className="h-5 w-5" />
+                  Available User Roles
+                </CardTitle>
+                <CardDescription>
+                  These are the predefined roles available in the system. Use the "Assign Role" buttons to assign these roles to users.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {roleOptions.map((role) => (
+                    <Card key={role.value} className="border border-border">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="p-2 bg-primary/10 rounded-md">
+                            {role.value === 'super_admin' && <Key className="h-4 w-4 text-primary" />}
+                            {role.value === 'school_admin' && <Settings className="h-4 w-4 text-primary" />}
+                            {role.value === 'teacher' && <Users className="h-4 w-4 text-primary" />}
+                            {role.value === 'hod' && <Crown className="h-4 w-4 text-primary" />}
+                            {role.value === 'dsl' && <Shield className="h-4 w-4 text-primary" />}
+                            {!['super_admin', 'school_admin', 'teacher', 'hod', 'dsl'].includes(role.value) && (
+                              <Users className="h-4 w-4 text-primary" />
+                            )}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold">{role.label}</h4>
+                            <Badge variant="outline" className="mt-1">
+                              {role.value.replace('_', ' ')}
+                            </Badge>
+                          </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          {role.value === 'super_admin' && 'Full system access across all schools'}
+                          {role.value === 'school_admin' && 'Administrative access within assigned school'}
+                          {role.value === 'teacher' && 'Teaching staff with classroom management access'}
+                          {role.value === 'form_tutor' && 'Form tutor responsibilities and pastoral care'}
+                          {role.value === 'hod' && 'Head of Department with subject leadership'}
+                          {role.value === 'dsl' && 'Designated Safeguarding Lead responsibilities'}
+                          {role.value === 'nurse' && 'School health and medical management'}
+                          {role.value === 'parent' && 'Parent portal access for student information'}
+                          {role.value === 'student' && 'Student portal access for learning resources'}
+                        </p>
+                        <div className="text-xs text-muted-foreground">
+                          <div className="flex justify-between">
+                            <span>Users with this role:</span>
+                            <span className="font-medium">
+                              {Object.values(userRoles).flat().filter(r => r.role === role.value).length}
+                            </span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                
+                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <Crown className="h-5 w-5 text-blue-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-semibold text-blue-900">How to Assign Roles</h4>
+                      <p className="text-sm text-blue-700 mt-1">
+                        1. Go to the "Users" tab<br/>
+                        2. Find the user you want to assign a role to<br/>
+                        3. Click the "+ Role" button in their row<br/>
+                        4. Select the appropriate role and school from the dropdown
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Permissions Tab */}
+          {activeTab === 'permissions' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Role Permissions Overview
+                </CardTitle>
+                <CardDescription>
+                  View the permissions associated with each role in the system
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {roleOptions.map((role) => (
+                    <Card key={role.value} className="border border-border">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-primary/10 rounded-md">
+                            {role.value === 'super_admin' && <Key className="h-4 w-4 text-primary" />}
+                            {role.value === 'school_admin' && <Settings className="h-4 w-4 text-primary" />}
+                            {role.value === 'teacher' && <Users className="h-4 w-4 text-primary" />}
+                            {role.value === 'hod' && <Crown className="h-4 w-4 text-primary" />}
+                            {role.value === 'dsl' && <Shield className="h-4 w-4 text-primary" />}
+                            {!['super_admin', 'school_admin', 'teacher', 'hod', 'dsl'].includes(role.value) && (
+                              <Users className="h-4 w-4 text-primary" />
+                            )}
+                          </div>
+                          <CardTitle className="text-lg">{role.label}</CardTitle>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {role.value === 'super_admin' && (
+                            <>
+                              <Badge variant="default">Full System Access</Badge>
+                              <Badge variant="default">All Schools Management</Badge>
+                              <Badge variant="default">User Management</Badge>
+                              <Badge variant="default">System Configuration</Badge>
+                            </>
+                          )}
+                          {role.value === 'school_admin' && (
+                            <>
+                              <Badge variant="secondary">School Management</Badge>
+                              <Badge variant="secondary">User Management (School)</Badge>
+                              <Badge variant="secondary">Academic Operations</Badge>
+                              <Badge variant="secondary">Financial Management</Badge>
+                              <Badge variant="secondary">Reports & Analytics</Badge>
+                            </>
+                          )}
+                          {role.value === 'teacher' && (
+                            <>
+                              <Badge variant="outline">Classroom Management</Badge>
+                              <Badge variant="outline">Gradebook Access</Badge>
+                              <Badge variant="outline">Attendance Marking</Badge>
+                              <Badge variant="outline">Assignment Creation</Badge>
+                              <Badge variant="outline">Student Communication</Badge>
+                            </>
+                          )}
+                          {role.value === 'hod' && (
+                            <>
+                              <Badge variant="secondary">Department Management</Badge>
+                              <Badge variant="secondary">Curriculum Oversight</Badge>
+                              <Badge variant="secondary">Teacher Supervision</Badge>
+                              <Badge variant="secondary">Departmental Reports</Badge>
+                            </>
+                          )}
+                          {role.value === 'dsl' && (
+                            <>
+                              <Badge variant="destructive">Safeguarding Access</Badge>
+                              <Badge variant="destructive">Incident Management</Badge>
+                              <Badge variant="destructive">Child Protection</Badge>
+                              <Badge variant="destructive">Welfare Monitoring</Badge>
+                            </>
+                          )}
+                          {role.value === 'parent' && (
+                            <>
+                              <Badge variant="outline">Student Information</Badge>
+                              <Badge variant="outline">Academic Progress</Badge>
+                              <Badge variant="outline">Communication</Badge>
+                              <Badge variant="outline">Event Booking</Badge>
+                            </>
+                          )}
+                          {role.value === 'student' && (
+                            <>
+                              <Badge variant="outline">Learning Resources</Badge>
+                              <Badge variant="outline">Assignment Submission</Badge>
+                              <Badge variant="outline">Timetable Access</Badge>
+                              <Badge variant="outline">Grade Viewing</Badge>
+                            </>
+                          )}
+                          {['form_tutor', 'nurse'].includes(role.value) && (
+                            <>
+                              <Badge variant="outline">Specialized Access</Badge>
+                              <Badge variant="outline">Student Welfare</Badge>
+                              <Badge variant="outline">Communication</Badge>
+                            </>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                
+                <Alert className="mt-6">
+                  <Shield className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Note:</strong> Permissions are automatically enforced based on user roles. 
+                    Role-based access control (RBAC) ensures users only see and access features appropriate to their assigned roles.
+                  </AlertDescription>
+                </Alert>
+              </CardContent>
+            </Card>
+          )}
+        </>
       )}
 
       {/* Assign Role Dialog */}
