@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Video, VideoOff, Mic, MicOff, Phone, Users, Share, Monitor,
   MessageSquare, Settings, Hand, Camera, MoreVertical, 
@@ -71,48 +71,43 @@ export function EnhancedVideoConference({
   const audioRecorderRef = useRef<MediaRecorder | null>(null);
   const transcriptChunksRef = useRef<string[]>([]);
 
-  // Add a separate effect for the working video approach
-  useEffect(() => {
-    // Use the EXACT same approach that worked for the test video
-    const startWorkingVideo = async () => {
+  // Simple working video setup with proper ref timing
+  const [workingStream, setWorkingStream] = useState<MediaStream | null>(null);
+  
+  const handleVideoRef = useCallback(async (video: HTMLVideoElement | null) => {
+    if (!video) return;
+    
+    console.log('WorkingVideo: Video element mounted, starting setup...');
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: true, 
+        audio: true 
+      });
+      
+      console.log('WorkingVideo: Got stream:', stream);
+      console.log('WorkingVideo: Video tracks:', stream.getVideoTracks());
+      
+      video.srcObject = stream;
+      setWorkingStream(stream);
+      console.log('WorkingVideo: Set srcObject on video element');
+      
+      // Add event listeners
+      video.onloadedmetadata = () => console.log('WorkingVideo: Metadata loaded');
+      video.oncanplay = () => console.log('WorkingVideo: Can play');
+      video.onplaying = () => console.log('WorkingVideo: Playing event fired');
+      video.onerror = (e) => console.error('WorkingVideo: Error event:', e);
+      
       try {
-        console.log('WorkingVideo: Starting...');
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: true, 
-          audio: true 
-        });
-        
-        console.log('WorkingVideo: Got stream:', stream);
-        console.log('WorkingVideo: Video tracks:', stream.getVideoTracks());
-        console.log('WorkingVideo: Video track ready state:', stream.getVideoTracks()[0]?.readyState);
-        
-        if (workingVideoRef.current) {
-          console.log('WorkingVideo: Video element found');
-          workingVideoRef.current.srcObject = stream;
-          console.log('WorkingVideo: Set srcObject on video element');
-          
-          // Add event listeners to track what's happening
-          workingVideoRef.current.onloadedmetadata = () => console.log('WorkingVideo: Metadata loaded');
-          workingVideoRef.current.oncanplay = () => console.log('WorkingVideo: Can play');
-          workingVideoRef.current.onplaying = () => console.log('WorkingVideo: Playing event fired');
-          workingVideoRef.current.onerror = (e) => console.error('WorkingVideo: Error event:', e);
-          
-          try {
-            console.log('WorkingVideo: Attempting to play...');
-            await workingVideoRef.current.play();
-            console.log('WorkingVideo: Play() completed successfully!');
-          } catch (e) {
-            console.error('WorkingVideo: Play failed:', e);
-          }
-        } else {
-          console.error('WorkingVideo: Video element NOT found');
-        }
-      } catch (error) {
-        console.error('WorkingVideo: Error getting camera:', error);
+        console.log('WorkingVideo: Attempting to play...');
+        await video.play();
+        console.log('WorkingVideo: Play() completed successfully!');
+      } catch (e) {
+        console.error('WorkingVideo: Play failed:', e);
       }
-    };
-
-    startWorkingVideo();
+    } catch (error) {
+      console.error('WorkingVideo: Error getting camera:', error);
+    }
   }, []);
 
   useEffect(() => {
@@ -426,8 +421,8 @@ export function EnhancedVideoConference({
             position: 'relative',
             backgroundColor: 'blue'
           }}>
-            <video
-              ref={workingVideoRef}
+            <video 
+              ref={handleVideoRef}
               autoPlay
               muted
               playsInline
@@ -447,7 +442,7 @@ export function EnhancedVideoConference({
             
             {/* Debug info */}
             <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-              Stream: {workingVideoRef.current?.srcObject ? 'SET' : 'NOT SET'}
+              Stream: {workingStream ? 'SET' : 'NOT SET'}
             </div>
           </div>
           
