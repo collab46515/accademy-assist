@@ -237,8 +237,8 @@ export function SchoolSettingsManager() {
           name: schoolInfo.name,
           code: schoolInfo.code,
           address: schoolInfo.address,
-          phone: schoolInfo.phone,
-          email: schoolInfo.email,
+          contact_phone: schoolInfo.phone,
+          contact_email: schoolInfo.email,
           website: schoolInfo.website,
           logo_url: logoUrl,
           principal_name: schoolInfo.principal_name,
@@ -255,12 +255,26 @@ export function SchoolSettingsManager() {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "School information updated successfully",
+        title: "Success", 
+        description: logoFile ? "School information and logo updated successfully. Page will refresh to show changes." : "School information updated successfully",
       });
+
+      // Update local state
+      if (logoFile) {
+        setSchoolInfo(prev => ({ ...prev, logo_url: logoUrl || prev.logo_url }));
+        setLogoFile(null);
+        setLogoPreview(null);
+      }
 
       // Refresh the data
       await fetchSchoolData();
+      
+      // Reload page if logo was updated to ensure all components show new logo
+      if (logoFile) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
     } catch (error) {
       console.error('Error saving school info:', error);
       toast({
