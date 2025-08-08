@@ -144,7 +144,7 @@ export function LibraryFines() {
           </TabsList>
           
           <div className="flex gap-2">
-            <Button variant="outline">Send Reminders</Button>
+            <Button variant="outline" onClick={() => console.log("Send reminders clicked")}>Send Reminders</Button>
             <Dialog>
               <DialogTrigger asChild>
                 <Button>Record Payment</Button>
@@ -174,7 +174,7 @@ export function LibraryFines() {
                     <Label>Notes</Label>
                     <Textarea placeholder="Payment notes..." />
                   </div>
-                  <Button className="w-full">Record Payment</Button>
+                  <Button className="w-full" onClick={() => console.log("Record payment clicked")}>Record Payment</Button>
                 </div>
               </DialogContent>
             </Dialog>
@@ -220,10 +220,10 @@ export function LibraryFines() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => console.log(`Show receipt for ${fine.studentName}`)}>
                             <Receipt className="h-4 w-4" />
                           </Button>
-                          <Button size="sm">Pay Now</Button>
+                          <Button size="sm" onClick={() => console.log(`Pay fine for ${fine.studentName}`)}>Pay Now</Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -270,7 +270,7 @@ export function LibraryFines() {
                         <Badge variant="outline">{fine.paymentMethod}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => console.log(`Show receipt for ${fine.studentName}`)}>
                           <Receipt className="h-4 w-4" />
                         </Button>
                       </TableCell>
@@ -332,7 +332,7 @@ export function LibraryFines() {
                   />
                 </div>
                 
-                <Button className="w-full">Update Settings</Button>
+                <Button className="w-full" onClick={() => console.log("Update fine settings clicked")}>Update Settings</Button>
               </CardContent>
             </Card>
 
@@ -369,7 +369,7 @@ export function LibraryFines() {
                   />
                 </div>
                 
-                <Button className="w-full">Save Payment Settings</Button>
+                <Button className="w-full" onClick={() => console.log("Save payment settings clicked")}>Save Payment Settings</Button>
               </CardContent>
             </Card>
           </div>

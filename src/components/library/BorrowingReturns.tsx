@@ -212,8 +212,8 @@ export function BorrowingReturns() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">Renew</Button>
-                          <Button variant="outline" size="sm">Return</Button>
+                          <Button variant="outline" size="sm" onClick={() => console.log(`Renew ${borrowing.bookTitle} for ${borrowing.studentName}`)}>Renew</Button>
+                          <Button variant="outline" size="sm" onClick={() => console.log(`Return ${borrowing.bookTitle} from ${borrowing.studentName}`)}>Return</Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -304,8 +304,8 @@ export function BorrowingReturns() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">Send Reminder</Button>
-                          <Button variant="outline" size="sm">Contact Parent</Button>
+                          <Button variant="outline" size="sm" onClick={() => console.log(`Send reminder to ${borrowing.studentName}`)}>Send Reminder</Button>
+                          <Button variant="outline" size="sm" onClick={() => console.log(`Contact parent of ${borrowing.studentName}`)}>Contact Parent</Button>
                         </div>
                       </TableCell>
                     </TableRow>

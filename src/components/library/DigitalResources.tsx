@@ -164,11 +164,11 @@ export function DigitalResources() {
                   </div>
                   
                   <div className="flex gap-2">
-                    <Button size="sm" className="flex-1">
+                    <Button size="sm" className="flex-1" onClick={() => console.log(`Read ${book.title} online`)}>
                       <Eye className="h-4 w-4 mr-1" />
                       Read Online
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => console.log(`Download ${book.title}`)}>
                       <Download className="h-4 w-4" />
                     </Button>
                   </div>
@@ -203,11 +203,11 @@ export function DigitalResources() {
                   <Progress value={35} className="h-2" />
                   
                   <div className="flex gap-2">
-                    <Button size="sm" className="flex-1">
+                    <Button size="sm" className="flex-1" onClick={() => console.log(`Continue playing ${book.title}`)}>
                       <Play className="h-4 w-4 mr-1" />
                       Continue Playing
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => console.log(`Download ${book.title}`)}>
                       <Download className="h-4 w-4" />
                     </Button>
                   </div>
@@ -239,7 +239,7 @@ export function DigitalResources() {
                     <span>{video.views} views</span>
                   </div>
                   
-                  <Button size="sm" className="w-full">
+                  <Button size="sm" className="w-full" onClick={() => console.log(`Watch ${video.title}`)}>
                     <Play className="h-4 w-4 mr-1" />
                     Watch Now
                   </Button>
@@ -268,11 +268,11 @@ export function DigitalResources() {
                   </div>
                   
                   <div className="flex gap-2 mt-4">
-                    <Button size="sm" className="flex-1">
+                    <Button size="sm" className="flex-1" onClick={() => console.log(`Access ${resource.name}`)}>
                       <Globe className="h-4 w-4 mr-1" />
                       Access Platform
                     </Button>
-                    <Button variant="outline" size="sm">Settings</Button>
+                    <Button variant="outline" size="sm" onClick={() => console.log(`Settings for ${resource.name}`)}>Settings</Button>
                   </div>
                 </CardContent>
               </Card>

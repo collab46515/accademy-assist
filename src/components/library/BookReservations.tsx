@@ -104,7 +104,7 @@ export function BookReservations() {
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold">Current Reservations</h2>
         <div className="flex gap-2">
-          <Button variant="outline">
+          <Button variant="outline" onClick={() => console.log("Send notifications clicked")}>
             <Bell className="h-4 w-4 mr-2" />
             Send Notifications
           </Button>
@@ -159,7 +159,7 @@ export function BookReservations() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button className="w-full">Create Reservation</Button>
+                <Button className="w-full" onClick={() => console.log("Create reservation clicked")}>Create Reservation</Button>
               </div>
             </DialogContent>
           </Dialog>
@@ -208,13 +208,13 @@ export function BookReservations() {
                   <TableCell>
                     <div className="flex gap-2">
                       {reservation.status === "Ready" ? (
-                        <Button size="sm">Process Pickup</Button>
+                        <Button size="sm" onClick={() => console.log(`Process pickup for ${reservation.studentName}`)}>Process Pickup</Button>
                       ) : (
                         <>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => console.log(`${reservation.notified ? "Already notified" : "Notify"} ${reservation.studentName}`)}>
                             {reservation.notified ? "Notified" : "Notify"}
                           </Button>
-                          <Button variant="outline" size="sm">Cancel</Button>
+                          <Button variant="outline" size="sm" onClick={() => console.log(`Cancel reservation for ${reservation.studentName}`)}>Cancel</Button>
                         </>
                       )}
                     </div>

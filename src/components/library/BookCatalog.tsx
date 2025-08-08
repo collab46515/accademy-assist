@@ -213,13 +213,13 @@ export function BookCatalog() {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => console.log(`QR Code for ${book.title}`)}>
                         <QrCode className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => console.log(`Edit ${book.title}`)}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => console.log(`Delete ${book.title}`)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>

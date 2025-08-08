@@ -112,7 +112,7 @@ export function BookSearch() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
             />
-            <Button className="absolute right-2 top-1 h-8" size="sm">
+            <Button className="absolute right-2 top-1 h-8" size="sm" onClick={() => console.log("Scan barcode clicked")}>
               <Scan className="h-4 w-4 mr-1" />
               Scan
             </Button>
@@ -144,7 +144,7 @@ export function BookSearch() {
               </SelectContent>
             </Select>
 
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => console.log("Advanced filters clicked")}>
               <Filter className="h-4 w-4 mr-2" />
               Advanced Filters
             </Button>
@@ -262,10 +262,10 @@ export function BookSearch() {
                                 <p className="text-sm text-muted-foreground mt-1">{book.description}</p>
                               </div>
                               <div className="flex gap-2">
-                                <Button className="flex-1" disabled={book.available === 0}>
+                                <Button className="flex-1" disabled={book.available === 0} onClick={() => console.log(`${book.available > 0 ? "Borrow" : "Reserve"} ${book.title}`)}>
                                   {book.available > 0 ? "Borrow Book" : "Reserve Book"}
                                 </Button>
-                                <Button variant="outline">
+                                <Button variant="outline" onClick={() => console.log(`QR Code for ${book.title}`)}>
                                   <QrCode className="h-4 w-4" />
                                 </Button>
                               </div>
@@ -274,9 +274,9 @@ export function BookSearch() {
                         </Dialog>
 
                         {book.available > 0 ? (
-                          <Button size="sm">Borrow</Button>
+                          <Button size="sm" onClick={() => console.log(`Borrow ${book.title}`)}>Borrow</Button>
                         ) : (
-                          <Button variant="outline" size="sm">Reserve</Button>
+                          <Button variant="outline" size="sm" onClick={() => console.log(`Reserve ${book.title}`)}>Reserve</Button>
                         )}
                       </div>
                     </div>

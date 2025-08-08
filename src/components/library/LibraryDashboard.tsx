@@ -30,16 +30,16 @@ export function LibraryDashboard() {
     <div className="space-y-6 pb-6">
       {/* Quick Actions */}
       <div className="flex gap-3 flex-wrap">
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => console.log("QR Check-out clicked")}>
           <QrCode className="h-4 w-4" />
           QR Check-out
         </Button>
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="gap-2" onClick={() => console.log("Barcode Scan clicked")}>
           <Scan className="h-4 w-4" />
           Barcode Scan
         </Button>
-        <Button variant="outline">Quick Return</Button>
-        <Button variant="outline">Add New Book</Button>
+        <Button variant="outline" onClick={() => console.log("Quick Return clicked")}>Quick Return</Button>
+        <Button variant="outline" onClick={() => console.log("Add New Book clicked")}>Add New Book</Button>
       </div>
 
       {/* Stats Grid */}
@@ -113,15 +113,15 @@ export function LibraryDashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
-            <Button variant="outline" className="h-20 flex-col gap-2">
+            <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => console.log("E-Books Portal clicked")}>
               <BookOpen className="h-6 w-6" />
               E-Books Portal
             </Button>
-            <Button variant="outline" className="h-20 flex-col gap-2">
+            <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => console.log("Audio Books clicked")}>
               <Users className="h-6 w-6" />
               Audio Books
             </Button>
-            <Button variant="outline" className="h-20 flex-col gap-2">
+            <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => console.log("Reading Analytics clicked")}>
               <Calendar className="h-6 w-6" />
               Reading Analytics
             </Button>
