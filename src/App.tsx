@@ -42,6 +42,7 @@ import { MasterDataPage } from "./pages/MasterDataPage";
 import TimetablePage from "./pages/TimetablePage";
 import LessonPlanningPage from "./pages/LessonPlanningPage";
 import AcademicsPage from "./pages/AcademicsPage";
+import AcademicManagementPage from "./pages/AcademicManagementPage";
 import NotFound from "./pages/NotFound";
 import StudentWelfarePage from "./pages/StudentWelfarePage";
 import BehaviorTrackingPage from "./pages/BehaviorTrackingPage";
@@ -104,6 +105,7 @@ const App = () => (
                           <Route path="/finance-operations" element={<FinanceOperationsPage />} />
                           <Route path="/administration" element={<AdministrationPage />} />
                           <Route path="/school-settings" element={<SchoolSettingsPage />} />
+                          <Route path="/academic-management" element={<AcademicManagementPage />} />
                           <Route path="/students" element={<StudentsPage />} />
              <Route path="/admissions" element={<UnifiedAdmissionsPage />} />
              <Route path="/admissions/new" element={<NewApplicationsPage />} />

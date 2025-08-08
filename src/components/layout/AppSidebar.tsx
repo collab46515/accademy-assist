@@ -82,6 +82,7 @@ const erpModules = [
       { title: "Dashboard", url: "/academic-operations", icon: LayoutDashboard },
       { title: "Admissions Workflow", url: "/admissions", icon: UserPlus },
       { title: "Curriculum & Lessons", url: "/curriculum", icon: BookOpen },
+      { title: "Academic Management", url: "/academic-management", icon: GraduationCap },
       { title: "Timetable Management", url: "/timetable", icon: Clock },
       
       { title: "Exams & Assessment", url: "/exams", icon: ClipboardCheck },
