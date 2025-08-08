@@ -71,11 +71,13 @@ export function EnhancedVideoConference({
   const transcriptChunksRef = useRef<string[]>([]);
 
   useEffect(() => {
+    console.log('EnhancedVideoConference: Component mounted, starting initialization');
     initializeWebRTC();
     
     // Initialize camera and microphone immediately
     const initializeMedia = async () => {
       try {
+        console.log('EnhancedVideoConference: Requesting camera permissions...');
         // Request camera and microphone permissions
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
@@ -85,9 +87,23 @@ export function EnhancedVideoConference({
           audio: true
         });
         
+        console.log('EnhancedVideoConference: Camera stream obtained:', stream);
+        console.log('EnhancedVideoConference: Video tracks:', stream.getVideoTracks());
+        console.log('EnhancedVideoConference: Audio tracks:', stream.getAudioTracks());
+        
         // Display local video immediately
         if (localVideoRef.current) {
+          console.log('EnhancedVideoConference: Setting video element srcObject');
           localVideoRef.current.srcObject = stream;
+          
+          // Force play the video
+          setTimeout(() => {
+            if (localVideoRef.current) {
+              localVideoRef.current.play().catch(e => console.error('Video play failed:', e));
+            }
+          }, 100);
+        } else {
+          console.error('EnhancedVideoConference: localVideoRef.current is null');
         }
         
         toast({
@@ -96,11 +112,11 @@ export function EnhancedVideoConference({
         });
         
       } catch (error) {
-        console.error('Failed to access camera:', error);
+        console.error('EnhancedVideoConference: Failed to access camera:', error);
         setHasVideo(false);
         toast({
-          title: "Camera Access Required",
-          description: "Please allow camera and microphone access to join the meeting",
+          title: "Camera Access Required", 
+          description: "Please allow camera and microphone access to join the meeting. Error: " + error.message,
           variant: "destructive",
         });
       }
@@ -331,74 +347,28 @@ export function EnhancedVideoConference({
     });
   };
 
-  const ParticipantGrid = () => (
-    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 h-full">
-      {/* Local video */}
-      <Card className="relative overflow-hidden bg-black">
-        <div className="aspect-video">
-          <video
-            ref={localVideoRef}
-            autoPlay
-            muted
-            playsInline
-            className="w-full h-full object-cover"
-          />
-          {!hasVideo && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-              <Avatar className="h-16 w-16">
-                <AvatarFallback className="text-2xl">
-                  {userName.split(' ').map(n => n[0]).join('')}
-                </AvatarFallback>
-              </Avatar>
-            </div>
-          )}
-        </div>
-        
-        <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-          <div className="flex items-center gap-1 bg-black/70 rounded px-2 py-1">
-            <span className="text-white text-xs font-medium truncate">
-              {userName} (You)
-            </span>
-          </div>
-          
-          <div className="flex items-center gap-1">
-            {isHandRaised && (
-              <div className="bg-yellow-500 rounded p-1">
-                <Hand className="h-3 w-3 text-white" />
-              </div>
-            )}
-            {!isMuted && (
-              <div className="bg-green-500 rounded p-1">
-                <Mic className="h-3 w-3 text-white" />
-              </div>
-            )}
-            {isMuted && (
-              <div className="bg-red-500 rounded p-1">
-                <MicOff className="h-3 w-3 text-white" />
-              </div>
-            )}
-          </div>
-        </div>
-      </Card>
-
-      {/* Remote participants */}
-      {participants.map(participant => (
-        <Card key={participant.id} className="relative overflow-hidden bg-black">
+  const ParticipantGrid = () => {
+    console.log('EnhancedVideoConference: Rendering ParticipantGrid, hasVideo:', hasVideo);
+    return (
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 h-full">
+        {/* Local video */}
+        <Card className="relative overflow-hidden bg-black">
           <div className="aspect-video">
             <video
-              ref={(el) => {
-                if (el) remoteVideoRefs.current.set(participant.id, el);
-              }}
+              ref={localVideoRef}
               autoPlay
+              muted
               playsInline
               className="w-full h-full object-cover"
+              onLoadedMetadata={() => console.log('EnhancedVideoConference: Video metadata loaded')}
+              onCanPlay={() => console.log('EnhancedVideoConference: Video can play')}
+              onError={(e) => console.error('EnhancedVideoConference: Video error:', e)}
             />
-            {!participant.hasVideo && (
+            {!hasVideo && (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
                 <Avatar className="h-16 w-16">
-                  <AvatarImage src={participant.avatar} />
                   <AvatarFallback className="text-2xl">
-                    {participant.name.split(' ').map(n => n[0]).join('')}
+                    {userName.split(' ').map(n => n[0]).join('')}
                   </AvatarFallback>
                 </Avatar>
               </div>
@@ -408,25 +378,22 @@ export function EnhancedVideoConference({
           <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
             <div className="flex items-center gap-1 bg-black/70 rounded px-2 py-1">
               <span className="text-white text-xs font-medium truncate">
-                {participant.name}
+                {userName} (You)
               </span>
-              {participant.role === 'host' && (
-                <Badge variant="secondary" className="text-xs">Host</Badge>
-              )}
             </div>
             
             <div className="flex items-center gap-1">
-              {participant.isHandRaised && (
+              {isHandRaised && (
                 <div className="bg-yellow-500 rounded p-1">
                   <Hand className="h-3 w-3 text-white" />
                 </div>
               )}
-              {!participant.isMuted && (
+              {!isMuted && (
                 <div className="bg-green-500 rounded p-1">
                   <Mic className="h-3 w-3 text-white" />
                 </div>
               )}
-              {participant.isMuted && (
+              {isMuted && (
                 <div className="bg-red-500 rounded p-1">
                   <MicOff className="h-3 w-3 text-white" />
                 </div>
@@ -434,9 +401,64 @@ export function EnhancedVideoConference({
             </div>
           </div>
         </Card>
-      ))}
-    </div>
-  );
+
+        {/* Remote participants */}
+        {participants.map(participant => (
+          <Card key={participant.id} className="relative overflow-hidden bg-black">
+            <div className="aspect-video">
+              <video
+                ref={(el) => {
+                  if (el) remoteVideoRefs.current.set(participant.id, el);
+                }}
+                autoPlay
+                playsInline
+                className="w-full h-full object-cover"
+              />
+              {!participant.hasVideo && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                  <Avatar className="h-16 w-16">
+                    <AvatarImage src={participant.avatar} />
+                    <AvatarFallback className="text-2xl">
+                      {participant.name.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+              )}
+            </div>
+            
+            <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+              <div className="flex items-center gap-1 bg-black/70 rounded px-2 py-1">
+                <span className="text-white text-xs font-medium truncate">
+                  {participant.name}
+                </span>
+                {participant.role === 'host' && (
+                  <Badge variant="secondary" className="text-xs">Host</Badge>
+                )}
+              </div>
+              
+              <div className="flex items-center gap-1">
+                {participant.isHandRaised && (
+                  <div className="bg-yellow-500 rounded p-1">
+                    <Hand className="h-3 w-3 text-white" />
+                  </div>
+                )}
+                {!participant.isMuted && (
+                  <div className="bg-green-500 rounded p-1">
+                    <Mic className="h-3 w-3 text-white" />
+                  </div>
+                )}
+                {participant.isMuted && (
+                  <div className="bg-red-500 rounded p-1">
+                    <MicOff className="h-3 w-3 text-white" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    );
+  };
 
   const ChatPanel = () => (
     <div className="flex flex-col h-full">
