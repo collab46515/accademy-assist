@@ -66,7 +66,15 @@ const CommunicationForm: React.FC<CommunicationFormProps> = ({
         scheduled_for: editingCommunication.scheduled_for ? new Date(editingCommunication.scheduled_for) : null,
         is_scheduled: !!editingCommunication.scheduled_for
       });
-      setAudienceDetails(editingCommunication.audience_details || {});
+      setAudienceDetails({
+        year_groups: [],
+        class_ids: [],
+        teacher_ids: [],
+        student_ids: [],
+        parent_ids: [],
+        departments: [],
+        ...(typeof editingCommunication.audience_details === 'object' ? editingCommunication.audience_details : {})
+      });
     } else if (selectedTemplate) {
       setFormData({
         title: selectedTemplate.subject_template,

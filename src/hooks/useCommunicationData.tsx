@@ -1,5 +1,12 @@
 import { useState } from 'react';
 
+export interface NotificationSettings {
+  email: boolean;
+  push: boolean;
+  sms: boolean;
+  priority_levels: string[];
+}
+
 export interface Communication {
   id: string;
   title: string;
@@ -80,7 +87,7 @@ export function useCommunicationData() {
   const getStats = (filter?: any) => announcementStats;
   const getFilteredCommunications = (filter: any, query?: any) => communications;
   const approveCommunication = async (id: string) => Promise.resolve();
-  const rejectCommunication = async (id: string) => Promise.resolve();
+  const rejectCommunication = async (id: string, reason?: string) => Promise.resolve();
   const sendCommunication = async (id: string) => Promise.resolve();
 
   return {
