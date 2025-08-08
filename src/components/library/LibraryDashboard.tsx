@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, Users, Calendar, AlertTriangle, TrendingUp, QrCode, Scan } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export function LibraryDashboard() {
+  const navigate = useNavigate();
   const stats = [
     { title: "Total Books", value: "12,450", icon: BookOpen, change: "+245 this month" },
     { title: "Active Borrowers", value: "856", icon: Users, change: "+45 today" },
@@ -31,16 +33,16 @@ export function LibraryDashboard() {
     <div className="space-y-6 pb-6">
       {/* Quick Actions */}
       <div className="flex gap-3 flex-wrap">
-        <Button className="gap-2" onClick={() => toast.success("QR Check-out scanner activated!")}>
+        <Button className="gap-2" onClick={() => navigate('/library/borrowing')}>
           <QrCode className="h-4 w-4" />
           QR Check-out
         </Button>
-        <Button variant="outline" className="gap-2" onClick={() => toast.success("Barcode scanner ready!")}>
+        <Button variant="outline" className="gap-2" onClick={() => navigate('/library/borrowing')}>
           <Scan className="h-4 w-4" />
           Barcode Scan
         </Button>
-        <Button variant="outline" onClick={() => toast.info("Quick Return process started")}>Quick Return</Button>
-        <Button variant="outline" onClick={() => toast.info("Add New Book form opened")}>Add New Book</Button>
+        <Button variant="outline" onClick={() => navigate('/library/borrowing')}>Quick Return</Button>
+        <Button variant="outline" onClick={() => navigate('/library/catalog')}>Add New Book</Button>
       </div>
 
       {/* Stats Grid */}
@@ -114,15 +116,15 @@ export function LibraryDashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
-            <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => toast.info("Opening E-Books Portal...")}>
+            <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => navigate('/library/digital')}>
               <BookOpen className="h-6 w-6" />
               E-Books Portal
             </Button>
-            <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => toast.info("Loading Audio Books library...")}>
+            <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => navigate('/library/digital')}>
               <Users className="h-6 w-6" />
               Audio Books
             </Button>
-            <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => toast.info("Generating Reading Analytics report...")}>
+            <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => navigate('/library/reports')}>
               <Calendar className="h-6 w-6" />
               Reading Analytics
             </Button>

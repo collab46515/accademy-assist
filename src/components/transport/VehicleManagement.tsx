@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Truck, Wrench, Calendar, AlertTriangle, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export function VehicleManagement() {
+  const navigate = useNavigate();
   const vehicles = [
     {
       id: "1",

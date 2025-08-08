@@ -4,8 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Truck, Users, MapPin, AlertTriangle, TrendingUp, Route, UserCheck, Clock } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export function TransportDashboard() {
+  const navigate = useNavigate();
   const stats = [
     { title: "Active Routes", value: "12", icon: Route, change: "+2 this term" },
     { title: "Students Transported", value: "847", icon: Users, change: "89% of school" },
@@ -31,13 +33,13 @@ export function TransportDashboard() {
     <div className="space-y-6">
       {/* Quick Actions */}
       <div className="flex gap-3 flex-wrap">
-        <Button className="gap-2" onClick={() => toast.info("Vehicle tracking system loading...")}>
+        <Button className="gap-2" onClick={() => navigate('/transport/tracking')}>
           <MapPin className="h-4 w-4" />
           Track Vehicles
         </Button>
-        <Button variant="outline" onClick={() => toast.warning("Emergency Contact activated - dispatching notification")}>Emergency Contact</Button>
-        <Button variant="outline" onClick={() => toast.info("Route Planning tool opening...")}>Route Planning</Button>
-        <Button variant="outline" onClick={() => toast.success("Driver Check-in system ready")}>Driver Check-in</Button>
+        <Button variant="outline" onClick={() => navigate('/transport/notifications')}>Emergency Contact</Button>
+        <Button variant="outline" onClick={() => navigate('/transport/routes')}>Route Planning</Button>
+        <Button variant="outline" onClick={() => navigate('/transport/drivers')}>Driver Check-in</Button>
       </div>
 
       {/* Stats Grid */}
