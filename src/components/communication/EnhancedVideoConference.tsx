@@ -73,6 +73,42 @@ export function EnhancedVideoConference({
   useEffect(() => {
     initializeWebRTC();
     
+    // Initialize camera and microphone immediately
+    const initializeMedia = async () => {
+      try {
+        // Request camera and microphone permissions
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: true
+        });
+        
+        // Display local video immediately
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = stream;
+        }
+        
+        toast({
+          title: "Camera Connected",
+          description: "Your camera and microphone are ready",
+        });
+        
+      } catch (error) {
+        console.error('Failed to access camera:', error);
+        setHasVideo(false);
+        toast({
+          title: "Camera Access Required",
+          description: "Please allow camera and microphone access to join the meeting",
+          variant: "destructive",
+        });
+      }
+    };
+    
+    // Start both WebRTC and media initialization
+    initializeMedia();
+    
     // Meeting timer
     const timer = setInterval(() => {
       setMeetingTime(prev => prev + 1);
@@ -130,7 +166,8 @@ export function EnhancedVideoConference({
         }
       };
 
-      await webRTC.initializeConnection(roomId, userId, userName, isHost);
+      // Initialize WebRTC in background - don't wait for it
+      webRTC.initializeConnection(roomId, userId, userName, isHost).catch(console.error);
       
       if (isHost) {
         startAudioTranscription();
@@ -138,11 +175,7 @@ export function EnhancedVideoConference({
       
     } catch (error) {
       console.error('Failed to initialize WebRTC:', error);
-      toast({
-        title: "Connection Error",
-        description: "Failed to connect to the meeting. Please check your camera and microphone permissions.",
-        variant: "destructive",
-      });
+      // Don't show error toast immediately, let video work first
     }
   };
 
