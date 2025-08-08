@@ -18,6 +18,7 @@ import { WebRTCManager, Participant, ChatMessage } from '@/utils/WebRTCManager';
 import { InteractiveWhiteboard } from './InteractiveWhiteboard';
 import { AIVoiceTutor } from './AIVoiceTutor';
 import { LiveTranslation } from './LiveTranslation';
+import { SimpleVideoTest } from './SimpleVideoTest';
 import { supabase } from '@/integrations/supabase/client';
 
 interface EnhancedVideoConferenceProps {
@@ -855,6 +856,9 @@ export function EnhancedVideoConference({
           audioStream={webRTC.getLocalStream()}
         />
       )}
+      
+      {/* Simple Video Test - positioned in top right corner */}
+      <SimpleVideoTest />
     </div>
   );
 }
