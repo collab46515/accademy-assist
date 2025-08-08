@@ -96,27 +96,34 @@ export function EnhancedVideoConference({
           console.log('EnhancedVideoConference: Setting video element srcObject');
           localVideoRef.current.srcObject = stream;
           
+          // Set video properties explicitly
+          localVideoRef.current.muted = true;
+          localVideoRef.current.autoplay = true;
+          localVideoRef.current.playsInline = true;
+          
           // Force play the video with better error handling
           setTimeout(async () => {
-            if (localVideoRef.current) {
+            if (localVideoRef.current && stream) {
               try {
                 console.log('EnhancedVideoConference: Attempting to play video...');
-                await localVideoRef.current.play();
-                console.log('EnhancedVideoConference: Video playing successfully!');
+                console.log('EnhancedVideoConference: Stream active tracks:', stream.getTracks().map(t => t.kind + ':' + t.readyState));
+                
+                // Ensure stream is active
+                const videoTrack = stream.getVideoTracks()[0];
+                if (videoTrack && videoTrack.readyState === 'live') {
+                  console.log('EnhancedVideoConference: Video track is live, playing video...');
+                  await localVideoRef.current.play();
+                  console.log('EnhancedVideoConference: Video playing successfully!');
+                } else {
+                  console.error('EnhancedVideoConference: Video track not ready:', videoTrack?.readyState);
+                }
               } catch (playError) {
                 console.error('EnhancedVideoConference: Video play failed:', playError);
-                // Try alternative approach
-                localVideoRef.current.muted = true;
-                localVideoRef.current.autoplay = true;
-                try {
-                  await localVideoRef.current.play();
-                  console.log('EnhancedVideoConference: Video playing after mute/autoplay fix!');
-                } catch (e) {
-                  console.error('EnhancedVideoConference: Final video play attempt failed:', e);
-                }
               }
+            } else {
+              console.error('EnhancedVideoConference: Video ref or stream missing');
             }
-          }, 200);
+          }, 500);
         } else {
           console.error('EnhancedVideoConference: localVideoRef.current is null');
         }
@@ -367,22 +374,30 @@ export function EnhancedVideoConference({
     return (
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 h-full">
         {/* Local video */}
-        <Card className="relative overflow-hidden bg-black">
-          <div className="aspect-video">
+        <Card className="relative overflow-hidden bg-gray-900 border-2 border-primary">
+          <div className="aspect-video relative">
             <video
               ref={localVideoRef}
               autoPlay
               muted
               playsInline
               controls={false}
-              style={{ display: 'block' }}
-              className="w-full h-full object-cover"
+              style={{ 
+                display: 'block',
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                backgroundColor: '#000'
+              }}
+              className="absolute inset-0"
               onLoadedMetadata={() => console.log('EnhancedVideoConference: Video metadata loaded')}
               onCanPlay={() => console.log('EnhancedVideoConference: Video can play')}
               onPlaying={() => console.log('EnhancedVideoConference: Video is playing!')}
               onError={(e) => console.error('EnhancedVideoConference: Video error:', e)}
               onLoadStart={() => console.log('EnhancedVideoConference: Video load started')}
             />
+            
+            {/* Fallback when no video */}
             {!hasVideo && (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
                 <Avatar className="h-16 w-16">
@@ -392,6 +407,11 @@ export function EnhancedVideoConference({
                 </Avatar>
               </div>
             )}
+            
+            {/* Debug overlay to show video state */}
+            <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+              Video: {hasVideo ? 'ON' : 'OFF'}
+            </div>
           </div>
           
           <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
