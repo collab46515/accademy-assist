@@ -20,10 +20,12 @@ import {
   XCircle,
   Eye,
   Edit,
-  BarChart3
+  BarChart3,
+  Monitor,
+  Video
 } from 'lucide-react';
 import { useCommunicationData } from '@/hooks/useCommunicationData';
-import { CommunicationForm } from '@/components/communication';
+import { CommunicationForm, DigitalNoticeBoard, AnnouncementsManager, VirtualClassroomManager, VideoConferenceInterface } from '@/components/communication';
 import { CSVReportSection } from '@/components/shared/CSVReportSection';
 
 const CommunicationPage: React.FC = () => {
@@ -247,6 +249,14 @@ const CommunicationPage: React.FC = () => {
             <MessageSquare className="h-4 w-4" />
             Communications
           </TabsTrigger>
+          <TabsTrigger value="notice-board" className="flex items-center gap-2">
+            <Monitor className="h-4 w-4" />
+            Notice Board
+          </TabsTrigger>
+          <TabsTrigger value="virtual-classroom" className="flex items-center gap-2">
+            <Video className="h-4 w-4" />
+            Virtual Classrooms
+          </TabsTrigger>
           <TabsTrigger value="templates" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Templates
@@ -338,6 +348,30 @@ const CommunicationPage: React.FC = () => {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="notice-board">
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold">Digital Notice Board</h2>
+                <p className="text-muted-foreground">View and manage school announcements</p>
+              </div>
+            </div>
+            <DigitalNoticeBoard />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="virtual-classroom">
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold">Virtual Classrooms</h2>
+                <p className="text-muted-foreground">Manage virtual meetings and classrooms</p>
+              </div>
+            </div>
+            <VirtualClassroomManager />
+          </div>
         </TabsContent>
 
         <TabsContent value="templates">
