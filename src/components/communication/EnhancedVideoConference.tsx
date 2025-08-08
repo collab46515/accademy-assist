@@ -96,12 +96,27 @@ export function EnhancedVideoConference({
           console.log('EnhancedVideoConference: Setting video element srcObject');
           localVideoRef.current.srcObject = stream;
           
-          // Force play the video
-          setTimeout(() => {
+          // Force play the video with better error handling
+          setTimeout(async () => {
             if (localVideoRef.current) {
-              localVideoRef.current.play().catch(e => console.error('Video play failed:', e));
+              try {
+                console.log('EnhancedVideoConference: Attempting to play video...');
+                await localVideoRef.current.play();
+                console.log('EnhancedVideoConference: Video playing successfully!');
+              } catch (playError) {
+                console.error('EnhancedVideoConference: Video play failed:', playError);
+                // Try alternative approach
+                localVideoRef.current.muted = true;
+                localVideoRef.current.autoplay = true;
+                try {
+                  await localVideoRef.current.play();
+                  console.log('EnhancedVideoConference: Video playing after mute/autoplay fix!');
+                } catch (e) {
+                  console.error('EnhancedVideoConference: Final video play attempt failed:', e);
+                }
+              }
             }
-          }, 100);
+          }, 200);
         } else {
           console.error('EnhancedVideoConference: localVideoRef.current is null');
         }
@@ -359,10 +374,14 @@ export function EnhancedVideoConference({
               autoPlay
               muted
               playsInline
+              controls={false}
+              style={{ display: 'block' }}
               className="w-full h-full object-cover"
               onLoadedMetadata={() => console.log('EnhancedVideoConference: Video metadata loaded')}
               onCanPlay={() => console.log('EnhancedVideoConference: Video can play')}
+              onPlaying={() => console.log('EnhancedVideoConference: Video is playing!')}
               onError={(e) => console.error('EnhancedVideoConference: Video error:', e)}
+              onLoadStart={() => console.log('EnhancedVideoConference: Video load started')}
             />
             {!hasVideo && (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
