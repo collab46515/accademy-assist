@@ -18,7 +18,6 @@ import { WebRTCManager, Participant, ChatMessage } from '@/utils/WebRTCManager';
 import { InteractiveWhiteboard } from './InteractiveWhiteboard';
 import { AIVoiceTutor } from './AIVoiceTutor';
 import { LiveTranslation } from './LiveTranslation';
-import { SimpleVideoTest } from './SimpleVideoTest';
 import { supabase } from '@/integrations/supabase/client';
 
 interface EnhancedVideoConferenceProps {
@@ -374,29 +373,28 @@ export function EnhancedVideoConference({
     console.log('EnhancedVideoConference: Rendering ParticipantGrid, hasVideo:', hasVideo);
     return (
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 h-full">
-        {/* Local video */}
-        <Card className="relative overflow-hidden bg-gray-900 border-2 border-primary">
-          <div className="aspect-video relative">
+        {/* Local video - using the EXACT same approach as the working test */}
+        <Card className="relative overflow-hidden border-2 border-green-500">
+          <div style={{ width: '100%', height: '0', paddingBottom: '56.25%', position: 'relative' }}>
             <video
               ref={localVideoRef}
               autoPlay
               muted
               playsInline
-              style={{ 
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover',
-                display: 'block'
+                objectFit: 'cover'
               }}
-              className="absolute inset-0"
-              onLoadedMetadata={() => console.log('Main video: metadata loaded')}
-              onCanPlay={() => console.log('Main video: can play')} 
-              onPlaying={() => console.log('Main video: playing!')}
+              onPlaying={() => console.log('Main video: NOW PLAYING!')}
             />
             
-            {/* Debug overlay */}
-            <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-              Main Video: {hasVideo ? 'ON' : 'OFF'}
+            {/* Success indicator */}
+            <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded">
+              ✅ MAIN VIDEO
             </div>
           </div>
           
@@ -841,9 +839,6 @@ export function EnhancedVideoConference({
           audioStream={webRTC.getLocalStream()}
         />
       )}
-      
-      {/* Simple Video Test - positioned in top right corner */}
-      <SimpleVideoTest />
     </div>
   );
 }
