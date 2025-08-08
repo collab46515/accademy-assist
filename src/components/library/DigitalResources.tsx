@@ -2,10 +2,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Headphones, Video, Globe, Download, Play, Eye, Clock } from "lucide-react";
+import { BookOpen, Headphones, Video, Globe, Download, Play, Eye, Clock, Pause } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useRef } from "react";
 
 export function DigitalResources() {
+  const [playingAudio, setPlayingAudio] = useState<string | null>(null);
+  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
+  const audioRefs = useRef<{[key: string]: HTMLAudioElement}>({});
+  const videoRefs = useRef<{[key: string]: HTMLVideoElement}>({});
   const ebooks = [
     { 
       id: "1", 
@@ -46,7 +51,8 @@ export function DigitalResources() {
       narrator: "John Williams", 
       duration: "6h 45m", 
       plays: 28,
-      rating: 4.7
+      rating: 4.7,
+      audioUrl: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" // Sample audio
     },
     { 
       id: "2", 
@@ -54,7 +60,8 @@ export function DigitalResources() {
       narrator: "Sarah Thompson", 
       duration: "8h 30m", 
       plays: 45,
-      rating: 4.9
+      rating: 4.9,
+      audioUrl: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" // Sample audio
     }
   ];
 
@@ -65,7 +72,8 @@ export function DigitalResources() {
       duration: "45 minutes", 
       views: 156,
       subject: "Chemistry",
-      level: "KS3"
+      level: "KS3",
+      videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
     },
     { 
       id: "2", 
@@ -73,7 +81,8 @@ export function DigitalResources() {
       duration: "90 minutes", 
       views: 89,
       subject: "History",
-      level: "KS4"
+      level: "KS4",
+      videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
     }
   ];
 
@@ -83,6 +92,43 @@ export function DigitalResources() {
     { name: "National Geographic Kids", status: "Connected", users: 312 },
     { name: "BBC Educational", status: "Connected", users: 156 }
   ];
+
+  const handleAudioPlay = (audioId: string, audioUrl: string) => {
+    // Stop any currently playing audio
+    if (playingAudio && audioRefs.current[playingAudio]) {
+      audioRefs.current[playingAudio].pause();
+    }
+
+    if (playingAudio === audioId) {
+      setPlayingAudio(null);
+      return;
+    }
+
+    // Create or get audio element
+    if (!audioRefs.current[audioId]) {
+      audioRefs.current[audioId] = new Audio(audioUrl);
+      audioRefs.current[audioId].addEventListener('ended', () => {
+        setPlayingAudio(null);
+      });
+    }
+
+    audioRefs.current[audioId].play();
+    setPlayingAudio(audioId);
+  };
+
+  const handleVideoPlay = (videoId: string) => {
+    // Stop any currently playing video
+    if (playingVideo && videoRefs.current[playingVideo]) {
+      videoRefs.current[playingVideo].pause();
+    }
+
+    if (playingVideo === videoId) {
+      setPlayingVideo(null);
+      return;
+    }
+
+    setPlayingVideo(videoId);
+  };
 
   return (
     <div className="space-y-6">
@@ -202,52 +248,99 @@ export function DigitalResources() {
                   
                   <Progress value={35} className="h-2" />
                   
-                  <div className="flex gap-2">
-                    <Button size="sm" className="flex-1" onClick={() => console.log(`Continue playing ${book.title}`)}>
-                      <Play className="h-4 w-4 mr-1" />
-                      Continue Playing
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => console.log(`Download ${book.title}`)}>
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </div>
+                   <div className="flex gap-2">
+                     <Button 
+                       size="sm" 
+                       className="flex-1" 
+                       onClick={() => handleAudioPlay(book.id, book.audioUrl)}
+                     >
+                       {playingAudio === book.id ? (
+                         <>
+                           <Pause className="h-4 w-4 mr-1" />
+                           Pause
+                         </>
+                       ) : (
+                         <>
+                           <Play className="h-4 w-4 mr-1" />
+                           Play Audio
+                         </>
+                       )}
+                     </Button>
+                     <Button variant="outline" size="sm" onClick={() => console.log(`Download ${book.title}`)}>
+                       <Download className="h-4 w-4" />
+                     </Button>
+                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         </TabsContent>
 
-        <TabsContent value="videos">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {videos.map((video) => (
-              <Card key={video.id} className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-6 space-y-4">
-                  <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
-                    <Video className="h-12 w-12 text-gray-400" />
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold">{video.title}</h3>
-                    <div className="flex gap-2 mt-1">
-                      <Badge variant="outline" className="text-xs">{video.subject}</Badge>
-                      <Badge variant="outline" className="text-xs">{video.level}</Badge>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>{video.duration}</span>
-                    <span>{video.views} views</span>
-                  </div>
-                  
-                  <Button size="sm" className="w-full" onClick={() => console.log(`Watch ${video.title}`)}>
-                    <Play className="h-4 w-4 mr-1" />
-                    Watch Now
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
+         <TabsContent value="videos">
+           <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+             {videos.map((video) => (
+               <Card key={video.id} className="hover:shadow-lg transition-shadow">
+                 <CardContent className="p-6 space-y-4">
+                   {playingVideo === video.id ? (
+                     <div className="aspect-video rounded-lg overflow-hidden">
+                       <video
+                         ref={(el) => {
+                           if (el) videoRefs.current[video.id] = el;
+                         }}
+                         className="w-full h-full object-cover"
+                         controls
+                         autoPlay
+                         onEnded={() => setPlayingVideo(null)}
+                         src={video.videoUrl}
+                       >
+                         Your browser does not support the video tag.
+                       </video>
+                     </div>
+                   ) : (
+                     <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors"
+                          onClick={() => handleVideoPlay(video.id)}>
+                       <div className="text-center">
+                         <Video className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                         <p className="text-sm text-gray-600">Click to play</p>
+                       </div>
+                     </div>
+                   )}
+                   
+                   <div>
+                     <h3 className="font-semibold">{video.title}</h3>
+                     <div className="flex gap-2 mt-1">
+                       <Badge variant="outline" className="text-xs">{video.subject}</Badge>
+                       <Badge variant="outline" className="text-xs">{video.level}</Badge>
+                     </div>
+                   </div>
+                   
+                   <div className="flex justify-between text-sm text-muted-foreground">
+                     <span>{video.duration}</span>
+                     <span>{video.views} views</span>
+                   </div>
+                   
+                   <Button 
+                     size="sm" 
+                     className="w-full" 
+                     onClick={() => handleVideoPlay(video.id)}
+                   >
+                     {playingVideo === video.id ? (
+                       <>
+                         <Pause className="h-4 w-4 mr-1" />
+                         Stop Video
+                       </>
+                     ) : (
+                       <>
+                         <Play className="h-4 w-4 mr-1" />
+                         Watch Now
+                       </>
+                     )}
+                   </Button>
+                 </CardContent>
+               </Card>
+             ))}
+           </div>
+         </TabsContent>
 
         <TabsContent value="platforms">
           <div className="grid gap-4 md:grid-cols-2">
