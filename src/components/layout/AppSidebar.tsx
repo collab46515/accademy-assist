@@ -182,6 +182,7 @@ function getCurrentModule(pathname: string) {
   if (pathname.startsWith('/academic-operations') || 
       pathname.startsWith('/admissions') || 
       pathname.startsWith('/curriculum') || 
+      pathname.startsWith('/academic-management') ||
       pathname.startsWith('/timetable') || 
       pathname.startsWith('/exams') || 
       pathname.startsWith('/academics') ||
