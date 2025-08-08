@@ -135,6 +135,7 @@ export function InteractiveWhiteboard({ roomId, isReadOnly = false }: Interactiv
   const handleSave = () => {
     if (!fabricCanvas) return;
     const dataURL = fabricCanvas.toDataURL({
+      multiplier: 1,
       format: 'png',
       quality: 0.8,
     });
