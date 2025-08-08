@@ -66,9 +66,42 @@ export function EnhancedVideoConference({
   
   // Refs
   const localVideoRef = useRef<HTMLVideoElement>(null);
+  const workingVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
   const audioRecorderRef = useRef<MediaRecorder | null>(null);
   const transcriptChunksRef = useRef<string[]>([]);
+
+  // Add a separate effect for the working video approach
+  useEffect(() => {
+    // Use the EXACT same approach that worked for the test video
+    const startWorkingVideo = async () => {
+      try {
+        console.log('WorkingVideo: Starting...');
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: true, 
+          audio: true 
+        });
+        
+        console.log('WorkingVideo: Got stream');
+        
+        if (workingVideoRef.current) {
+          workingVideoRef.current.srcObject = stream;
+          console.log('WorkingVideo: Set srcObject');
+          
+          try {
+            await workingVideoRef.current.play();
+            console.log('WorkingVideo: Video playing!');
+          } catch (e) {
+            console.error('WorkingVideo: Play failed:', e);
+          }
+        }
+      } catch (error) {
+        console.error('WorkingVideo: Error:', error);
+      }
+    };
+
+    startWorkingVideo();
+  }, []);
 
   useEffect(() => {
     console.log('EnhancedVideoConference: Component mounted, starting initialization');
@@ -373,28 +406,28 @@ export function EnhancedVideoConference({
     console.log('EnhancedVideoConference: Rendering ParticipantGrid, hasVideo:', hasVideo);
     return (
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 h-full">
-        {/* Local video - using the EXACT same approach as the working test */}
-        <Card className="relative overflow-hidden border-2 border-green-500">
-          <div style={{ width: '100%', height: '0', paddingBottom: '56.25%', position: 'relative' }}>
+        {/* WORKING VIDEO - using the exact approach that worked in the test */}
+        <Card className="relative overflow-hidden border-4 border-green-500">
+          <div style={{ 
+            width: '100%', 
+            height: '300px',
+            position: 'relative',
+            backgroundColor: 'blue'
+          }}>
             <video
-              ref={localVideoRef}
+              ref={workingVideoRef}
               autoPlay
               muted
               playsInline
               style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover'
               }}
-              onPlaying={() => console.log('Main video: NOW PLAYING!')}
             />
             
-            {/* Success indicator */}
             <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded">
-              ✅ MAIN VIDEO
+              ✅ WORKING VIDEO
             </div>
           </div>
           
