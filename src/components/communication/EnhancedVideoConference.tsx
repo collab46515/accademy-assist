@@ -82,21 +82,33 @@ export function EnhancedVideoConference({
           audio: true 
         });
         
-        console.log('WorkingVideo: Got stream');
+        console.log('WorkingVideo: Got stream:', stream);
+        console.log('WorkingVideo: Video tracks:', stream.getVideoTracks());
+        console.log('WorkingVideo: Video track ready state:', stream.getVideoTracks()[0]?.readyState);
         
         if (workingVideoRef.current) {
+          console.log('WorkingVideo: Video element found');
           workingVideoRef.current.srcObject = stream;
-          console.log('WorkingVideo: Set srcObject');
+          console.log('WorkingVideo: Set srcObject on video element');
+          
+          // Add event listeners to track what's happening
+          workingVideoRef.current.onloadedmetadata = () => console.log('WorkingVideo: Metadata loaded');
+          workingVideoRef.current.oncanplay = () => console.log('WorkingVideo: Can play');
+          workingVideoRef.current.onplaying = () => console.log('WorkingVideo: Playing event fired');
+          workingVideoRef.current.onerror = (e) => console.error('WorkingVideo: Error event:', e);
           
           try {
+            console.log('WorkingVideo: Attempting to play...');
             await workingVideoRef.current.play();
-            console.log('WorkingVideo: Video playing!');
+            console.log('WorkingVideo: Play() completed successfully!');
           } catch (e) {
             console.error('WorkingVideo: Play failed:', e);
           }
+        } else {
+          console.error('WorkingVideo: Video element NOT found');
         }
       } catch (error) {
-        console.error('WorkingVideo: Error:', error);
+        console.error('WorkingVideo: Error getting camera:', error);
       }
     };
 
@@ -406,7 +418,7 @@ export function EnhancedVideoConference({
     console.log('EnhancedVideoConference: Rendering ParticipantGrid, hasVideo:', hasVideo);
     return (
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 h-full">
-        {/* WORKING VIDEO - using the exact approach that worked in the test */}
+        {/* WORKING VIDEO - with enhanced debugging */}
         <Card className="relative overflow-hidden border-4 border-green-500">
           <div style={{ 
             width: '100%', 
@@ -422,12 +434,20 @@ export function EnhancedVideoConference({
               style={{
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover'
+                objectFit: 'cover',
+                backgroundColor: 'red'
               }}
+              onLoadedData={() => console.log('WorkingVideo: Data loaded')}
+              onLoadedMetadata={() => console.log('WorkingVideo: Metadata loaded (inline)')}
             />
             
             <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded">
               ✅ WORKING VIDEO
+            </div>
+            
+            {/* Debug info */}
+            <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+              Stream: {workingVideoRef.current?.srcObject ? 'SET' : 'NOT SET'}
             </div>
           </div>
           
