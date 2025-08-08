@@ -164,25 +164,47 @@ export function ApplicationDetail({ applicationId, onBack, getStatusColor }: App
   const getStatusActions = (status: string) => {
     const actions = {
       submitted: [
-        { label: 'Start Review', action: () => handleStatusUpdate('reviewing'), variant: 'default' as const },
-        { label: 'Request Documents', action: () => {}, variant: 'outline' as const }
+        { label: 'Start Review', action: () => handleStatusUpdate('under_review'), variant: 'default' as const },
+        { label: 'Request Documents', action: () => handleStatusUpdate('documents_pending'), variant: 'outline' as const }
       ],
-      reviewing: [
-        { label: 'Schedule Assessment', action: () => handleStatusUpdate('assessment'), variant: 'default' as const },
-        { label: 'Request Interview', action: () => handleStatusUpdate('interview'), variant: 'outline' as const },
+      under_review: [
+        { label: 'Schedule Assessment', action: () => handleStatusUpdate('assessment_scheduled'), variant: 'default' as const },
+        { label: 'Request Interview', action: () => handleStatusUpdate('interview_scheduled'), variant: 'outline' as const },
         { label: 'Reject Application', action: () => handleStatusUpdate('rejected'), variant: 'destructive' as const }
       ],
-      assessment: [
-        { label: 'Complete Assessment', action: () => handleStatusUpdate('decision'), variant: 'default' as const },
-        { label: 'Schedule Interview', action: () => handleStatusUpdate('interview'), variant: 'outline' as const }
+      documents_pending: [
+        { label: 'Documents Received', action: () => handleStatusUpdate('under_review'), variant: 'default' as const },
+        { label: 'Follow Up', action: () => {}, variant: 'outline' as const }
       ],
-      interview: [
-        { label: 'Make Decision', action: () => handleStatusUpdate('decision'), variant: 'default' as const }
+      assessment_scheduled: [
+        { label: 'Assessment Complete', action: () => handleStatusUpdate('assessment_complete'), variant: 'default' as const },
+        { label: 'Reschedule', action: () => {}, variant: 'outline' as const }
       ],
-      decision: [
+      assessment_complete: [
+        { label: 'Schedule Interview', action: () => handleStatusUpdate('interview_scheduled'), variant: 'default' as const },
+        { label: 'Move to Decision', action: () => handleStatusUpdate('pending_approval'), variant: 'outline' as const }
+      ],
+      interview_scheduled: [
+        { label: 'Interview Complete', action: () => handleStatusUpdate('interview_complete'), variant: 'default' as const },
+        { label: 'Reschedule', action: () => {}, variant: 'outline' as const }
+      ],
+      interview_complete: [
+        { label: 'Move to Decision', action: () => handleStatusUpdate('pending_approval'), variant: 'default' as const }
+      ],
+      pending_approval: [
         { label: 'Approve', action: () => handleStatusUpdate('approved'), variant: 'default' as const },
-        { label: 'Waitlist', action: () => handleStatusUpdate('waitlisted'), variant: 'outline' as const },
+        { label: 'Put on Hold', action: () => handleStatusUpdate('on_hold'), variant: 'outline' as const },
         { label: 'Reject', action: () => handleStatusUpdate('rejected'), variant: 'destructive' as const }
+      ],
+      approved: [
+        { label: 'Send Offer', action: () => handleStatusUpdate('offer_sent'), variant: 'default' as const }
+      ],
+      offer_sent: [
+        { label: 'Offer Accepted', action: () => handleStatusUpdate('offer_accepted'), variant: 'default' as const },
+        { label: 'Offer Declined', action: () => handleStatusUpdate('offer_declined'), variant: 'outline' as const }
+      ],
+      offer_accepted: [
+        { label: 'Complete Enrollment', action: () => handleStatusUpdate('enrolled'), variant: 'default' as const }
       ]
     };
     return actions[status as keyof typeof actions] || [];
