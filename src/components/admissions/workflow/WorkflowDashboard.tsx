@@ -19,6 +19,7 @@ import {
 
 interface WorkflowDashboardProps {
   getStatusColor: (status: string) => string;
+  onViewApplications?: (status: string) => void;
 }
 
 interface WorkflowStage {
@@ -31,7 +32,7 @@ interface WorkflowStage {
   color: string;
 }
 
-export function WorkflowDashboard({ getStatusColor }: WorkflowDashboardProps) {
+export function WorkflowDashboard({ getStatusColor, onViewApplications }: WorkflowDashboardProps) {
   const [workflowData, setWorkflowData] = useState<WorkflowStage[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -227,6 +228,7 @@ export function WorkflowDashboard({ getStatusColor }: WorkflowDashboardProps) {
                       variant="ghost" 
                       size="sm" 
                       className="w-full group-hover:bg-slate-100"
+                      onClick={() => onViewApplications?.(stage.id)}
                     >
                       View Applications
                       <ArrowRight className="h-4 w-4 ml-2" />

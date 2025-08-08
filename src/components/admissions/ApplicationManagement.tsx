@@ -350,7 +350,13 @@ export function ApplicationManagement({ initialFilter = 'all' }: ApplicationMana
           </TabsContent>
 
           <TabsContent value="workflow">
-            <WorkflowDashboard getStatusColor={getStatusColor} />
+            <WorkflowDashboard 
+              getStatusColor={getStatusColor} 
+              onViewApplications={(status) => {
+                setStatusFilter(status);
+                setActiveTab('applications');
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="assessments">
