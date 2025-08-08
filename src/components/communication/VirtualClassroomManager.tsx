@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Video, Users, Calendar, Clock, Settings, Link, Play, Pause } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -34,8 +35,7 @@ const mockMeetings: VirtualMeeting[] = [
     meeting_type: 'classroom',
     host: 'Ms. Johnson',
     participants: ['Year 10A', 'Year 10B'],
-    meeting_url: 'https://meet.school.com/math-year10',
-    status: 'scheduled'
+    status: 'live'  // Changed to live for demo
   },
   {
     id: '2',
@@ -46,7 +46,6 @@ const mockMeetings: VirtualMeeting[] = [
     meeting_type: 'parent_teacher',
     host: 'Mr. Davis',
     participants: ['Mr. Smith', 'Mrs. Smith'],
-    meeting_url: 'https://meet.school.com/ptc-emma-smith',
     status: 'live'
   },
   {
@@ -60,6 +59,28 @@ const mockMeetings: VirtualMeeting[] = [
     participants: ['Year 12 Literature'],
     status: 'ended',
     recording_available: true
+  },
+  {
+    id: '4',
+    title: 'Science Lab - Chemistry',
+    description: 'Virtual chemistry experiments with AI assistance',
+    scheduled_for: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes from now
+    duration: 75,
+    meeting_type: 'classroom',
+    host: 'Dr. Smith',
+    participants: ['Year 11 Chemistry'],
+    status: 'live'
+  },
+  {
+    id: '5',
+    title: 'Staff Meeting - AI Tools Training',
+    description: 'Training session on AI-powered teaching tools',
+    scheduled_for: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour from now
+    duration: 45,
+    meeting_type: 'staff_meeting',
+    host: 'Head Teacher',
+    participants: ['All Teaching Staff'],
+    status: 'scheduled'
   }
 ];
 
@@ -70,23 +91,21 @@ const meetingTypeConfig = {
 };
 
 export function VirtualClassroomManager() {
-  const [meetings, setMeetings] = useState<VirtualMeeting[]>(mockMeetings);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  
+  const joinMeeting = (meetingId: string) => {
+    // Navigate to our AI-powered video conference page
+    navigate(`/virtual-classroom/meeting/${meetingId}`);
+  };
 
-  const filteredMeetings = meetings.filter(meeting => {
+  const filteredMeetings = mockMeetings.filter(meeting => {
     if (activeTab === 'all') return true;
     if (activeTab === 'live') return meeting.status === 'live';
     if (activeTab === 'scheduled') return meeting.status === 'scheduled';
     return meeting.meeting_type === activeTab;
   });
-
-  const joinMeeting = (meetingId: string) => {
-    const meeting = meetings.find(m => m.id === meetingId);
-    if (meeting?.meeting_url) {
-      window.open(meeting.meeting_url, '_blank');
-    }
-  };
 
   const MeetingCard = ({ meeting }: { meeting: VirtualMeeting }) => {
     const config = meetingTypeConfig[meeting.meeting_type];
@@ -164,13 +183,13 @@ export function VirtualClassroomManager() {
   };
 
   const CreateMeetingDialog = () => (
-    <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Video className="h-4 w-4 mr-2" />
-          Schedule Meeting
-        </Button>
-      </DialogTrigger>
+    <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogTrigger asChild>
+          <Button>
+            <Video className="h-4 w-4 mr-2" />
+            Schedule Meeting
+          </Button>
+        </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Schedule Virtual Meeting</DialogTitle>
@@ -222,10 +241,10 @@ export function VirtualClassroomManager() {
           </div>
           
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={() => setIsCreateDialogOpen(false)}>
+            <Button onClick={() => setShowCreateDialog(false)}>
               Schedule Meeting
             </Button>
           </div>
@@ -234,8 +253,8 @@ export function VirtualClassroomManager() {
     </Dialog>
   );
 
-  const liveCount = meetings.filter(m => m.status === 'live').length;
-  const scheduledCount = meetings.filter(m => m.status === 'scheduled').length;
+  const liveCount = mockMeetings.filter(m => m.status === 'live').length;
+  const scheduledCount = mockMeetings.filter(m => m.status === 'scheduled').length;
 
   return (
     <div className="space-y-6">
