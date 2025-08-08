@@ -382,36 +382,21 @@ export function EnhancedVideoConference({
               autoPlay
               muted
               playsInline
-              controls={false}
               style={{ 
-                display: 'block',
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
-                backgroundColor: '#000'
+                display: 'block'
               }}
               className="absolute inset-0"
-              onLoadedMetadata={() => console.log('EnhancedVideoConference: Video metadata loaded')}
-              onCanPlay={() => console.log('EnhancedVideoConference: Video can play')}
-              onPlaying={() => console.log('EnhancedVideoConference: Video is playing!')}
-              onError={(e) => console.error('EnhancedVideoConference: Video error:', e)}
-              onLoadStart={() => console.log('EnhancedVideoConference: Video load started')}
+              onLoadedMetadata={() => console.log('Main video: metadata loaded')}
+              onCanPlay={() => console.log('Main video: can play')} 
+              onPlaying={() => console.log('Main video: playing!')}
             />
             
-            {/* Fallback when no video */}
-            {!hasVideo && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-                <Avatar className="h-16 w-16">
-                  <AvatarFallback className="text-2xl">
-                    {userName.split(' ').map(n => n[0]).join('')}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-            )}
-            
-            {/* Debug overlay to show video state */}
+            {/* Debug overlay */}
             <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-              Video: {hasVideo ? 'ON' : 'OFF'}
+              Main Video: {hasVideo ? 'ON' : 'OFF'}
             </div>
           </div>
           
