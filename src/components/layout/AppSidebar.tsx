@@ -165,6 +165,7 @@ const erpModules = [
     icon: Settings,
     subItems: [
       { title: "Dashboard", url: "/administration", icon: LayoutDashboard },
+      { title: "School Settings", url: "/school-settings", icon: Building },
       { title: "User Management", url: "/user-management", icon: UserCog },
       { title: "System Settings", url: "/admin-management", icon: Settings },
       { title: "Master Data", url: "/master-data", icon: Database },
@@ -208,6 +209,7 @@ function getCurrentModule(pathname: string) {
   if (pathname.startsWith('/analytics')) return 'Analytics & Reports';
   
   if (pathname.startsWith('/administration') || 
+      pathname.startsWith('/school-settings') ||
       pathname.startsWith('/admin-management') || 
       pathname.startsWith('/user-management') || 
       pathname.startsWith('/master-data') || 

@@ -67,6 +67,7 @@ import StudentServicesPage from "./pages/StudentServicesPage";
 import StaffHRPage from "./pages/StaffHRPage";
 import FinanceOperationsPage from "./pages/FinanceOperationsPage";
 import AdministrationPage from "./pages/AdministrationPage";
+import SchoolSettingsPage from "./pages/SchoolSettingsPage";
 
 const queryClient = new QueryClient();
 
@@ -102,6 +103,7 @@ const App = () => (
                           <Route path="/staff-hr" element={<StaffHRPage />} />
                           <Route path="/finance-operations" element={<FinanceOperationsPage />} />
                           <Route path="/administration" element={<AdministrationPage />} />
+                          <Route path="/school-settings" element={<SchoolSettingsPage />} />
                           <Route path="/students" element={<StudentsPage />} />
              <Route path="/admissions" element={<UnifiedAdmissionsPage />} />
              <Route path="/admissions/new" element={<NewApplicationsPage />} />
