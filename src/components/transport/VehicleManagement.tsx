@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Truck, Wrench, Calendar, AlertTriangle, CheckCircle } from "lucide-react";
+import { toast } from "sonner";
 
 export function VehicleManagement() {
   const vehicles = [
@@ -127,7 +128,7 @@ export function VehicleManagement() {
                   <Input id="mileage" type="number" placeholder="0" />
                 </div>
               </div>
-              <Button className="w-full">Add Vehicle</Button>
+              <Button className="w-full" onClick={() => toast.success("Vehicle added successfully!")}>Add Vehicle</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -229,8 +230,8 @@ export function VehicleManagement() {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm">Edit</Button>
-                      <Button variant="outline" size="sm">Service</Button>
+                      <Button variant="outline" size="sm" onClick={() => toast.info(`Edit vehicle ${vehicle.number}`)}>Edit</Button>
+                      <Button variant="outline" size="sm" onClick={() => toast.info(`Schedule service for ${vehicle.number}`)}>Service</Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -264,8 +265,8 @@ export function VehicleManagement() {
                   <p className="text-xs text-muted-foreground">Due: {alert.date}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">Schedule</Button>
-                  <Button size="sm">Resolve</Button>
+                  <Button variant="outline" size="sm" onClick={() => toast.info(`Schedule maintenance for ${alert.vehicle}`)}>Schedule</Button>
+                  <Button size="sm" onClick={() => toast.success(`Mark ${alert.issue} as resolved for ${alert.vehicle}`)}>Resolve</Button>
                 </div>
               </div>
             ))}

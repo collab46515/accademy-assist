@@ -1,8 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Truck, Users, MapPin, AlertTriangle, TrendingUp, Route, UserCheck, Clock } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
 
 export function TransportDashboard() {
   const stats = [
@@ -30,13 +31,13 @@ export function TransportDashboard() {
     <div className="space-y-6">
       {/* Quick Actions */}
       <div className="flex gap-3 flex-wrap">
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => toast.info("Vehicle tracking system loading...")}>
           <MapPin className="h-4 w-4" />
           Track Vehicles
         </Button>
-        <Button variant="outline">Emergency Contact</Button>
-        <Button variant="outline">Route Planning</Button>
-        <Button variant="outline">Driver Check-in</Button>
+        <Button variant="outline" onClick={() => toast.warning("Emergency Contact activated - dispatching notification")}>Emergency Contact</Button>
+        <Button variant="outline" onClick={() => toast.info("Route Planning tool opening...")}>Route Planning</Button>
+        <Button variant="outline" onClick={() => toast.success("Driver Check-in system ready")}>Driver Check-in</Button>
       </div>
 
       {/* Stats Grid */}
