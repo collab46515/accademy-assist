@@ -22,6 +22,7 @@ import { AdmissionsWorkflow } from "@/components/workflows/AdmissionsWorkflow";
 import { HRManagementWorkflow } from "@/components/workflows/HRManagementWorkflow";
 import { AITimetableWorkflow } from "@/components/workflows/AITimetableWorkflow";
 import { CommunicationWorkflow } from "@/components/workflows/CommunicationWorkflow";
+import { AIClassroomWorkflow } from "@/components/workflows/AIClassroomWorkflow";
 
 interface Module {
   name: string;
@@ -86,6 +87,14 @@ export function WorkflowDiagrams({ modules }: WorkflowDiagramsProps) {
       description: "Multi-channel communication workflow",
       component: CommunicationWorkflow,
       color: "bg-pink-500"
+    },
+    {
+      id: "ai-classroom",
+      name: "AI Classroom Suite",
+      icon: Brain,
+      description: "Revolutionary AI-powered teaching and learning environment",
+      component: AIClassroomWorkflow,
+      color: "bg-gradient-to-r from-purple-500 to-blue-500"
     }
   ];
 
