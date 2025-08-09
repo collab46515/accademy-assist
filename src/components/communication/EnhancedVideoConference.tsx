@@ -363,7 +363,7 @@ export function EnhancedVideoConference({
         </div>
       </div>
 
-      <div className="flex h-[calc(100vh-4rem)]">
+      <div className="flex h-[calc(100vh-8rem)]">
         {/* Main Video Area - Full screen video */}
         <div className="flex-1">
           <ParticipantGrid />
@@ -385,7 +385,7 @@ export function EnhancedVideoConference({
           </div>
 
           {/* Chat Messages */}
-          <div className="flex-1 p-3 overflow-y-auto">
+          <div className="flex-1 p-3 overflow-y-auto mb-2">
             {chatMessages.length === 0 ? (
               <div className="text-slate-400 text-sm">
                 <div className="mb-3">Chat is ready!</div>
@@ -407,9 +407,9 @@ export function EnhancedVideoConference({
             )}
           </div>
           
-          {/* Chat Input - Always visible */}
-          <div className="p-3 border-t border-slate-700 bg-slate-900">
-            <div className="flex gap-2">
+          {/* Chat Input - Fixed at bottom with proper spacing */}
+          <div className="p-4 border-t border-slate-700 bg-slate-900 mb-16">
+            <div className="flex gap-2 mb-3">
               <input
                 type="text"
                 placeholder="Type message..."
@@ -418,13 +418,13 @@ export function EnhancedVideoConference({
                 onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
                 className="flex-1 bg-slate-700 text-white px-3 py-2 rounded border-0 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500"
               />
-              <Button onClick={sendMessage} className="bg-blue-600 hover:bg-blue-700 px-4">
+              <Button onClick={sendMessage} className="bg-blue-600 hover:bg-blue-700 px-4 py-2">
                 Send
               </Button>
             </div>
             
             {/* Quick Feature Access */}
-            <div className="flex gap-1 mt-2">
+            <div className="flex gap-1">
               <Button size="sm" variant="outline" onClick={() => setShowTranslation(!showTranslation)} className="text-xs bg-slate-800 border-slate-600 text-slate-300">
                 🌍 Translate
               </Button>
