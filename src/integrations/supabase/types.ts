@@ -44,6 +44,60 @@ export type Database = {
         }
         Relationships: []
       }
+      application_documents: {
+        Row: {
+          application_id: string
+          created_at: string | null
+          document_name: string
+          document_type: string
+          file_path: string
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          status: string
+          updated_at: string | null
+          uploaded_at: string | null
+          uploaded_by: string | null
+          verification_notes: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          application_id: string
+          created_at?: string | null
+          document_name: string
+          document_type: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          status?: string
+          updated_at?: string | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+          verification_notes?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          application_id?: string
+          created_at?: string | null
+          document_name?: string
+          document_type?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          status?: string
+          updated_at?: string | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+          verification_notes?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
       assessment_tests: {
         Row: {
           created_at: string | null
