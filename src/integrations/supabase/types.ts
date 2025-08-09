@@ -6070,40 +6070,67 @@ export type Database = {
       }
       schools: {
         Row: {
+          academic_year_end: string | null
+          academic_year_start: string | null
           address: string | null
           code: string
+          colors: Json | null
           contact_email: string | null
           contact_phone: string | null
           created_at: string
+          establishment_type: string | null
+          founded_year: number | null
           id: string
           is_active: boolean
+          logo_url: string | null
+          motto: string | null
           name: string
+          principal_name: string | null
           settings: Json | null
           updated_at: string
+          website: string | null
         }
         Insert: {
+          academic_year_end?: string | null
+          academic_year_start?: string | null
           address?: string | null
           code: string
+          colors?: Json | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          establishment_type?: string | null
+          founded_year?: number | null
           id?: string
           is_active?: boolean
+          logo_url?: string | null
+          motto?: string | null
           name: string
+          principal_name?: string | null
           settings?: Json | null
           updated_at?: string
+          website?: string | null
         }
         Update: {
+          academic_year_end?: string | null
+          academic_year_start?: string | null
           address?: string | null
           code?: string
+          colors?: Json | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          establishment_type?: string | null
+          founded_year?: number | null
           id?: string
           is_active?: boolean
+          logo_url?: string | null
+          motto?: string | null
           name?: string
+          principal_name?: string | null
           settings?: Json | null
           updated_at?: string
+          website?: string | null
         }
         Relationships: []
       }
