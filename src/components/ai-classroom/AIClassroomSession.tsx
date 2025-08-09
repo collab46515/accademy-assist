@@ -52,6 +52,7 @@ import {
 import { InteractiveWhiteboard } from '@/components/communication/InteractiveWhiteboard';
 import { AITeachingAssistant } from './AITeachingAssistant';
 import { DynamicContentGenerator } from './DynamicContentGenerator';
+import { DemoNotificationBanner } from './DemoNotificationBanner';
 
 // Import all AI classroom components
 import { StudentAnalyticsDashboard } from './StudentAnalyticsDashboard';
@@ -95,6 +96,7 @@ interface AIClassroomSessionProps {
   userName: string;
   userId: string;
   lessonTitle?: string;
+  isDemoMode?: boolean;
 }
 
 export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
@@ -102,61 +104,147 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
   userRole,
   userName,
   userId,
-  lessonTitle = "AI-Enhanced Mathematics - Algebra Fundamentals"
+  lessonTitle = "AI-Enhanced Mathematics - Algebra Fundamentals",
+  isDemoMode = false
 }) => {
-  // Enhanced student data with AI metrics
-  const [students, setStudents] = useState<Student[]>([
-    {
-      id: '1',
-      name: 'Sarah Johnson',
-      hasAudio: false,
-      hasVideo: true,
-      isHandRaised: true,
-      handRaisedAt: new Date(Date.now() - 2000),
-      attentionStatus: 'focused',
-      participationScore: 85,
-      joinedAt: new Date(Date.now() - 300000),
-      learningStyle: 'visual',
-      comprehensionLevel: 78,
-      engagementScore: 92,
-      aiInteractions: 12,
-      strugglingTopics: ['quadratic formulas'],
-      strengths: ['graphing', 'basic algebra']
-    },
-    {
-      id: '2', 
-      name: 'Mike Chen',
-      hasAudio: true,
-      hasVideo: false,
-      isHandRaised: false,
-      attentionStatus: 'focused',
-      participationScore: 92,
-      joinedAt: new Date(Date.now() - 280000),
-      learningStyle: 'auditory',
-      comprehensionLevel: 94,
-      engagementScore: 88,
-      aiInteractions: 8,
-      strugglingTopics: [],
-      strengths: ['problem solving', 'logical reasoning']
-    },
-    {
-      id: '3',
-      name: 'Emma Davis',
-      hasAudio: false,
-      hasVideo: true,
-      isHandRaised: true,
-      handRaisedAt: new Date(Date.now() - 5000),
-      attentionStatus: 'distracted',
-      participationScore: 67,
-      joinedAt: new Date(Date.now() - 250000),
-      learningStyle: 'kinesthetic',
-      comprehensionLevel: 58,
-      engagementScore: 72,
-      aiInteractions: 15,
-      strugglingTopics: ['algebraic manipulation', 'word problems'],
-      strengths: ['geometric concepts']
-    }
-  ]);
+  // Enhanced student data with AI metrics (enhanced for demo mode)
+  const [students, setStudents] = useState<Student[]>(
+    isDemoMode ? [
+      {
+        id: '1',
+        name: 'Sarah Johnson (Demo)',
+        hasAudio: false,
+        hasVideo: true,
+        isHandRaised: true,
+        handRaisedAt: new Date(Date.now() - 2000),
+        attentionStatus: 'focused',
+        participationScore: 85,
+        joinedAt: new Date(Date.now() - 300000),
+        learningStyle: 'visual',
+        comprehensionLevel: 78,
+        engagementScore: 92,
+        aiInteractions: 12,
+        strugglingTopics: ['quadratic formulas'],
+        strengths: ['graphing', 'basic algebra']
+      },
+      {
+        id: '2', 
+        name: 'Mike Chen (Demo)',
+        hasAudio: true,
+        hasVideo: false,
+        isHandRaised: false,
+        attentionStatus: 'focused',
+        participationScore: 92,
+        joinedAt: new Date(Date.now() - 280000),
+        learningStyle: 'auditory',
+        comprehensionLevel: 94,
+        engagementScore: 88,
+        aiInteractions: 8,
+        strugglingTopics: [],
+        strengths: ['problem solving', 'logical reasoning']
+      },
+      {
+        id: '3',
+        name: 'Emma Davis (Demo)',
+        hasAudio: false,
+        hasVideo: true,
+        isHandRaised: true,
+        handRaisedAt: new Date(Date.now() - 5000),
+        attentionStatus: 'distracted',
+        participationScore: 67,
+        joinedAt: new Date(Date.now() - 250000),
+        learningStyle: 'kinesthetic',
+        comprehensionLevel: 58,
+        engagementScore: 72,
+        aiInteractions: 15,
+        strugglingTopics: ['algebraic manipulation', 'word problems'],
+        strengths: ['geometric concepts']
+      },
+      {
+        id: '4',
+        name: 'Alex Thompson (Demo)',
+        hasAudio: true,
+        hasVideo: true,
+        isHandRaised: false,
+        attentionStatus: 'focused',
+        participationScore: 88,
+        joinedAt: new Date(Date.now() - 320000),
+        learningStyle: 'mixed',
+        comprehensionLevel: 89,
+        engagementScore: 95,
+        aiInteractions: 6,
+        strugglingTopics: [],
+        strengths: ['analytical thinking', 'pattern recognition']
+      },
+      {
+        id: '5',
+        name: 'Lisa Park (Demo)',
+        hasAudio: false,
+        hasVideo: true,
+        isHandRaised: false,
+        attentionStatus: 'away',
+        participationScore: 45,
+        joinedAt: new Date(Date.now() - 200000),
+        learningStyle: 'visual',
+        comprehensionLevel: 62,
+        engagementScore: 55,
+        aiInteractions: 20,
+        strugglingTopics: ['basic operations', 'word problems'],
+        strengths: ['memorization']
+      }
+    ] : [
+      {
+        id: '1',
+        name: 'Sarah Johnson',
+        hasAudio: false,
+        hasVideo: true,
+        isHandRaised: true,
+        handRaisedAt: new Date(Date.now() - 2000),
+        attentionStatus: 'focused',
+        participationScore: 85,
+        joinedAt: new Date(Date.now() - 300000),
+        learningStyle: 'visual',
+        comprehensionLevel: 78,
+        engagementScore: 92,
+        aiInteractions: 12,
+        strugglingTopics: ['quadratic formulas'],
+        strengths: ['graphing', 'basic algebra']
+      },
+      {
+        id: '2', 
+        name: 'Mike Chen',
+        hasAudio: true,
+        hasVideo: false,
+        isHandRaised: false,
+        attentionStatus: 'focused',
+        participationScore: 92,
+        joinedAt: new Date(Date.now() - 280000),
+        learningStyle: 'auditory',
+        comprehensionLevel: 94,
+        engagementScore: 88,
+        aiInteractions: 8,
+        strugglingTopics: [],
+        strengths: ['problem solving', 'logical reasoning']
+      },
+      {
+        id: '3',
+        name: 'Emma Davis',
+        hasAudio: false,
+        hasVideo: true,
+        isHandRaised: true,
+        handRaisedAt: new Date(Date.now() - 5000),
+        attentionStatus: 'distracted',
+        participationScore: 67,
+        joinedAt: new Date(Date.now() - 250000),
+        learningStyle: 'kinesthetic',
+        comprehensionLevel: 58,
+        engagementScore: 72,
+        aiInteractions: 15,
+        strugglingTopics: ['algebraic manipulation', 'word problems'],
+        strengths: ['geometric concepts']
+      }
+    ]
+  );
 
   // AI Teaching Assistant insights (different format)
   const [teachingInsights, setTeachingInsights] = useState<{
@@ -378,6 +466,9 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
 
   return (
     <div className="h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col">
+      {/* Demo Mode Banner */}
+      {isDemoMode && <DemoNotificationBanner />}
+
       {/* Enhanced Header Bar with AI Status */}
       <div className="bg-white border-b border-slate-200 px-6 py-4 shadow-sm">
         <div className="flex items-center justify-between">
@@ -475,8 +566,28 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
                 <div className="p-4 rounded-full bg-slate-800/50 mb-4 inline-block">
                   <Presentation className="h-12 w-12" />
                 </div>
-                <h3 className="text-xl font-medium mb-2">AI-Enhanced Presentation</h3>
-                <p className="text-sm opacity-75">Interactive content with real-time AI assistance</p>
+                <h3 className="text-xl font-medium mb-2">
+                  {isDemoMode ? '🚀 AI Demo Classroom' : 'AI-Enhanced Presentation'}
+                </h3>
+                <p className="text-sm opacity-75">
+                  {isDemoMode 
+                    ? 'Experience live AI features - all components are fully functional!' 
+                    : 'Interactive content with real-time AI assistance'
+                  }
+                </p>
+                {isDemoMode && (
+                  <div className="mt-4 space-y-2">
+                    <Badge className="bg-green-500/20 text-green-300 border border-green-500/30">
+                      ✓ AI Teaching Assistant Active
+                    </Badge>
+                    <Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                      ✓ Voice Controls Enabled
+                    </Badge>
+                    <Badge className="bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      ✓ Real-time Analytics Running
+                    </Badge>
+                  </div>
+                )}
               </div>
             </div>
 

@@ -11,6 +11,22 @@ function AIClassroomRoom() {
   
   if (!user || !id) return <div>Loading...</div>;
   
+  // Special demo configuration
+  const isDemoSession = id === 'demo-session-1';
+  
+  if (isDemoSession) {
+    return (
+      <AIClassroomSession
+        roomId={id}
+        userId={user.id}
+        userName="Demo Teacher"
+        userRole="teacher"
+        lessonTitle="🚀 AI Classroom Demo - Interactive Mathematics"
+        isDemoMode={true}
+      />
+    );
+  }
+  
   return (
     <AIClassroomSession
       roomId={id}
