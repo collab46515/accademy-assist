@@ -302,29 +302,54 @@ const AnalyticsPage = () => {
   };
 
   const renderVisualizationChart = () => {
-    if (!reportBuilder.visualizations.length || !reportBuilder.dataSources.includes('Financial Data')) return null;
+    if (!reportBuilder.visualizations.length || reportBuilder.dataSources.length === 0) return null;
 
     // Get the first selected visualization type for preview
     const selectedVisualization = reportBuilder.visualizations[0];
     
+    // Determine which data to use based on selected data sources
+    let chartData = [];
+    let dataKey = '';
+    let nameKey = '';
+    let color = moduleColors.financial;
+    
+    if (reportBuilder.dataSources.includes('Student Data')) {
+      chartData = mockAttendance;
+      dataKey = 'attendance';
+      nameKey = 'year';
+      color = moduleColors.academic;
+    } else if (reportBuilder.dataSources.includes('Financial Data')) {
+      chartData = financialData;
+      dataKey = 'revenue';
+      nameKey = 'month';
+      color = moduleColors.financial;
+    } else if (reportBuilder.dataSources.includes('Staff Data')) {
+      chartData = hrMetrics;
+      dataKey = 'satisfaction';
+      nameKey = 'department';
+      color = moduleColors.hr;
+    } else {
+      return <div className="text-center text-muted-foreground">No compatible data selected</div>;
+    }
+    
     switch (selectedVisualization) {
       case 'Bar Charts':
         return (
-          <BarChart data={financialData}>
+          <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
+            <XAxis dataKey={nameKey} />
             <YAxis />
             <Tooltip />
-            <Bar dataKey="revenue" fill={moduleColors.financial} name="Revenue" />
+            <Bar dataKey={dataKey} fill={color} name={dataKey.charAt(0).toUpperCase() + dataKey.slice(1)} />
           </BarChart>
         );
       
       case 'Pie Charts':
         // Transform data for pie chart
-        const pieData = financialData.map((item, index) => ({
-          name: item.month,
-          value: item.revenue,
-          fill: [moduleColors.financial, moduleColors.academic, moduleColors.hr, moduleColors.communication, moduleColors.operational, '#8884d8'][index % 6]
+        const pieData = chartData.map((item, index) => ({
+          name: item[nameKey],
+          value: item[dataKey],
+          fill: [color, moduleColors.academic, moduleColors.hr, moduleColors.communication, moduleColors.operational, '#8884d8'][index % 6]
         }));
         return (
           <RechartsPieChart>
@@ -348,37 +373,30 @@ const AnalyticsPage = () => {
       
       case 'Line Trends':
         return (
-          <LineChart data={financialData}>
+          <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
+            <XAxis dataKey={nameKey} />
             <YAxis />
             <Tooltip />
             <Legend />
             <Line 
               type="monotone" 
-              dataKey="revenue" 
-              stroke={moduleColors.financial} 
+              dataKey={dataKey} 
+              stroke={color} 
               strokeWidth={2}
-              name="Revenue"
-            />
-            <Line 
-              type="monotone" 
-              dataKey="profit" 
-              stroke={moduleColors.academic} 
-              strokeWidth={2}
-              name="Profit"
+              name={dataKey.charAt(0).toUpperCase() + dataKey.slice(1)}
             />
           </LineChart>
         );
       
       default:
         return (
-          <BarChart data={financialData}>
+          <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
+            <XAxis dataKey={nameKey} />
             <YAxis />
             <Tooltip />
-            <Bar dataKey="revenue" fill={moduleColors.financial} />
+            <Bar dataKey={dataKey} fill={color} />
           </BarChart>
         );
     }
@@ -1115,24 +1133,24 @@ const AnalyticsPage = () => {
                    </CardContent>
                  </Card>
 
-                 {/* Chart Preview (if visualizations selected) */}
-                 {reportBuilder.visualizations.length > 0 && reportBuilder.dataSources.includes('Financial Data') && (
-                   <Card>
-                     <CardHeader>
-                       <CardTitle className="text-base">
-                         Sample Visualization - {reportBuilder.visualizations[0]}
-                       </CardTitle>
-                     </CardHeader>
-                     <CardContent>
-                       <ResponsiveContainer width="100%" height={300}>
-                         {renderVisualizationChart()}
-                       </ResponsiveContainer>
-                     </CardContent>
-                   </Card>
-                 )}
+                  {/* Chart Preview (if visualizations selected) */}
+                  {reportBuilder.visualizations.length > 0 && reportBuilder.dataSources.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">
+                          Sample Visualization - {reportBuilder.visualizations[0]}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={300}>
+                          {renderVisualizationChart()}
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+                  )}
 
-                 {/* Multiple Chart Preview if multiple visualizations selected */}
-                 {reportBuilder.visualizations.length > 1 && reportBuilder.dataSources.includes('Financial Data') && (
+                  {/* Multiple Chart Preview if multiple visualizations selected */}
+                  {reportBuilder.visualizations.length > 1 && reportBuilder.dataSources.length > 0 && (
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                      {reportBuilder.visualizations.slice(1).map((vizType, index) => (
                        <Card key={index}>
