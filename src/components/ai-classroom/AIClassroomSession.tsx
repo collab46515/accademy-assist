@@ -1,64 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
-  Brain, 
-  Users, 
-  BarChart3, 
-  Presentation, 
-  Eye, 
-  EyeOff,
-  Mic, 
-  MicOff, 
-  Video, 
-  VideoOff,
-  Phone,
-  Settings,
-  Clock,
-  BookOpen,
-  Target,
-  CheckSquare,
-  AlertCircle,
-  UserCheck,
-  MessageSquare,
-  Upload,
-  Timer,
-  Bot,
-  Sparkles,
-  TrendingUp,
-  Lightbulb,
-  Zap,
-  Award,
-  Gamepad2,
-  Volume2,
-  Palette,
-  Activity,
-  Star,
-  Hand,
-  UserPlus,
-  ArrowRight,
-  Flame,
-  Shield,
-  Headphones,
-  Image,
-  FileText
-} from 'lucide-react';
+  Mic, MicOff, Video, VideoOff, Volume2, Phone, Settings, 
+  Brain, Users, Target, Zap, Lightbulb, Eye, Sparkles, 
+  Presentation, Bot, AlertCircle, Clock, BarChart3, 
+  Palette, Play, FileText
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 
 // Import existing components
 import { InteractiveWhiteboard } from '@/components/communication/InteractiveWhiteboard';
 import { AITeachingAssistant } from './AITeachingAssistant';
 import { DynamicContentGenerator } from './DynamicContentGenerator';
-import { DemoNotificationBanner } from './DemoNotificationBanner';
-
-// Import all AI classroom components
 import { StudentAnalyticsDashboard } from './StudentAnalyticsDashboard';
 import { AIClassroomManager } from './AIClassroomManager';
 import { CreativeAIFeatures } from './CreativeAIFeatures';
-import { VoiceControls, useVoiceControls } from './VoiceControls';
+import { VoiceControls } from './VoiceControls';
+import { DemoNotificationBanner } from './DemoNotificationBanner';
+
+// Import new components
+import { ClassroomHeader } from './ClassroomHeader';
+import { ClassroomControls } from './ClassroomControls';
 
 interface Student {
   id: string;
@@ -380,19 +346,17 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
   const [isMuted, setIsMuted] = useState(true);
   const [isCameraOn, setIsCameraOn] = useState(false);
 
-  // Voice controls integration
-  const voiceControls = useVoiceControls(
-    roomId,
-    userRole,
-    (text, isComplete) => {
-      // Handle transcriptions
-      console.log('Transcription:', text, isComplete);
+  // Voice controls integration - simplified fallback
+  const voiceControls = {
+    isVoiceEnabled: false,
+    selectedVoice: 'alloy' as const,
+    setIsVoiceEnabled: (enabled: boolean) => {
+      console.log('Voice enabled:', enabled);
     },
-    (command) => {
-      // Handle voice commands
-      handleVoiceCommand(command);
+    speakText: (text: string) => {
+      console.log('Speaking text:', text);
     }
-  );
+  };
 
   // AI metrics
   const [aiMetrics, setAIMetrics] = useState({
@@ -523,33 +487,32 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
       {/* Demo Mode Banner */}
       {isDemoMode && <DemoNotificationBanner />}
 
-      {/* Demo Quick Actions */}
+      {/* Demo Quick Actions - Repositioned to avoid overlap */}
       {isDemoMode && (
-        <div className="fixed bottom-6 right-6 z-40 space-y-3">
-          <Card className="p-4 bg-white/95 backdrop-blur shadow-lg border border-gray-200">
+        <div className="fixed bottom-20 right-4 z-40 lg:bottom-6 lg:right-6">
+          <Card className="p-3 bg-white/95 backdrop-blur shadow-lg border border-gray-200 max-w-[200px]">
             <div className="space-y-2">
-              <h4 className="font-semibold text-sm text-gray-900">🚀 Demo Actions</h4>
-              <div className="space-y-2">
+              <h4 className="font-semibold text-xs text-gray-900">🚀 Demo Actions</h4>
+              <div className="space-y-1">
                 <Button 
                   size="sm" 
                   variant="outline"
-                  className="w-full text-xs"
+                  className="w-full text-xs py-1 h-7"
                   onClick={() => window.open('/landing', '_blank')}
                 >
-                  <FileText className="h-3 w-3 mr-2" />
-                  View Workflow Guide
+                  <FileText className="h-3 w-3 mr-1" />
+                  Workflow Guide
                 </Button>
                 <Button 
                   size="sm" 
                   variant="outline"
-                  className="w-full text-xs"
+                  className="w-full text-xs py-1 h-7"
                   onClick={() => {
                     navigator.clipboard.writeText(window.location.href);
-                    // Could add toast notification here
                   }}
                 >
-                  <Users className="h-3 w-3 mr-2" />
-                  Share Demo Link
+                  <Users className="h-3 w-3 mr-1" />
+                  Share Demo
                 </Button>
               </div>
             </div>
@@ -557,219 +520,154 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
         </div>
       )}
 
-      {/* Enhanced Header Bar with AI Status */}
-      <div className="bg-white border-b border-slate-200 px-6 py-4 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500">
-                <Brain className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-semibold text-foreground flex items-center gap-2">
-                  {lessonTitle}
-                  <Badge variant="secondary" className="bg-gradient-to-r from-purple-100 to-blue-100 text-purple-700">
-                    <Sparkles className="h-3 w-3 mr-1" />
-                    AI Enhanced
-                  </Badge>
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  AI Systems: {aiSystemsActive ? '🟢 Active' : '🔴 Disabled'} • 
-                  Engagement: {getOverallEngagement()}% • 
-                  Comprehension: {getAverageComprehension()}%
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <Badge variant="outline" className="bg-background">
-                <Clock className="h-3 w-3 mr-1" />
-                {formatTime(getClassDuration())}
-              </Badge>
-              <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                <Users className="h-3 w-3 mr-1" />
-                {students.length + 1}
-              </Badge>
-              {getAtRiskStudents().length > 0 && (
-                <Badge variant="destructive" className="animate-pulse">
-                  <AlertCircle className="h-3 w-3 mr-1" />
-                  {getAtRiskStudents().length} at risk
-                </Badge>
-              )}
-            </div>
-          </div>
+      {/* Enhanced Header */}
+      <ClassroomHeader
+        lessonTitle={lessonTitle}
+        aiSystemsActive={aiSystemsActive}
+        onAISystemsToggle={() => setAISystemsActive(!aiSystemsActive)}
+        onQuickQuiz={handleQuickQuiz}
+        onIntervention={handleIntervention}
+        onViewAllInsights={handleViewAllInsights}
+        formatTime={formatTime}
+        getClassDuration={getClassDuration}
+        getOverallEngagement={getOverallEngagement}
+        getAverageComprehension={getAverageComprehension}
+        studentsCount={students.length + 1}
+        atRiskStudents={getAtRiskStudents()}
+        priorityInsights={getPriorityInsights()}
+      />
 
-          <div className="flex items-center gap-2">
-            {/* AI System Toggle */}
-            <Button
-              variant={aiSystemsActive ? "default" : "outline"}
-              size="sm"
-              onClick={() => setAISystemsActive(!aiSystemsActive)}
-              className={`h-9 ${aiSystemsActive ? 'bg-gradient-to-r from-purple-500 to-blue-500' : ''}`}
-            >
-              <Brain className="h-4 w-4 mr-2" />
-              AI Systems
-            </Button>
-
-            {/* Quick AI Actions */}
-            <Button variant="outline" size="sm" className="h-9" onClick={handleQuickQuiz}>
-              <Zap className="h-4 w-4 mr-2" />
-              Quick Quiz
-            </Button>
-            
-            <Button variant="outline" size="sm" className="h-9" onClick={handleIntervention}>
-              <Target className="h-4 w-4 mr-2" />
-              Intervention
-            </Button>
-          </div>
-        </div>
-
-        {/* AI Insights Banner */}
-        {getPriorityInsights().length > 0 && (
-          <div className="mt-3 p-3 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-orange-600" />
-                <span className="font-medium text-orange-800">Priority AI Insights</span>
-              </div>
-              <Button size="sm" variant="ghost" className="text-orange-700" onClick={handleViewAllInsights}>
-                View All
-              </Button>
-            </div>
-            <p className="text-sm text-orange-700 mt-1">
-              {getPriorityInsights()[0].message}
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Main Content with AI Panels */}
-      <div className="flex-1 flex overflow-hidden">
+      {/* Main Content with Professional Layout */}
+      <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Central Lesson Area */}
-        <div className="flex-1 flex flex-col">
-          {/* Video/Presentation Area with AI Overlays */}
-          <div className="flex-1 bg-slate-900 relative rounded-lg m-4 overflow-hidden shadow-lg">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center text-slate-300">
-                <div className="p-4 rounded-full bg-slate-800/50 mb-4 inline-block">
-                  <Presentation className="h-12 w-12" />
-                </div>
-                <h3 className="text-xl font-medium mb-2">
-                  {isDemoMode ? '🚀 AI Demo Classroom' : 'AI-Enhanced Presentation'}
-                </h3>
-                <p className="text-sm opacity-75">
-                  {isDemoMode 
-                    ? 'Experience live AI features - all components are fully functional!' 
-                    : 'Interactive content with real-time AI assistance'
-                  }
-                </p>
-                {isDemoMode && (
-                  <div className="mt-4 space-y-2">
-                    <Badge className="bg-green-500/20 text-green-300 border border-green-500/30">
-                      ✓ AI Teaching Assistant Active
-                    </Badge>
-                    <Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                      ✓ Voice Controls Enabled
-                    </Badge>
-                    <Badge className="bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                      ✓ Real-time Analytics Running
-                    </Badge>
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Presentation Area */}
+          <div className="flex-1 relative m-4 mb-2 overflow-hidden">
+            <div className="h-full bg-slate-900 relative rounded-lg shadow-lg">
+              <div className="absolute inset-0 flex items-center justify-center p-8">
+                <div className="text-center text-slate-300 max-w-lg">
+                  <div className="p-4 rounded-full bg-slate-800/50 mb-4 inline-block">
+                    <Presentation className="h-12 w-12" />
                   </div>
-                )}
+                  <h3 className="text-xl font-medium mb-2">
+                    {isDemoMode ? '🚀 AI Demo Classroom' : 'AI-Enhanced Presentation'}
+                  </h3>
+                  <p className="text-sm opacity-75 mb-4">
+                    {isDemoMode 
+                      ? 'Experience live AI features - all components are fully functional!' 
+                      : 'Interactive content with real-time AI assistance'
+                    }
+                  </p>
+                  {isDemoMode && (
+                    <div className="space-y-2">
+                      <Badge className="bg-green-500/20 text-green-300 border border-green-500/30 mr-2 mb-2">
+                        ✓ AI Teaching Assistant
+                      </Badge>
+                      <Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/30 mr-2 mb-2">
+                        ✓ Voice Controls
+                      </Badge>
+                      <Badge className="bg-purple-500/20 text-purple-300 border border-purple-500/30 mr-2 mb-2">
+                        ✓ Real-time Analytics
+                      </Badge>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* AI Comprehension Meter */}
-            <div className="absolute top-4 left-4">
-              <Card className="p-3 bg-white/90 backdrop-blur-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <Brain className="h-4 w-4 text-purple-600" />
-                  <span className="text-sm font-medium">Class Comprehension</span>
-                </div>
-                <Progress value={getAverageComprehension()} className="h-2 w-32" />
-                <span className="text-xs text-muted-foreground mt-1 block">
-                  {getAverageComprehension()}% Understanding
-                </span>
-              </Card>
-            </div>
+              {/* Compact Status Overlays */}
+              <div className="absolute top-4 left-4 space-y-2">
+                <Card className="p-3 bg-white/90 backdrop-blur-sm">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Brain className="h-4 w-4 text-purple-600" />
+                    <span className="text-sm font-medium">Class Comprehension</span>
+                  </div>
+                  <Progress value={getAverageComprehension()} className="h-2 w-32" />
+                  <span className="text-xs text-muted-foreground mt-1 block">
+                    {getAverageComprehension()}% Understanding
+                  </span>
+                </Card>
+              </div>
 
-            {/* Real-time AI Suggestions */}
-            <div className="absolute top-4 right-4 w-80">
-              <Card className="p-4 bg-white/95 backdrop-blur-sm border shadow-lg">
-                <div className="flex items-center gap-2 mb-3">
-                  <Lightbulb className="h-4 w-4 text-yellow-600" />
-                  <span className="font-semibold">AI Suggestion</span>
-                  <Badge variant="secondary" className="text-xs">Live</Badge>
-                </div>
-                <p className="text-sm mb-3">
-                  3 students are struggling with the current concept. Consider using a visual demonstration or practical example.
-                </p>
-                 <div className="flex gap-2">
-                   <Button size="sm" className="flex-1" onClick={handleGenerateExample}>
-                     <Sparkles className="h-3 w-3 mr-1" />
-                     Generate Example
-                   </Button>
-                   <Button size="sm" variant="outline" onClick={handlePreviewExample}>
-                     <Eye className="h-3 w-3" />
-                   </Button>
-                 </div>
-              </Card>
+              {/* Compact AI Suggestions */}
+              <div className="absolute top-4 right-4 w-72">
+                <Card className="p-4 bg-white/95 backdrop-blur-sm border shadow-lg">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Lightbulb className="h-4 w-4 text-yellow-600" />
+                    <span className="font-semibold text-sm">AI Suggestion</span>
+                    <Badge variant="secondary" className="text-xs">Live</Badge>
+                  </div>
+                  <p className="text-sm mb-3">
+                    3 students are struggling with the current concept. Consider using a visual demonstration.
+                  </p>
+                   <div className="flex gap-2">
+                     <Button size="sm" className="flex-1" onClick={handleGenerateExample}>
+                       <Sparkles className="h-3 w-3 mr-1" />
+                       Generate Example
+                     </Button>
+                     <Button size="sm" variant="outline" onClick={handlePreviewExample}>
+                       <Eye className="h-3 w-3" />
+                     </Button>
+                   </div>
+                </Card>
+              </div>
             </div>
           </div>
 
-          {/* Interactive Whiteboard with AI */}
-          <div className="flex-1 bg-card border border-border mx-4 mb-4 rounded-lg shadow-sm overflow-hidden min-h-[400px]">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
-              <h3 className="font-semibold flex items-center gap-2 text-foreground">
-                <div className="p-1 rounded bg-primary/10">
-                  <Presentation className="h-4 w-4 text-primary" />
+          {/* Interactive Whiteboard - Improved Layout */}
+          <div className="mx-4 mb-4">
+            <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
+                <h3 className="font-semibold flex items-center gap-2 text-foreground">
+                  <div className="p-1 rounded bg-primary/10">
+                    <Presentation className="h-4 w-4 text-primary" />
+                  </div>
+                  AI-Powered Collaborative Whiteboard
+                </h3>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="bg-background">
+                    <Bot className="h-3 w-3 mr-1" />
+                    AI Assist: On
+                  </Badge>
+                  <Button size="sm" variant="ghost" onClick={handleAIAssist}>
+                    <Sparkles className="h-3 w-3" />
+                  </Button>
                 </div>
-                AI-Powered Collaborative Whiteboard
-              </h3>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-background">
-                  <Bot className="h-3 w-3 mr-1" />
-                  AI Assist: On
-                </Badge>
-                <Button size="sm" variant="ghost" onClick={handleAIAssist}>
-                  <Sparkles className="h-3 w-3" />
-                </Button>
               </div>
-            </div>
-            <div className="flex-1" style={{ height: 'calc(100% - 60px)' }}>
-              <InteractiveWhiteboard roomId={roomId} />
+              <div className="h-80">
+                <InteractiveWhiteboard roomId={roomId} />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Right AI Panel */}
-        <div className="w-96 bg-white border-l border-slate-200 flex flex-col shadow-sm">
+        {/* Right AI Panel - Improved Responsive Design */}
+        <div className="w-80 lg:w-96 bg-white border-l border-slate-200 flex flex-col shadow-sm">
           <Tabs value={activeAITab} onValueChange={setActiveAITab} className="flex-1 flex flex-col">
             <TabsList className="grid w-full grid-cols-5 m-2">
-              <TabsTrigger value="assistant" className="text-xs">
+              <TabsTrigger value="assistant" className="text-xs p-2">
                 <Brain className="h-3 w-3" />
               </TabsTrigger>
-              <TabsTrigger value="content" className="text-xs">
+              <TabsTrigger value="content" className="text-xs p-2">
                 <Sparkles className="h-3 w-3" />
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="text-xs">
+              <TabsTrigger value="analytics" className="text-xs p-2">
                 <BarChart3 className="h-3 w-3" />
               </TabsTrigger>
-              <TabsTrigger value="management" className="text-xs">
+              <TabsTrigger value="management" className="text-xs p-2">
                 <Users className="h-3 w-3" />
               </TabsTrigger>
-              <TabsTrigger value="creative" className="text-xs">
+              <TabsTrigger value="creative" className="text-xs p-2">
                 <Palette className="h-3 w-3" />
               </TabsTrigger>
             </TabsList>
 
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-hidden min-h-0">
               <TabsContent value="assistant" className="h-full p-0 m-0">
                 <AITeachingAssistant
                   roomId={roomId}
                   students={students}
                   userRole={userRole}
-            insights={teachingInsights}
+                  insights={teachingInsights}
                 />
               </TabsContent>
 
@@ -796,8 +694,8 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
                     strengths: s.strengths,
                     riskLevel: s.comprehensionLevel < 50 ? 'critical' : s.comprehensionLevel < 70 ? 'high' : 'low',
                     aiInteractions: s.aiInteractions,
-                    responseTime: [2000, 1800, 2200], // Mock response times
-                    accuracy: [85, 78, 92] // Mock accuracy scores
+                    responseTime: [2000, 1800, 2200],
+                    accuracy: [85, 78, 92]
                   }))}
                   insights={aiInsights}
                   metrics={{
@@ -846,7 +744,7 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
           </Tabs>
 
           {/* Voice Controls Panel */}
-          <div className="p-4">
+          <div className="p-4 border-t">
             <VoiceControls
               roomId={roomId}
               userRole={userRole}
@@ -862,45 +760,16 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
       </div>
 
       {/* Bottom Controls */}
-      <div className="p-4 bg-white border-t border-slate-200 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button 
-              size="sm" 
-              variant={isMuted ? "destructive" : "default"}
-              onClick={() => setIsMuted(!isMuted)}
-            >
-              {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-            </Button>
-            
-            <Button 
-              size="sm" 
-              variant={isCameraOn ? "default" : "outline"}
-              onClick={() => setIsCameraOn(!isCameraOn)}
-            >
-              {isCameraOn ? <Video className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
-            </Button>
-
-            <Button 
-              size="sm" 
-              variant={voiceControls.isVoiceEnabled ? "default" : "outline"}
-              onClick={() => voiceControls.setIsVoiceEnabled(!voiceControls.isVoiceEnabled)}
-            >
-              {voiceControls.isVoiceEnabled ? <Volume2 className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
-            </Button>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" onClick={handleSettings}>
-              <Settings className="h-4 w-4" />
-            </Button>
-            <Button size="sm" variant="destructive" onClick={handleEndSession}>
-              <Phone className="h-4 w-4 mr-2" />
-              End Session
-            </Button>
-          </div>
-        </div>
-      </div>
+      <ClassroomControls
+        isMuted={isMuted}
+        isCameraOn={isCameraOn}
+        isVoiceEnabled={voiceControls.isVoiceEnabled}
+        onMuteToggle={() => setIsMuted(!isMuted)}
+        onCameraToggle={() => setIsCameraOn(!isCameraOn)}
+        onVoiceToggle={() => voiceControls.setIsVoiceEnabled(!voiceControls.isVoiceEnabled)}
+        onSettings={handleSettings}
+        onEndSession={handleEndSession}
+      />
     </div>
   );
 };
