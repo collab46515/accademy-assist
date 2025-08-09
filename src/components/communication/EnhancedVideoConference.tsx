@@ -369,34 +369,70 @@ export function EnhancedVideoConference({
           <ParticipantGrid />
         </div>
 
-        {/* Clean Sidebar */}
-        <div className="w-80 bg-slate-900 border-l border-slate-700">
-          <Tabs defaultValue="chat" className="h-full flex flex-col">
-            <TabsList className="m-4 bg-slate-800">
-              <TabsTrigger value="chat" className="flex-1 text-white">Chat</TabsTrigger>
-              <TabsTrigger value="participants" className="flex-1 text-white">People</TabsTrigger>
-            </TabsList>
+        {/* Chat Sidebar - Always visible */}
+        <div className="w-80 bg-slate-900 border-l border-slate-700 flex flex-col">
+          {/* Chat Header */}
+          <div className="p-3 border-b border-slate-700 flex items-center justify-between">
+            <h3 className="font-semibold text-white">Chat & Features</h3>
+            <div className="flex gap-1">
+              <Button size="sm" variant="ghost" onClick={() => setShowAITutor(true)} className="text-blue-400 hover:bg-slate-800">
+                <Bot className="h-4 w-4" />
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setShowWhiteboard(true)} className="text-green-400 hover:bg-slate-800">
+                <PenTool className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
 
-            <TabsContent value="chat" className="flex-1 m-0">
-              <ChatPanel />
-            </TabsContent>
-            
-            <TabsContent value="participants" className="flex-1 m-0 p-4">
-              <div className="text-white">
-                <h3 className="font-semibold mb-4">Participants ({participants.length + 1})</h3>
-                <div className="space-y-2">
-                  <div className="p-2 bg-slate-800 rounded">
-                    <div className="font-medium">{userName.split('@')[0]} (You)</div>
-                  </div>
-                  {participants.map(p => (
-                    <div key={p.id} className="p-2 bg-slate-800 rounded">
-                      <div className="font-medium">{p.name}</div>
-                    </div>
-                  ))}
+          {/* Chat Messages */}
+          <div className="flex-1 p-3 overflow-y-auto">
+            {chatMessages.length === 0 ? (
+              <div className="text-slate-400 text-sm">
+                <div className="mb-3">Chat is ready!</div>
+                <div className="text-xs space-y-1">
+                  <div>🤖 AI Tutor available</div>
+                  <div>📝 Whiteboard ready</div>
+                  <div>🌍 Translation active</div>
                 </div>
               </div>
-            </TabsContent>
-          </Tabs>
+            ) : (
+              <div className="space-y-2">
+                {chatMessages.map(msg => (
+                  <div key={msg.id} className="bg-slate-800 rounded p-2">
+                    <div className="text-xs text-slate-300 mb-1">{msg.senderName}</div>
+                    <div className="text-white text-sm">{msg.message}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          {/* Chat Input - Always visible */}
+          <div className="p-3 border-t border-slate-700 bg-slate-900">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Type message..."
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+                className="flex-1 bg-slate-700 text-white px-3 py-2 rounded border-0 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500"
+              />
+              <Button onClick={sendMessage} className="bg-blue-600 hover:bg-blue-700 px-4">
+                Send
+              </Button>
+            </div>
+            
+            {/* Quick Feature Access */}
+            <div className="flex gap-1 mt-2">
+              <Button size="sm" variant="outline" onClick={() => setShowTranslation(!showTranslation)} className="text-xs bg-slate-800 border-slate-600 text-slate-300">
+                🌍 Translate
+              </Button>
+              <Button size="sm" variant="outline" onClick={generateMeetingSummary} className="text-xs bg-slate-800 border-slate-600 text-slate-300">
+                📝 Summary
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
