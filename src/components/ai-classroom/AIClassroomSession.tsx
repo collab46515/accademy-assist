@@ -22,6 +22,7 @@ import { AIClassroomManager } from './AIClassroomManager';
 import { CreativeAIFeatures } from './CreativeAIFeatures';
 import { VoiceControls } from './VoiceControls';
 import { DemoNotificationBanner } from './DemoNotificationBanner';
+import { AIAssistantsPanel } from './AIAssistantsPanel';
 
 // Import new components
 import { ClassroomHeader } from './ClassroomHeader';
@@ -339,7 +340,7 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
   // }, [isDemoMode]);
 
   // UI state
-  const [activeAITab, setActiveAITab] = useState('assistant');
+  const [activeAITab, setActiveAITab] = useState('assistants');
   const [aiSystemsActive, setAISystemsActive] = useState(true);
   const [showAIInsights, setShowAIInsights] = useState(true);
   const [autoInterventionEnabled, setAutoInterventionEnabled] = useState(true);
@@ -700,14 +701,7 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
         {/* Right AI Panel - Improved scrolling */}
         <div className="w-80 lg:w-96 bg-white border-l border-slate-200 flex flex-col shadow-sm max-h-full">
           <Tabs value={activeAITab} onValueChange={setActiveAITab} className="flex-1 flex flex-col h-full">
-            <TabsList className="grid w-full grid-cols-5 m-2 bg-muted flex-shrink-0">
-              <TabsTrigger 
-                value="assistant" 
-                className="text-xs p-2 data-[state=active]:bg-white data-[state=active]:text-primary cursor-pointer transition-all"
-              >
-                <Brain className="h-3 w-3" />
-                <span className="hidden lg:inline ml-1">AI</span>
-              </TabsTrigger>
+            <TabsList className="grid w-full grid-cols-4 m-2 bg-muted flex-shrink-0">
               <TabsTrigger 
                 value="content" 
                 className="text-xs p-2 data-[state=active]:bg-white data-[state=active]:text-primary cursor-pointer transition-all"
@@ -730,26 +724,15 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
                 <span className="hidden lg:inline ml-1">Manage</span>
               </TabsTrigger>
               <TabsTrigger 
-                value="creative" 
+                value="assistants" 
                 className="text-xs p-2 data-[state=active]:bg-white data-[state=active]:text-primary cursor-pointer transition-all"
               >
-                <Palette className="h-3 w-3" />
-                <span className="hidden lg:inline ml-1">Creative</span>
+                <Brain className="h-3 w-3" />
+                <span className="hidden lg:inline ml-1">AI Assistants</span>
               </TabsTrigger>
             </TabsList>
 
             <div className="flex-1 overflow-auto min-h-0">
-              <TabsContent value="assistant" className="h-full p-0 m-0 data-[state=inactive]:hidden">
-                <div className="h-full overflow-auto">
-                  <AITeachingAssistant
-                    roomId={roomId}
-                    students={students}
-                    userRole={userRole}
-                    insights={teachingInsights}
-                  />
-                </div>
-              </TabsContent>
-
               <TabsContent value="content" className="h-full p-0 m-0 data-[state=inactive]:hidden">
                 <div className="h-full overflow-auto">
                   <DynamicContentGenerator
@@ -817,13 +800,17 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
                 </div>
               </TabsContent>
 
-              <TabsContent value="creative" className="h-full p-0 m-0 data-[state=inactive]:hidden">
+              <TabsContent value="assistants" className="h-full p-0 m-0 data-[state=inactive]:hidden">
                 <div className="h-full overflow-auto">
-                  <CreativeAIFeatures
+                  <AIAssistantsPanel
                     roomId={roomId}
-                    currentSubject="Mathematics"
-                    lessonTheme={lessonTitle}
-                    onFeatureActivate={handleFeatureActivate}
+                    students={students}
+                    schoolData={{ 
+                      totalStudents: students.length,
+                      classMetrics: classroomMetrics,
+                      aiMetrics: aiMetrics 
+                    }}
+                    context={`AI Classroom Session - ${lessonTitle}`}
                   />
                 </div>
               </TabsContent>
