@@ -70,6 +70,7 @@ import FinanceOperationsPage from "./pages/FinanceOperationsPage";
 import AdministrationPage from "./pages/AdministrationPage";
 import SchoolSettingsPage from "./pages/SchoolSettingsPage";
 import VirtualClassroomPage from "./pages/VirtualClassroomPage";
+import AIClassroomPage from "./pages/AIClassroomPage";
 
 const queryClient = new QueryClient();
 
