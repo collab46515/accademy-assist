@@ -167,6 +167,13 @@ const AnalyticsPage = () => {
   const [activeModule, setActiveModule] = useState("overview");
   const [dateRange, setDateRange] = useState("last30days");
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [reportBuilder, setReportBuilder] = useState({
+    dataSources: [] as string[],
+    visualizations: [] as string[],
+    reportData: [] as any[],
+    reportName: "Custom Report",
+    showPreview: false
+  });
   const { toast } = useToast();
 
   // Auto-refresh functionality
@@ -205,6 +212,91 @@ const AnalyticsPage = () => {
     toast({
       title: "Drill-down Analysis",
       description: `Opening detailed view for ${item} in ${module} module.`,
+    });
+  };
+
+  const addDataSource = (dataSource: string) => {
+    if (!reportBuilder.dataSources.includes(dataSource)) {
+      setReportBuilder(prev => ({
+        ...prev,
+        dataSources: [...prev.dataSources, dataSource],
+        reportData: getReportData([...prev.dataSources, dataSource])
+      }));
+      toast({
+        title: `${dataSource} Added`,
+        description: `${dataSource} data source added to your custom report.`,
+      });
+    }
+  };
+
+  const addVisualization = (visualization: string) => {
+    if (!reportBuilder.visualizations.includes(visualization)) {
+      setReportBuilder(prev => ({
+        ...prev,
+        visualizations: [...prev.visualizations, visualization]
+      }));
+      toast({
+        title: `${visualization} Added`,
+        description: `${visualization} visualization added to your report.`,
+      });
+    }
+  };
+
+  const removeReportItem = (type: 'dataSources' | 'visualizations', item: string) => {
+    setReportBuilder(prev => ({
+      ...prev,
+      [type]: prev[type].filter(i => i !== item),
+      reportData: type === 'dataSources' ? getReportData(prev.dataSources.filter(i => i !== item)) : prev.reportData
+    }));
+  };
+
+  const getReportData = (dataSources: string[]) => {
+    const data: any[] = [];
+    
+    if (dataSources.includes('Student Data')) {
+      data.push(...mockAttendance.map(item => ({ type: 'student', category: 'Attendance', ...item })));
+      data.push(...mockPerformance.map(item => ({ type: 'student', category: 'Performance', ...item })));
+    }
+    
+    if (dataSources.includes('Financial Data')) {
+      data.push(...financialData.map(item => ({ type: 'financial', category: 'Monthly', ...item })));
+    }
+    
+    if (dataSources.includes('Staff Data')) {
+      data.push(...hrMetrics.map(item => ({ type: 'staff', category: 'HR Metrics', ...item })));
+    }
+    
+    return data;
+  };
+
+  const generateCustomReport = () => {
+    if (reportBuilder.dataSources.length === 0) {
+      toast({
+        title: "No Data Sources Selected",
+        description: "Please select at least one data source to generate a report.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setReportBuilder(prev => ({
+      ...prev,
+      showPreview: true
+    }));
+
+    toast({
+      title: "Report Generated Successfully",
+      description: "Your custom report is now ready for viewing and export.",
+    });
+  };
+
+  const clearReport = () => {
+    setReportBuilder({
+      dataSources: [],
+      visualizations: [],
+      reportData: [],
+      reportName: "Custom Report",
+      showPreview: false
     });
   };
 
@@ -724,49 +816,47 @@ const AnalyticsPage = () => {
       {/* Custom Report Builder */}
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <FileText className="h-5 w-5" />
-            <span>Custom Report Builder</span>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <FileText className="h-5 w-5" />
+              <span>Custom Report Builder</span>
+            </div>
+            {(reportBuilder.dataSources.length > 0 || reportBuilder.visualizations.length > 0) && (
+              <Button variant="outline" size="sm" onClick={clearReport}>
+                Clear All
+              </Button>
+            )}
           </CardTitle>
-          <CardDescription>Drag-and-drop interface to create custom reports</CardDescription>
+          <CardDescription>Build custom reports by selecting data sources and visualizations</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <Label className="text-sm font-medium">Data Sources</Label>
-              <div className="mt-2 space-y-2">
+              <Label className="text-sm font-medium mb-2 block">Data Sources</Label>
+              <div className="space-y-2">
                 <Button 
-                  variant="outline" 
+                  variant={reportBuilder.dataSources.includes('Student Data') ? 'default' : 'outline'}
                   size="sm" 
                   className="w-full justify-start"
-                  onClick={() => toast({
-                    title: "Student Data Selected",
-                    description: "Student data source added to your custom report."
-                  })}
+                  onClick={() => addDataSource('Student Data')}
                 >
-                  <BarChart3 className="h-4 w-4 mr-2" />
+                  <BookOpen className="h-4 w-4 mr-2" />
                   Student Data
                 </Button>
                 <Button 
-                  variant="outline" 
+                  variant={reportBuilder.dataSources.includes('Financial Data') ? 'default' : 'outline'}
                   size="sm" 
                   className="w-full justify-start"
-                  onClick={() => toast({
-                    title: "Financial Data Selected", 
-                    description: "Financial data source added to your custom report."
-                  })}
+                  onClick={() => addDataSource('Financial Data')}
                 >
                   <DollarSign className="h-4 w-4 mr-2" />
                   Financial Data
                 </Button>
                 <Button 
-                  variant="outline" 
+                  variant={reportBuilder.dataSources.includes('Staff Data') ? 'default' : 'outline'}
                   size="sm" 
                   className="w-full justify-start"
-                  onClick={() => toast({
-                    title: "Staff Data Selected",
-                    description: "Staff data source added to your custom report."
-                  })}
+                  onClick={() => addDataSource('Staff Data')}
                 >
                   <Users className="h-4 w-4 mr-2" />
                   Staff Data
@@ -775,40 +865,31 @@ const AnalyticsPage = () => {
             </div>
             
             <div>
-              <Label className="text-sm font-medium">Visualization Types</Label>
-              <div className="mt-2 space-y-2">
+              <Label className="text-sm font-medium mb-2 block">Visualization Types</Label>
+              <div className="space-y-2">
                 <Button 
-                  variant="outline" 
+                  variant={reportBuilder.visualizations.includes('Bar Charts') ? 'default' : 'outline'}
                   size="sm" 
                   className="w-full justify-start"
-                  onClick={() => toast({
-                    title: "Bar Chart Selected",
-                    description: "Bar chart visualization added to your report template."
-                  })}
+                  onClick={() => addVisualization('Bar Charts')}
                 >
                   <BarChart3 className="h-4 w-4 mr-2" />
                   Bar Charts
                 </Button>
                 <Button 
-                  variant="outline" 
+                  variant={reportBuilder.visualizations.includes('Pie Charts') ? 'default' : 'outline'}
                   size="sm" 
                   className="w-full justify-start"
-                  onClick={() => toast({
-                    title: "Pie Chart Selected",
-                    description: "Pie chart visualization added to your report template."
-                  })}
+                  onClick={() => addVisualization('Pie Charts')}
                 >
                   <PieChart className="h-4 w-4 mr-2" />
                   Pie Charts
                 </Button>
                 <Button 
-                  variant="outline" 
+                  variant={reportBuilder.visualizations.includes('Line Trends') ? 'default' : 'outline'}
                   size="sm" 
                   className="w-full justify-start"
-                  onClick={() => toast({
-                    title: "Line Trend Selected",
-                    description: "Line trend visualization added to your report template."
-                  })}
+                  onClick={() => addVisualization('Line Trends')}
                 >
                   <TrendingUp className="h-4 w-4 mr-2" />
                   Line Trends
@@ -817,48 +898,161 @@ const AnalyticsPage = () => {
             </div>
 
             <div>
-              <Label className="text-sm font-medium">Export Options</Label>
-              <div className="mt-2 space-y-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full justify-start"
-                  onClick={() => exportData("pdf", "custom report")}
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  PDF Report
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full justify-start"
-                  onClick={() => exportData("excel", "custom report")}
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Excel Export
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full justify-start"
-                  onClick={() => exportData("csv", "custom report")}
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  CSV Data
-                </Button>
+              <Label className="text-sm font-medium mb-2 block">Report Configuration</Label>
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-xs">Report Name</Label>
+                  <Input 
+                    value={reportBuilder.reportName}
+                    onChange={(e) => setReportBuilder(prev => ({ ...prev, reportName: e.target.value }))}
+                    placeholder="Enter report name"
+                    className="mt-1"
+                  />
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  <p>Selected: {reportBuilder.dataSources.length} data sources, {reportBuilder.visualizations.length} visualizations</p>
+                </div>
               </div>
             </div>
           </div>
+
+          {/* Selected Items Display */}
+          {(reportBuilder.dataSources.length > 0 || reportBuilder.visualizations.length > 0) && (
+            <div className="mt-6 space-y-4">
+              {reportBuilder.dataSources.length > 0 && (
+                <div>
+                  <Label className="text-sm font-medium">Selected Data Sources:</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {reportBuilder.dataSources.map(source => (
+                      <Badge key={source} variant="secondary" className="flex items-center gap-2">
+                        {source}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-4 w-4 p-0 hover:bg-transparent"
+                          onClick={() => removeReportItem('dataSources', source)}
+                        >
+                          ×
+                        </Button>
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {reportBuilder.visualizations.length > 0 && (
+                <div>
+                  <Label className="text-sm font-medium">Selected Visualizations:</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {reportBuilder.visualizations.map(viz => (
+                      <Badge key={viz} variant="outline" className="flex items-center gap-2">
+                        {viz}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-4 w-4 p-0 hover:bg-transparent"
+                          onClick={() => removeReportItem('visualizations', viz)}
+                        >
+                          ×
+                        </Button>
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
           
-          <div className="mt-6 text-center">
-            <Button onClick={() => toast({
-              title: "Custom Report Created!",
-              description: "Your custom report has been generated successfully. It will be available in your downloads shortly.",
-            })}>
+          <div className="mt-6 flex justify-center gap-3">
+            <Button 
+              onClick={generateCustomReport}
+              disabled={reportBuilder.dataSources.length === 0}
+            >
               <FileText className="h-4 w-4 mr-2" />
-              Create Custom Report
+              Generate Report
             </Button>
+            {reportBuilder.showPreview && (
+              <Button 
+                variant="outline"
+                onClick={() => exportData("pdf", reportBuilder.reportName)}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export Report
+              </Button>
+            )}
           </div>
+
+          {/* Report Preview */}
+          {reportBuilder.showPreview && reportBuilder.reportData.length > 0 && (
+            <div className="mt-8 border-t pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">{reportBuilder.reportName} - Preview</h3>
+                <Badge variant="outline">{reportBuilder.reportData.length} records</Badge>
+              </div>
+              
+              <div className="space-y-6">
+                {/* Data Table */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Report Data</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="max-h-96 overflow-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Type</TableHead>
+                            <TableHead>Category</TableHead>
+                            <TableHead>Details</TableHead>
+                            <TableHead>Value</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {reportBuilder.reportData.slice(0, 10).map((item, index) => (
+                            <TableRow key={index}>
+                              <TableCell className="font-medium">{item.type}</TableCell>
+                              <TableCell>{item.category}</TableCell>
+                              <TableCell>
+                                {item.year || item.subject || item.department || item.month || 'N/A'}
+                              </TableCell>
+                              <TableCell>
+                                {item.attendance || item.averageGrade || item.satisfaction || item.revenue || 'N/A'}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                      {reportBuilder.reportData.length > 10 && (
+                        <div className="text-center text-sm text-muted-foreground mt-4">
+                          Showing 10 of {reportBuilder.reportData.length} records
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Chart Preview (if visualizations selected) */}
+                {reportBuilder.visualizations.length > 0 && reportBuilder.dataSources.includes('Financial Data') && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Sample Visualization</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={financialData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="month" />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar dataKey="revenue" fill={moduleColors.financial} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
