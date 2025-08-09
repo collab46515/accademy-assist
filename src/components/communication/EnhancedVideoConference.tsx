@@ -280,16 +280,19 @@ export function EnhancedVideoConference({
               {/* Video Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               
-              {/* User Info Overlay - Minimal */}
-              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-                <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md rounded-md px-2 py-1 text-xs">
-                  <span className="text-white font-medium">{userName}</span>
-                  {isHost && <Badge className="text-xs bg-amber-500 text-white px-1">Host</Badge>}
-                </div>
-                
-                <div className="flex items-center gap-1">
-                  {isHandRaised && <Hand className="h-3 w-3 text-amber-400" />}
-                  {isMuted ? <MicOff className="h-3 w-3 text-red-400" /> : <Mic className="h-3 w-3 text-green-400" />}
+              {/* Minimal name overlay at very bottom */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-white font-medium bg-black/60 px-2 py-1 rounded">
+                    {userName.split('@')[0]} {isHost && '(Host)'}
+                  </span>
+                  <div className="flex gap-1">
+                    {isHandRaised && <Hand className="h-3 w-3 text-yellow-300 bg-black/60 rounded p-0.5" />}
+                    {isMuted ? 
+                      <MicOff className="h-3 w-3 text-red-300 bg-black/60 rounded p-0.5" /> : 
+                      <Mic className="h-3 w-3 text-green-300 bg-black/60 rounded p-0.5" />
+                    }
+                  </div>
                 </div>
               </div>
             </div>
@@ -448,249 +451,67 @@ export function EnhancedVideoConference({
           </div>
         </div>
 
-        {/* Professional Sidebar */}
-        <div className="w-80 bg-black/40 backdrop-blur-xl border-l border-white/10">
-          <Tabs defaultValue="participants" className="h-full flex flex-col">
-            <TabsList className="m-4 bg-white/10 backdrop-blur-md">
-              <TabsTrigger value="participants" className="flex-1">
-                <Users className="h-4 w-4 mr-2" />
-                People
-              </TabsTrigger>
-              <TabsTrigger value="chat" className="flex-1">
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Chat
-              </TabsTrigger>
-              <TabsTrigger value="ai" className="flex-1">
-                <Bot className="h-4 w-4 mr-2" />
-                AI
-              </TabsTrigger>
+        {/* Clean Sidebar */}
+        <div className="w-80 bg-slate-900 border-l border-slate-700">
+          <Tabs defaultValue="chat" className="h-full flex flex-col">
+            <TabsList className="m-4 bg-slate-800">
+              <TabsTrigger value="chat" className="flex-1 text-white">Chat</TabsTrigger>
+              <TabsTrigger value="participants" className="flex-1 text-white">People</TabsTrigger>
             </TabsList>
 
-            <div className="flex-1 overflow-hidden">
-              <TabsContent value="participants" className="h-full m-0">
-                <div className="p-4 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-lg">Participants</h3>
-                    <Badge variant="outline" className="bg-white/10 border-white/20">
-                      {participants.length + 1}
-                    </Badge>
+            <TabsContent value="chat" className="flex-1 m-0">
+              <ChatPanel />
+            </TabsContent>
+            
+            <TabsContent value="participants" className="flex-1 m-0 p-4">
+              <div className="text-white">
+                <h3 className="font-semibold mb-4">Participants ({participants.length + 1})</h3>
+                <div className="space-y-2">
+                  <div className="p-2 bg-slate-800 rounded">
+                    <div className="font-medium">{userName.split('@')[0]} (You)</div>
                   </div>
-                  
-                  <ScrollArea className="h-[calc(100vh-200px)]">
-                    <div className="space-y-2">
-                      {/* Current User */}
-                      <div className="p-3 rounded-xl bg-gradient-to-r from-primary/20 to-blue-500/20 border border-primary/30">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10 ring-2 ring-primary/50">
-                            <AvatarImage src="/placeholder-avatar.png" />
-                            <AvatarFallback className="bg-primary/20 text-primary">
-                              {userName[0]?.toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <div className="font-medium">{userName} (You)</div>
-                            {isHost && (
-                              <Badge className="text-xs bg-amber-500/20 text-amber-300 border-amber-500/30">
-                                Host
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            {isHandRaised && <Hand className="h-4 w-4 text-amber-400" />}
-                            {isMuted ? 
-                              <MicOff className="h-4 w-4 text-red-400" /> : 
-                              <Mic className="h-4 w-4 text-green-400" />
-                            }
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Remote Participants */}
-                      {participants.map(participant => (
-                        <div key={participant.id} className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src={participant.avatar} />
-                              <AvatarFallback className="bg-slate-600">
-                                {participant.name.split(' ').map(n => n[0]).join('')}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <div className="font-medium">{participant.name}</div>
-                              {participant.role === 'host' && (
-                                <Badge className="text-xs bg-amber-500/20 text-amber-300 border-amber-500/30">
-                                  Host
-                                </Badge>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              {participant.isHandRaised && <Hand className="h-4 w-4 text-amber-400" />}
-                              {participant.isMuted ? 
-                                <MicOff className="h-4 w-4 text-red-400" /> : 
-                                <Mic className="h-4 w-4 text-green-400" />
-                              }
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                  {participants.map(p => (
+                    <div key={p.id} className="p-2 bg-slate-800 rounded">
+                      <div className="font-medium">{p.name}</div>
                     </div>
-                  </ScrollArea>
+                  ))}
                 </div>
-              </TabsContent>
-              
-              <TabsContent value="chat" className="h-full m-0">
-                <div className="h-full bg-black/20">
-                  <ChatPanel />
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="ai" className="h-full m-0">
-                <div className="p-4 space-y-4">
-                  <h3 className="font-semibold text-lg mb-4">AI Features</h3>
-                  
-                  <div className="grid gap-3">
-                    <Button
-                      variant="outline"
-                      className="justify-start h-12 bg-white/10 border-white/20 hover:bg-white/20 text-left"
-                      onClick={() => setShowAITutor(true)}
-                    >
-                      <Bot className="h-5 w-5 mr-3 text-blue-400" />
-                      <div>
-                        <div className="font-medium">AI Voice Tutor</div>
-                        <div className="text-xs text-slate-400">Interactive voice assistant</div>
-                      </div>
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      className="justify-start h-12 bg-white/10 border-white/20 hover:bg-white/20 text-left"
-                      onClick={() => setShowWhiteboard(!showWhiteboard)}
-                    >
-                      <PenTool className="h-5 w-5 mr-3 text-green-400" />
-                      <div>
-                        <div className="font-medium">Interactive Whiteboard</div>
-                        <div className="text-xs text-slate-400">Collaborative drawing</div>
-                      </div>
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      className="justify-start h-12 bg-white/10 border-white/20 hover:bg-white/20 text-left"
-                      onClick={() => setShowTranslation(!showTranslation)}
-                    >
-                      <Languages className="h-5 w-5 mr-3 text-purple-400" />
-                      <div>
-                        <div className="font-medium">Live Translation</div>
-                        <div className="text-xs text-slate-400">Real-time language support</div>
-                      </div>
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      className="justify-start h-12 bg-white/10 border-white/20 hover:bg-white/20 text-left"
-                      onClick={generateMeetingSummary}
-                      disabled={!currentTranscript}
-                    >
-                      <MessageSquare className="h-5 w-5 mr-3 text-orange-400" />
-                      <div>
-                        <div className="font-medium">Generate Summary</div>
-                        <div className="text-xs text-slate-400">AI meeting notes</div>
-                      </div>
-                    </Button>
-                  </div>
-                  
-                  {meetingSummary && (
-                    <div className="mt-6 p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20">
-                      <h4 className="font-medium mb-2 text-blue-300">Meeting Summary</h4>
-                      <ScrollArea className="h-32">
-                        <div className="text-sm text-slate-300 leading-relaxed">
-                          {meetingSummary}
-                        </div>
-                      </ScrollArea>
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
-            </div>
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
       </div>
 
-      {/* Professional Control Bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-20 bg-black/60 backdrop-blur-xl border-t border-white/10">
-        <div className="flex items-center justify-center h-full gap-4">
-          {/* Main Controls */}
-          <div className="flex items-center gap-3">
-            <Button
-              variant={isMuted ? "destructive" : "secondary"}
-              size="lg"
-              onClick={toggleMute}
-              className="rounded-full h-14 w-14 shadow-lg hover:scale-105 transition-transform"
-            >
-              {isMuted ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
-            </Button>
-            
-            <Button
-              variant={hasVideo ? "secondary" : "destructive"}
-              size="lg"
-              onClick={toggleVideo}
-              className="rounded-full h-14 w-14 shadow-lg hover:scale-105 transition-transform"
-            >
-              {hasVideo ? <Video className="h-6 w-6" /> : <VideoOff className="h-6 w-6" />}
-            </Button>
-            
-            <Button
-              variant={isScreenSharing ? "default" : "secondary"}
-              size="lg"
-              onClick={toggleScreenShare}
-              className="rounded-full h-14 w-14 shadow-lg hover:scale-105 transition-transform"
-            >
-              <Monitor className="h-6 w-6" />
-            </Button>
-          </div>
+      {/* Control Bar - Fixed visibility */}
+      <div className="absolute bottom-0 left-0 right-0 h-16 bg-black border-t border-slate-700">
+        <div className="flex items-center justify-center h-full gap-6">
+          <Button
+            variant={isMuted ? "destructive" : "default"}
+            size="sm"
+            onClick={toggleMute}
+            className="rounded-full h-12 w-12 bg-slate-700 hover:bg-slate-600 text-white"
+          >
+            {isMuted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+          </Button>
           
-          {/* Secondary Controls */}
-          <div className="flex items-center gap-2 ml-8">
-            <Button
-              variant={isHandRaised ? "default" : "outline"}
-              size="sm"
-              onClick={toggleHand}
-              className={`rounded-full h-12 w-12 ${isHandRaised ? 'bg-amber-500 hover:bg-amber-600' : ''}`}
-            >
-              <Hand className="h-5 w-5" />
-            </Button>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="rounded-full h-12 w-12">
-                  <Settings className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-black/90 backdrop-blur-md border-white/20" align="end">
-                <DropdownMenuItem className="text-white hover:bg-white/10">
-                  <Volume2 className="h-4 w-4 mr-2" />
-                  Audio Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-white hover:bg-white/10">
-                  <Camera className="h-4 w-4 mr-2" />
-                  Video Settings
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          <Button
+            variant={hasVideo ? "default" : "destructive"}
+            size="sm"
+            onClick={toggleVideo}
+            className="rounded-full h-12 w-12 bg-slate-700 hover:bg-slate-600 text-white"
+          >
+            {hasVideo ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
+          </Button>
           
-          {/* End Call */}
-          <div className="ml-8">
-            <Button
-              variant="destructive"
-              size="lg"
-              onClick={() => webRTC.disconnect()}
-              className="rounded-full h-14 px-8 bg-red-500 hover:bg-red-600 shadow-lg hover:scale-105 transition-transform"
-            >
-              <Phone className="h-6 w-6 mr-2" />
-              End Call
-            </Button>
-          </div>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => webRTC.disconnect()}
+            className="rounded-full h-12 px-6 bg-red-600 hover:bg-red-700"
+          >
+            <Phone className="h-5 w-5 mr-2" />
+            End
+          </Button>
         </div>
       </div>
 
