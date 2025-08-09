@@ -32,7 +32,7 @@ interface EnrollmentFormWrapperProps {
 
 export function EnrollmentFormWrapper({ pathway, applicationId, children }: EnrollmentFormWrapperProps) {
   const formHook = useEnrollmentForm({ pathway, applicationId });
-  const { config, currentStep, totalSteps, progress, isLoading, isSaving, isFirstStep, isLastStep, nextStep, previousStep } = formHook;
+  const { config, currentStep, totalSteps, progress, isLoading, isSaving, isSubmitted, isFirstStep, isLastStep, nextStep, previousStep } = formHook;
 
   const contextValue: EnrollmentContextType = {
     pathway,
@@ -154,11 +154,12 @@ export function EnrollmentFormWrapper({ pathway, applicationId, children }: Enro
                   <Button
                     type="button"
                     onClick={() => formHook.submitApplication(formHook.form.getValues())}
-                    disabled={isLoading}
+                    disabled={isLoading || isSubmitted}
+                    variant={isSubmitted ? "secondary" : "default"}
                     className="gap-2"
                   >
                     <Send className="h-4 w-4" />
-                    Submit Application
+                    {isSubmitted ? "Application Submitted" : "Submit Application"}
                   </Button>
                 ) : (
                   <Button

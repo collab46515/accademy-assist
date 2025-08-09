@@ -15,6 +15,7 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   const { currentSchool } = useRBAC();
   const { toast } = useToast();
@@ -248,7 +249,7 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
 
   // Submit final application
   const submitApplication = useCallback(async (data: EnrollmentFormData) => {
-    if (!currentSchool) return;
+    if (!currentSchool || isSubmitted || isLoading) return;
 
     setIsLoading(true);
     try {
@@ -307,6 +308,7 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
         description: `Your ${config.name.toLowerCase()} application has been submitted successfully.`,
       });
 
+      setIsSubmitted(true);
       return result.data;
     } catch (error) {
       console.error('Error submitting application:', error);
@@ -319,7 +321,7 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
     } finally {
       setIsLoading(false);
     }
-  }, [currentSchool, applicationId, totalSteps, config.name, toast, extractCommonFields, pathway, mapPathwayToDatabase]);
+  }, [currentSchool, applicationId, totalSteps, config.name, toast, extractCommonFields, pathway, mapPathwayToDatabase, isSubmitted, isLoading]);
 
   // Get field validation status
   const getFieldErrors = useCallback((fieldPath: string) => {
@@ -343,6 +345,7 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
     totalSteps,
     isLoading,
     isSaving,
+    isSubmitted,
     config,
     
     // Navigation
