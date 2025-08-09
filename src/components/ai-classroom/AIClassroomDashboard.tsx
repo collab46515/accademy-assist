@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 import {
   Brain,
   Sparkles,
@@ -224,7 +226,10 @@ const mockClassrooms = [
 
 export const AIClassroomDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [configDialogOpen, setConfigDialogOpen] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState<AIFeature | null>(null);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -255,22 +260,50 @@ export const AIClassroomDashboard: React.FC = () => {
   // Add click handlers for all buttons
   const handleConfigureFeature = (featureId: string, featureTitle: string) => {
     console.log(`Configuring AI feature: ${featureTitle}`, featureId);
-    // TODO: Open feature configuration modal or navigate to config page
+    const feature = aiFeatures.find(f => f.id === featureId);
+    if (feature) {
+      setSelectedFeature(feature);
+      setConfigDialogOpen(true);
+    }
+    toast({
+      title: "Opening Configuration",
+      description: `Configuring ${featureTitle}...`,
+    });
   };
 
   const handleViewFeatureDocs = (featureId: string, featureTitle: string) => {
     console.log(`Viewing documentation for: ${featureTitle}`, featureId);
-    // TODO: Open documentation modal or navigate to docs
+    toast({
+      title: "Opening Documentation",
+      description: `Loading docs for ${featureTitle}...`,
+    });
   };
 
   const handleCreateClassroom = () => {
     console.log('Creating new AI classroom...');
-    // TODO: Open classroom creation modal or navigate to creation page
+    toast({
+      title: "Creating AI Classroom",
+      description: "Setting up your new AI-enhanced classroom...",
+    });
   };
 
   const handleClassroomSettings = (classroomId: string, classroomTitle: string) => {
     console.log(`Opening settings for classroom: ${classroomTitle}`, classroomId);
-    // TODO: Open classroom settings modal or navigate to settings page
+    toast({
+      title: "Opening Settings",
+      description: `Configuring ${classroomTitle}...`,
+    });
+  };
+
+  const handleSaveFeatureConfig = () => {
+    if (selectedFeature) {
+      toast({
+        title: "Configuration Saved",
+        description: `${selectedFeature.title} has been configured successfully.`,
+      });
+      setConfigDialogOpen(false);
+      setSelectedFeature(null);
+    }
   };
 
   return (
@@ -596,6 +629,95 @@ export const AIClassroomDashboard: React.FC = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Configuration Dialog */}
+      <Dialog open={configDialogOpen} onOpenChange={setConfigDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {selectedFeature?.icon}
+              Configure {selectedFeature?.title}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedFeature?.description}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            <div>
+              <h4 className="text-sm font-medium mb-3">Current Status</h4>
+              <Badge 
+                className={`text-white ${getStatusColor(selectedFeature?.status || 'active')}`}
+              >
+                {getStatusLabel(selectedFeature?.status || 'active')}
+              </Badge>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-medium mb-3">Capabilities</h4>
+              <div className="grid grid-cols-2 gap-2">
+                {selectedFeature?.capabilities.map((capability, index) => (
+                  <div key={index} className="flex items-center gap-2 p-2 bg-muted/30 rounded">
+                    <div className="w-2 h-2 bg-green-500 rounded-full" />
+                    <span className="text-sm">{capability}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-medium mb-3">Configuration Options</h4>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-card border rounded-lg">
+                  <div>
+                    <p className="font-medium">Enable Feature</p>
+                    <p className="text-sm text-muted-foreground">Turn this AI feature on or off</p>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    {selectedFeature?.status === 'active' ? 'Enabled' : 'Disabled'}
+                  </Button>
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-card border rounded-lg">
+                  <div>
+                    <p className="font-medium">Sensitivity Level</p>
+                    <p className="text-sm text-muted-foreground">Adjust AI responsiveness</p>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    Medium
+                  </Button>
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-card border rounded-lg">
+                  <div>
+                    <p className="font-medium">Notifications</p>
+                    <p className="text-sm text-muted-foreground">Get alerts when AI takes action</p>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    Enabled
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <Button 
+              className="flex-1" 
+              onClick={handleSaveFeatureConfig}
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Save Configuration
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setConfigDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
