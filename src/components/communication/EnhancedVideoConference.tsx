@@ -72,15 +72,29 @@ export function EnhancedVideoConference({
 
   // Video connection state  
   const [isStreamReady, setIsStreamReady] = useState(false);
+  const hasConnectedVideo = useRef(false);
 
-  // Connect video when stream becomes available
+  // Connect video when stream becomes available - only once
   useEffect(() => {
-    if (isStreamReady && localVideoRef.current) {
+    if (isStreamReady && localVideoRef.current && !hasConnectedVideo.current) {
       const stream = webRTC.getLocalStream();
-      if (stream && !localVideoRef.current.srcObject) {
-        console.log('✅ Connecting stream to video element');
+      if (stream) {
+        console.log('✅ Connecting stream to video element (stable setup)');
         localVideoRef.current.srcObject = stream;
-        localVideoRef.current.play().catch(console.error);
+        hasConnectedVideo.current = true;
+        
+        // Play without await to avoid blocking
+        localVideoRef.current.play().then(() => {
+          console.log('✅ Video playing successfully');
+        }).catch(e => {
+          console.log('Play failed, will retry:', e.message);
+          // Retry once after brief delay
+          setTimeout(() => {
+            if (localVideoRef.current) {
+              localVideoRef.current.play().catch(console.error);
+            }
+          }, 100);
+        });
       }
     }
   }, [isStreamReady, webRTC]);
@@ -312,8 +326,7 @@ export function EnhancedVideoConference({
     });
   };
 
-  const ParticipantGrid = () => {
-    console.log('EnhancedVideoConference: Rendering ParticipantGrid, hasVideo:', hasVideo);
+  const ParticipantGrid = useCallback(() => {
     return (
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 h-full">
         {/* Local user video */}
@@ -414,14 +427,14 @@ export function EnhancedVideoConference({
                   <div className="bg-red-500 rounded p-1">
                     <MicOff className="h-3 w-3 text-white" />
                   </div>
-                )}
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-    );
-  };
+                 )}
+               </div>
+             </div>
+           </Card>
+         ))}
+       </div>
+     );
+   }, [participants, hasVideo, userName, isMuted, isHandRaised]);
 
   const ChatPanel = () => (
     <div className="flex flex-col h-full">
