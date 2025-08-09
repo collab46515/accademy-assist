@@ -348,7 +348,7 @@ export const AIClassroomDashboard: React.FC = () => {
                 size="sm"
                 variant="outline" 
                 className="border-white/20 text-white hover:bg-white/10 w-full"
-                onClick={() => navigate('/', { state: { section: 'workflows', workflow: 'ai-classroom' } })}
+                onClick={() => navigate('/landing', { state: { section: 'workflows', workflow: 'ai-classroom' } })}
               >
                 <FileText className="h-4 w-4 mr-2" />
                 View Workflow Guide
