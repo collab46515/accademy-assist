@@ -308,35 +308,35 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
     averageResponseTime: isDemoMode ? '2.4s' : '3.1s'
   });
 
-  // Update metrics periodically for demo realism
-  useEffect(() => {
-    if (!isDemoMode) return;
-    
-    const interval = setInterval(() => {
-      setClassroomMetrics(prev => ({
-        ...prev,
-        averageEngagement: Math.min(95, Math.max(65, prev.averageEngagement + (Math.random() - 0.5) * 4)),
-        averageComprehension: Math.min(100, Math.max(60, prev.averageComprehension + (Math.random() - 0.5) * 3)),
-        questionsAsked: prev.questionsAsked + (Math.random() > 0.7 ? 1 : 0),
-        aiInterventions: prev.aiInterventions + (Math.random() > 0.85 ? 1 : 0)
-      }));
-      
-      // Update student metrics randomly
-      setStudents(prevStudents => 
-        prevStudents.map(student => ({
-          ...student,
-          engagementScore: Math.min(100, Math.max(40, student.engagementScore + (Math.random() - 0.5) * 5)),
-          comprehensionLevel: Math.min(100, Math.max(30, student.comprehensionLevel + (Math.random() - 0.5) * 4)),
-          participationScore: Math.min(100, Math.max(20, student.participationScore + (Math.random() - 0.5) * 3)),
-          attentionStatus: Math.random() > 0.8 ? 
-            (['focused', 'distracted', 'away'] as const)[Math.floor(Math.random() * 3)] : 
-            student.attentionStatus
-        }))
-      );
-    }, 5000);
+  // Real-time analytics disabled for better UX
+  // useEffect(() => {
+  //   if (!isDemoMode) return;
+  //   
+  //   const interval = setInterval(() => {
+  //     setClassroomMetrics(prev => ({
+  //       ...prev,
+  //       averageEngagement: Math.min(95, Math.max(65, prev.averageEngagement + (Math.random() - 0.5) * 4)),
+  //       averageComprehension: Math.min(100, Math.max(60, prev.averageComprehension + (Math.random() - 0.5) * 3)),
+  //       questionsAsked: prev.questionsAsked + (Math.random() > 0.7 ? 1 : 0),
+  //       aiInterventions: prev.aiInterventions + (Math.random() > 0.85 ? 1 : 0)
+  //     }));
+  //     
+  //     // Update student metrics randomly
+  //     setStudents(prevStudents => 
+  //       prevStudents.map(student => ({
+  //         ...student,
+  //         engagementScore: Math.min(100, Math.max(40, student.engagementScore + (Math.random() - 0.5) * 5)),
+  //         comprehensionLevel: Math.min(100, Math.max(30, student.comprehensionLevel + (Math.random() - 0.5) * 4)),
+  //         participationScore: Math.min(100, Math.max(20, student.participationScore + (Math.random() - 0.5) * 3)),
+  //         attentionStatus: Math.random() > 0.8 ? 
+  //           (['focused', 'distracted', 'away'] as const)[Math.floor(Math.random() * 3)] : 
+  //           student.attentionStatus
+  //       }))
+  //     );
+  //   }, 5000);
 
-    return () => clearInterval(interval);
-  }, [isDemoMode]);
+  //   return () => clearInterval(interval);
+  // }, [isDemoMode]);
 
   // UI state
   const [activeAITab, setActiveAITab] = useState('assistant');

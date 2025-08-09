@@ -129,11 +129,12 @@ export const StudentAnalyticsDashboard: React.FC<Props> = ({
     }
   };
 
-  useEffect(() => {
-    if (students.length > 0) {
-      runAnalytics();
-    }
-  }, [students]);
+  // Disabled automatic analytics to prevent frequent AI calls
+  // useEffect(() => {
+  //   if (students.length > 0) {
+  //     runAnalytics();
+  //   }
+  // }, [students]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
