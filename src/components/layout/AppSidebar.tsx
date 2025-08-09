@@ -145,9 +145,7 @@ const erpModules = [
     subItems: [
       { title: "Dashboard", url: "/ai-suite", icon: LayoutDashboard },
       { title: "AI Classroom", url: "/ai-classroom", icon: Monitor },
-      { title: "Knowledge Base AI", url: "/ai-suite", icon: Brain },
-      { title: "Management Assistant", url: "/ai-suite", icon: Bot },
-      { title: "System Administrator", url: "/ai-suite", icon: Settings },
+      { title: "AI Assistants", url: "/ai-suite", icon: Brain },
       { title: "AI Timetable Generator", url: "/ai-suite/timetable", icon: Clock },
       { title: "Lesson Planner", url: "/ai-suite/lesson-planner", icon: BookOpen },
       { title: "AI Grading Assistant", url: "/ai-suite/grading", icon: CheckCircle },
