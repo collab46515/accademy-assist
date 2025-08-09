@@ -70,25 +70,20 @@ export function EnhancedVideoConference({
   const audioRecorderRef = useRef<MediaRecorder | null>(null);
   const transcriptChunksRef = useRef<string[]>([]);
 
-  // Working video setup with proper cleanup to prevent AbortError
+  // Working video setup with proper play state management
   const workingVideoRef = useRef<HTMLVideoElement>(null);
   const [workingStream, setWorkingStream] = useState<MediaStream | null>(null);
+  const playPromiseRef = useRef<Promise<void> | null>(null);
   
   useEffect(() => {
     let isActive = true;
+    let hasSetup = false;
     
     const setupVideo = async () => {
-      // Wait for the video element to be available
-      if (!workingVideoRef.current) {
-        setTimeout(() => {
-          if (isActive) setupVideo();
-        }, 100);
-        return;
-      }
+      if (!workingVideoRef.current || hasSetup) return;
+      hasSetup = true;
       
-      if (workingStream) return; // Already has stream
-      
-      console.log('WorkingVideo: Setting up video (ref is ready)...');
+      console.log('WorkingVideo: Setting up video...');
       
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -101,33 +96,38 @@ export function EnhancedVideoConference({
           return;
         }
         
-        console.log('WorkingVideo: Got stream, applying to video element...');
+        console.log('WorkingVideo: Got stream, applying...');
         
         const video = workingVideoRef.current;
         if (video) {
           video.srcObject = stream;
           setWorkingStream(stream);
           
-          video.onplaying = () => console.log('WorkingVideo: Video is playing!');
+          // Wait for loadedmetadata before playing
+          await new Promise((resolve) => {
+            video.onloadedmetadata = resolve;
+          });
           
+          console.log('WorkingVideo: Metadata loaded, playing...');
           await video.play();
-          console.log('WorkingVideo: Successfully started video!');
+          console.log('WorkingVideo: ✅ Video successfully playing!');
         }
       } catch (error) {
         console.error('WorkingVideo: Setup failed:', error);
       }
     };
     
-    // Start setup after a brief delay to ensure DOM is ready
-    setTimeout(setupVideo, 50);
+    // Small delay to ensure DOM is stable
+    const timer = setTimeout(setupVideo, 100);
     
     return () => {
       isActive = false;
+      clearTimeout(timer);
       if (workingStream) {
         workingStream.getTracks().forEach(track => track.stop());
       }
     };
-  }, []); // Only run once
+  }, []); // Empty dependency - run only once
 
   useEffect(() => {
     console.log('EnhancedVideoConference: Component mounted, starting initialization');
