@@ -362,9 +362,9 @@ export const CreativeAIFeatures: React.FC<Props> = ({
   const activeAvatar = avatars.find(a => a.active);
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-pink-50 to-purple-50 overflow-hidden">
+    <div className="h-full flex flex-col bg-gradient-to-br from-pink-50 to-purple-50">
       {/* Header */}
-      <div className="p-4 bg-white border-b border-slate-200 shadow-sm">
+      <div className="p-4 bg-white border-b border-slate-200 shadow-sm flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-gradient-to-r from-pink-500 to-purple-500">
@@ -388,7 +388,7 @@ export const CreativeAIFeatures: React.FC<Props> = ({
 
       {/* Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-        <TabsList className="grid w-full grid-cols-3 m-2">
+        <TabsList className="grid w-full grid-cols-3 m-2 flex-shrink-0">
           <TabsTrigger value="avatars" className="text-xs">
             <Gamepad2 className="h-3 w-3 mr-1" />
             Avatars
@@ -403,7 +403,7 @@ export const CreativeAIFeatures: React.FC<Props> = ({
           </TabsTrigger>
         </TabsList>
 
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-auto">
           {/* AI Avatars Tab */}
           <TabsContent value="avatars" className="h-full p-0 m-0">
             <div className="h-full flex flex-col">
