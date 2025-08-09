@@ -50,6 +50,16 @@ export default function LandingPage() {
 
   const modules = [
     {
+      name: "AI Classroom Suite - Smart Virtual Learning",
+      icon: Brain,
+      description: "Revolutionary AI-powered virtual classroom with real-time student analytics and adaptive teaching assistance",
+      features: ["Real-time Student Analytics", "AI Teaching Assistant", "Smart Interventions", "Adaptive Learning", "Engagement Monitoring", "Live Demo Available"],
+      color: "bg-gradient-to-r from-emerald-600 to-cyan-600",
+      highlight: true,
+      featured: true,
+      demoUrl: "/ai-classroom/session/demo-session-1"
+    },
+    {
       name: "Qrypta - AI Question Paper Generator",
       icon: Brain,
       description: "Revolutionary AI-powered automatic question paper generation with intelligent difficulty balancing",
@@ -236,68 +246,76 @@ export default function LandingPage() {
           <>
             <HeroSection onGetStarted={() => setIsSignInModalOpen(true)} />
             
-            {/* AI ERP First of its Kind Highlight Section */}
-            <section className="py-20 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20">
+            {/* AI Classroom Featured Highlight Section */}
+            <section className="py-20 bg-gradient-to-r from-emerald-50 to-cyan-50 dark:from-emerald-900/20 dark:to-cyan-900/20">
               <div className="container mx-auto px-4">
                 <div className="text-center mb-12">
-                  <Badge className="mb-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white text-lg px-6 py-2">
-                    🚀 WORLD'S FIRST AI ERP FOR SCHOOLS
+                  <Badge className="mb-4 bg-gradient-to-r from-emerald-600 to-cyan-600 text-white text-lg px-6 py-2">
+                    🌟 BREAKTHROUGH AI CLASSROOM TECHNOLOGY
                   </Badge>
-                  <h2 className="text-5xl font-bold mb-4 bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-                    Qrypta - AI Question Paper Generator
+                  <h2 className="text-5xl font-bold mb-4 bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">
+                    AI Classroom Suite - Smart Virtual Learning
                   </h2>
                   <p className="text-xl text-muted-foreground max-w-4xl mx-auto">
-                    Revolutionary AI that automatically generates complete question papers with perfect difficulty balancing, 
-                    curriculum alignment, and learning objectives mapping. The first intelligent question paper generator 
-                    that understands your educational needs.
+                    Experience the future of education with AI-powered virtual classrooms that monitor student engagement in real-time, 
+                    provide adaptive teaching assistance, and deliver personalized interventions. The world's most advanced AI classroom system.
                   </p>
                 </div>
                 
                 <div className="grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
-                  <Card className="border-2 border-violet-200 shadow-lg hover:shadow-xl transition-shadow">
+                  <Card className="border-2 border-emerald-200 shadow-lg hover:shadow-xl transition-shadow">
                     <CardHeader>
-                      <div className="w-12 h-12 bg-gradient-to-r from-violet-600 to-purple-600 rounded-lg flex items-center justify-center mb-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-emerald-600 to-cyan-600 rounded-lg flex items-center justify-center mb-4">
                         <Brain className="h-6 w-6 text-white" />
                       </div>
-                      <CardTitle>Auto Question Generation</CardTitle>
+                      <CardTitle>Real-time Student Analytics</CardTitle>
                       <CardDescription>
-                        AI creates diverse questions types automatically - MCQs, short answers, essays, and practical questions aligned to curriculum standards
+                        AI continuously monitors engagement, comprehension, and attention patterns, providing instant insights about each student's learning state
                       </CardDescription>
                     </CardHeader>
                   </Card>
                   
-                  <Card className="border-2 border-purple-200 shadow-lg hover:shadow-xl transition-shadow">
+                  <Card className="border-2 border-cyan-200 shadow-lg hover:shadow-xl transition-shadow">
                     <CardHeader>
-                      <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-violet-600 rounded-lg flex items-center justify-center mb-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-cyan-600 to-emerald-600 rounded-lg flex items-center justify-center mb-4">
+                        <Users className="h-6 w-6 text-white" />
+                      </div>
+                      <CardTitle>AI Teaching Assistant</CardTitle>
+                      <CardDescription>
+                        Intelligent assistant provides adaptive explanations, proactive interventions, and personalized support based on individual learning styles
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                  
+                  <Card className="border-2 border-emerald-200 shadow-lg hover:shadow-xl transition-shadow">
+                    <CardHeader>
+                      <div className="w-12 h-12 bg-gradient-to-r from-emerald-600 to-cyan-600 rounded-lg flex items-center justify-center mb-4">
                         <BarChart3 className="h-6 w-6 text-white" />
                       </div>
-                      <CardTitle>Intelligent Difficulty Balancing</CardTitle>
+                      <CardTitle>Smart Classroom Management</CardTitle>
                       <CardDescription>
-                        Smart algorithms ensure perfect distribution of easy, medium, and difficult questions for optimal assessment
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
-                  
-                  <Card className="border-2 border-violet-200 shadow-lg hover:shadow-xl transition-shadow">
-                    <CardHeader>
-                      <div className="w-12 h-12 bg-gradient-to-r from-violet-600 to-purple-600 rounded-lg flex items-center justify-center mb-4">
-                        <CheckCircle className="h-6 w-6 text-white" />
-                      </div>
-                      <CardTitle>Learning Objectives Mapping</CardTitle>
-                      <CardDescription>
-                        Every question is intelligently mapped to specific learning objectives and curriculum standards for comprehensive assessment
+                        AI generates intelligent breakout groups, manages student queues, and provides behavior coaching for optimal learning environments
                       </CardDescription>
                     </CardHeader>
                   </Card>
                 </div>
                 
-                <div className="text-center mt-12">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
                   <Button 
                     size="lg" 
-                    className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white px-8 py-3 text-lg"
+                    className="bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 text-white px-8 py-3 text-lg"
+                    onClick={() => window.open('/ai-classroom/session/demo-session-1', '_blank')}
+                  >
+                    <PlayCircle className="mr-2 h-5 w-5" />
+                    Try Live AI Classroom Demo
+                  </Button>
+                  <Button 
+                    size="lg" 
+                    variant="outline"
+                    className="border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white px-8 py-3 text-lg"
                     onClick={() => setIsSignInModalOpen(true)}
                   >
-                    Try Qrypta AI Question Generator
+                    Get Started
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </div>

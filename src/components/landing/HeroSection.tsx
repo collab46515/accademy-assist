@@ -24,13 +24,13 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
               </Badge>
               
               <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-                Transform Your
-                <span className="text-primary block">Educational Institution</span>
+                AI-Powered Education
+                <span className="text-primary block">Revolutionizing Schools</span>
               </h1>
               
               <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
-                Streamline every aspect of school management with our comprehensive, AI-powered platform. 
-                From admissions to graduation, we've got you covered.
+                Experience the future of education with our AI Classroom Suite featuring real-time student analytics, 
+                adaptive teaching assistance, and intelligent classroom management.
               </p>
             </div>
 
@@ -38,6 +38,15 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
               <Button size="lg" onClick={onGetStarted} className="text-lg px-8">
                 Get Started
                 <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                onClick={() => window.open('/ai-classroom/session/demo-session-1', '_blank')}
+                className="text-lg px-8"
+              >
+                <PlayCircle className="mr-2 h-5 w-5" />
+                Try AI Classroom Demo
               </Button>
             </div>
 
@@ -57,13 +66,13 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
             
             {/* Floating Cards */}
             <div className="absolute -top-4 -right-4 bg-background border rounded-lg p-3 shadow-lg">
-              <div className="text-sm font-medium">Live Updates</div>
-              <div className="text-xs text-muted-foreground">Real-time notifications</div>
+              <div className="text-sm font-medium">AI Classroom Live</div>
+              <div className="text-xs text-muted-foreground">Real-time student analytics</div>
             </div>
             
             <div className="absolute -bottom-4 -left-4 bg-background border rounded-lg p-3 shadow-lg">
-              <div className="text-sm font-medium">AI Insights</div>
-              <div className="text-xs text-muted-foreground">Predictive analytics</div>
+              <div className="text-sm font-medium">Smart Teaching</div>
+              <div className="text-xs text-muted-foreground">Adaptive AI assistance</div>
             </div>
           </div>
         </div>

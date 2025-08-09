@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle } from "lucide-react";
+import { ArrowRight, CheckCircle, PlayCircle } from "lucide-react";
 
 interface Module {
   name: string;
@@ -10,6 +10,8 @@ interface Module {
   features: string[];
   color: string;
   highlight?: boolean;
+  featured?: boolean;
+  demoUrl?: string;
 }
 
 interface FeaturesGridProps {
@@ -25,12 +27,12 @@ export function FeaturesGrid({ modules }: FeaturesGridProps) {
             Comprehensive Features
           </Badge>
           <h2 className="text-3xl md:text-5xl font-bold">
-            Everything You Need to
-            <span className="text-primary block">Manage Your School</span>
+            AI-Powered School
+            <span className="text-primary block">Management Suite</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Our platform covers every aspect of school management with powerful, integrated modules
-            designed specifically for educational institutions.
+            Revolutionary AI features leading the future of education, plus comprehensive 
+            management modules for complete school operations.
           </p>
         </div>
 
@@ -39,13 +41,21 @@ export function FeaturesGrid({ modules }: FeaturesGridProps) {
             <Card 
               key={index} 
               className={`group hover:shadow-lg transition-all duration-300 border-0 shadow-md relative ${
+                module.highlight && module.featured ? 'border-2 border-emerald-200 shadow-2xl bg-gradient-to-br from-emerald-50 to-cyan-50 dark:from-emerald-900/20 dark:to-cyan-900/20 ring-2 ring-emerald-100' : 
                 module.highlight ? 'border-2 border-purple-200 shadow-xl bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20' : ''
               }`}
             >
-              {module.highlight && (
+              {module.highlight && module.featured && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-gradient-to-r from-emerald-600 to-cyan-600 text-white animate-pulse">
+                    🌟 BREAKTHROUGH AI
+                  </Badge>
+                </div>
+              )}
+              {module.highlight && !module.featured && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                   <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
-                    ⭐ Featured
+                    ⭐ AI Powered
                   </Badge>
                 </div>
               )}
@@ -70,13 +80,21 @@ export function FeaturesGrid({ modules }: FeaturesGridProps) {
                 <Button 
                   variant="ghost" 
                   className={`w-full transition-colors ${
-                    module.highlight 
+                    module.highlight && module.featured
+                      ? 'bg-gradient-to-r from-emerald-600 to-cyan-600 text-white hover:from-emerald-700 hover:to-cyan-700' 
+                      : module.highlight 
                       ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700' 
                       : 'group-hover:bg-primary group-hover:text-primary-foreground'
                   }`}
+                  onClick={() => module.demoUrl && window.open(module.demoUrl, '_blank')}
                 >
-                  {module.highlight ? 'Try AI Generator' : 'Learn More'}
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  {module.featured ? (
+                    <>
+                      <PlayCircle className="mr-2 h-4 w-4" />
+                      Try Live Demo
+                    </>
+                  ) : module.highlight ? 'Try AI Feature' : 'Learn More'}
+                  {!module.featured && <ArrowRight className="ml-2 h-4 w-4" />}
                 </Button>
               </CardContent>
             </Card>
