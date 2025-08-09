@@ -173,10 +173,10 @@ export const AILessonHighlights: React.FC<AILessonHighlightsProps> = ({
   };
 
   return (
-    <div className={`fixed top-20 right-4 z-40 transition-all duration-300 ${
+    <div className={`fixed top-20 right-4 z-30 transition-all duration-300 ${
       isVisible ? 'translate-x-0' : 'translate-x-full'
     }`}>
-      <Card className="w-96 max-h-[calc(100vh-6rem)] flex flex-col bg-white shadow-lg border border-slate-200">
+      <Card className="w-80 max-h-[70vh] flex flex-col bg-white shadow-lg border border-slate-200">
         {/* Header */}
         <div className="p-4 border-b border-slate-200">
           <div className="flex items-center justify-between">
@@ -334,7 +334,8 @@ export const AILessonHighlights: React.FC<AILessonHighlightsProps> = ({
       {!isVisible && (
         <Button
           onClick={onToggle}
-          className="absolute -left-12 top-4 bg-blue-600 hover:bg-blue-700 text-white rounded-l-lg rounded-r-none px-3 py-2"
+          className="absolute -left-10 top-4 bg-blue-600 hover:bg-blue-700 text-white rounded-l-lg rounded-r-none px-2 py-2 shadow-md"
+          size="sm"
         >
           <Brain className="h-4 w-4" />
         </Button>

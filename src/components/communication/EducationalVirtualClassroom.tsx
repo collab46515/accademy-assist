@@ -130,7 +130,7 @@ export const EducationalVirtualClassroom: React.FC<EducationalVirtualClassroomPr
   const [showBreakoutPods, setShowBreakoutPods] = useState(false);
   const [currentPodId, setCurrentPodId] = useState<string | null>(null);
   const [showAssignments, setShowAssignments] = useState(false);
-  const [showAIHighlights, setShowAIHighlights] = useState(true);
+  const [showAIHighlights, setShowAIHighlights] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
 
   // Audio/Video controls
