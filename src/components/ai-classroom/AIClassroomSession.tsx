@@ -200,6 +200,8 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
   const [showAIInsights, setShowAIInsights] = useState(true);
   const [autoInterventionEnabled, setAutoInterventionEnabled] = useState(true);
   const [classStartTime] = useState(new Date(Date.now() - 1800000));
+  const [isMuted, setIsMuted] = useState(true);
+  const [isCameraOn, setIsCameraOn] = useState(false);
 
   // AI metrics
   const [aiMetrics, setAIMetrics] = useState({
@@ -235,6 +237,50 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
 
   const getPriorityInsights = () => {
     return aiInsights.filter(i => i.priority === 'high' || i.priority === 'critical');
+  };
+
+  // Click handlers
+  const handleQuickQuiz = () => {
+    console.log('Generating quick quiz...');
+    // AI generates a quick quiz based on current topic
+  };
+
+  const handleIntervention = () => {
+    console.log('Starting AI intervention...');
+    // AI provides targeted support to struggling students
+  };
+
+  const handleViewAllInsights = () => {
+    console.log('Viewing all AI insights...');
+    setShowAIInsights(!showAIInsights);
+  };
+
+  const handleGenerateExample = () => {
+    console.log('Generating AI example...');
+    // AI creates a visual example for current concept
+  };
+
+  const handlePreviewExample = () => {
+    console.log('Previewing example...');
+    // Preview the generated example
+  };
+
+  const handleAIAssist = () => {
+    console.log('Toggling AI whiteboard assist...');
+    // Toggle AI whiteboard assistance
+  };
+
+  const handleEndSession = () => {
+    console.log('Ending classroom session...');
+    if (confirm('Are you sure you want to end this session?')) {
+      // End the classroom session
+      window.location.href = '/ai-classroom/dashboard';
+    }
+  };
+
+  const handleSettings = () => {
+    console.log('Opening settings...');
+    // Open AI classroom settings
   };
 
   return (
@@ -294,12 +340,12 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
             </Button>
 
             {/* Quick AI Actions */}
-            <Button variant="outline" size="sm" className="h-9">
+            <Button variant="outline" size="sm" className="h-9" onClick={handleQuickQuiz}>
               <Zap className="h-4 w-4 mr-2" />
               Quick Quiz
             </Button>
             
-            <Button variant="outline" size="sm" className="h-9">
+            <Button variant="outline" size="sm" className="h-9" onClick={handleIntervention}>
               <Target className="h-4 w-4 mr-2" />
               Intervention
             </Button>
@@ -314,7 +360,7 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
                 <AlertCircle className="h-4 w-4 text-orange-600" />
                 <span className="font-medium text-orange-800">Priority AI Insights</span>
               </div>
-              <Button size="sm" variant="ghost" className="text-orange-700">
+              <Button size="sm" variant="ghost" className="text-orange-700" onClick={handleViewAllInsights}>
                 View All
               </Button>
             </div>
@@ -366,15 +412,15 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
                 <p className="text-sm mb-3">
                   3 students are struggling with the current concept. Consider using a visual demonstration or practical example.
                 </p>
-                <div className="flex gap-2">
-                  <Button size="sm" className="flex-1">
-                    <Sparkles className="h-3 w-3 mr-1" />
-                    Generate Example
-                  </Button>
-                  <Button size="sm" variant="outline">
-                    <Eye className="h-3 w-3" />
-                  </Button>
-                </div>
+                 <div className="flex gap-2">
+                   <Button size="sm" className="flex-1" onClick={handleGenerateExample}>
+                     <Sparkles className="h-3 w-3 mr-1" />
+                     Generate Example
+                   </Button>
+                   <Button size="sm" variant="outline" onClick={handlePreviewExample}>
+                     <Eye className="h-3 w-3" />
+                   </Button>
+                 </div>
               </Card>
             </div>
           </div>
@@ -393,7 +439,7 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
                   <Bot className="h-3 w-3 mr-1" />
                   AI Assist: On
                 </Badge>
-                <Button size="sm" variant="ghost">
+                <Button size="sm" variant="ghost" onClick={handleAIAssist}>
                   <Sparkles className="h-3 w-3" />
                 </Button>
               </div>
@@ -499,24 +545,27 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
               variant="outline"
               size="sm"
               className="h-10 px-4"
+              onClick={() => setIsMuted(!isMuted)}
             >
-              <Mic className="h-4 w-4 mr-2" />
-              Muted
+              {isMuted ? <MicOff className="h-4 w-4 mr-2" /> : <Mic className="h-4 w-4 mr-2" />}
+              {isMuted ? 'Muted' : 'Unmute'}
             </Button>
             
             <Button
               variant="outline"
               size="sm"
               className="h-10 px-4"
+              onClick={() => setIsCameraOn(!isCameraOn)}
             >
-              <Video className="h-4 w-4 mr-2" />
-              Camera
+              {isCameraOn ? <Video className="h-4 w-4 mr-2" /> : <VideoOff className="h-4 w-4 mr-2" />}
+              {isCameraOn ? 'Camera On' : 'Camera Off'}
             </Button>
             
             <Button
               variant="destructive"
               size="sm"
               className="h-10 px-6"
+              onClick={handleEndSession}
             >
               <Phone className="h-4 w-4 mr-2" />
               End Session
@@ -535,7 +584,7 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
               Auto-Help
             </Button>
             
-            <Button variant="outline" size="sm" className="h-9">
+            <Button variant="outline" size="sm" className="h-9" onClick={handleSettings}>
               <Settings className="h-4 w-4" />
             </Button>
           </div>
