@@ -176,62 +176,74 @@ export const EducationalVirtualClassroom: React.FC<EducationalVirtualClassroomPr
   };
 
   return (
-    <div className="h-screen bg-slate-50 flex flex-col">
+    <div className="h-screen bg-background flex flex-col">
       {/* Header Bar */}
-      <div className="bg-white border-b border-slate-200 p-4">
+      <div className="bg-card border-b border-border px-6 py-4 shadow-sm">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-blue-600" />
-              <h1 className="text-lg font-semibold">{lessonTitle}</h1>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <BookOpen className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold text-foreground">{lessonTitle}</h1>
+                <p className="text-sm text-muted-foreground">Live Session</p>
+              </div>
             </div>
-            <Badge variant="outline" className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {formatTime(getClassDuration())}
-            </Badge>
-            <Badge variant="secondary">
-              {students.length + 1} participants
-            </Badge>
+            
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="bg-background">
+                <Clock className="h-3 w-3 mr-1" />
+                {formatTime(getClassDuration())}
+              </Badge>
+              <Badge variant="secondary" className="bg-primary/10 text-primary">
+                <Users className="h-3 w-3 mr-1" />
+                {students.length + 1}
+              </Badge>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {/* Teacher Controls */}
             {userRole === 'teacher' && (
-              <>
+              <div className="flex items-center gap-2 mr-4">
                 <Button
-                  variant="outline"
+                  variant={focusMode ? "default" : "outline"}
                   size="sm"
                   onClick={() => setFocusMode(!focusMode)}
-                  className={focusMode ? 'bg-blue-50 border-blue-200' : ''}
+                  className="h-9"
                 >
-                  <Target className="h-4 w-4 mr-1" />
+                  <Target className="h-4 w-4 mr-2" />
                   Focus Mode
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={createQuickPoll}
+                  className="h-9"
                 >
-                  <BarChart3 className="h-4 w-4 mr-1" />
-                  Quick Poll
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Poll
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setShowBreakoutPods(true)}
+                  className="h-9"
                 >
-                  <UserPlus className="h-4 w-4 mr-1" />
-                  Breakout Pods
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Groups
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setShowAssignments(true)}
+                  className="h-9"
                 >
-                  <Upload className="h-4 w-4 mr-1" />
-                  Assignments
+                  <Upload className="h-4 w-4 mr-2" />
+                  Tasks
                 </Button>
-              </>
+              </div>
             )}
 
             {/* Student Hand Raise */}
@@ -240,18 +252,18 @@ export const EducationalVirtualClassroom: React.FC<EducationalVirtualClassroomPr
                 variant={myHandRaised ? "default" : "outline"}
                 size="sm"
                 onClick={toggleHandRaise}
-                className={myHandRaised ? 'bg-yellow-500 hover:bg-yellow-600' : ''}
+                className={`h-9 mr-4 ${myHandRaised ? 'bg-amber-500 hover:bg-amber-600 text-white' : ''}`}
               >
-                <Hand className="h-4 w-4 mr-1" />
+                <Hand className="h-4 w-4 mr-2" />
                 {myHandRaised ? 'Lower Hand' : 'Raise Hand'}
               </Button>
             )}
 
-            {/* Attention Alerts (Teacher only) */}
+            {/* Attention Alerts */}
             {userRole === 'teacher' && getAttentionAlerts().length > 0 && (
-              <Badge variant="destructive" className="flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {getAttentionAlerts().length} attention alerts
+              <Badge variant="destructive" className="mr-2 px-2 py-1">
+                <AlertCircle className="h-3 w-3 mr-1" />
+                {getAttentionAlerts().length} alerts
               </Badge>
             )}
           </div>
@@ -259,63 +271,72 @@ export const EducationalVirtualClassroom: React.FC<EducationalVirtualClassroomPr
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex">
+      <div className="flex-1 flex overflow-hidden">
         {/* Main Lesson Area */}
         <div className="flex-1 flex flex-col">
           {/* Video/Presentation Area */}
-          <div className="flex-1 bg-black relative">
+          <div className="flex-1 bg-slate-900 relative rounded-lg m-4 overflow-hidden shadow-lg">
             {/* Teacher's Video/Screen Share would go here */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center text-white">
-                <Presentation className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                <p className="text-lg opacity-75">Teacher's presentation area</p>
+              <div className="text-center text-slate-300">
+                <div className="p-4 rounded-full bg-slate-800/50 mb-4 inline-block">
+                  <Presentation className="h-12 w-12" />
+                </div>
+                <h3 className="text-xl font-medium mb-2">Presentation Area</h3>
+                <p className="text-sm opacity-75">Teacher's screen share will appear here</p>
               </div>
             </div>
 
             {/* Live Poll Overlay */}
             {currentPoll && currentPoll.isActive && !focusMode && (
-              <div className="absolute top-4 right-4 w-80">
-                <Card className="p-4 bg-white/95 backdrop-blur">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold flex items-center gap-2">
-                      <BarChart3 className="h-4 w-4" />
-                      Live Poll
-                    </h3>
-                    <Badge variant="secondary">{currentPoll.totalResponses} responses</Badge>
-                  </div>
-                  <p className="text-sm mb-3">{currentPoll.question}</p>
-                  <div className="space-y-2">
-                    {currentPoll.options.map((option, index) => {
-                      const count = currentPoll.responses[option] || 0;
-                      const percentage = currentPoll.totalResponses > 0 
-                        ? (count / currentPoll.totalResponses) * 100 
-                        : 0;
-                      
-                      return (
-                        <div key={index} className="space-y-1">
-                          <div className="flex justify-between text-xs">
-                            <span>{option}</span>
-                            <span>{count} ({Math.round(percentage)}%)</span>
-                          </div>
-                          <Progress value={percentage} className="h-2" />
+              <div className="absolute top-6 right-6 w-80">
+                <Card className="bg-card/95 backdrop-blur-sm border shadow-lg">
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-semibold flex items-center gap-2 text-foreground">
+                        <div className="p-1 rounded bg-primary/10">
+                          <BarChart3 className="h-4 w-4 text-primary" />
                         </div>
-                      );
-                    })}
-                  </div>
-                  {userRole === 'student' && (
-                    <div className="flex gap-1 mt-3">
-                      {currentPoll.options.map((option, index) => (
-                        <Button
-                          key={index}
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 text-xs"
-                        >
-                          {String.fromCharCode(65 + index)}
-                        </Button>
-                      ))}
+                        Live Poll
+                      </h3>
+                      <Badge variant="secondary" className="bg-primary/10 text-primary">
+                        {currentPoll.totalResponses} responses
+                      </Badge>
                     </div>
-                  )}
+                    <p className="text-sm mb-4 text-foreground font-medium">{currentPoll.question}</p>
+                    <div className="space-y-3">
+                      {currentPoll.options.map((option, index) => {
+                        const count = currentPoll.responses[option] || 0;
+                        const percentage = currentPoll.totalResponses > 0 
+                          ? (count / currentPoll.totalResponses) * 100 
+                          : 0;
+                        
+                        return (
+                          <div key={index} className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="font-medium">{option}</span>
+                              <span className="text-muted-foreground">{count} ({Math.round(percentage)}%)</span>
+                            </div>
+                            <Progress value={percentage} className="h-2" />
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {userRole === 'student' && (
+                      <div className="grid grid-cols-2 gap-2 mt-4">
+                        {currentPoll.options.map((option, index) => (
+                          <Button
+                            key={index}
+                            variant="outline"
+                            size="sm"
+                            className="h-8"
+                          >
+                            {String.fromCharCode(65 + index)}
+                          </Button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </Card>
               </div>
             )}
@@ -323,19 +344,19 @@ export const EducationalVirtualClassroom: React.FC<EducationalVirtualClassroomPr
 
           {/* Interactive Whiteboard */}
           {showWhiteboard && (
-            <div className="h-64 border-t border-slate-200 bg-white">
-              <div className="flex items-center justify-between px-4 py-2 border-b border-slate-200">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Presentation className="h-4 w-4" />
+            <div className="h-72 bg-card border border-border mx-4 mb-4 rounded-lg shadow-sm overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
+                <h3 className="font-semibold flex items-center gap-2 text-foreground">
+                  <div className="p-1 rounded bg-primary/10">
+                    <Presentation className="h-4 w-4 text-primary" />
+                  </div>
                   Collaborative Whiteboard
                 </h3>
-                <div className="flex items-center gap-2 text-xs text-slate-600">
-                  <Badge variant="outline" className="text-xs">
-                    {userRole === 'teacher' ? 'Full Access' : 'View Only'}
-                  </Badge>
-                </div>
+                <Badge variant="outline" className="bg-background">
+                  {userRole === 'teacher' ? 'Full Access' : 'View Only'}
+                </Badge>
               </div>
-              <div className="h-56">
+              <div className="h-60">
                 <InteractiveWhiteboard roomId={roomId} />
               </div>
             </div>
@@ -344,26 +365,30 @@ export const EducationalVirtualClassroom: React.FC<EducationalVirtualClassroomPr
 
         {/* Right Sidebar - Student Roster & Features */}
         {showStudentRoster && !focusMode && (
-          <div className="w-80 bg-white border-l border-slate-200 flex flex-col">
+          <div className="w-80 bg-card border-l border-border flex flex-col shadow-sm">
             {/* Hand Raised Queue (Teacher view) */}
             {userRole === 'teacher' && getHandRaisedQueue().length > 0 && (
-              <div className="p-3 border-b border-slate-200 bg-yellow-50">
-                <h3 className="font-semibold text-yellow-800 flex items-center gap-2 mb-2">
-                  <Hand className="h-4 w-4" />
+              <div className="p-4 border-b border-border bg-amber-50 dark:bg-amber-900/20">
+                <h3 className="font-semibold text-amber-800 dark:text-amber-200 flex items-center gap-2 mb-3">
+                  <div className="p-1 rounded bg-amber-100 dark:bg-amber-800">
+                    <Hand className="h-4 w-4 text-amber-600 dark:text-amber-300" />
+                  </div>
                   Hand Raised Queue ({getHandRaisedQueue().length})
                 </h3>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {getHandRaisedQueue().map((student, index) => (
-                    <div key={student.id} className="flex items-center gap-2 text-sm">
-                      <Badge variant="secondary" className="text-xs">
+                    <div key={student.id} className="flex items-center gap-3 p-2 bg-white dark:bg-slate-800 rounded-lg">
+                      <Badge variant="secondary" className="text-xs min-w-fit">
                         #{index + 1}
                       </Badge>
-                      <span>{student.name}</span>
-                      <span className="text-xs text-slate-500">
-                        {student.handRaisedAt && 
-                          `${Math.floor((Date.now() - student.handRaisedAt.getTime()) / 1000)}s ago`
-                        }
-                      </span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-medium truncate">{student.name}</span>
+                        <div className="text-xs text-muted-foreground">
+                          {student.handRaisedAt && 
+                            `${Math.floor((Date.now() - student.handRaisedAt.getTime()) / 1000)}s ago`
+                          }
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -371,54 +396,62 @@ export const EducationalVirtualClassroom: React.FC<EducationalVirtualClassroomPr
             )}
 
             {/* Student Roster */}
-            <div className="flex-1 p-3">
-              <h3 className="font-semibold flex items-center gap-2 mb-3">
-                <Users className="h-4 w-4" />
+            <div className="flex-1 p-4 overflow-y-auto">
+              <h3 className="font-semibold flex items-center gap-2 mb-4 text-foreground">
+                <div className="p-1 rounded bg-primary/10">
+                  <Users className="h-4 w-4 text-primary" />
+                </div>
                 Students ({students.length})
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {students.map((student) => (
-                  <div key={student.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50">
+                  <div key={student.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
                     {/* Avatar/Status */}
-                    <div className="relative">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-xs font-semibold text-blue-700">
+                    <div className="relative flex-shrink-0">
+                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                        <span className="text-sm font-semibold text-primary">
                           {student.name.split(' ').map(n => n[0]).join('').substring(0, 2)}
                         </span>
                       </div>
                       {/* Attention Status Indicator */}
-                      <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
-                        student.attentionStatus === 'focused' ? 'bg-green-400' :
-                        student.attentionStatus === 'distracted' ? 'bg-yellow-400' : 'bg-red-400'
+                      <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-card ${
+                        student.attentionStatus === 'focused' ? 'bg-green-500' :
+                        student.attentionStatus === 'distracted' ? 'bg-amber-500' : 'bg-red-500'
                       }`} />
                     </div>
 
                     {/* Student Info */}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">{student.name}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-medium text-foreground truncate">{student.name}</span>
                         {student.isHandRaised && (
-                          <Hand className="h-3 w-3 text-yellow-600" />
+                          <div className="p-0.5 rounded bg-amber-100 dark:bg-amber-900">
+                            <Hand className="h-3 w-3 text-amber-600 dark:text-amber-300" />
+                          </div>
                         )}
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-slate-500">
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <UserCheck className="h-3 w-3" />
                         {student.participationScore}% participation
                       </div>
                     </div>
 
                     {/* Audio/Video Status */}
-                    <div className="flex gap-1">
-                      {student.hasAudio ? (
-                        <Mic className="h-3 w-3 text-green-600" />
-                      ) : (
-                        <MicOff className="h-3 w-3 text-slate-400" />
-                      )}
-                      {student.hasVideo ? (
-                        <Video className="h-3 w-3 text-green-600" />
-                      ) : (
-                        <VideoOff className="h-3 w-3 text-slate-400" />
-                      )}
+                    <div className="flex gap-2 flex-shrink-0">
+                      <div className={`p-1 rounded ${student.hasAudio ? 'bg-green-100 dark:bg-green-900' : 'bg-slate-100 dark:bg-slate-800'}`}>
+                        {student.hasAudio ? (
+                          <Mic className="h-3 w-3 text-green-600 dark:text-green-400" />
+                        ) : (
+                          <MicOff className="h-3 w-3 text-slate-400" />
+                        )}
+                      </div>
+                      <div className={`p-1 rounded ${student.hasVideo ? 'bg-green-100 dark:bg-green-900' : 'bg-slate-100 dark:bg-slate-800'}`}>
+                        {student.hasVideo ? (
+                          <Video className="h-3 w-3 text-green-600 dark:text-green-400" />
+                        ) : (
+                          <VideoOff className="h-3 w-3 text-slate-400" />
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -426,8 +459,8 @@ export const EducationalVirtualClassroom: React.FC<EducationalVirtualClassroomPr
             </div>
 
             {/* Quick Chat (Minimized) */}
-            <div className="p-3 border-t border-slate-200 bg-slate-50">
-              <Button variant="ghost" size="sm" className="w-full justify-start text-xs">
+            <div className="p-4 border-t border-border bg-muted/30">
+              <Button variant="ghost" size="sm" className="w-full justify-start h-9 text-sm">
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Quick questions (2 unread)
               </Button>
@@ -437,42 +470,46 @@ export const EducationalVirtualClassroom: React.FC<EducationalVirtualClassroomPr
       </div>
 
       {/* Bottom Control Bar */}
-      <div className="bg-white border-t border-slate-200 p-4">
+      <div className="bg-card border-t border-border px-6 py-4 shadow-sm">
         <div className="flex items-center justify-between">
           {/* Left side - Lesson controls */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Button
-              variant="outline"
+              variant={showWhiteboard ? "default" : "outline"}
               size="sm"
               onClick={() => setShowWhiteboard(!showWhiteboard)}
+              className="h-9"
             >
-              <Presentation className="h-4 w-4 mr-1" />
-              {showWhiteboard ? 'Hide' : 'Show'} Whiteboard
+              <Presentation className="h-4 w-4 mr-2" />
+              Whiteboard
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowLessonNotes(!showLessonNotes)}
+              className="h-9"
             >
-              <BookOpen className="h-4 w-4 mr-1" />
-              Lesson Notes
+              <BookOpen className="h-4 w-4 mr-2" />
+              Notes
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowAssignments(true)}
+              className="h-9"
             >
-              <Upload className="h-4 w-4 mr-1" />
-              Assignments
+              <Upload className="h-4 w-4 mr-2" />
+              Tasks
             </Button>
             {userRole === 'teacher' && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowBreakoutPods(true)}
+                className="h-9"
               >
-                <Timer className="h-4 w-4 mr-1" />
-                Breakout Pods
+                <Timer className="h-4 w-4 mr-2" />
+                Groups
               </Button>
             )}
           </div>
@@ -483,49 +520,52 @@ export const EducationalVirtualClassroom: React.FC<EducationalVirtualClassroomPr
               variant={isMuted ? "destructive" : "default"}
               size="sm"
               onClick={() => setIsMuted(!isMuted)}
-              className="rounded-full h-10 w-10"
+              className="rounded-full h-12 w-12 shadow-md"
             >
-              {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              {isMuted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
             </Button>
             
             <Button
               variant={hasVideo ? "default" : "destructive"}
               size="sm"
               onClick={() => setHasVideo(!hasVideo)}
-              className="rounded-full h-10 w-10"
+              className="rounded-full h-12 w-12 shadow-md"
             >
-              {hasVideo ? <Video className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
+              {hasVideo ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
             </Button>
             
             <Button
               variant="destructive"
               size="sm"
-              className="rounded-full px-6"
+              className="rounded-full px-6 h-12 shadow-md"
             >
-              <Phone className="h-4 w-4 mr-1" />
+              <Phone className="h-4 w-4 mr-2" />
               Leave Class
             </Button>
           </div>
 
           {/* Right side - View controls */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Button
-              variant="ghost"
+              variant={showStudentRoster ? "default" : "outline"}
               size="sm"
               onClick={() => setShowStudentRoster(!showStudentRoster)}
+              className="h-9"
             >
-              {showStudentRoster ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              <span className="ml-1">Roster</span>
-            </Button>
-            <Button variant="ghost" size="sm">
-              <Settings className="h-4 w-4" />
+              <Users className="h-4 w-4 mr-2" />
+              Roster
             </Button>
             <Button 
-              variant="ghost" 
+              variant={showAIHighlights ? "default" : "outline"}
               size="sm"
               onClick={() => setShowAIHighlights(!showAIHighlights)}
+              className="h-9"
             >
-              <Brain className="h-4 w-4" />
+              <Brain className="h-4 w-4 mr-2" />
+              AI Insights
+            </Button>
+            <Button variant="outline" size="sm" className="h-9">
+              <Settings className="h-4 w-4" />
             </Button>
           </div>
         </div>
