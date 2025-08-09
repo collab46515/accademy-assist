@@ -469,6 +469,40 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
       {/* Demo Mode Banner */}
       {isDemoMode && <DemoNotificationBanner />}
 
+      {/* Demo Quick Actions */}
+      {isDemoMode && (
+        <div className="fixed bottom-6 right-6 z-40 space-y-3">
+          <Card className="p-4 bg-white/95 backdrop-blur shadow-lg border border-gray-200">
+            <div className="space-y-2">
+              <h4 className="font-semibold text-sm text-gray-900">🚀 Demo Actions</h4>
+              <div className="space-y-2">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  className="w-full text-xs"
+                  onClick={() => window.open('/landing', '_blank')}
+                >
+                  <FileText className="h-3 w-3 mr-2" />
+                  View Workflow Guide
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  className="w-full text-xs"
+                  onClick={() => {
+                    navigator.clipboard.writeText(window.location.href);
+                    // Could add toast notification here
+                  }}
+                >
+                  <Users className="h-3 w-3 mr-2" />
+                  Share Demo Link
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
       {/* Enhanced Header Bar with AI Status */}
       <div className="bg-white border-b border-slate-200 px-6 py-4 shadow-sm">
         <div className="flex items-center justify-between">
