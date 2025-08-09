@@ -362,52 +362,38 @@ export function EnhancedVideoConference({
   }, [participants, hasVideo, userName, isMuted, isHandRaised]);
 
   const ChatPanel = () => (
-    <div className="flex flex-col h-full bg-black/20 backdrop-blur-sm">
-      <div className="p-4 border-b border-white/10">
-        <h3 className="font-semibold text-lg">Chat</h3>
+    <div className="flex flex-col h-full bg-slate-800">
+      <div className="p-3 border-b border-slate-700">
+        <h3 className="font-semibold text-white">Chat</h3>
       </div>
       
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-3">
-          {chatMessages.map(msg => (
-            <div key={msg.id} className="space-y-1 animate-fade-in">
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <span className="font-medium">{msg.senderName}</span>
-                <span>{new Date(msg.timestamp).toLocaleTimeString()}</span>
+      <div className="flex-1 p-3 overflow-y-auto">
+        {chatMessages.length === 0 ? (
+          <div className="text-slate-400 text-sm">No messages yet...</div>
+        ) : (
+          <div className="space-y-2">
+            {chatMessages.map(msg => (
+              <div key={msg.id} className="bg-slate-700 rounded p-2">
+                <div className="text-xs text-slate-300 mb-1">{msg.senderName}</div>
+                <div className="text-white text-sm">{msg.message}</div>
               </div>
-              <div className="text-sm bg-white/10 rounded-lg p-3 text-white">
-                {msg.message}
-              </div>
-            </div>
-          ))}
-          {chatMessages.length === 0 && (
-            <div className="text-center text-slate-400 text-sm py-8">
-              No messages yet. Start the conversation!
-            </div>
-          )}
-        </div>
-      </ScrollArea>
+            ))}
+          </div>
+        )}
+      </div>
       
-      <div className="p-4 border-t border-white/10">
+      <div className="p-3 border-t border-slate-700">
         <div className="flex gap-2">
-          <Input
-            placeholder="Type a message..."
+          <input
+            type="text"
+            placeholder="Type message..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-              }
-            }}
-            className="bg-white/10 border-white/20 text-white placeholder:text-slate-400"
+            onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+            className="flex-1 bg-slate-700 text-white px-3 py-2 rounded border-0 placeholder:text-slate-400"
           />
-          <Button 
-            onClick={sendMessage} 
-            size="sm"
-            className="bg-primary hover:bg-primary/80"
-          >
-            <MessageSquare className="h-4 w-4" />
+          <Button onClick={sendMessage} className="bg-blue-600 hover:bg-blue-700">
+            Send
           </Button>
         </div>
       </div>
@@ -444,11 +430,9 @@ export function EnhancedVideoConference({
       </div>
 
       <div className="flex h-[calc(100vh-4rem)]">
-        {/* Main Video Area */}
+        {/* Main Video Area - No grey box */}
         <div className="flex-1 p-4">
-          <div className="h-full bg-black/20 rounded-2xl backdrop-blur-sm border border-white/10 overflow-hidden">
-            <ParticipantGrid />
-          </div>
+          <ParticipantGrid />
         </div>
 
         {/* Clean Sidebar */}
