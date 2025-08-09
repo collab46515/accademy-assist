@@ -233,7 +233,14 @@ const AnalyticsPage = () => {
                 <SelectItem value="thisyear">This year</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => toast({
+                title: "Advanced Filters",
+                description: "Advanced filtering options panel will open here."
+              })}
+            >
               <Filter className="h-4 w-4 mr-2" />
               Advanced Filters
             </Button>
@@ -728,15 +735,39 @@ const AnalyticsPage = () => {
             <div>
               <Label className="text-sm font-medium">Data Sources</Label>
               <div className="mt-2 space-y-2">
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => toast({
+                    title: "Student Data Selected",
+                    description: "Student data source added to your custom report."
+                  })}
+                >
                   <BarChart3 className="h-4 w-4 mr-2" />
                   Student Data
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => toast({
+                    title: "Financial Data Selected", 
+                    description: "Financial data source added to your custom report."
+                  })}
+                >
                   <DollarSign className="h-4 w-4 mr-2" />
                   Financial Data
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => toast({
+                    title: "Staff Data Selected",
+                    description: "Staff data source added to your custom report."
+                  })}
+                >
                   <Users className="h-4 w-4 mr-2" />
                   Staff Data
                 </Button>
@@ -746,15 +777,39 @@ const AnalyticsPage = () => {
             <div>
               <Label className="text-sm font-medium">Visualization Types</Label>
               <div className="mt-2 space-y-2">
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => toast({
+                    title: "Bar Chart Selected",
+                    description: "Bar chart visualization added to your report template."
+                  })}
+                >
                   <BarChart3 className="h-4 w-4 mr-2" />
                   Bar Charts
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => toast({
+                    title: "Pie Chart Selected",
+                    description: "Pie chart visualization added to your report template."
+                  })}
+                >
                   <PieChart className="h-4 w-4 mr-2" />
                   Pie Charts
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => toast({
+                    title: "Line Trend Selected",
+                    description: "Line trend visualization added to your report template."
+                  })}
+                >
                   <TrendingUp className="h-4 w-4 mr-2" />
                   Line Trends
                 </Button>
@@ -764,15 +819,30 @@ const AnalyticsPage = () => {
             <div>
               <Label className="text-sm font-medium">Export Options</Label>
               <div className="mt-2 space-y-2">
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => exportData("pdf", "custom report")}
+                >
                   <Download className="h-4 w-4 mr-2" />
                   PDF Report
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => exportData("excel", "custom report")}
+                >
                   <Download className="h-4 w-4 mr-2" />
                   Excel Export
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => exportData("csv", "custom report")}
+                >
                   <Download className="h-4 w-4 mr-2" />
                   CSV Data
                 </Button>
@@ -781,7 +851,10 @@ const AnalyticsPage = () => {
           </div>
           
           <div className="mt-6 text-center">
-            <Button>
+            <Button onClick={() => toast({
+              title: "Custom Report Created!",
+              description: "Your custom report has been generated successfully. It will be available in your downloads shortly.",
+            })}>
               <FileText className="h-4 w-4 mr-2" />
               Create Custom Report
             </Button>
