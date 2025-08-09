@@ -70,141 +70,27 @@ export function EnhancedVideoConference({
   const audioRecorderRef = useRef<MediaRecorder | null>(null);
   const transcriptChunksRef = useRef<string[]>([]);
 
-  // Working video setup with proper play state management
-  const workingVideoRef = useRef<HTMLVideoElement>(null);
-  const [workingStream, setWorkingStream] = useState<MediaStream | null>(null);
-  const playPromiseRef = useRef<Promise<void> | null>(null);
-  
+  // Connect local video to WebRTC stream
   useEffect(() => {
-    let isActive = true;
-    let hasSetup = false;
-    
-    const setupVideo = async () => {
-      if (!workingVideoRef.current || hasSetup) return;
-      hasSetup = true;
-      
-      console.log('WorkingVideo: Setting up video...');
-      
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: true, 
-          audio: true 
-        });
-        
-        if (!isActive) {
-          stream.getTracks().forEach(track => track.stop());
-          return;
-        }
-        
-        console.log('WorkingVideo: Got stream, applying...');
-        
-        const video = workingVideoRef.current;
-        if (video) {
-          video.srcObject = stream;
-          setWorkingStream(stream);
-          
-          // Wait for loadedmetadata before playing
-          await new Promise((resolve) => {
-            video.onloadedmetadata = resolve;
-          });
-          
-          console.log('WorkingVideo: Metadata loaded, playing...');
-          await video.play();
-          console.log('WorkingVideo: ✅ Video successfully playing!');
-        }
-      } catch (error) {
-        console.error('WorkingVideo: Setup failed:', error);
+    const setupLocalVideo = () => {
+      const stream = webRTC.getLocalStream();
+      if (stream && localVideoRef.current) {
+        console.log('Setting local video stream from WebRTC');
+        localVideoRef.current.srcObject = stream;
+        localVideoRef.current.play().catch(e => console.error('Play failed:', e));
       }
     };
     
-    // Small delay to ensure DOM is stable
-    const timer = setTimeout(setupVideo, 100);
+    // Check periodically for stream availability
+    const interval = setInterval(setupLocalVideo, 500);
+    setupLocalVideo(); // Try immediately too
     
-    return () => {
-      isActive = false;
-      clearTimeout(timer);
-      if (workingStream) {
-        workingStream.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, []); // Empty dependency - run only once
+    return () => clearInterval(interval);
+  }, [webRTC]);
 
   useEffect(() => {
     console.log('EnhancedVideoConference: Component mounted, starting initialization');
     initializeWebRTC();
-    
-    // Initialize camera and microphone immediately
-    const initializeMedia = async () => {
-      try {
-        console.log('EnhancedVideoConference: Requesting camera permissions...');
-        // Request camera and microphone permissions
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          },
-          audio: true
-        });
-        
-        console.log('EnhancedVideoConference: Camera stream obtained:', stream);
-        console.log('EnhancedVideoConference: Video tracks:', stream.getVideoTracks());
-        console.log('EnhancedVideoConference: Audio tracks:', stream.getAudioTracks());
-        
-        // Display local video immediately
-        if (localVideoRef.current) {
-          console.log('EnhancedVideoConference: Setting video element srcObject');
-          localVideoRef.current.srcObject = stream;
-          
-          // Set video properties explicitly
-          localVideoRef.current.muted = true;
-          localVideoRef.current.autoplay = true;
-          localVideoRef.current.playsInline = true;
-          
-          // Force play the video with better error handling
-          setTimeout(async () => {
-            if (localVideoRef.current && stream) {
-              try {
-                console.log('EnhancedVideoConference: Attempting to play video...');
-                console.log('EnhancedVideoConference: Stream active tracks:', stream.getTracks().map(t => t.kind + ':' + t.readyState));
-                
-                // Ensure stream is active
-                const videoTrack = stream.getVideoTracks()[0];
-                if (videoTrack && videoTrack.readyState === 'live') {
-                  console.log('EnhancedVideoConference: Video track is live, playing video...');
-                  await localVideoRef.current.play();
-                  console.log('EnhancedVideoConference: Video playing successfully!');
-                } else {
-                  console.error('EnhancedVideoConference: Video track not ready:', videoTrack?.readyState);
-                }
-              } catch (playError) {
-                console.error('EnhancedVideoConference: Video play failed:', playError);
-              }
-            } else {
-              console.error('EnhancedVideoConference: Video ref or stream missing');
-            }
-          }, 500);
-        } else {
-          console.error('EnhancedVideoConference: localVideoRef.current is null');
-        }
-        
-        toast({
-          title: "Camera Connected",
-          description: "Your camera and microphone are ready",
-        });
-        
-      } catch (error) {
-        console.error('EnhancedVideoConference: Failed to access camera:', error);
-        setHasVideo(false);
-        toast({
-          title: "Camera Access Required", 
-          description: "Please allow camera and microphone access to join the meeting. Error: " + error.message,
-          variant: "destructive",
-        });
-      }
-    };
-    
-    // Start both WebRTC and media initialization
-    initializeMedia();
     
     // Meeting timer
     const timer = setInterval(() => {
@@ -217,13 +103,7 @@ export function EnhancedVideoConference({
     };
   }, []);
 
-  useEffect(() => {
-    // Display local video
-    if (localVideoRef.current && webRTC.getLocalStream()) {
-      localVideoRef.current.srcObject = webRTC.getLocalStream();
-    }
-  }, [webRTC]);
-
+  // WebRTC setup with proper video connection
   const initializeWebRTC = async () => {
     try {
       // Set up WebRTC callbacks
@@ -263,8 +143,18 @@ export function EnhancedVideoConference({
         }
       };
 
-      // Initialize WebRTC in background - don't wait for it
-      webRTC.initializeConnection(roomId, userId, userName, isHost).catch(console.error);
+      // Initialize WebRTC connection
+      await webRTC.initializeConnection(roomId, userId, userName, isHost);
+      
+      // Connect local video once WebRTC stream is ready
+      setTimeout(() => {
+        const stream = webRTC.getLocalStream();
+        if (stream && localVideoRef.current) {
+          console.log('✅ Connecting WebRTC stream to video element');
+          localVideoRef.current.srcObject = stream;
+          localVideoRef.current.play().catch(console.error);
+        }
+      }, 1000);
       
       if (isHost) {
         startAudioTranscription();
@@ -272,7 +162,11 @@ export function EnhancedVideoConference({
       
     } catch (error) {
       console.error('Failed to initialize WebRTC:', error);
-      // Don't show error toast immediately, let video work first
+      toast({
+        title: "Connection Error",
+        description: "Failed to connect to the meeting room",
+        variant: "destructive",
+      });
     }
   };
 
@@ -432,34 +326,26 @@ export function EnhancedVideoConference({
     console.log('EnhancedVideoConference: Rendering ParticipantGrid, hasVideo:', hasVideo);
     return (
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 h-full">
-        {/* WORKING VIDEO - with enhanced debugging */}
-        <Card className="relative overflow-hidden border-4 border-green-500">
-          <div style={{ 
-            width: '100%', 
-            height: '300px',
-            position: 'relative',
-            backgroundColor: 'blue'
-          }}>
-            <video 
-              ref={workingVideoRef}
+        {/* Local user video */}
+        <Card className="relative overflow-hidden border-2 border-primary">
+          <div className="aspect-video bg-muted">
+            <video
+              ref={localVideoRef}
               autoPlay
               muted
               playsInline
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover'
-              }}
+              className="w-full h-full object-cover"
             />
-            
-            <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded">
-              ✅ WORKING VIDEO
-            </div>
-            
-            {/* Debug info */}
-            <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-              Stream: {workingStream ? 'SET' : 'NOT SET'}
-            </div>
+            {!hasVideo && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                <Avatar className="h-16 w-16">
+                  <AvatarImage src="/placeholder-avatar.png" />
+                  <AvatarFallback className="text-2xl">
+                    {userName[0]?.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+            )}
           </div>
           
           <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
