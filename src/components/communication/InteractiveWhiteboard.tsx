@@ -33,12 +33,22 @@ export function InteractiveWhiteboard({ roomId, isReadOnly = false }: Interactiv
       width: 800,
       height: 600,
       backgroundColor: "#ffffff",
-      isDrawingMode: activeTool === "draw",
+      isDrawingMode: false, // Start with drawing mode off
     });
 
-    // Initialize the freeDrawingBrush
-    canvas.freeDrawingBrush.color = activeColor;
-    canvas.freeDrawingBrush.width = brushWidth;
+    // Wait for canvas to be fully initialized before accessing freeDrawingBrush
+    setTimeout(() => {
+      if (canvas.freeDrawingBrush) {
+        canvas.freeDrawingBrush.color = activeColor;
+        canvas.freeDrawingBrush.width = brushWidth;
+        console.log('Whiteboard: freeDrawingBrush initialized successfully');
+      } else {
+        console.warn('Whiteboard: freeDrawingBrush not available yet');
+      }
+      
+      // Set drawing mode after brush is configured
+      canvas.isDrawingMode = activeTool === "draw";
+    }, 100);
 
     setFabricCanvas(canvas);
     
@@ -65,12 +75,17 @@ export function InteractiveWhiteboard({ roomId, isReadOnly = false }: Interactiv
 
     fabricCanvas.isDrawingMode = activeTool === "draw" || activeTool === "eraser";
     
-    if (activeTool === "draw" && fabricCanvas.freeDrawingBrush) {
-      fabricCanvas.freeDrawingBrush.color = activeColor;
-      fabricCanvas.freeDrawingBrush.width = brushWidth;
-    } else if (activeTool === "eraser" && fabricCanvas.freeDrawingBrush) {
-      fabricCanvas.freeDrawingBrush.color = "#ffffff";
-      fabricCanvas.freeDrawingBrush.width = brushWidth * 2;
+    // Add null check for freeDrawingBrush before accessing it
+    if (fabricCanvas.freeDrawingBrush) {
+      if (activeTool === "draw") {
+        fabricCanvas.freeDrawingBrush.color = activeColor;
+        fabricCanvas.freeDrawingBrush.width = brushWidth;
+      } else if (activeTool === "eraser") {
+        fabricCanvas.freeDrawingBrush.color = "#ffffff";
+        fabricCanvas.freeDrawingBrush.width = brushWidth * 2;
+      }
+    } else {
+      console.warn('freeDrawingBrush not available for tool:', activeTool);
     }
   }, [activeTool, activeColor, brushWidth, fabricCanvas]);
 
