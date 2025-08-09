@@ -296,9 +296,9 @@ export const AIClassroomManager: React.FC<Props> = ({
   const lowParticipation = students.filter(s => s.participationScore < 50);
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-purple-50 to-pink-50 overflow-hidden">
-      {/* Header */}
-      <div className="p-4 bg-white border-b border-slate-200 shadow-sm">
+    <div className="h-full flex flex-col bg-gradient-to-br from-purple-50 to-pink-50">
+      {/* Header - Fixed */}
+      <div className="flex-shrink-0 p-4 bg-white border-b border-slate-200 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500">
@@ -327,16 +327,18 @@ export const AIClassroomManager: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* Quick Stats */}
-      <div className="p-4 grid grid-cols-4 gap-3">
-        <Card className="p-3">
-          <div className="flex items-center gap-2 mb-1">
-            <Hand className="h-4 w-4 text-blue-600" />
-            <span className="text-sm font-medium">Raised Hands</span>
-          </div>
-          <div className="text-xl font-bold text-blue-700">{raisedHands.length}</div>
-          <div className="text-xs text-muted-foreground">Need attention</div>
-        </Card>
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-auto">
+        {/* Quick Stats */}
+        <div className="p-4 grid grid-cols-4 gap-3">
+          <Card className="p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <Hand className="h-4 w-4 text-blue-600" />
+              <span className="text-sm font-medium">Raised Hands</span>
+            </div>
+            <div className="text-xl font-bold text-blue-700">{raisedHands.length}</div>
+            <div className="text-xs text-muted-foreground">Need attention</div>
+          </Card>
 
         <Card className="p-3">
           <div className="flex items-center gap-2 mb-1">
@@ -364,174 +366,175 @@ export const AIClassroomManager: React.FC<Props> = ({
           <div className="text-xl font-bold text-green-700">{activeGroups.length}</div>
           <div className="text-xs text-muted-foreground">Breakout rooms</div>
         </Card>
-      </div>
+        </div>
 
-      {/* Action Center */}
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="font-semibold text-foreground">Smart Actions</h4>
-          <Dialog open={groupingDialogOpen} onOpenChange={setGroupingDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" className="bg-gradient-to-r from-purple-500 to-pink-500">
-                <Shuffle className="h-4 w-4 mr-2" />
-                Create Groups
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>AI Group Generation</DialogTitle>
-                <DialogDescription>
-                  Choose how you'd like AI to create optimal breakout groups.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-sm font-medium">Grouping Strategy</label>
-                    <div className="grid gap-2 mt-2">
-                      <Button
-                        variant={selectedGrouping === 'mixed' ? 'default' : 'outline'}
-                        className="justify-start"
-                        onClick={() => setSelectedGrouping('mixed')}
-                      >
-                        <Brain className="h-4 w-4 mr-2" />
-                        Mixed Skills (Peer Tutoring)
-                      </Button>
-                      <Button
-                        variant={selectedGrouping === 'skill' ? 'default' : 'outline'}
-                        className="justify-start"
-                        onClick={() => setSelectedGrouping('skill')}
-                      >
-                        <TrendingUp className="h-4 w-4 mr-2" />
-                        Similar Skill Level
-                      </Button>
-                      <Button
-                        variant={selectedGrouping === 'learning_style' ? 'default' : 'outline'}
-                        className="justify-start"
-                        onClick={() => setSelectedGrouping('learning_style')}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Learning Style Based
-                      </Button>
+        {/* Action Center */}
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-semibold text-foreground">Smart Actions</h4>
+            <Dialog open={groupingDialogOpen} onOpenChange={setGroupingDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" className="bg-gradient-to-r from-purple-500 to-pink-500">
+                  <Shuffle className="h-4 w-4 mr-2" />
+                  Create Groups
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>AI Group Generation</DialogTitle>
+                  <DialogDescription>
+                    Choose how you'd like AI to create optimal breakout groups.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 pt-4">
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium">Grouping Strategy</label>
+                      <div className="grid gap-2 mt-2">
+                        <Button
+                          variant={selectedGrouping === 'mixed' ? 'default' : 'outline'}
+                          className="justify-start"
+                          onClick={() => setSelectedGrouping('mixed')}
+                        >
+                          <Brain className="h-4 w-4 mr-2" />
+                          Mixed Skills (Peer Tutoring)
+                        </Button>
+                        <Button
+                          variant={selectedGrouping === 'skill' ? 'default' : 'outline'}
+                          className="justify-start"
+                          onClick={() => setSelectedGrouping('skill')}
+                        >
+                          <TrendingUp className="h-4 w-4 mr-2" />
+                          Similar Skill Level
+                        </Button>
+                        <Button
+                          variant={selectedGrouping === 'learning_style' ? 'default' : 'outline'}
+                          className="justify-start"
+                          onClick={() => setSelectedGrouping('learning_style')}
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          Learning Style Based
+                        </Button>
+                      </div>
                     </div>
                   </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setGroupingDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={generateSmartGroups}
+                      disabled={isGeneratingGroups}
+                      className="bg-gradient-to-r from-purple-500 to-pink-500"
+                    >
+                      {isGeneratingGroups ? 'Generating...' : 'Generate Groups'}
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setGroupingDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button 
-                    onClick={generateSmartGroups}
-                    disabled={isGeneratingGroups}
-                    className="bg-gradient-to-r from-purple-500 to-pink-500"
-                  >
-                    {isGeneratingGroups ? 'Generating...' : 'Generate Groups'}
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => distractedStudents.forEach(s => triggerFocusReminder(s.id))}
+              disabled={distractedStudents.length === 0}
+            >
+              <Focus className="h-4 w-4 mr-2" />
+              Send Focus Reminders ({distractedStudents.length})
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => lowParticipation.forEach(s => triggerParticipationPrompt(s.id))}
+              disabled={lowParticipation.length === 0}
+            >
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Encourage Participation ({lowParticipation.length})
+            </Button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <Button 
-            size="sm" 
-            variant="outline"
-            onClick={() => distractedStudents.forEach(s => triggerFocusReminder(s.id))}
-            disabled={distractedStudents.length === 0}
-          >
-            <Focus className="h-4 w-4 mr-2" />
-            Send Focus Reminders ({distractedStudents.length})
-          </Button>
-          <Button 
-            size="sm" 
-            variant="outline"
-            onClick={() => lowParticipation.forEach(s => triggerParticipationPrompt(s.id))}
-            disabled={lowParticipation.length === 0}
-          >
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Encourage Participation ({lowParticipation.length})
-          </Button>
-        </div>
-      </div>
+        {/* Raised Hands Queue */}
+        {raisedHands.length > 0 && (
+          <div className="p-4">
+            <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+              <Hand className="h-4 w-4" />
+              Attention Queue ({raisedHands.length})
+            </h4>
+            <div className="space-y-2">
+              {raisedHands.slice(0, 3).map((student, i) => (
+                <Card key={student.id} className="p-3 border-l-4 border-l-blue-500">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">#{i + 1}</Badge>
+                      <span className="font-medium text-sm">{student.name}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {student.handRaisedAt && (
+                          <Timer className="h-3 w-3 mr-1" />
+                        )}
+                        {student.handRaisedAt && Math.floor((Date.now() - student.handRaisedAt.getTime()) / 1000)}s
+                      </Badge>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      onClick={() => handleHandRaise(student.id)}
+                      className="h-6 px-2"
+                    >
+                      <UserCheck className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
-      {/* Raised Hands Queue */}
-      {raisedHands.length > 0 && (
-        <div className="p-4">
-          <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-            <Hand className="h-4 w-4" />
-            Attention Queue ({raisedHands.length})
-          </h4>
-          <div className="space-y-2">
-            {raisedHands.slice(0, 3).map((student, i) => (
-              <Card key={student.id} className="p-3 border-l-4 border-l-blue-500">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-xs">#{i + 1}</Badge>
-                    <span className="font-medium text-sm">{student.name}</span>
+        {/* Active Groups */}
+        {activeGroups.length > 0 && (
+          <div className="p-4">
+            <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Active Breakout Groups ({activeGroups.length})
+            </h4>
+            <div className="grid grid-cols-1 gap-3">
+              {activeGroups.map((group) => (
+                <Card key={group.id} className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h5 className="font-medium text-sm">{group.name}</h5>
+                      <p className="text-xs text-muted-foreground">{group.focus}</p>
+                    </div>
                     <Badge variant="outline" className="text-xs">
-                      {student.handRaisedAt && (
-                        <Timer className="h-3 w-3 mr-1" />
-                      )}
-                      {student.handRaisedAt && Math.floor((Date.now() - student.handRaisedAt.getTime()) / 1000)}s
+                      {group.students.length} students
                     </Badge>
                   </div>
-                  <Button 
-                    size="sm" 
-                    onClick={() => handleHandRaise(student.id)}
-                    className="h-6 px-2"
-                  >
-                    <UserCheck className="h-3 w-3" />
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Active Groups */}
-      {activeGroups.length > 0 && (
-        <div className="flex-1 p-4 overflow-auto">
-          <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Active Breakout Groups ({activeGroups.length})
-          </h4>
-          <div className="grid grid-cols-1 gap-3">
-            {activeGroups.map((group) => (
-              <Card key={group.id} className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <h5 className="font-medium text-sm">{group.name}</h5>
-                    <p className="text-xs text-muted-foreground">{group.focus}</p>
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {group.students.map((student) => (
+                      <Badge key={student.id} variant="secondary" className="text-xs">
+                        {student.name}
+                      </Badge>
+                    ))}
                   </div>
-                  <Badge variant="outline" className="text-xs">
-                    {group.students.length} students
-                  </Badge>
-                </div>
-                <div className="flex flex-wrap gap-1 mb-2">
-                  {group.students.map((student) => (
-                    <Badge key={student.id} variant="secondary" className="text-xs">
-                      {student.name}
-                    </Badge>
-                  ))}
-                </div>
-                <div className="bg-blue-50 p-2 rounded border-l-2 border-blue-500">
-                  <div className="flex items-center gap-1 mb-1">
-                    <Lightbulb className="h-3 w-3 text-blue-600" />
-                    <span className="text-xs font-medium text-blue-800">AI Recommendation</span>
+                  <div className="bg-blue-50 p-2 rounded border-l-2 border-blue-500">
+                    <div className="flex items-center gap-1 mb-1">
+                      <Lightbulb className="h-3 w-3 text-blue-600" />
+                      <span className="text-xs font-medium text-blue-800">AI Recommendation</span>
+                    </div>
+                    <p className="text-xs text-blue-700">{group.aiRecommendation}</p>
                   </div>
-                  <p className="text-xs text-blue-700">{group.aiRecommendation}</p>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Recent Interventions */}
       {behaviorInterventions.length > 0 && (
-        <div className="p-4 bg-white border-t border-slate-200">
+        <div className="flex-shrink-0 p-4 bg-white border-t border-slate-200">
           <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
             <Award className="h-4 w-4" />
             Recent Nudges ({behaviorInterventions.length})
