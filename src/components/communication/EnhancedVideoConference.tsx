@@ -70,22 +70,20 @@ export function EnhancedVideoConference({
   const audioRecorderRef = useRef<MediaRecorder | null>(null);
   const transcriptChunksRef = useRef<string[]>([]);
 
-  // Connect local video to WebRTC stream
+  // Clean single video setup - no intervals or competing timers
   useEffect(() => {
-    const setupLocalVideo = () => {
+    const connectVideo = () => {
       const stream = webRTC.getLocalStream();
-      if (stream && localVideoRef.current) {
-        console.log('Setting local video stream from WebRTC');
+      if (stream && localVideoRef.current && !localVideoRef.current.srcObject) {
+        console.log('✅ Connecting WebRTC stream to video (once only)');
         localVideoRef.current.srcObject = stream;
-        localVideoRef.current.play().catch(e => console.error('Play failed:', e));
+        localVideoRef.current.play().catch(console.error);
       }
     };
     
-    // Check periodically for stream availability
-    const interval = setInterval(setupLocalVideo, 500);
-    setupLocalVideo(); // Try immediately too
-    
-    return () => clearInterval(interval);
+    // Single attempt after brief delay
+    const timer = setTimeout(connectVideo, 800);
+    return () => clearTimeout(timer);
   }, [webRTC]);
 
   useEffect(() => {
@@ -145,16 +143,6 @@ export function EnhancedVideoConference({
 
       // Initialize WebRTC connection
       await webRTC.initializeConnection(roomId, userId, userName, isHost);
-      
-      // Connect local video once WebRTC stream is ready
-      setTimeout(() => {
-        const stream = webRTC.getLocalStream();
-        if (stream && localVideoRef.current) {
-          console.log('✅ Connecting WebRTC stream to video element');
-          localVideoRef.current.srcObject = stream;
-          localVideoRef.current.play().catch(console.error);
-        }
-      }, 1000);
       
       if (isHost) {
         startAudioTranscription();
