@@ -51,16 +51,13 @@ export function EnhancedVideoConference({
   const [volume, setVolume] = useState(100);
   
   // UI state
-  const [activeTab, setActiveTab] = useState('video');
   const [newMessage, setNewMessage] = useState('');
   const [meetingTime, setMeetingTime] = useState(0);
-  const [isRecording, setIsRecording] = useState(false);
   const [showAITutor, setShowAITutor] = useState(false);
   const [showWhiteboard, setShowWhiteboard] = useState(false);
   const [showTranslation, setShowTranslation] = useState(false);
   
   // AI features state
-  const [isTranscribing, setIsTranscribing] = useState(false);
   const [currentTranscript, setCurrentTranscript] = useState('');
   const [meetingSummary, setMeetingSummary] = useState('');
   
@@ -68,7 +65,6 @@ export function EnhancedVideoConference({
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
   const audioRecorderRef = useRef<MediaRecorder | null>(null);
-  const transcriptChunksRef = useRef<string[]>([]);
 
   // Video connection state  
   const [isStreamReady, setIsStreamReady] = useState(false);
@@ -160,10 +156,6 @@ export function EnhancedVideoConference({
       // Signal that stream is ready
       setIsStreamReady(true);
       
-      if (isHost) {
-        startAudioTranscription();
-      }
-      
     } catch (error) {
       console.error('Failed to initialize WebRTC:', error);
       toast({
@@ -225,63 +217,6 @@ export function EnhancedVideoConference({
     webRTC.toggleHand(newRaised);
   };
 
-  const toggleRecording = () => {
-    setIsRecording(!isRecording);
-    if (!isRecording) {
-      toast({
-        title: "Recording started",
-        description: "This meeting is now being recorded",
-      });
-    } else {
-      toast({
-        title: "Recording stopped",
-        description: "Meeting recording has been saved",
-      });
-    }
-  };
-
-  const startAudioTranscription = async () => {
-    if (!isHost) return;
-    
-    try {
-      setIsTranscribing(true);
-      const stream = webRTC.getLocalStream();
-      if (!stream) return;
-
-      audioRecorderRef.current = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus'
-      });
-
-      audioRecorderRef.current.ondataavailable = async (event) => {
-        if (event.data.size > 0) {
-          const audioBlob = event.data;
-          const base64Audio = await blobToBase64(audioBlob);
-          
-          try {
-            const { data } = await supabase.functions.invoke('ai-meeting-assistant', {
-              body: {
-                action: 'transcribe-audio',
-                data: { audio: base64Audio.split(',')[1] }
-              }
-            });
-            
-            if (data && data.text) {
-              transcriptChunksRef.current.push(data.text);
-              setCurrentTranscript(prev => prev + ' ' + data.text);
-            }
-          } catch (error) {
-            console.error('Transcription error:', error);
-          }
-        }
-      };
-
-      audioRecorderRef.current.start(5000); // Record in 5-second chunks
-    } catch (error) {
-      console.error('Failed to start transcription:', error);
-      setIsTranscribing(false);
-    }
-  };
-
   const generateMeetingSummary = async () => {
     if (!currentTranscript.trim()) {
       toast({
@@ -317,162 +252,173 @@ export function EnhancedVideoConference({
     }
   };
 
-  const blobToBase64 = (blob: Blob): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  };
-
   const ParticipantGrid = useCallback(() => {
     return (
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 h-full">
-        {/* Local user video */}
-        <Card className="relative overflow-hidden border-2 border-primary">
-          <div className="aspect-video bg-muted">
-            <video
-              ref={localVideoRef}
-              autoPlay
-              muted
-              playsInline
-              className="w-full h-full object-cover"
-            />
-            {!hasVideo && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-                <Avatar className="h-16 w-16">
-                  <AvatarImage src="/placeholder-avatar.png" />
-                  <AvatarFallback className="text-2xl">
-                    {userName[0]?.toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-            )}
-          </div>
-          
-          <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-            <div className="flex items-center gap-1 bg-black/70 rounded px-2 py-1">
-              <span className="text-white text-xs font-medium truncate">
-                {userName} (You)
-              </span>
-            </div>
-            
-            <div className="flex items-center gap-1">
-              {isHandRaised && (
-                <div className="bg-yellow-500 rounded p-1">
-                  <Hand className="h-3 w-3 text-white" />
-                </div>
-              )}
-              {!isMuted && (
-                <div className="bg-green-500 rounded p-1">
-                  <Mic className="h-3 w-3 text-white" />
-                </div>
-              )}
-              {isMuted && (
-                <div className="bg-red-500 rounded p-1">
-                  <MicOff className="h-3 w-3 text-white" />
-                </div>
-              )}
-            </div>
-          </div>
-        </Card>
-
-        {/* Remote participants */}
-        {participants.map(participant => (
-          <Card key={participant.id} className="relative overflow-hidden bg-black">
-            <div className="aspect-video">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 h-full p-2">
+        {/* Local user video - Featured */}
+        <div className="relative group">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-white/20 backdrop-blur-sm h-full hover:scale-[1.02] transition-transform">
+            <div className="aspect-video bg-black/40 relative">
               <video
-                ref={(el) => {
-                  if (el) remoteVideoRefs.current.set(participant.id, el);
-                }}
+                ref={localVideoRef}
                 autoPlay
+                muted
                 playsInline
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover rounded-lg"
               />
-              {!participant.hasVideo && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={participant.avatar} />
-                    <AvatarFallback className="text-2xl">
-                      {participant.name.split(' ').map(n => n[0]).join('')}
+              {!hasVideo && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-700 to-slate-800">
+                  <Avatar className="h-20 w-20 ring-4 ring-primary/50">
+                    <AvatarImage src="/placeholder-avatar.png" />
+                    <AvatarFallback className="bg-primary/20 text-primary text-2xl">
+                      {userName[0]?.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 </div>
               )}
-            </div>
-            
-            <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-              <div className="flex items-center gap-1 bg-black/70 rounded px-2 py-1">
-                <span className="text-white text-xs font-medium truncate">
-                  {participant.name}
-                </span>
-                {participant.role === 'host' && (
-                  <Badge variant="secondary" className="text-xs">Host</Badge>
-                )}
-              </div>
               
-              <div className="flex items-center gap-1">
-                {participant.isHandRaised && (
-                  <div className="bg-yellow-500 rounded p-1">
-                    <Hand className="h-3 w-3 text-white" />
+              {/* Video Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              
+              {/* User Info Overlay */}
+              <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                <div className="flex items-center gap-2 bg-black/70 backdrop-blur-md rounded-full px-3 py-1">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                  <span className="text-white text-sm font-medium">{userName} (You)</span>
+                  {isHost && (
+                    <Badge className="text-xs bg-amber-500/90 text-white px-2">Host</Badge>
+                  )}
+                </div>
+                
+                <div className="flex items-center gap-1">
+                  {isHandRaised && (
+                    <div className="bg-amber-500 rounded-full p-1.5 animate-bounce">
+                      <Hand className="h-3 w-3 text-white" />
+                    </div>
+                  )}
+                  {isMuted ? (
+                    <div className="bg-red-500 rounded-full p-1.5">
+                      <MicOff className="h-3 w-3 text-white" />
+                    </div>
+                  ) : (
+                    <div className="bg-green-500 rounded-full p-1.5">
+                      <Mic className="h-3 w-3 text-white" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Remote participants */}
+        {participants.map(participant => (
+          <div key={participant.id} className="relative group">
+            <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-white/20 backdrop-blur-sm h-full hover:scale-[1.02] transition-transform">
+              <div className="aspect-video bg-black/40 relative">
+                <video
+                  ref={(el) => {
+                    if (el) remoteVideoRefs.current.set(participant.id, el);
+                  }}
+                  autoPlay
+                  playsInline
+                  className="w-full h-full object-cover rounded-lg"
+                />
+                {!participant.hasVideo && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-700 to-slate-800">
+                    <Avatar className="h-20 w-20 ring-4 ring-white/20">
+                      <AvatarImage src={participant.avatar} />
+                      <AvatarFallback className="bg-slate-600 text-white text-2xl">
+                        {participant.name.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
                   </div>
                 )}
-                {!participant.isMuted && (
-                  <div className="bg-green-500 rounded p-1">
-                    <Mic className="h-3 w-3 text-white" />
+                
+                {/* Video Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                
+                {/* Participant Info Overlay */}
+                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2 bg-black/70 backdrop-blur-md rounded-full px-3 py-1">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+                    <span className="text-white text-sm font-medium">{participant.name}</span>
+                    {participant.role === 'host' && (
+                      <Badge className="text-xs bg-amber-500/90 text-white px-2">Host</Badge>
+                    )}
                   </div>
-                )}
-                {participant.isMuted && (
-                  <div className="bg-red-500 rounded p-1">
-                    <MicOff className="h-3 w-3 text-white" />
+                  
+                  <div className="flex items-center gap-1">
+                    {participant.isHandRaised && (
+                      <div className="bg-amber-500 rounded-full p-1.5 animate-bounce">
+                        <Hand className="h-3 w-3 text-white" />
+                      </div>
+                    )}
+                    {participant.isMuted ? (
+                      <div className="bg-red-500 rounded-full p-1.5">
+                        <MicOff className="h-3 w-3 text-white" />
+                      </div>
+                    ) : (
+                      <div className="bg-green-500 rounded-full p-1.5">
+                        <Mic className="h-3 w-3 text-white" />
+                      </div>
+                    )}
                   </div>
-                 )}
-               </div>
-             </div>
-           </Card>
-         ))}
-       </div>
-     );
-   }, [participants, hasVideo, userName, isMuted, isHandRaised]);
+                </div>
+              </div>
+            </Card>
+          </div>
+        ))}
+      </div>
+    );  
+  }, [participants, hasVideo, userName, isMuted, isHandRaised]);
 
   const ChatPanel = () => (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-black/20 backdrop-blur-sm">
+      <div className="p-4 border-b border-white/10">
+        <h3 className="font-semibold text-lg">Chat</h3>
+      </div>
+      
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-3">
           {chatMessages.map(msg => (
-            <div key={msg.id} className="space-y-1">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <div key={msg.id} className="space-y-1 animate-fade-in">
+              <div className="flex items-center gap-2 text-xs text-slate-400">
                 <span className="font-medium">{msg.senderName}</span>
                 <span>{new Date(msg.timestamp).toLocaleTimeString()}</span>
               </div>
-              <p className="text-sm bg-muted rounded p-2">{msg.message}</p>
+              <div className="text-sm bg-white/10 rounded-lg p-3 text-white">
+                {msg.message}
+              </div>
             </div>
           ))}
-          
-          {/* Live transcript */}
-          {isTranscribing && currentTranscript && (
-            <div className="border-t pt-4">
-              <div className="text-sm font-medium text-muted-foreground mb-2">
-                Live Transcript
-              </div>
-              <div className="text-sm bg-blue-50 rounded p-2 max-h-32 overflow-y-auto">
-                {currentTranscript}
-              </div>
+          {chatMessages.length === 0 && (
+            <div className="text-center text-slate-400 text-sm py-8">
+              No messages yet. Start the conversation!
             </div>
           )}
         </div>
       </ScrollArea>
       
-      <div className="border-t p-4">
+      <div className="p-4 border-t border-white/10">
         <div className="flex gap-2">
           <Input
+            placeholder="Type a message..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type a message..."
-            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
+            className="bg-white/10 border-white/20 text-white placeholder:text-slate-400"
           />
-          <Button size="sm" onClick={sendMessage}>
+          <Button 
+            onClick={sendMessage} 
+            size="sm"
+            className="bg-primary hover:bg-primary/80"
+          >
             <MessageSquare className="h-4 w-4" />
           </Button>
         </div>
@@ -481,316 +427,331 @@ export function EnhancedVideoConference({
   );
 
   return (
-    <div className="h-screen flex flex-col bg-gray-900">
-      {/* Header */}
-      <div className="bg-black text-white p-4 flex items-center justify-between">
+    <div className="h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
+      {/* Header Bar */}
+      <div className="h-16 bg-black/30 backdrop-blur-md border-b border-white/10 flex items-center justify-between px-6">
         <div className="flex items-center gap-4">
-          <h1 className="text-lg font-semibold">
-            {lessonPlan?.title || `Room ${roomId}`}
-          </h1>
-          {connectionState === 'connected' && (
-            <Badge variant="destructive" className="animate-pulse">LIVE</Badge>
-          )}
-          <div className="text-sm opacity-75">
-            {formatTime(meetingTime)}
+          <div className="flex items-center gap-2">
+            <Video className="h-6 w-6 text-primary" />
+            <h1 className="text-xl font-semibold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
+              AI Virtual Classroom
+            </h1>
           </div>
-          {isRecording && (
-            <Badge variant="destructive">Recording</Badge>
-          )}
+          <Badge variant="secondary" className="bg-green-500/20 text-green-300 border-green-500/30">
+            Room {roomId}
+          </Badge>
         </div>
         
-        <div className="flex items-center gap-2">
-          {isTranscribing && (
-            <Badge variant="secondary" className="animate-pulse">
-              Transcribing
-            </Badge>
-          )}
-          <span className="text-sm">{participants.length + 1} participants</span>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={toggleRecording}>
-                {isRecording ? 'Stop Recording' : 'Start Recording'}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={generateMeetingSummary}>
-                Generate AI Summary
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setShowAITutor(true)}>
-                AI Voice Tutor
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setShowWhiteboard(!showWhiteboard)}>
-                {showWhiteboard ? 'Hide' : 'Show'} Whiteboard
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setShowTranslation(!showTranslation)}>
-                {showTranslation ? 'Hide' : 'Show'} Translation
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div className="flex items-center gap-4">
+          <div className="text-sm text-slate-300">
+            Duration: {formatTime(meetingTime)}
+          </div>
+          <Badge 
+            variant={connectionState === 'connected' ? 'default' : 'destructive'}
+            className="capitalize"
+          >
+            {connectionState}
+          </Badge>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex">
-        {/* Video Area */}
+      <div className="flex h-[calc(100vh-4rem)]">
+        {/* Main Video Area */}
         <div className="flex-1 p-4">
-          {showWhiteboard ? (
-            <div className="h-full">
-              <InteractiveWhiteboard roomId={roomId} />
-            </div>
-          ) : (
+          <div className="h-full bg-black/20 rounded-2xl backdrop-blur-sm border border-white/10 overflow-hidden">
             <ParticipantGrid />
-          )}
+          </div>
         </div>
 
-        {/* Side Panel */}
-        <div className="w-80 bg-background border-l">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-4 m-2">
-              <TabsTrigger value="video">Video</TabsTrigger>
-              <TabsTrigger value="chat">Chat</TabsTrigger>
-              <TabsTrigger value="ai">AI</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
+        {/* Professional Sidebar */}
+        <div className="w-80 bg-black/40 backdrop-blur-xl border-l border-white/10">
+          <Tabs defaultValue="participants" className="h-full flex flex-col">
+            <TabsList className="m-4 bg-white/10 backdrop-blur-md">
+              <TabsTrigger value="participants" className="flex-1">
+                <Users className="h-4 w-4 mr-2" />
+                People
+              </TabsTrigger>
+              <TabsTrigger value="chat" className="flex-1">
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Chat
+              </TabsTrigger>
+              <TabsTrigger value="ai" className="flex-1">
+                <Bot className="h-4 w-4 mr-2" />
+                AI
+              </TabsTrigger>
             </TabsList>
-            
-            <TabsContent value="video" className="flex-1 m-0">
-              <div className="p-4">
-                <h3 className="font-medium mb-4">Participants ({participants.length + 1})</h3>
-                <ScrollArea className="h-96">
-                  <div className="space-y-2">
-                    {/* Current user */}
-                    <div className="flex items-center justify-between p-2 rounded hover:bg-muted">
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback>
-                            {userName.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="text-sm font-medium">{userName} (You)</div>
-                          {isHost && (
-                            <Badge variant="secondary" className="text-xs">Host</Badge>
-                          )}
+
+            <div className="flex-1 overflow-hidden">
+              <TabsContent value="participants" className="h-full m-0">
+                <div className="p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-lg">Participants</h3>
+                    <Badge variant="outline" className="bg-white/10 border-white/20">
+                      {participants.length + 1}
+                    </Badge>
+                  </div>
+                  
+                  <ScrollArea className="h-[calc(100vh-200px)]">
+                    <div className="space-y-2">
+                      {/* Current User */}
+                      <div className="p-3 rounded-xl bg-gradient-to-r from-primary/20 to-blue-500/20 border border-primary/30">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10 ring-2 ring-primary/50">
+                            <AvatarImage src="/placeholder-avatar.png" />
+                            <AvatarFallback className="bg-primary/20 text-primary">
+                              {userName[0]?.toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="font-medium">{userName} (You)</div>
+                            {isHost && (
+                              <Badge className="text-xs bg-amber-500/20 text-amber-300 border-amber-500/30">
+                                Host
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            {isHandRaised && <Hand className="h-4 w-4 text-amber-400" />}
+                            {isMuted ? 
+                              <MicOff className="h-4 w-4 text-red-400" /> : 
+                              <Mic className="h-4 w-4 text-green-400" />
+                            }
+                          </div>
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-1">
-                        {isHandRaised && (
-                          <Hand className="h-4 w-4 text-yellow-500" />
-                        )}
-                        {isMuted ? (
-                          <MicOff className="h-4 w-4 text-red-500" />
-                        ) : (
-                          <Mic className="h-4 w-4 text-green-500" />
-                        )}
-                        {!hasVideo && (
-                          <VideoOff className="h-4 w-4 text-gray-500" />
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Remote participants */}
-                    {participants.map(participant => (
-                      <div key={participant.id} className="flex items-center justify-between p-2 rounded hover:bg-muted">
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={participant.avatar} />
-                            <AvatarFallback>
-                              {participant.name.split(' ').map(n => n[0]).join('')}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="text-sm font-medium">{participant.name}</div>
-                            {participant.role === 'host' && (
-                              <Badge variant="secondary" className="text-xs">Host</Badge>
-                            )}
+                      {/* Remote Participants */}
+                      {participants.map(participant => (
+                        <div key={participant.id} className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage src={participant.avatar} />
+                              <AvatarFallback className="bg-slate-600">
+                                {participant.name.split(' ').map(n => n[0]).join('')}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <div className="font-medium">{participant.name}</div>
+                              {participant.role === 'host' && (
+                                <Badge className="text-xs bg-amber-500/20 text-amber-300 border-amber-500/30">
+                                  Host
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              {participant.isHandRaised && <Hand className="h-4 w-4 text-amber-400" />}
+                              {participant.isMuted ? 
+                                <MicOff className="h-4 w-4 text-red-400" /> : 
+                                <Mic className="h-4 w-4 text-green-400" />
+                              }
+                            </div>
                           </div>
                         </div>
-                        
-                        <div className="flex items-center gap-1">
-                          {participant.isHandRaised && (
-                            <Hand className="h-4 w-4 text-yellow-500" />
-                          )}
-                          {participant.isMuted ? (
-                            <MicOff className="h-4 w-4 text-red-500" />
-                          ) : (
-                            <Mic className="h-4 w-4 text-green-500" />
-                          )}
-                          {!participant.hasVideo && (
-                            <VideoOff className="h-4 w-4 text-gray-500" />
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="chat" className="flex-1 m-0">
-              <ChatPanel />
-            </TabsContent>
-            
-            <TabsContent value="ai" className="flex-1 m-0 p-4">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-medium mb-2">AI Features</h3>
-                  <div className="space-y-2">
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="chat" className="h-full m-0">
+                <div className="h-full bg-black/20">
+                  <ChatPanel />
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="ai" className="h-full m-0">
+                <div className="p-4 space-y-4">
+                  <h3 className="font-semibold text-lg mb-4">AI Features</h3>
+                  
+                  <div className="grid gap-3">
                     <Button
                       variant="outline"
-                      size="sm"
-                      className="w-full justify-start"
+                      className="justify-start h-12 bg-white/10 border-white/20 hover:bg-white/20 text-left"
                       onClick={() => setShowAITutor(true)}
                     >
-                      <Bot className="h-4 w-4 mr-2" />
-                      AI Voice Tutor
+                      <Bot className="h-5 w-5 mr-3 text-blue-400" />
+                      <div>
+                        <div className="font-medium">AI Voice Tutor</div>
+                        <div className="text-xs text-slate-400">Interactive voice assistant</div>
+                      </div>
                     </Button>
                     
                     <Button
                       variant="outline"
-                      size="sm"
-                      className="w-full justify-start"
+                      className="justify-start h-12 bg-white/10 border-white/20 hover:bg-white/20 text-left"
+                      onClick={() => setShowWhiteboard(!showWhiteboard)}
+                    >
+                      <PenTool className="h-5 w-5 mr-3 text-green-400" />
+                      <div>
+                        <div className="font-medium">Interactive Whiteboard</div>
+                        <div className="text-xs text-slate-400">Collaborative drawing</div>
+                      </div>
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      className="justify-start h-12 bg-white/10 border-white/20 hover:bg-white/20 text-left"
                       onClick={() => setShowTranslation(!showTranslation)}
                     >
-                      <Languages className="h-4 w-4 mr-2" />
-                      Live Translation
+                      <Languages className="h-5 w-5 mr-3 text-purple-400" />
+                      <div>
+                        <div className="font-medium">Live Translation</div>
+                        <div className="text-xs text-slate-400">Real-time language support</div>
+                      </div>
                     </Button>
                     
                     <Button
                       variant="outline"
-                      size="sm"
-                      className="w-full justify-start"
+                      className="justify-start h-12 bg-white/10 border-white/20 hover:bg-white/20 text-left"
                       onClick={generateMeetingSummary}
                       disabled={!currentTranscript}
                     >
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Generate Summary
+                      <MessageSquare className="h-5 w-5 mr-3 text-orange-400" />
+                      <div>
+                        <div className="font-medium">Generate Summary</div>
+                        <div className="text-xs text-slate-400">AI meeting notes</div>
+                      </div>
                     </Button>
                   </div>
-                </div>
-                
-                {meetingSummary && (
-                  <div>
-                    <h3 className="font-medium mb-2">Meeting Summary</h3>
-                    <ScrollArea className="h-40">
-                      <div className="text-sm bg-muted rounded p-3">
-                        {meetingSummary}
-                      </div>
-                    </ScrollArea>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="settings" className="flex-1 m-0 p-4">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-medium mb-2">Audio Settings</h3>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Volume</span>
-                      <span className="text-sm">{volume}%</span>
+                  
+                  {meetingSummary && (
+                    <div className="mt-6 p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20">
+                      <h4 className="font-medium mb-2 text-blue-300">Meeting Summary</h4>
+                      <ScrollArea className="h-32">
+                        <div className="text-sm text-slate-300 leading-relaxed">
+                          {meetingSummary}
+                        </div>
+                      </ScrollArea>
                     </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={volume}
-                      onChange={(e) => setVolume(Number(e.target.value))}
-                      className="w-full"
-                    />
-                  </div>
+                  )}
                 </div>
-                
-                <div>
-                  <h3 className="font-medium mb-2">Meeting Info</h3>
-                  <div className="text-sm space-y-1">
-                    <div>Room ID: {roomId}</div>
-                    <div>Duration: {formatTime(meetingTime)}</div>
-                    <div>Status: {connectionState}</div>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
+              </TabsContent>
+            </div>
           </Tabs>
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="bg-black text-white p-4 flex items-center justify-center gap-4">
-        <Button
-          variant={isMuted ? "destructive" : "secondary"}
-          size="lg"
-          onClick={toggleMute}
-          className="rounded-full h-12 w-12"
-        >
-          {isMuted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-        </Button>
-        
-        <Button
-          variant={hasVideo ? "secondary" : "destructive"}
-          size="lg"
-          onClick={toggleVideo}
-          className="rounded-full h-12 w-12"
-        >
-          {hasVideo ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
-        </Button>
-        
-        <Button
-          variant={isScreenSharing ? "default" : "secondary"}
-          size="lg"
-          onClick={toggleScreenShare}
-          className="rounded-full h-12 w-12"
-        >
-          <Monitor className="h-5 w-5" />
-        </Button>
-        
-        <Button
-          variant={isHandRaised ? "default" : "secondary"}
-          size="lg"
-          onClick={toggleHand}
-          className="rounded-full h-12 w-12"
-        >
-          <Hand className="h-5 w-5" />
-        </Button>
-        
-        <Button
-          variant="secondary"
-          size="lg"
-          onClick={() => setShowWhiteboard(!showWhiteboard)}
-          className="rounded-full h-12 w-12"
-        >
-          <PenTool className="h-5 w-5" />
-        </Button>
-        
-        <Button
-          variant="destructive"
-          size="lg"
-          onClick={() => webRTC.disconnect()}
-          className="rounded-full h-12 w-12"
-        >
-          <Phone className="h-5 w-5" />
-        </Button>
+      {/* Professional Control Bar */}
+      <div className="absolute bottom-0 left-0 right-0 h-20 bg-black/60 backdrop-blur-xl border-t border-white/10">
+        <div className="flex items-center justify-center h-full gap-4">
+          {/* Main Controls */}
+          <div className="flex items-center gap-3">
+            <Button
+              variant={isMuted ? "destructive" : "secondary"}
+              size="lg"
+              onClick={toggleMute}
+              className="rounded-full h-14 w-14 shadow-lg hover:scale-105 transition-transform"
+            >
+              {isMuted ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
+            </Button>
+            
+            <Button
+              variant={hasVideo ? "secondary" : "destructive"}
+              size="lg"
+              onClick={toggleVideo}
+              className="rounded-full h-14 w-14 shadow-lg hover:scale-105 transition-transform"
+            >
+              {hasVideo ? <Video className="h-6 w-6" /> : <VideoOff className="h-6 w-6" />}
+            </Button>
+            
+            <Button
+              variant={isScreenSharing ? "default" : "secondary"}
+              size="lg"
+              onClick={toggleScreenShare}
+              className="rounded-full h-14 w-14 shadow-lg hover:scale-105 transition-transform"
+            >
+              <Monitor className="h-6 w-6" />
+            </Button>
+          </div>
+          
+          {/* Secondary Controls */}
+          <div className="flex items-center gap-2 ml-8">
+            <Button
+              variant={isHandRaised ? "default" : "outline"}
+              size="sm"
+              onClick={toggleHand}
+              className={`rounded-full h-12 w-12 ${isHandRaised ? 'bg-amber-500 hover:bg-amber-600' : ''}`}
+            >
+              <Hand className="h-5 w-5" />
+            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="rounded-full h-12 w-12">
+                  <Settings className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-black/90 backdrop-blur-md border-white/20" align="end">
+                <DropdownMenuItem className="text-white hover:bg-white/10">
+                  <Volume2 className="h-4 w-4 mr-2" />
+                  Audio Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem className="text-white hover:bg-white/10">
+                  <Camera className="h-4 w-4 mr-2" />
+                  Video Settings
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          
+          {/* End Call */}
+          <div className="ml-8">
+            <Button
+              variant="destructive"
+              size="lg"
+              onClick={() => webRTC.disconnect()}
+              className="rounded-full h-14 px-8 bg-red-500 hover:bg-red-600 shadow-lg hover:scale-105 transition-transform"
+            >
+              <Phone className="h-6 w-6 mr-2" />
+              End Call
+            </Button>
+          </div>
+        </div>
       </div>
-      
-      {/* AI Components */}
+
+      {/* AI Features Overlays */}
       {showAITutor && (
-        <AIVoiceTutor
-          isOpen={showAITutor}
-          onClose={() => setShowAITutor(false)}
-          lessonContext={lessonPlan}
-        />
+        <div className="absolute inset-4 bg-black/80 backdrop-blur-md rounded-2xl border border-white/20 z-50">
+          <div className="flex items-center justify-between p-4 border-b border-white/20">
+            <h2 className="text-xl font-semibold">AI Voice Tutor</h2>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setShowAITutor(false)}
+              className="text-white hover:bg-white/10"
+            >
+              ✕
+            </Button>
+          </div>
+          <div className="p-4">
+            <AIVoiceTutor isOpen={showAITutor} onClose={() => setShowAITutor(false)} />
+          </div>
+        </div>
+      )}
+      
+      {showWhiteboard && (
+        <div className="absolute inset-4 bg-white rounded-2xl border border-white/20 z-50">
+          <div className="flex items-center justify-between p-4 border-b">
+            <h2 className="text-xl font-semibold text-slate-800">Interactive Whiteboard</h2>  
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setShowWhiteboard(false)}
+              className="text-slate-800 hover:bg-slate-100"
+            >
+              ✕
+            </Button>
+          </div>
+          <div className="h-[calc(100%-80px)]">
+            <InteractiveWhiteboard roomId={roomId} />
+          </div>
+        </div>
       )}
       
       {showTranslation && (
-        <LiveTranslation
-          isOpen={showTranslation}
-          onClose={() => setShowTranslation(false)}
-          audioStream={webRTC.getLocalStream()}
-        />
+        <div className="absolute bottom-24 right-4 w-80 bg-black/90 backdrop-blur-md rounded-xl border border-white/20 z-40">
+          <LiveTranslation isOpen={showTranslation} onClose={() => setShowTranslation(false)} />
+        </div>
       )}
     </div>
   );
