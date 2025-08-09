@@ -409,7 +409,7 @@ export function EnhancedVideoConference({
           
           {/* Chat Input - Fixed at bottom with proper spacing */}
           <div className="p-4 border-t border-slate-700 bg-slate-900 mb-16">
-            <div className="flex gap-2 mb-3">
+            <div className="flex gap-3 mb-3">
               <input
                 type="text"
                 placeholder="Type message..."
@@ -418,7 +418,7 @@ export function EnhancedVideoConference({
                 onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
                 className="flex-1 bg-slate-700 text-white px-3 py-2 rounded border-0 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500"
               />
-              <Button onClick={sendMessage} className="bg-blue-600 hover:bg-blue-700 px-4 py-2">
+              <Button onClick={sendMessage} className="bg-blue-600 hover:bg-blue-700 px-6 py-2 font-semibold">
                 Send
               </Button>
             </div>
