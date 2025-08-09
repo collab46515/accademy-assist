@@ -409,7 +409,7 @@ export function EnhancedVideoConference({
           
           {/* Chat Input - Fixed at bottom with proper spacing */}
           <div className="p-4 border-t border-slate-700 bg-slate-900 mb-16">
-            <div className="flex gap-3 mb-3">
+            <div className="flex gap-1 mb-3">
               <input
                 type="text"
                 placeholder="Type message..."
