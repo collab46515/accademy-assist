@@ -50,6 +50,7 @@ import {
   LineChart,
   Line,
   PieChart as RechartsPieChart,
+  Pie,
   Cell,
   AreaChart,
   Area
@@ -298,6 +299,89 @@ const AnalyticsPage = () => {
       reportName: "Custom Report",
       showPreview: false
     });
+  };
+
+  const renderVisualizationChart = () => {
+    if (!reportBuilder.visualizations.length || !reportBuilder.dataSources.includes('Financial Data')) return null;
+
+    // Get the first selected visualization type for preview
+    const selectedVisualization = reportBuilder.visualizations[0];
+    
+    switch (selectedVisualization) {
+      case 'Bar Charts':
+        return (
+          <BarChart data={financialData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="revenue" fill={moduleColors.financial} name="Revenue" />
+          </BarChart>
+        );
+      
+      case 'Pie Charts':
+        // Transform data for pie chart
+        const pieData = financialData.map((item, index) => ({
+          name: item.month,
+          value: item.revenue,
+          fill: [moduleColors.financial, moduleColors.academic, moduleColors.hr, moduleColors.communication, moduleColors.operational, '#8884d8'][index % 6]
+        }));
+        return (
+          <RechartsPieChart>
+            <Pie
+              data={pieData}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+              outerRadius={80}
+              fill="#8884d8"
+              dataKey="value"
+            >
+              {pieData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.fill} />
+              ))}
+            </Pie>
+            <Tooltip />
+          </RechartsPieChart>
+        );
+      
+      case 'Line Trends':
+        return (
+          <LineChart data={financialData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line 
+              type="monotone" 
+              dataKey="revenue" 
+              stroke={moduleColors.financial} 
+              strokeWidth={2}
+              name="Revenue"
+            />
+            <Line 
+              type="monotone" 
+              dataKey="profit" 
+              stroke={moduleColors.academic} 
+              strokeWidth={2}
+              name="Profit"
+            />
+          </LineChart>
+        );
+      
+      default:
+        return (
+          <BarChart data={financialData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="revenue" fill={moduleColors.financial} />
+          </BarChart>
+        );
+    }
   };
 
   return (
@@ -1027,36 +1111,56 @@ const AnalyticsPage = () => {
                           Showing 10 of {reportBuilder.reportData.length} records
                         </div>
                       )}
-                    </div>
-                  </CardContent>
-                </Card>
+                     </div>
+                   </CardContent>
+                 </Card>
 
-                {/* Chart Preview (if visualizations selected) */}
-                {reportBuilder.visualizations.length > 0 && reportBuilder.dataSources.includes('Financial Data') && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Sample Visualization</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={financialData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="month" />
-                          <YAxis />
-                          <Tooltip />
-                          <Bar dataKey="revenue" fill={moduleColors.financial} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
+                 {/* Chart Preview (if visualizations selected) */}
+                 {reportBuilder.visualizations.length > 0 && reportBuilder.dataSources.includes('Financial Data') && (
+                   <Card>
+                     <CardHeader>
+                       <CardTitle className="text-base">
+                         Sample Visualization - {reportBuilder.visualizations[0]}
+                       </CardTitle>
+                     </CardHeader>
+                     <CardContent>
+                       <ResponsiveContainer width="100%" height={300}>
+                         {renderVisualizationChart()}
+                       </ResponsiveContainer>
+                     </CardContent>
+                   </Card>
+                 )}
 
-export default AnalyticsPage;
+                 {/* Multiple Chart Preview if multiple visualizations selected */}
+                 {reportBuilder.visualizations.length > 1 && reportBuilder.dataSources.includes('Financial Data') && (
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     {reportBuilder.visualizations.slice(1).map((vizType, index) => (
+                       <Card key={index}>
+                         <CardHeader>
+                           <CardTitle className="text-sm">{vizType} Preview</CardTitle>
+                         </CardHeader>
+                         <CardContent>
+                           <ResponsiveContainer width="100%" height={250}>
+                             {(() => {
+                               const tempViz = reportBuilder.visualizations[0];
+                               reportBuilder.visualizations[0] = vizType;
+                               const chart = renderVisualizationChart();
+                               reportBuilder.visualizations[0] = tempViz;
+                               return chart;
+                             })()}
+                           </ResponsiveContainer>
+                         </CardContent>
+                       </Card>
+                     ))}
+                   </div>
+                 )}
+               </div>
+             </div>
+           )}
+         </CardContent>
+       </Card>
+     </div>
+   );
+ };
+
+ export default AnalyticsPage;
