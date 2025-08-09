@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { ContactModal } from '@/components/landing/ContactModal';
+import { useToast } from '@/hooks/use-toast';
 import {
   Users,
   Brain,
@@ -209,8 +212,24 @@ const UserJourney = ({ userType }: { userType: 'teacher' | 'student' }) => {
 };
 
 export const AIClassroomWorkflow: React.FC = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [activeStep, setActiveStep] = useState(1);
   const [selectedTab, setSelectedTab] = useState("overview");
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+
+  const startLiveDemo = () => {
+    toast({
+      title: "Starting AI Classroom Demo",
+      description: "Redirecting you to the live AI Classroom session...",
+    });
+    // Navigate to AI classroom session
+    navigate('/ai-classroom/session/demo-session-1');
+  };
+
+  const requestDemo = () => {
+    setIsContactModalOpen(true);
+  };
 
   const aiFeatures = [
     {
@@ -525,14 +544,34 @@ export const AIClassroomWorkflow: React.FC = () => {
           Join the future of education with our revolutionary AI Classroom Suite
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100">
-            Start Free Demo
+          <Button 
+            size="lg" 
+            className="bg-white text-purple-600 hover:bg-gray-100"
+            onClick={startLiveDemo}
+          >
+            <Play className="h-5 w-5 mr-2" />
+            Try Live Demo
           </Button>
-          <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-            Watch Video Tutorial
+          <Button 
+            size="lg" 
+            variant="outline" 
+            className="border-white text-white hover:bg-white/10"
+            onClick={requestDemo}
+          >
+            <MessageSquare className="h-5 w-5 mr-2" />
+            Request Personalized Demo
           </Button>
         </div>
+        <p className="text-sm mt-4 opacity-75">
+          Live demo available instantly • Personalized demo scheduled within 24 hours
+        </p>
       </Card>
+      
+      {/* Contact Modal for Demo Requests */}
+      <ContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+      />
     </div>
   );
 };
