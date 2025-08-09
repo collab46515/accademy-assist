@@ -284,38 +284,92 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
     }
   ]);
 
-  // AI Insights for StudentAnalyticsDashboard
+  // AI Insights for StudentAnalyticsDashboard  
   const [aiInsights, setAIInsights] = useState<AIInsight[]>([
     {
       id: '1',
       type: 'risk_prediction',
       priority: 'high',
-      message: 'Emma may need additional support with algebraic manipulation - consider providing visual aids',
+      message: 'Emma Davis (Demo) showing signs of disengagement - recommend immediate intervention with visual aids',
       studentId: '3',
       actionable: true,
       timestamp: new Date(Date.now() - 30000),
-      confidence: 87
+      confidence: 89
     },
     {
       id: '2',
       type: 'attention',
       priority: 'medium',
-      message: 'Class engagement dropped 12% during quadratic formula explanation - suggest interactive example',
+      message: 'Class attention dropped 15% during quadratic formula explanation - suggest interactive demonstration',
       actionable: true,
       timestamp: new Date(Date.now() - 60000),
-      confidence: 92
+      confidence: 94
     },
     {
       id: '3',
       type: 'recommendation',
       priority: 'low',
-      message: 'Sarah shows strong visual learning preference - whiteboard exercises are highly effective',
-      studentId: '1',
+      message: 'Mike Chen (Demo) shows exceptional audio learning preference - increase verbal explanations',
+      studentId: '2',
       actionable: false,
       timestamp: new Date(Date.now() - 90000),
-      confidence: 95
+      confidence: 96
+    },
+    {
+      id: '4',
+      type: 'learning_style',
+      priority: 'medium',
+      message: 'Lisa Park (Demo) requires more structured approach - break down complex problems into smaller steps',
+      studentId: '5',
+      actionable: true,
+      timestamp: new Date(Date.now() - 120000),
+      confidence: 87
     }
   ]);
+
+  // Enhanced classroom metrics for demo
+  const [classroomMetrics, setClassroomMetrics] = useState({
+    totalStudents: isDemoMode ? 5 : 3,
+    activeStudents: isDemoMode ? 4 : 3,
+    averageEngagement: isDemoMode ? 78 : 84,
+    averageComprehension: isDemoMode ? 76 : 77,
+    handsRaised: isDemoMode ? 2 : 2,
+    aiInterventions: isDemoMode ? 8 : 5,
+    sessionDuration: '34:28',
+    topicsCovered: isDemoMode ? 4 : 3,
+    questionsAsked: isDemoMode ? 17 : 12,
+    averageResponseTime: isDemoMode ? '2.4s' : '3.1s'
+  });
+
+  // Update metrics periodically for demo realism
+  useEffect(() => {
+    if (!isDemoMode) return;
+    
+    const interval = setInterval(() => {
+      setClassroomMetrics(prev => ({
+        ...prev,
+        averageEngagement: Math.min(95, Math.max(65, prev.averageEngagement + (Math.random() - 0.5) * 4)),
+        averageComprehension: Math.min(100, Math.max(60, prev.averageComprehension + (Math.random() - 0.5) * 3)),
+        questionsAsked: prev.questionsAsked + (Math.random() > 0.7 ? 1 : 0),
+        aiInterventions: prev.aiInterventions + (Math.random() > 0.85 ? 1 : 0)
+      }));
+      
+      // Update student metrics randomly
+      setStudents(prevStudents => 
+        prevStudents.map(student => ({
+          ...student,
+          engagementScore: Math.min(100, Math.max(40, student.engagementScore + (Math.random() - 0.5) * 5)),
+          comprehensionLevel: Math.min(100, Math.max(30, student.comprehensionLevel + (Math.random() - 0.5) * 4)),
+          participationScore: Math.min(100, Math.max(20, student.participationScore + (Math.random() - 0.5) * 3)),
+          attentionStatus: Math.random() > 0.8 ? 
+            (['focused', 'distracted', 'away'] as const)[Math.floor(Math.random() * 3)] : 
+            student.attentionStatus
+        }))
+      );
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [isDemoMode]);
 
   // UI state
   const [activeAITab, setActiveAITab] = useState('assistant');
