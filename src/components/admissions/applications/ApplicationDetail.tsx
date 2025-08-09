@@ -63,6 +63,7 @@ interface ApplicationData {
   workflow_completion_percentage?: number;
   priority_score?: number;
   additional_data?: any;
+  school_id?: string;
 }
 
 export function ApplicationDetail({ applicationId, onBack, getStatusColor }: ApplicationDetailProps) {
@@ -122,6 +123,58 @@ export function ApplicationDetail({ applicationId, onBack, getStatusColor }: App
     }
   };
 
+  const handleFollowUp = async () => {
+    if (!application) return;
+    
+    try {
+      // Create a follow-up communication record
+      const followUpMessage = {
+        title: `Follow-up: ${application.student_name} Application`,
+        content: `This is a follow-up regarding the application for ${application.student_name} (${application.application_number}). Please provide the requested documents or information to proceed with the application process.`,
+        communication_type: 'email' as any,
+        audience_type: 'specific_parents' as any,
+        status: 'draft' as any,
+        priority: 'normal' as any,
+        school_id: application.school_id || null,
+        created_by: (await supabase.auth.getUser()).data.user?.id,
+        audience_details: {
+          parent_emails: [application.parent_email]
+        },
+        metadata: {
+          application_id: applicationId,
+          follow_up_type: 'document_request'
+        }
+      };
+
+      const { error } = await supabase
+        .from('communications')
+        .insert([followUpMessage]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Follow-up Created",
+        description: `Follow-up communication created for ${application.student_name}'s application`,
+      });
+    } catch (error) {
+      console.error('Error creating follow-up:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create follow-up communication",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleReschedule = async () => {
+    if (!application) return;
+    
+    toast({
+      title: "Reschedule Request",
+      description: `Reschedule options for ${application.student_name} will be available soon. Please contact the applicant directly for now.`,
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
@@ -174,11 +227,11 @@ export function ApplicationDetail({ applicationId, onBack, getStatusColor }: App
       ],
       documents_pending: [
         { label: 'Documents Received', action: () => handleStatusUpdate('under_review'), variant: 'default' as const },
-        { label: 'Follow Up', action: () => {}, variant: 'outline' as const }
+        { label: 'Follow Up', action: handleFollowUp, variant: 'outline' as const }
       ],
       assessment_scheduled: [
         { label: 'Assessment Complete', action: () => handleStatusUpdate('assessment_complete'), variant: 'default' as const },
-        { label: 'Reschedule', action: () => {}, variant: 'outline' as const }
+        { label: 'Reschedule', action: handleReschedule, variant: 'outline' as const }
       ],
       assessment_complete: [
         { label: 'Schedule Interview', action: () => handleStatusUpdate('interview_scheduled'), variant: 'default' as const },
@@ -186,7 +239,7 @@ export function ApplicationDetail({ applicationId, onBack, getStatusColor }: App
       ],
       interview_scheduled: [
         { label: 'Interview Complete', action: () => handleStatusUpdate('interview_complete'), variant: 'default' as const },
-        { label: 'Reschedule', action: () => {}, variant: 'outline' as const }
+        { label: 'Reschedule', action: handleReschedule, variant: 'outline' as const }
       ],
       interview_complete: [
         { label: 'Move to Decision', action: () => handleStatusUpdate('pending_approval'), variant: 'default' as const }
