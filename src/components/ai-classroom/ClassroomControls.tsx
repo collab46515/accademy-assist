@@ -43,7 +43,7 @@ export function ClassroomControls({
               size="sm" 
               variant={isCameraOn ? "default" : "outline"}
               onClick={onCameraToggle}
-              className="flex-shrink-0"
+              className={`flex-shrink-0 ${isCameraOn ? 'bg-gradient-to-r from-green-500 to-blue-500 text-white animate-pulse' : ''}`}
             >
               {isCameraOn ? <Video className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
               <span className="hidden sm:inline ml-2">
