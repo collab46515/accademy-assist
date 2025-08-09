@@ -133,8 +133,8 @@ export function SchoolSettingsManager() {
         status: schoolDataExtended.status || 'active',
         motto: schoolDataExtended.motto || '',
         founded_year: schoolDataExtended.founded_year || new Date().getFullYear(),
-        academic_year_start: schoolDataExtended.academic_year_start || '09-01',
-        academic_year_end: schoolDataExtended.academic_year_end || '08-31',
+        academic_year_start: schoolDataExtended.academic_year_start || `${new Date().getFullYear()}-09-01`,
+        academic_year_end: schoolDataExtended.academic_year_end || `${new Date().getFullYear() + 1}-08-31`,
         total_students: schoolDataExtended.total_students || 0,
         total_staff: schoolDataExtended.total_staff || 0,
         colors: schoolDataExtended.colors || { primary: '#3B82F6', secondary: '#10B981', accent: '#8B5CF6' }
