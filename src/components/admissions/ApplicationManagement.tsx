@@ -42,7 +42,7 @@ export function ApplicationManagement({ initialFilter = 'all' }: ApplicationMana
     
     if (filterParam && filterParam !== statusFilter) {
       // Only set valid filters, otherwise default to 'all'
-      const validFilters = ['all', 'submitted', 'under_review', 'assessment_scheduled', 'interview_scheduled', 'pending_approval', 'approved'];
+      const validFilters = ['all', 'submitted', 'under_review', 'assessment_scheduled', 'interview_scheduled', 'pending_approval', 'approved', 'on_hold', 'rejected'];
       const filterToSet = validFilters.includes(filterParam) ? filterParam : 'all';
       console.log('Setting statusFilter to:', filterToSet);
       setStatusFilter(filterToSet);
@@ -75,7 +75,7 @@ export function ApplicationManagement({ initialFilter = 'all' }: ApplicationMana
             reviewing: applications.filter(app => app.status === 'under_review').length,
             assessed: applications.filter(app => app.status === 'assessment_scheduled').length,
             approved: applications.filter(app => app.status === 'approved').length,
-            waitlisted: applications.filter(app => app.status === 'documents_pending').length, // Use valid status
+            waitlisted: applications.filter(app => app.status === 'on_hold').length,
             rejected: applications.filter(app => app.status === 'rejected').length
           };
           setStats(newStats);
@@ -108,6 +108,7 @@ export function ApplicationManagement({ initialFilter = 'all' }: ApplicationMana
       pending_approval: 'bg-orange-100 text-orange-700 border-orange-200',
       approved: 'bg-green-100 text-green-700 border-green-200',
       waitlisted: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+      on_hold: 'bg-yellow-100 text-yellow-700 border-yellow-200',
       rejected: 'bg-red-100 text-red-700 border-red-200',
       committed: 'bg-emerald-100 text-emerald-700 border-emerald-200',
       onboarding: 'bg-cyan-100 text-cyan-700 border-cyan-200',
@@ -163,6 +164,8 @@ export function ApplicationManagement({ initialFilter = 'all' }: ApplicationMana
                 <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
                 <SelectItem value="approved">Approved</SelectItem>
                 <SelectItem value="pending_approval">Pending Approval</SelectItem>
+                <SelectItem value="on_hold">Waitlisted</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -263,7 +266,7 @@ export function ApplicationManagement({ initialFilter = 'all' }: ApplicationMana
           <Card 
             className="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white border-0 cursor-pointer hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 transform hover:scale-105"
             onClick={() => {
-              setStatusFilter('waitlisted');
+              setStatusFilter('on_hold');
               setActiveTab('applications');
             }}
           >

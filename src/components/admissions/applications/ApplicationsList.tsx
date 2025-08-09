@@ -258,6 +258,38 @@ export function ApplicationsList({
             priority_score: 72,
             nationality: 'Pakistani',
             previous_school: 'Global Learning Center'
+          },
+          {
+            id: '12',
+            application_number: 'APP-2024-012',
+            student_name: 'Marcus Johnson',
+            year_group: '8',
+            pathway: 'academic',
+            status: 'on_hold',
+            submitted_at: '2024-01-04T09:30:00Z',
+            date_of_birth: '2010-08-15',
+            parent_email: 'parent12@example.com',
+            parent_phone: '+44123456800',
+            workflow_completion_percentage: 75,
+            priority_score: 68,
+            nationality: 'British',
+            previous_school: 'Riverside Academy'
+          },
+          {
+            id: '13',
+            application_number: 'APP-2024-013',
+            student_name: 'Aisha Hassan',
+            year_group: '7',
+            pathway: 'creative',
+            status: 'rejected',
+            submitted_at: '2024-01-03T16:45:00Z',
+            date_of_birth: '2011-12-03',
+            parent_email: 'parent13@example.com',
+            parent_phone: '+44123456801',
+            workflow_completion_percentage: 55,
+            priority_score: 45,
+            nationality: 'Somali',
+            previous_school: 'Community Primary'
           }
         ];
         setApplications(mockApplications);
@@ -282,8 +314,8 @@ export function ApplicationsList({
         app.application_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.parent_email.toLowerCase().includes(searchTerm.toLowerCase());
       
-      // Map invalid filters to 'all' to ensure data is always shown
-      const validFilters = ['all', 'submitted', 'under_review', 'assessment_scheduled', 'interview_scheduled', 'pending_approval', 'approved'];
+      // Filter by status - include rejected and on_hold (waitlisted)
+      const validFilters = ['all', 'submitted', 'under_review', 'assessment_scheduled', 'interview_scheduled', 'pending_approval', 'approved', 'on_hold', 'rejected'];
       const effectiveFilter = validFilters.includes(statusFilter) ? statusFilter : 'all';
       
       console.log('Filtering app:', app.student_name, 'status:', app.status, 'filter:', statusFilter, 'effective:', effectiveFilter);
@@ -332,6 +364,7 @@ export function ApplicationsList({
       pending_approval: 'Pending Approval',
       approved: 'Approved',
       waitlisted: 'Waitlisted',
+      on_hold: 'Waitlisted',
       rejected: 'Rejected',
       committed: 'Committed',
       onboarding: 'Onboarding',
