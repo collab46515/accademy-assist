@@ -166,6 +166,38 @@ export function ApplicationDetail({ applicationId, onBack, getStatusColor }: App
     }
   };
 
+  const handleDeleteDraft = async () => {
+    if (!application) return;
+    
+    if (!confirm(`Are you sure you want to delete the draft application for ${application.student_name}? This action cannot be undone.`)) {
+      return;
+    }
+    
+    try {
+      const { error } = await supabase
+        .from('enrollment_applications')
+        .delete()
+        .eq('id', applicationId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Draft Deleted",
+        description: `Draft application for ${application.student_name} has been deleted successfully`,
+      });
+
+      // Go back to applications list
+      onBack();
+    } catch (error) {
+      console.error('Error deleting draft:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete draft application",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleReschedule = async () => {
     if (!application) return;
     
@@ -258,6 +290,21 @@ export function ApplicationDetail({ applicationId, onBack, getStatusColor }: App
       ],
       offer_accepted: [
         { label: 'Complete Enrollment', action: () => handleStatusUpdate('enrolled'), variant: 'default' as const }
+      ],
+      on_hold: [
+        { label: 'Resume Application', action: () => handleStatusUpdate('under_review'), variant: 'default' as const },
+        { label: 'Request Documents', action: () => handleStatusUpdate('documents_pending'), variant: 'outline' as const },
+        { label: 'Reject Application', action: () => handleStatusUpdate('rejected'), variant: 'destructive' as const }
+      ],
+      draft: [
+        { label: 'Submit Application', action: () => handleStatusUpdate('submitted'), variant: 'default' as const },
+        { label: 'Delete Draft', action: () => handleDeleteDraft(), variant: 'destructive' as const }
+      ],
+      rejected: [
+        { label: 'Reconsider Application', action: () => handleStatusUpdate('under_review'), variant: 'outline' as const }
+      ],
+      enrolled: [
+        { label: 'View Student Profile', action: () => {}, variant: 'outline' as const }
       ]
     };
     return actions[status as keyof typeof actions] || [];
