@@ -78,9 +78,17 @@ export function EnhancedVideoConference({
     let isActive = true;
     
     const setupVideo = async () => {
-      if (!workingVideoRef.current || workingStream) return;
+      // Wait for the video element to be available
+      if (!workingVideoRef.current) {
+        setTimeout(() => {
+          if (isActive) setupVideo();
+        }, 100);
+        return;
+      }
       
-      console.log('WorkingVideo: Setting up video (once only)...');
+      if (workingStream) return; // Already has stream
+      
+      console.log('WorkingVideo: Setting up video (ref is ready)...');
       
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -89,29 +97,29 @@ export function EnhancedVideoConference({
         });
         
         if (!isActive) {
-          // Component unmounted, cleanup
           stream.getTracks().forEach(track => track.stop());
           return;
         }
         
-        console.log('WorkingVideo: Got stream, setting up...');
+        console.log('WorkingVideo: Got stream, applying to video element...');
         
         const video = workingVideoRef.current;
         if (video) {
           video.srcObject = stream;
           setWorkingStream(stream);
           
-          video.onplaying = () => console.log('WorkingVideo: Playing!');
+          video.onplaying = () => console.log('WorkingVideo: Video is playing!');
           
           await video.play();
-          console.log('WorkingVideo: Successfully playing!');
+          console.log('WorkingVideo: Successfully started video!');
         }
       } catch (error) {
         console.error('WorkingVideo: Setup failed:', error);
       }
     };
     
-    setupVideo();
+    // Start setup after a brief delay to ensure DOM is ready
+    setTimeout(setupVideo, 50);
     
     return () => {
       isActive = false;
