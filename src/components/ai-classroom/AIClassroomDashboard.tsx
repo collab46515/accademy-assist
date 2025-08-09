@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import { JoinSessionModal } from './JoinSessionModal';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import {
   Brain,
@@ -230,6 +231,7 @@ export const AIClassroomDashboard: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState<AIFeature | null>(null);
+  const [showJoinModal, setShowJoinModal] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -254,7 +256,8 @@ export const AIClassroomDashboard: React.FC = () => {
     : aiFeatures.filter(f => f.category === selectedCategory);
 
   const startAISession = (classroomId: string) => {
-    navigate(`/ai-classroom/session/${classroomId}`);
+    // Open join modal instead of direct navigation
+    setShowJoinModal(true);
   };
 
   // Add click handlers for all buttons
@@ -729,6 +732,13 @@ export const AIClassroomDashboard: React.FC = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Join Session Modal */}
+      <JoinSessionModal
+        isOpen={showJoinModal}
+        onClose={() => setShowJoinModal(false)}
+        sessionId="demo-session-1"
+      />
     </div>
   );
 };

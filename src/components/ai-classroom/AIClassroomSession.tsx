@@ -640,29 +640,49 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
           </div>
         </div>
 
-        {/* Right AI Panel - Improved Responsive Design */}
+        {/* Right AI Panel - Fixed clickable tabs */}
         <div className="w-80 lg:w-96 bg-white border-l border-slate-200 flex flex-col shadow-sm">
           <Tabs value={activeAITab} onValueChange={setActiveAITab} className="flex-1 flex flex-col">
-            <TabsList className="grid w-full grid-cols-5 m-2">
-              <TabsTrigger value="assistant" className="text-xs p-2">
+            <TabsList className="grid w-full grid-cols-5 m-2 bg-muted">
+              <TabsTrigger 
+                value="assistant" 
+                className="text-xs p-2 data-[state=active]:bg-white data-[state=active]:text-primary cursor-pointer"
+              >
                 <Brain className="h-3 w-3" />
+                <span className="hidden lg:inline ml-1">AI</span>
               </TabsTrigger>
-              <TabsTrigger value="content" className="text-xs p-2">
+              <TabsTrigger 
+                value="content" 
+                className="text-xs p-2 data-[state=active]:bg-white data-[state=active]:text-primary cursor-pointer"
+              >
                 <Sparkles className="h-3 w-3" />
+                <span className="hidden lg:inline ml-1">Content</span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="text-xs p-2">
+              <TabsTrigger 
+                value="analytics" 
+                className="text-xs p-2 data-[state=active]:bg-white data-[state=active]:text-primary cursor-pointer"
+              >
                 <BarChart3 className="h-3 w-3" />
+                <span className="hidden lg:inline ml-1">Analytics</span>
               </TabsTrigger>
-              <TabsTrigger value="management" className="text-xs p-2">
+              <TabsTrigger 
+                value="management" 
+                className="text-xs p-2 data-[state=active]:bg-white data-[state=active]:text-primary cursor-pointer"
+              >
                 <Users className="h-3 w-3" />
+                <span className="hidden lg:inline ml-1">Manage</span>
               </TabsTrigger>
-              <TabsTrigger value="creative" className="text-xs p-2">
+              <TabsTrigger 
+                value="creative" 
+                className="text-xs p-2 data-[state=active]:bg-white data-[state=active]:text-primary cursor-pointer"
+              >
                 <Palette className="h-3 w-3" />
+                <span className="hidden lg:inline ml-1">Creative</span>
               </TabsTrigger>
             </TabsList>
 
             <div className="flex-1 overflow-hidden min-h-0">
-              <TabsContent value="assistant" className="h-full p-0 m-0">
+              <TabsContent value="assistant" className="h-full p-0 m-0 data-[state=inactive]:hidden">
                 <AITeachingAssistant
                   roomId={roomId}
                   students={students}
@@ -671,7 +691,7 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
                 />
               </TabsContent>
 
-              <TabsContent value="content" className="h-full p-0 m-0">
+              <TabsContent value="content" className="h-full p-0 m-0 data-[state=inactive]:hidden">
                 <DynamicContentGenerator
                   roomId={roomId}
                   lessonTitle={lessonTitle}
@@ -680,7 +700,7 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
                 />
               </TabsContent>
 
-              <TabsContent value="analytics" className="h-full p-0 m-0">
+              <TabsContent value="analytics" className="h-full p-0 m-0 data-[state=inactive]:hidden">
                 <StudentAnalyticsDashboard
                   students={students.map(s => ({
                     id: s.id,
@@ -709,7 +729,7 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
                 />
               </TabsContent>
 
-              <TabsContent value="management" className="h-full p-0 m-0">
+              <TabsContent value="management" className="h-full p-0 m-0 data-[state=inactive]:hidden">
                 <AIClassroomManager
                   students={students.map(s => ({
                     id: s.id,
@@ -732,7 +752,7 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
                 />
               </TabsContent>
 
-              <TabsContent value="creative" className="h-full p-0 m-0">
+              <TabsContent value="creative" className="h-full p-0 m-0 data-[state=inactive]:hidden">
                 <CreativeAIFeatures
                   roomId={roomId}
                   currentSubject="Mathematics"

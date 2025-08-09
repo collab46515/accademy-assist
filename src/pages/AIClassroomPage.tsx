@@ -11,6 +11,11 @@ function AIClassroomRoom() {
   
   if (!user || !id) return <div>Loading...</div>;
   
+  // Get URL parameters for role and name
+  const urlParams = new URLSearchParams(window.location.search);
+  const userRole = (urlParams.get('role') as 'teacher' | 'student') || 'teacher';
+  const userName = urlParams.get('name') || user.email?.split('@')[0] || 'User';
+  
   // Special demo configuration
   const isDemoSession = id === 'demo-session-1';
   
@@ -19,8 +24,8 @@ function AIClassroomRoom() {
       <AIClassroomSession
         roomId={id}
         userId={user.id}
-        userName="Demo Teacher"
-        userRole="teacher"
+        userName={userName}
+        userRole={userRole}
         lessonTitle="🚀 AI Classroom Demo - Interactive Mathematics"
         isDemoMode={true}
       />
@@ -31,8 +36,8 @@ function AIClassroomRoom() {
     <AIClassroomSession
       roomId={id}
       userId={user.id}
-      userName={user.email?.split('@')[0] || 'Student'}
-      userRole="teacher" // This should be determined based on user permissions
+      userName={userName}
+      userRole={userRole}
       lessonTitle="AI-Enhanced Mathematics - Algebra Fundamentals"
     />
   );
