@@ -17,7 +17,7 @@ import {
   Settings,
   Zap,
   Brain,
-  Waveform
+  AudioLines
 } from 'lucide-react';
 
 interface Props {
@@ -356,7 +356,7 @@ export const VoiceControls: React.FC<Props> = ({
         {isRecording && (
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Waveform className="h-4 w-4 text-green-600" />
+              <AudioLines className="h-4 w-4 text-green-600" />
               <span className="text-sm text-muted-foreground">Audio Level:</span>
               <span className="text-sm font-medium">{audioLevel}%</span>
             </div>

@@ -80,12 +80,13 @@ interface Student {
 
 interface AIInsight {
   id: string;
-  type: 'comprehension' | 'engagement' | 'prediction' | 'suggestion';
+  type: 'learning_style' | 'attention' | 'risk_prediction' | 'recommendation';
   priority: 'low' | 'medium' | 'high' | 'critical';
   message: string;
   studentId?: string;
   actionable: boolean;
   timestamp: Date;
+  confidence: number;
 }
 
 interface AIClassroomSessionProps {
@@ -157,8 +158,16 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
     }
   ]);
 
-  // AI Insights
-  const [aiInsights, setAIInsights] = useState<AIInsight[]>([
+  // AI Teaching Assistant insights (different format)
+  const [teachingInsights, setTeachingInsights] = useState<{
+    id: string;
+    type: 'comprehension' | 'engagement' | 'prediction' | 'suggestion';
+    priority: 'low' | 'medium' | 'high' | 'critical';
+    message: string;
+    studentId?: string;
+    actionable: boolean;
+    timestamp: Date;
+  }[]>([
     {
       id: '1',
       type: 'prediction',
@@ -184,6 +193,39 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
       studentId: '1',
       actionable: false,
       timestamp: new Date(Date.now() - 90000)
+    }
+  ]);
+
+  // AI Insights for StudentAnalyticsDashboard
+  const [aiInsights, setAIInsights] = useState<AIInsight[]>([
+    {
+      id: '1',
+      type: 'risk_prediction',
+      priority: 'high',
+      message: 'Emma may need additional support with algebraic manipulation - consider providing visual aids',
+      studentId: '3',
+      actionable: true,
+      timestamp: new Date(Date.now() - 30000),
+      confidence: 87
+    },
+    {
+      id: '2',
+      type: 'attention',
+      priority: 'medium',
+      message: 'Class engagement dropped 12% during quadratic formula explanation - suggest interactive example',
+      actionable: true,
+      timestamp: new Date(Date.now() - 60000),
+      confidence: 92
+    },
+    {
+      id: '3',
+      type: 'recommendation',
+      priority: 'low',
+      message: 'Sarah shows strong visual learning preference - whiteboard exercises are highly effective',
+      studentId: '1',
+      actionable: false,
+      timestamp: new Date(Date.now() - 90000),
+      confidence: 95
     }
   ]);
 
@@ -528,7 +570,7 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
                   roomId={roomId}
                   students={students}
                   userRole={userRole}
-                  insights={aiInsights}
+            insights={teachingInsights}
                 />
               </TabsContent>
 
@@ -645,7 +687,7 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
               variant={voiceControls.isVoiceEnabled ? "default" : "outline"}
               onClick={() => voiceControls.setIsVoiceEnabled(!voiceControls.isVoiceEnabled)}
             >
-              {voiceControls.isVoiceEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+              {voiceControls.isVoiceEnabled ? <Volume2 className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
             </Button>
           </div>
           
@@ -661,7 +703,5 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
         </div>
       </div>
     </div>
-  );
-};
   );
 };
