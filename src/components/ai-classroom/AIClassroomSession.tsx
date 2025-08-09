@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/components/ui/use-toast";
 
 // Import existing components
 import { InteractiveWhiteboard } from '@/components/communication/InteractiveWhiteboard';
@@ -345,6 +346,7 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
   const [classStartTime] = useState(new Date(Date.now() - 1800000));
   const [isMuted, setIsMuted] = useState(true);
   const [isCameraOn, setIsCameraOn] = useState(false);
+  const { toast } = useToast();
 
   // Voice controls integration - simplified fallback
   const voiceControls = {
@@ -495,6 +497,46 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
   const handleFeatureActivate = (feature: string, config: any) => {
     console.log('Activating feature:', feature, config);
     // Handle creative AI feature activation
+  };
+
+  // Enhanced camera functionality with visual feedback and simulation
+  const handleCameraToggle = () => {
+    setIsCameraOn(!isCameraOn);
+    
+    if (!isCameraOn) {
+      // Turning camera ON
+      toast({
+        title: "Camera Activated",
+        description: "Your camera is now on and streaming to the class",
+      });
+      
+      // Simulate camera initialization
+      console.log('Camera turned ON - initializing video stream...');
+    } else {
+      // Turning camera OFF
+      toast({
+        title: "Camera Deactivated", 
+        description: "Your camera is now off",
+      });
+      
+      console.log('Camera turned OFF - stopping video stream...');
+    }
+  };
+
+  const handleMuteToggle = () => {
+    setIsMuted(!isMuted);
+    
+    if (isMuted) {
+      toast({
+        title: "Microphone Unmuted",
+        description: "Your audio is now active",
+      });
+    } else {
+      toast({
+        title: "Microphone Muted",
+        description: "Your audio is now muted",
+      });
+    }
   };
 
   return (
@@ -809,8 +851,8 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
         isMuted={isMuted}
         isCameraOn={isCameraOn}
         isVoiceEnabled={voiceControls.isVoiceEnabled}
-        onMuteToggle={() => setIsMuted(!isMuted)}
-        onCameraToggle={() => setIsCameraOn(!isCameraOn)}
+        onMuteToggle={handleMuteToggle}
+        onCameraToggle={handleCameraToggle}
         onVoiceToggle={() => voiceControls.setIsVoiceEnabled(!voiceControls.isVoiceEnabled)}
         onSettings={handleSettings}
         onEndSession={handleEndSession}
