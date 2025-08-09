@@ -212,13 +212,14 @@ export function InteractiveWhiteboard({ roomId, isReadOnly = false }: Interactiv
   };
 
   const Toolbar = () => (
-    <div className="flex flex-wrap items-center gap-2 p-4 bg-muted rounded-lg">
+    <div className="flex flex-wrap items-center gap-1 text-sm">
       <div className="flex gap-1">
         <Button
           variant={activeTool === "select" ? "default" : "outline"}
           size="sm"
           onClick={() => handleToolClick("select")}
           disabled={isReadOnly}
+          className="h-8 px-2 text-xs"
         >
           Select
         </Button>
@@ -227,45 +228,50 @@ export function InteractiveWhiteboard({ roomId, isReadOnly = false }: Interactiv
           size="sm"
           onClick={() => handleToolClick("draw")}
           disabled={isReadOnly}
+          className="h-8 px-2"
         >
-          <PenTool className="h-4 w-4" />
+          <PenTool className="h-3 w-3" />
         </Button>
         <Button
           variant={activeTool === "eraser" ? "default" : "outline"}
           size="sm"
           onClick={() => handleToolClick("eraser")}
           disabled={isReadOnly}
+          className="h-8 px-2"
         >
-          <Eraser className="h-4 w-4" />
+          <Eraser className="h-3 w-3" />
         </Button>
         <Button
           variant={activeTool === "rectangle" ? "default" : "outline"}
           size="sm"
           onClick={() => handleToolClick("rectangle")}
           disabled={isReadOnly}
+          className="h-8 px-2"
         >
-          <Square className="h-4 w-4" />
+          <Square className="h-3 w-3" />
         </Button>
         <Button
           variant={activeTool === "circle" ? "default" : "outline"}
           size="sm"
           onClick={() => handleToolClick("circle")}
           disabled={isReadOnly}
+          className="h-8 px-2"
         >
-          <CircleIcon className="h-4 w-4" />
+          <CircleIcon className="h-3 w-3" />
         </Button>
         <Button
           variant={activeTool === "text" ? "default" : "outline"}
           size="sm"
           onClick={() => handleToolClick("text")}
           disabled={isReadOnly}
+          className="h-8 px-2"
         >
-          <Type className="h-4 w-4" />
+          <Type className="h-3 w-3" />
         </Button>
       </div>
       
-      <div className="flex items-center gap-2">
-        <span className="text-sm">Size:</span>
+      <div className="flex items-center gap-1 ml-2">
+        <span className="text-xs">Size:</span>
         <input
           type="range"
           min="1"
@@ -273,12 +279,12 @@ export function InteractiveWhiteboard({ roomId, isReadOnly = false }: Interactiv
           value={brushWidth}
           onChange={(e) => setBrushWidth(Number(e.target.value))}
           disabled={isReadOnly}
-          className="w-20"
+          className="w-16 h-4"
         />
-        <span className="text-sm w-8">{brushWidth}</span>
+        <span className="text-xs w-6">{brushWidth}</span>
       </div>
       
-      <div className="flex gap-1">
+      <div className="flex gap-1 ml-2">
         {colors.map((color) => (
           <Button
             key={color}
@@ -286,7 +292,7 @@ export function InteractiveWhiteboard({ roomId, isReadOnly = false }: Interactiv
             size="sm"
             onClick={() => setActiveColor(color)}
             disabled={isReadOnly}
-            className="w-8 h-8 p-0"
+            className="w-6 h-6 p-0 border"
             style={{ backgroundColor: color }}
           />
         ))}
@@ -298,54 +304,60 @@ export function InteractiveWhiteboard({ roomId, isReadOnly = false }: Interactiv
           size="sm"
           onClick={handleUndo}
           disabled={isReadOnly}
+          className="h-8 px-2"
         >
-          <Undo2 className="h-4 w-4" />
+          <Undo2 className="h-3 w-3" />
         </Button>
         <Button
           variant="outline"
           size="sm"
           onClick={handleClear}
           disabled={isReadOnly}
+          className="h-8 px-2"
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-3 w-3" />
         </Button>
         <Button
           variant="outline"
           size="sm"
           onClick={handleSave}
+          className="h-8 px-2"
         >
-          <Download className="h-4 w-4" />
+          <Download className="h-3 w-3" />
         </Button>
       </div>
     </div>
   );
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2">
-          <PenTool className="h-5 w-5" />
-          Interactive Whiteboard
+    <div className="h-full flex flex-col bg-white">
+      {/* Compact Header */}
+      <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 bg-muted/30 flex-shrink-0">
+        <div className="flex items-center gap-2">
+          <PenTool className="h-4 w-4" />
+          <span className="font-medium text-sm">Interactive Whiteboard</span>
           {isReadOnly && (
-            <span className="text-sm bg-muted px-2 py-1 rounded">View Only</span>
+            <span className="text-xs bg-muted px-2 py-1 rounded">View Only</span>
           )}
-        </CardTitle>
-      </CardHeader>
+        </div>
+      </div>
       
-      <CardContent className="flex-1 flex flex-col gap-4">
+      {/* Toolbar */}
+      <div className="px-4 py-2 bg-muted/20 border-b flex-shrink-0">
         <Toolbar />
-        
+      </div>
+      
+      {/* Canvas Area - Takes remaining height */}
+      <div className="flex-1 relative overflow-hidden bg-white">
         <div 
           ref={containerRef}
-          className="flex-1 border border-gray-200 rounded-lg shadow-lg overflow-hidden bg-white relative min-h-[300px]"
+          className="absolute inset-0"
         >
           <canvas 
             ref={canvasRef} 
-            className="w-full h-full"
+            className="absolute inset-0 w-full h-full"
             style={{ 
-              display: 'block',
-              maxWidth: '100%',
-              maxHeight: '100%'
+              display: 'block'
             }}
           />
           {!fabricCanvas && (
@@ -357,7 +369,7 @@ export function InteractiveWhiteboard({ roomId, isReadOnly = false }: Interactiv
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
