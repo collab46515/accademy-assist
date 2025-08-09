@@ -335,14 +335,25 @@ export const AIClassroomDashboard: React.FC = () => {
             </div>
           </div>
           <div className="text-right">
-            <Button 
-              size="lg" 
-              className="bg-white text-purple-600 hover:bg-gray-100"
-              onClick={() => startAISession('1')}
-            >
-              <Play className="h-5 w-5 mr-2" />
-              Start AI Session
-            </Button>
+            <div className="space-y-3">
+              <Button 
+                size="lg" 
+                className="bg-white text-purple-600 hover:bg-gray-100 w-full"
+                onClick={() => startAISession('1')}
+              >
+                <Play className="h-5 w-5 mr-2" />
+                Start AI Session
+              </Button>
+              <Button 
+                size="sm"
+                variant="outline" 
+                className="border-white/20 text-white hover:bg-white/10 w-full"
+                onClick={() => navigate('/', { state: { section: 'workflows', workflow: 'ai-classroom' } })}
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                View Workflow Guide
+              </Button>
+            </div>
           </div>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,9 +36,17 @@ import { SignInModal } from "@/components/auth/SignInModal";
 import { ContactModal } from "@/components/landing/ContactModal";
 
 export default function LandingPage() {
+  const location = useLocation();
   const [activeSection, setActiveSection] = useState("home");
   const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  
+  // Handle navigation from other parts of the app
+  useEffect(() => {
+    if (location.state?.section) {
+      setActiveSection(location.state.section);
+    }
+  }, [location.state]);
 
   const modules = [
     {

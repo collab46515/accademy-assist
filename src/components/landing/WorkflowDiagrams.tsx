@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +38,15 @@ interface WorkflowDiagramsProps {
 }
 
 export function WorkflowDiagrams({ modules }: WorkflowDiagramsProps) {
+  const location = useLocation();
   const [selectedWorkflow, setSelectedWorkflow] = useState("student-management");
+
+  // Handle navigation from AI Classroom Dashboard
+  useEffect(() => {
+    if (location.state?.workflow === 'ai-classroom') {
+      setSelectedWorkflow("ai-classroom");
+    }
+  }, [location.state]);
 
   const workflows = [
     {
