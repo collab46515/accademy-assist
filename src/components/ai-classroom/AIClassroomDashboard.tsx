@@ -252,6 +252,27 @@ export const AIClassroomDashboard: React.FC = () => {
     navigate(`/ai-classroom/session/${classroomId}`);
   };
 
+  // Add click handlers for all buttons
+  const handleConfigureFeature = (featureId: string, featureTitle: string) => {
+    console.log(`Configuring AI feature: ${featureTitle}`, featureId);
+    // TODO: Open feature configuration modal or navigate to config page
+  };
+
+  const handleViewFeatureDocs = (featureId: string, featureTitle: string) => {
+    console.log(`Viewing documentation for: ${featureTitle}`, featureId);
+    // TODO: Open documentation modal or navigate to docs
+  };
+
+  const handleCreateClassroom = () => {
+    console.log('Creating new AI classroom...');
+    // TODO: Open classroom creation modal or navigate to creation page
+  };
+
+  const handleClassroomSettings = (classroomId: string, classroomTitle: string) => {
+    console.log(`Opening settings for classroom: ${classroomTitle}`, classroomId);
+    // TODO: Open classroom settings modal or navigate to settings page
+  };
+
   return (
     <div className="space-y-8 p-6">
       {/* Hero Section */}
@@ -387,11 +408,19 @@ export const AIClassroomDashboard: React.FC = () => {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button size="sm" className="flex-1">
+                  <Button 
+                    size="sm" 
+                    className="flex-1"
+                    onClick={() => handleConfigureFeature(feature.id, feature.title)}
+                  >
                     <Settings className="h-3 w-3 mr-1" />
                     Configure
                   </Button>
-                  <Button size="sm" variant="outline">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handleViewFeatureDocs(feature.id, feature.title)}
+                  >
                     <FileText className="h-3 w-3" />
                   </Button>
                 </div>
@@ -403,7 +432,7 @@ export const AIClassroomDashboard: React.FC = () => {
         <TabsContent value="classrooms" className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">Active AI Classrooms</h2>
-            <Button>
+            <Button onClick={handleCreateClassroom}>
               <Plus className="h-4 w-4 mr-2" />
               Create AI Classroom
             </Button>
@@ -465,7 +494,11 @@ export const AIClassroomDashboard: React.FC = () => {
                   >
                     {classroom.status === 'live' ? 'Join Session' : 'Start Session'}
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleClassroomSettings(classroom.id, classroom.title)}
+                  >
                     <Settings className="h-4 w-4" />
                   </Button>
                 </div>
