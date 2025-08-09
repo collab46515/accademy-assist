@@ -254,112 +254,46 @@ export function EnhancedVideoConference({
 
   const ParticipantGrid = useCallback(() => {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 h-full p-2">
-        {/* Local user video - Featured */}
-        <div className="relative group">
-          <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-white/20 backdrop-blur-sm h-full hover:scale-[1.02] transition-transform">
-            <div className="aspect-video bg-black/40 relative">
-              <video
-                ref={localVideoRef}
-                autoPlay
-                muted
-                playsInline
-                className="w-full h-full object-cover rounded-lg"
-              />
-              {!hasVideo && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-700 to-slate-800">
-                  <Avatar className="h-20 w-20 ring-4 ring-primary/50">
-                    <AvatarImage src="/placeholder-avatar.png" />
-                    <AvatarFallback className="bg-primary/20 text-primary text-2xl">
-                      {userName[0]?.toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-              )}
-              
-              {/* Video Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              
-              {/* Minimal name overlay at very bottom */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-white font-medium bg-black/60 px-2 py-1 rounded">
-                    {userName.split('@')[0]} {isHost && '(Host)'}
-                  </span>
-                  <div className="flex gap-1">
-                    {isHandRaised && <Hand className="h-3 w-3 text-yellow-300 bg-black/60 rounded p-0.5" />}
-                    {isMuted ? 
-                      <MicOff className="h-3 w-3 text-red-300 bg-black/60 rounded p-0.5" /> : 
-                      <Mic className="h-3 w-3 text-green-300 bg-black/60 rounded p-0.5" />
-                    }
-                  </div>
-                </div>
+      <div className="w-full h-full bg-black">
+        {/* Local user video - Full screen */}
+        <div className="w-full h-full relative">
+          <video
+            ref={localVideoRef}
+            autoPlay
+            muted
+            playsInline
+            className="w-full h-full object-cover bg-black"
+          />
+          {!hasVideo && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black">
+              <Avatar className="h-32 w-32">
+                <AvatarImage src="/placeholder-avatar.png" />
+                <AvatarFallback className="bg-slate-700 text-white text-4xl">
+                  {userName.split('@')[0][0]?.toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+          )}
+          
+          {/* Minimal name overlay at very bottom */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-white font-medium bg-black/60 px-2 py-1 rounded">
+                {userName.split('@')[0]} {isHost && '(Host)'}
+              </span>
+              <div className="flex gap-1">
+                {isHandRaised && <Hand className="h-3 w-3 text-yellow-300 bg-black/60 rounded p-0.5" />}
+                {isMuted ? 
+                  <MicOff className="h-3 w-3 text-red-300 bg-black/60 rounded p-0.5" /> : 
+                  <Mic className="h-3 w-3 text-green-300 bg-black/60 rounded p-0.5" />
+                }
               </div>
             </div>
-          </Card>
-        </div>
-
-        {/* Remote participants */}
-        {participants.map(participant => (
-          <div key={participant.id} className="relative group">
-            <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-white/20 backdrop-blur-sm h-full hover:scale-[1.02] transition-transform">
-              <div className="aspect-video bg-black/40 relative">
-                <video
-                  ref={(el) => {
-                    if (el) remoteVideoRefs.current.set(participant.id, el);
-                  }}
-                  autoPlay
-                  playsInline
-                  className="w-full h-full object-cover rounded-lg"
-                />
-                {!participant.hasVideo && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-700 to-slate-800">
-                    <Avatar className="h-20 w-20 ring-4 ring-white/20">
-                      <AvatarImage src={participant.avatar} />
-                      <AvatarFallback className="bg-slate-600 text-white text-2xl">
-                        {participant.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
-                )}
-                
-                {/* Video Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                
-                {/* Participant Info Overlay */}
-                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2 bg-black/70 backdrop-blur-md rounded-full px-3 py-1">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
-                    <span className="text-white text-sm font-medium">{participant.name}</span>
-                    {participant.role === 'host' && (
-                      <Badge className="text-xs bg-amber-500/90 text-white px-2">Host</Badge>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center gap-1">
-                    {participant.isHandRaised && (
-                      <div className="bg-amber-500 rounded-full p-1.5 animate-bounce">
-                        <Hand className="h-3 w-3 text-white" />
-                      </div>
-                    )}
-                    {participant.isMuted ? (
-                      <div className="bg-red-500 rounded-full p-1.5">
-                        <MicOff className="h-3 w-3 text-white" />
-                      </div>
-                    ) : (
-                      <div className="bg-green-500 rounded-full p-1.5">
-                        <Mic className="h-3 w-3 text-white" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Card>
           </div>
-        ))}
+        </div>
       </div>
     );  
-  }, [participants, hasVideo, userName, isMuted, isHandRaised]);
+  }, [hasVideo, userName, isMuted, isHandRaised]);
 
   const ChatPanel = () => (
     <div className="flex flex-col h-full bg-slate-800">
@@ -430,8 +364,8 @@ export function EnhancedVideoConference({
       </div>
 
       <div className="flex h-[calc(100vh-4rem)]">
-        {/* Main Video Area - No grey box */}
-        <div className="flex-1 p-4">
+        {/* Main Video Area - Full screen video */}
+        <div className="flex-1">
           <ParticipantGrid />
         </div>
 
