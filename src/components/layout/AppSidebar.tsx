@@ -144,6 +144,7 @@ const erpModules = [
     icon: Bot,
     subItems: [
       { title: "Dashboard", url: "/ai-suite", icon: LayoutDashboard },
+      { title: "AI Classroom", url: "/ai-classroom", icon: Monitor },
       { title: "Knowledge Base AI", url: "/ai-suite", icon: Brain },
       { title: "Management Assistant", url: "/ai-suite", icon: Bot },
       { title: "System Administrator", url: "/ai-suite", icon: Settings },
@@ -207,7 +208,7 @@ function getCurrentModule(pathname: string) {
       pathname.startsWith('/school-management/fee-management') || 
       pathname.startsWith('/accounting')) return 'Finance & Operations';
   
-  if (pathname.startsWith('/ai-suite')) return 'AI Suite';
+  if (pathname.startsWith('/ai-suite') || pathname.startsWith('/ai-classroom')) return 'AI Suite';
   
   if (pathname.startsWith('/analytics')) return 'Analytics & Reports';
   
