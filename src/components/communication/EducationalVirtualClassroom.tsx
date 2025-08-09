@@ -23,9 +23,18 @@ import {
   CheckSquare,
   AlertCircle,
   UserCheck,
-  MessageSquare
+  MessageSquare,
+  Upload,
+  Brain,
+  UserPlus,
+  Timer,
+  Bot
 } from 'lucide-react';
 import { InteractiveWhiteboard } from './InteractiveWhiteboard';
+import { BreakoutPods } from './BreakoutPods';
+import { AssignmentDropZone } from './AssignmentDropZone';
+import { AILessonHighlights } from './AILessonHighlights';
+import { AIVoiceAssistant } from './AIVoiceAssistant';
 
 interface Student {
   id: string;
@@ -116,6 +125,13 @@ export const EducationalVirtualClassroom: React.FC<EducationalVirtualClassroomPr
   const [showLessonNotes, setShowLessonNotes] = useState(false);
   const [classStartTime] = useState(new Date(Date.now() - 1800000)); // 30 min ago
   const [myHandRaised, setMyHandRaised] = useState(false);
+  
+  // New features
+  const [showBreakoutPods, setShowBreakoutPods] = useState(false);
+  const [currentPodId, setCurrentPodId] = useState<string | null>(null);
+  const [showAssignments, setShowAssignments] = useState(false);
+  const [showAIHighlights, setShowAIHighlights] = useState(true);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
 
   // Audio/Video controls
   const [isMuted, setIsMuted] = useState(true);
@@ -198,6 +214,22 @@ export const EducationalVirtualClassroom: React.FC<EducationalVirtualClassroomPr
                 >
                   <BarChart3 className="h-4 w-4 mr-1" />
                   Quick Poll
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowBreakoutPods(true)}
+                >
+                  <UserPlus className="h-4 w-4 mr-1" />
+                  Breakout Pods
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAssignments(true)}
+                >
+                  <Upload className="h-4 w-4 mr-1" />
+                  Assignments
                 </Button>
               </>
             )}
@@ -425,6 +457,24 @@ export const EducationalVirtualClassroom: React.FC<EducationalVirtualClassroomPr
               <BookOpen className="h-4 w-4 mr-1" />
               Lesson Notes
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAssignments(true)}
+            >
+              <Upload className="h-4 w-4 mr-1" />
+              Assignments
+            </Button>
+            {userRole === 'teacher' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowBreakoutPods(true)}
+              >
+                <Timer className="h-4 w-4 mr-1" />
+                Breakout Pods
+              </Button>
+            )}
           </div>
 
           {/* Center - Audio/Video controls */}
@@ -470,9 +520,64 @@ export const EducationalVirtualClassroom: React.FC<EducationalVirtualClassroomPr
             <Button variant="ghost" size="sm">
               <Settings className="h-4 w-4" />
             </Button>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setShowAIHighlights(!showAIHighlights)}
+            >
+              <Brain className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
+
+      {/* Breakout Pods Modal */}
+      {showBreakoutPods && (
+        <div className="fixed inset-0 z-50">
+          <BreakoutPods
+            roomId={roomId}
+            userRole={userRole}
+            currentPodId={currentPodId}
+            onLeavePod={() => setCurrentPodId(null)}
+            onReturnToMain={() => setShowBreakoutPods(false)}
+          />
+        </div>
+      )}
+
+      {/* Assignment Drop Zone */}
+      <AssignmentDropZone
+        roomId={roomId}
+        userRole={userRole}
+        userId={userId}
+        userName={userName}
+        isVisible={showAssignments}
+        onClose={() => setShowAssignments(false)}
+      />
+
+      {/* AI Lesson Highlights */}
+      <AILessonHighlights
+        roomId={roomId}
+        lessonTitle={lessonTitle}
+        isVisible={showAIHighlights}
+        onToggle={() => setShowAIHighlights(!showAIHighlights)}
+      />
+
+      {/* AI Voice Assistant */}
+      <AIVoiceAssistant
+        roomId={roomId}
+        isVisible={showAIAssistant}
+        onToggle={() => setShowAIAssistant(!showAIAssistant)}
+      />
+
+      {/* AI Assistant Toggle Button */}
+      {!showAIAssistant && (
+        <Button
+          onClick={() => setShowAIAssistant(true)}
+          className="fixed bottom-4 right-4 rounded-full h-12 w-12 bg-blue-600 hover:bg-blue-700 text-white shadow-lg z-40"
+        >
+          <Bot className="h-5 w-5" />
+        </Button>
+      )}
     </div>
   );
 };
