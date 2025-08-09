@@ -70,21 +70,20 @@ export function EnhancedVideoConference({
   const audioRecorderRef = useRef<MediaRecorder | null>(null);
   const transcriptChunksRef = useRef<string[]>([]);
 
-  // Clean single video setup - no intervals or competing timers
+  // Video connection state  
+  const [isStreamReady, setIsStreamReady] = useState(false);
+
+  // Connect video when stream becomes available
   useEffect(() => {
-    const connectVideo = () => {
+    if (isStreamReady && localVideoRef.current) {
       const stream = webRTC.getLocalStream();
-      if (stream && localVideoRef.current && !localVideoRef.current.srcObject) {
-        console.log('✅ Connecting WebRTC stream to video (once only)');
+      if (stream && !localVideoRef.current.srcObject) {
+        console.log('✅ Connecting stream to video element');
         localVideoRef.current.srcObject = stream;
         localVideoRef.current.play().catch(console.error);
       }
-    };
-    
-    // Single attempt after brief delay
-    const timer = setTimeout(connectVideo, 800);
-    return () => clearTimeout(timer);
-  }, [webRTC]);
+    }
+  }, [isStreamReady, webRTC]);
 
   useEffect(() => {
     console.log('EnhancedVideoConference: Component mounted, starting initialization');
@@ -143,6 +142,9 @@ export function EnhancedVideoConference({
 
       // Initialize WebRTC connection
       await webRTC.initializeConnection(roomId, userId, userName, isHost);
+      
+      // Signal that stream is ready
+      setIsStreamReady(true);
       
       if (isHost) {
         startAudioTranscription();
