@@ -280,31 +280,16 @@ export function EnhancedVideoConference({
               {/* Video Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               
-              {/* User Info Overlay */}
-              <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-                <div className="flex items-center gap-2 bg-black/70 backdrop-blur-md rounded-full px-3 py-1">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                  <span className="text-white text-sm font-medium">{userName} (You)</span>
-                  {isHost && (
-                    <Badge className="text-xs bg-amber-500/90 text-white px-2">Host</Badge>
-                  )}
+              {/* User Info Overlay - Minimal */}
+              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+                <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md rounded-md px-2 py-1 text-xs">
+                  <span className="text-white font-medium">{userName}</span>
+                  {isHost && <Badge className="text-xs bg-amber-500 text-white px-1">Host</Badge>}
                 </div>
                 
                 <div className="flex items-center gap-1">
-                  {isHandRaised && (
-                    <div className="bg-amber-500 rounded-full p-1.5 animate-bounce">
-                      <Hand className="h-3 w-3 text-white" />
-                    </div>
-                  )}
-                  {isMuted ? (
-                    <div className="bg-red-500 rounded-full p-1.5">
-                      <MicOff className="h-3 w-3 text-white" />
-                    </div>
-                  ) : (
-                    <div className="bg-green-500 rounded-full p-1.5">
-                      <Mic className="h-3 w-3 text-white" />
-                    </div>
-                  )}
+                  {isHandRaised && <Hand className="h-3 w-3 text-amber-400" />}
+                  {isMuted ? <MicOff className="h-3 w-3 text-red-400" /> : <Mic className="h-3 w-3 text-green-400" />}
                 </div>
               </div>
             </div>
