@@ -718,7 +718,7 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
           </div>
 
           {/* Interactive Whiteboard with AI */}
-          <div className="h-72 bg-card border border-border mx-4 mb-4 rounded-lg shadow-sm overflow-hidden">
+          <div className="flex-1 bg-card border border-border mx-4 mb-4 rounded-lg shadow-sm overflow-hidden min-h-[400px]">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
               <h3 className="font-semibold flex items-center gap-2 text-foreground">
                 <div className="p-1 rounded bg-primary/10">
@@ -736,7 +736,7 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
                 </Button>
               </div>
             </div>
-            <div className="h-60">
+            <div className="flex-1" style={{ height: 'calc(100% - 60px)' }}>
               <InteractiveWhiteboard roomId={roomId} />
             </div>
           </div>

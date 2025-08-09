@@ -15,10 +15,12 @@ interface InteractiveWhiteboardProps {
 
 export function InteractiveWhiteboard({ roomId, isReadOnly = false }: InteractiveWhiteboardProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
   const [activeColor, setActiveColor] = useState("#000000");
   const [activeTool, setActiveTool] = useState<"select" | "draw" | "rectangle" | "circle" | "text" | "eraser">("draw");
   const [brushWidth, setBrushWidth] = useState(2);
+  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 400 });
   const { toast } = useToast();
 
   const colors = [
@@ -26,46 +28,89 @@ export function InteractiveWhiteboard({ roomId, isReadOnly = false }: Interactiv
     "#FFFF00", "#FF00FF", "#00FFFF", "#FFA500"
   ];
 
+  // Function to resize canvas to fit container
+  const resizeCanvas = () => {
+    if (!containerRef.current) return { width: 800, height: 400 };
+    
+    const container = containerRef.current;
+    const rect = container.getBoundingClientRect();
+    const width = Math.max(400, rect.width - 32); // Account for padding
+    const height = Math.max(300, rect.height - 32); // Account for padding
+    
+    console.log('Canvas resize:', { width, height, containerRect: rect });
+    return { width, height };
+  };
+
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || !containerRef.current) return;
+
+    console.log('Initializing whiteboard canvas...');
+    
+    // Calculate proper canvas size
+    const { width, height } = resizeCanvas();
+    setCanvasSize({ width, height });
 
     const canvas = new FabricCanvas(canvasRef.current, {
-      width: 800,
-      height: 600,
+      width,
+      height,
       backgroundColor: "#ffffff",
-      isDrawingMode: false, // Start with drawing mode off
+      isDrawingMode: false,
     });
 
-    // Wait for canvas to be fully initialized before accessing freeDrawingBrush
-    setTimeout(() => {
-      if (canvas.freeDrawingBrush) {
-        canvas.freeDrawingBrush.color = activeColor;
-        canvas.freeDrawingBrush.width = brushWidth;
-        console.log('Whiteboard: freeDrawingBrush initialized successfully');
-      } else {
-        console.warn('Whiteboard: freeDrawingBrush not available yet');
+    console.log('Canvas created with dimensions:', { width, height });
+
+    // Initialize canvas properly
+    const initializeCanvas = () => {
+      try {
+        if (canvas.freeDrawingBrush) {
+          canvas.freeDrawingBrush.color = activeColor;
+          canvas.freeDrawingBrush.width = brushWidth;
+          canvas.isDrawingMode = activeTool === "draw";
+          console.log('Whiteboard: Canvas fully initialized');
+          
+          toast({
+            title: "Whiteboard ready!",
+            description: "Start drawing and collaborating",
+          });
+        } else {
+          console.warn('freeDrawingBrush not ready, retrying...');
+          setTimeout(initializeCanvas, 50);
+        }
+      } catch (error) {
+        console.error('Error initializing canvas:', error);
+        setTimeout(initializeCanvas, 100);
       }
-      
-      // Set drawing mode after brush is configured
-      canvas.isDrawingMode = activeTool === "draw";
-    }, 100);
+    };
 
+    // Start initialization
+    setTimeout(initializeCanvas, 100);
     setFabricCanvas(canvas);
-    
-    toast({
-      title: "Whiteboard ready!",
-      description: "Start drawing and collaborating",
-    });
 
-    // Set up real-time collaboration (placeholder for now)
+    // Set up real-time collaboration
     canvas.on('path:created', (e) => {
       if (!isReadOnly) {
-        // In a real implementation, you'd broadcast this change to other participants
         console.log('Path created:', e);
       }
     });
 
+    canvas.on('object:added', () => {
+      console.log('Object added to canvas');
+    });
+
+    // Handle window resize
+    const handleResize = () => {
+      const newSize = resizeCanvas();
+      if (newSize.width !== canvas.width || newSize.height !== canvas.height) {
+        canvas.setDimensions(newSize);
+        canvas.renderAll();
+        setCanvasSize(newSize);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
     return () => {
+      window.removeEventListener('resize', handleResize);
       canvas.dispose();
     };
   }, []);
@@ -290,11 +335,27 @@ export function InteractiveWhiteboard({ roomId, isReadOnly = false }: Interactiv
       <CardContent className="flex-1 flex flex-col gap-4">
         <Toolbar />
         
-        <div className="flex-1 border border-gray-200 rounded-lg shadow-lg overflow-hidden bg-white">
+        <div 
+          ref={containerRef}
+          className="flex-1 border border-gray-200 rounded-lg shadow-lg overflow-hidden bg-white relative min-h-[300px]"
+        >
           <canvas 
             ref={canvasRef} 
-            className="max-w-full max-h-full"
+            className="w-full h-full"
+            style={{ 
+              display: 'block',
+              maxWidth: '100%',
+              maxHeight: '100%'
+            }}
           />
+          {!fabricCanvas && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center text-muted-foreground">
+                <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
+                <p className="text-sm">Loading whiteboard...</p>
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
