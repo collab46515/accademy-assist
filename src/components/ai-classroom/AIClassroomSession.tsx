@@ -53,18 +53,11 @@ import { InteractiveWhiteboard } from '@/components/communication/InteractiveWhi
 import { AITeachingAssistant } from './AITeachingAssistant';
 import { DynamicContentGenerator } from './DynamicContentGenerator';
 
-// Placeholder components for missing ones
-const StudentAnalyticsDashboard = ({ students, insights, metrics }: any) => (
-  <div className="p-4"><div className="text-sm">Analytics Dashboard (Coming Soon)</div></div>
-);
-
-const AIClassroomManager = ({ students, roomId, userRole, onStudentUpdate }: any) => (
-  <div className="p-4"><div className="text-sm">Classroom Manager (Coming Soon)</div></div>
-);
-
-const CreativeAIFeatures = ({ roomId, currentSubject, lessonTheme }: any) => (
-  <div className="p-4"><div className="text-sm">Creative AI Features (Coming Soon)</div></div>
-);
+// Import all AI classroom components
+import { StudentAnalyticsDashboard } from './StudentAnalyticsDashboard';
+import { AIClassroomManager } from './AIClassroomManager';
+import { CreativeAIFeatures } from './CreativeAIFeatures';
+import { VoiceControls, useVoiceControls } from './VoiceControls';
 
 interface Student {
   id: string;
@@ -203,6 +196,20 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
   const [isMuted, setIsMuted] = useState(true);
   const [isCameraOn, setIsCameraOn] = useState(false);
 
+  // Voice controls integration
+  const voiceControls = useVoiceControls(
+    roomId,
+    userRole,
+    (text, isComplete) => {
+      // Handle transcriptions
+      console.log('Transcription:', text, isComplete);
+    },
+    (command) => {
+      // Handle voice commands
+      handleVoiceCommand(command);
+    }
+  );
+
   // AI metrics
   const [aiMetrics, setAIMetrics] = useState({
     totalInterventions: 23,
@@ -281,6 +288,50 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
   const handleSettings = () => {
     console.log('Opening settings...');
     // Open AI classroom settings
+  };
+
+  const handleVoiceCommand = (command: string) => {
+    console.log('Voice command received:', command);
+    
+    if (command === 'create_quiz') {
+      setActiveAITab('content');
+      handleQuickQuiz();
+    } else if (command === 'show_example') {
+      handleGenerateExample();
+    } else if (command.startsWith('explain:')) {
+      const topic = command.replace('explain:', '').trim();
+      voiceControls.speakText(`Let me explain ${topic}. This is an important concept that...`);
+    } else if (command.startsWith('query:')) {
+      const query = command.replace('query:', '').trim();
+      // Send to AI assistant
+      console.log('AI query:', query);
+    }
+  };
+
+  const handleStudentUpdate = (studentId: string, updates: Partial<Student>) => {
+    setStudents(prev => prev.map(s => 
+      s.id === studentId ? { ...s, ...updates } : s
+    ));
+  };
+
+  const handleGroupsUpdate = (groups: any[]) => {
+    console.log('Groups updated:', groups);
+    // Handle breakout groups update
+  };
+
+  const handleStudentFocus = (studentId: string) => {
+    console.log('Focusing on student:', studentId);
+    // Implement student focus functionality
+  };
+
+  const handleInterventionTrigger = (type: string, studentId: string) => {
+    console.log('Triggering intervention:', type, 'for student:', studentId);
+    // Handle AI intervention
+  };
+
+  const handleFeatureActivate = (feature: string, config: any) => {
+    console.log('Activating feature:', feature, config);
+    // Handle creative AI feature activation
   };
 
   return (
@@ -492,18 +543,53 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
 
               <TabsContent value="analytics" className="h-full p-0 m-0">
                 <StudentAnalyticsDashboard
-                  students={students}
+                  students={students.map(s => ({
+                    id: s.id,
+                    name: s.name,
+                    learningStyle: s.learningStyle,
+                    attentionStatus: s.attentionStatus,
+                    comprehensionLevel: s.comprehensionLevel,
+                    engagementScore: s.engagementScore,
+                    participationRate: s.participationScore,
+                    strugglingTopics: s.strugglingTopics,
+                    strengths: s.strengths,
+                    riskLevel: s.comprehensionLevel < 50 ? 'critical' : s.comprehensionLevel < 70 ? 'high' : 'low',
+                    aiInteractions: s.aiInteractions,
+                    responseTime: [2000, 1800, 2200], // Mock response times
+                    accuracy: [85, 78, 92] // Mock accuracy scores
+                  }))}
                   insights={aiInsights}
-                  metrics={aiMetrics}
+                  metrics={{
+                    classAverage: Math.round(students.reduce((sum, s) => sum + s.comprehensionLevel, 0) / students.length),
+                    engagementTrend: 12,
+                    atRiskCount: students.filter(s => s.comprehensionLevel < 70).length,
+                    topPerformers: students.filter(s => s.comprehensionLevel > 85).length
+                  }}
+                  onStudentFocus={handleStudentFocus}
+                  onInterventionTrigger={handleInterventionTrigger}
                 />
               </TabsContent>
 
               <TabsContent value="management" className="h-full p-0 m-0">
                 <AIClassroomManager
-                  students={students}
+                  students={students.map(s => ({
+                    id: s.id,
+                    name: s.name,
+                    learningStyle: s.learningStyle,
+                    attentionStatus: s.attentionStatus,
+                    comprehensionLevel: s.comprehensionLevel,
+                    engagementScore: s.engagementScore,
+                    participationScore: s.participationScore,
+                    behaviorScore: s.participationScore,
+                    strengths: s.strengths,
+                    needsSupport: s.strugglingTopics,
+                    isHandRaised: s.isHandRaised,
+                    handRaisedAt: s.handRaisedAt
+                  }))}
                   roomId={roomId}
                   userRole={userRole}
-                  onStudentUpdate={setStudents}
+                  onStudentUpdate={handleStudentUpdate}
+                  onGroupsUpdate={handleGroupsUpdate}
                 />
               </TabsContent>
 
@@ -511,85 +597,71 @@ export const AIClassroomSession: React.FC<AIClassroomSessionProps> = ({
                 <CreativeAIFeatures
                   roomId={roomId}
                   currentSubject="Mathematics"
-                  lessonTheme="Algebraic Adventures"
+                  lessonTheme={lessonTitle}
+                  onFeatureActivate={handleFeatureActivate}
                 />
               </TabsContent>
             </div>
           </Tabs>
+
+          {/* Voice Controls Panel */}
+          <div className="p-4">
+            <VoiceControls
+              roomId={roomId}
+              userRole={userRole}
+              onTranscription={(text, isComplete) => {
+                console.log('Voice transcription:', text, isComplete);
+              }}
+              onVoiceCommand={handleVoiceCommand}
+              aiVoiceEnabled={voiceControls.isVoiceEnabled}
+              selectedVoice={voiceControls.selectedVoice}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Enhanced Bottom Control Bar */}
-      <div className="bg-white border-t border-slate-200 px-6 py-4 shadow-sm">
+      {/* Bottom Controls */}
+      <div className="p-4 bg-white border-t border-slate-200 shadow-sm">
         <div className="flex items-center justify-between">
-          {/* Left - AI Status & Quick Actions */}
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium">AI Systems Active</span>
-            </div>
-            <Separator orientation="vertical" className="h-6" />
-            <Badge variant="outline" className="bg-green-50 text-green-700">
-              <Activity className="h-3 w-3 mr-1" />
-              {aiMetrics.totalInterventions} AI assists today
-            </Badge>
-            <Badge variant="outline" className="bg-blue-50 text-blue-700">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              +{aiMetrics.engagementImprovement}% engagement
-            </Badge>
-          </div>
-
-          {/* Center - Main Controls */}
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-10 px-4"
+            <Button 
+              size="sm" 
+              variant={isMuted ? "destructive" : "default"}
               onClick={() => setIsMuted(!isMuted)}
             >
-              {isMuted ? <MicOff className="h-4 w-4 mr-2" /> : <Mic className="h-4 w-4 mr-2" />}
-              {isMuted ? 'Muted' : 'Unmute'}
+              {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
             </Button>
             
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-10 px-4"
+            <Button 
+              size="sm" 
+              variant={isCameraOn ? "default" : "outline"}
               onClick={() => setIsCameraOn(!isCameraOn)}
             >
-              {isCameraOn ? <Video className="h-4 w-4 mr-2" /> : <VideoOff className="h-4 w-4 mr-2" />}
-              {isCameraOn ? 'Camera On' : 'Camera Off'}
+              {isCameraOn ? <Video className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
             </Button>
-            
-            <Button
-              variant="destructive"
-              size="sm"
-              className="h-10 px-6"
-              onClick={handleEndSession}
+
+            <Button 
+              size="sm" 
+              variant={voiceControls.isVoiceEnabled ? "default" : "outline"}
+              onClick={() => voiceControls.setIsVoiceEnabled(!voiceControls.isVoiceEnabled)}
             >
-              <Phone className="h-4 w-4 mr-2" />
-              End Session
+              {voiceControls.isVoiceEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
             </Button>
           </div>
-
-          {/* Right - AI Controls */}
+          
           <div className="flex items-center gap-2">
-            <Button
-              variant={autoInterventionEnabled ? "default" : "outline"}
-              size="sm"
-              onClick={() => setAutoInterventionEnabled(!autoInterventionEnabled)}
-              className="h-9"
-            >
-              <Shield className="h-4 w-4 mr-1" />
-              Auto-Help
-            </Button>
-            
-            <Button variant="outline" size="sm" className="h-9" onClick={handleSettings}>
+            <Button size="sm" variant="outline" onClick={handleSettings}>
               <Settings className="h-4 w-4" />
+            </Button>
+            <Button size="sm" variant="destructive" onClick={handleEndSession}>
+              <Phone className="h-4 w-4 mr-2" />
+              End Session
             </Button>
           </div>
         </div>
       </div>
     </div>
+  );
+};
   );
 };
