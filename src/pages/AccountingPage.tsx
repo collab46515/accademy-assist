@@ -1915,29 +1915,240 @@ export function AccountingPage() {
                     </DialogContent>
                   </Dialog>
 
-                  <Button variant="outline" className="h-32 flex-col gap-3 hover:bg-primary hover:text-primary-foreground transition-all">
-                    <Receipt className="h-8 w-8" />
-                    <div className="text-center">
-                      <div className="font-semibold">A/R Aging</div>
-                      <div className="text-xs text-muted-foreground">Outstanding Receivables</div>
-                    </div>
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="h-32 flex-col gap-3 hover:bg-primary hover:text-primary-foreground transition-all">
+                        <Receipt className="h-8 w-8" />
+                        <div className="text-center">
+                          <div className="font-semibold">Accounts Receivable Aging</div>
+                          <div className="text-xs text-muted-foreground">Outstanding Receivables</div>
+                        </div>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Accounts Receivable Aging Report</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <h3 className="text-lg font-semibold">As of: {new Date().toLocaleDateString()}</h3>
+                          <Button size="sm" variant="outline">
+                            <Download className="h-4 w-4 mr-2" />
+                            Download PDF
+                          </Button>
+                        </div>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Customer</TableHead>
+                              <TableHead className="text-right">Current</TableHead>
+                              <TableHead className="text-right">1-30 Days</TableHead>
+                              <TableHead className="text-right">31-60 Days</TableHead>
+                              <TableHead className="text-right">61-90 Days</TableHead>
+                              <TableHead className="text-right">Over 90 Days</TableHead>
+                              <TableHead className="text-right">Total</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            <TableRow>
+                              <TableCell className="font-medium">ABC Academy</TableCell>
+                              <TableCell className="text-right">£15,000</TableCell>
+                              <TableCell className="text-right">£8,500</TableCell>
+                              <TableCell className="text-right">£0</TableCell>
+                              <TableCell className="text-right">£0</TableCell>
+                              <TableCell className="text-right">£0</TableCell>
+                              <TableCell className="text-right font-semibold">£23,500</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-medium">XYZ School District</TableCell>
+                              <TableCell className="text-right">£12,000</TableCell>
+                              <TableCell className="text-right">£5,500</TableCell>
+                              <TableCell className="text-right">£3,200</TableCell>
+                              <TableCell className="text-right">£0</TableCell>
+                              <TableCell className="text-right">£0</TableCell>
+                              <TableCell className="text-right font-semibold">£20,700</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-medium">City Education Board</TableCell>
+                              <TableCell className="text-right">£8,000</TableCell>
+                              <TableCell className="text-right">£2,500</TableCell>
+                              <TableCell className="text-right">£1,800</TableCell>
+                              <TableCell className="text-right">£950</TableCell>
+                              <TableCell className="text-right text-red-600">£1,200</TableCell>
+                              <TableCell className="text-right font-semibold">£14,450</TableCell>
+                            </TableRow>
+                            <TableRow className="border-t-2 bg-muted">
+                              <TableCell className="font-bold">Total</TableCell>
+                              <TableCell className="text-right font-bold">£35,000</TableCell>
+                              <TableCell className="text-right font-bold">£16,500</TableCell>
+                              <TableCell className="text-right font-bold">£5,000</TableCell>
+                              <TableCell className="text-right font-bold">£950</TableCell>
+                              <TableCell className="text-right font-bold text-red-600">£1,200</TableCell>
+                              <TableCell className="text-right font-bold">£58,650</TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
 
-                  <Button variant="outline" className="h-32 flex-col gap-3 hover:bg-primary hover:text-primary-foreground transition-all">
-                    <CreditCard className="h-8 w-8" />
-                    <div className="text-center">
-                      <div className="font-semibold">A/P Aging</div>
-                      <div className="text-xs text-muted-foreground">Outstanding Payables</div>
-                    </div>
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="h-32 flex-col gap-3 hover:bg-primary hover:text-primary-foreground transition-all">
+                        <CreditCard className="h-8 w-8" />
+                        <div className="text-center">
+                          <div className="font-semibold">Accounts Payable Aging</div>
+                          <div className="text-xs text-muted-foreground">Outstanding Payables</div>
+                        </div>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Accounts Payable Aging Report</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <h3 className="text-lg font-semibold">As of: {new Date().toLocaleDateString()}</h3>
+                          <Button size="sm" variant="outline">
+                            <Download className="h-4 w-4 mr-2" />
+                            Download PDF
+                          </Button>
+                        </div>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Vendor</TableHead>
+                              <TableHead className="text-right">Current</TableHead>
+                              <TableHead className="text-right">1-30 Days</TableHead>
+                              <TableHead className="text-right">31-60 Days</TableHead>
+                              <TableHead className="text-right">61-90 Days</TableHead>
+                              <TableHead className="text-right">Over 90 Days</TableHead>
+                              <TableHead className="text-right">Total</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            <TableRow>
+                              <TableCell className="font-medium">Office Supplies Ltd</TableCell>
+                              <TableCell className="text-right">£5,500</TableCell>
+                              <TableCell className="text-right">£2,200</TableCell>
+                              <TableCell className="text-right">£0</TableCell>
+                              <TableCell className="text-right">£0</TableCell>
+                              <TableCell className="text-right">£0</TableCell>
+                              <TableCell className="text-right font-semibold">£7,700</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-medium">Tech Solutions Inc</TableCell>
+                              <TableCell className="text-right">£12,000</TableCell>
+                              <TableCell className="text-right">£8,500</TableCell>
+                              <TableCell className="text-right">£3,200</TableCell>
+                              <TableCell className="text-right">£0</TableCell>
+                              <TableCell className="text-right">£0</TableCell>
+                              <TableCell className="text-right font-semibold">£23,700</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-medium">Utilities Company</TableCell>
+                              <TableCell className="text-right">£3,200</TableCell>
+                              <TableCell className="text-right">£1,800</TableCell>
+                              <TableCell className="text-right">£900</TableCell>
+                              <TableCell className="text-right">£450</TableCell>
+                              <TableCell className="text-right text-red-600">£650</TableCell>
+                              <TableCell className="text-right font-semibold">£7,000</TableCell>
+                            </TableRow>
+                            <TableRow className="border-t-2 bg-muted">
+                              <TableCell className="font-bold">Total</TableCell>
+                              <TableCell className="text-right font-bold">£20,700</TableCell>
+                              <TableCell className="text-right font-bold">£12,500</TableCell>
+                              <TableCell className="text-right font-bold">£4,100</TableCell>
+                              <TableCell className="text-right font-bold">£450</TableCell>
+                              <TableCell className="text-right font-bold text-red-600">£650</TableCell>
+                              <TableCell className="text-right font-bold">£38,400</TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
 
-                  <Button variant="outline" className="h-32 flex-col gap-3 hover:bg-primary hover:text-primary-foreground transition-all">
-                    <Target className="h-8 w-8" />
-                    <div className="text-center">
-                      <div className="font-semibold">Budget Variance</div>
-                      <div className="text-xs text-muted-foreground">Budget vs Actual</div>
-                    </div>
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="h-32 flex-col gap-3 hover:bg-primary hover:text-primary-foreground transition-all">
+                        <Target className="h-8 w-8" />
+                        <div className="text-center">
+                          <div className="font-semibold">Budget Variance</div>
+                          <div className="text-xs text-muted-foreground">Budget vs Actual</div>
+                        </div>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Budget Variance Report</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <h3 className="text-lg font-semibold">Period: January 2024</h3>
+                          <Button size="sm" variant="outline">
+                            <Download className="h-4 w-4 mr-2" />
+                            Download PDF
+                          </Button>
+                        </div>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Account</TableHead>
+                              <TableHead className="text-right">Budget</TableHead>
+                              <TableHead className="text-right">Actual</TableHead>
+                              <TableHead className="text-right">Variance</TableHead>
+                              <TableHead className="text-right">Variance %</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            <TableRow>
+                              <TableCell className="font-medium">Tuition Revenue</TableCell>
+                              <TableCell className="text-right">£380,000</TableCell>
+                              <TableCell className="text-right">£395,600</TableCell>
+                              <TableCell className="text-right text-green-600">£15,600</TableCell>
+                              <TableCell className="text-right text-green-600">+4.1%</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-medium">Staff Salaries</TableCell>
+                              <TableCell className="text-right">£245,000</TableCell>
+                              <TableCell className="text-right">£248,500</TableCell>
+                              <TableCell className="text-right text-red-600">-£3,500</TableCell>
+                              <TableCell className="text-right text-red-600">-1.4%</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-medium">Utilities</TableCell>
+                              <TableCell className="text-right">£15,000</TableCell>
+                              <TableCell className="text-right">£18,200</TableCell>
+                              <TableCell className="text-right text-red-600">-£3,200</TableCell>
+                              <TableCell className="text-right text-red-600">-21.3%</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-medium">Supplies</TableCell>
+                              <TableCell className="text-right">£12,000</TableCell>
+                              <TableCell className="text-right">£9,800</TableCell>
+                              <TableCell className="text-right text-green-600">£2,200</TableCell>
+                              <TableCell className="text-right text-green-600">+18.3%</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-medium">Maintenance</TableCell>
+                              <TableCell className="text-right">£8,500</TableCell>
+                              <TableCell className="text-right">£11,200</TableCell>
+                              <TableCell className="text-right text-red-600">-£2,700</TableCell>
+                              <TableCell className="text-right text-red-600">-31.8%</TableCell>
+                            </TableRow>
+                            <TableRow className="border-t-2 bg-muted">
+                              <TableCell className="font-bold">Net Variance</TableCell>
+                              <TableCell className="text-right font-bold">£275,500</TableCell>
+                              <TableCell className="text-right font-bold">£287,900</TableCell>
+                              <TableCell className="text-right font-bold text-green-600">£12,400</TableCell>
+                              <TableCell className="text-right font-bold text-green-600">+4.5%</TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardContent>
             </Card>
