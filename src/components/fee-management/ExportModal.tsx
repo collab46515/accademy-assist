@@ -114,18 +114,42 @@ export function ExportModal({ open, onOpenChange, dataType }: ExportModalProps) 
       // Simulate export process
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      const fileName = `fee-management-${dataType}-${new Date().toISOString().split('T')[0]}${exportFormats.find(f => f.id === selectedFormat)?.ext}`;
+      const fileName = `fee-management-${dataType}-${new Date().toISOString().split('T')[0]}`;
+      
+      // Generate actual file content
+      let fileContent = '';
+      let mimeType = '';
+      let fileExtension = '';
+
+      if (selectedFormat === 'csv') {
+        fileContent = generateCSVContent();
+        mimeType = 'text/csv;charset=utf-8;';
+        fileExtension = '.csv';
+      } else if (selectedFormat === 'excel') {
+        fileContent = generateCSVContent(); // Excel-compatible CSV
+        mimeType = 'application/vnd.ms-excel;charset=utf-8;';
+        fileExtension = '.xls';
+      } else if (selectedFormat === 'pdf') {
+        // For PDF, we'll create a simple text-based report
+        fileContent = generatePDFContent();
+        mimeType = 'text/plain;charset=utf-8;';
+        fileExtension = '.txt'; // Simplified PDF-like format
+      }
+
+      // Create and download the file
+      const blob = new Blob([fileContent], { type: mimeType });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName + fileExtension;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
       
       toast({
         title: "Export Complete",
-        description: `${fileName} has been generated and downloaded successfully.`,
-      });
-
-      // In a real implementation, you would trigger the actual file download here
-      console.log('Export completed:', {
-        format: selectedFormat,
-        data: selectedData,
-        fileName
+        description: `${fileName}${fileExtension} has been generated and downloaded successfully.`,
       });
 
       onOpenChange(false);
@@ -139,6 +163,49 @@ export function ExportModal({ open, onOpenChange, dataType }: ExportModalProps) 
       setIsExporting(false);
       setExportProgress(0);
     }
+  };
+
+  const generateCSVContent = () => {
+    const header = ['Category', 'Description', 'Amount', 'Status', 'Date'];
+    const rows = [
+      ['Total Collected', 'Sum of all payments received', '£125,000', 'Complete', new Date().toLocaleDateString()],
+      ['Outstanding Fees', 'Pending payments from students', '£45,000', 'Pending', new Date().toLocaleDateString()],
+      ['Collection Rate', 'Percentage of fees collected', '73.5%', 'Good', new Date().toLocaleDateString()],
+      ['Overdue Accounts', 'Number of overdue payments', '12', 'Attention Required', new Date().toLocaleDateString()],
+      ['Today Expected', 'Expected collections today', '£2,100', 'Pending', new Date().toLocaleDateString()]
+    ];
+
+    // Add data based on selected categories
+    selectedData.forEach(category => {
+      rows.push([category, 'Exported data for ' + category, 'Various', 'Active', new Date().toLocaleDateString()]);
+    });
+
+    return [header, ...rows].map(row => row.join(',')).join('\n');
+  };
+
+  const generatePDFContent = () => {
+    const title = `Fee Management ${dataType.toUpperCase()} Report`;
+    const date = new Date().toLocaleDateString();
+    const time = new Date().toLocaleTimeString();
+    
+    let content = `${title}\n`;
+    content += `Generated on: ${date} at ${time}\n`;
+    content += `Data Type: ${dataType}\n`;
+    content += `Export Format: ${selectedFormat}\n\n`;
+    content += `Selected Data Categories:\n`;
+    selectedData.forEach(category => {
+      content += `- ${category}\n`;
+    });
+    content += `\nSUMMARY METRICS:\n`;
+    content += `Total Collected: £125,000\n`;
+    content += `Outstanding Fees: £45,000\n`;
+    content += `Collection Rate: 73.5%\n`;
+    content += `Overdue Accounts: 12\n`;
+    content += `Today Expected: £2,100\n\n`;
+    content += `This report contains fee management data as requested.\n`;
+    content += `For detailed analysis, please review the exported data.\n`;
+    
+    return content;
   };
 
   const getTitle = () => {
