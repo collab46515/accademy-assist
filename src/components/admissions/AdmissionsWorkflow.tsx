@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { AdmissionsFeeService } from '@/services/AdmissionsFeeService';
+import { FeesDisplay } from './FeesDisplay';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -239,6 +241,32 @@ export function AdmissionsWorkflow() {
           return;
         }
 
+        // Auto-assign fees when reaching payment stages
+        if (AdmissionsFeeService.isPaymentStage(nextStage.key)) {
+          console.log(`🎯 Payment stage detected: ${nextStage.key}`);
+          
+          // Get full application data for fee assignment
+          const { data: fullApplication } = await supabase
+            .from('enrollment_applications')
+            .select('*')
+            .eq('id', applicationId)
+            .single();
+
+          if (fullApplication) {
+            const feeResult = await AdmissionsFeeService.assignFeesForStage(
+              applicationId, 
+              nextStage.key, 
+              fullApplication
+            );
+            
+            if (feeResult.success && feeResult.amount) {
+              console.log(`✅ Fees auto-assigned: £${feeResult.amount}`);
+            } else if (!feeResult.success) {
+              console.error('Fee assignment failed:', feeResult.error);
+            }
+          }
+        }
+
         // Special handling for final stage - create actual student record
         if (nextStage.key === 'class_allocation') {
           await handleFinalEnrollment(applicationId);
@@ -437,18 +465,25 @@ export function AdmissionsWorkflow() {
                 </div>
 
                 {/* Stage Timeline */}
-                <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
-                  {WORKFLOW_STAGES.map((stage, index) => (
-                    <div
-                      key={stage.key}
-                      className={`flex-shrink-0 w-3 h-3 rounded-full ${
-                        index <= currentStageIndex 
-                          ? 'bg-primary' 
-                          : 'bg-muted-foreground/20'
-                      }`}
-                    />
-                  ))}
-                </div>
+                  <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
+                    {WORKFLOW_STAGES.map((stage, index) => (
+                      <div
+                        key={stage.key}
+                        className={`flex-shrink-0 w-3 h-3 rounded-full ${
+                          index <= currentStageIndex 
+                            ? 'bg-primary' 
+                            : 'bg-muted-foreground/20'
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Fees Display */}
+                  <FeesDisplay 
+                    applicationId={application.id}
+                    applicationData={application}
+                    currentStage={application.currentStage}
+                  />
               </CardContent>
             </Card>
           );
