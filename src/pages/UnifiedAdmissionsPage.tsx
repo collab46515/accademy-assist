@@ -15,6 +15,7 @@ import { StageWorkflowManager } from "@/components/admissions/StageWorkflowManag
 import { AdmissionStagesBreadcrumb } from "@/components/admissions/AdmissionStagesBreadcrumb";
 import { EnrollmentProcessor } from "@/components/admissions/EnrollmentProcessor";
 import { StageNavigator } from "@/components/admissions/StageNavigator";
+import { EnhancedWorkflowManager } from "@/components/admissions/EnhancedWorkflowManager";
 import { ArrowLeft, UserPlus, FileText, Phone, Globe, Calendar, Upload } from "lucide-react";
 
 const UnifiedAdmissionsPage = () => {
@@ -80,9 +81,10 @@ const UnifiedAdmissionsPage = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="management">Application Management</TabsTrigger>
           <TabsTrigger value="workflow">Workflow</TabsTrigger>
+          <TabsTrigger value="enhanced">Enhanced Workflow</TabsTrigger>
           <TabsTrigger value="pathways">New Applications</TabsTrigger>
           <TabsTrigger value="processor">Enrollment Processor</TabsTrigger>
           <TabsTrigger value="reports">Reports & Analytics</TabsTrigger>
@@ -102,6 +104,11 @@ const UnifiedAdmissionsPage = () => {
               <ApplicationTaskManager />
             </TabsContent>
           </Tabs>
+        </TabsContent>
+
+        {/* Enhanced Workflow Tab */}
+        <TabsContent value="enhanced" className="space-y-6">
+          <EnhancedWorkflowManager />
         </TabsContent>
 
         {/* Workflow Tab */}
