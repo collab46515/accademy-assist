@@ -184,7 +184,7 @@ export function AccountingPage() {
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
-            <Button size="sm" onClick={refreshData}>
+            <Button size="sm" onClick={() => navigate('/accounting/transactions/new')}>
               <Plus className="h-4 w-4 mr-2" />
               New Transaction
             </Button>
