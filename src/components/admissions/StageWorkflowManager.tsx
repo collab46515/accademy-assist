@@ -26,14 +26,15 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
   const [searchTerm, setSearchTerm] = useState('');
 
   const stages = [
-    { title: 'Application Submitted', status: 'submitted' },
-    { title: 'Document Verification', status: 'document_verification' },
-    { title: 'Application Review', status: 'under_review' },
+    { title: 'Application Submission', status: 'draft' },
+    { title: 'Application Fee', status: 'submitted' },
+    { title: 'Enrollment Processing', status: 'documents_pending' },
+    { title: 'Detailed Review', status: 'under_review' },
     { title: 'Assessment/Interview', status: 'assessment_scheduled' },
-    { title: 'Admission Decision', status: 'pending_approval' },
-    { title: 'Fee Payment', status: 'fee_payment' },
-    { title: 'Enrollment Confirmation', status: 'enrollment_confirmation' },
-    { title: 'Welcome & Onboarding', status: 'onboarding' }
+    { title: 'Admission Decision', status: 'approved' },
+    { title: 'Deposit Payment', status: 'offer_sent' },
+    { title: 'Admission Confirmed', status: 'offer_accepted' },
+    { title: 'Class Allocation', status: 'enrolled' }
   ];
 
   const stageComponents = [

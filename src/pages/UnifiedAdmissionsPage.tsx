@@ -14,6 +14,7 @@ import { ApplicationTaskManager } from "@/components/admissions/ApplicationTaskM
 import { StageWorkflowManager } from "@/components/admissions/StageWorkflowManager";
 import { AdmissionStagesBreadcrumb } from "@/components/admissions/AdmissionStagesBreadcrumb";
 import { EnrollmentProcessor } from "@/components/admissions/EnrollmentProcessor";
+import { StageNavigator } from "@/components/admissions/StageNavigator";
 import { ArrowLeft, UserPlus, FileText, Phone, Globe, Calendar, Upload } from "lucide-react";
 
 const UnifiedAdmissionsPage = () => {
@@ -105,6 +106,7 @@ const UnifiedAdmissionsPage = () => {
 
         {/* Workflow Tab */}
         <TabsContent value="workflow" className="space-y-6">
+          <StageNavigator />
           <AdmissionsFlowVisualization />
           <StageDetailBreakdown />
           <AdmissionsWorkflow />
