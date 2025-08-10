@@ -802,7 +802,7 @@ export default function Dashboard() {
                 <div className="flex justify-between items-center">
                   <Button variant="outline" size="sm" onClick={() => navigate('/finance')}>Detailed Report</Button>
                   <Button variant="outline" size="sm" onClick={() => navigate('/finance')}>Export Data</Button>
-                  <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => navigate('/fee-management')}>
+                  <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => navigate('/school-management/fee-management')}>
                     Process Payments
                   </Button>
                 </div>
