@@ -55,14 +55,14 @@ export function EnrollmentProcessor() {
         return { success: true, message: 'Already exists' };
       }
 
-      // Extract student data from the application
+      // Extract student and parent data from the application
       const additionalData = application.additional_data as any;
       const pathwayData = additionalData?.pathway_data || additionalData?.submitted_data || {};
       
       const studentData = {
         first_name: pathwayData.student_name?.split(' ')[0] || application.student_name?.split(' ')[0] || 'Unknown',
         last_name: pathwayData.student_name?.split(' ').slice(1).join(' ') || application.student_name?.split(' ').slice(1).join(' ') || 'Student',
-        email: pathwayData.student_email || pathwayData.parent_email || application.student_email || application.parent_email || `${application.application_number}@school.edu`,
+        email: pathwayData.student_email || `${application.application_number.replace(/[^0-9a-z]/gi, '')}@school.edu`,
         student_number: application.application_number.replace(/[^0-9]/g, '') || `STU${Date.now().toString().slice(-6)}`,
         year_group: pathwayData.year_group || application.year_group || 'Year 7',
         form_class: pathwayData.form_class_preference || application.form_class_preference,
@@ -73,22 +73,49 @@ export function EnrollmentProcessor() {
         phone: pathwayData.student_phone || application.student_phone,
       };
 
-      console.log('Creating student with data:', studentData);
+      // Extract parent data
+      const parentData = {
+        first_name: pathwayData.parent_name?.split(' ')[0] || application.parent_name?.split(' ')[0] || 'Parent',
+        last_name: pathwayData.parent_name?.split(' ').slice(1).join(' ') || application.parent_name?.split(' ').slice(1).join(' ') || 'Parent',
+        email: pathwayData.parent_email || application.parent_email,
+        phone: pathwayData.parent_phone || application.parent_phone,
+        relationship: pathwayData.parent_relationship || 'Parent'
+      };
 
-      // Create the student record
+      console.log('Creating complete student enrollment with data:', { studentData, parentData });
+
+      // Create complete student enrollment with student and parent accounts
       const { data, error } = await supabase
-        .rpc('create_student_with_user', {
+        .rpc('create_complete_student_enrollment', {
           student_data: studentData,
-          school_id: application.school_id
+          parent_data: parentData,
+          school_id: application.school_id,
+          application_id: application.id
         });
 
       if (error) {
-        console.error('Error creating student:', error);
+        console.error('Error creating complete student enrollment:', error);
         throw error;
       }
 
-      console.log('✅ Student created successfully:', data);
-      return { success: true, data };
+      console.log('✅ Complete student enrollment created successfully:', data);
+      
+      // Cast data to proper type and return detailed result including credentials
+      const enrollmentData = data as any;
+      return { 
+        success: true, 
+        data: enrollmentData,
+        credentials: {
+          student: {
+            email: enrollmentData.student_email,
+            password: enrollmentData.student_temp_password
+          },
+          parent: enrollmentData.parent_email ? {
+            email: enrollmentData.parent_email,
+            password: enrollmentData.parent_temp_password
+          } : null
+        }
+      };
 
     } catch (error: any) {
       console.error('Error processing application:', error);

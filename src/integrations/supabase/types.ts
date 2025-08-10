@@ -7165,6 +7165,16 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      create_complete_student_enrollment: {
+        Args: {
+          student_data: Json
+          parent_data: Json
+          school_id: string
+          application_id: string
+          created_by?: string
+        }
+        Returns: Json
+      }
       create_employee_with_user: {
         Args: { employee_data: Json; created_by?: string }
         Returns: Json

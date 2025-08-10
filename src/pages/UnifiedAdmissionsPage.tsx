@@ -16,6 +16,7 @@ import { AdmissionStagesBreadcrumb } from "@/components/admissions/AdmissionStag
 import { EnrollmentProcessor } from "@/components/admissions/EnrollmentProcessor";
 import { StageNavigator } from "@/components/admissions/StageNavigator";
 import { EnhancedWorkflowManager } from "@/components/admissions/EnhancedWorkflowManager";
+import { StudentIntegrationVerifier } from "@/components/admissions/StudentIntegrationVerifier";
 import { ArrowLeft, UserPlus, FileText, Phone, Globe, Calendar, Upload } from "lucide-react";
 
 const UnifiedAdmissionsPage = () => {
@@ -81,12 +82,13 @@ const UnifiedAdmissionsPage = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="management">Application Management</TabsTrigger>
           <TabsTrigger value="workflow">Workflow</TabsTrigger>
           <TabsTrigger value="enhanced">Enhanced Workflow</TabsTrigger>
           <TabsTrigger value="pathways">New Applications</TabsTrigger>
           <TabsTrigger value="processor">Enrollment Processor</TabsTrigger>
+          <TabsTrigger value="integration">Student Integration</TabsTrigger>
           <TabsTrigger value="reports">Reports & Analytics</TabsTrigger>
         </TabsList>
 
@@ -252,6 +254,11 @@ const UnifiedAdmissionsPage = () => {
         {/* Enrollment Processor Tab */}
         <TabsContent value="processor" className="space-y-6">
           <EnrollmentProcessor />
+        </TabsContent>
+
+        {/* Student Integration Tab */}
+        <TabsContent value="integration" className="space-y-6">
+          <StudentIntegrationVerifier />
         </TabsContent>
 
         {/* Reports Tab */}
