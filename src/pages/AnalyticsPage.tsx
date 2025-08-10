@@ -209,90 +209,91 @@ const AnalyticsPage = () => {
     });
 
     try {
-      if (format === "pdf") {
-        const { jsPDF } = await import('jspdf');
-        const doc = new jsPDF();
-        
-        // Add title
-        doc.setFontSize(20);
-        doc.text(`${module} Report`, 20, 20);
-        
-        // Add date
-        doc.setFontSize(12);
-        doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 35);
-        
-        // Add report data
-        let yPos = 50;
-        
-        if (reportBuilder.showPreview && reportBuilder.reportData.length > 0) {
-          doc.setFontSize(14);
-          doc.text('Report Data:', 20, yPos);
-          yPos += 10;
-          
-          doc.setFontSize(10);
-          reportBuilder.reportData.slice(0, 20).forEach((item, index) => {
-            const line = `${item.type} - ${item.category}: ${item.year || item.subject || item.department || item.month || 'N/A'} - ${item.attendance || item.averageGrade || item.satisfaction || item.revenue || 'N/A'}`;
-            doc.text(line, 20, yPos);
-            yPos += 8;
-            
-            // Add new page if needed
-            if (yPos > 270) {
-              doc.addPage();
-              yPos = 20;
-            }
-          });
-        } else {
-          // Add summary data for the module
-          doc.setFontSize(14);
-          doc.text('Analytics Summary:', 20, yPos);
-          yPos += 15;
-          
-          doc.setFontSize(10);
-          const summaryData = [
-            'Total Revenue: £823,400 (+12.5%)',
-            'Academic Performance: 85.2% average',
-            'Staff Satisfaction: 4.2/5.0',
-            'Student Attendance: 92.3%',
-            'Active Users: 892',
-            'System Uptime: 99.7%'
-          ];
-          
-          summaryData.forEach(item => {
-            doc.text(item, 20, yPos);
-            yPos += 10;
-          });
+      // Get report data or use default analytics data
+      let data = reportBuilder.reportData.length > 0 ? reportBuilder.reportData : [];
+      
+      // If no custom report data, use default module data
+      if (data.length === 0) {
+        switch (module.toLowerCase()) {
+          case 'financial':
+            data = financialData.map(item => ({ type: 'financial', category: 'Monthly', ...item }));
+            break;
+          case 'academic':
+            data = [...mockAttendance.map(item => ({ type: 'academic', category: 'Attendance', ...item })),
+                   ...mockPerformance.map(item => ({ type: 'academic', category: 'Performance', ...item }))];
+            break;
+          case 'hr':
+            data = hrMetrics.map(item => ({ type: 'hr', category: 'Metrics', ...item }));
+            break;
+          default:
+            data = [
+              { type: 'overview', category: 'Revenue', value: '£823,400', trend: '+12.5%' },
+              { type: 'overview', category: 'Performance', value: '85.2%', trend: '+3.2%' },
+              { type: 'overview', category: 'Satisfaction', value: '4.2/5.0', trend: '+0.3' },
+              { type: 'overview', category: 'Attendance', value: '92.3%', trend: '+1.1%' }
+            ];
         }
+      }
+
+      if (format === 'csv') {
+        // Generate CSV content
+        const headers = ['Type', 'Category', 'Details', 'Value', 'Additional Info'];
+        const csvRows = data.map(item => [
+          item.type || '',
+          item.category || '',
+          item.year || item.subject || item.department || item.month || item.name || '',
+          item.attendance || item.averageGrade || item.satisfaction || item.revenue || item.value || '',
+          item.trend || item.passRate || item.turnover || item.employees || ''
+        ]);
         
-        // Save the PDF
-        doc.save(`${module.toLowerCase().replace(/\s+/g, '-')}-report-${new Date().toISOString().split('T')[0]}.pdf`);
+        const csvContent = [headers, ...csvRows]
+          .map(row => row.map(field => `"${field}"`).join(','))
+          .join('\n');
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${module.toLowerCase().replace(/\s+/g, '-')}-report-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
         
         toast({
           title: "Export Successful",
-          description: "Your PDF report has been downloaded successfully.",
+          description: "Your CSV report has been downloaded successfully.",
         });
-      } else {
-        // Handle other formats (CSV, Excel)
-        const data = reportBuilder.reportData.length > 0 ? reportBuilder.reportData : [];
-        const csvContent = format === 'csv' ? 
-          "Type,Category,Details,Value\n" + 
-          data.map(item => 
-            `${item.type || ''},${item.category || ''},${item.year || item.subject || item.department || item.month || ''},${item.attendance || item.averageGrade || item.satisfaction || item.revenue || ''}`
-          ).join('\n') : '';
+      } else if (format === 'excel') {
+        // Generate Excel-compatible CSV with proper formatting
+        const headers = ['Type', 'Category', 'Details', 'Value', 'Additional Info', 'Generated Date'];
+        const excelRows = data.map(item => [
+          item.type || '',
+          item.category || '',
+          item.year || item.subject || item.department || item.month || item.name || '',
+          item.attendance || item.averageGrade || item.satisfaction || item.revenue || item.value || '',
+          item.trend || item.passRate || item.turnover || item.employees || '',
+          new Date().toLocaleDateString()
+        ]);
         
-        if (format === 'csv' && csvContent) {
-          const blob = new Blob([csvContent], { type: 'text/csv' });
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${module.toLowerCase().replace(/\s+/g, '-')}-report-${new Date().toISOString().split('T')[0]}.csv`;
-          a.click();
-          window.URL.revokeObjectURL(url);
-          
-          toast({
-            title: "Export Successful",
-            description: "Your CSV report has been downloaded successfully.",
-          });
-        }
+        const csvContent = [headers, ...excelRows]
+          .map(row => row.map(field => `"${field}"`).join(','))
+          .join('\n');
+        
+        const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${module.toLowerCase().replace(/\s+/g, '-')}-report-${new Date().toISOString().split('T')[0]}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        toast({
+          title: "Export Successful",
+          description: "Your Excel report has been downloaded successfully.",
+        });
       }
     } catch (error) {
       console.error('Export error:', error);
@@ -695,13 +696,13 @@ const AnalyticsPage = () => {
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Financial Analytics</h2>
             <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => exportData("csv", "financial")}>
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
               <Button variant="outline" size="sm" onClick={() => exportData("excel", "financial")}>
                 <Download className="h-4 w-4 mr-2" />
                 Export Excel
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => exportData("pdf", "financial")}>
-                <Download className="h-4 w-4 mr-2" />
-                Export PDF
               </Button>
             </div>
           </div>
@@ -841,10 +842,16 @@ const AnalyticsPage = () => {
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">HR Metrics & Staff Analytics</h2>
-            <Button variant="outline" size="sm" onClick={() => exportData("pdf", "hr")}>
-              <Download className="h-4 w-4 mr-2" />
-              Export Report
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => exportData("csv", "hr")}>
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => exportData("excel", "hr")}>
+                <Download className="h-4 w-4 mr-2" />
+                Export Excel
+              </Button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -934,10 +941,16 @@ const AnalyticsPage = () => {
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Operational Efficiency Reports</h2>
-            <Button variant="outline" size="sm" onClick={() => exportData("pdf", "operational")}>
-              <Download className="h-4 w-4 mr-2" />
-              Export Analysis
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => exportData("csv", "operational")}>
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => exportData("excel", "operational")}>
+                <Download className="h-4 w-4 mr-2" />
+                Export Excel
+              </Button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1169,13 +1182,22 @@ const AnalyticsPage = () => {
               Generate Report
             </Button>
             {reportBuilder.showPreview && (
-              <Button 
-                variant="outline"
-                onClick={() => exportData("pdf", reportBuilder.reportName)}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Export Report
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline"
+                  onClick={() => exportData("csv", reportBuilder.reportName)}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export CSV
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => exportData("excel", reportBuilder.reportName)}
+                >
+                  <Download className="h-4 w-4 mr-2" />  
+                  Export Excel
+                </Button>
+              </div>
             )}
           </div>
 
