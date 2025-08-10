@@ -55,45 +55,37 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
     try {
       setLoading(true);
       
-      // For demo purposes, create mock applications for each stage
-      // In a real app, you'd filter by actual stage status from the database
-      const mockApplications = [
-        {
-          id: 'APP-2024-001',
-          application_number: 'APP-2024-001',
-          student_name: 'John Smith',
-          year_group: 'Year 7',
-          status: stages[currentStage]?.status || 'submitted',
-          submitted_at: '2024-01-15T10:00:00Z',
-          parent_email: 'john.smith@email.com',
-          pathway: 'standard_digital',
-          priority_score: 85
-        },
-        {
-          id: 'APP-2024-002',
-          application_number: 'APP-2024-002',
-          student_name: 'Emma Johnson',
-          year_group: 'Year 8',
-          status: stages[currentStage]?.status || 'submitted',
-          submitted_at: '2024-01-16T14:30:00Z',
-          parent_email: 'emma.johnson@email.com',
-          pathway: 'standard_digital',
-          priority_score: 92
-        },
-        {
-          id: 'APP-2024-003',
-          application_number: 'APP-2024-003',
-          student_name: 'Michael Brown',
-          year_group: 'Year 9',
-          status: stages[currentStage]?.status || 'submitted',
-          submitted_at: '2024-01-17T09:15:00Z',
-          parent_email: 'michael.brown@email.com',
-          pathway: 'sibling_automatic',
-          priority_score: 78
-        }
-      ];
+      // Fetch real applications from the database
+      const { data, error } = await supabase
+        .from('enrollment_applications')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-      setApplications(mockApplications);
+      // Filter by status after fetching to avoid TypeScript issues
+      const filteredData = (data || []).filter(app => 
+        app.status === (stages[currentStage]?.status || 'submitted')
+      );
+
+      if (error) {
+        console.error('Error fetching applications:', error);
+        setApplications([]);
+        return;
+      }
+
+      // Transform the data to match our UI expectations
+      const transformedApplications = filteredData.map(app => ({
+        id: app.id,
+        application_number: app.application_number,
+        student_name: app.student_name || 'Unknown Student',
+        year_group: app.year_group || 'Not specified',
+        status: app.status,
+        submitted_at: app.submitted_at || app.created_at,
+        parent_email: app.parent_email || 'No email',
+        pathway: app.pathway || 'standard_digital',
+        priority_score: app.priority_score || 0
+      }));
+
+      setApplications(transformedApplications);
     } catch (error) {
       console.error('Error fetching applications:', error);
       setApplications([]);

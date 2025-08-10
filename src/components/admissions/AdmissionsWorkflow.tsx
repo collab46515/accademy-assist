@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -97,46 +98,99 @@ const WORKFLOW_STAGES = [
   }
 ];
 
-const mockApplications: Application[] = [
-  {
-    id: '1',
-    applicationNumber: 'APP2024001',
-    studentName: 'Emma Thompson',
-    source: 'online',
-    currentStage: 'review',
-    status: 'in_progress',
-    yearGroup: 'Year 7',
-    submittedAt: '2024-01-15',
-    progress: 35
-  },
-  {
-    id: '2',
-    applicationNumber: 'APP2024002',
-    studentName: 'James Wilson',
-    source: 'referral',
-    currentStage: 'assessment',
-    status: 'in_progress',
-    yearGroup: 'Year 9',
-    submittedAt: '2024-01-18',
-    progress: 60
-  },
-  {
-    id: '3',
-    applicationNumber: 'APP2024003',
-    studentName: 'Sophie Chen',
-    source: 'call_centre',
-    currentStage: 'decision',
-    status: 'pending',
-    yearGroup: 'Year 8',
-    submittedAt: '2024-01-20',
-    progress: 75
-  }
-];
 
 export function AdmissionsWorkflow() {
-  const [applications, setApplications] = useState<Application[]>(mockApplications);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchRealApplications();
+  }, []);
+
+  const fetchRealApplications = async () => {
+    try {
+      setLoading(true);
+      
+      const { data, error } = await supabase
+        .from('enrollment_applications')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching applications:', error);
+        return;
+      }
+
+      // Transform database data to match Application interface
+      const transformedApps: Application[] = (data || []).map(app => ({
+        id: app.id,
+        applicationNumber: app.application_number,
+        studentName: app.student_name || 'Unknown Student',
+        source: mapPathwayToSource(app.pathway),
+        currentStage: mapStatusToStage(app.status),
+        status: mapStatusToWorkflowStatus(app.status),
+        yearGroup: app.year_group || 'Not specified',
+        submittedAt: app.submitted_at ? new Date(app.submitted_at).toISOString().split('T')[0] : new Date(app.created_at).toISOString().split('T')[0],
+        progress: calculateProgress(app.status)
+      }));
+
+      setApplications(transformedApps);
+    } catch (error) {
+      console.error('Error fetching applications:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const mapPathwayToSource = (pathway: string): 'online' | 'referral' | 'call_centre' | 'walk_in' => {
+    switch (pathway) {
+      case 'standard_digital': return 'online';
+      case 'sibling_automatic': return 'referral';
+      case 'staff_child': return 'referral';
+      case 'phone_enquiry': return 'call_centre';
+      default: return 'online';
+    }
+  };
+
+  const mapStatusToStage = (status: string): 'submission' | 'application_fee' | 'enrollment' | 'review' | 'assessment' | 'decision' | 'deposit' | 'confirmed' | 'class_allocation' => {
+    switch (status) {
+      case 'draft': return 'submission';
+      case 'submitted': return 'application_fee';
+      case 'under_review': return 'review';
+      case 'assessment_scheduled': return 'assessment';
+      case 'approved': return 'decision';
+      case 'fee_payment': return 'deposit';
+      case 'confirmed': return 'confirmed';
+      case 'enrolled': return 'class_allocation';
+      default: return 'submission';
+    }
+  };
+
+  const mapStatusToWorkflowStatus = (status: string): 'pending' | 'in_progress' | 'completed' | 'rejected' | 'on_hold' => {
+    switch (status) {
+      case 'draft': return 'pending';
+      case 'submitted': case 'under_review': case 'assessment_scheduled': return 'in_progress';
+      case 'approved': case 'confirmed': case 'enrolled': return 'completed';
+      case 'rejected': return 'rejected';
+      case 'on_hold': return 'on_hold';
+      default: return 'pending';
+    }
+  };
+
+  const calculateProgress = (status: string): number => {
+    switch (status) {
+      case 'draft': return 10;
+      case 'submitted': return 20;
+      case 'under_review': return 40;
+      case 'assessment_scheduled': return 60;
+      case 'approved': return 80;
+      case 'confirmed': return 90;
+      case 'enrolled': return 100;
+      default: return 0;
+    }
+  };
 
   const getSourceIcon = (source: string) => {
     switch (source) {
@@ -164,22 +218,48 @@ export function AdmissionsWorkflow() {
     setEditMode(true);
   };
 
-  const handleAdvanceStage = (applicationId: string) => {
-    setApplications(prev => prev.map(app => {
-      if (app.id === applicationId) {
-        const currentIndex = WORKFLOW_STAGES.findIndex(stage => stage.key === app.currentStage);
-        const nextStage = WORKFLOW_STAGES[currentIndex + 1];
-        
-        if (nextStage) {
-          return {
-            ...app,
-            currentStage: nextStage.key as any,
-            progress: Math.min(100, app.progress + 11.1)
-          };
+  const handleAdvanceStage = async (applicationId: string) => {
+    try {
+      const app = applications.find(a => a.id === applicationId);
+      if (!app) return;
+
+      const currentIndex = WORKFLOW_STAGES.findIndex(stage => stage.key === app.currentStage);
+      const nextStage = WORKFLOW_STAGES[currentIndex + 1];
+      
+      if (nextStage) {
+        // Update the status in the database
+        const newStatus = mapStageToStatus(nextStage.key);
+        const { error } = await supabase
+          .from('enrollment_applications')
+          .update({ status: newStatus as any })
+          .eq('id', applicationId);
+
+        if (error) {
+          console.error('Error updating application status:', error);
+          return;
         }
+
+        // Refresh the applications list
+        fetchRealApplications();
       }
-      return app;
-    }));
+    } catch (error) {
+      console.error('Error advancing stage:', error);
+    }
+  };
+
+  const mapStageToStatus = (stage: string): string => {
+    switch (stage) {
+      case 'submission': return 'draft';
+      case 'application_fee': return 'submitted';
+      case 'enrollment': return 'submitted';
+      case 'review': return 'under_review';
+      case 'assessment': return 'assessment_scheduled';
+      case 'decision': return 'approved';
+      case 'deposit': return 'fee_payment';
+      case 'confirmed': return 'confirmed';
+      case 'class_allocation': return 'enrolled';
+      default: return 'draft';
+    }
   };
 
   return (
@@ -221,7 +301,14 @@ export function AdmissionsWorkflow() {
 
       {/* Applications List */}
       <div className="grid gap-4">
-        {applications.map((application) => {
+        {loading ? (
+          <div className="text-center py-8">Loading applications...</div>
+        ) : applications.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            No applications found. Create some applications to see them here.
+          </div>
+        ) : (
+          applications.map((application) => {
           const currentStageIndex = WORKFLOW_STAGES.findIndex(stage => stage.key === application.currentStage);
           const currentStageInfo = WORKFLOW_STAGES[currentStageIndex];
           
@@ -297,7 +384,7 @@ export function AdmissionsWorkflow() {
               </CardContent>
             </Card>
           );
-        })}
+        }))}
       </div>
 
       {/* Edit Dialog would go here */}
