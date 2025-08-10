@@ -128,15 +128,20 @@ export function ApplicationDetail({ applicationId, onBack, getStatusColor }: App
     
     try {
       // Create a follow-up communication record
+      const user = await supabase.auth.getUser();
+      if (!user.data.user?.id) {
+        throw new Error('User not authenticated');
+      }
+
       const followUpMessage = {
         title: `Follow-up: ${application.student_name} Application`,
         content: `This is a follow-up regarding the application for ${application.student_name} (${application.application_number}). Please provide the requested documents or information to proceed with the application process.`,
-        communication_type: 'email' as any,
-        audience_type: 'specific_parents' as any,
-        status: 'draft' as any,
-        priority: 'normal' as any,
-        school_id: application.school_id || null,
-        created_by: (await supabase.auth.getUser()).data.user?.id,
+        communication_type: 'parent_communication' as const,
+        audience_type: 'specific_parents' as const,
+        status: 'draft' as const,
+        priority: 'normal' as const,
+        school_id: application.school_id,
+        created_by: user.data.user.id,
         audience_details: {
           parent_emails: [application.parent_email]
         },
