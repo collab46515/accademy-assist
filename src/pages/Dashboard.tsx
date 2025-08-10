@@ -703,7 +703,7 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <div className="text-center pt-2">
-                  <Button variant="outline" size="sm" className="w-full">
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => navigate('/administration')}>
                     View All Alerts
                   </Button>
                 </div>
@@ -743,7 +743,7 @@ export default function Dashboard() {
                   <span className="text-xs text-purple-700 font-mono bg-purple-200 px-2 py-1 rounded">6:00 PM</span>
                 </div>
                 <div className="text-center pt-2">
-                  <Button variant="outline" size="sm" className="w-full">
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => navigate('/events')}>
                     View Full Calendar
                   </Button>
                 </div>
@@ -800,9 +800,9 @@ export default function Dashboard() {
               </div>
               <div className="mt-6 pt-4 border-t">
                 <div className="flex justify-between items-center">
-                  <Button variant="outline" size="sm">Detailed Report</Button>
-                  <Button variant="outline" size="sm">Export Data</Button>
-                  <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                  <Button variant="outline" size="sm" onClick={() => navigate('/finance')}>Detailed Report</Button>
+                  <Button variant="outline" size="sm" onClick={() => navigate('/finance')}>Export Data</Button>
+                  <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => navigate('/fee-management')}>
                     Process Payments
                   </Button>
                 </div>
