@@ -239,11 +239,78 @@ export function AdmissionsWorkflow() {
           return;
         }
 
+        // Special handling for final stage - create actual student record
+        if (nextStage.key === 'class_allocation') {
+          await handleFinalEnrollment(applicationId);
+        }
+
         // Refresh the applications list
         fetchRealApplications();
       }
     } catch (error) {
       console.error('Error advancing stage:', error);
+    }
+  };
+
+  const handleFinalEnrollment = async (applicationId: string) => {
+    try {
+      // Get the full application data
+      const { data: application, error: fetchError } = await supabase
+        .from('enrollment_applications')
+        .select('*')
+        .eq('id', applicationId)
+        .single();
+
+      if (fetchError || !application) {
+        console.error('Error fetching application for enrollment:', fetchError);
+        return;
+      }
+
+      // Extract student data from the application
+      const additionalData = application.additional_data as any;
+      const pathwayData = additionalData?.pathway_data || additionalData?.submitted_data || {};
+      
+      const studentData = {
+        first_name: pathwayData.student_name?.split(' ')[0] || application.student_name?.split(' ')[0] || 'Unknown',
+        last_name: pathwayData.student_name?.split(' ').slice(1).join(' ') || application.student_name?.split(' ').slice(1).join(' ') || 'Student',
+        email: pathwayData.student_email || pathwayData.parent_email || application.student_email || application.parent_email,
+        student_number: `STU${Date.now().toString().slice(-6)}`, // Generate unique student number
+        year_group: pathwayData.year_group || application.year_group,
+        form_class: pathwayData.form_class_preference || application.form_class_preference,
+        date_of_birth: pathwayData.date_of_birth || application.date_of_birth,
+        emergency_contact_name: pathwayData.emergency_contact_name || application.emergency_contact_name,
+        emergency_contact_phone: pathwayData.emergency_contact_phone || application.emergency_contact_phone,
+        medical_notes: pathwayData.medical_information || application.medical_information,
+        phone: pathwayData.student_phone || application.student_phone,
+      };
+
+      // Create the student record using the existing function
+      const { data, error } = await supabase
+        .rpc('create_student_with_user', {
+          student_data: studentData,
+          school_id: application.school_id
+        });
+
+      if (error) {
+        console.error('Error creating student record:', error);
+        throw error;
+      }
+
+      console.log('✅ Student record created successfully:', data);
+      
+      // Update application to mark it as completed
+      await supabase
+        .from('enrollment_applications')
+        .update({ 
+          status: 'enrolled',
+          workflow_completion_percentage: 100,
+          last_activity_at: new Date().toISOString()
+        })
+        .eq('id', applicationId);
+
+    } catch (error) {
+      console.error('Error in final enrollment process:', error);
+      throw error;
     }
   };
 
@@ -343,9 +410,10 @@ export function AdmissionsWorkflow() {
                       size="sm"
                       onClick={() => handleAdvanceStage(application.id)}
                       disabled={currentStageIndex >= WORKFLOW_STAGES.length - 1}
+                      className={currentStageIndex === WORKFLOW_STAGES.length - 2 ? 'bg-green-600 hover:bg-green-700' : ''}
                     >
                       <Send className="h-4 w-4 mr-1" />
-                      Advance
+                      {currentStageIndex === WORKFLOW_STAGES.length - 2 ? 'Complete Enrollment' : 'Advance'}
                     </Button>
                   </div>
                 </div>
