@@ -86,6 +86,7 @@ export function AccountingPage() {
     if (location.pathname === '/accounting/reports') return 'reports';
     if (location.pathname === '/accounting/accounts') return 'accounts';
     if (location.pathname === '/accounting/budget') return 'budget';
+    if (location.pathname === '/accounting/transactions/new') return 'new-transaction';
     if (location.pathname === '/accounting/settings') return 'settings';
     return 'dashboard';
   };
@@ -103,6 +104,7 @@ export function AccountingPage() {
       case 'reports': return 'Financial Reports';
       case 'accounts': return 'Chart of Accounts';
       case 'budget': return 'Budget Planning';
+      case 'new-transaction': return 'New Transaction';
       case 'settings': return 'Accounting Settings';
       default: return 'Accounting Dashboard';
     }
@@ -2220,6 +2222,118 @@ export function AccountingPage() {
                     </TableRow>
                   </TableBody>
                 </Table>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* New Transaction View */}
+        {currentView === 'new-transaction' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Plus className="h-5 w-5" />
+                  Create New Transaction
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Transaction Type</label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select transaction type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="income">Income</SelectItem>
+                          <SelectItem value="expense">Expense</SelectItem>
+                          <SelectItem value="transfer">Transfer</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Date</label>
+                      <Input type="date" defaultValue={new Date().toISOString().split('T')[0]} />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Account</label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select account" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {chartOfAccounts.map((account) => (
+                            <SelectItem key={account.id} value={account.id}>
+                              {account.account_code} - {account.account_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Amount</label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">£</span>
+                        <Input 
+                          type="number" 
+                          placeholder="0.00" 
+                          className="pl-8"
+                          step="0.01"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="text-sm font-medium">Description</label>
+                      <Input placeholder="Transaction description" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Reference Number</label>
+                      <Input placeholder="Optional reference number" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Payment Method</label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select payment method" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cash">Cash</SelectItem>
+                          <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                          <SelectItem value="cheque">Cheque</SelectItem>
+                          <SelectItem value="card">Card Payment</SelectItem>
+                          <SelectItem value="online">Online Payment</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="text-sm font-medium">Notes</label>
+                      <Textarea placeholder="Additional notes (optional)" rows={3} />
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end gap-3 pt-6 border-t">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => navigate('/accounting')}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit">
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Transaction
+                    </Button>
+                  </div>
+                </form>
               </CardContent>
             </Card>
           </div>
