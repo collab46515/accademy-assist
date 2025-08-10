@@ -202,11 +202,106 @@ const AnalyticsPage = () => {
     }
   };
 
-  const exportData = (format: string, module: string) => {
+  const exportData = async (format: string, module: string) => {
     toast({
       title: `Exporting ${module} Report`,
-      description: `Your ${format.toUpperCase()} report is being generated and will be downloaded shortly.`,
+      description: `Your ${format.toUpperCase()} report is being generated...`,
     });
+
+    try {
+      if (format === "pdf") {
+        const { jsPDF } = await import('jspdf');
+        const doc = new jsPDF();
+        
+        // Add title
+        doc.setFontSize(20);
+        doc.text(`${module} Report`, 20, 20);
+        
+        // Add date
+        doc.setFontSize(12);
+        doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 35);
+        
+        // Add report data
+        let yPos = 50;
+        
+        if (reportBuilder.showPreview && reportBuilder.reportData.length > 0) {
+          doc.setFontSize(14);
+          doc.text('Report Data:', 20, yPos);
+          yPos += 10;
+          
+          doc.setFontSize(10);
+          reportBuilder.reportData.slice(0, 20).forEach((item, index) => {
+            const line = `${item.type} - ${item.category}: ${item.year || item.subject || item.department || item.month || 'N/A'} - ${item.attendance || item.averageGrade || item.satisfaction || item.revenue || 'N/A'}`;
+            doc.text(line, 20, yPos);
+            yPos += 8;
+            
+            // Add new page if needed
+            if (yPos > 270) {
+              doc.addPage();
+              yPos = 20;
+            }
+          });
+        } else {
+          // Add summary data for the module
+          doc.setFontSize(14);
+          doc.text('Analytics Summary:', 20, yPos);
+          yPos += 15;
+          
+          doc.setFontSize(10);
+          const summaryData = [
+            'Total Revenue: £823,400 (+12.5%)',
+            'Academic Performance: 85.2% average',
+            'Staff Satisfaction: 4.2/5.0',
+            'Student Attendance: 92.3%',
+            'Active Users: 892',
+            'System Uptime: 99.7%'
+          ];
+          
+          summaryData.forEach(item => {
+            doc.text(item, 20, yPos);
+            yPos += 10;
+          });
+        }
+        
+        // Save the PDF
+        doc.save(`${module.toLowerCase().replace(/\s+/g, '-')}-report-${new Date().toISOString().split('T')[0]}.pdf`);
+        
+        toast({
+          title: "Export Successful",
+          description: "Your PDF report has been downloaded successfully.",
+        });
+      } else {
+        // Handle other formats (CSV, Excel)
+        const data = reportBuilder.reportData.length > 0 ? reportBuilder.reportData : [];
+        const csvContent = format === 'csv' ? 
+          "Type,Category,Details,Value\n" + 
+          data.map(item => 
+            `${item.type || ''},${item.category || ''},${item.year || item.subject || item.department || item.month || ''},${item.attendance || item.averageGrade || item.satisfaction || item.revenue || ''}`
+          ).join('\n') : '';
+        
+        if (format === 'csv' && csvContent) {
+          const blob = new Blob([csvContent], { type: 'text/csv' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${module.toLowerCase().replace(/\s+/g, '-')}-report-${new Date().toISOString().split('T')[0]}.csv`;
+          a.click();
+          window.URL.revokeObjectURL(url);
+          
+          toast({
+            title: "Export Successful",
+            description: "Your CSV report has been downloaded successfully.",
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Export error:', error);
+      toast({
+        title: "Export Failed",
+        description: "There was an error generating your report. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const drillDown = (module: string, item: string) => {
