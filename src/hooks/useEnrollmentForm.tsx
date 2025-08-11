@@ -141,12 +141,34 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
           .select()
           .single();
       } else {
-        // Create new draft
-        result = await supabase
+        // Check if there's already a recent draft for this user/school to avoid duplicates
+        const { data: existingDraft } = await supabase
           .from('enrollment_applications')
-          .insert([mappedData])
-          .select()
-          .single();
+          .select('id')
+          .eq('status', 'draft')
+          .eq('school_id', currentSchool.id)
+          .eq('pathway', mapPathwayToDatabase(pathway) as any)
+          .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Within last 24 hours
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (existingDraft) {
+          // Update existing recent draft instead of creating new one
+          result = await supabase
+            .from('enrollment_applications')
+            .update(mappedData)
+            .eq('id', existingDraft.id)
+            .select()
+            .single();
+        } else {
+          // Create new draft only if no recent draft exists
+          result = await supabase
+            .from('enrollment_applications')
+            .insert([mappedData])
+            .select()
+            .single();
+        }
       }
 
       if (result.error) throw result.error;
