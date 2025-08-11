@@ -17,6 +17,7 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
   const [isSaving, setIsSaving] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [currentDraftId, setCurrentDraftId] = useState<string | null>(applicationId || null);
   const { currentSchool } = useRBAC();
   const { toast } = useToast();
   
@@ -132,12 +133,12 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
       };
 
       let result;
-      if (applicationId) {
+      if (currentDraftId || applicationId) {
         // Update existing draft
         result = await supabase
           .from('enrollment_applications')
           .update(mappedData)
-          .eq('id', applicationId)
+          .eq('id', currentDraftId || applicationId)
           .select()
           .single();
       } else {
@@ -161,6 +162,9 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
             .eq('id', existingDraft.id)
             .select()
             .single();
+          
+          // Store the draft ID for future updates
+          setCurrentDraftId(existingDraft.id);
         } else {
           // Create new draft only if no recent draft exists
           result = await supabase
@@ -168,6 +172,11 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
             .insert([mappedData])
             .select()
             .single();
+          
+          // Store the new draft ID for future updates
+          if (result.data) {
+            setCurrentDraftId(result.data.id);
+          }
         }
       }
 
