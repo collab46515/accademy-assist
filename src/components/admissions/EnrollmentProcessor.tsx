@@ -42,16 +42,20 @@ export function EnrollmentProcessor() {
 
   const processEnrolledApplication = async (application: any) => {
     try {
-      // Check if student already exists
+      // Check if student already exists by email or student number pattern
+      const potentialEmail = application.additional_data?.submitted_data?.student_email || 
+                           application.additional_data?.pathway_data?.student_email ||
+                           `${application.application_number.replace(/[^0-9a-z]/gi, '')}@school.edu`;
+      
       const { data: existingStudent } = await supabase
         .from('students')
-        .select('id')
+        .select('id, student_number')
         .eq('school_id', application.school_id)
-        .ilike('student_number', `%${application.application_number}%`)
+        .or(`student_number.ilike.%${application.application_number}%,user_id.in.(select user_id from profiles where email='${potentialEmail}')`)
         .single();
 
       if (existingStudent) {
-        console.log(`Student already exists for application ${application.application_number}`);
+        console.log(`Student already exists for application ${application.application_number}: ${existingStudent.student_number}`);
         return { success: true, message: 'Already exists' };
       }
 
