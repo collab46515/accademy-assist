@@ -102,6 +102,40 @@ export function EnrollmentProcessor() {
       
       // Cast data to proper type and return detailed result including credentials
       const enrollmentData = data as any;
+      
+      // Send welcome emails automatically
+      try {
+        const emailData = {
+          studentData: {
+            email: enrollmentData.student_email,
+            name: pathwayData.student_name || application.student_name || 'Student',
+            studentNumber: studentData.student_number,
+            yearGroup: studentData.year_group,
+            tempPassword: enrollmentData.student_temp_password
+          },
+          parentData: enrollmentData.parent_email ? {
+            email: enrollmentData.parent_email,
+            name: pathwayData.parent_name || application.parent_name || 'Parent',
+            tempPassword: enrollmentData.parent_temp_password,
+            relationship: parentData.relationship
+          } : undefined,
+          schoolName: 'Your School' // You can make this dynamic from school settings
+        };
+
+        const emailResult = await supabase.functions.invoke('send-enrollment-emails', {
+          body: emailData
+        });
+
+        if (emailResult.error) {
+          console.warn('Failed to send enrollment emails:', emailResult.error);
+        } else {
+          console.log('✅ Enrollment emails sent successfully:', emailResult.data);
+        }
+      } catch (emailError) {
+        console.warn('Error sending enrollment emails:', emailError);
+        // Don't fail the enrollment process if emails fail
+      }
+      
       return { 
         success: true, 
         data: enrollmentData,
@@ -167,7 +201,7 @@ export function EnrollmentProcessor() {
     
     toast({
       title: "Processing Complete",
-      description: `Successfully created ${successCount} students. ${failedCount} failed.`,
+      description: `Successfully created ${successCount} students and sent welcome emails. ${failedCount} failed.`,
       variant: successCount > 0 ? "default" : "destructive"
     });
   };
