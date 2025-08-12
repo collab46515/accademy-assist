@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   BookOpen, 
   Calendar,
@@ -19,48 +20,110 @@ import {
   AlertCircle,
   GraduationCap,
   Award,
-  ClipboardList
+  ClipboardList,
+  Loader2
 } from 'lucide-react';
 import { StudentAssignmentView } from '../assignments/StudentAssignmentView';
+import { StudentTimetableView } from '../timetable/StudentTimetableView';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/hooks/use-toast';
 
 export function StudentPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [studentData, setStudentData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [attendance, setAttendance] = useState<any[]>([]);
+  const { user } = useAuth();
 
-  const studentInfo = {
-    name: 'Emma Johnson',
-    class: 'Year 8A',
-    house: 'Phoenix',
-    overallGrade: 'A-',
-    attendance: 96
+  useEffect(() => {
+    if (user) {
+      fetchStudentData();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (studentData?.id) {
+      fetchAttendance();
+    }
+  }, [studentData]);
+
+  const fetchStudentData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('students')
+        .select(`
+          *,
+          profiles!inner(first_name, last_name, email)
+        `)
+        .eq('user_id', user?.id)
+        .single();
+
+      if (error) throw error;
+      setStudentData(data);
+    } catch (error: any) {
+      console.error('Error fetching student data:', error);
+      if (error.code === 'PGRST116') {
+        // No student record found - show helpful message
+        toast({
+          title: "Student Record Not Found",
+          description: "Your student profile is still being set up. Please contact the admissions office.",
+          variant: "destructive"
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const todaySchedule = [
-    { time: '09:00-09:45', subject: 'Mathematics', teacher: 'Ms. Smith', room: 'M101', homework: true },
-    { time: '09:45-10:30', subject: 'English', teacher: 'Mr. Wilson', room: 'E203', homework: false },
-    { time: '11:00-11:45', subject: 'Science', teacher: 'Dr. Brown', room: 'S105', homework: true },
-    { time: '13:30-14:15', subject: 'History', teacher: 'Ms. Davis', room: 'H301', homework: false },
-    { time: '14:15-15:00', subject: 'Art', teacher: 'Mr. Taylor', room: 'A102', homework: false }
-  ];
+  const fetchAttendance = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('attendance_records')
+        .select('*')
+        .eq('student_id', studentData.id)
+        .order('date', { ascending: false })
+        .limit(30);
 
-  const upcomingAssignments = [
-    { subject: 'Mathematics', task: 'Algebra Quiz', due: 'Tomorrow', priority: 'high', completed: false },
-    { subject: 'English', task: 'Essay: Romeo and Juliet', due: 'Friday', priority: 'medium', completed: false },
-    { subject: 'Science', task: 'Lab Report', due: 'Next week', priority: 'medium', completed: true },
-    { subject: 'History', task: 'World War 2 Project', due: 'Next week', priority: 'low', completed: false }
-  ];
+      if (error) throw error;
+      setAttendance(data || []);
+    } catch (error) {
+      console.error('Error fetching attendance:', error);
+    }
+  };
 
-  const recentGrades = [
-    { subject: 'Mathematics', assignment: 'Geometry Test', grade: 'A-', date: '2024-01-15' },
-    { subject: 'English', assignment: 'Creative Writing', grade: 'B+', date: '2024-01-12' },
-    { subject: 'Science', assignment: 'Physics Quiz', grade: 'A', date: '2024-01-10' },
-    { subject: 'History', assignment: 'Medieval Essay', grade: 'B', date: '2024-01-08' }
-  ];
+  const calculateAttendancePercentage = () => {
+    if (attendance.length === 0) return 0;
+    const present = attendance.filter(record => record.status === 'present').length;
+    return Math.round((present / attendance.length) * 100);
+  };
 
-  const achievements = [
-    { title: 'Math Star', description: 'Top performance in algebra', icon: Star, date: '2024-01-15' },
-    { title: 'Perfect Attendance', description: 'No absences this month', icon: CheckCircle, date: '2024-01-01' },
-    { title: 'Science Champion', description: 'Excellent lab work', icon: Trophy, date: '2023-12-20' }
-  ];
+  const getTodaySchedule = () => {
+    // This would come from timetable data - placeholder for now
+    return [
+      { time: '09:00-09:45', subject: 'Mathematics', teacher: 'Ms. Smith', room: 'M101' },
+      { time: '09:45-10:30', subject: 'English', teacher: 'Mr. Wilson', room: 'E203' },
+      { time: '11:00-11:45', subject: 'Science', teacher: 'Dr. Brown', room: 'S105' },
+    ];
+  };
+
+  const getUpcomingAssignments = () => {
+    // Placeholder assignments - would come from assignments system
+    return [
+      { subject: 'Mathematics', task: 'Algebra Quiz', due: 'Tomorrow', priority: 'high', completed: false },
+      { subject: 'English', task: 'Essay: Romeo and Juliet', due: 'Friday', priority: 'medium', completed: false },
+      { subject: 'Science', task: 'Lab Report', due: 'Next week', priority: 'medium', completed: true },
+    ];
+  };
+
+  const getRecentGrades = () => {
+    // Placeholder grades - would come from gradebook system
+    return [
+      { subject: 'Mathematics', assignment: 'Geometry Test', grade: 'A-', date: '2024-01-15' },
+      { subject: 'English', assignment: 'Creative Writing', grade: 'B+', date: '2024-01-12' },
+      { subject: 'Science', assignment: 'Physics Quiz', grade: 'A', date: '2024-01-10' },
+    ];
+  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -77,22 +140,57 @@ export function StudentPortal() {
     return 'text-red-600 bg-red-50';
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading your portal...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!studentData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <Alert className="max-w-md">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Your student profile is being set up. Please contact the admissions office for assistance.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  const studentName = `${studentData.profiles?.first_name || ''} ${studentData.profiles?.last_name || ''}`.trim() || 'Student';
+  const attendancePercentage = calculateAttendancePercentage();
+  const todaySchedule = getTodaySchedule();
+  const upcomingAssignments = getUpcomingAssignments();
+  const recentGrades = getRecentGrades();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="p-6 space-y-6">
         {/* Welcome Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Welcome back, {studentInfo.name}!</h1>
+            <h1 className="text-3xl font-bold">Welcome back, {studentName}!</h1>
             <p className="text-muted-foreground">Ready to make today amazing? Let's see what's ahead.</p>
+            <div className="flex items-center gap-4 mt-2">
+              <Badge variant="outline">{studentData.year_group}</Badge>
+              <Badge variant="outline">{studentData.form_class}</Badge>
+              <Badge variant="outline">#{studentData.student_number}</Badge>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-primary">{studentInfo.overallGrade}</p>
+              <p className="text-2xl font-bold text-primary">A-</p>
               <p className="text-xs text-muted-foreground">Overall Grade</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">{studentInfo.attendance}%</p>
+              <p className="text-2xl font-bold text-green-600">{attendancePercentage}%</p>
               <p className="text-xs text-muted-foreground">Attendance</p>
             </div>
           </div>
@@ -119,10 +217,10 @@ export function StudentPortal() {
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {[
-                { title: 'Classes Today', value: '5', icon: BookOpen, color: 'text-blue-600' },
-                { title: 'Pending Tasks', value: '3', icon: Target, color: 'text-orange-600' },
-                { title: 'Messages', value: '2', icon: MessageSquare, color: 'text-purple-600' },
-                { title: 'Achievements', value: '12', icon: Trophy, color: 'text-green-600' }
+                { title: 'Classes Today', value: todaySchedule.length.toString(), icon: BookOpen, color: 'text-blue-600' },
+                { title: 'Pending Tasks', value: upcomingAssignments.filter(a => !a.completed).length.toString(), icon: Target, color: 'text-orange-600' },
+                { title: 'Recent Grades', value: recentGrades.length.toString(), icon: Trophy, color: 'text-green-600' },
+                { title: 'Attendance', value: `${attendancePercentage}%`, icon: CheckCircle, color: 'text-purple-600' }
               ].map((stat, index) => (
                 <Card key={index} className="hover:shadow-lg transition-shadow">
                   <CardContent className="p-6">
@@ -150,7 +248,7 @@ export function StudentPortal() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {todaySchedule.map((lesson, index) => (
+                      {todaySchedule.length > 0 ? todaySchedule.map((lesson, index) => (
                         <div key={index} className="flex items-center gap-4 p-3 rounded-lg border hover:bg-muted/50">
                           <div className="text-center min-w-[80px]">
                             <p className="text-sm font-medium">{lesson.time}</p>
@@ -159,17 +257,14 @@ export function StudentPortal() {
                             <p className="font-medium">{lesson.subject}</p>
                             <p className="text-sm text-muted-foreground">{lesson.teacher} • Room {lesson.room}</p>
                           </div>
-                          <div className="flex items-center gap-2">
-                            {lesson.homework && (
-                              <Badge variant="outline" className="text-orange-600">
-                                <FileText className="h-3 w-3 mr-1" />
-                                Homework
-                              </Badge>
-                            )}
-                            <Badge variant="outline">Next</Badge>
-                          </div>
+                          <Badge variant="outline">Next</Badge>
                         </div>
-                      ))}
+                      )) : (
+                        <div className="text-center py-8">
+                          <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                          <p className="text-muted-foreground">No classes scheduled for today</p>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -184,7 +279,7 @@ export function StudentPortal() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {upcomingAssignments.map((assignment, index) => (
+                  {upcomingAssignments.length > 0 ? upcomingAssignments.map((assignment, index) => (
                     <div key={index} className={`p-3 rounded-lg border ${getPriorityColor(assignment.priority)}`}>
                       <div className="flex items-start justify-between mb-2">
                         <p className="font-medium text-sm">{assignment.subject}</p>
@@ -197,7 +292,12 @@ export function StudentPortal() {
                       <p className="text-sm">{assignment.task}</p>
                       <p className="text-xs opacity-70 mt-1">Due: {assignment.due}</p>
                     </div>
-                  ))}
+                  )) : (
+                    <div className="text-center py-4">
+                      <ClipboardList className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">No assignments due</p>
+                    </div>
+                  )}
                   <Button 
                     variant="outline" 
                     size="sm" 
@@ -210,8 +310,8 @@ export function StudentPortal() {
               </Card>
             </div>
 
-            {/* Academic Performance */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Recent Grades */}
+            {recentGrades.length > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -220,8 +320,8 @@ export function StudentPortal() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    {recentGrades.map((grade, index) => (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {recentGrades.slice(0, 6).map((grade, index) => (
                       <div key={index} className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50">
                         <div>
                           <p className="font-medium">{grade.subject}</p>
@@ -234,37 +334,9 @@ export function StudentPortal() {
                   </div>
                 </CardContent>
               </Card>
+            )}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Award className="h-5 w-5" />
-                    Recent Achievements
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {achievements.map((achievement, index) => (
-                      <div key={index} className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50">
-                        <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                          <achievement.icon className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-medium">{achievement.title}</p>
-                          <p className="text-sm text-muted-foreground">{achievement.description}</p>
-                          <p className="text-xs text-muted-foreground">{achievement.date}</p>
-                        </div>
-                      </div>
-                    ))}
-                    <Button variant="outline" size="sm" className="w-full">
-                      View All Achievements
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Progress Tracking */}
+            {/* Academic Progress */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -303,38 +375,6 @@ export function StudentPortal() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Star className="h-5 w-5" />
-                  Quick Actions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {[
-                    { title: 'Submit Assignment', description: 'Upload your latest work', icon: FileText, color: 'bg-blue-500' },
-                    { title: 'Join Study Group', description: 'Connect with classmates', icon: Users, color: 'bg-green-500' },
-                    { title: 'Book Library Slot', description: 'Reserve study space', icon: BookOpen, color: 'bg-purple-500' }
-                  ].map((action, index) => (
-                    <Card key={index} className="cursor-pointer hover:shadow-md transition-all hover:scale-105">
-                      <CardContent className="p-4 text-center">
-                        <div className={`w-12 h-12 rounded-lg ${action.color} text-white flex items-center justify-center mx-auto mb-3`}>
-                          <action.icon className="h-6 w-6" />
-                        </div>
-                        <h3 className="font-semibold mb-1">{action.title}</h3>
-                        <p className="text-sm text-muted-foreground mb-3">{action.description}</p>
-                        <Button variant="outline" size="sm" className="w-full">
-                          Get Started
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           <TabsContent value="assignments">
@@ -342,17 +382,7 @@ export function StudentPortal() {
           </TabsContent>
 
           <TabsContent value="timetable">
-            <Card>
-              <CardHeader>
-                <CardTitle>My Timetable</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Full timetable view coming soon...</p>
-                </div>
-              </CardContent>
-            </Card>
+            <StudentTimetableView />
           </TabsContent>
         </Tabs>
       </div>
