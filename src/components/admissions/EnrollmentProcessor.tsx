@@ -192,13 +192,28 @@ export function EnrollmentProcessor() {
       return;
     }
 
+    // Deduplicate applications - keep only the latest per student name
+    const deduplicatedApps = new Map();
+    applications.forEach(app => {
+      const studentName = app.student_name?.toLowerCase().trim();
+      if (!studentName) return;
+      
+      const existing = deduplicatedApps.get(studentName);
+      if (!existing || new Date(app.created_at) > new Date(existing.created_at)) {
+        deduplicatedApps.set(studentName, app);
+      }
+    });
+
+    const uniqueApplications = Array.from(deduplicatedApps.values());
+    console.log(`Deduplicated ${applications.length} applications to ${uniqueApplications.length} unique students`);
+
     let successCount = 0;
     let failedCount = 0;
     const errors: string[] = [];
 
-    for (let i = 0; i < applications.length; i++) {
-      const app = applications[i];
-      console.log(`Processing application ${i + 1}/${applications.length}: ${app.application_number}`);
+    for (let i = 0; i < uniqueApplications.length; i++) {
+      const app = uniqueApplications[i];
+      console.log(`Processing application ${i + 1}/${uniqueApplications.length}: ${app.application_number} (${app.student_name})`);
       
       const result = await processEnrolledApplication(app);
       
@@ -220,7 +235,7 @@ export function EnrollmentProcessor() {
     
     toast({
       title: "Processing Complete",
-      description: `Successfully created ${successCount} students and sent welcome emails. ${failedCount} failed.`,
+      description: `Successfully created ${successCount} students from ${uniqueApplications.length} unique applications (deduplicated from ${applications.length} total). ${failedCount} failed.`,
       variant: successCount > 0 ? "default" : "destructive"
     });
   };
