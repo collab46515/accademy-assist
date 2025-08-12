@@ -65,13 +65,13 @@ export function EnrollmentProcessor() {
       }
 
       // Extract student and parent data from the application
-      const additionalData = application.additional_data as any;
+      const applicationData = application.additional_data as any;
       
       // Try submitted_data first (most complete), then pathway_data, then fallback to application fields
-      const sourceData = additionalData?.submitted_data || additionalData?.pathway_data || {};
+      const enrollmentSourceData = applicationData?.submitted_data || applicationData?.pathway_data || {};
       
       // Ensure we have student name
-      const fullStudentName = sourceData.student_name || application.student_name || 'Unknown Student';
+      const fullStudentName = enrollmentSourceData.student_name || application.student_name || 'Unknown Student';
       const nameParts = fullStudentName.split(' ');
       const firstName = nameParts[0] || 'Unknown';
       const lastName = nameParts.slice(1).join(' ') || 'Student';
@@ -80,19 +80,19 @@ export function EnrollmentProcessor() {
       const studentData = {
         first_name: firstName,
         last_name: lastName,
-        email: sourceData.student_email || `${application.application_number.replace(/[^0-9a-z]/gi, '')}@school.edu`,
+        email: enrollmentSourceData.student_email || `${application.application_number.replace(/[^0-9a-z]/gi, '')}@school.edu`,
         student_number: application.application_number.replace(/[^0-9]/g, '') || `STU${Date.now().toString().slice(-6)}`,
-        year_group: sourceData.year_group || application.year_group || 'Year 7',
-        form_class: sourceData.form_class_preference || application.form_class_preference || null,
-        date_of_birth: sourceData.date_of_birth || application.date_of_birth || null,
-        emergency_contact_name: sourceData.emergency_contact_name || application.emergency_contact_name || `${firstName} Emergency Contact`,
-        emergency_contact_phone: sourceData.emergency_contact_phone || sourceData.parent_phone || application.parent_phone || null,
-        medical_notes: sourceData.medical_information || application.medical_information || null,
-        phone: sourceData.student_phone || application.student_phone || null,
+        year_group: enrollmentSourceData.year_group || application.year_group || 'Year 7',
+        form_class: enrollmentSourceData.form_class_preference || application.form_class_preference || null,
+        date_of_birth: enrollmentSourceData.date_of_birth || application.date_of_birth || null,
+        emergency_contact_name: enrollmentSourceData.emergency_contact_name || application.emergency_contact_name || `${firstName} Emergency Contact`,
+        emergency_contact_phone: enrollmentSourceData.emergency_contact_phone || enrollmentSourceData.parent_phone || application.parent_phone || null,
+        medical_notes: enrollmentSourceData.medical_information || application.medical_information || null,
+        phone: enrollmentSourceData.student_phone || application.student_phone || null,
       };
 
       // Extract parent data with better fallbacks
-      const parentFullName = sourceData.parent_name || application.parent_name || 'Parent Guardian';
+      const parentFullName = enrollmentSourceData.parent_name || application.parent_name || 'Parent Guardian';
       const parentNameParts = parentFullName.split(' ');
       const parentFirstName = parentNameParts[0] || 'Parent';
       const parentLastName = parentNameParts.slice(1).join(' ') || 'Guardian';
@@ -100,16 +100,16 @@ export function EnrollmentProcessor() {
       const parentData = {
         first_name: parentFirstName,
         last_name: parentLastName,
-        email: sourceData.parent_email || application.parent_email || null,
-        phone: sourceData.parent_phone || application.parent_phone || null,
-        relationship: sourceData.parent_relationship || sourceData.emergency_contact_relationship || 'Parent'
+        email: enrollmentSourceData.parent_email || application.parent_email || null,
+        phone: enrollmentSourceData.parent_phone || application.parent_phone || null,
+        relationship: enrollmentSourceData.parent_relationship || enrollmentSourceData.emergency_contact_relationship || 'Parent'
       };
 
       console.log('Creating complete student enrollment with data:', { 
         applicationNumber: application.application_number,
         studentData, 
         parentData,
-        sourceDataKeys: Object.keys(sourceData)
+        sourceDataKeys: Object.keys(enrollmentSourceData)
       });
 
       // Create complete student enrollment with student and parent accounts
@@ -136,14 +136,14 @@ export function EnrollmentProcessor() {
         const emailData = {
           studentData: {
             email: enrollmentData.student_email,
-            name: sourceData.student_name || application.student_name || 'Student',
+            name: enrollmentSourceData.student_name || application.student_name || 'Student',
             studentNumber: studentData.student_number,
             yearGroup: studentData.year_group,
             tempPassword: enrollmentData.student_temp_password
           },
           parentData: enrollmentData.parent_email ? {
             email: enrollmentData.parent_email,
-            name: sourceData.parent_name || application.parent_name || 'Parent',
+            name: enrollmentSourceData.parent_name || application.parent_name || 'Parent',
             tempPassword: enrollmentData.parent_temp_password,
             relationship: parentData.relationship
           } : undefined,
