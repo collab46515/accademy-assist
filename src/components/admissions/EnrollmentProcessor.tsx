@@ -57,32 +57,51 @@ export function EnrollmentProcessor() {
 
       // Extract student and parent data from the application
       const additionalData = application.additional_data as any;
-      const pathwayData = additionalData?.pathway_data || additionalData?.submitted_data || {};
       
+      // Try submitted_data first (most complete), then pathway_data, then fallback to application fields
+      const sourceData = additionalData?.submitted_data || additionalData?.pathway_data || {};
+      
+      // Ensure we have student name
+      const fullStudentName = sourceData.student_name || application.student_name || 'Unknown Student';
+      const nameParts = fullStudentName.split(' ');
+      const firstName = nameParts[0] || 'Unknown';
+      const lastName = nameParts.slice(1).join(' ') || 'Student';
+      
+      // Build robust student data
       const studentData = {
-        first_name: pathwayData.student_name?.split(' ')[0] || application.student_name?.split(' ')[0] || 'Unknown',
-        last_name: pathwayData.student_name?.split(' ').slice(1).join(' ') || application.student_name?.split(' ').slice(1).join(' ') || 'Student',
-        email: pathwayData.student_email || `${application.application_number.replace(/[^0-9a-z]/gi, '')}@school.edu`,
+        first_name: firstName,
+        last_name: lastName,
+        email: sourceData.student_email || `${application.application_number.replace(/[^0-9a-z]/gi, '')}@school.edu`,
         student_number: application.application_number.replace(/[^0-9]/g, '') || `STU${Date.now().toString().slice(-6)}`,
-        year_group: pathwayData.year_group || application.year_group || 'Year 7',
-        form_class: pathwayData.form_class_preference || application.form_class_preference,
-        date_of_birth: pathwayData.date_of_birth || application.date_of_birth,
-        emergency_contact_name: pathwayData.emergency_contact_name || application.emergency_contact_name || pathwayData.parent_name || application.parent_name,
-        emergency_contact_phone: pathwayData.emergency_contact_phone || application.emergency_contact_phone || pathwayData.parent_phone || application.parent_phone,
-        medical_notes: pathwayData.medical_information || application.medical_information,
-        phone: pathwayData.student_phone || application.student_phone,
+        year_group: sourceData.year_group || application.year_group || 'Year 7',
+        form_class: sourceData.form_class_preference || application.form_class_preference || null,
+        date_of_birth: sourceData.date_of_birth || application.date_of_birth || null,
+        emergency_contact_name: sourceData.emergency_contact_name || application.emergency_contact_name || `${firstName} Emergency Contact`,
+        emergency_contact_phone: sourceData.emergency_contact_phone || sourceData.parent_phone || application.parent_phone || null,
+        medical_notes: sourceData.medical_information || application.medical_information || null,
+        phone: sourceData.student_phone || application.student_phone || null,
       };
 
-      // Extract parent data
+      // Extract parent data with better fallbacks
+      const parentFullName = sourceData.parent_name || application.parent_name || 'Parent Guardian';
+      const parentNameParts = parentFullName.split(' ');
+      const parentFirstName = parentNameParts[0] || 'Parent';
+      const parentLastName = parentNameParts.slice(1).join(' ') || 'Guardian';
+      
       const parentData = {
-        first_name: pathwayData.parent_name?.split(' ')[0] || application.parent_name?.split(' ')[0] || 'Parent',
-        last_name: pathwayData.parent_name?.split(' ').slice(1).join(' ') || application.parent_name?.split(' ').slice(1).join(' ') || 'Parent',
-        email: pathwayData.parent_email || application.parent_email,
-        phone: pathwayData.parent_phone || application.parent_phone,
-        relationship: pathwayData.parent_relationship || 'Parent'
+        first_name: parentFirstName,
+        last_name: parentLastName,
+        email: sourceData.parent_email || application.parent_email || null,
+        phone: sourceData.parent_phone || application.parent_phone || null,
+        relationship: sourceData.parent_relationship || sourceData.emergency_contact_relationship || 'Parent'
       };
 
-      console.log('Creating complete student enrollment with data:', { studentData, parentData });
+      console.log('Creating complete student enrollment with data:', { 
+        applicationNumber: application.application_number,
+        studentData, 
+        parentData,
+        sourceDataKeys: Object.keys(sourceData)
+      });
 
       // Create complete student enrollment with student and parent accounts
       const { data, error } = await supabase
@@ -108,14 +127,14 @@ export function EnrollmentProcessor() {
         const emailData = {
           studentData: {
             email: enrollmentData.student_email,
-            name: pathwayData.student_name || application.student_name || 'Student',
+            name: sourceData.student_name || application.student_name || 'Student',
             studentNumber: studentData.student_number,
             yearGroup: studentData.year_group,
             tempPassword: enrollmentData.student_temp_password
           },
           parentData: enrollmentData.parent_email ? {
             email: enrollmentData.parent_email,
-            name: pathwayData.parent_name || application.parent_name || 'Parent',
+            name: sourceData.parent_name || application.parent_name || 'Parent',
             tempPassword: enrollmentData.parent_temp_password,
             relationship: parentData.relationship
           } : undefined,
