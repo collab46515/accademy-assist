@@ -42,21 +42,26 @@ export function EnrollmentProcessor() {
 
   const processEnrolledApplication = async (application: any) => {
     try {
-      // Check if student already exists by email or student number pattern
-      const potentialEmail = application.additional_data?.submitted_data?.student_email || 
-                           application.additional_data?.pathway_data?.student_email ||
+      // First check if this application has already been processed
+      if (application.additional_data?.student_record_id) {
+        console.log(`Application ${application.application_number} already processed - skipping`);
+        return { success: true, message: 'Already processed' };
+      }
+
+      // Check if student already exists by email or similar application data
+      const sourceData = application.additional_data?.submitted_data || application.additional_data?.pathway_data || {};
+      const potentialEmail = sourceData.student_email || 
                            `${application.application_number.replace(/[^0-9a-z]/gi, '')}@school.edu`;
       
       const { data: existingStudent } = await supabase
-        .from('students')
-        .select('id, student_number')
-        .eq('school_id', application.school_id)
-        .or(`student_number.ilike.%${application.application_number}%,user_id.in.(select user_id from profiles where email='${potentialEmail}')`)
-        .single();
+        .from('profiles')
+        .select('user_id')
+        .eq('email', potentialEmail)
+        .maybeSingle();
 
       if (existingStudent) {
-        console.log(`Student already exists for application ${application.application_number}: ${existingStudent.student_number}`);
-        return { success: true, message: 'Already exists' };
+        console.log(`Student already exists with email ${potentialEmail} - skipping application ${application.application_number}`);
+        return { success: true, message: 'Student already exists' };
       }
 
       // Extract student and parent data from the application
