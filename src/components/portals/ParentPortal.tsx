@@ -26,31 +26,118 @@ import {
   Download,
   Eye
 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useStudentData } from '@/hooks/useStudentData';
+import { supabase } from '@/integrations/supabase/client';
 
 export function ParentPortal() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { students } = useStudentData();
   const [activeTab, setActiveTab] = useState('parent');
   
-  // Mock data to check if parent is also a staff member
-  const isStaffMember = true; // In real app, this would come from user context/auth
-  
-  const parentData = {
-    name: 'David Johnson',
-    employee_id: 'EMP002', // Only if staff member
-    department: 'History', // Only if staff member
-    position: 'History Teacher', // Only if staff member
-  };
+  // Get parent's children from database using student_parents relationship
+  const [parentChildren, setParentChildren] = React.useState([]);
+  const [isStaffMember, setIsStaffMember] = React.useState(false);
+  const [parentData, setParentData] = React.useState(null);
 
-  const children = [
+  React.useEffect(() => {
+    const fetchParentData = async () => {
+      if (!user) return;
+
+      try {
+        // Get children this parent is linked to
+        const { data: studentParents, error } = await supabase
+          .from('student_parents')
+          .select(`
+            student_id,
+            relationship
+          `)
+          .eq('parent_id', user.id);
+
+        if (studentParents && !error) {
+          // Get student details separately
+          const studentIds = studentParents.map(sp => sp.student_id);
+          const { data: studentsData } = await supabase
+            .from('students')
+            .select(`
+              id,
+              user_id,
+              year_group,
+              form_class
+            `)
+            .in('id', studentIds);
+
+          if (studentsData) {
+            // Get profiles for the students
+            const userIds = studentsData.map(s => s.user_id);
+            const { data: profilesData } = await supabase
+              .from('profiles')
+              .select('user_id, first_name, last_name')
+              .in('user_id', userIds);
+
+            const children = studentsData.map(student => {
+              const profile = profilesData?.find(p => p.user_id === student.user_id);
+              const parentRelation = studentParents.find(sp => sp.student_id === student.id);
+              
+              return {
+                id: student.id,
+                name: profile ? `${profile.first_name} ${profile.last_name}` : 'Unknown Student',
+                class: `${student.year_group || ''} ${student.form_class || ''}`.trim(),
+                relationship: parentRelation?.relationship || 'Parent',
+                attendance: 96, // This would come from attendance records
+                recentGrades: [
+                  { subject: 'Mathematics', grade: 'A-', date: '2024-01-15' },
+                  { subject: 'English', grade: 'B+', date: '2024-01-12' },
+                  { subject: 'Science', grade: 'A', date: '2024-01-10' }
+                ]
+              };
+            });
+            setParentChildren(children);
+          }
+        }
+
+        // Check if parent is also a staff member
+        const { data: userRoles } = await supabase
+          .from('user_roles')
+          .select('role, department')
+          .eq('user_id', user.id)
+          .eq('is_active', true);
+
+        const staffRoles = userRoles?.filter(role => 
+          ['teacher', 'hod', 'school_admin'].includes(role.role)
+        );
+
+        if (staffRoles?.length > 0) {
+          setIsStaffMember(true);
+          // Get employee details
+          const { data: employeeData } = await supabase
+            .from('employees')
+            .select('employee_id, position, department_id')
+            .eq('user_id', user.id)
+            .single();
+
+          setParentData({
+            name: user.email, // Would get from profiles
+            employee_id: employeeData?.employee_id,
+            department: staffRoles[0].department,
+            position: employeeData?.position,
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching parent data:', error);
+      }
+    };
+
+    fetchParentData();
+  }, [user]);
+
+  const children = parentChildren.length > 0 ? parentChildren : [
     { 
-      name: 'Emma Johnson', 
-      class: 'Year 8A', 
-      attendance: 96,
-      recentGrades: [
-        { subject: 'Mathematics', grade: 'A-', date: '2024-01-15' },
-        { subject: 'English', grade: 'B+', date: '2024-01-12' },
-        { subject: 'Science', grade: 'A', date: '2024-01-10' }
-      ]
+      name: 'Loading...', 
+      class: '', 
+      attendance: 0,
+      recentGrades: []
     }
   ];
 
