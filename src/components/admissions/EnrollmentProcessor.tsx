@@ -123,7 +123,12 @@ export function EnrollmentProcessor() {
         });
 
       if (error) {
-        console.error('Error creating complete student enrollment:', error);
+        console.error('❌ ERROR creating complete student enrollment for', application.application_number);
+        console.error('Full error details:', error);
+        console.error('Student data:', studentData);
+        console.error('Parent data:', parentData);
+        console.error('School ID:', application.school_id);
+        console.error('Application ID:', application.id);
         throw error;
       }
 
