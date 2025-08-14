@@ -93,23 +93,17 @@ export function PortalRouter() {
   }
 
   // Check if user is admin (super admin or school admin)
-  const isAdmin = isSuperAdmin() || isSchoolAdmin();
+  // Temporary fix: explicitly check roles instead of using RBAC functions
+  const hasAdminRole = userRoles.some(role => 
+    role.role === 'super_admin' || role.role === 'school_admin'
+  );
+  const isAdmin = hasAdminRole;
   
-  // Debug logging - remove after testing
-  console.log('🔍 Portal Debug:', {
+  console.log('🔍 Admin Check:', {
     userEmail: user?.email,
-    userRoles: userRoles,
-    isSuperAdmin: isSuperAdmin(),
-    isSchoolAdmin: isSchoolAdmin(),
-    isAdmin: isAdmin,
-    currentSchool: currentSchool?.name,
-    getUserType: (() => {
-      const hasHODRole = userRoles.some(role => role.role === 'hod');
-      const hasTeacherRole = userRoles.some(role => ['teacher'].includes(role.role));
-      const hasParentRole = userRoles.some(role => role.role === 'parent');
-      const hasStudentRole = userRoles.some(role => role.role === 'student');
-      return { hasHODRole, hasTeacherRole, hasParentRole, hasStudentRole };
-    })()
+    userRoles: userRoles.map(r => r.role),
+    hasAdminRole,
+    isAdmin
   });
 
   // If user is admin, show all portals with tabs
