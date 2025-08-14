@@ -1,33 +1,32 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { LoginRedirectHandler } from "@/components/auth/LoginRedirectHandler";
+import { useAuth } from "@/hooks/useAuth";
 import LandingPage from "./LandingPage";
 
 export default function Index() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
-    // Check if user is already authenticated
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        // User is authenticated, redirect to main dashboard
-        navigate("/dashboard");
-      }
-    };
+    // Listen for auth changes for non-authenticated users
+    if (!user) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (session) {
+          // User just logged in, LoginRedirectHandler will handle the redirect
+        }
+      });
 
-    checkAuth();
+      return () => subscription.unsubscribe();
+    }
+  }, [navigate, user]);
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        navigate("/dashboard");
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  // Show landing page for non-authenticated users
-  return <LandingPage />;
+  // Show redirect handler for authenticated users, landing page for others
+  return (
+    <>
+      {user && <LoginRedirectHandler />}
+      <LandingPage />
+    </>
+  );
 }

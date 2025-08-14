@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
+import { LoginRedirectHandler } from './LoginRedirectHandler';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -13,7 +14,7 @@ interface SignInModalProps {
 }
 
 export function SignInModal({ isOpen, onClose }: SignInModalProps) {
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loginForm, setLoginForm] = useState({
@@ -56,8 +57,10 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+    <>
+      {user && <LoginRedirectHandler />}
+      <Dialog open={isOpen} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-md">
         <DialogHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
             <School className="h-12 w-12 text-primary" />
@@ -126,5 +129,6 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
         </div>
       </DialogContent>
     </Dialog>
+    </>
   );
 }
