@@ -152,20 +152,22 @@ export function EnrollmentProcessor() {
       try {
         const emailData = {
           studentData: {
-            email: enrollmentData.student_email,
-            name: enrollmentSourceData.student_name || application.student_name || 'Student',
+            email: studentDataWithAuth.email,
+            name: enrollmentSourceData.student_name || application.student_name || `${firstName} ${lastName}`,
             studentNumber: studentDataWithAuth.student_number,
             yearGroup: studentDataWithAuth.year_group,
-            tempPassword: enrollmentData.student_temp_password
+            tempPassword: studentTempPassword
           },
-          parentData: enrollmentData.parent_email ? {
-            email: enrollmentData.parent_email,
-            name: enrollmentSourceData.parent_name || application.parent_name || 'Parent',
-            tempPassword: enrollmentData.parent_temp_password,
+          parentData: parentData.email ? {
+            email: parentData.email,
+            name: `${parentData.first_name} ${parentData.last_name}`,
+            tempPassword: parentTempPassword,
             relationship: parentData.relationship
           } : undefined,
-          schoolName: 'Your School' // You can make this dynamic from school settings
+          schoolName: 'Pappaya Academy'
         };
+
+        console.log('Sending enrollment emails with data:', emailData);
 
         const emailResult = await supabase.functions.invoke('send-enrollment-emails', {
           body: emailData
@@ -186,12 +188,12 @@ export function EnrollmentProcessor() {
         data: enrollmentData,
         credentials: {
           student: {
-            email: enrollmentData.student_email,
-            password: enrollmentData.student_temp_password
+            email: studentDataWithAuth.email,
+            password: studentTempPassword
           },
-          parent: enrollmentData.parent_email ? {
-            email: enrollmentData.parent_email,
-            password: enrollmentData.parent_temp_password
+          parent: parentData.email ? {
+            email: parentData.email,
+            password: parentTempPassword
           } : null
         }
       };
