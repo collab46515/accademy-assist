@@ -1,6 +1,7 @@
 import React from 'react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { DataIntegrityTest } from '@/components/test/DataIntegrityTest';
+import { AuditRunner } from '@/components/test/AuditRunner';
 
 export default function DataIntegrityTestPage() {
   return (
@@ -15,7 +16,8 @@ export default function DataIntegrityTestPage() {
           { label: 'Data Testing' }
         ]}
       />
-      <div className="p-6">
+      <div className="p-6 space-y-8">
+        <AuditRunner />
         <DataIntegrityTest />
       </div>
     </div>
