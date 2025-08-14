@@ -14,7 +14,7 @@ export function SimpleTestAccount() {
     setCreating(true);
     
     try {
-      console.log('Creating simple test account...');
+      console.log('Creating verified test accounts...');
       
       // Fixed test credentials
       const studentEmail = 'test.student@pappaya.academy';
@@ -22,35 +22,42 @@ export function SimpleTestAccount() {
       const studentPassword = 'TestStudent123';
       const parentPassword = 'TestParent123';
       
-      console.log('Test credentials:', { studentEmail, parentEmail });
-      
-      // Try to sign up the test student
-      const { data: studentSignup, error: studentError } = await supabase.auth.signUp({
-        email: studentEmail,
-        password: studentPassword,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
+      // Call edge function to create verified accounts
+      const { data, error } = await supabase.functions.invoke('create-student-accounts', {
+        body: {
+          student_data: {
+            email: studentEmail,
+            first_name: 'Test',
+            last_name: 'Student',
+            password: studentPassword,
+            student_number: 'TEST001',
+            year_group: 'Year 7',
+            form_class: '7A',
+            emergency_contact_name: 'Test Parent',
+            emergency_contact_phone: '+44 7000 000000'
+          },
+          parent_data: {
+            email: parentEmail,
+            first_name: 'Test',
+            last_name: 'Parent',
+            password: parentPassword,
+            relationship: 'Parent'
+          },
+          school_id: '8cafd4e6-2974-4cf7-aa6e-39c70aef789f',
+          application_id: 'test-fixed-accounts'
         }
       });
-      
-      if (studentError && !studentError.message.includes('already registered')) {
-        throw new Error(`Student signup failed: ${studentError.message}`);
-      }
-      
-      // Try to sign up the test parent
-      const { data: parentSignup, error: parentError } = await supabase.auth.signUp({
-        email: parentEmail,
-        password: parentPassword,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
+
+      if (error) {
+        // If accounts already exist, that's fine
+        if (error.message?.includes('already registered') || error.message?.includes('duplicate key')) {
+          console.log('Accounts already exist, showing credentials');
+        } else {
+          throw error;
         }
-      });
-      
-      if (parentError && !parentError.message.includes('already registered')) {
-        throw new Error(`Parent signup failed: ${parentError.message}`);
       }
       
-      console.log('✅ Test accounts created or already exist');
+      console.log('✅ Test accounts ready');
       
       setTestCredentials({
         student: { email: studentEmail, password: studentPassword },
@@ -59,14 +66,21 @@ export function SimpleTestAccount() {
       
       toast({
         title: "Test Accounts Ready!",
-        description: "You can now log in with the credentials shown below",
+        description: "Verified accounts created. You can now log in immediately!",
       });
       
     } catch (error: any) {
       console.error('Error creating test account:', error);
+      
+      // Still show credentials even if there was an error - they might already exist
+      setTestCredentials({
+        student: { email: 'test.student@pappaya.academy', password: 'TestStudent123' },
+        parent: { email: 'test.parent@pappaya.academy', password: 'TestParent123' }
+      });
+      
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Accounts May Already Exist",
+        description: "Try logging in with the credentials below. If it fails, disable email confirmation in Supabase settings.",
         variant: "destructive"
       });
     } finally {
