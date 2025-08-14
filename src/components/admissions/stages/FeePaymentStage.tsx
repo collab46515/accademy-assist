@@ -343,7 +343,42 @@ export function FeePaymentStage({ applicationId, onMoveToNext }: FeePaymentStage
               <Mail className="h-4 w-4" />
               Send Payment Reminder
             </Button>
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2"
+              onClick={() => {
+                // Generate receipt for latest payment
+                const latestPayment = paymentSchedule.find(p => p.status === 'paid');
+                const receiptData = {
+                  receiptNumber: `RCP-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
+                  date: new Date().toLocaleDateString(),
+                  applicationId: applicationId,
+                  amount: latestPayment?.amount || 100,
+                  description: latestPayment?.description || 'Payment'
+                };
+                
+                // Create and download receipt
+                const receiptContent = `
+SCHOOL PAYMENT RECEIPT
+Receipt No: ${receiptData.receiptNumber}
+Date: ${receiptData.date}
+Application ID: ${receiptData.applicationId}
+Description: ${receiptData.description}
+Amount: £${receiptData.amount}
+Status: Payment Processed
+                `.trim();
+                
+                const blob = new Blob([receiptContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `receipt-${receiptData.receiptNumber}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+              }}
+            >
               <Receipt className="h-4 w-4" />
               Generate Receipt
             </Button>
