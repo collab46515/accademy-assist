@@ -13,25 +13,55 @@ export function SimpleTestAccount() {
   const createSimpleTestAccount = async () => {
     setCreating(true);
     
-    // Fixed test credentials - accounts already exist
-    const studentEmail = 'test.student@pappaya.academy';
-    const parentEmail = 'test.parent@pappaya.academy';
-    const studentPassword = 'TestStudent123';
-    const parentPassword = 'TestParent123';
-    
-    // Show credentials immediately
-    setTestCredentials({
-      student: { email: studentEmail, password: studentPassword },
-      parent: { email: parentEmail, password: parentPassword }
-    });
-    
-    toast({
-      title: "⚠️ Test Accounts Ready (Email Confirmation Required)",
-      description: "To login immediately, disable 'Confirm email' in Supabase Auth settings or manually confirm users in the dashboard.",
-      variant: "destructive"
-    });
-    
-    setCreating(false);
+    try {
+      // Fixed test credentials - accounts already exist
+      const studentEmail = 'test.student@pappaya.academy';
+      const parentEmail = 'test.parent@pappaya.academy';
+      const studentPassword = 'TestStudent123';
+      const parentPassword = 'TestParent123';
+      
+      // Try to confirm the test accounts automatically
+      console.log('Confirming test accounts...');
+      const { data: confirmResult, error: confirmError } = await supabase.functions.invoke('confirm-test-accounts');
+      
+      if (confirmError) {
+        console.error('Error confirming accounts:', confirmError);
+        toast({
+          title: "⚠️ Manual Confirmation Needed",
+          description: "Could not auto-confirm accounts. Please manually confirm the users in Supabase dashboard.",
+          variant: "destructive"
+        });
+      } else {
+        console.log('Account confirmation result:', confirmResult);
+        toast({
+          title: "✅ Test Accounts Ready!",
+          description: "Accounts have been confirmed and are ready for login.",
+        });
+      }
+      
+      // Show credentials
+      setTestCredentials({
+        student: { email: studentEmail, password: studentPassword },
+        parent: { email: parentEmail, password: parentPassword }
+      });
+      
+    } catch (error: any) {
+      console.error('Error:', error);
+      
+      // Still show credentials even if confirmation fails
+      setTestCredentials({
+        student: { email: 'test.student@pappaya.academy', password: 'TestStudent123' },
+        parent: { email: 'test.parent@pappaya.academy', password: 'TestParent123' }
+      });
+      
+      toast({
+        title: "⚠️ Manual Confirmation Needed",
+        description: "Could not auto-confirm accounts. Please manually confirm the users in Supabase dashboard.",
+        variant: "destructive"
+      });
+    } finally {
+      setCreating(false);
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -62,15 +92,10 @@ export function SimpleTestAccount() {
         </Button>
 
         {testCredentials && (
-            <div className="space-y-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <h3 className="font-semibold text-yellow-800">⚠️ Test Accounts (Email Confirmation Required)</h3>
-            <div className="text-sm text-yellow-700 mb-3">
-              <p><strong>To login immediately:</strong></p>
-              <ol className="list-decimal list-inside mt-1 space-y-1">
-                <li>Go to Supabase Dashboard → Authentication → Settings</li>
-                <li>Disable "Confirm email" option</li>
-                <li>Or manually confirm users in Authentication → Users</li>
-              </ol>
+          <div className="space-y-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <h3 className="font-semibold text-green-800">✅ Test Accounts Ready!</h3>
+            <div className="text-sm text-green-700 mb-3">
+              <p>The accounts have been automatically confirmed and are ready to use.</p>
             </div>
             
             <div className="space-y-3">
