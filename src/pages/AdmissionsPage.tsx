@@ -314,6 +314,13 @@ const AdmissionsPage = () => {
         <p className="text-muted-foreground">End-to-end digital admissions with e-signatures and document management</p>
       </div>
 
+      {/* Debug Test Component - Immediately Visible */}
+      <div className="mb-8 p-6 bg-red-50 border-2 border-red-300 rounded-lg">
+        <h2 className="text-xl font-bold text-red-800 mb-2">🚨 ENROLLMENT DEBUG TEST</h2>
+        <p className="text-red-700 mb-4">Click the button below to run the enrollment test and check console for detailed logs</p>
+        <TestEnrollmentProcessor />
+      </div>
+
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {stats.map((stat, index) => {
