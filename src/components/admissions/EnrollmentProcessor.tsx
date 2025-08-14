@@ -92,40 +92,51 @@ export function EnrollmentProcessor() {
         phone: enrollmentSourceData.student_phone || application.student_phone || null,
       };
 
+      // Build robust student data with temporary password
+      const studentTempPassword = `Temp${studentData.student_number}!`;
+      const studentDataWithAuth = {
+        ...studentData,
+        password: studentTempPassword
+      };
+
       // Extract parent data with better fallbacks
       const parentFullName = enrollmentSourceData.parent_name || application.parent_name || 'Parent Guardian';
       const parentNameParts = parentFullName.split(' ');
       const parentFirstName = parentNameParts[0] || 'Parent';
       const parentLastName = parentNameParts.slice(1).join(' ') || 'Guardian';
       
+      const parentTempPassword = `Parent${Date.now().toString().slice(-6)}!`;
       const parentData = {
         first_name: parentFirstName,
         last_name: parentLastName,
         email: enrollmentSourceData.parent_email || application.parent_email || null,
         phone: enrollmentSourceData.parent_phone || application.parent_phone || null,
-        relationship: enrollmentSourceData.parent_relationship || enrollmentSourceData.emergency_contact_relationship || 'Parent'
+        relationship: enrollmentSourceData.parent_relationship || enrollmentSourceData.emergency_contact_relationship || 'Parent',
+        password: parentTempPassword
       };
 
       console.log('Creating complete student enrollment with data:', { 
         applicationNumber: application.application_number,
-        studentData, 
+        studentData: studentDataWithAuth, 
         parentData,
         sourceDataKeys: Object.keys(enrollmentSourceData)
       });
 
       // Create complete student enrollment with student and parent accounts
       const { data, error } = await supabase
-        .rpc('create_complete_student_enrollment', {
-          student_data: studentData,
-          parent_data: parentData,
-          school_id: application.school_id,
-          application_id: application.id
+        .functions.invoke('create-student-accounts', {
+          body: {
+            student_data: studentDataWithAuth,
+            parent_data: parentData,
+            school_id: application.school_id,
+            application_id: application.id
+          }
         });
 
       if (error) {
         console.error('❌ ERROR creating complete student enrollment for', application.application_number);
         console.error('Full error details:', error);
-        console.error('Student data:', studentData);
+        console.error('Student data:', studentDataWithAuth);
         console.error('Parent data:', parentData);
         console.error('School ID:', application.school_id);
         console.error('Application ID:', application.id);
@@ -143,8 +154,8 @@ export function EnrollmentProcessor() {
           studentData: {
             email: enrollmentData.student_email,
             name: enrollmentSourceData.student_name || application.student_name || 'Student',
-            studentNumber: studentData.student_number,
-            yearGroup: studentData.year_group,
+            studentNumber: studentDataWithAuth.student_number,
+            yearGroup: studentDataWithAuth.year_group,
             tempPassword: enrollmentData.student_temp_password
           },
           parentData: enrollmentData.parent_email ? {
