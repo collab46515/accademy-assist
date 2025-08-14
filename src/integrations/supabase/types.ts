@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
@@ -6388,6 +6388,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "student_parents_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "student_parents_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
@@ -7182,20 +7189,20 @@ export type Database = {
       }
       create_complete_student_enrollment: {
         Args: {
-          student_data: Json
-          parent_data: Json
-          school_id: string
           application_id: string
           created_by?: string
+          parent_data: Json
+          school_id: string
+          student_data: Json
         }
         Returns: Json
       }
       create_employee_with_user: {
-        Args: { employee_data: Json; created_by?: string }
+        Args: { created_by?: string; employee_data: Json }
         Returns: Json
       }
       create_student_with_user: {
-        Args: { student_data: Json; school_id: string; created_by?: string }
+        Args: { created_by?: string; school_id: string; student_data: Json }
         Returns: Json
       }
       generate_comprehensive_demo_data: {
@@ -7208,27 +7215,27 @@ export type Database = {
       }
       generate_report_card_data: {
         Args: {
-          p_student_id: string
           p_academic_term: string
           p_academic_year: string
+          p_student_id: string
         }
         Returns: Json
       }
       get_user_roles: {
-        Args: { user_uuid: string; school_uuid?: string }
+        Args: { school_uuid?: string; user_uuid: string }
         Returns: {
+          department: string
           role: Database["public"]["Enums"]["app_role"]
           school_id: string
-          department: string
           year_group: string
         }[]
       }
       has_permission: {
         Args: {
-          user_uuid: string
-          school_uuid: string
-          resource: Database["public"]["Enums"]["resource_type"]
           permission: Database["public"]["Enums"]["permission_type"]
+          resource: Database["public"]["Enums"]["resource_type"]
+          school_uuid: string
+          user_uuid: string
         }
         Returns: boolean
       }
