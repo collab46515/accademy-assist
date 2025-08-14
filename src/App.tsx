@@ -71,6 +71,7 @@ import AdministrationPage from "./pages/AdministrationPage";
 import SchoolSettingsPage from "./pages/SchoolSettingsPage";
 import VirtualClassroomPage from "./pages/VirtualClassroomPage";
 import AIClassroomPage from "./pages/AIClassroomPage";
+import EnrollmentTestPage from "./pages/EnrollmentTestPage";
 
 const queryClient = new QueryClient();
 
@@ -112,6 +113,7 @@ const App = () => (
              <Route path="/admissions" element={<UnifiedAdmissionsPage />} />
              <Route path="/admissions/new" element={<NewApplicationsPage />} />
              <Route path="/admissions/enroll" element={<EnrollmentPage />} />
+             <Route path="/admissions/test" element={<EnrollmentTestPage />} />
              <Route path="/admissions/exit/*" element={<StudentExitPage />} />
              <Route path="/legacy-admissions" element={<AdmissionsPage />} />
             <Route path="/admin-management" element={<AdminManagementPage />} />
