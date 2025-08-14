@@ -13,24 +13,51 @@ export function SimpleTestAccount() {
   const createSimpleTestAccount = async () => {
     setCreating(true);
     
-    // Fixed test credentials - accounts already exist
-    const studentEmail = 'test.student@pappaya.academy';
-    const parentEmail = 'test.parent@pappaya.academy';
-    const studentPassword = 'TestStudent123';
-    const parentPassword = 'TestParent123';
-    
-    // Just show credentials immediately since accounts exist
-    setTestCredentials({
-      student: { email: studentEmail, password: studentPassword },
-      parent: { email: parentEmail, password: parentPassword }
-    });
-    
-    toast({
-      title: "Test Accounts Ready!",
-      description: "These accounts already exist. If login fails, you may need to disable 'Confirm email' in Supabase Auth settings.",
-    });
-    
-    setCreating(false);
+    try {
+      // Fixed test credentials
+      const studentEmail = 'test.student@pappaya.academy';
+      const parentEmail = 'test.parent@pappaya.academy';
+      const studentPassword = 'TestStudent123';
+      const parentPassword = 'TestParent123';
+      
+      // Try to confirm the test accounts first
+      console.log('Confirming test accounts...');
+      const { data: confirmResult, error: confirmError } = await supabase.functions.invoke('confirm-test-accounts');
+      
+      if (confirmError) {
+        console.error('Error confirming accounts:', confirmError);
+      } else {
+        console.log('Account confirmation result:', confirmResult);
+      }
+      
+      // Show credentials
+      setTestCredentials({
+        student: { email: studentEmail, password: studentPassword },
+        parent: { email: parentEmail, password: parentPassword }
+      });
+      
+      toast({
+        title: "Test Accounts Ready!",
+        description: "Accounts have been confirmed and are ready for login.",
+      });
+      
+    } catch (error: any) {
+      console.error('Error:', error);
+      
+      // Still show credentials 
+      setTestCredentials({
+        student: { email: 'test.student@pappaya.academy', password: 'TestStudent123' },
+        parent: { email: 'test.parent@pappaya.academy', password: 'TestParent123' }
+      });
+      
+      toast({
+        title: "Accounts Ready (Manual Confirmation Needed)",
+        description: "If login fails, disable 'Confirm email' in Supabase Auth settings or use the credentials below.",
+        variant: "destructive"
+      });
+    } finally {
+      setCreating(false);
+    }
   };
 
   const copyToClipboard = (text: string) => {
