@@ -19,6 +19,11 @@ export function PortalRouter() {
   const [activePortal, setActivePortal] = useState('management');
   const [showDebug, setShowDebug] = useState(false);
 
+  // TEMPORARY: Show current user email prominently
+  if (user) {
+    console.log('🚨 CURRENT USER:', user.email);
+  }
+
   // Debug information
   const debugInfo = {
     user: user ? { id: user.id, email: user.email } : null,
@@ -36,6 +41,10 @@ export function PortalRouter() {
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">Loading your portal...</p>
+          <div className="mt-4 p-4 bg-red-100 border border-red-300 rounded-lg max-w-md mx-auto">
+            <p className="text-red-800 font-medium">🚨 CURRENT USER: {user?.email || 'No user'}</p>
+            <p className="text-sm text-red-600 mt-1">If this is not "test.parent@pappaya.academy", you need to log out and login correctly!</p>
+          </div>
           <Button 
             variant="outline" 
             size="sm" 
