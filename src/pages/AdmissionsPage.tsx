@@ -1,6 +1,7 @@
 import { useState } from "react";
 import React from "react";
 import { ApplicationManagement } from "@/components/admissions/ApplicationManagement";
+import { TestEnrollmentProcessor } from "@/components/admissions/TestEnrollmentProcessor";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -343,6 +344,11 @@ const AdmissionsPage = () => {
 
         <TabsContent value="management" className="space-y-6">
           <ApplicationManagement initialFilter={filterStage} />
+          
+          {/* Debug Test Component - Remove after fixing enrollment issues */}
+          <div className="mt-8">
+            <TestEnrollmentProcessor />
+          </div>
         </TabsContent>
 
         <TabsContent value="applications" className="space-y-6">
