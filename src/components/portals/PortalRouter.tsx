@@ -94,6 +94,23 @@ export function PortalRouter() {
 
   // Check if user is admin (super admin or school admin)
   const isAdmin = isSuperAdmin() || isSchoolAdmin();
+  
+  // Debug logging - remove after testing
+  console.log('🔍 Portal Debug:', {
+    userEmail: user?.email,
+    userRoles: userRoles,
+    isSuperAdmin: isSuperAdmin(),
+    isSchoolAdmin: isSchoolAdmin(),
+    isAdmin: isAdmin,
+    currentSchool: currentSchool?.name,
+    getUserType: (() => {
+      const hasHODRole = userRoles.some(role => role.role === 'hod');
+      const hasTeacherRole = userRoles.some(role => ['teacher'].includes(role.role));
+      const hasParentRole = userRoles.some(role => role.role === 'parent');
+      const hasStudentRole = userRoles.some(role => role.role === 'student');
+      return { hasHODRole, hasTeacherRole, hasParentRole, hasStudentRole };
+    })()
+  });
 
   // If user is admin, show all portals with tabs
   if (isAdmin) {
