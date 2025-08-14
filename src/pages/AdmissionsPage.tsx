@@ -2,6 +2,7 @@ import { useState } from "react";
 import React from "react";
 import { ApplicationManagement } from "@/components/admissions/ApplicationManagement";
 import { TestEnrollmentProcessor } from "@/components/admissions/TestEnrollmentProcessor";
+import { ResendEnrollmentEmails } from "@/components/admin/ResendEnrollmentEmails";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -355,6 +356,13 @@ const AdmissionsPage = () => {
             <h2 className="text-lg font-semibold text-yellow-800 mb-2">🔧 Debug Test (Temporary)</h2>
             <p className="text-yellow-700 text-sm mb-4">Use this to test the enrollment process and get detailed error logs</p>
             <TestEnrollmentProcessor />
+          </div>
+          
+          {/* Resend Enrollment Emails */}
+          <div className="mb-8 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <h2 className="text-lg font-semibold text-green-800 mb-2">📧 Resend Enrollment Emails</h2>
+            <p className="text-green-700 text-sm mb-4">Resend welcome emails with login credentials to all enrolled students and parents</p>
+            <ResendEnrollmentEmails />
           </div>
           
           <ApplicationManagement initialFilter={filterStage} />
