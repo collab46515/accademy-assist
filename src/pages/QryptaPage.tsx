@@ -23,6 +23,7 @@ import {
   GraduationCap,
   Sparkles,
   Eye,
+  Edit,
 } from "lucide-react";
 
 const QryptaPage = () => {
