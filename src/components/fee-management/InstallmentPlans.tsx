@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, Edit, Trash2, Calendar, CreditCard, Download, Eye, Users } from 'lucide-react';
-import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface InstallmentPlan {
   id: string;
@@ -102,9 +102,21 @@ export const InstallmentPlans = () => {
     setShowEditDialog(true);
   };
 
-  const handleDeletePlan = (planId: string) => {
-    setPlans(plans.filter(plan => plan.id !== planId));
-    toast.success('Installment plan deleted successfully');
+  const handleDeletePlan = async (planId: string) => {
+    try {
+      const { error } = await supabase
+        .from('installment_plans')
+        .delete()
+        .eq('id', planId);
+
+      if (error) throw error;
+
+      setPlans(plans.filter(plan => plan.id !== planId));
+      toast.success('Installment plan deleted successfully');
+    } catch (error) {
+      console.error('Error deleting plan:', error);
+      toast.error('Failed to delete installment plan');
+    }
   };
 
   const downloadCSV = (data: any[], filename: string) => {
@@ -161,9 +173,41 @@ export const InstallmentPlans = () => {
     }
   };
 
-  const handleCreatePlan = () => {
-    toast.success('Installment plan created successfully');
-    setShowCreateDialog(false);
+  const handleCreatePlan = async () => {
+    try {
+      const newPlan = {
+        name: `New Installment Plan ${plans.length + 1}`,
+        total_amount: 5000,
+        installments_count: 3,
+        frequency: 'monthly',
+        status: 'active',
+        created_at: new Date().toISOString(),
+        school_id: 'current-school-id' // Replace with actual school ID
+      };
+
+      const { data, error } = await supabase
+        .from('installment_plans')
+        .insert([newPlan])
+        .select();
+
+      if (error) throw error;
+
+      // Add to local state
+      setPlans([...plans, {
+        id: data[0].id,
+        name: newPlan.name,
+        duration: '3 months',
+        totalAmount: newPlan.total_amount,
+        studentsEnrolled: 0,
+        status: 'active'
+      }]);
+
+      toast.success('Installment plan created successfully');
+      setShowCreateDialog(false);
+    } catch (error) {
+      console.error('Error creating plan:', error);
+      toast.error('Failed to create installment plan');
+    }
   };
 
   const totalStudentsEnrolled = plans.reduce((sum, plan) => sum + plan.studentsEnrolled, 0);

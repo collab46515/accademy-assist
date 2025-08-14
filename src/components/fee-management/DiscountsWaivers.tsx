@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Edit, Trash2, Percent, Gift, Users, TrendingDown, Download, FileText, CheckCircle, XCircle, Eye } from 'lucide-react';
-import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Discount {
   id: string;
@@ -154,18 +154,35 @@ export const DiscountsWaivers = () => {
     }
   };
 
-  const handleApproveWaiver = (waiverId: string) => {
-    setWaivers(waivers.map(waiver => 
-      waiver.id === waiverId 
-        ? { 
-            ...waiver, 
-            status: 'approved',
-            approvedBy: 'Current User',
-            approvalDate: new Date().toISOString().split('T')[0]
-          }
-        : waiver
-    ));
-    toast.success('Waiver approved successfully');
+  const handleApproveWaiver = async (waiverId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('fee_waivers')
+        .update({ 
+          status: 'approved',
+          approved_by: (await supabase.auth.getUser()).data.user?.id,
+          approval_date: new Date().toISOString()
+        })
+        .eq('id', waiverId)
+        .select();
+
+      if (error) throw error;
+
+      setWaivers(waivers.map(waiver => 
+        waiver.id === waiverId 
+          ? { 
+              ...waiver, 
+              status: 'approved',
+              approvedBy: 'Current User',
+              approvalDate: new Date().toISOString().split('T')[0]
+            }
+          : waiver
+      ));
+      toast.success('Waiver approved successfully');
+    } catch (error) {
+      console.error('Error approving waiver:', error);
+      toast.error('Failed to approve waiver');
+    }
   };
 
   const handleRejectWaiver = (waiverId: string) => {
@@ -182,9 +199,21 @@ export const DiscountsWaivers = () => {
     toast.success('Waiver rejected');
   };
 
-  const handleDeleteDiscount = (discountId: string) => {
-    setDiscounts(discounts.filter(discount => discount.id !== discountId));
-    toast.success('Discount deleted successfully');
+  const handleDeleteDiscount = async (discountId: string) => {
+    try {
+      const { error } = await supabase
+        .from('fee_discounts')
+        .delete()
+        .eq('id', discountId);
+
+      if (error) throw error;
+
+      setDiscounts(discounts.filter(discount => discount.id !== discountId));
+      toast.success('Discount deleted successfully');
+    } catch (error) {
+      console.error('Error deleting discount:', error);
+      toast.error('Failed to delete discount');
+    }
   };
 
   const downloadCSV = (data: any[], filename: string) => {

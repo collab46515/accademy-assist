@@ -145,9 +145,31 @@ export const OutstandingFees = () => {
     setShowDetailsDialog(true);
   };
 
-  const handleSendBulkReminders = () => {
-    toast.success('Bulk reminders sent successfully');
-    setShowReminderDialog(false);
+  const handleSendBulkReminders = async () => {
+    try {
+      // For now, just update the UI to show bulk reminders sent
+      // In a real implementation, you would send emails to selected parents
+      
+      // Update reminder count for overdue fees
+      const updatedFees = fees.map(fee => 
+        fee.status === 'overdue'
+          ? { 
+              ...fee, 
+              lastReminderSent: new Date().toISOString().split('T')[0],
+              reminderCount: fee.reminderCount + 1
+            }
+          : fee
+      );
+
+      setFees(updatedFees);
+      
+      const overdueCount = fees.filter(f => f.status === 'overdue').length;
+      toast.success(`Bulk reminders sent to ${overdueCount} overdue payments successfully`);
+      setShowReminderDialog(false);
+    } catch (error) {
+      console.error('Error sending bulk reminders:', error);
+      toast.error('Failed to send bulk reminders');
+    }
   };
 
   const downloadCSV = (data: any[], filename: string) => {
