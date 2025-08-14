@@ -363,6 +363,20 @@ export function EmployeeForm({
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
+          {employee && (
+            <Button 
+              type="button" 
+              variant="destructive" 
+              onClick={() => {
+                if (confirm('Are you sure you want to delete this employee?')) {
+                  console.log('Delete employee:', employee.id);
+                  // Delete functionality to be implemented
+                }
+              }}
+            >
+              Delete Employee
+            </Button>
+          )}
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Saving...' : employee ? 'Update Employee' : 'Create Employee'}
           </Button>

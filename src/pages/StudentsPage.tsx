@@ -74,10 +74,39 @@ export default function StudentsPage() {
           </p>
         </div>
         {canManageStudents && (
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Student
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline"
+              onClick={() => {
+                toast({
+                  title: "Bulk Import",
+                  description: "Bulk import functionality will be implemented soon.",
+                });
+              }}
+            >
+              Bulk Import
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => {
+                toast({
+                  title: "Export Students",
+                  description: "Student export functionality will be implemented soon.",
+                });
+              }}
+            >
+              Export Students
+            </Button>
+            <Button onClick={() => {
+              toast({
+                title: "Add Student",
+                description: "Student creation form will be implemented soon.",
+              });
+            }}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Student
+            </Button>
+          </div>
         )}
       </div>
 

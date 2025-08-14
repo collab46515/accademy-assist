@@ -866,7 +866,14 @@ export function FeeDashboard() {
                         <Badge variant={getPriorityColor(alert.priority) as any} className="text-xs">
                           {alert.priority}
                         </Badge>
-                        <Button variant="ghost" size="sm" className="text-xs">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-xs"
+                          onClick={() => {
+                            console.log('Alert action triggered for:', alert.title);
+                          }}
+                        >
                           Action
                         </Button>
                       </div>

@@ -384,6 +384,18 @@ export function ReportCardGenerator({ open, onOpenChange, mode, onGenerationComp
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {loading ? 'Generating...' : `Generate ${mode === 'individual' ? 'Report' : 'Reports'}`}
             </Button>
+            {yearGroup && mode !== 'individual' && (
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  console.log('Bulk generate all reports for year group:', yearGroup);
+                  // Bulk generate functionality to be implemented
+                }}
+                disabled={loading}
+              >
+                Bulk Generate All
+              </Button>
+            )}
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>

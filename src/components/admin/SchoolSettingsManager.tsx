@@ -520,7 +520,17 @@ export function SchoolSettingsManager() {
             </Card>
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                if (confirm('Are you sure you want to reset all settings to default values?')) {
+                  console.log('Reset settings functionality to be implemented');
+                }
+              }}
+            >
+              Reset to Defaults
+            </Button>
             <Button onClick={saveSchoolInfo} disabled={saving} className="gap-2">
               <Save className="h-4 w-4" />
               {saving ? 'Saving...' : 'Save School Information'}
@@ -959,7 +969,17 @@ export function SchoolSettingsManager() {
             </Card>
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                if (confirm('Are you sure you want to reset all system settings to default values?')) {
+                  console.log('Reset system settings functionality to be implemented');
+                }
+              }}
+            >
+              Reset to Defaults
+            </Button>
             <Button onClick={saveSettings} disabled={saving} className="gap-2">
               <Save className="h-4 w-4" />
               {saving ? 'Saving...' : 'Save Settings'}
