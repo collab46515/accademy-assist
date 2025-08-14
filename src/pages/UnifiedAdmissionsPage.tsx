@@ -17,6 +17,7 @@ import { EnrollmentProcessor } from "@/components/admissions/EnrollmentProcessor
 import { StageNavigator } from "@/components/admissions/StageNavigator";
 import { EnhancedWorkflowManager } from "@/components/admissions/EnhancedWorkflowManager";
 import { StudentIntegrationVerifier } from "@/components/admissions/StudentIntegrationVerifier";
+import { ResendEnrollmentEmails } from "@/components/admin/ResendEnrollmentEmails";
 import { ArrowLeft, UserPlus, FileText, Phone, Globe, Calendar, Upload } from "lucide-react";
 
 const UnifiedAdmissionsPage = () => {
@@ -254,6 +255,13 @@ const UnifiedAdmissionsPage = () => {
         {/* Enrollment Processor Tab */}
         <TabsContent value="processor" className="space-y-6">
           <EnrollmentProcessor />
+          
+          {/* Resend Enrollment Emails */}
+          <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <h2 className="text-lg font-semibold text-green-800 mb-2">📧 Resend Enrollment Emails</h2>
+            <p className="text-green-700 text-sm mb-4">Resend welcome emails with login credentials to all enrolled students and parents</p>
+            <ResendEnrollmentEmails />
+          </div>
         </TabsContent>
 
         {/* Student Integration Tab */}
