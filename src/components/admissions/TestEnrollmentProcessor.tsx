@@ -13,107 +13,96 @@ export function TestEnrollmentProcessor() {
     setResult(null);
 
     try {
-      console.log('🧪 Starting direct enrollment test...');
+      console.log('🧪 Starting test enrollment with auth users...');
 
-      // Test 1: Create student profile directly
-      const studentUserId = crypto.randomUUID();
-      const studentEmail = `test-student-${Date.now()}@example.com`;
-      
-      console.log('Step 1: Creating student profile...');
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          user_id: studentUserId,
+      // Create test student data
+      const studentEmail = `test-student-${Date.now()}@pappaya.academy`;
+      const parentEmail = `test-parent-${Date.now()}@pappaya.academy`;
+      const studentPassword = `TestStudent123!`;
+      const parentPassword = `TestParent123!`;
+
+      const studentData = {
+        email: studentEmail,
+        first_name: 'Test',
+        last_name: 'Student',
+        password: studentPassword,
+        student_number: `TEST${Date.now()}`,
+        year_group: 'Year 7',
+        form_class: '7A',
+        emergency_contact_name: 'Test Parent',
+        emergency_contact_phone: '+44 7000 000000'
+      };
+
+      const parentData = {
+        email: parentEmail,
+        first_name: 'Test',
+        last_name: 'Parent',
+        password: parentPassword,
+        relationship: 'Parent'
+      };
+
+      console.log('Step 1: Creating auth users and database records...');
+      const { data: enrollmentResult, error: enrollmentError } = await supabase
+        .functions.invoke('create-student-accounts', {
+          body: {
+            student_data: studentData,
+            parent_data: parentData,
+            school_id: '8cafd4e6-2974-4cf7-aa6e-39c70aef789f',
+            application_id: `test-app-${Date.now()}`
+          }
+        });
+
+      if (enrollmentError) {
+        console.error('❌ Enrollment failed:', enrollmentError);
+        throw new Error(`Enrollment failed: ${enrollmentError.message}`);
+      }
+
+      console.log('✅ Enrollment successful:', enrollmentResult);
+
+      // Send test email
+      console.log('Step 2: Sending test email...');
+      const emailData = {
+        studentData: {
           email: studentEmail,
-          first_name: 'Test',
-          last_name: 'Student',
-          must_change_password: true
-        })
-        .select()
-        .single();
-
-      if (profileError) {
-        console.error('❌ Profile creation failed:', profileError);
-        throw new Error(`Profile creation failed: ${profileError.message}`);
-      }
-      console.log('✅ Profile created:', profileData);
-
-      // Test 2: Create student record
-      console.log('Step 2: Creating student record...');
-      const { data: studentData, error: studentError } = await supabase
-        .from('students')
-        .insert({
-          user_id: studentUserId,
-          school_id: '8cafd4e6-2974-4cf7-aa6e-39c70aef789f',
-          student_number: `TEST${Date.now()}`,
-          year_group: 'Year 7',
-          is_enrolled: true
-        })
-        .select()
-        .single();
-
-      if (studentError) {
-        console.error('❌ Student creation failed:', studentError);
-        throw new Error(`Student creation failed: ${studentError.message}`);
-      }
-      console.log('✅ Student created:', studentData);
-
-      // Test 3: Create parent profile
-      const parentUserId = crypto.randomUUID();
-      const parentEmail = `test-parent-${Date.now()}@example.com`;
-      
-      console.log('Step 3: Creating parent profile...');
-      const { data: parentProfileData, error: parentProfileError } = await supabase
-        .from('profiles')
-        .insert({
-          user_id: parentUserId,
+          name: 'Test Student',
+          studentNumber: studentData.student_number,
+          yearGroup: studentData.year_group,
+          tempPassword: studentPassword
+        },
+        parentData: {
           email: parentEmail,
-          first_name: 'Test',
-          last_name: 'Parent',
-          must_change_password: true
-        })
-        .select()
-        .single();
-
-      if (parentProfileError) {
-        console.error('❌ Parent profile creation failed:', parentProfileError);
-        throw new Error(`Parent profile creation failed: ${parentProfileError.message}`);
-      }
-      console.log('✅ Parent profile created:', parentProfileData);
-
-      // Test 4: Link parent to student
-      console.log('Step 4: Linking parent to student...');
-      console.log('Student ID for linking:', studentData.id);
-      console.log('Parent User ID for linking:', parentUserId);
-      
-      const { data: linkData, error: linkError } = await supabase
-        .from('student_parents')
-        .insert({
-          student_id: studentData.id, // This should be the students.id
-          parent_id: parentUserId,    // This should be the parent's user_id
+          name: 'Test Parent',
+          tempPassword: parentPassword,
           relationship: 'Parent'
-        })
-        .select()
-        .single();
+        },
+        schoolName: 'Pappaya Academy'
+      };
 
-      if (linkError) {
-        console.error('❌ Parent-Student linking failed:', linkError);
-        console.error('Full error object:', JSON.stringify(linkError, null, 2));
-        throw new Error(`Parent-Student linking failed: ${linkError.message}`);
+      const { data: emailResult, error: emailError } = await supabase
+        .functions.invoke('send-enrollment-emails', {
+          body: emailData
+        });
+
+      if (emailError) {
+        console.warn('Email sending failed:', emailError);
+      } else {
+        console.log('✅ Test emails sent:', emailResult);
       }
-      console.log('✅ Parent-Student link created:', linkData);
 
       setResult({
         success: true,
-        studentData,
-        parentProfileData,
-        linkData,
-        message: 'Direct enrollment test successful!'
+        credentials: {
+          student: { email: studentEmail, password: studentPassword },
+          parent: { email: parentEmail, password: parentPassword }
+        },
+        enrollmentResult,
+        emailResult,
+        message: 'Test enrollment with auth users successful!'
       });
 
       toast({
         title: "Test Successful",
-        description: "Direct enrollment test completed successfully!",
+        description: `Created test accounts - Student: ${studentEmail} | Parent: ${parentEmail}`,
       });
 
     } catch (error: any) {
@@ -137,9 +126,9 @@ export function TestEnrollmentProcessor() {
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>🧪 Test Enrollment Processor</CardTitle>
+        <CardTitle>🧪 Create Test Login Account</CardTitle>
         <p className="text-muted-foreground">
-          Test direct database enrollment to debug foreign key issues
+          Create a test student and parent with working login credentials
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -148,7 +137,7 @@ export function TestEnrollmentProcessor() {
           disabled={processing}
           className="w-full"
         >
-          {processing ? 'Testing...' : 'Run Direct Enrollment Test'}
+          {processing ? 'Creating Test Accounts...' : 'Create Test Login Accounts'}
         </Button>
 
         {result && (
