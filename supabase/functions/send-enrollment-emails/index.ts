@@ -89,7 +89,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     emails.push({
-      from: `${schoolName} Admissions <onboarding@resend.dev>`,
+      from: `${schoolName} Admissions <admissions@pappaya.academy>`,
       to: [studentData.email],
       subject: `Welcome to ${schoolName} - Your Student Portal Access`,
       html: studentEmailHtml,
@@ -157,7 +157,7 @@ const handler = async (req: Request): Promise<Response> => {
       `;
 
       emails.push({
-        from: `${schoolName} <onboarding@resend.dev>`,
+        from: `${schoolName} <admissions@pappaya.academy>`,
         to: [parentData.email],
         subject: `Parent Portal Access - ${studentData.name} at ${schoolName}`,
         html: parentEmailHtml,
