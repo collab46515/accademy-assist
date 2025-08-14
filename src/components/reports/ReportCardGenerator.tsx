@@ -387,9 +387,71 @@ export function ReportCardGenerator({ open, onOpenChange, mode, onGenerationComp
             {yearGroup && mode !== 'individual' && (
               <Button
                 variant="secondary"
-                onClick={() => {
-                  console.log('Bulk generate all reports for year group:', yearGroup);
-                  // Bulk generate functionality to be implemented
+                onClick={async () => {
+                  if (!yearGroup || !academicTerm || !academicYear) return;
+                  setLoading(true);
+                  try {
+                    const studentsToProcess = await fetchStudentsForBulk();
+                    
+                    if (studentsToProcess.length === 0) {
+                      toast({
+                        title: "No Students Found",
+                        description: "No students found in the selected year group.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+
+                    let successCount = 0;
+                    let errorCount = 0;
+
+                    for (const student of studentsToProcess) {
+                      try {
+                        await supabase
+                          .from('report_cards')
+                          .insert({
+                            student_id: student.id,
+                            student_name: `${student.first_name} ${student.last_name}`,
+                            school_id: '550e8400-e29b-41d4-a716-446655440000',
+                            academic_year: academicYear,
+                            academic_term: academicTerm,
+                            year_group: yearGroup,
+                            class_name: yearGroup,
+                            teacher_id: '550e8400-e29b-41d4-a716-446655440100',
+                            teacher_name: 'Current Teacher',
+                            generated_by: '550e8400-e29b-41d4-a716-446655440200',
+                            status: 'draft',
+                            grades_data: [],
+                            attendance_data: {},
+                            comments_data: {},
+                            effort_data: {},
+                            curriculum_coverage: {},
+                            targets: []
+                          });
+                        successCount++;
+                      } catch (error) {
+                        console.error(`Error generating report for ${student.first_name} ${student.last_name}:`, error);
+                        errorCount++;
+                      }
+                    }
+
+                    toast({
+                      title: "Bulk Generation Completed",
+                      description: `Generated ${successCount} report cards successfully${errorCount > 0 ? `, ${errorCount} failed` : ''}`,
+                    });
+                    
+                    onGenerationComplete?.();
+                    onOpenChange(false);
+                  } catch (error) {
+                    console.error('Error in bulk generation:', error);
+                    toast({
+                      title: "Generation Failed",
+                      description: "There was an error generating the report cards. Please try again.",
+                      variant: "destructive",
+                    });
+                  } finally {
+                    setLoading(false);
+                  }
                 }}
                 disabled={loading}
               >

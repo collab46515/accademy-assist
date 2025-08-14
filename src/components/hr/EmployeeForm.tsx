@@ -367,10 +367,20 @@ export function EmployeeForm({
             <Button 
               type="button" 
               variant="destructive" 
-              onClick={() => {
-                if (confirm('Are you sure you want to delete this employee?')) {
-                  console.log('Delete employee:', employee.id);
-                  // Delete functionality to be implemented
+              onClick={async () => {
+                if (confirm('Are you sure you want to delete this employee? This action cannot be undone.')) {
+                  try {
+                    // Update employee status to terminated instead of actual deletion
+                    await onSubmit({
+                      ...employee,
+                      status: 'terminated',
+                      work_type: employee.work_type,
+                      salary: employee.salary
+                    });
+                    onCancel(); // Close the form
+                  } catch (error) {
+                    console.error('Error terminating employee:', error);
+                  }
                 }
               }}
             >

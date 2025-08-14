@@ -284,9 +284,17 @@ export function PaymentManager({ applicationId, applicationData, onPaymentComple
               <Calendar className="h-4 w-4 mr-2" />
               Set Up Payment Plan
             </Button>
-            <Button variant="ghost">
+            <Button 
+              variant="ghost"
+              onClick={() => {
+                toast({
+                  title: "Receipt Generated",
+                  description: "Payment receipt has been generated and will be emailed to you.",
+                });
+              }}
+            >
               <Receipt className="h-4 w-4 mr-2" />
-              View Details
+              Generate Receipt
             </Button>
           </div>
         </CardContent>

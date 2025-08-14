@@ -973,8 +973,41 @@ export function SchoolSettingsManager() {
             <Button 
               variant="outline" 
               onClick={() => {
-                if (confirm('Are you sure you want to reset all system settings to default values?')) {
-                  console.log('Reset system settings functionality to be implemented');
+                if (confirm('Are you sure you want to reset all system settings to default values? This action cannot be undone.')) {
+                  const defaultSettings: SchoolSettings = {
+                    attendance_settings: {
+                      auto_mark_absent_after_minutes: 30,
+                      require_parent_approval: true,
+                      send_daily_reports: true
+                    },
+                    communication_settings: {
+                      enable_sms: true,
+                      enable_email: true,
+                      enable_push_notifications: true,
+                      default_language: 'en'
+                    },
+                    security_settings: {
+                      password_policy: {
+                        min_length: 8,
+                        require_uppercase: true,
+                        require_numbers: true,
+                        require_symbols: false
+                      },
+                      session_timeout_minutes: 480,
+                      two_factor_required: false
+                    },
+                    academic_settings: {
+                      grading_system: 'percentage',
+                      pass_marks: 40,
+                      academic_terms: 3,
+                      working_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+                    }
+                  };
+                  setSchoolSettings(defaultSettings);
+                  toast({
+                    title: "Settings Reset",
+                    description: "All system settings have been reset to default values. Don't forget to save.",
+                  });
                 }
               }}
             >

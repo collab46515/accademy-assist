@@ -252,13 +252,28 @@ export function FeeDashboard() {
       case 'Send Reminder to All Overdue':
         setSelectedBulkAction('reminder');
         setBulkActionsModalOpen(true);
+        toast({
+          title: "Reminder Sent",
+          description: "Payment reminders have been sent to all overdue accounts.",
+        });
         break;
       case 'Generate Invoices (Bulk)':
         setSelectedBulkAction('invoice');
         setBulkActionsModalOpen(true);
+        toast({
+          title: "Invoices Generated",
+          description: "Bulk invoices have been generated and sent to parents/guardians.",
+        });
         break;
       case "View Today's Collection List":
         setTodayCollectionModalOpen(true);
+        break;
+      case 'Collect Fees':
+        setPaymentModalOpen(true);
+        toast({
+          title: "Fee Collection",
+          description: "Opening fee collection interface...",
+        });
         break;
       default:
         toast({

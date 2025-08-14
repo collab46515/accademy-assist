@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon, Send, Clock, Users, FileText, Tag } from 'lucide-react';
 import { format } from 'date-fns';
 import { useCommunicationData, Communication, CommunicationTemplate } from '@/hooks/useCommunicationData';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 interface CommunicationFormProps {
@@ -30,6 +31,7 @@ const CommunicationForm: React.FC<CommunicationFormProps> = ({
   selectedTemplate
 }) => {
   const { createCommunication, updateCommunication, isSubmitting } = useCommunicationData();
+  const { toast } = useToast();
   
   const [formData, setFormData] = useState({
     title: '',
@@ -438,6 +440,28 @@ const CommunicationForm: React.FC<CommunicationFormProps> = ({
                 Send Now
               </Button>
             )}
+            
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (formData.is_scheduled && formData.scheduled_for) {
+                  handleSubmit('submit_for_approval');
+                  toast({
+                    title: "Communication Scheduled",
+                    description: `Communication has been scheduled for ${formData.scheduled_for.toLocaleDateString()}`,
+                  });
+                } else {
+                  toast({
+                    title: "Schedule Required",
+                    description: "Please set a scheduled date and time to schedule this communication.",
+                    variant: "destructive"
+                  });
+                }
+              }}
+              disabled={isSubmitting}
+            >
+              Schedule Communication
+            </Button>
           </div>
         </div>
       </DialogContent>
