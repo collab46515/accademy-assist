@@ -94,16 +94,6 @@ export function PortalRouter() {
 
   // Check if user is admin (super admin or school admin)
   const isAdmin = isSuperAdmin() || isSchoolAdmin();
-  
-  // Debug admin check - remove after testing
-  console.log('🔍 RBAC Debug:', {
-    email: user?.email,
-    userRoles,
-    isSuperAdmin: isSuperAdmin(),
-    isSchoolAdmin: isSchoolAdmin(),
-    isAdmin,
-    currentSchool: currentSchool?.name
-  });
 
   // If user is admin, show all portals with tabs
   if (isAdmin) {
