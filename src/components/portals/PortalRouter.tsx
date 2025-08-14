@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useRBAC } from '@/hooks/useRBAC';
+import { useAuth } from '@/hooks/useAuth';
 import { ManagementPortal } from './ManagementPortal';
 import { TeacherPortal } from './TeacherPortal';
 import { ParentPortal } from './ParentPortal';
@@ -9,11 +10,25 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Shield, Users, GraduationCap, Home, User, Target } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Loader2, Shield, Users, GraduationCap, Home, User, Target, AlertTriangle } from 'lucide-react';
 
 export function PortalRouter() {
-  const { userRoles, loading, isSuperAdmin, isSchoolAdmin } = useRBAC();
+  const { userRoles, loading, isSuperAdmin, isSchoolAdmin, currentSchool } = useRBAC();
+  const { user, session } = useAuth();
   const [activePortal, setActivePortal] = useState('management');
+  const [showDebug, setShowDebug] = useState(false);
+
+  // Debug information
+  const debugInfo = {
+    user: user ? { id: user.id, email: user.email } : null,
+    session: session ? { expires_at: session.expires_at } : null,
+    userRoles: userRoles || [],
+    currentSchool: currentSchool ? { id: currentSchool.id, name: currentSchool.name } : null,
+    loading,
+    isSuperAdmin: isSuperAdmin(),
+    isSchoolAdmin: isSchoolAdmin()
+  };
 
   if (loading) {
     return (
@@ -21,7 +36,58 @@ export function PortalRouter() {
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">Loading your portal...</p>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="mt-4"
+            onClick={() => setShowDebug(!showDebug)}
+          >
+            {showDebug ? 'Hide' : 'Show'} Debug Info
+          </Button>
+          {showDebug && (
+            <Card className="mt-4 max-w-lg mx-auto text-left">
+              <CardContent className="pt-4">
+                <pre className="text-xs">{JSON.stringify(debugInfo, null, 2)}</pre>
+              </CardContent>
+            </Card>
+          )}
         </div>
+      </div>
+    );
+  }
+
+  // Add debug panel for troubleshooting
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-orange-500" />
+              Authentication Required
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Alert>
+              <AlertDescription>
+                You need to be logged in to access the portals. Please sign in first.
+              </AlertDescription>
+            </Alert>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mt-4 w-full"
+              onClick={() => setShowDebug(!showDebug)}
+            >
+              {showDebug ? 'Hide' : 'Show'} Debug Info
+            </Button>
+            {showDebug && (
+              <div className="mt-4 p-4 bg-muted rounded">
+                <pre className="text-xs">{JSON.stringify(debugInfo, null, 2)}</pre>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -185,7 +251,35 @@ export function PortalRouter() {
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground">No roles assigned</p>
+                <div className="space-y-4">
+                  <p className="text-muted-foreground">No roles assigned</p>
+                  <Alert className="border-orange-200 bg-orange-50">
+                    <AlertTriangle className="h-4 w-4 text-orange-500" />
+                    <AlertDescription className="text-orange-700">
+                      <strong>Portal Access Issue:</strong> Your account doesn't have any roles assigned yet. 
+                      This is normal for new accounts. Please contact your school administrator to:
+                      <ul className="list-disc ml-4 mt-2">
+                        <li>Assign you a student, parent, or staff role</li>
+                        <li>Link you to the appropriate school</li>
+                        <li>Set up your profile data</li>
+                      </ul>
+                    </AlertDescription>
+                  </Alert>
+                </div>
+              )}
+              
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-4 w-full"
+                onClick={() => setShowDebug(!showDebug)}
+              >
+                {showDebug ? 'Hide' : 'Show'} Debug Info
+              </Button>
+              {showDebug && (
+                <div className="mt-4 p-4 bg-muted rounded">
+                  <pre className="text-xs">{JSON.stringify(debugInfo, null, 2)}</pre>
+                </div>
               )}
             </CardContent>
           </Card>
