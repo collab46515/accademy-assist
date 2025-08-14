@@ -72,6 +72,7 @@ import SchoolSettingsPage from "./pages/SchoolSettingsPage";
 import VirtualClassroomPage from "./pages/VirtualClassroomPage";
 import AIClassroomPage from "./pages/AIClassroomPage";
 import EnrollmentTestPage from "./pages/EnrollmentTestPage";
+import DataIntegrityTestPage from "./pages/DataIntegrityTestPage";
 
 const queryClient = new QueryClient();
 
@@ -106,8 +107,9 @@ const App = () => (
                           <Route path="/student-services" element={<StudentServicesPage />} />
                           <Route path="/staff-hr" element={<StaffHRPage />} />
                           <Route path="/finance-operations" element={<FinanceOperationsPage />} />
-                          <Route path="/administration" element={<AdministrationPage />} />
-                          <Route path="/school-settings" element={<SchoolSettingsPage />} />
+                           <Route path="/administration" element={<AdministrationPage />} />
+                           <Route path="/school-settings" element={<SchoolSettingsPage />} />
+                           <Route path="/data-integrity-test" element={<DataIntegrityTestPage />} />
                           <Route path="/academic-management" element={<AcademicManagementPage />} />
                           <Route path="/students" element={<StudentsPage />} />
              <Route path="/admissions" element={<UnifiedAdmissionsPage />} />
