@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Edit, Trash2, Percent, Gift, Users, TrendingDown, Download, FileText, CheckCircle, XCircle, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface Discount {
   id: string;
@@ -178,10 +179,17 @@ export const DiscountsWaivers = () => {
             }
           : waiver
       ));
-      toast.success('Waiver approved successfully');
+      toast({
+        title: "Success",
+        description: "Waiver approved successfully"
+      });
     } catch (error) {
       console.error('Error approving waiver:', error);
-      toast.error('Failed to approve waiver');
+      toast({
+        title: "Error",
+        description: "Failed to approve waiver",
+        variant: "destructive"
+      });
     }
   };
 
@@ -196,7 +204,10 @@ export const DiscountsWaivers = () => {
           }
         : waiver
     ));
-    toast.success('Waiver rejected');
+    toast({
+      title: "Success",
+      description: "Waiver rejected"
+    });
   };
 
   const handleDeleteDiscount = async (discountId: string) => {
@@ -209,10 +220,17 @@ export const DiscountsWaivers = () => {
       if (error) throw error;
 
       setDiscounts(discounts.filter(discount => discount.id !== discountId));
-      toast.success('Discount deleted successfully');
+      toast({
+        title: "Success",
+        description: "Discount deleted successfully"
+      });
     } catch (error) {
       console.error('Error deleting discount:', error);
-      toast.error('Failed to delete discount');
+      toast({
+        title: "Error", 
+        description: "Failed to delete discount",
+        variant: "destructive"
+      });
     }
   };
 
@@ -250,9 +268,16 @@ export const DiscountsWaivers = () => {
       }));
 
       downloadCSV(csvData, 'fee_discounts');
-      toast.success('Discounts exported successfully');
+      toast({
+        title: "Success",
+        description: "Discounts exported successfully"
+      });
     } catch (error) {
-      toast.error('Failed to export discounts');
+      toast({
+        title: "Error",
+        description: "Failed to export discounts",
+        variant: "destructive"
+      });
     }
   };
 
@@ -275,9 +300,16 @@ export const DiscountsWaivers = () => {
       }));
 
       downloadCSV(csvData, 'fee_waivers');
-      toast.success('Waivers exported successfully');
+      toast({
+        title: "Success",
+        description: "Waivers exported successfully"
+      });
     } catch (error) {
-      toast.error('Failed to export waivers');
+      toast({
+        title: "Error", 
+        description: "Failed to export waivers",
+        variant: "destructive"
+      });
     }
   };
 

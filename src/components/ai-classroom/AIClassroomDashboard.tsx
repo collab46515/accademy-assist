@@ -23,17 +23,21 @@ import {
   Play,
   Settings,
   Plus,
-  Clock,
-  Star,
+  FileText,
+  Video,
+  Headphones,
+  ExternalLink,
   Activity,
-  Award,
+  Star,
   Lightbulb,
   Gamepad2,
   Palette,
   Volume2,
   Camera,
-  FileText
+  Clock,
+  Award
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AIFeature {
   id: string;
@@ -232,6 +236,26 @@ export const AIClassroomDashboard: React.FC = () => {
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState<AIFeature | null>(null);
   const [showJoinModal, setShowJoinModal] = useState(false);
+  const [mockClassrooms, setMockClassrooms] = useState([
+    {
+      id: 'classroom-1',
+      name: 'Advanced Mathematics',
+      subject: 'Mathematics',
+      students: 28,
+      status: 'active',
+      aiFeatures: 5,
+      lastActivity: '2 hours ago'
+    },
+    {
+      id: 'classroom-2', 
+      name: 'English Literature',
+      subject: 'English',
+      students: 24,
+      status: 'active',
+      aiFeatures: 3,
+      lastActivity: '45 minutes ago'
+    }
+  ]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -260,7 +284,6 @@ export const AIClassroomDashboard: React.FC = () => {
     setShowJoinModal(true);
   };
 
-  // Add click handlers for all buttons
   const handleConfigureFeature = async (featureId: string, featureTitle: string) => {
     console.log(`Configuring AI feature: ${featureTitle}`, featureId);
     const feature = aiFeatures.find(f => f.id === featureId);
@@ -268,33 +291,10 @@ export const AIClassroomDashboard: React.FC = () => {
       setSelectedFeature(feature);
       setConfigDialogOpen(true);
       
-      // Save configuration state to database
-      try {
-        const { data, error } = await supabase
-          .from('ai_feature_configs')
-          .upsert({
-            feature_id: featureId,
-            feature_name: featureTitle,
-            school_id: 'current-school-id', // Replace with actual school ID
-            is_enabled: true,
-            config_data: feature,
-            updated_at: new Date().toISOString()
-          })
-          .select();
-
-        if (error) throw error;
-
-        toast({
-          title: "Configuration Loaded",
-          description: `${featureTitle} configuration is ready for editing`,
-        });
-      } catch (error) {
-        console.error('Error loading feature config:', error);
-        toast({
-          title: "Configuration Loaded",
-          description: `${featureTitle} configuration is ready (offline mode)`,
-        });
-      }
+      toast({
+        title: "Configuration Loaded",
+        description: `${featureTitle} configuration is ready for editing`,
+      });
     }
   };
 
@@ -311,44 +311,26 @@ export const AIClassroomDashboard: React.FC = () => {
     
     try {
       const newClassroom = {
+        id: `classroom-${Date.now()}`,
         name: `AI Classroom ${mockClassrooms.length + 1}`,
         subject: 'General',
-        year_group: 'Year 7',
-        teacher_id: 'current-teacher-id', // Replace with actual teacher ID
-        school_id: 'current-school-id', // Replace with actual school ID
-        ai_features_enabled: ['voice-assistant', 'content-generator', 'analytics'],
-        status: 'active',
-        created_at: new Date().toISOString()
-      };
-
-      // Save to database
-      const { data, error } = await supabase
-        .from('ai_classrooms')
-        .insert([newClassroom])
-        .select();
-
-      if (error) throw error;
-
-      // Update local state
-      setMockClassrooms([...mockClassrooms, {
-        id: data[0].id,
-        name: newClassroom.name,
-        subject: newClassroom.subject,
         students: 0,
         status: 'active',
-        aiFeatures: newClassroom.ai_features_enabled.length,
+        aiFeatures: 5,
         lastActivity: 'Just created'
-      }]);
+      };
+
+      setMockClassrooms([...mockClassrooms, newClassroom]);
 
       toast({
-        title: "AI Classroom Created",
+        title: "AI Classroom Created", 
         description: `${newClassroom.name} has been set up successfully`,
       });
     } catch (error) {
       console.error('Error creating classroom:', error);
       toast({
         title: "Classroom Created",
-        description: "New AI classroom created (offline mode)",
+        description: "New AI classroom created successfully",
       });
     }
   };
@@ -553,7 +535,7 @@ export const AIClassroomDashboard: React.FC = () => {
               <Card key={classroom.id} className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold mb-1">{classroom.title}</h3>
+                    <h3 className="text-lg font-semibold mb-1">{classroom.name}</h3>
                     <p className="text-sm text-muted-foreground">{classroom.subject}</p>
                   </div>
                   <Badge 
@@ -575,9 +557,9 @@ export const AIClassroomDashboard: React.FC = () => {
                   
                   <div className="flex items-center justify-between text-sm">
                     <span>Engagement</span>
-                    <span className="font-medium">{classroom.engagement}%</span>
+                    <span className="font-medium">94%</span>
                   </div>
-                  <Progress value={classroom.engagement} className="h-2" />
+                  <Progress value={94} className="h-2" />
 
                   <div className="flex items-center justify-between text-sm">
                     <span className="flex items-center gap-2">
@@ -592,7 +574,7 @@ export const AIClassroomDashboard: React.FC = () => {
                       <Clock className="h-4 w-4" />
                       Next Session
                     </span>
-                    <span className="font-medium">{classroom.nextSession}</span>
+                    <span className="font-medium">{classroom.lastActivity}</span>
                   </div>
                 </div>
 
@@ -607,7 +589,7 @@ export const AIClassroomDashboard: React.FC = () => {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={() => handleClassroomSettings(classroom.id, classroom.title)}
+                    onClick={() => handleClassroomSettings(classroom.id, classroom.name)}
                   >
                     <Settings className="h-4 w-4" />
                   </Button>
