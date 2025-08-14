@@ -72,8 +72,14 @@ const handler = async (req: Request): Promise<Response> => {
           <div style="text-align: center; margin: 30px 0;">
             <a href="${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovable.app') || '#'}" 
                style="display: inline-block; background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
-              Access Student Portal
+              Login to Student Portal
             </a>
+          </div>
+          
+          <div style="background: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 6px; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0; color: #004085;">
+              <strong>📋 How to Access:</strong> Click the button above to go to the login page. Use your email and temporary password to sign in. You'll be automatically directed to your student portal.
+            </p>
           </div>
           
           <p style="color: #666; line-height: 1.6;">
@@ -140,8 +146,14 @@ const handler = async (req: Request): Promise<Response> => {
             <div style="text-align: center; margin: 30px 0;">
               <a href="${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovable.app') || '#'}" 
                  style="display: inline-block; background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
-                Access Parent Portal
+                Login to Parent Portal
               </a>
+            </div>
+            
+            <div style="background: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 6px; padding: 15px; margin: 20px 0;">
+              <p style="margin: 0; color: #004085;">
+                <strong>📋 How to Access:</strong> Click the button above to go to the login page. Use your email and temporary password to sign in. You'll be automatically directed to your parent portal.
+              </p>
             </div>
             
             <p style="color: #666; line-height: 1.6;">
