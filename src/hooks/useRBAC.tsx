@@ -67,7 +67,7 @@ export function useRBAC() {
     try {
       setLoading(true);
 
-      // Fetch user roles
+      // Fetch user roles with LEFT JOIN to handle missing schools
       const { data: rolesData, error: rolesError } = await supabase
         .from('user_roles')
         .select(`
@@ -75,7 +75,7 @@ export function useRBAC() {
           school_id,
           department,
           year_group,
-          schools!inner(id, name, code)
+          schools(id, name, code)
         `)
         .eq('user_id', user!.id)
         .eq('is_active', true);
@@ -94,7 +94,8 @@ export function useRBAC() {
 
       rolesData?.forEach(item => {
         const school = item.schools;
-        if (!schoolMap.has(school.id)) {
+        // Only add school if it exists (handles LEFT JOIN nulls)
+        if (school && !schoolMap.has(school.id)) {
           schoolMap.set(school.id, school);
           uniqueSchools.push({
             id: school.id,
