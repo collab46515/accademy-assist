@@ -116,12 +116,14 @@ export function AITimetableGenerator({ onClose }: AITimetableGeneratorProps) {
         .from('user_roles')
         .select(`
           user_id,
-          profiles!inner(first_name, last_name, email)
+          role,
+          school_id,
+          profiles!left(first_name, last_name, email)
         `)
-        .eq('role', 'teacher')
+        .in('role', ['teacher', 'hod'])
         .eq('school_id', currentSchool.id)
-        .eq('is_active', true)
-        .limit(50);
+        .or('is_active.is.true,is_active.is.null')
+        .limit(200);
 
       // Fetch subjects  
       const { data: subjects } = await supabase
