@@ -319,6 +319,22 @@ export function TimetableEntriesManager() {
         notes: `${entryData.subject} - ${entryData.teacher} - ${entryData.room}`
       };
 
+      // Check for existing entries that would conflict with unique constraints
+      if (!editingId) {
+        const { data: existingEntry } = await supabase
+          .from('timetable_entries')
+          .select('id')
+          .eq('school_id', currentSchool.id)
+          .eq('teacher_id', user.id)
+          .eq('period_id', periodId)
+          .eq('day_of_week', dayIndex)
+          .maybeSingle();
+
+        if (existingEntry) {
+          throw new Error(`Teacher already has a class scheduled for Period ${entryData.period} on ${entryData.day}. Please choose a different period or day.`);
+        }
+      }
+
       let result;
       if (editingId) {
         result = await supabase
