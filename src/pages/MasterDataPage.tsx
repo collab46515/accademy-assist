@@ -54,12 +54,15 @@ export function MasterDataPage() {
     subjects,
     students,
     parents,
+    classes,
     createSchool,
     createSubject,
     createStudent,
+    createClass,
     updateSchool,
     updateSubject,
     updateStudent,
+    updateClass,
     deleteRecord,
     getEntityCounts,
     getActiveEntities,
@@ -370,6 +373,9 @@ export function MasterDataPage() {
           case 'subjects':
             await updateSubject(editingItem.id, { ...data, school_id: currentSchool?.id });
             break;
+          case 'classes':
+            await updateClass(editingItem.id, { ...data, school_id: currentSchool?.id });
+            break;
           case 'students':
             await updateStudent(editingItem.id, { ...data, school_id: currentSchool?.id });
             break;
@@ -382,6 +388,9 @@ export function MasterDataPage() {
             break;
           case 'subjects':
             await createSubject({ ...data, school_id: currentSchool?.id, is_active: true });
+            break;
+          case 'classes':
+            await createClass({ ...data, school_id: currentSchool?.id || '', is_active: true, current_enrollment: 0 });
             break;
           case 'students':
             // Generate a temporary user_id that's a valid UUID
@@ -428,6 +437,10 @@ export function MasterDataPage() {
     subjects: subjects.filter(item => 
       item.subject_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.subject_code.toLowerCase().includes(searchTerm.toLowerCase())
+    ),
+    classes: classes.filter(item => 
+      item.class_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.year_group.toLowerCase().includes(searchTerm.toLowerCase())
     ),
     students: students.filter(item => 
       item.student_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -509,6 +522,55 @@ export function MasterDataPage() {
             </div>
           </div>
         );
+      case 'classes':
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Class Name</label>
+                <Input {...form.register('class_name')} placeholder="7A" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Year Group</label>
+                <Select onValueChange={(value) => form.setValue('year_group', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select year group" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Reception">Reception</SelectItem>
+                    <SelectItem value="Year 1">Year 1</SelectItem>
+                    <SelectItem value="Year 2">Year 2</SelectItem>
+                    <SelectItem value="Year 3">Year 3</SelectItem>
+                    <SelectItem value="Year 4">Year 4</SelectItem>
+                    <SelectItem value="Year 5">Year 5</SelectItem>
+                    <SelectItem value="Year 6">Year 6</SelectItem>
+                    <SelectItem value="Year 7">Year 7</SelectItem>
+                    <SelectItem value="Year 8">Year 8</SelectItem>
+                    <SelectItem value="Year 9">Year 9</SelectItem>
+                    <SelectItem value="Year 10">Year 10</SelectItem>
+                    <SelectItem value="Year 11">Year 11</SelectItem>
+                    <SelectItem value="Year 12">Year 12</SelectItem>
+                    <SelectItem value="Year 13">Year 13</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Capacity</label>
+                <Input {...form.register('capacity')} type="number" placeholder="30" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Academic Year</label>
+                <Input {...form.register('academic_year')} placeholder="2024-2025" />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Notes</label>
+              <Textarea {...form.register('notes')} placeholder="Additional notes..." />
+            </div>
+          </div>
+        );
       case 'students':
         return (
           <div className="space-y-4">
@@ -556,6 +618,7 @@ export function MasterDataPage() {
           <div className="h-12 w-12 text-muted-foreground mx-auto mb-4">
             {type === 'schools' && <SchoolIcon className="h-12 w-12" />}
             {type === 'subjects' && <BookOpen className="h-12 w-12" />}
+            {type === 'classes' && <Building2 className="h-12 w-12" />}
             {type === 'students' && <GraduationCap className="h-12 w-12" />}
             {type === 'parents' && <Home className="h-12 w-12" />}
           </div>
@@ -568,6 +631,7 @@ export function MasterDataPage() {
     const headers = {
       schools: ['School', 'Code', 'Contact', 'Status', 'Actions'],
       subjects: ['Subject', 'Code', 'Lab Required', 'Status', 'Actions'],
+      classes: ['Class', 'Year Group', 'Capacity', 'Status', 'Actions'],
       students: ['Student', 'Number', 'Year Group', 'Status', 'Actions'],
       parents: ['ID', 'Student ID', 'Relationship', 'Actions']
     };
@@ -629,6 +693,28 @@ export function MasterDataPage() {
                     <Badge variant={item.requires_lab ? 'default' : 'secondary'}>
                       {item.requires_lab ? 'Yes' : 'No'}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={item.is_active ? 'default' : 'secondary'}>
+                      {item.is_active ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </TableCell>
+                </>
+              )}
+              {type === 'classes' && (
+                <>
+                  <TableCell>
+                    <div>
+                      <p className="font-medium">{item.class_name}</p>
+                      <p className="text-sm text-muted-foreground">{item.notes || 'No notes'}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-medium">{item.year_group}</TableCell>
+                  <TableCell>
+                    <div>
+                      <p className="text-sm">{item.current_enrollment}/{item.capacity}</p>
+                      <p className="text-xs text-muted-foreground">{item.academic_year}</p>
+                    </div>
                   </TableCell>
                   <TableCell>
                     <Badge variant={item.is_active ? 'default' : 'secondary'}>
@@ -840,6 +926,19 @@ export function MasterDataPage() {
                 </CardContent>
               </Card>
 
+              <Card className="bg-gradient-to-br from-orange-50 to-orange-100/50 border-orange-200 dark:from-orange-900/20 dark:to-orange-800/20 dark:border-orange-800">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Classes</CardTitle>
+                  <Building2 className="h-4 w-4 text-orange-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{entityCounts.classes}</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {activeEntities.classes} active
+                  </p>
+                </CardContent>
+              </Card>
+
               <Card className="bg-gradient-to-br from-red-50 to-red-100/50 border-red-200 dark:from-red-900/20 dark:to-red-800/20 dark:border-red-800">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Parents</CardTitle>
@@ -901,6 +1000,10 @@ export function MasterDataPage() {
                       <Badge variant="secondary">{entityCounts.students}</Badge>
                     </div>
                     <div className="flex items-center justify-between">
+                      <span className="text-sm">Classes</span>
+                      <Badge variant="secondary">{entityCounts.classes}</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
                       <span className="text-sm">Parents</span>
                       <Badge variant="secondary">{entityCounts.parents}</Badge>
                     </div>
@@ -913,15 +1016,16 @@ export function MasterDataPage() {
           {/* Academic Data Tab */}
           <TabsContent value="academic" className="space-y-6">
             <Tabs value={activeEntityTab} onValueChange={setActiveEntityTab} className="space-y-4">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="schools">Schools</TabsTrigger>
                 <TabsTrigger value="subjects">Subjects</TabsTrigger>
+                <TabsTrigger value="classes">Classes</TabsTrigger>
                 <TabsTrigger value="students">Students</TabsTrigger>
                 <TabsTrigger value="parents">Parents</TabsTrigger>
               </TabsList>
 
               {/* Academic Entity Management */}
-              {['schools', 'subjects', 'students', 'parents'].map((entityType) => (
+              {['schools', 'subjects', 'classes', 'students', 'parents'].map((entityType) => (
                 <TabsContent key={entityType} value={entityType} className="space-y-4">
                   <Card>
                     <CardHeader>
@@ -929,6 +1033,7 @@ export function MasterDataPage() {
                         <CardTitle className="flex items-center gap-2 capitalize">
                           {entityType === 'schools' && <SchoolIcon className="h-5 w-5" />}
                           {entityType === 'subjects' && <BookOpen className="h-5 w-5" />}
+                          {entityType === 'classes' && <Building2 className="h-5 w-5" />}
                           {entityType === 'students' && <GraduationCap className="h-5 w-5" />}
                           {entityType === 'parents' && <Home className="h-5 w-5" />}
                           {entityType} Management

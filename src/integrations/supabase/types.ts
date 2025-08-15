@@ -1030,6 +1030,69 @@ export type Database = {
         }
         Relationships: []
       }
+      classes: {
+        Row: {
+          academic_year: string | null
+          capacity: number | null
+          class_name: string
+          classroom_id: string | null
+          created_at: string | null
+          current_enrollment: number | null
+          form_teacher_id: string | null
+          id: string
+          is_active: boolean | null
+          notes: string | null
+          school_id: string
+          updated_at: string | null
+          year_group: string
+        }
+        Insert: {
+          academic_year?: string | null
+          capacity?: number | null
+          class_name: string
+          classroom_id?: string | null
+          created_at?: string | null
+          current_enrollment?: number | null
+          form_teacher_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          school_id: string
+          updated_at?: string | null
+          year_group: string
+        }
+        Update: {
+          academic_year?: string | null
+          capacity?: number | null
+          class_name?: string
+          classroom_id?: string | null
+          created_at?: string | null
+          current_enrollment?: number | null
+          form_teacher_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          school_id?: string
+          updated_at?: string | null
+          year_group?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classes_classroom_id_fkey"
+            columns: ["classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "classes_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       classrooms: {
         Row: {
           capacity: number | null

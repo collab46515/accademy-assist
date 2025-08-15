@@ -111,6 +111,22 @@ export interface DBDepartment {
   updated_at: string;
 }
 
+export interface Class {
+  id: string;
+  school_id: string;
+  class_name: string;
+  year_group: string;
+  form_teacher_id?: string;
+  classroom_id?: string;
+  capacity: number;
+  current_enrollment: number;
+  is_active: boolean;
+  academic_year: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export function useMasterData() {
   const [isLoading, setIsLoading] = useState(false);
   const [schools, setSchools] = useState<School[]>([]);
@@ -121,6 +137,7 @@ export function useMasterData() {
   const [yearGroups, setYearGroups] = useState<YearGroup[]>([]);
   const [houses, setHouses] = useState<House[]>([]);
   const [departments, setDepartments] = useState<DBDepartment[]>([]);
+  const [classes, setClasses] = useState<Class[]>([]);
   const { toast } = useToast();
 
   // Fetch all master data
@@ -135,7 +152,8 @@ export function useMasterData() {
         staffResponse,
         departmentsResponse,
         yearGroupsResponse,
-        housesResponse
+        housesResponse,
+        classesResponse
       ] = await Promise.all([
         supabase.from('schools').select('*').order('name'),
         supabase.from('subjects').select('*').order('subject_name'),
@@ -149,7 +167,8 @@ export function useMasterData() {
         supabase.from('staff').select('*').order('last_name'),
         supabase.from('departments').select('*').order('name'),
         supabase.from('year_groups' as any).select('*').order('sort_order'),
-        supabase.from('houses' as any).select('*').order('house_name')
+        supabase.from('houses' as any).select('*').order('house_name'),
+        supabase.from('classes').select('*').order('year_group, class_name')
       ]);
 
       if (schoolsResponse.error) throw schoolsResponse.error;
@@ -162,6 +181,7 @@ export function useMasterData() {
       setStudents(studentsResponse.data as Student[] || []);
       setStaff(staffResponse.data as Staff[] || []);
       setDepartments(departmentsResponse.data as DBDepartment[] || []);
+      setClasses(classesResponse.data as Class[] || []);
       
       // Handle new tables that might not be in types yet
       if (!yearGroupsResponse.error && yearGroupsResponse.data) {
@@ -279,6 +299,33 @@ export function useMasterData() {
     }
   };
 
+  const createClass = async (classData: Omit<Class, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('classes')
+        .insert([classData])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setClasses(prev => [...prev, data as Class]);
+      toast({
+        title: "Success",
+        description: "Class created successfully",
+      });
+      return data;
+    } catch (error: any) {
+      console.error('Error creating class:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create class",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   // Update functions
   const updateSchool = async (id: string, updates: Partial<School>) => {
     try {
@@ -364,8 +411,36 @@ export function useMasterData() {
     }
   };
 
+  const updateClass = async (id: string, updates: Partial<Class>) => {
+    try {
+      const { data, error } = await supabase
+        .from('classes')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setClasses(prev => prev.map(cls => cls.id === id ? data as Class : cls));
+      toast({
+        title: "Success",
+        description: "Class updated successfully",
+      });
+      return data;
+    } catch (error: any) {
+      console.error('Error updating class:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update class",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   // Delete functions
-  const deleteRecord = async (tableName: 'schools' | 'subjects' | 'students', id: string) => {
+  const deleteRecord = async (tableName: 'schools' | 'subjects' | 'students' | 'classes', id: string) => {
     try {
       const { error } = await supabase
         .from(tableName)
@@ -384,6 +459,9 @@ export function useMasterData() {
           break;
         case 'students':
           setStudents(prev => prev.filter(item => item.id !== id));
+          break;
+        case 'classes':
+          setClasses(prev => prev.filter(item => item.id !== id));
           break;
       }
 
@@ -412,7 +490,8 @@ export function useMasterData() {
       staff: staff.length,
       yearGroups: yearGroups.length,
       houses: houses.length,
-      departments: departments.length
+      departments: departments.length,
+      classes: classes.length
     };
   };
 
@@ -420,7 +499,8 @@ export function useMasterData() {
     return {
       schools: schools.filter(s => s.is_active).length,
       subjects: subjects.filter(s => s.is_active).length,
-      students: students.filter(s => s.is_enrolled === true).length
+      students: students.filter(s => s.is_enrolled === true).length,
+      classes: classes.filter(c => c.is_active).length
     };
   };
 
@@ -442,12 +522,15 @@ export function useMasterData() {
     yearGroups,
     houses,
     departments,
+    classes,
     createSchool,
     createSubject,
     createStudent,
+    createClass,
     updateSchool,
     updateSubject,
     updateStudent,
+    updateClass,
     deleteRecord,
     getEntityCounts,
     getActiveEntities,
