@@ -59,7 +59,7 @@ export const HODCoverageDashboard: React.FC<HODCoverageDashboardProps> = ({ scho
   };
 
   const departments = ['Mathematics', 'English', 'Science', 'History', 'Geography', 'Modern Languages'];
-  const yearGroups = ['Year 7', 'Year 8', 'Year 9', 'Year 10', 'Year 11'];
+  const yearGroups = ['Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7', 'Year 8', 'Year 9', 'Year 10', 'Year 11', 'Year 12', 'Year 13'];
 
   const getRiskBadgeVariant = (riskLevel: string) => {
     switch (riskLevel) {

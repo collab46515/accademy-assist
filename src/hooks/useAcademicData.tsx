@@ -135,10 +135,20 @@ export interface Class {
 
 // Mock year groups for backward compatibility
 const mockYearGroups: YearGroup[] = [
-  { id: '1', name: 'Year 7', school_id: 'school1' },
-  { id: '2', name: 'Year 8', school_id: 'school1' },
-  { id: '3', name: 'Year 9', school_id: 'school1' },
-  { id: '4', name: 'Year 10', school_id: 'school1' },
+  { id: '1', name: 'Reception', school_id: 'school1' },
+  { id: '2', name: 'Year 1', school_id: 'school1' },
+  { id: '3', name: 'Year 2', school_id: 'school1' },
+  { id: '4', name: 'Year 3', school_id: 'school1' },
+  { id: '5', name: 'Year 4', school_id: 'school1' },
+  { id: '6', name: 'Year 5', school_id: 'school1' },
+  { id: '7', name: 'Year 6', school_id: 'school1' },
+  { id: '8', name: 'Year 7', school_id: 'school1' },
+  { id: '9', name: 'Year 8', school_id: 'school1' },
+  { id: '10', name: 'Year 9', school_id: 'school1' },
+  { id: '11', name: 'Year 10', school_id: 'school1' },
+  { id: '12', name: 'Year 11', school_id: 'school1' },
+  { id: '13', name: 'Year 12', school_id: 'school1' },
+  { id: '14', name: 'Year 13', school_id: 'school1' },
 ];
 
 // Mock classes for backward compatibility

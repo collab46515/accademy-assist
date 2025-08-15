@@ -59,7 +59,7 @@ const MOCK_STUDENTS: Student[] = [
 ];
 
 const CLASS_OPTIONS = ['7A', '7B', '8A', '8B', '9A', '9B', '10A', '10B', '11A', '11B', '12A', '12B', '13A', '13B'];
-const YEAR_GROUP_OPTIONS = ['Year 7', 'Year 8', 'Year 9', 'Year 10', 'Year 11', 'Year 12', 'Year 13'];
+const YEAR_GROUP_OPTIONS = ['Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7', 'Year 8', 'Year 9', 'Year 10', 'Year 11', 'Year 12', 'Year 13'];
 
 export const StudentFeeAssignments = () => {
   const [students, setStudents] = useState<Student[]>(MOCK_STUDENTS);

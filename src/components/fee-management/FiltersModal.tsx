@@ -51,7 +51,7 @@ export function FiltersModal({ open, onOpenChange, onApplyFilters, currentFilter
   const { toast } = useToast();
 
   const availableClasses = ['7A', '7B', '8A', '8B', '8C', '9A', '9B', '9C', '10A', '10B', '11A', '11B', '12A', '12B', '13A', '13B'];
-  const availableYearGroups = ['Year 7', 'Year 8', 'Year 9', 'Year 10', 'Year 11', 'Year 12', 'Year 13'];
+  const availableYearGroups = ['Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7', 'Year 8', 'Year 9', 'Year 10', 'Year 11', 'Year 12', 'Year 13'];
   const availableFeeTypes = ['Tuition Fee', 'Transport Fee', 'Examination Fee', 'Library Fee', 'ICT Fee', 'Sports Fee', 'Music Lessons'];
   const availableStatuses = ['Paid', 'Partial', 'Pending', 'Overdue'];
 
