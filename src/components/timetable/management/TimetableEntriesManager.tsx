@@ -239,7 +239,7 @@ export function TimetableEntriesManager() {
       };
 
       const getOrCreateSubjectId = async (subjectName: string): Promise<string> => {
-        const code = subjectName ? subjectName.replace(/[^A-Za-z]/g, '').slice(0, 6).toUpperCase() || 'GEN' : 'GEN';
+        // First try to find existing subject by name
         const { data: existing, error: subjErr } = await supabase
           .from('subjects')
           .select('id')
@@ -247,6 +247,24 @@ export function TimetableEntriesManager() {
           .eq('subject_name', subjectName || 'General')
           .maybeSingle();
         if (!subjErr && existing?.id) return existing.id;
+        
+        // If not found by name, check if there are existing subjects to avoid code conflicts
+        const { data: existingSubjects } = await supabase
+          .from('subjects')
+          .select('subject_code')
+          .eq('school_id', currentSchool.id);
+        
+        const existingCodes = new Set((existingSubjects || []).map(s => s.subject_code));
+        let code = subjectName ? subjectName.replace(/[^A-Za-z]/g, '').slice(0, 6).toUpperCase() || 'GEN' : 'GEN';
+        
+        // Ensure unique code by adding number suffix if needed
+        let counter = 1;
+        let originalCode = code;
+        while (existingCodes.has(code)) {
+          code = originalCode.slice(0, 4) + counter.toString().padStart(2, '0');
+          counter++;
+        }
+        
         const { data: created, error: createErr } = await supabase
           .from('subjects')
           .insert({
