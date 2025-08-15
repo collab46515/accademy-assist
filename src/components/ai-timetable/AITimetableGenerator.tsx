@@ -111,50 +111,61 @@ export function AITimetableGenerator({ onClose }: AITimetableGeneratorProps) {
     if (!currentSchool) return;
 
     try {
-      // Fetch teachers from user_roles table with their profile information
-      const { data: teachers } = await supabase
+      // 1) Fetch all employees marked as teachers in Master Data
+      const { data: employeeTeachers } = await supabase
+        .from('employees')
+        .select('user_id, first_name, last_name, email, position')
+        .ilike('position', '%teacher%')
+        .limit(500);
+
+      // 2) Fetch teacher roles scoped to the current school (teacher + HOD)
+      const { data: teacherRoles } = await supabase
         .from('user_roles')
-        .select(`
-          user_id,
-          role,
-          school_id,
-          profiles!left(first_name, last_name, email)
-        `)
+        .select('user_id')
         .in('role', ['teacher', 'hod'])
         .eq('school_id', currentSchool.id)
         .or('is_active.is.true,is_active.is.null')
-        .limit(200);
+        .limit(1000);
+
+      const teacherUserIds = new Set((teacherRoles || []).map((r: any) => r.user_id));
+
+      // If we have role-scoped users, filter employees to school; else fallback to all employee teachers
+      const teachers = teacherUserIds.size > 0
+        ? (employeeTeachers || []).filter((e: any) => teacherUserIds.has(e.user_id))
+        : (employeeTeachers || []);
 
       // Fetch subjects  
       const { data: subjects } = await supabase
         .from('subjects')
         .select('*')
         .eq('school_id', currentSchool.id)
-        .limit(50);
+        .limit(200);
 
       // Fetch rooms
       const { data: rooms } = await supabase
         .from('classrooms')
         .select('*')
         .eq('school_id', currentSchool.id)
-        .limit(50);
+        .limit(200);
 
       // Fetch classes
       const { data: classes } = await supabase
         .from('classes')
         .select('*')
         .eq('school_id', currentSchool.id)
-        .limit(50);
+        .limit(200);
 
-      console.log('Fetched school data:', {
-        teachers: teachers?.length || 0,
+      console.log('Fetched school data (Master Data):', {
+        employeesFound: employeeTeachers?.length || 0,
+        rolesMatched: teacherRoles?.length || 0,
+        teachersCount: teachers.length,
         subjects: subjects?.length || 0,
         rooms: rooms?.length || 0,
         classes: classes?.length || 0
       });
 
       setRealSchoolData({
-        teachers: teachers || [],
+        teachers,
         subjects: subjects || [],
         rooms: rooms || [],
         classes: classes || []
@@ -163,7 +174,7 @@ export function AITimetableGenerator({ onClose }: AITimetableGeneratorProps) {
       // Update school data counts
       setSchoolData({
         classes: classes?.length || 0,
-        teachers: teachers?.length || 0,
+        teachers: teachers.length || 0,
         subjects: subjects?.length || 0,
         rooms: rooms?.length || 0,
         periods: 8
@@ -206,8 +217,8 @@ export function AITimetableGenerator({ onClose }: AITimetableGeneratorProps) {
           constraints: [], // Add constraints here if needed
           teacherData: realSchoolData.teachers.map(t => ({
             id: t.user_id,
-            name: `${t.profiles.first_name} ${t.profiles.last_name}`,
-            subject: 'General' // Default value, could be enhanced with subject specialization
+            name: `${t.first_name} ${t.last_name}`,
+            subject: 'General'
           })),
           subjectData: realSchoolData.subjects.map(s => ({
             id: s.id,
