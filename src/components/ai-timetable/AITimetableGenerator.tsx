@@ -111,11 +111,16 @@ export function AITimetableGenerator({ onClose }: AITimetableGeneratorProps) {
     if (!currentSchool) return;
 
     try {
-      // Fetch teachers
+      // Fetch teachers from user_roles table with their profile information
       const { data: teachers } = await supabase
-        .from('employees')
-        .select('id, first_name, last_name, position')
-        .eq('position', 'Teacher')
+        .from('user_roles')
+        .select(`
+          user_id,
+          profiles!inner(first_name, last_name, email)
+        `)
+        .eq('role', 'teacher')
+        .eq('school_id', currentSchool.id)
+        .eq('is_active', true)
         .limit(50);
 
       // Fetch subjects  
@@ -138,6 +143,13 @@ export function AITimetableGenerator({ onClose }: AITimetableGeneratorProps) {
         .select('*')
         .eq('school_id', currentSchool.id)
         .limit(50);
+
+      console.log('Fetched school data:', {
+        teachers: teachers?.length || 0,
+        subjects: subjects?.length || 0,
+        rooms: rooms?.length || 0,
+        classes: classes?.length || 0
+      });
 
       setRealSchoolData({
         teachers: teachers || [],
@@ -191,9 +203,9 @@ export function AITimetableGenerator({ onClose }: AITimetableGeneratorProps) {
           settings,
           constraints: [], // Add constraints here if needed
           teacherData: realSchoolData.teachers.map(t => ({
-            id: t.id,
-            name: `${t.first_name} ${t.last_name}`,
-            subject: t.position || 'General'
+            id: t.user_id,
+            name: `${t.profiles.first_name} ${t.profiles.last_name}`,
+            subject: 'General' // Default value, could be enhanced with subject specialization
           })),
           subjectData: realSchoolData.subjects.map(s => ({
             id: s.id,
