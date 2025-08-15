@@ -150,6 +150,19 @@ export function TimetableEntriesManager() {
         // Parse notes field to extract subject, teacher, room
         const notes = entry.notes || '';
         const parts = notes.split(' - ');
+
+        // Derive period number robustly from period_id (uuid or numeric)
+        let periodNum = 1;
+        if (entry.period_id) {
+          const pid = String(entry.period_id);
+          if (pid.includes('-')) {
+            const n = parseInt(pid.slice(-1), 10);
+            if (!Number.isNaN(n)) periodNum = n;
+          } else {
+            const n = parseInt(pid, 10);
+            if (!Number.isNaN(n)) periodNum = n;
+          }
+        }
         
         return {
           id: entry.id,
@@ -160,7 +173,7 @@ export function TimetableEntriesManager() {
           subject: parts[0] || 'Unknown Subject',
           teacher: parts[1] || 'Unknown Teacher',
           room: parts[2] || 'Unknown Room',
-          period: entry.period_id ? parseInt(entry.period_id) : 1,
+          period: periodNum,
           day: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'][entry.day_of_week - 1] || 'Monday',
           color: subjectColors[parts[0] as keyof typeof subjectColors] || '#64748B'
         };
@@ -193,14 +206,95 @@ export function TimetableEntriesManager() {
       // Convert day to index (1-based)
       const dayIndex = days.indexOf(entryData.day) + 1;
 
+      // Helpers to resolve or create required IDs
+      const getOrCreatePeriodId = async (periodNumber: number): Promise<string> => {
+        // Try to find existing period for this school + number
+        const { data: existing, error: periodErr } = await supabase
+          .from('timetable_periods')
+          .select('id')
+          .eq('school_id', currentSchool.id)
+          .eq('period_number', periodNumber)
+          .maybeSingle();
+        if (!periodErr && existing?.id) return existing.id;
+
+        // Create a basic period slot if missing
+        const startHour = 8 + (periodNumber - 1);
+        const start = `${String(startHour).padStart(2, '0')}:00:00`;
+        const end = `${String(startHour).padStart(2, '0')}:45:00`;
+        const { data: created, error: createErr } = await supabase
+          .from('timetable_periods')
+          .insert({
+            school_id: currentSchool.id,
+            period_number: periodNumber,
+            period_name: `Period ${periodNumber}`,
+            start_time: start,
+            end_time: end,
+            is_break: false,
+            is_active: true,
+          })
+          .select('id')
+          .maybeSingle();
+        if (createErr || !created?.id) throw createErr || new Error('Failed to create period');
+        return created.id;
+      };
+
+      const getOrCreateSubjectId = async (subjectName: string): Promise<string> => {
+        const code = subjectName ? subjectName.replace(/[^A-Za-z]/g, '').slice(0, 6).toUpperCase() || 'GEN' : 'GEN';
+        const { data: existing, error: subjErr } = await supabase
+          .from('subjects')
+          .select('id')
+          .eq('school_id', currentSchool.id)
+          .eq('subject_name', subjectName || 'General')
+          .maybeSingle();
+        if (!subjErr && existing?.id) return existing.id;
+        const { data: created, error: createErr } = await supabase
+          .from('subjects')
+          .insert({
+            school_id: currentSchool.id,
+            subject_name: subjectName || 'General',
+            subject_code: code,
+          })
+          .select('id')
+          .maybeSingle();
+        if (createErr || !created?.id) throw createErr || new Error('Failed to create subject');
+        return created.id;
+      };
+
+      const getOrCreateClassroomId = async (roomName: string): Promise<string> => {
+        const { data: existing, error: roomErr } = await supabase
+          .from('classrooms')
+          .select('id')
+          .eq('school_id', currentSchool.id)
+          .eq('room_name', roomName || 'Room 1')
+          .maybeSingle();
+        if (!roomErr && existing?.id) return existing.id;
+        const { data: created, error: createErr } = await supabase
+          .from('classrooms')
+          .insert({
+            school_id: currentSchool.id,
+            room_name: roomName || 'Room 1',
+          })
+          .select('id')
+          .maybeSingle();
+        if (createErr || !created?.id) throw createErr || new Error('Failed to create classroom');
+        return created.id;
+      };
+
+      // Resolve IDs in parallel
+      const [periodId, subjectId, classroomId] = await Promise.all([
+        getOrCreatePeriodId(entryData.period),
+        getOrCreateSubjectId(entryData.subject),
+        getOrCreateClassroomId(entryData.room),
+      ]);
+
       const timetableEntry = {
         school_id: currentSchool.id,
         class_id: entryData.form_class,
         day_of_week: dayIndex,
-        period_id: `00000000-0000-0000-0000-00000000000${entryData.period}`, // Generate period UUID
-        subject_id: '00000000-0000-0000-0000-000000000000', // Placeholder UUID
-        teacher_id: '00000000-0000-0000-0000-000000000000', // Placeholder UUID  
-        classroom_id: '00000000-0000-0000-0000-000000000000', // Placeholder UUID
+        period_id: periodId,
+        subject_id: subjectId,
+        teacher_id: user.id, // attribute to current user for now
+        classroom_id: classroomId,
         academic_year: new Date().getFullYear().toString(),
         term: 'Term 1',
         is_active: true,
