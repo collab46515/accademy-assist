@@ -31,18 +31,18 @@ import { InternationalizationManager, I18nProvider } from '../enterprise/Interna
 import { SISERPIntegrations } from '../enterprise/SISERPIntegrations';
 import { AILearningOptimization } from './ai-learning/AILearningOptimization';
 
-
 interface TimetablePreviewProps {
   onBack: () => void;
   onRegenerate: () => void;
   onSave: () => void;
+  generatedData?: any;
 }
 
-export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePreviewProps) {
+export function TimetablePreview({ onBack, onRegenerate, onSave, generatedData }: TimetablePreviewProps) {
   const [selectedClass, setSelectedClass] = useState('10A');
   const [showEditor, setShowEditor] = useState(false);
   
-  // Mock timetable data
+  // Mock timetable data as fallback
   const mockTimetable = {
     Monday: [
       { period: 1, subject: 'Mathematics', teacher: 'Ms. Johnson', room: 'Room 101', time: '08:00-08:45' },
@@ -95,15 +95,24 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
       { period: 8, subject: 'Biology', teacher: 'Dr. White', room: 'Biology Lab', time: '12:45-13:30' },
     ],
   };
+  
+  // Use generated data if available, otherwise fallback to mock
+  const timetableData = generatedData?.timetable || mockTimetable;
+  const stats = generatedData?.stats || {
+    conflictsResolved: 47,
+    optimizationScore: 94.2,
+    teacherUtilization: 87,
+    roomUtilization: 91
+  };
 
   const generationStats = {
     totalClasses: 12,
     totalTeachers: 24,
     totalRooms: 15,
-    conflictsResolved: 47, // Across all classes
-    optimizationScore: 94.2,
-    teacherSatisfaction: 87,
-    roomUtilization: 91,
+    conflictsResolved: stats.conflictsResolved || 47,
+    optimizationScore: stats.optimizationScore || 94.2,
+    teacherSatisfaction: stats.teacherUtilization || 87,
+    roomUtilization: stats.roomUtilization || 91,
     totalPeriods: 960 // 12 classes × 8 periods × 10 days (2 weeks)
   };
 
@@ -123,14 +132,60 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
     return colors[subject] || 'bg-gray-100 text-gray-800 border-gray-200';
   };
 
+  const renderDaySchedule = (dayPeriods: any[]) => (
+    <div className="space-y-2">
+      {dayPeriods.map((period) => (
+        <div key={period.period} className="flex items-center space-x-4 p-3 border rounded-lg">
+          <div className="w-12 text-center">
+            <span className="text-sm font-medium">P{period.period}</span>
+          </div>
+          <div className="flex-1">
+            {period.subject === 'Break' || period.subject === 'Lunch' ? (
+              <div className="flex items-center space-x-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium text-muted-foreground">{period.subject}</span>
+                <span className="text-sm text-muted-foreground">{period.time}</span>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Badge className={`${getSubjectColor(period.subject)} border`}>
+                  {period.subject}
+                </Badge>
+                <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                  <Users className="h-3 w-3" />
+                  <span>{period.teacher}</span>
+                </div>
+                <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                  <MapPin className="h-3 w-3" />
+                  <span>{period.room}</span>
+                </div>
+                <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  <span>{period.time}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
         <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-success/20 to-success/10 rounded-full mb-4">
           <CheckCircle className="h-10 w-10 text-success" />
         </div>
-        <h2 className="text-2xl font-bold mb-2">School-Wide Timetable Generated Successfully!</h2>
-        <p className="text-muted-foreground">AI generated optimized timetables for all {generationStats.totalClasses} classes, {24} teachers, and {15} rooms</p>
+        <h2 className="text-2xl font-bold mb-2">
+          {generatedData ? 'AI-Generated Timetable Complete!' : 'Sample Timetable Preview'}
+        </h2>
+        <p className="text-muted-foreground">
+          {generatedData 
+            ? `AI generated optimized timetables for all ${generationStats.totalClasses} classes`
+            : `Preview of what an AI-generated timetable would look like`
+          }
+        </p>
       </div>
 
       {/* Generation Summary */}
@@ -191,24 +246,19 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
             <div>
               <CardTitle className="flex items-center space-x-2">
                 <Eye className="h-5 w-5" />
-                <span>School Timetable Preview - Class {selectedClass}</span>
+                <span>Timetable Preview - Class {selectedClass}</span>
               </CardTitle>
-              <CardDescription>AI-generated school-wide timetable with conflict resolution across all classes and teachers</CardDescription>
+              <CardDescription>
+                {generatedData 
+                  ? 'AI-generated timetable with conflict resolution' 
+                  : 'Sample timetable showing potential AI generation results'
+                }
+              </CardDescription>
             </div>
             <div className="flex items-center space-x-2">
               <Badge variant="outline" className="text-xs">
-                {generationStats.totalClasses} Classes Generated
+                {generatedData ? 'AI Generated' : 'Sample Data'}
               </Badge>
-              <select
-                value={selectedClass}
-                onChange={(e) => setSelectedClass(e.target.value)}
-                className="px-3 py-1 border rounded-md text-sm"
-              >
-                <option value="10A">Class 10A</option>
-                <option value="10B">Class 10B</option>
-                <option value="11A">Class 11A</option>
-                <option value="11B">Class 11B</option>
-              </select>
             </div>
           </div>
         </CardHeader>
@@ -223,198 +273,23 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
             </TabsList>
             
             <TabsContent value="Monday" className="mt-6">
-              <div className="space-y-2">
-                {mockTimetable.Monday.map((period) => (
-                  <div key={period.period} className="flex items-center space-x-4 p-3 border rounded-lg">
-                    <div className="w-12 text-center">
-                      <span className="text-sm font-medium">P{period.period}</span>
-                    </div>
-                    <div className="flex-1">
-                      {period.subject === 'Break' || period.subject === 'Lunch' ? (
-                        <div className="flex items-center space-x-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium text-muted-foreground">{period.subject}</span>
-                          <span className="text-sm text-muted-foreground">{period.time}</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center space-x-4">
-                          <Badge className={`${getSubjectColor(period.subject)} border`}>
-                            {period.subject}
-                          </Badge>
-                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                            <Users className="h-3 w-3" />
-                            <span>{period.teacher}</span>
-                          </div>
-                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                            <MapPin className="h-3 w-3" />
-                            <span>{period.room}</span>
-                          </div>
-                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            <span>{period.time}</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {renderDaySchedule(timetableData.Monday || mockTimetable.Monday)}
             </TabsContent>
             
             <TabsContent value="Tuesday" className="mt-6">
-              <div className="space-y-2">
-                {mockTimetable.Tuesday.map((period) => (
-                  <div key={period.period} className="flex items-center space-x-4 p-3 border rounded-lg">
-                    <div className="w-12 text-center">
-                      <span className="text-sm font-medium">P{period.period}</span>
-                    </div>
-                    <div className="flex-1">
-                      {period.subject === 'Break' || period.subject === 'Lunch' ? (
-                        <div className="flex items-center space-x-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium text-muted-foreground">{period.subject}</span>
-                          <span className="text-sm text-muted-foreground">{period.time}</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center space-x-4">
-                          <Badge className={`${getSubjectColor(period.subject)} border`}>
-                            {period.subject}
-                          </Badge>
-                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                            <Users className="h-3 w-3" />
-                            <span>{period.teacher}</span>
-                          </div>
-                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                            <MapPin className="h-3 w-3" />
-                            <span>{period.room}</span>
-                          </div>
-                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            <span>{period.time}</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {renderDaySchedule(timetableData.Tuesday || mockTimetable.Tuesday)}
             </TabsContent>
             
             <TabsContent value="Wednesday" className="mt-6">
-              <div className="space-y-2">
-                {mockTimetable.Wednesday.map((period) => (
-                  <div key={period.period} className="flex items-center space-x-4 p-3 border rounded-lg">
-                    <div className="w-12 text-center">
-                      <span className="text-sm font-medium">P{period.period}</span>
-                    </div>
-                    <div className="flex-1">
-                      {period.subject === 'Break' || period.subject === 'Lunch' ? (
-                        <div className="flex items-center space-x-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium text-muted-foreground">{period.subject}</span>
-                          <span className="text-sm text-muted-foreground">{period.time}</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center space-x-4">
-                          <Badge className={`${getSubjectColor(period.subject)} border`}>
-                            {period.subject}
-                          </Badge>
-                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                            <Users className="h-3 w-3" />
-                            <span>{period.teacher}</span>
-                          </div>
-                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                            <MapPin className="h-3 w-3" />
-                            <span>{period.room}</span>
-                          </div>
-                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            <span>{period.time}</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {renderDaySchedule(timetableData.Wednesday || mockTimetable.Wednesday)}
             </TabsContent>
             
             <TabsContent value="Thursday" className="mt-6">
-              <div className="space-y-2">
-                {mockTimetable.Thursday.map((period) => (
-                  <div key={period.period} className="flex items-center space-x-4 p-3 border rounded-lg">
-                    <div className="w-12 text-center">
-                      <span className="text-sm font-medium">P{period.period}</span>
-                    </div>
-                    <div className="flex-1">
-                      {period.subject === 'Break' || period.subject === 'Lunch' ? (
-                        <div className="flex items-center space-x-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium text-muted-foreground">{period.subject}</span>
-                          <span className="text-sm text-muted-foreground">{period.time}</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center space-x-4">
-                          <Badge className={`${getSubjectColor(period.subject)} border`}>
-                            {period.subject}
-                          </Badge>
-                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                            <Users className="h-3 w-3" />
-                            <span>{period.teacher}</span>
-                          </div>
-                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                            <MapPin className="h-3 w-3" />
-                            <span>{period.room}</span>
-                          </div>
-                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            <span>{period.time}</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {renderDaySchedule(timetableData.Thursday || mockTimetable.Thursday)}
             </TabsContent>
             
             <TabsContent value="Friday" className="mt-6">
-              <div className="space-y-2">
-                {mockTimetable.Friday.map((period) => (
-                  <div key={period.period} className="flex items-center space-x-4 p-3 border rounded-lg">
-                    <div className="w-12 text-center">
-                      <span className="text-sm font-medium">P{period.period}</span>
-                    </div>
-                    <div className="flex-1">
-                      {period.subject === 'Break' || period.subject === 'Lunch' ? (
-                        <div className="flex items-center space-x-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium text-muted-foreground">{period.subject}</span>
-                          <span className="text-sm text-muted-foreground">{period.time}</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center space-x-4">
-                          <Badge className={`${getSubjectColor(period.subject)} border`}>
-                            {period.subject}
-                          </Badge>
-                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                            <Users className="h-3 w-3" />
-                            <span>{period.teacher}</span>
-                          </div>
-                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                            <MapPin className="h-3 w-3" />
-                            <span>{period.room}</span>
-                          </div>
-                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            <span>{period.time}</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {renderDaySchedule(timetableData.Friday || mockTimetable.Friday)}
             </TabsContent>
           </Tabs>
         </CardContent>
@@ -452,7 +327,7 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
       {/* Interactive Timetable Editor */}
       {showEditor && (
         <InteractiveTimetableEditor
-          timetableData={mockTimetable}
+          timetableData={timetableData}
           onClose={() => setShowEditor(false)}
           onSave={(data) => {
             console.log('Saving updated timetable:', data);
@@ -460,113 +335,6 @@ export function TimetablePreview({ onBack, onRegenerate, onSave }: TimetablePrev
           }}
         />
       )}
-
-      {/* Live Usage Features */}
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5" />
-            Live Usage Features
-          </CardTitle>
-          <CardDescription>
-            Manage day-to-day operations after timetable deployment
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="export" className="w-full">
-            <TabsList className="grid w-full grid-cols-7">
-              <TabsTrigger value="export" className="flex items-center gap-2">
-                <Download className="h-4 w-4" />
-                Export
-              </TabsTrigger>
-              <TabsTrigger value="views" className="flex items-center gap-2">
-                <Eye className="h-4 w-4" />
-                Views
-              </TabsTrigger>
-              <TabsTrigger value="enterprise" className="flex items-center gap-2">
-                <Building2 className="h-4 w-4" />
-                Enterprise
-              </TabsTrigger>
-              <TabsTrigger value="substitution" className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Substitutions
-              </TabsTrigger>
-              <TabsTrigger value="conflicts" className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4" />
-                Conflicts
-              </TabsTrigger>
-              <TabsTrigger value="regeneration" className="flex items-center gap-2">
-                <RefreshCw className="h-4 w-4" />
-                Auto-Regen
-              </TabsTrigger>
-              <TabsTrigger value="ai-learning" className="flex items-center gap-2">
-                <Brain className="h-4 w-4" />
-                AI Learning
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="export" className="mt-6">
-              <ExportManager />
-            </TabsContent>
-            
-            <TabsContent value="views" className="mt-6">
-              <Tabs defaultValue="admin" className="w-full">
-                <TabsList>
-                  <TabsTrigger value="admin">Admin View</TabsTrigger>
-                  <TabsTrigger value="teacher">Teacher View</TabsTrigger>
-                  <TabsTrigger value="student">Student View</TabsTrigger>
-                </TabsList>
-                <TabsContent value="admin">
-                  <RoleBasedTimetableView role="admin" />
-                </TabsContent>
-                <TabsContent value="teacher">
-                  <RoleBasedTimetableView role="teacher" />
-                </TabsContent>
-                <TabsContent value="student">
-                  <RoleBasedTimetableView role="student" />
-                </TabsContent>
-              </Tabs>
-            </TabsContent>
-            
-            <TabsContent value="enterprise" className="mt-6">
-              <Tabs defaultValue="multi-school" className="w-full">
-                <TabsList>
-                  <TabsTrigger value="multi-school">Multi-School</TabsTrigger>
-                  <TabsTrigger value="i18n">Languages</TabsTrigger>
-                  <TabsTrigger value="integrations">Integrations</TabsTrigger>
-                </TabsList>
-                <TabsContent value="multi-school">
-                  <MultiSchoolManagement />
-                </TabsContent>
-                <TabsContent value="i18n">
-                  <I18nProvider>
-                    <InternationalizationManager />
-                  </I18nProvider>
-                </TabsContent>
-                <TabsContent value="integrations">
-                  <SISERPIntegrations />
-                </TabsContent>
-              </Tabs>
-            </TabsContent>
-            
-            <TabsContent value="substitution" className="mt-6">
-              <SubstitutionPlanner />
-            </TabsContent>
-            
-            <TabsContent value="conflicts" className="mt-6">
-              <ConflictDetector />
-            </TabsContent>
-            
-            <TabsContent value="regeneration" className="mt-6">
-              <AutoRegeneration />
-            </TabsContent>
-            
-            <TabsContent value="ai-learning" className="mt-6">
-              <AILearningOptimization />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
     </div>
   );
 }

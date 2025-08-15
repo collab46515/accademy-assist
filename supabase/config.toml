@@ -18,6 +18,9 @@ verify_jwt = false
 [functions.ai-system-admin]
 verify_jwt = false
 
+[functions.ai-timetable-generator]
+verify_jwt = false
+
 [functions.enhanced-ai-grading]
 verify_jwt = false
 
