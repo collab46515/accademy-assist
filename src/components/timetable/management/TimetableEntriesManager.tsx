@@ -64,7 +64,17 @@ const subjects = ['Mathematics', 'English Language', 'English Literature', 'Chem
 const teachers = ['Mr. Johnson', 'Ms. Smith', 'Dr. Brown', 'Mr. Davis', 'Ms. Wilson', 'Mr. Taylor', 'Ms. Miller', 'Mr. Lee', 'Dr. Green', 'Mme. Dubois', 'Mr. Ahmed', 'Ms. Garcia', 'Mr. Patel', 'Ms. Clark', 'Mr. Wright'];
 const rooms = ['Room 101', 'Room 102', 'Room 103', 'Room 104', 'Room 105', 'Lab 1', 'Lab 2', 'Lab 3', 'Gym', 'Art Studio', 'Music Room', 'IT Lab', 'Drama Studio', 'Workshop'];
 const yearGroups = ['Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7', 'Year 8', 'Year 9', 'Year 10', 'Year 11', 'Year 12', 'Year 13'];
-const formClasses = ['7A', '7B', '8A', '8B', '9A', '9B', '10A', '10B', '11A', '11B', '12A', '12B', '13A', '13B'];
+const getFormClasses = (yearGroup: string) => {
+  const match = yearGroup.match(/Year\s+(\d+)/i);
+  if (match) {
+    const y = match[1];
+    return [`${y}A`, `${y}B`, `${y}C`];
+  }
+  if (yearGroup.toLowerCase() === 'reception') {
+    return ['R1', 'R2', 'R3'];
+  }
+  return ['A', 'B', 'C'];
+};
 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 const periods = [1, 2, 3, 4, 5, 6, 7, 8];
 
@@ -303,7 +313,7 @@ export function TimetableEntriesManager() {
             />
           </div>
           
-          <Select value={selectedYearGroup} onValueChange={setSelectedYearGroup}>
+          <Select value={selectedYearGroup} onValueChange={(value) => { setSelectedYearGroup(value); const next = getFormClasses(value)[0]; setSelectedClass(next); }}>
             <SelectTrigger>
               <SelectValue placeholder="Select Year Group" />
             </SelectTrigger>
@@ -319,7 +329,7 @@ export function TimetableEntriesManager() {
               <SelectValue placeholder="Select Class" />
             </SelectTrigger>
             <SelectContent>
-              {formClasses.map(cls => (
+              {getFormClasses(selectedYearGroup).map((cls) => (
                 <SelectItem key={cls} value={cls}>{cls}</SelectItem>
               ))}
             </SelectContent>
@@ -416,7 +426,7 @@ export function TimetableEntriesManager() {
                   <Label htmlFor="year_group">Year Group</Label>
                   <Select 
                     value={formData.year_group} 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, year_group: value }))}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, year_group: value, form_class: getFormClasses(value)[0] }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -439,7 +449,7 @@ export function TimetableEntriesManager() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {formClasses.map(cls => (
+                      {getFormClasses(formData.year_group).map((cls) => (
                         <SelectItem key={cls} value={cls}>{cls}</SelectItem>
                       ))}
                     </SelectContent>
