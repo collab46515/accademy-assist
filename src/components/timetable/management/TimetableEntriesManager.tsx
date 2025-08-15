@@ -197,7 +197,7 @@ export function TimetableEntriesManager() {
         school_id: currentSchool.id,
         class_id: entryData.form_class,
         day_of_week: dayIndex,
-        period_id: entryData.period.toString(),
+        period_id: `00000000-0000-0000-0000-00000000000${entryData.period}`, // Generate period UUID
         subject_id: '00000000-0000-0000-0000-000000000000', // Placeholder UUID
         teacher_id: '00000000-0000-0000-0000-000000000000', // Placeholder UUID  
         classroom_id: '00000000-0000-0000-0000-000000000000', // Placeholder UUID
