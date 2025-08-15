@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useRBAC } from '@/hooks/useRBAC';
 
 interface TimetableEntry {
   id: string;
@@ -101,24 +104,202 @@ const subjectColors = {
 
 export function TimetableEntriesManager() {
   const { toast } = useToast();
-  const [entries, setEntries] = useState<TimetableEntry[]>(mockEntries);
+  const { user } = useAuth();
+  const { currentSchool } = useRBAC();
+  const [entries, setEntries] = useState<TimetableEntry[]>([]);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedYearGroup, setSelectedYearGroup] = useState<string>('Year 10');
-  const [selectedClass, setSelectedClass] = useState<string>('10A');
+  const [selectedYearGroup, setSelectedYearGroup] = useState<string>('Year 1');
+  const [selectedClass, setSelectedClass] = useState<string>('1A');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<TimetableEntry | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Form state
   const [formData, setFormData] = useState({
-    year_group: 'Year 10',
-    form_class: '10A',
+    year_group: 'Year 1',
+    form_class: '1A',
     subject: '',
     teacher: '',
     room: '',
     period: 1,
     day: 'Monday'
   });
+
+  // Load timetable entries from database
+  const loadEntries = async () => {
+    if (!currentSchool) return;
+
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('timetable_entries')
+        .select('*')
+        .eq('school_id', currentSchool.id)
+        .eq('is_active', true);
+
+      if (error) {
+        console.error('Error loading timetable entries:', error);
+        // Fallback to mock data if database query fails
+        setEntries(mockEntries);
+        return;
+      }
+
+      // Transform database entries to match component interface
+      const transformedEntries = (data || []).map(entry => {
+        // Parse notes field to extract subject, teacher, room
+        const notes = entry.notes || '';
+        const parts = notes.split(' - ');
+        
+        return {
+          id: entry.id,
+          year_group: entry.class_id?.includes('A') || entry.class_id?.includes('B') || entry.class_id?.includes('C') 
+            ? `Year ${entry.class_id.charAt(0)}` 
+            : 'Year 1', // Default fallback
+          form_class: entry.class_id || '1A',
+          subject: parts[0] || 'Unknown Subject',
+          teacher: parts[1] || 'Unknown Teacher',
+          room: parts[2] || 'Unknown Room',
+          period: entry.period_id ? parseInt(entry.period_id) : 1,
+          day: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'][entry.day_of_week - 1] || 'Monday',
+          color: subjectColors[parts[0] as keyof typeof subjectColors] || '#64748B'
+        };
+      });
+
+      setEntries(transformedEntries);
+    } catch (error) {
+      console.error('Error loading entries:', error);
+      // Fallback to mock data on error
+      setEntries(mockEntries);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Save timetable entry to database
+  const saveEntry = async (entryData: typeof formData, editingId?: string) => {
+    if (!currentSchool || !user) {
+      toast({
+        title: "Error",
+        description: "School context or user authentication required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Convert day to index (1-based)
+      const dayIndex = days.indexOf(entryData.day) + 1;
+
+      const timetableEntry = {
+        school_id: currentSchool.id,
+        class_id: entryData.form_class,
+        day_of_week: dayIndex,
+        period_id: entryData.period.toString(),
+        subject_id: '00000000-0000-0000-0000-000000000000', // Placeholder UUID
+        teacher_id: '00000000-0000-0000-0000-000000000000', // Placeholder UUID  
+        classroom_id: '00000000-0000-0000-0000-000000000000', // Placeholder UUID
+        academic_year: new Date().getFullYear().toString(),
+        term: 'Term 1',
+        is_active: true,
+        notes: `${entryData.subject} - ${entryData.teacher} - ${entryData.room}`
+      };
+
+      let result;
+      if (editingId) {
+        result = await supabase
+          .from('timetable_entries')
+          .update(timetableEntry)
+          .eq('id', editingId)
+          .select();
+      } else {
+        result = await supabase
+          .from('timetable_entries')
+          .insert(timetableEntry)
+          .select();
+      }
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      // For immediate UI feedback, also update local state
+      const color = subjectColors[entryData.subject as keyof typeof subjectColors] || '#64748B';
+      
+      if (editingId) {
+        setEntries(prev => prev.map(entry => 
+          entry.id === editingId 
+            ? { id: editingId, ...entryData, color }
+            : entry
+        ));
+      } else {
+        const newEntry: TimetableEntry = {
+          id: result.data[0]?.id || Date.now().toString(),
+          ...entryData,
+          color
+        };
+        setEntries(prev => [...prev, newEntry]);
+      }
+
+      toast({
+        title: editingId ? "Entry Updated" : "Entry Added",
+        description: `Timetable entry has been ${editingId ? 'updated' : 'added'} successfully.`,
+      });
+
+      return true;
+    } catch (error: any) {
+      console.error('Error saving entry:', error);
+      toast({
+        title: "Error",
+        description: `Failed to save entry: ${error.message}`,
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Delete entry from database
+  const deleteEntry = async (id: string) => {
+    if (!currentSchool) return;
+
+    try {
+      setLoading(true);
+      const { error } = await supabase
+        .from('timetable_entries')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      setEntries(prev => prev.filter(entry => entry.id !== id));
+      toast({
+        title: "Entry Deleted",
+        description: "Timetable entry has been deleted successfully.",
+      });
+    } catch (error: any) {
+      console.error('Error deleting entry:', error);
+      toast({
+        title: "Error",
+        description: `Failed to delete entry: ${error.message}`,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load entries when component mounts or school changes
+  useEffect(() => {
+    if (currentSchool) {
+      loadEntries();
+    }
+  }, [currentSchool]);
 
   const filteredEntries = entries.filter(entry => {
     const matchesSearch = 
@@ -132,34 +313,12 @@ export function TimetableEntriesManager() {
     return matchesSearch && matchesYearGroup && matchesClass;
   });
 
-  const handleSubmit = () => {
-    const color = subjectColors[formData.subject as keyof typeof subjectColors] || '#64748B';
-    
-    if (editingEntry) {
-      setEntries(prev => prev.map(entry => 
-        entry.id === editingEntry.id 
-          ? { ...editingEntry, ...formData, color }
-          : entry
-      ));
-      toast({
-        title: "Entry Updated",
-        description: "Timetable entry has been updated successfully.",
-      });
-    } else {
-      const newEntry: TimetableEntry = {
-        id: Date.now().toString(),
-        ...formData,
-        color
-      };
-      setEntries(prev => [...prev, newEntry]);
-      toast({
-        title: "Entry Added",
-        description: "New timetable entry has been added successfully.",
-      });
+  const handleSubmit = async () => {
+    const success = await saveEntry(formData, editingEntry?.id);
+    if (success) {
+      resetForm();
+      setIsDialogOpen(false);
     }
-    
-    resetForm();
-    setIsDialogOpen(false);
   };
 
   const handleEdit = (entry: TimetableEntry) => {
@@ -177,11 +336,7 @@ export function TimetableEntriesManager() {
   };
 
   const handleDelete = (id: string) => {
-    setEntries(prev => prev.filter(entry => entry.id !== id));
-    toast({
-      title: "Entry Deleted",
-      description: "Timetable entry has been deleted successfully.",
-    });
+    deleteEntry(id);
   };
 
   const resetForm = () => {
