@@ -321,7 +321,22 @@ export function TimetableEntriesManager() {
 
       // Check for existing entries that would conflict with unique constraints
       if (!editingId) {
-        const { data: existingEntry } = await supabase
+        // Check for class/period/day conflict (main constraint)
+        const { data: classConflict } = await supabase
+          .from('timetable_entries')
+          .select('id')
+          .eq('school_id', currentSchool.id)
+          .eq('class_id', entryData.form_class)
+          .eq('period_id', periodId)
+          .eq('day_of_week', dayIndex)
+          .maybeSingle();
+
+        if (classConflict) {
+          throw new Error(`Class ${entryData.form_class} already has a subject scheduled for Period ${entryData.period} on ${entryData.day}. Please choose a different period or day.`);
+        }
+
+        // Check for teacher conflict
+        const { data: teacherConflict } = await supabase
           .from('timetable_entries')
           .select('id')
           .eq('school_id', currentSchool.id)
@@ -330,7 +345,7 @@ export function TimetableEntriesManager() {
           .eq('day_of_week', dayIndex)
           .maybeSingle();
 
-        if (existingEntry) {
+        if (teacherConflict) {
           throw new Error(`Teacher already has a class scheduled for Period ${entryData.period} on ${entryData.day}. Please choose a different period or day.`);
         }
       }
