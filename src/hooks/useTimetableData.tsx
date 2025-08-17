@@ -217,33 +217,44 @@ export function useTimetableData() {
 
     setLoading(true);
     try {
-      console.log('Using mock timetable entries data');
-      
-      // Filter mock data for the specific class
-      const classEntries = mockTimetableEntries.filter(entry => 
-        entry.class_id === classId && 
-        entry.academic_year === academicYear && 
-        entry.term === term
-      );
+      const { data, error } = await supabase
+        .from('timetable_entries')
+        .select('*')
+        .eq('school_id', currentSchool.id)
+        .eq('class_id', classId)
+        .eq('academic_year', academicYear)
+        .eq('term', term)
+        .eq('is_active', true)
+        .order('day_of_week')
+        .order('period_id');
 
-      // Enrich with joined data
-      const enrichedEntries: TimetableEntry[] = classEntries.map(entry => ({
-        ...entry,
-        period: mockPeriods.find(p => p.id === entry.period_id),
-        subject: mockSubjects.find(s => s.id === entry.subject_id),
-        classroom: mockClassrooms.find(c => c.id === entry.classroom_id),
-        teacher_name: `Teacher ${entry.teacher_id}`, // Mock teacher name
-        attendance_status: Math.random() > 0.7 ? (['present', 'absent', 'late'] as const)[Math.floor(Math.random() * 3)] : null
-      }));
+      if (error) throw error;
+
+      // Enrich with related data manually
+      const enrichedEntries: TimetableEntry[] = (data || []).map(entry => {
+        const period = periods.find(p => p.id === entry.period_id);
+        const subject = subjects.find(s => s.id === entry.subject_id);
+        const classroom = classrooms.find(c => c.id === entry.classroom_id);
+        
+        return {
+          ...entry,
+          period,
+          subject,
+          classroom,
+          teacher_name: 'Teacher', // Will be populated from employee data
+          attendance_status: null
+        };
+      });
 
       setTimetableEntries(enrichedEntries);
     } catch (error: any) {
       console.error('Error fetching timetable:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch timetable",
+        description: "Failed to fetch timetable entries",
         variant: "destructive",
       });
+      setTimetableEntries([]);
     } finally {
       setLoading(false);
     }
