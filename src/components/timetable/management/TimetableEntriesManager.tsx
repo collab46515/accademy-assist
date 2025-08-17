@@ -442,6 +442,34 @@ export function TimetableEntriesManager() {
   });
 
   const handleSubmit = async () => {
+    // Validate required fields
+    if (!formData.subject) {
+      toast({
+        title: "Validation Error",
+        description: "Please select a subject",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!formData.teacher) {
+      toast({
+        title: "Validation Error", 
+        description: "Please select a teacher",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!formData.room) {
+      toast({
+        title: "Validation Error",
+        description: "Please select a room",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const success = await saveEntry(formData, editingEntry?.id);
     if (success) {
       resetForm();
