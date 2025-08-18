@@ -238,12 +238,34 @@ export function useTimetableData() {
         const subject = subjects.find(s => s.id === entry.subject_id);
         const classroom = classrooms.find(c => c.id === entry.classroom_id);
         
+        // Parse teacher and room info from notes field if available
+        const notesParts = entry.notes?.split(' - ') || [];
+        const subjectName = notesParts[0] || 'Subject';
+        const teacherName = notesParts[1] || 'Teacher';
+        const roomName = notesParts[2] || 'Room';
+        
         return {
           ...entry,
           period,
-          subject,
-          classroom,
-          teacher_name: 'Teacher', // Will be populated from employee data
+          subject: subject || { 
+            id: entry.subject_id,
+            school_id: entry.school_id,
+            subject_name: subjectName,
+            subject_code: subjectName.toUpperCase().replace(/\s+/g, '-'),
+            color_code: '#3B82F6',
+            requires_lab: false,
+            periods_per_week: 3,
+            is_active: true
+          },
+          classroom: classroom || { 
+            id: entry.classroom_id,
+            school_id: entry.school_id,
+            room_name: roomName,
+            room_type: 'classroom',
+            capacity: 30,
+            is_active: true
+          },
+          teacher_name: teacherName,
           attendance_status: null
         };
       });

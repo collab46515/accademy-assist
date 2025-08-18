@@ -71,23 +71,22 @@ export function StudentTimetableView() {
 
         console.log('fetchClasses: Classes query result:', { classesData, error });
 
-        // Create a comprehensive list including mock data classes and database classes
+        // Get unique class names from database
         const dbClasses = [...new Set((classesData || []).map(c => c.class_name))];
-        const mockClasses = ['Year-10A', '1A', '2A', '3A']; // Classes with mock timetable data
         
-        // Prioritize classes with actual timetable data, then mock classes, then remaining db classes
+        // Prioritize classes with actual timetable data first, then remaining db classes
         const allAvailableClasses = [
           ...classesWithData,
-          ...mockClasses.filter(c => !classesWithData.includes(c)),
-          ...dbClasses.filter(c => !classesWithData.includes(c) && !mockClasses.includes(c))
+          ...dbClasses.filter(c => !classesWithData.includes(c))
         ];
 
         console.log('fetchClasses: All available classes:', allAvailableClasses);
+        console.log('fetchClasses: Classes with timetable data:', classesWithData);
         setAvailableClasses(allAvailableClasses);
 
-        // Auto-select first class with data or mock data if none selected
+        // Auto-select first class with timetable data if none selected
         if (allAvailableClasses.length > 0 && !selectedClass) {
-          const firstAvailableClass = classesWithData[0] || mockClasses[0] || allAvailableClasses[0];
+          const firstAvailableClass = classesWithData[0] || allAvailableClasses[0];
           console.log('fetchClasses: Auto-selecting class:', firstAvailableClass);
           setSelectedClass(firstAvailableClass);
         }
