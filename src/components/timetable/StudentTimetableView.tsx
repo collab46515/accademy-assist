@@ -40,13 +40,18 @@ export function StudentTimetableView() {
     const fetchClasses = async () => {
       if (!currentSchool) return;
 
+      console.log('fetchClasses: Starting to fetch classes for school:', currentSchool.id);
+
       try {
         // First, fetch classes that actually have timetable entries
+        console.log('fetchClasses: Fetching timetable entries...');
         const { data: timetableClasses, error: timetableError } = await supabase
           .from('timetable_entries')
           .select('class_id')
           .eq('school_id', currentSchool.id)
           .eq('is_active', true);
+
+        console.log('fetchClasses: Timetable query result:', { timetableClasses, timetableError });
 
         if (timetableError) {
           console.error('Error fetching timetable classes:', timetableError);
@@ -54,14 +59,17 @@ export function StudentTimetableView() {
 
         // Get unique class IDs that have timetable data
         const classesWithData = [...new Set((timetableClasses || []).map(t => t.class_id))];
-        console.log('Classes with timetable data:', classesWithData);
+        console.log('fetchClasses: Classes with timetable data:', classesWithData);
 
         // Fetch all available classes from classes table
+        console.log('fetchClasses: Fetching all classes...');
         const { data: classesData, error } = await supabase
           .from('classes')
           .select('class_name, year_group')
           .eq('school_id', currentSchool.id)
           .eq('is_active', true);
+
+        console.log('fetchClasses: Classes query result:', { classesData, error });
 
         if (error) {
           console.error('Error fetching classes:', error);
@@ -75,27 +83,30 @@ export function StudentTimetableView() {
           ...allClasses.filter(c => !classesWithData.includes(c))
         ];
 
-        console.log('Available classes (prioritized):', classesWithDataFirst.length, classesWithDataFirst);
+        console.log('fetchClasses: All classes:', allClasses);
+        console.log('fetchClasses: Classes with data first:', classesWithDataFirst);
         setAvailableClasses(classesWithDataFirst);
 
         // Auto-select first class with data if none selected
         if (classesWithDataFirst.length > 0 && !selectedClass) {
           const firstClassWithData = classesWithData.length > 0 ? classesWithData[0] : classesWithDataFirst[0];
-          console.log('Auto-selecting class:', firstClassWithData);
+          console.log('fetchClasses: Auto-selecting class:', firstClassWithData);
           setSelectedClass(firstClassWithData);
         }
 
       } catch (error) {
-        console.error('Error fetching classes:', error);
+        console.error('fetchClasses: Caught error:', error);
         // Fallback to student-based classes if database fetch fails
         const studentClasses = [...new Set([
           ...students.map(s => s.form_class).filter(Boolean),
           ...students.map(s => s.year_group).filter(Boolean)
         ])].sort();
+        console.log('fetchClasses: Fallback to student classes:', studentClasses);
         setAvailableClasses(studentClasses);
       }
     };
 
+    console.log('useEffect: About to call fetchClasses');
     fetchClasses();
   }, [currentSchool, students]);
 
