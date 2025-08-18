@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useRBAC } from './useRBAC';
@@ -212,7 +212,7 @@ export function useTimetableData() {
   };
 
   // Fetch timetable entries for a specific class
-  const fetchTimetableForClass = async (classId: string, academicYear: string = '2024-2025', term: string = 'Term 1') => {
+  const fetchTimetableForClass = useCallback(async (classId: string, academicYear: string = '2024-2025', term: string = 'Term 1') => {
     if (!currentSchool) return;
 
     setLoading(true);
@@ -282,7 +282,7 @@ export function useTimetableData() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentSchool, periods, subjects, classrooms]);
 
   // Get timetable organized by day and period
   const getTimetableGrid = (classId: string) => {
