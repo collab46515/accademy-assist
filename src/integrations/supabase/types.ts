@@ -7234,6 +7234,10 @@ export type Database = {
         Args: { student_uuid: string }
         Returns: boolean
       }
+      can_access_student_in_school: {
+        Args: { student_school_id: string }
+        Returns: boolean
+      }
       can_approve_lesson_plan: {
         Args: { lesson_plan_id: string; user_id?: string }
         Returns: boolean
