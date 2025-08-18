@@ -7,6 +7,7 @@ import { TimetableGrid } from './TimetableGrid';
 import { useTimetableData } from '@/hooks/useTimetableData';
 import { useStudentData } from '@/hooks/useStudentData';
 import { useRBAC } from '@/hooks/useRBAC';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Calendar, 
   Clock, 
@@ -32,12 +33,49 @@ export function StudentTimetableView() {
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedWeek, setSelectedWeek] = useState<string>('current');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [availableClasses, setAvailableClasses] = useState<string[]>([]);
 
-  // Get unique classes from students
-  const availableClasses = [...new Set([
-    ...students.map(s => s.form_class).filter(Boolean),
-    ...students.map(s => s.year_group).filter(Boolean)
-  ])].sort();
+  // Fetch all available classes from database
+  useEffect(() => {
+    const fetchClasses = async () => {
+      if (!currentSchool) return;
+
+      try {
+        // Fetch classes from classes table
+        const { data: classesData } = await supabase
+          .from('classes')
+          .select('class_name, year_group')
+          .eq('school_id', currentSchool.id)
+          .eq('is_active', true);
+
+        // Get unique class names from students (for backward compatibility)
+        const studentClasses = [...new Set([
+          ...students.map(s => s.form_class).filter(Boolean),
+          ...students.map(s => s.year_group).filter(Boolean)
+        ])];
+
+        // Combine classes from both sources
+        const allClasses = [...new Set([
+          ...(classesData || []).map(c => c.class_name || c.year_group).filter(Boolean),
+          ...studentClasses
+        ])].sort();
+
+        console.log('Available classes found:', allClasses.length, allClasses);
+        setAvailableClasses(allClasses);
+
+      } catch (error) {
+        console.error('Error fetching classes:', error);
+        // Fallback to student-based classes if database fetch fails
+        const studentClasses = [...new Set([
+          ...students.map(s => s.form_class).filter(Boolean),
+          ...students.map(s => s.year_group).filter(Boolean)
+        ])].sort();
+        setAvailableClasses(studentClasses);
+      }
+    };
+
+    fetchClasses();
+  }, [currentSchool, students]);
 
   // Auto-select class if user is a student
   useEffect(() => {
