@@ -41,7 +41,22 @@ export function StudentTimetableView() {
       if (!currentSchool) return;
 
       try {
-        // Fetch classes from classes table
+        // First, fetch classes that actually have timetable entries
+        const { data: timetableClasses, error: timetableError } = await supabase
+          .from('timetable_entries')
+          .select('class_id')
+          .eq('school_id', currentSchool.id)
+          .eq('is_active', true);
+
+        if (timetableError) {
+          console.error('Error fetching timetable classes:', timetableError);
+        }
+
+        // Get unique class IDs that have timetable data
+        const classesWithData = [...new Set((timetableClasses || []).map(t => t.class_id))];
+        console.log('Classes with timetable data:', classesWithData);
+
+        // Fetch all available classes from classes table
         const { data: classesData, error } = await supabase
           .from('classes')
           .select('class_name, year_group')
@@ -53,23 +68,21 @@ export function StudentTimetableView() {
           return;
         }
 
-        // Create class options: combine class_name with year_group for display
-        const classOptions = (classesData || []).map(c => ({
-          id: c.class_name,
-          display: `${c.year_group} ${c.class_name}`,
-          class_name: c.class_name,
-          year_group: c.year_group
-        }));
+        // Get unique class names for the dropdown, prioritizing those with timetable data
+        const allClasses = [...new Set((classesData || []).map(c => c.class_name))];
+        const classesWithDataFirst = [
+          ...classesWithData.filter(c => allClasses.includes(c)),
+          ...allClasses.filter(c => !classesWithData.includes(c))
+        ];
 
-        // Get unique class names for the dropdown
-        const uniqueClasses = [...new Set(classOptions.map(c => c.class_name))].sort();
+        console.log('Available classes (prioritized):', classesWithDataFirst.length, classesWithDataFirst);
+        setAvailableClasses(classesWithDataFirst);
 
-        console.log('Available classes found:', uniqueClasses.length, uniqueClasses);
-        setAvailableClasses(uniqueClasses);
-
-        // Auto-select first class if none selected
-        if (uniqueClasses.length > 0 && !selectedClass) {
-          setSelectedClass(uniqueClasses[0]);
+        // Auto-select first class with data if none selected
+        if (classesWithDataFirst.length > 0 && !selectedClass) {
+          const firstClassWithData = classesWithData.length > 0 ? classesWithData[0] : classesWithDataFirst[0];
+          console.log('Auto-selecting class:', firstClassWithData);
+          setSelectedClass(firstClassWithData);
         }
 
       } catch (error) {
