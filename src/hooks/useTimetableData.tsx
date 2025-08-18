@@ -133,7 +133,7 @@ export function useTimetableData() {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('school_periods')
+        .from('timetable_periods')
         .select('*')
         .eq('school_id', currentSchool.id)
         .eq('is_active', true)
