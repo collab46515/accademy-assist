@@ -42,26 +42,35 @@ export function StudentTimetableView() {
 
       try {
         // Fetch classes from classes table
-        const { data: classesData } = await supabase
+        const { data: classesData, error } = await supabase
           .from('classes')
           .select('class_name, year_group')
           .eq('school_id', currentSchool.id)
           .eq('is_active', true);
 
-        // Get unique class names from students (for backward compatibility)
-        const studentClasses = [...new Set([
-          ...students.map(s => s.form_class).filter(Boolean),
-          ...students.map(s => s.year_group).filter(Boolean)
-        ])];
+        if (error) {
+          console.error('Error fetching classes:', error);
+          return;
+        }
 
-        // Combine classes from both sources
-        const allClasses = [...new Set([
-          ...(classesData || []).map(c => c.class_name || c.year_group).filter(Boolean),
-          ...studentClasses
-        ])].sort();
+        // Create class options: combine class_name with year_group for display
+        const classOptions = (classesData || []).map(c => ({
+          id: c.class_name,
+          display: `${c.year_group} ${c.class_name}`,
+          class_name: c.class_name,
+          year_group: c.year_group
+        }));
 
-        console.log('Available classes found:', allClasses.length, allClasses);
-        setAvailableClasses(allClasses);
+        // Get unique class names for the dropdown
+        const uniqueClasses = [...new Set(classOptions.map(c => c.class_name))].sort();
+
+        console.log('Available classes found:', uniqueClasses.length, uniqueClasses);
+        setAvailableClasses(uniqueClasses);
+
+        // Auto-select first class if none selected
+        if (uniqueClasses.length > 0 && !selectedClass) {
+          setSelectedClass(uniqueClasses[0]);
+        }
 
       } catch (error) {
         console.error('Error fetching classes:', error);
@@ -301,8 +310,14 @@ export function StudentTimetableView() {
             <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Timetable Available</h3>
             <p className="text-muted-foreground text-center">
-              No timetable entries found for {selectedClass}. Contact your administrator.
+              No timetable entries found for {selectedClass}. 
+              <br />
+              Use the AI Timetable Generator in the Manage tab to create timetables.
             </p>
+            <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh Data
+            </Button>
           </CardContent>
         </Card>
       )}
