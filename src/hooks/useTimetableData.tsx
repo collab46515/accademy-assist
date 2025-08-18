@@ -217,18 +217,20 @@ export function useTimetableData() {
 
     setLoading(true);
     try {
+      console.log('Fetching timetable for:', { classId, academicYear, term, schoolId: currentSchool.id });
+      
       const { data, error } = await supabase
         .from('timetable_entries')
         .select('*')
         .eq('school_id', currentSchool.id)
         .eq('class_id', classId)
-        .eq('academic_year', academicYear)
-        .eq('term', term)
         .eq('is_active', true)
         .order('day_of_week')
         .order('period_id');
 
       if (error) throw error;
+      
+      console.log('Timetable entries found:', data?.length || 0, data);
 
       // Enrich with related data manually
       const enrichedEntries: TimetableEntry[] = (data || []).map(entry => {
