@@ -102,10 +102,12 @@ export function StudentTimetableView() {
 
   // Fetch timetable when class changes
   useEffect(() => {
+    console.log('StudentTimetableView: selectedClass changed to:', selectedClass);
     if (selectedClass) {
+      console.log('StudentTimetableView: calling fetchTimetableForClass with:', selectedClass);
       fetchTimetableForClass(selectedClass);
     }
-  }, [selectedClass]);
+  }, [selectedClass, fetchTimetableForClass]);
 
   const currentPeriod = getCurrentPeriod();
   const nextPeriod = getNextPeriod();
