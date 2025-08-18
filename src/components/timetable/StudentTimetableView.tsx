@@ -71,27 +71,25 @@ export function StudentTimetableView() {
 
         console.log('fetchClasses: Classes query result:', { classesData, error });
 
-        if (error) {
-          console.error('Error fetching classes:', error);
-          return;
-        }
-
-        // Get unique class names for the dropdown, prioritizing those with timetable data
-        const allClasses = [...new Set((classesData || []).map(c => c.class_name))];
-        const classesWithDataFirst = [
-          ...classesWithData.filter(c => allClasses.includes(c)),
-          ...allClasses.filter(c => !classesWithData.includes(c))
+        // Create a comprehensive list including mock data classes and database classes
+        const dbClasses = [...new Set((classesData || []).map(c => c.class_name))];
+        const mockClasses = ['Year-10A', '1A', '2A', '3A']; // Classes with mock timetable data
+        
+        // Prioritize classes with actual timetable data, then mock classes, then remaining db classes
+        const allAvailableClasses = [
+          ...classesWithData,
+          ...mockClasses.filter(c => !classesWithData.includes(c)),
+          ...dbClasses.filter(c => !classesWithData.includes(c) && !mockClasses.includes(c))
         ];
 
-        console.log('fetchClasses: All classes:', allClasses);
-        console.log('fetchClasses: Classes with data first:', classesWithDataFirst);
-        setAvailableClasses(classesWithDataFirst);
+        console.log('fetchClasses: All available classes:', allAvailableClasses);
+        setAvailableClasses(allAvailableClasses);
 
-        // Auto-select first class with data if none selected
-        if (classesWithDataFirst.length > 0 && !selectedClass) {
-          const firstClassWithData = classesWithData.length > 0 ? classesWithData[0] : classesWithDataFirst[0];
-          console.log('fetchClasses: Auto-selecting class:', firstClassWithData);
-          setSelectedClass(firstClassWithData);
+        // Auto-select first class with data or mock data if none selected
+        if (allAvailableClasses.length > 0 && !selectedClass) {
+          const firstAvailableClass = classesWithData[0] || mockClasses[0] || allAvailableClasses[0];
+          console.log('fetchClasses: Auto-selecting class:', firstAvailableClass);
+          setSelectedClass(firstAvailableClass);
         }
 
       } catch (error) {
