@@ -178,12 +178,12 @@ export function TimetablePreview({ onBack, onRegenerate, onSave, generatedData }
           <CheckCircle className="h-10 w-10 text-success" />
         </div>
         <h2 className="text-2xl font-bold mb-2">
-          {generatedData ? 'AI-Generated Timetable Complete!' : 'Sample Timetable Preview'}
+          {generatedData ? 'School-Wide AI Timetable Generated!' : 'Sample Timetable Preview'}
         </h2>
         <p className="text-muted-foreground">
           {generatedData 
-            ? `AI generated optimized timetables for all ${generationStats.totalClasses} classes`
-            : `Preview of what an AI-generated timetable would look like`
+            ? `AI successfully generated optimized timetables for all ${generationStats.totalClasses} classes, ${generationStats.totalTeachers} teachers, and ${generationStats.totalRooms} rooms`
+            : `Preview of what an AI-generated school-wide timetable would look like`
           }
         </p>
       </div>
@@ -247,10 +247,13 @@ export function TimetablePreview({ onBack, onRegenerate, onSave, generatedData }
               <CardTitle className="flex items-center space-x-2">
                 <Eye className="h-5 w-5" />
                 <span>Timetable Preview - Class {selectedClass}</span>
+                <Badge variant="outline" className="ml-2 text-xs">
+                  Sample from {generationStats.totalClasses} generated classes
+                </Badge>
               </CardTitle>
               <CardDescription>
                 {generatedData 
-                  ? 'AI-generated timetable with conflict resolution' 
+                  ? 'AI-generated timetable with conflict resolution for entire school' 
                   : 'Sample timetable showing potential AI generation results'
                 }
               </CardDescription>

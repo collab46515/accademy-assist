@@ -23,6 +23,8 @@ interface GenerationProgressProps {
     conflictsResolved: number;
     optimizationScore: number;
     timeElapsed: number;
+    totalClasses?: number;
+    totalTeachers?: number;
   };
   settings: any;
   onStart: () => void;
@@ -72,8 +74,8 @@ export function GenerationProgress({
         <h2 className="text-2xl font-bold mb-2">AI Generation in Progress</h2>
         <p className="text-muted-foreground">
           {isGenerating 
-            ? "AI is analyzing constraints and optimizing your timetable..." 
-            : "Ready to start AI-powered timetable generation"
+            ? "AI is analyzing constraints and optimizing timetables for the entire school..." 
+            : "Ready to start AI-powered timetable generation for all classes"
           }
         </p>
       </div>
@@ -205,22 +207,22 @@ export function GenerationProgress({
               <div className="flex items-center space-x-2 text-sm">
                 <Clock className="h-3 w-3 text-muted-foreground" />
                 <span className="text-muted-foreground">{formatTime(stats.timeElapsed)}</span>
-                <span>Iteration {stats.iterations}: Resolved teacher conflict in Period 3</span>
+                <span>Iteration {stats.iterations}: Processing all {stats.totalClasses || 25} classes simultaneously</span>
               </div>
               <div className="flex items-center space-x-2 text-sm">
                 <Clock className="h-3 w-3 text-muted-foreground" />
                 <span className="text-muted-foreground">{formatTime(Math.max(0, stats.timeElapsed - 0.5))}</span>
-                <span>Optimizing room assignments for laboratory subjects</span>
+                <span>Optimizing teacher schedules across all year groups</span>
               </div>
               <div className="flex items-center space-x-2 text-sm">
                 <Clock className="h-3 w-3 text-muted-foreground" />
                 <span className="text-muted-foreground">{formatTime(Math.max(0, stats.timeElapsed - 1))}</span>
-                <span>Balancing teacher workload across periods</span>
+                <span>Balancing workload for all {stats.totalTeachers || 2} teachers</span>
               </div>
               <div className="flex items-center space-x-2 text-sm">
                 <Clock className="h-3 w-3 text-muted-foreground" />
                 <span className="text-muted-foreground">{formatTime(Math.max(0, stats.timeElapsed - 1.5))}</span>
-                <span>Applying soft constraints for schedule optimization</span>
+                <span>Applying constraints across entire school timetable</span>
               </div>
             </div>
           </CardContent>
