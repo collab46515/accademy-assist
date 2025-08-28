@@ -7,6 +7,7 @@ import { StudentAssignments } from "@/components/transport/StudentAssignments";
 import { VehicleTracking } from "@/components/transport/VehicleTracking";
 import { TransportNotifications } from "@/components/transport/TransportNotifications";
 import { TransportReports } from "@/components/transport/TransportReports";
+import { RouteDeviationMonitor } from "@/components/transport/RouteDeviationMonitor";
 import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function TransportPage() {
@@ -26,6 +27,7 @@ export default function TransportPage() {
         <Route path="/assignments" element={<StudentAssignments />} />
         <Route path="/tracking" element={<VehicleTracking />} />
         <Route path="/notifications" element={<TransportNotifications />} />
+        <Route path="/deviation-monitor" element={<RouteDeviationMonitor />} />
         <Route path="/reports" element={<TransportReports />} />
       </Routes>
     </div>

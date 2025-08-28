@@ -260,11 +260,11 @@ export function VehicleTracking() {
             <div className="flex items-center gap-3">
               <Clock className="h-5 w-5 text-orange-600" />
               <div>
-                <p className="font-medium text-orange-900">Route 4 Extended Stop</p>
-                <p className="text-sm text-orange-700">Vehicle stopped longer than usual at Oak Street</p>
+                <p className="font-medium text-orange-900">Route Deviation Alert</p>
+                <p className="text-sm text-orange-700">TB-04 stopped for 8 minutes at Oak Street (limit: 5 min) - Management notified</p>
               </div>
             </div>
-            <Button variant="outline" size="sm">Contact</Button>
+            <Button variant="outline" size="sm">View Alert</Button>
           </div>
 
           <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
