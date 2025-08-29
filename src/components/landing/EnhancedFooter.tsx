@@ -25,7 +25,7 @@ interface FooterContent {
 }
 
 const defaultFooterContent: FooterContent = {
-  companyName: "Pappaya Academy",
+  companyName: "Doxa Technology Solutions",
   description: "Comprehensive school management system for academic operations, student services, and administration. Transforming education through innovative technology solutions.",
   address: {
     street: "St Anns Hill Road",

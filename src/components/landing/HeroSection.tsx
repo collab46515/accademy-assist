@@ -58,7 +58,7 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
               <div className="h-full w-full bg-background rounded-2xl shadow-2xl flex items-center justify-center p-8">
                 <div className="text-center space-y-4">
                   <img src="/lovable-uploads/5908f914-4b1a-4234-abb8-009537c792ee.png" alt="DOXA Logo" className="h-96 w-auto mx-auto" />
-                  <h3 className="text-xl font-semibold">Pappaya Academy</h3>
+                  <h3 className="text-xl font-semibold">Doxa Technology Solutions</h3>
                   <p className="text-muted-foreground">Complete School Management System</p>
                 </div>
               </div>
