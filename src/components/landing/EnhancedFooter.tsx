@@ -95,7 +95,7 @@ export function EnhancedFooter() {
           <div className="lg:col-span-2 space-y-6">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <img src="/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png" alt="Pappaya Academy Logo" className="h-8 w-8" />
+                <img src="/lovable-uploads/5908f914-4b1a-4234-abb8-009537c792ee.png" alt="DOXA Logo" className="h-8 w-8" />
                 <div>
                   <h3 className="text-xl font-bold">{content.companyName}</h3>
                   <p className="text-sm text-muted-foreground">School Management System</p>
