@@ -96,14 +96,14 @@ export const Navbar = () => {
     <nav className="bg-card border-b border-border shadow-[var(--shadow-card)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20">
-          <div className="flex w-full">
-            <Link to="/" className="flex">
+          <div className="flex w-full items-center">
+            <Link to="/" className="flex items-center">
               <div 
-                className="bg-contain bg-no-repeat bg-top w-60 h-16 mt-0"
+                className="bg-contain bg-no-repeat bg-center w-48 h-12"
                 style={{ backgroundImage: 'url(/lovable-uploads/5908f914-4b1a-4234-abb8-009537c792ee.png)' }}
               />
             </Link>
-            <div className="flex items-center">
+            <div className="flex items-center ml-4">
               <SchoolSelector />
             </div>
           </div>
