@@ -96,14 +96,16 @@ export const Navbar = () => {
     <nav className="bg-card border-b border-border shadow-[var(--shadow-card)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20">
-          <div className="flex items-start w-full pt-2">
-            <Link to="/" className="flex items-start">
+          <div className="flex w-full">
+            <Link to="/" className="flex">
               <div 
-                className="bg-contain bg-no-repeat bg-top w-60 h-16"
+                className="bg-contain bg-no-repeat bg-top w-60 h-16 mt-0"
                 style={{ backgroundImage: 'url(/lovable-uploads/5908f914-4b1a-4234-abb8-009537c792ee.png)' }}
               />
             </Link>
-            <SchoolSelector />
+            <div className="flex items-center">
+              <SchoolSelector />
+            </div>
           </div>
 
           {/* Desktop Navigation */}
