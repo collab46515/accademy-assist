@@ -95,14 +95,15 @@ export const Navbar = () => {
   return (
     <nav className="bg-card border-b border-border shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-8">
-            <Link to="/" className="flex items-center space-x-2">
-              <img 
-                src="/lovable-uploads/5908f914-4b1a-4234-abb8-009537c792ee.png" 
-                alt="DOXA"
-                className="h-8 w-auto object-contain"
-                style={{ maxWidth: '120px' }}
+        <div className="flex justify-between items-center h-14">
+          <div className="flex items-center space-x-6">
+            <Link to="/" className="flex items-center">
+              <div 
+                className="w-32 h-8 bg-no-repeat bg-contain bg-center"
+                style={{ 
+                  backgroundImage: 'url(/lovable-uploads/5908f914-4b1a-4234-abb8-009537c792ee.png)',
+                  imageRendering: 'crisp-edges'
+                }}
               />
             </Link>
             <div className="flex items-center">
