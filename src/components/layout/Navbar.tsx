@@ -99,7 +99,7 @@ export const Navbar = () => {
           <div className="flex items-center space-x-6">
             <Link to="/" className="flex items-center">
               <div 
-                className="w-24 h-6 bg-no-repeat bg-contain bg-center"
+                className="w-8 h-2 bg-no-repeat bg-contain bg-center"
                 style={{ 
                   backgroundImage: 'url(/lovable-uploads/5908f914-4b1a-4234-abb8-009537c792ee.png)',
                   imageRendering: 'crisp-edges'
