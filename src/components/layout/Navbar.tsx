@@ -95,12 +95,13 @@ export const Navbar = () => {
   return (
     <nav className="bg-card border-b border-border shadow-[var(--shadow-card)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-12">
+        <div className="flex justify-between h-16">
           <div className="flex w-full items-center">
-            <Link to="/" className="flex items-center">
-              <div 
-                className="bg-contain bg-no-repeat bg-center w-36 h-8"
-                style={{ backgroundImage: 'url(/lovable-uploads/5908f914-4b1a-4234-abb8-009537c792ee.png)' }}
+            <Link to="/" className="flex items-center py-3">
+              <img 
+                src="/lovable-uploads/5908f914-4b1a-4234-abb8-009537c792ee.png" 
+                alt="DOXA Logo"
+                className="h-10 w-auto object-contain"
               />
             </Link>
             <div className="flex items-center ml-6">
