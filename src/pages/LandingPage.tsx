@@ -201,7 +201,7 @@ export default function LandingPage() {
       <div className="container mx-auto px-4 -my-24">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <img src="/lovable-uploads/5908f914-4b1a-4234-abb8-009537c792ee.png" alt="DOXA Logo" className="h-12 w-auto" />
+            <img src="/lovable-uploads/5908f914-4b1a-4234-abb8-009537c792ee.png" alt="DOXA Logo" className="h-80 w-80" />
           </div>
           
           <div className="hidden md:flex items-center gap-6">
