@@ -34,9 +34,9 @@ const defaultFooterContent: FooterContent = {
     country: "United Kingdom"
   },
   contact: {
-    email: "support@pappaya.co.uk",
+    email: "support@doxa.co.uk",
     phone: "+44 (0) 1932 123 456",
-    website: "www.pappaya.co.uk"
+    website: "www.doxa.co.uk"
   },
   links: [
     {
@@ -66,7 +66,7 @@ const defaultFooterContent: FooterContent = {
       ]
     }
   ],
-  copyright: `© ${new Date().getFullYear()} Pappaya (Pappaya Global Limited). All rights reserved.`
+  copyright: `© ${new Date().getFullYear()} Doxa (Doxa Global Limited). All rights reserved.`
 };
 
 export function EnhancedFooter() {
@@ -153,7 +153,7 @@ export function EnhancedFooter() {
           
           <div className="flex items-center gap-6">
             <p className="text-xs text-muted-foreground">
-              Powered by Pappaya Global Limited
+              Powered by Doxa Global Limited
             </p>
             <div className="flex gap-4 text-xs">
               <a href="/privacy" className="text-muted-foreground hover:text-primary transition-colors">

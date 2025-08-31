@@ -35,7 +35,7 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
           setError('Invalid email or password. Please check your credentials and try again.');
         } else if (error.message.includes('Email not confirmed')) {
           // Check if this is a test account
-          const isTestAccount = loginForm.email.includes('@pappaya.academy');
+          const isTestAccount = loginForm.email.includes('@doxa.academy');
           if (isTestAccount) {
             setError('Test account needs email confirmation. Please disable "Confirm email" in Supabase Auth settings, or manually confirm the user in the Supabase dashboard.');
           } else {

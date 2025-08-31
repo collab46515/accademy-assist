@@ -52,7 +52,7 @@ export function UserGuidesSection() {
     // Add school name/logo text in header
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(16);
-    doc.text('PAPPAYA', 20, 15);
+    doc.text('DOXA', 20, 15);
     doc.setFontSize(10);
     doc.text('School Management System', 20, 20);
     
@@ -82,7 +82,7 @@ export function UserGuidesSection() {
         doc.rect(0, 0, 210, 25, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(16);
-        doc.text('PAPPAYA', 20, 15);
+        doc.text('DOXA', 20, 15);
         doc.setFontSize(10);
         doc.text('School Management System', 20, 20);
         doc.setTextColor(0, 0, 0);
@@ -216,7 +216,7 @@ export function UserGuidesSection() {
     // Add school name/logo text in header
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(16);
-    doc.text('PAPPAYA', 20, 15);
+    doc.text('DOXA', 20, 15);
     doc.setFontSize(10);
     doc.text('School Management System', 20, 20);
     
@@ -247,7 +247,7 @@ export function UserGuidesSection() {
         doc.rect(0, 0, 210, 25, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(16);
-        doc.text('PAPPAYA', 20, 15);
+        doc.text('DOXA', 20, 15);
         doc.setFontSize(10);
         doc.text('School Management System', 20, 20);
         doc.setTextColor(0, 0, 0);
@@ -277,14 +277,14 @@ export function UserGuidesSection() {
 
   const getQuickStartContent = (title: string) => {
     const content = {
-      "Getting Started with Pappaya": [
+      "Getting Started with Doxa": [
         {
           title: "📋 Pre-Setup Checklist",
           content: "Before you begin:\n• Ensure stable internet connection\n• Have your admin credentials ready\n• Gather school basic information\n• Prepare staff and student lists\n• Review your current academic structure"
         },
         {
           title: "🚀 Step 1: First Login & Profile Setup",
-          content: "WORKFLOW:\n1. Open your web browser and navigate to your Pappaya URL\n2. Enter your admin credentials (provided by your IT team)\n3. Complete the mandatory password change for security\n4. Fill in your personal profile information\n5. Set your timezone and language preferences\n\nExpected time: 10 minutes"
+          content: "WORKFLOW:\n1. Open your web browser and navigate to your Doxa URL\n2. Enter your admin credentials (provided by your IT team)\n3. Complete the mandatory password change for security\n4. Fill in your personal profile information\n5. Set your timezone and language preferences\n\nExpected time: 10 minutes"
         },
         {
           title: "🏫 Step 2: School Configuration",
@@ -352,7 +352,7 @@ export function UserGuidesSection() {
     return content[title as keyof typeof content] || [
       {
         title: "Guide Content",
-        content: `This is a comprehensive guide for ${title}. It contains detailed instructions and best practices to help you make the most of the Pappaya school management system.`
+        content: `This is a comprehensive guide for ${title}. It contains detailed instructions and best practices to help you make the most of the Doxa school management system.`
       }
     ];
   };
@@ -416,7 +416,7 @@ export function UserGuidesSection() {
 
   const quickStartGuides = [
     {
-      title: "Getting Started with Pappaya",
+      title: "Getting Started with Doxa",
       duration: "5 min read",
       type: "Quick Start",
       description: "Essential first steps to set up your school management system",

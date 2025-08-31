@@ -32,7 +32,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Format the demo request details
     const demoRequestDetails = `
-      <h2>New Demo Request from Pappaya Academy Website</h2>
+      <h2>New Demo Request from Doxa Academy Website</h2>
       
       <h3>Contact Information:</h3>
       <ul>
@@ -62,12 +62,12 @@ const handler = async (req: Request): Promise<Response> => {
       ` : ''}
 
       <hr>
-      <p><em>This demo request was submitted through the Pappaya Academy website.</em></p>
+      <p><em>This demo request was submitted through the Doxa Academy website.</em></p>
     `;
 
     // Send email to the business
     const businessEmailResponse = await resend.emails.send({
-      from: "Pappaya Academy <onboarding@resend.dev>",
+      from: "Doxa Academy <onboarding@resend.dev>",
       to: ["dominic@dexra.cloud"],
       subject: `Demo Request from ${formData.name} - ${formData.schoolName}`,
       html: demoRequestDetails,
@@ -75,13 +75,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send confirmation email to the user
     const userEmailResponse = await resend.emails.send({
-      from: "Pappaya Academy <onboarding@resend.dev>",
+      from: "Doxa Academy <onboarding@resend.dev>",
       to: [formData.email],
-      subject: "Thank you for requesting a demo - Pappaya Academy",
+      subject: "Thank you for requesting a demo - Doxa Academy",
       html: `
         <h1>Thank you for your demo request, ${formData.name}!</h1>
         
-        <p>We have received your request for a personalized demonstration of Pappaya Academy.</p>
+        <p>We have received your request for a personalized demonstration of Doxa Academy.</p>
         
         <h3>What happens next?</h3>
         <ul>
@@ -101,11 +101,11 @@ const handler = async (req: Request): Promise<Response> => {
         <p>If you have any immediate questions, feel free to reply to this email.</p>
         
         <p>Best regards,<br>
-        The Pappaya Academy Team</p>
+        The Doxa Academy Team</p>
 
         <hr>
         <p style="font-size: 12px; color: #666;">
-          Pappaya Academy - Complete School Management System<br>
+          Doxa Academy - Complete School Management System<br>
           Transforming education through innovative technology solutions.
         </p>
       `,

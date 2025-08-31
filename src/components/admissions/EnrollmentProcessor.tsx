@@ -164,7 +164,7 @@ export function EnrollmentProcessor() {
             tempPassword: parentTempPassword,
             relationship: parentData.relationship
           } : undefined,
-          schoolName: 'Pappaya Academy'
+          schoolName: 'Doxa Academy'
         };
 
         console.log('Sending enrollment emails with data:', emailData);

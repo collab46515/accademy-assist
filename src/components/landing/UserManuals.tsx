@@ -168,7 +168,7 @@ export function UserManuals({ modules }: UserManualsProps) {
 
   const quickStartGuides = [
     {
-      title: "Getting Started with Pappaya",
+      title: "Getting Started with Doxa",
       duration: "5 min read",
       type: "Quick Start",
       description: "Essential first steps to set up your school management system"

@@ -98,7 +98,7 @@ const handler = async (req: Request): Promise<Response> => {
         const emailPayload = {
           studentData,
           parentData,
-          schoolName: "Pappaya Academy"
+          schoolName: "Doxa Academy"
         };
 
         const { data: emailResult, error: emailError } = await supabase.functions.invoke(

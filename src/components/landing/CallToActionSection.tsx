@@ -62,7 +62,7 @@ export function CallToActionSection({ onGetStarted, onScheduleDemo }: CallToActi
             </h2>
             
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Join hundreds of schools already using Pappaya Academy to streamline operations, 
+              Join hundreds of schools already using Doxa Academy to streamline operations, 
               improve communication, and enhance the educational experience for everyone.
             </p>
           </div>

@@ -8,7 +8,7 @@ export function TestimonialsSection() {
       name: "Sarah Mitchell",
       role: "Head Teacher",
       school: "Greenwood Academy",
-      content: "Pappaya has transformed how we manage our school. The integrated modules save us hours every week, and the parent communication features have significantly improved engagement.",
+      content: "Doxa has transformed how we manage our school. The integrated modules save us hours every week, and the parent communication features have significantly improved engagement.",
       rating: 5,
       avatar: "SM"
     },
@@ -51,7 +51,7 @@ export function TestimonialsSection() {
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Join hundreds of educational institutions that have transformed their 
-            operations with Pappaya.
+            operations with Doxa.
           </p>
         </div>
 

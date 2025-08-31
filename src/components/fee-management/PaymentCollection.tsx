@@ -179,7 +179,7 @@ export const PaymentCollection = () => {
     try {
       // Create receipt content
       const receiptContent = `
-        PAPPAYA SCHOOL SYSTEM
+        DOXA SCHOOL SYSTEM
         PAYMENT RECEIPT
         
         Receipt No: RCP-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}

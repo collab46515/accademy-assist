@@ -332,7 +332,7 @@ export function AppSidebar() {
         <div className="flex items-center gap-3 px-3 py-3 h-full">
           <img 
             src={(currentSchool as any)?.logo_url || "/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png"} 
-            alt={`${currentSchool?.name || 'Pappaya Academy'} Logo`} 
+            alt={`${currentSchool?.name || 'Doxa Academy'} Logo`} 
             className="h-12 w-12 object-contain"
             onError={(e) => {
               e.currentTarget.src = "/lovable-uploads/0a977b5c-549a-4597-a296-a9e51592864a.png";
@@ -340,7 +340,7 @@ export function AppSidebar() {
           />
           {state !== "collapsed" && (
             <div className="flex flex-col">
-              <span className="text-base font-bold">{currentSchool?.name || 'Pappaya AI Suite'}</span>
+              <span className="text-base font-bold">{currentSchool?.name || 'Doxa AI Suite'}</span>
               <span className="text-sm text-muted-foreground font-bold">{currentModule}</span>
             </div>
           )}

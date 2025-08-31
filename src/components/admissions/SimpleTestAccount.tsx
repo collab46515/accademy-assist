@@ -15,8 +15,8 @@ export function SimpleTestAccount() {
     
     try {
       // Fixed test credentials - accounts already exist
-      const studentEmail = 'test.student@pappaya.academy';
-      const parentEmail = 'test.parent@pappaya.academy';
+      const studentEmail = 'test.student@doxa.academy';
+      const parentEmail = 'test.parent@doxa.academy';
       const studentPassword = 'TestStudent123';
       const parentPassword = 'TestParent123';
       
@@ -50,8 +50,8 @@ export function SimpleTestAccount() {
       
       // Still show credentials even if confirmation fails
       setTestCredentials({
-        student: { email: 'test.student@pappaya.academy', password: 'TestStudent123' },
-        parent: { email: 'test.parent@pappaya.academy', password: 'TestParent123' }
+        student: { email: 'test.student@doxa.academy', password: 'TestStudent123' },
+        parent: { email: 'test.parent@doxa.academy', password: 'TestParent123' }
       });
       
       toast({
@@ -79,7 +79,7 @@ export function SimpleTestAccount() {
           🚀 Quick Test Login Accounts
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Create or use existing test accounts for https://pappaya.academy
+          Create or use existing test accounts for https://doxa.academy
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -147,7 +147,7 @@ export function SimpleTestAccount() {
               </Button>
               
               <Button
-                onClick={() => window.open('https://pappaya.academy/', '_blank')}
+                onClick={() => window.open('https://doxa.academy/', '_blank')}
                 className="bg-green-600 hover:bg-green-700"
               >
                 🚀 Go to Login Page

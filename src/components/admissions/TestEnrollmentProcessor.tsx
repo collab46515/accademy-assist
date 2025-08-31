@@ -16,8 +16,8 @@ export function TestEnrollmentProcessor() {
       console.log('🧪 Starting test enrollment with auth users...');
 
       // Create test student data
-      const studentEmail = `test-student-${Date.now()}@pappaya.academy`;
-      const parentEmail = `test-parent-${Date.now()}@pappaya.academy`;
+      const studentEmail = `test-student-${Date.now()}@doxa.academy`;
+      const parentEmail = `test-parent-${Date.now()}@doxa.academy`;
       const studentPassword = `TestStudent123!`;
       const parentPassword = `TestParent123!`;
 
@@ -75,7 +75,7 @@ export function TestEnrollmentProcessor() {
           tempPassword: parentPassword,
           relationship: 'Parent'
         },
-        schoolName: 'Pappaya Academy'
+        schoolName: 'Doxa Academy'
       };
 
       const { data: emailResult, error: emailError } = await supabase

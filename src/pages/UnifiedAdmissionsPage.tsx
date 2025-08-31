@@ -264,7 +264,7 @@ const UnifiedAdmissionsPage = () => {
           {/* Create Test Login Account */}
           <div className="mb-8 p-6 bg-blue-50 border-2 border-blue-300 rounded-lg">
             <h2 className="text-xl font-bold text-blue-800 mb-2">🧪 Advanced Test (if simple test fails)</h2>
-            <p className="text-blue-700 text-sm mb-4">Create test student and parent accounts with working login credentials for https://pappaya.academy</p>
+            <p className="text-blue-700 text-sm mb-4">Create test student and parent accounts with working login credentials for https://doxa.academy</p>
             <TestEnrollmentProcessor />
           </div>
           

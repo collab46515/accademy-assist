@@ -1,4 +1,4 @@
-# Pappaya Academy - School Management System
+# Doxa Academy - School Management System
 
 ## Project Overview
 

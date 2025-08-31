@@ -20,7 +20,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     // Confirm both test accounts
-    const testEmails = ['test.student@pappaya.academy', 'test.parent@pappaya.academy'];
+    const testEmails = ['test.student@doxa.academy', 'test.parent@doxa.academy'];
     const results = [];
 
     for (const email of testEmails) {
