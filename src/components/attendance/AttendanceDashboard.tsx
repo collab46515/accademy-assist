@@ -30,7 +30,6 @@ export function AttendanceDashboard() {
   
   const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month'>('today');
 
-  // Calculate date ranges
   const today = new Date();
   const getDateRange = () => {
     switch (timeRange) {
@@ -57,51 +56,34 @@ export function AttendanceDashboard() {
     }
   };
 
-  // Auto-refresh data every 5 seconds to ensure real-time updates
   useEffect(() => {
-    const { start, end } = getDateRange();
-    console.log('=== DASHBOARD FETCHING ATTENDANCE ===');
-    console.log('Date range:', { start, end });
-    console.log('Time range:', timeRange);
-    console.log('Current school:', currentSchool);
-    
-    fetchAttendanceRecords(start, end);
-    
-    const interval = setInterval(() => {
-      console.log('Dashboard auto-refresh fetch');
+    if (currentSchool?.id) {
+      const { start, end } = getDateRange();
       fetchAttendanceRecords(start, end);
-    }, 5000);
+    }
+  }, [timeRange, currentSchool?.id, fetchAttendanceRecords]);
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (currentSchool?.id) {
+        const { start, end } = getDateRange();
+        fetchAttendanceRecords(start, end);
+      }
+    }, 30000);
     
     return () => clearInterval(interval);
-  }, [timeRange, currentSchool, fetchAttendanceRecords]);
+  }, [timeRange, currentSchool?.id, fetchAttendanceRecords]);
 
-  // Calculate statistics
   const stats = getAttendanceStats(attendanceRecords);
   const totalStudents = students.length;
   
-  console.log('=== DASHBOARD DATA PROCESSING ===');
-  console.log('All attendance records:', attendanceRecords);
-  console.log('Total students:', totalStudents);
-  console.log('Students data:', students);
-  
-  // Get today's attendance specifically
   const todayFormatted = format(today, 'yyyy-MM-dd');
-  console.log('Today formatted for comparison:', todayFormatted);
-  
-  const todayRecords = attendanceRecords.filter(
-    record => {
-      console.log(`Comparing record date "${record.date}" with today "${todayFormatted}"`);
-      return record.date === todayFormatted;
-    }
-  );
-  console.log('Today records found:', todayRecords);
-  
+  const todayRecords = attendanceRecords.filter(record => record.date === todayFormatted);
   const todayStats = getAttendanceStats(todayRecords);
-  console.log('Today stats:', todayStats);
   const studentsMarkedToday = new Set(todayRecords.map(r => r.student_id)).size;
   const studentsNotMarkedToday = totalStudents - studentsMarkedToday;
 
-  // Calculate class-wise statistics
   const classStats = students.reduce((acc, student) => {
     const className = student.form_class || student.year_group;
     if (!acc[className]) {
@@ -121,11 +103,9 @@ export function AttendanceDashboard() {
     return acc;
   }, {} as Record<string, { total: number; present: number; absent: number; late: number; notMarked: number }>);
 
-  // Get alerts (students with consecutive absences, etc.)
   const getAlerts = () => {
     const alerts = [];
     
-    // Students not marked today
     if (studentsNotMarkedToday > 0) {
       alerts.push({
         type: 'warning',
@@ -134,7 +114,6 @@ export function AttendanceDashboard() {
       });
     }
     
-    // High absence classes
     Object.entries(classStats).forEach(([className, classStat]) => {
       const absentRate = classStat.total > 0 ? (classStat.absent / classStat.total) * 100 : 0;
       if (absentRate > 20) {
@@ -153,7 +132,6 @@ export function AttendanceDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Time Range Selector */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center justify-between">
@@ -188,7 +166,6 @@ export function AttendanceDashboard() {
         </CardHeader>
       </Card>
 
-      {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -243,7 +220,6 @@ export function AttendanceDashboard() {
         </Card>
       </div>
 
-      {/* Alerts */}
       {alerts.length > 0 && (
         <Card className="border-warning">
           <CardHeader>
@@ -267,7 +243,6 @@ export function AttendanceDashboard() {
         </Card>
       )}
 
-      {/* Class-wise Breakdown */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -315,7 +290,6 @@ export function AttendanceDashboard() {
         </CardContent>
       </Card>
 
-      {/* Overall Period Stats for selected range */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

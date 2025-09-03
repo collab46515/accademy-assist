@@ -1,9 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
 import { useRBAC } from './useRBAC';
-import { toast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { useToast } from '@/components/ui/use-toast';
 
 export interface AttendanceRecord {
   id: string;
@@ -11,46 +9,45 @@ export interface AttendanceRecord {
   school_id: string;
   date: string;
   period?: number;
-  subject?: string;
   teacher_id: string;
   status: 'present' | 'absent' | 'late' | 'left_early';
   reason?: string;
   notes?: string;
-  is_excused: boolean;
+  subject?: string;
+  is_excused?: boolean;
   excused_by?: string;
   excused_at?: string;
+  excuse_document_url?: string;
   marked_at: string;
-  
-  // Joined data
-  student_name?: string;
-  student_number?: string;
-  form_class?: string;
-  year_group?: string;
-  teacher_name?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface AttendanceSettings {
   id: string;
   school_id: string;
-  late_threshold_minutes: number;
   attendance_mode: 'daily' | 'period';
+  late_threshold_minutes: number;
   auto_mark_weekends: boolean;
   alert_after_days: number;
   require_excuse_approval: boolean;
   enable_qr_checkin: boolean;
   enable_biometric_checkin: boolean;
-  settings: any;
+  settings: Record<string, any>;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface SchoolPeriod {
   id: string;
   school_id: string;
-  period_number: number;
-  period_name: string;
+  name: string;
   start_time: string;
   end_time: string;
-  days_of_week: number[];
+  days_of_week: string[];
   is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ClassSchedule {
@@ -63,192 +60,168 @@ export interface ClassSchedule {
   year_group: string;
   form_class?: string;
   student_ids: string[];
-  days_of_week: number[];
+  days_of_week: string[];
   is_active: boolean;
-  
-  // Joined data
+  created_at: string;
+  updated_at: string;
   period?: SchoolPeriod;
 }
 
+interface AttendanceFilters {
+  student_id?: string;
+  year_group?: string;
+  form_class?: string;
+  status?: string;
+  period?: number;
+}
+
 export function useAttendanceData() {
-  const { user } = useAuth();
-  const { currentSchool } = useRBAC();
+  const { currentSchool, userRoles } = useRBAC();
+  const user = userRoles.find(role => role.user_id);
+  const { toast } = useToast();
+  
   const [loading, setLoading] = useState(false);
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const [attendanceSettings, setAttendanceSettings] = useState<AttendanceSettings | null>(null);
   const [schoolPeriods, setSchoolPeriods] = useState<SchoolPeriod[]>([]);
   const [classSchedules, setClassSchedules] = useState<ClassSchedule[]>([]);
 
-  // Fetch attendance records for a specific date range
-  const fetchAttendanceRecords = async (startDate: string, endDate: string, filters?: {
-    student_id?: string;
-    year_group?: string;
-    form_class?: string;
-    status?: string;
-    period?: number;
-  }) => {
-    if (!currentSchool) return;
-    
-    console.log('=== FETCHING ATTENDANCE RECORDS ===');
-    console.log('School ID:', currentSchool.id);
-    console.log('Date range:', startDate, 'to', endDate);
-    console.log('Filters:', filters);
+  const fetchAttendanceRecords = useCallback(async (
+    startDate: string,
+    endDate: string,
+    filters?: AttendanceFilters
+  ) => {
+    if (!currentSchool?.id) return;
     
     setLoading(true);
     try {
       let query = supabase
         .from('attendance_records')
-        .select(`
-          *
-        `)
+        .select('*')
         .eq('school_id', currentSchool.id)
         .gte('date', startDate)
         .lte('date', endDate)
         .order('date', { ascending: false })
         .order('marked_at', { ascending: false });
 
-      // Apply filters
       if (filters?.student_id) {
         query = query.eq('student_id', filters.student_id);
       }
       if (filters?.status) {
         query = query.eq('status', filters.status);
       }
-      if (filters?.period !== undefined) {
+      if (filters?.period) {
         query = query.eq('period', filters.period);
       }
 
       const { data, error } = await query;
-
-      console.log('Raw attendance data from DB:', data);
-      console.log('DB error:', error);
-
+      
       if (error) throw error;
-
-      // For now, create basic records without joined data since relationships aren't set up
-      const formattedRecords: AttendanceRecord[] = (data || []).map((record: any) => ({
-        ...record,
-        student_name: 'Student', // Will be populated when we fix relationships
-        student_number: 'N/A',
-        form_class: 'N/A',
-        year_group: 'N/A',
-        teacher_name: 'Teacher',
-      }));
-
-      console.log('Formatted attendance records:', formattedRecords);
-      console.log('Total records found:', formattedRecords.length);
-
-      setAttendanceRecords(formattedRecords);
+      
+      setAttendanceRecords((data || []) as AttendanceRecord[]);
     } catch (error: any) {
       console.error('Error fetching attendance records:', error);
-      // Don't show error toast for now to avoid spam
+      toast({
+        title: 'Error fetching attendance',
+        description: error.message,
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentSchool?.id, toast]);
 
-  // Mark attendance for a student
-  const markAttendance = async (attendance: {
+  const markAttendance = useCallback(async (attendance: {
     student_id: string;
     date: string;
+    status: 'present' | 'absent' | 'late' | 'left_early';
     period?: number;
     subject?: string;
-    status: 'present' | 'absent' | 'late' | 'left_early';
     reason?: string;
     notes?: string;
   }) => {
-    if (!currentSchool || !user) return null;
+    if (!currentSchool?.id || !user?.id) return false;
 
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('attendance_records')
         .upsert({
-          ...attendance,
+          student_id: attendance.student_id,
           school_id: currentSchool.id,
           teacher_id: user.id,
-        })
-        .select()
-        .single();
+          date: attendance.date,
+          period: attendance.period,
+          status: attendance.status,
+          subject: attendance.subject,
+          reason: attendance.reason,
+          notes: attendance.notes,
+          marked_at: new Date().toISOString(),
+        });
 
       if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Attendance marked successfully",
-      });
-
-      return data;
+      
+      return true;
     } catch (error: any) {
       console.error('Error marking attendance:', error);
       toast({
-        title: "Error",
-        description: "Failed to mark attendance",
-        variant: "destructive",
+        title: 'Error marking attendance',
+        description: error.message,
+        variant: 'destructive',
       });
-      return null;
+      return false;
     }
-  };
+  }, [currentSchool?.id, user?.user_id, toast]);
 
-  // Mark attendance for multiple students at once
-  const markBulkAttendance = async (attendanceList: Array<{
+  const markBulkAttendance = useCallback(async (attendanceList: Array<{
     student_id: string;
     date: string;
+    status: 'present' | 'absent' | 'late' | 'left_early';
     period?: number;
     subject?: string;
-    status: 'present' | 'absent' | 'late' | 'left_early';
     reason?: string;
     notes?: string;
   }>) => {
-    if (!currentSchool || !user) return false;
+    if (!currentSchool?.id || !user?.id) return false;
 
     try {
-      const recordsToInsert = attendanceList.map(attendance => ({
-        ...attendance,
+      const records = attendanceList.map(attendance => ({
+        student_id: attendance.student_id,
         school_id: currentSchool.id,
         teacher_id: user.id,
+        date: attendance.date,
+        period: attendance.period,
+        status: attendance.status,
+        subject: attendance.subject,
+        reason: attendance.reason,
+        notes: attendance.notes,
+        marked_at: new Date().toISOString(),
       }));
 
-      console.log('=== SAVING ATTENDANCE RECORDS ===');
-      console.log('Records to save:', recordsToInsert);
-
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('attendance_records')
-        .upsert(recordsToInsert)
-        .select();
-
-      console.log('Save response data:', data);
-      console.log('Save response error:', error);
+        .upsert(records);
 
       if (error) throw error;
-
-      // Immediately refresh the local attendance records
-      console.log('Immediately refreshing attendance records after save...');
-      const { start, end } = { 
-        start: format(new Date(), 'yyyy-MM-dd'), 
-        end: format(new Date(), 'yyyy-MM-dd') 
-      };
-      await fetchAttendanceRecords(start, end);
-
+      
       toast({
-        title: "Success",
+        title: 'Success',
         description: `Attendance marked for ${attendanceList.length} students`,
       });
-
+      
       return true;
     } catch (error: any) {
       console.error('Error marking bulk attendance:', error);
       toast({
-        title: "Error",
-        description: "Failed to mark bulk attendance",
-        variant: "destructive",
+        title: 'Error marking attendance',
+        description: error.message,
+        variant: 'destructive',
       });
       return false;
     }
-  };
+  }, [currentSchool?.id, user?.user_id, toast]);
 
-  // Fetch attendance settings
-  const fetchAttendanceSettings = async () => {
-    if (!currentSchool) return;
+  const fetchAttendanceSettings = useCallback(async () => {
+    if (!currentSchool?.id) return;
 
     try {
       const { data, error } = await supabase
@@ -258,16 +231,15 @@ export function useAttendanceData() {
         .single();
 
       if (error && error.code !== 'PGRST116') throw error;
-
-      setAttendanceSettings(data as AttendanceSettings);
+      
+      setAttendanceSettings(data as any);
     } catch (error: any) {
       console.error('Error fetching attendance settings:', error);
     }
-  };
+  }, [currentSchool?.id]);
 
-  // Fetch school periods
-  const fetchSchoolPeriods = async () => {
-    if (!currentSchool) return;
+  const fetchSchoolPeriods = useCallback(async () => {
+    if (!currentSchool?.id) return;
 
     try {
       const { data, error } = await supabase
@@ -275,76 +247,57 @@ export function useAttendanceData() {
         .select('*')
         .eq('school_id', currentSchool.id)
         .eq('is_active', true)
-        .order('period_number');
+        .order('start_time');
 
       if (error) throw error;
-
-      setSchoolPeriods(data || []);
+      
+      setSchoolPeriods((data || []) as any);
     } catch (error: any) {
       console.error('Error fetching school periods:', error);
     }
-  };
+  }, [currentSchool?.id]);
 
-  // Fetch class schedules for current teacher
-  const fetchMyClassSchedules = async () => {
-    if (!currentSchool || !user) return;
+  const fetchMyClassSchedules = useCallback(async () => {
+    if (!currentSchool?.id || !user?.id) return;
 
     try {
-      // First fetch class schedules without the problematic join
-      const { data: scheduleData, error: scheduleError } = await supabase
+      const { data, error } = await supabase
         .from('class_schedules')
-        .select('*')
+        .select(`
+          *,
+          period:school_periods(*)
+        `)
         .eq('school_id', currentSchool.id)
         .eq('teacher_id', user.id)
         .eq('is_active', true);
 
-      if (scheduleError) throw scheduleError;
-
-      // Then fetch school periods separately
-      const { data: periodsData, error: periodsError } = await supabase
-        .from('school_periods')
-        .select('*')
-        .eq('school_id', currentSchool.id)
-        .eq('is_active', true);
-
-      if (periodsError) throw periodsError;
-
-      // Manually join the data
-      const scheduleWithPeriods = (scheduleData || []).map(schedule => {
-        const period = (periodsData || []).find(p => p.id === schedule.period_id);
-        return {
-          ...schedule,
-          period: period || null
-        };
-      });
-
-      setClassSchedules(scheduleWithPeriods as any[]);
+      if (error) throw error;
+      
+      setClassSchedules((data || []) as any);
     } catch (error: any) {
       console.error('Error fetching class schedules:', error);
-      // Set empty array to avoid pending state
-      setClassSchedules([]);
     }
-  };
+  }, [currentSchool?.id, user?.user_id]);
 
-  // Get current class based on day and time
-  const getCurrentClass = () => {
+  const getCurrentClass = useCallback(() => {
     const now = new Date();
-    const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
-    const currentTime = now.toTimeString().slice(0, 5); // HH:MM format
+    const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    const currentTime = now.toTimeString().slice(0, 5);
 
     return classSchedules.find(schedule => {
       if (!schedule.period) return false;
       
       const isToday = schedule.days_of_week.includes(currentDay);
+      if (!isToday) return false;
+
       const startTime = schedule.period.start_time;
       const endTime = schedule.period.end_time;
       
-      return isToday && currentTime >= startTime && currentTime <= endTime;
+      return currentTime >= startTime && currentTime <= endTime;
     });
-  };
+  }, [classSchedules]);
 
-  // Calculate attendance statistics
-  const getAttendanceStats = (records: AttendanceRecord[]) => {
+  const getAttendanceStats = useCallback((records: AttendanceRecord[]) => {
     const total = records.length;
     const present = records.filter(r => r.status === 'present').length;
     const absent = records.filter(r => r.status === 'absent').length;
@@ -359,33 +312,28 @@ export function useAttendanceData() {
       leftEarly,
       attendanceRate: total > 0 ? Math.round((present / total) * 100) : 0,
     };
-  };
+  }, []);
 
   useEffect(() => {
-    if (currentSchool) {
+    if (currentSchool?.id) {
       fetchAttendanceSettings();
       fetchSchoolPeriods();
       fetchMyClassSchedules();
     }
-  }, [currentSchool]);
+  }, [currentSchool?.id, fetchAttendanceSettings, fetchSchoolPeriods, fetchMyClassSchedules]);
 
   return {
-    // State
     loading,
     attendanceRecords,
     attendanceSettings,
     schoolPeriods,
     classSchedules,
-    
-    // Actions
     fetchAttendanceRecords,
     markAttendance,
     markBulkAttendance,
     fetchAttendanceSettings,
     fetchSchoolPeriods,
     fetchMyClassSchedules,
-    
-    // Utilities
     getCurrentClass,
     getAttendanceStats,
   };
