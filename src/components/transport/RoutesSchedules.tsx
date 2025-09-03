@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 
 export function RoutesSchedules() {
-  const { loading, routes, vehicles, drivers, stats, addRoute, updateRoute } = useTransportData();
+  const { loading, routes, vehicles, drivers, studentTransports, addRoute, updateRoute } = useTransportData();
   const { toast } = useToast();
   const [showDialog, setShowDialog] = useState(false);
   const [editingRoute, setEditingRoute] = useState<any>(null);
@@ -32,7 +32,7 @@ export function RoutesSchedules() {
   });
 
   const handleAddRoute = async () => {
-    console.log('🚌 Starting route creation...', newRoute);
+    console.log('🚌 Starting route operation...', newRoute);
     
     if (!newRoute.route_name || !newRoute.start_time || !newRoute.end_time) {
       toast({
@@ -43,10 +43,18 @@ export function RoutesSchedules() {
       return;
     }
 
-    const result = await addRoute(newRoute);
+    let result;
+    
+    if (editingRoute) {
+      console.log('🚌 Updating existing route...');
+      result = await updateRoute(editingRoute.id, newRoute);
+    } else {
+      console.log('🚌 Creating new route...');
+      result = await addRoute(newRoute);
+    }
     
     if (result) {
-      console.log('✅ Route created successfully');
+      console.log('✅ Route operation successful');
       setNewRoute({
         route_name: '',
         start_time: '07:30',
@@ -59,7 +67,7 @@ export function RoutesSchedules() {
       setEditingRoute(null);
       setShowDialog(false);
     } else {
-      console.log('❌ Route creation failed');
+      console.log('❌ Route operation failed');
     }
   };
 
@@ -70,8 +78,8 @@ export function RoutesSchedules() {
   };
 
   // Calculate totals from real data
-  const totalStudents = Math.floor(Math.random() * 200) + 150; // Simulated for now
-  const totalStops = routes.reduce((sum, route) => sum + (route.route_stops?.length || 0), 0) || 29;
+  const totalStudents = studentTransports.filter(st => st.status === 'active').length || 0;
+  const totalStops = routes.reduce((sum, route) => sum + (route.route_stops?.length || 0), 0) || 0;
 
   return (
     <div className="space-y-6">
@@ -212,7 +220,7 @@ export function RoutesSchedules() {
               <CardContent className="flex items-center p-6">
                 <Route className="h-8 w-8 text-blue-600 mr-3" />
                 <div>
-                  <p className="text-2xl font-bold">{stats.activeRoutes}</p>
+                  <p className="text-2xl font-bold">{routes.filter(r => r.status === 'active').length}</p>
                   <p className="text-sm text-muted-foreground">Active Routes</p>
                 </div>
               </CardContent>
@@ -274,22 +282,38 @@ export function RoutesSchedules() {
                           <p className="text-sm text-muted-foreground">{route.route_stops?.length || 0} stops • {route.estimated_duration || 30} min</p>
                         </div>
                       </TableCell>
-                      <TableCell>{route.driver ? `${route.driver.first_name} ${route.driver.last_name}` : 'Unassigned'}</TableCell>
+                      <TableCell>
+                        {route.driver_id ? 
+                          drivers.find(d => d.id === route.driver_id)?.first_name + ' ' + drivers.find(d => d.id === route.driver_id)?.last_name || 'Driver Not Found' : 
+                          'Unassigned'
+                        }
+                      </TableCell>
                       <TableCell>
                         <Badge variant="outline">
-                          {route.vehicle ? route.vehicle.vehicle_number : 'No vehicle'}
+                          {route.vehicle_id ? 
+                            vehicles.find(v => v.id === route.vehicle_id)?.vehicle_number || 'Vehicle Not Found' : 
+                            'No vehicle'
+                          }
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="text-center">
-                          <p className="font-medium">0</p>
-                          <div className="w-16 bg-secondary rounded-full h-2 mt-1">
-                            <div 
-                              className="bg-primary h-2 rounded-full" 
-                              style={{ width: "0%" }}
-                            />
-                          </div>
-                        </div>
+                        {(() => {
+                          const studentsOnRoute = studentTransports.filter(st => st.route_id === route.id && st.status === 'active').length;
+                          const vehicleCapacity = route.vehicle_id ? vehicles.find(v => v.id === route.vehicle_id)?.capacity || 50 : 50;
+                          const percentage = Math.min((studentsOnRoute / vehicleCapacity) * 100, 100);
+                          
+                          return (
+                            <div className="text-center">
+                              <p className="font-medium">{studentsOnRoute}/{vehicleCapacity}</p>
+                              <div className="w-16 bg-secondary rounded-full h-2 mt-1">
+                                <div 
+                                  className="bg-primary h-2 rounded-full" 
+                                  style={{ width: `${percentage}%` }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell>
                         <div className="space-y-1">
@@ -305,7 +329,23 @@ export function RoutesSchedules() {
                           <Button variant="ghost" size="sm">
                             <MapPin className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                              setEditingRoute(route);
+                              setNewRoute({
+                                route_name: route.route_name,
+                                start_time: route.start_time,
+                                end_time: route.end_time,
+                                vehicle_id: route.vehicle_id || '',
+                                driver_id: route.driver_id || '',
+                                description: route.description || '',
+                                days_of_week: route.days_of_week
+                              });
+                              setShowDialog(true);
+                            }}
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
                         </div>
