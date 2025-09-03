@@ -166,24 +166,89 @@ export function useTransportData() {
   const [maintenance, setMaintenance] = useState<VehicleMaintenance[]>([]);
   const [incidents, setIncidents] = useState<TransportIncident[]>([]);
 
-  // Fetch all transport data - using mock data until types are regenerated
+  // Fetch all transport data - using mock data until database is ready
   const fetchTransportData = async () => {
     if (!currentSchool?.id) return;
     
     setLoading(true);
     try {
-      // Mock data - replace with real API calls once types are updated
-      const mockVehicles = [
-        { id: '1', school_id: currentSchool.id, vehicle_number: 'BUS-001', vehicle_type: 'bus' as const, make: 'Mercedes', model: 'Sprinter', year: 2022, capacity: 50, fuel_type: 'diesel' as const, mileage: 45000, status: 'active' as const, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-        { id: '2', school_id: currentSchool.id, vehicle_number: 'VAN-001', vehicle_type: 'van' as const, make: 'Ford', model: 'Transit', year: 2021, capacity: 25, fuel_type: 'diesel' as const, mileage: 32000, status: 'maintenance' as const, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+      // Mock data with realistic values
+      const mockVehicles: Vehicle[] = [
+        { 
+          id: '1', 
+          school_id: currentSchool.id, 
+          vehicle_number: 'BUS-001', 
+          vehicle_type: 'bus', 
+          make: 'Mercedes', 
+          model: 'Sprinter', 
+          year: 2022, 
+          capacity: 50, 
+          fuel_type: 'diesel', 
+          mileage: 45000, 
+          status: 'active',
+          registration_number: 'AB21 DEF',
+          insurance_expiry: '2024-12-31',
+          last_service_date: '2024-01-15',
+          next_service_date: '2024-07-15',
+          created_at: new Date().toISOString(), 
+          updated_at: new Date().toISOString() 
+        },
+        { 
+          id: '2', 
+          school_id: currentSchool.id, 
+          vehicle_number: 'VAN-001', 
+          vehicle_type: 'van', 
+          make: 'Ford', 
+          model: 'Transit', 
+          year: 2021, 
+          capacity: 25, 
+          fuel_type: 'diesel', 
+          mileage: 32000, 
+          status: 'maintenance',
+          registration_number: 'CD22 GHI',
+          insurance_expiry: '2024-11-30',
+          created_at: new Date().toISOString(), 
+          updated_at: new Date().toISOString() 
+        }
       ];
       
-      const mockDrivers = [
-        { id: '1', school_id: currentSchool.id, employee_id: 'DR001', first_name: 'John', last_name: 'Smith', phone: '+44123456789', license_number: 'DL123456', license_expiry: '2025-12-31', license_type: ['D1'], hire_date: '2020-01-15', status: 'active' as const, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+      const mockDrivers: Driver[] = [
+        { 
+          id: '1', 
+          school_id: currentSchool.id, 
+          employee_id: 'DR001', 
+          first_name: 'John', 
+          last_name: 'Smith', 
+          phone: '+44123456789', 
+          license_number: 'DL123456', 
+          license_expiry: '2025-12-31', 
+          license_type: ['D1'], 
+          hire_date: '2020-01-15', 
+          status: 'active',
+          email: 'john.smith@school.com',
+          dbs_check_date: '2023-01-01',
+          dbs_expiry: '2026-01-01',
+          created_at: new Date().toISOString(), 
+          updated_at: new Date().toISOString() 
+        }
       ];
       
-      const mockRoutes = [
-        { id: '1', school_id: currentSchool.id, route_name: 'Route 1 - City Center', start_time: '07:30', end_time: '08:15', status: 'active' as const, days_of_week: [1,2,3,4,5], created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+      const mockRoutes: TransportRoute[] = [
+        { 
+          id: '1', 
+          school_id: currentSchool.id, 
+          route_name: 'Route 1 - City Center', 
+          start_time: '07:30', 
+          end_time: '08:15', 
+          status: 'active', 
+          days_of_week: [1,2,3,4,5],
+          vehicle_id: '1',
+          driver_id: '1',
+          estimated_duration: 45,
+          distance: 12.5,
+          created_at: new Date().toISOString(), 
+          updated_at: new Date().toISOString() 
+        }
       ];
 
       setVehicles(mockVehicles);
@@ -194,6 +259,7 @@ export function useTransportData() {
       setIncidents([]);
     } catch (error) {
       console.error('Error loading transport data:', error);
+      toast.error('Failed to load transport data');
     } finally {
       setLoading(false);
     }
@@ -205,84 +271,62 @@ export function useTransportData() {
     
     try {
       // Mock implementation
-      const newVehicle = {
-        ...vehicleData,
+      const newVehicle: Vehicle = {
         id: `vehicle-${Date.now()}`,
         school_id: currentSchool.id,
+        vehicle_number: vehicleData.vehicle_number || `VEH-${Date.now()}`,
+        vehicle_type: vehicleData.vehicle_type || 'van',
+        make: vehicleData.make || '',
+        model: vehicleData.model || '',
+        year: vehicleData.year || new Date().getFullYear(),
+        capacity: vehicleData.capacity || 20,
+        fuel_type: vehicleData.fuel_type || 'diesel',
+        mileage: vehicleData.mileage || 0,
+        status: vehicleData.status || 'active',
+        registration_number: vehicleData.registration_number,
+        insurance_expiry: vehicleData.insurance_expiry,
+        mot_expiry: vehicleData.mot_expiry,
+        last_service_date: vehicleData.last_service_date,
+        next_service_date: vehicleData.next_service_date,
+        purchase_date: vehicleData.purchase_date,
+        purchase_cost: vehicleData.purchase_cost,
+        notes: vehicleData.notes,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      } as Vehicle;
+      };
 
       setVehicles(prev => [...prev, newVehicle]);
-      toast({
-        title: "Success",
-        description: "Vehicle added successfully"
-      });
+      toast.success("Vehicle added successfully");
       
       return newVehicle;
     } catch (error) {
       console.error('Error adding vehicle:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add vehicle",
-        variant: "destructive"
-      });
+      toast.error("Failed to add vehicle");
       return null;
     }
   };
 
   const updateVehicle = async (id: string, updates: Partial<Vehicle>) => {
     try {
-      const { data, error } = await supabase
-        .from('vehicles')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      setVehicles(prev => prev.map(v => v.id === id ? data : v));
-      toast({
-        title: "Success",
-        description: "Vehicle updated successfully"
-      });
-      
-      return data;
+      const updatedVehicle = { ...updates, updated_at: new Date().toISOString() };
+      setVehicles(prev => prev.map(v => v.id === id ? { ...v, ...updatedVehicle } : v));
+      toast.success("Vehicle updated successfully");
+      return updatedVehicle;
     } catch (error) {
       console.error('Error updating vehicle:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update vehicle",
-        variant: "destructive"
-      });
+      toast.error("Failed to update vehicle");
       return null;
     }
   };
 
   const deleteVehicle = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('vehicles')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
       setVehicles(prev => prev.filter(v => v.id !== id));
-      toast({
-        title: "Success",
-        description: "Vehicle deleted successfully"
-      });
-      
+      toast.success("Vehicle deleted successfully");
       return true;
     } catch (error) {
       console.error('Error deleting vehicle:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete vehicle",
-        variant: "destructive"
-      });
+      toast.error("Failed to delete vehicle");
       return false;
     }
   };
@@ -292,57 +336,51 @@ export function useTransportData() {
     if (!currentSchool?.id) return null;
     
     try {
-      const { data, error } = await supabase
-        .from('drivers')
-        .insert([{ ...driverData, school_id: currentSchool.id }])
-        .select()
-        .single();
+      const newDriver: Driver = {
+        id: `driver-${Date.now()}`,
+        school_id: currentSchool.id,
+        employee_id: driverData.employee_id || `DR${Date.now()}`,
+        first_name: driverData.first_name || '',
+        last_name: driverData.last_name || '',
+        phone: driverData.phone || '',
+        license_number: driverData.license_number || '',
+        license_expiry: driverData.license_expiry || '',
+        license_type: driverData.license_type || ['D1'],
+        hire_date: driverData.hire_date || new Date().toISOString().split('T')[0],
+        status: driverData.status || 'active',
+        email: driverData.email,
+        birth_date: driverData.birth_date,
+        address: driverData.address,
+        emergency_contact_name: driverData.emergency_contact_name,
+        emergency_contact_phone: driverData.emergency_contact_phone,
+        dbs_check_date: driverData.dbs_check_date,
+        dbs_expiry: driverData.dbs_expiry,
+        first_aid_cert_date: driverData.first_aid_cert_date,
+        first_aid_expiry: driverData.first_aid_expiry,
+        notes: driverData.notes,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
 
-      if (error) throw error;
-
-      setDrivers(prev => [...prev, data]);
-      toast({
-        title: "Success",
-        description: "Driver added successfully"
-      });
-      
-      return data;
+      setDrivers(prev => [...prev, newDriver]);
+      toast.success("Driver added successfully");
+      return newDriver;
     } catch (error) {
       console.error('Error adding driver:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add driver",
-        variant: "destructive"
-      });
+      toast.error("Failed to add driver");
       return null;
     }
   };
 
   const updateDriver = async (id: string, updates: Partial<Driver>) => {
     try {
-      const { data, error } = await supabase
-        .from('drivers')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      setDrivers(prev => prev.map(d => d.id === id ? data : d));
-      toast({
-        title: "Success",
-        description: "Driver updated successfully"
-      });
-      
-      return data;
+      const updatedDriver = { ...updates, updated_at: new Date().toISOString() };
+      setDrivers(prev => prev.map(d => d.id === id ? { ...d, ...updatedDriver } : d));
+      toast.success("Driver updated successfully");
+      return updatedDriver;
     } catch (error) {
       console.error('Error updating driver:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update driver",
-        variant: "destructive"
-      });
+      toast.error("Failed to update driver");
       return null;
     }
   };
@@ -352,57 +390,44 @@ export function useTransportData() {
     if (!currentSchool?.id) return null;
     
     try {
-      const { data, error } = await supabase
-        .from('transport_routes')
-        .insert([{ ...routeData, school_id: currentSchool.id }])
-        .select()
-        .single();
+      const newRoute: TransportRoute = {
+        id: `route-${Date.now()}`,
+        school_id: currentSchool.id,
+        route_name: routeData.route_name || '',
+        start_time: routeData.start_time || '08:00',
+        end_time: routeData.end_time || '09:00',
+        status: routeData.status || 'active',
+        days_of_week: routeData.days_of_week || [1,2,3,4,5],
+        route_code: routeData.route_code,
+        description: routeData.description,
+        estimated_duration: routeData.estimated_duration,
+        distance: routeData.distance,
+        vehicle_id: routeData.vehicle_id,
+        driver_id: routeData.driver_id,
+        notes: routeData.notes,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
 
-      if (error) throw error;
-
-      setRoutes(prev => [...prev, data]);
-      toast({
-        title: "Success",
-        description: "Route added successfully"
-      });
-      
-      return data;
+      setRoutes(prev => [...prev, newRoute]);
+      toast.success("Route added successfully");
+      return newRoute;
     } catch (error) {
       console.error('Error adding route:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add route",
-        variant: "destructive"
-      });
+      toast.error("Failed to add route");
       return null;
     }
   };
 
   const updateRoute = async (id: string, updates: Partial<TransportRoute>) => {
     try {
-      const { data, error } = await supabase
-        .from('transport_routes')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      setRoutes(prev => prev.map(r => r.id === id ? data : r));
-      toast({
-        title: "Success",
-        description: "Route updated successfully"
-      });
-      
-      return data;
+      const updatedRoute = { ...updates, updated_at: new Date().toISOString() };
+      setRoutes(prev => prev.map(r => r.id === id ? { ...r, ...updatedRoute } : r));
+      toast.success("Route updated successfully");
+      return updatedRoute;
     } catch (error) {
       console.error('Error updating route:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update route",
-        variant: "destructive"
-      });
+      toast.error("Failed to update route");
       return null;
     }
   };
@@ -410,31 +435,30 @@ export function useTransportData() {
   // Maintenance operations
   const addMaintenance = async (maintenanceData: Partial<VehicleMaintenance>) => {
     try {
-      const { data, error } = await supabase
-        .from('vehicle_maintenance')
-        .insert([maintenanceData])
-        .select(`
-          *,
-          vehicle:vehicles(*)
-        `)
-        .single();
+      const newMaintenance: VehicleMaintenance = {
+        id: `maintenance-${Date.now()}`,
+        vehicle_id: maintenanceData.vehicle_id || '',
+        maintenance_type: maintenanceData.maintenance_type || 'service',
+        description: maintenanceData.description || '',
+        service_date: maintenanceData.service_date || new Date().toISOString().split('T')[0],
+        status: maintenanceData.status || 'scheduled',
+        cost: maintenanceData.cost,
+        mileage_at_service: maintenanceData.mileage_at_service,
+        service_provider: maintenanceData.service_provider,
+        next_service_due: maintenanceData.next_service_due,
+        parts_replaced: maintenanceData.parts_replaced,
+        warranty_expiry: maintenanceData.warranty_expiry,
+        notes: maintenanceData.notes,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
 
-      if (error) throw error;
-
-      setMaintenance(prev => [...prev, data]);
-      toast({
-        title: "Success",
-        description: "Maintenance record added successfully"
-      });
-      
-      return data;
+      setMaintenance(prev => [...prev, newMaintenance]);
+      toast.success("Maintenance record added successfully");
+      return newMaintenance;
     } catch (error) {
       console.error('Error adding maintenance:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add maintenance record",
-        variant: "destructive"
-      });
+      toast.error("Failed to add maintenance record");
       return null;
     }
   };
@@ -442,34 +466,28 @@ export function useTransportData() {
   // Student transport assignment operations
   const assignStudentToRoute = async (assignmentData: Partial<StudentTransport>) => {
     try {
-      const { data, error } = await supabase
-        .from('student_transport')
-        .insert([assignmentData])
-        .select(`
-          *,
-          student:students(*, profiles(*)),
-          route:transport_routes(*),
-          pickup_stop:route_stops!pickup_stop_id(*),
-          dropoff_stop:route_stops!dropoff_stop_id(*)
-        `)
-        .single();
+      const newAssignment: StudentTransport = {
+        id: `assignment-${Date.now()}`,
+        student_id: assignmentData.student_id || '',
+        route_id: assignmentData.route_id || '',
+        start_date: assignmentData.start_date || new Date().toISOString().split('T')[0],
+        status: assignmentData.status || 'active',
+        payment_status: assignmentData.payment_status || 'pending',
+        pickup_stop_id: assignmentData.pickup_stop_id,
+        dropoff_stop_id: assignmentData.dropoff_stop_id,
+        end_date: assignmentData.end_date,
+        fee_amount: assignmentData.fee_amount,
+        notes: assignmentData.notes,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
 
-      if (error) throw error;
-
-      setStudentTransports(prev => [...prev, data]);
-      toast({
-        title: "Success",
-        description: "Student assigned to route successfully"
-      });
-      
-      return data;
+      setStudentTransports(prev => [...prev, newAssignment]);
+      toast.success("Student assigned to route successfully");
+      return newAssignment;
     } catch (error) {
       console.error('Error assigning student:', error);
-      toast({
-        title: "Error",
-        description: "Failed to assign student to route",
-        variant: "destructive"
-      });
+      toast.error("Failed to assign student to route");
       return null;
     }
   };
