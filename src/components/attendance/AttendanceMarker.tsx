@@ -82,12 +82,20 @@ export function AttendanceMarker() {
       if (!currentSchool) return;
       
       // Fetch existing attendance records for the selected date
-      const { data: existingRecords, error } = await supabase
+      let query = supabase
         .from('attendance_records')
         .select('*')
         .eq('school_id', currentSchool.id)
-        .eq('date', format(selectedDate, 'yyyy-MM-dd'))
-        .eq('period', selectedPeriod);
+        .eq('date', format(selectedDate, 'yyyy-MM-dd'));
+
+      // Handle period filtering - use .is() for null values, .eq() for actual values
+      if (selectedPeriod === null) {
+        query = query.is('period', null);
+      } else {
+        query = query.eq('period', selectedPeriod);
+      }
+
+      const { data: existingRecords, error } = await query;
 
       if (error) {
         console.error('Error fetching existing attendance:', error);
