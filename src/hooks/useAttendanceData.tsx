@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useRBAC } from './useRBAC';
 import { toast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 
 export interface AttendanceRecord {
   id: string;
@@ -201,6 +202,13 @@ export function useAttendanceData() {
         .upsert(recordsToInsert);
 
       if (error) throw error;
+
+      // Immediately refresh the local attendance records
+      const { start, end } = { 
+        start: format(new Date(), 'yyyy-MM-dd'), 
+        end: format(new Date(), 'yyyy-MM-dd') 
+      };
+      await fetchAttendanceRecords(start, end);
 
       toast({
         title: "Success",

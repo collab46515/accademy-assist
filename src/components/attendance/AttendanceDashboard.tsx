@@ -57,54 +57,17 @@ export function AttendanceDashboard() {
     }
   };
 
-  // Fetch data when component mounts or time range changes
+  // Auto-refresh data every 5 seconds to ensure real-time updates
   useEffect(() => {
     const { start, end } = getDateRange();
     fetchAttendanceRecords(start, end);
-  }, [timeRange, currentSchool]);
-
-  // Refresh data function that can be called externally
-  const refreshData = () => {
-    const { start, end } = getDateRange();
-    fetchAttendanceRecords(start, end);
-  };
-
-  // Listen for attendance changes in localStorage (simple solution)
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      console.log('Storage event received:', e.key);
-      if (e.key === 'attendance_updated') {
-        console.log('Refreshing dashboard data due to storage event');
-        refreshData();
-        localStorage.removeItem('attendance_updated'); // Clean up
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
     
-    // Also listen for custom events within the same window
-    const handleCustomEvent = () => {
-      console.log('Custom attendance_updated event received, refreshing dashboard');
-      refreshData();
-    };
-    
-    window.addEventListener('attendance_updated', handleCustomEvent);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('attendance_updated', handleCustomEvent);
-    };
-  }, [timeRange]);
-
-  // Force refresh every 30 seconds as backup
-  useEffect(() => {
     const interval = setInterval(() => {
-      console.log('Auto-refreshing dashboard data');
-      refreshData();
-    }, 30000);
+      fetchAttendanceRecords(start, end);
+    }, 5000);
     
     return () => clearInterval(interval);
-  }, [timeRange]);
+  }, [timeRange, currentSchool]);
 
   // Calculate statistics
   const stats = getAttendanceStats(attendanceRecords);

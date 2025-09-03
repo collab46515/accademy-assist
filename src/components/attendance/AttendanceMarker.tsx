@@ -189,15 +189,8 @@ export function AttendanceMarker() {
       const success = await markBulkAttendance(attendanceToSave);
       
       if (success) {
-        // Don't reset the form - keep the marked attendance visible
-        // The attendance has been successfully saved to the database
+        // Keep the marked attendance visible and the system will auto-refresh
         console.log('Attendance successfully saved - keeping UI state');
-        
-        // Notify dashboard to refresh data
-        console.log('Dispatching attendance_updated event');
-        window.dispatchEvent(new CustomEvent('attendance_updated'));
-        localStorage.setItem('attendance_updated', Date.now().toString());
-        console.log('Set localStorage attendance_updated');
       }
     } catch (error) {
       console.error('Error saving attendance:', error);
