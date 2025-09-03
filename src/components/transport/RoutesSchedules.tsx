@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Edit, MapPin, Clock, Users, Route, Calendar, Settings, TrendingUp } from "lucide-react";
+import { Plus, Edit, MapPin, Clock, Users, Route, Calendar, Settings, TrendingUp, Car } from "lucide-react";
 import { useTransportData } from "@/hooks/useTransportData";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
@@ -414,39 +414,69 @@ export function RoutesSchedules() {
               <CardDescription>Visual overview of all route schedules throughout the week</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-2">
-                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map((day, dayIndex) => (
-                  <div key={day} className="border rounded-lg p-4">
-                    <h3 className="font-semibold mb-3">{day}</h3>
-                    <div className="grid gap-2">
-                      {routes.filter(route => route.days_of_week?.includes(dayIndex + 1)).map((route) => {
-                        const driver = drivers.find(d => d.id === route.driver_id);
-                        const vehicle = vehicles.find(v => v.id === route.vehicle_id);
-                        const studentsCount = studentTransports.filter(st => st.route_id === route.id && st.status === 'active').length;
-                        
-                        return (
-                          <div key={route.id} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
-                            <div className="flex items-center gap-4">
-                              <div className="font-medium">{route.route_name}</div>
-                              <Badge variant="outline">{route.start_time} - {route.end_time}</Badge>
-                              <div className="text-sm text-muted-foreground">
-                                {driver ? `${driver.first_name} ${driver.last_name}` : 'No driver'}
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                {vehicle ? vehicle.vehicle_number : 'No vehicle'}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge>{studentsCount} students</Badge>
-                              <div className={`w-3 h-3 rounded-full ${route.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+              {routes.length === 0 ? (
+                <div className="text-center py-12 space-y-4">
+                  <Route className="h-16 w-16 mx-auto text-muted-foreground/50" />
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold">No Routes Created Yet</h3>
+                    <p className="text-muted-foreground">Create your first transport route to see the weekly schedule</p>
                   </div>
-                ))}
-              </div>
+                  <Button 
+                    onClick={() => setActiveTab('routes')}
+                    className="mt-4"
+                  >
+                    Create First Route
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid gap-2">
+                  {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map((day, dayIndex) => {
+                    const dayRoutes = routes.filter(route => route.days_of_week?.includes(dayIndex + 1) && route.status === 'active');
+                    
+                    return (
+                      <div key={day} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="font-semibold">{day}</h3>
+                          <Badge variant="outline">{dayRoutes.length} routes</Badge>
+                        </div>
+                        
+                        {dayRoutes.length === 0 ? (
+                          <div className="text-center py-4 text-muted-foreground">
+                            <p className="text-sm">No routes scheduled for {day}</p>
+                          </div>
+                        ) : (
+                          <div className="grid gap-2">
+                            {dayRoutes.map((route) => {
+                              const driver = drivers.find(d => d.id === route.driver_id);
+                              const vehicle = vehicles.find(v => v.id === route.vehicle_id);
+                              const studentsCount = studentTransports.filter(st => st.route_id === route.id && st.status === 'active').length;
+                              
+                              return (
+                                <div key={route.id} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
+                                  <div className="flex items-center gap-4">
+                                    <div className="font-medium">{route.route_name}</div>
+                                    <Badge variant="outline">{route.start_time} - {route.end_time}</Badge>
+                                    <div className="text-sm text-muted-foreground">
+                                      {driver ? `${driver.first_name} ${driver.last_name}` : 'No driver assigned'}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">
+                                      {vehicle ? vehicle.vehicle_number : 'No vehicle assigned'}
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge>{studentsCount} students</Badge>
+                                    <div className={`w-3 h-3 rounded-full ${route.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -457,50 +487,79 @@ export function RoutesSchedules() {
               <CardDescription>Analyze and optimize route capacities based on demand</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {routes.map((route) => {
-                  const vehicle = vehicles.find(v => v.id === route.vehicle_id);
-                  const studentsOnRoute = studentTransports.filter(st => st.route_id === route.id && st.status === 'active').length;
-                  const capacity = vehicle?.capacity || 0;
-                  const utilizationPercentage = capacity > 0 ? Math.round((studentsOnRoute / capacity) * 100) : 0;
-                  
-                  return (
-                    <div key={route.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="space-y-1">
-                        <div className="font-medium">{route.route_name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {vehicle ? vehicle.vehicle_number : 'No vehicle assigned'}
+              {routes.length === 0 ? (
+                <div className="text-center py-8 space-y-4">
+                  <Users className="h-12 w-12 mx-auto text-muted-foreground/50" />
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold">No Routes to Analyze</h3>
+                    <p className="text-muted-foreground">Create routes with assigned vehicles to see capacity planning</p>
+                  </div>
+                  <div className="flex gap-2 justify-center">
+                    <Button variant="outline" onClick={() => setActiveTab('routes')}>
+                      Create Route
+                    </Button>
+                    <Button variant="outline" onClick={() => window.open('/transport/vehicles', '_self')}>
+                      Add Vehicles
+                    </Button>
+                  </div>
+                </div>
+              ) : vehicles.length === 0 ? (
+                <div className="text-center py-8 space-y-4">
+                  <Car className="h-12 w-12 mx-auto text-muted-foreground/50" />
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold">No Vehicles Available</h3>
+                    <p className="text-muted-foreground">Add vehicles to your fleet to enable capacity planning</p>
+                  </div>
+                  <Button onClick={() => window.open('/transport/vehicles', '_self')}>
+                    Add Vehicles
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {routes.map((route) => {
+                    const vehicle = vehicles.find(v => v.id === route.vehicle_id);
+                    const studentsOnRoute = studentTransports.filter(st => st.route_id === route.id && st.status === 'active').length;
+                    const capacity = vehicle?.capacity || 0;
+                    const utilizationPercentage = capacity > 0 ? Math.round((studentsOnRoute / capacity) * 100) : 0;
+                    
+                    return (
+                      <div key={route.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="space-y-1">
+                          <div className="font-medium">{route.route_name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {vehicle ? vehicle.vehicle_number : 'No vehicle assigned'}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold">{studentsOnRoute}</div>
+                            <div className="text-xs text-muted-foreground">Students</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold">{capacity}</div>
+                            <div className="text-xs text-muted-foreground">Capacity</div>
+                          </div>
+                          <div className="w-32">
+                            <div className="flex justify-between text-sm mb-1">
+                              <span>Utilization</span>
+                              <span>{utilizationPercentage}%</span>
+                            </div>
+                            <div className="w-full bg-secondary rounded-full h-2">
+                              <div 
+                                className={`h-2 rounded-full ${utilizationPercentage > 90 ? 'bg-red-500' : utilizationPercentage > 75 ? 'bg-orange-500' : 'bg-green-500'}`}
+                                style={{ width: `${Math.min(utilizationPercentage, 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                          <Badge variant={utilizationPercentage > 90 ? 'destructive' : utilizationPercentage > 75 ? 'secondary' : 'default'}>
+                            {utilizationPercentage > 90 ? 'Over-capacity' : utilizationPercentage > 75 ? 'Near capacity' : 'Available'}
+                          </Badge>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-center">
-                          <div className="text-2xl font-bold">{studentsOnRoute}</div>
-                          <div className="text-xs text-muted-foreground">Students</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold">{capacity}</div>
-                          <div className="text-xs text-muted-foreground">Capacity</div>
-                        </div>
-                        <div className="w-32">
-                          <div className="flex justify-between text-sm mb-1">
-                            <span>Utilization</span>
-                            <span>{utilizationPercentage}%</span>
-                          </div>
-                          <div className="w-full bg-secondary rounded-full h-2">
-                            <div 
-                              className={`h-2 rounded-full ${utilizationPercentage > 90 ? 'bg-red-500' : utilizationPercentage > 75 ? 'bg-orange-500' : 'bg-green-500'}`}
-                              style={{ width: `${Math.min(utilizationPercentage, 100)}%` }}
-                            />
-                          </div>
-                        </div>
-                        <Badge variant={utilizationPercentage > 90 ? 'destructive' : utilizationPercentage > 75 ? 'secondary' : 'default'}>
-                          {utilizationPercentage > 90 ? 'Over-capacity' : utilizationPercentage > 75 ? 'Near capacity' : 'Available'}
-                        </Badge>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
