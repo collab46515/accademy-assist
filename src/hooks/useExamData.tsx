@@ -1,23 +1,24 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 export interface Exam {
   id: string;
   title: string;
   subject: string;
-  exam_board: string;
+  exam_board: string | null;
   exam_type: 'internal' | 'external' | 'mock' | 'assessment';
-  grade_level: string;
-  academic_term: string;
+  grade_level: string | null;
+  academic_term: string | null;
   academic_year: string;
   total_marks: number;
   duration_minutes: number;
   exam_date: string;
   start_time: string;
   end_time: string;
-  instructions: string;
-  created_by: string;
-  school_id: string;
+  instructions: string | null;
+  created_by: string | null;
+  school_id: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -30,8 +31,8 @@ export interface ExamSession {
   session_date: string;
   start_time: string;
   end_time: string;
-  room: string;
-  invigilator_id: string;
+  room: string | null;
+  invigilator_id: string | null;
   max_candidates: number;
   status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
   created_at: string;
@@ -40,8 +41,8 @@ export interface ExamSession {
 export interface ExamCandidate {
   id: string;
   exam_session_id: string;
-  student_id: string;
-  seat_number: string;
+  student_id: string | null;
+  seat_number: string | null;
   status: 'registered' | 'present' | 'absent' | 'disqualified';
   access_arrangements: string[];
   registered_at: string;
@@ -50,157 +51,114 @@ export interface ExamCandidate {
 export interface ExamResult {
   id: string;
   exam_id: string;
-  student_id: string;
+  student_id: string | null;
   marks_obtained: number;
   percentage: number;
-  grade: string;
+  grade: string | null;
   rank: number | null;
-  feedback: string;
-  marked_by: string;
+  feedback: string | null;
+  marked_by: string | null;
   marked_at: string;
 }
 
-// Mock data
-const mockExams: Exam[] = [
-  {
-    id: "1",
-    title: "Mathematics End of Term Assessment",
-    subject: "Mathematics",
-    exam_board: "Cambridge",
-    exam_type: "internal",
-    grade_level: "Year 10",
-    academic_term: "Term 1",
-    academic_year: "2023-2024",
-    total_marks: 100,
-    duration_minutes: 150,
-    exam_date: "2024-03-15",
-    start_time: "09:00",
-    end_time: "11:30",
-    instructions: "Answer all questions in Section A and choose 3 from Section B",
-    created_by: "teacher-1",
-    school_id: "school-1",
-    is_active: true,
-    created_at: "2024-01-01T00:00:00Z",
-    updated_at: "2024-01-01T00:00:00Z"
-  },
-  {
-    id: "2",
-    title: "Physics IGCSE Mock Exam",
-    subject: "Physics",
-    exam_board: "Edexcel",
-    exam_type: "mock",
-    grade_level: "Year 11",
-    academic_term: "Term 2",
-    academic_year: "2023-2024",
-    total_marks: 120,
-    duration_minutes: 180,
-    exam_date: "2024-03-20",
-    start_time: "14:00",
-    end_time: "17:00",
-    instructions: "This is a mock examination. Answer all questions.",
-    created_by: "teacher-2",
-    school_id: "school-1",
-    is_active: true,
-    created_at: "2024-01-02T00:00:00Z",
-    updated_at: "2024-01-02T00:00:00Z"
-  },
-  {
-    id: "3",
-    title: "English Literature A-Level",
-    subject: "English Literature",
-    exam_board: "AQA",
-    exam_type: "external",
-    grade_level: "Year 13",
-    academic_term: "Term 3",
-    academic_year: "2023-2024",
-    total_marks: 75,
-    duration_minutes: 120,
-    exam_date: "2024-05-15",
-    start_time: "09:00",
-    end_time: "11:00",
-    instructions: "Answer one question from each section",
-    created_by: "teacher-3",
-    school_id: "school-1",
-    is_active: true,
-    created_at: "2024-01-03T00:00:00Z",
-    updated_at: "2024-01-03T00:00:00Z"
-  }
-];
-
-const mockExamResults: ExamResult[] = [
-  {
-    id: "1",
-    exam_id: "1",
-    student_id: "student-1",
-    marks_obtained: 87,
-    percentage: 87,
-    grade: "A",
-    rank: 1,
-    feedback: "Excellent work",
-    marked_by: "teacher-1",
-    marked_at: "2024-03-16T00:00:00Z"
-  },
-  {
-    id: "2",
-    exam_id: "1",
-    student_id: "student-2",
-    marks_obtained: 74,
-    percentage: 74,
-    grade: "B",
-    rank: 5,
-    feedback: "Good effort, improve calculation accuracy",
-    marked_by: "teacher-1",
-    marked_at: "2024-03-16T00:00:00Z"
-  },
-  {
-    id: "3",
-    exam_id: "2",
-    student_id: "student-3",
-    marks_obtained: 110,
-    percentage: 92,
-    grade: "A*",
-    rank: 1,
-    feedback: "Outstanding performance",
-    marked_by: "teacher-2",
-    marked_at: "2024-03-21T00:00:00Z"
-  }
-];
-
 export function useExamData() {
-  const [exams, setExams] = useState<Exam[]>(mockExams);
+  const [exams, setExams] = useState<Exam[]>([]);
   const [examSessions, setExamSessions] = useState<ExamSession[]>([]);
   const [examCandidates, setExamCandidates] = useState<ExamCandidate[]>([]);
-  const [examResults, setExamResults] = useState<ExamResult[]>(mockExamResults);
-  const [loading, setLoading] = useState(false);
+  const [examResults, setExamResults] = useState<ExamResult[]>([]);
+  const [loading, setLoading] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Get user's school_id from user_roles
+  const getUserSchoolId = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data: userRoles } = await supabase
+      .from('user_roles')
+      .select('school_id')
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+      .single();
+
+    return userRoles?.school_id || null;
+  };
+
+  // Fetch exams from Supabase
+  const fetchExams = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('exams')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setExams((data || []) as Exam[]);
+    } catch (error) {
+      console.error('Error fetching exams:', error);
+      toast.error('Failed to load exams');
+    }
+  };
+
+  // Fetch exam results from Supabase
+  const fetchExamResults = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('exam_results')
+        .select('*')
+        .order('marked_at', { ascending: false });
+
+      if (error) throw error;
+      setExamResults((data || []) as ExamResult[]);
+    } catch (error) {
+      console.error('Error fetching exam results:', error);
+      toast.error('Failed to load exam results');
+    }
+  };
+
+  // Initial data fetch
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([fetchExams(), fetchExamResults()]);
+      setLoading(false);
+    };
+
+    loadData();
+  }, [refreshTrigger]);
 
   const createExam = async (examData: Omit<Exam, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'school_id'>) => {
     try {
       console.log('Creating exam with data:', examData);
+
+      // Get current user and school
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const schoolId = await getUserSchoolId();
+      if (!schoolId) throw new Error('User school not found');
+
+      const { data, error } = await supabase
+        .from('exams')
+        .insert({
+          ...examData,
+          created_by: user.id,
+          school_id: schoolId
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      console.log('Exam created successfully:', data);
       
-      const newExam: Exam = {
-        ...examData,
-        id: Date.now().toString(),
-        created_by: "current-user",
-        school_id: "current-school",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-      
-      console.log('New exam created:', newExam);
-      
-      // Force immediate state update
-      setExams(prevExams => {
-        const updatedExams = [...prevExams, newExam];
-        console.log('Setting exams to:', updatedExams.length, 'exams');
-        return updatedExams;
-      });
-      
-      // Force re-render by updating trigger
+      // Update local state
+      setExams(prev => [data as Exam, ...prev]);
       setRefreshTrigger(prev => prev + 1);
       
       toast.success('Exam scheduled successfully!');
-      return newExam;
+      return data as Exam;
     } catch (error) {
       console.error('Error creating exam:', error);
       toast.error('Failed to schedule exam');
@@ -210,13 +168,19 @@ export function useExamData() {
 
   const updateExam = async (id: string, updates: Partial<Exam>) => {
     try {
-      const updatedExam = exams.find(exam => exam.id === id);
-      if (!updatedExam) throw new Error('Exam not found');
-      
-      const newExam = { ...updatedExam, ...updates, updated_at: new Date().toISOString() };
-      setExams(prev => prev.map(exam => exam.id === id ? newExam : exam));
+      const { data, error } = await supabase
+        .from('exams')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update local state
+      setExams(prev => prev.map(exam => exam.id === id ? data as Exam : exam));
       toast.success('Exam updated successfully');
-      return newExam;
+      return data as Exam;
     } catch (error) {
       console.error('Error updating exam:', error);
       toast.error('Failed to update exam');
@@ -226,15 +190,17 @@ export function useExamData() {
 
   const createExamSession = async (sessionData: Omit<ExamSession, 'id' | 'created_at'>) => {
     try {
-      const newSession: ExamSession = {
-        ...sessionData,
-        id: Date.now().toString(),
-        created_at: new Date().toISOString()
-      };
-      
-      setExamSessions(prev => [...prev, newSession]);
+      const { data, error } = await supabase
+        .from('exam_sessions')
+        .insert(sessionData)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setExamSessions(prev => [data as ExamSession, ...prev]);
       toast.success('Exam session created successfully');
-      return newSession;
+      return data as ExamSession;
     } catch (error) {
       console.error('Error creating exam session:', error);
       toast.error('Failed to create exam session');
@@ -244,15 +210,17 @@ export function useExamData() {
 
   const registerCandidate = async (candidateData: Omit<ExamCandidate, 'id' | 'registered_at'>) => {
     try {
-      const newCandidate: ExamCandidate = {
-        ...candidateData,
-        id: Date.now().toString(),
-        registered_at: new Date().toISOString()
-      };
-      
-      setExamCandidates(prev => [...prev, newCandidate]);
+      const { data, error } = await supabase
+        .from('exam_candidates')
+        .insert(candidateData)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setExamCandidates(prev => [data as ExamCandidate, ...prev]);
       toast.success('Candidate registered successfully');
-      return newCandidate;
+      return data as ExamCandidate;
     } catch (error) {
       console.error('Error registering candidate:', error);
       toast.error('Failed to register candidate');
@@ -262,16 +230,23 @@ export function useExamData() {
 
   const recordExamResult = async (resultData: Omit<ExamResult, 'id' | 'marked_at' | 'marked_by'>) => {
     try {
-      const newResult: ExamResult = {
-        ...resultData,
-        id: Date.now().toString(),
-        marked_by: "current-user",
-        marked_at: new Date().toISOString()
-      };
-      
-      setExamResults(prev => [...prev, newResult]);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const { data, error } = await supabase
+        .from('exam_results')
+        .insert({
+          ...resultData,
+          marked_by: user.id
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setExamResults(prev => [data as ExamResult, ...prev]);
       toast.success('Exam result recorded successfully');
-      return newResult;
+      return data as ExamResult;
     } catch (error) {
       console.error('Error recording exam result:', error);
       toast.error('Failed to record exam result');
@@ -280,12 +255,7 @@ export function useExamData() {
   };
 
   const refreshData = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setExams(mockExams);
-      setExamResults(mockExamResults);
-      setLoading(false);
-    }, 500);
+    setRefreshTrigger(prev => prev + 1);
   };
 
   return {
