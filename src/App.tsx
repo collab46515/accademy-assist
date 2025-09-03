@@ -58,7 +58,7 @@ import ReportCardsPage from "./pages/ReportCardsPage";
 import NewApplicationsPage from "./pages/NewApplicationsPage";
 import EnrollmentPage from "./pages/EnrollmentPage";
 import LibraryPage from "./pages/LibraryPage";
-import TransportPage from "./pages/TransportPage";
+
 import { StudentSubmissionInterface } from "@/components/assignments/StudentSubmissionInterface";
 import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
@@ -143,7 +143,7 @@ const App = () => (
             <Route path="/ai-classroom/*" element={<AIClassroomPage />} />
             <Route path="/virtual-classroom/*" element={<VirtualClassroomPage />} />
                             <Route path="/library/*" element={<LibraryPage />} />
-                            <Route path="/transport/*" element={<TransportPage />} />
+                            
                           <Route path="/finance" element={<FinancePage />} />
                           <Route path="/activities" element={<ActivitiesPage />} />
                           <Route path="/safeguarding" element={<SafeguardingPage />} />
