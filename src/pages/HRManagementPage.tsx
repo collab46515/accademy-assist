@@ -1062,17 +1062,19 @@ export function HRManagementPage() {
           </CardContent>
         </Card>
 
-        {activeTab === 'dashboard' && renderDashboard()}
-        {activeTab === 'employees' && renderEmployees()}
-        {activeTab === 'timeTracking' && renderTimesheet()}
-        {activeTab === 'attendance' && renderAttendance()}
-        {activeTab === 'recruitment' && <RecruitmentDashboard />}
-        {activeTab === 'employee-exit' && <EmployeeExit employees={employees} />}
-        {activeTab === 'performance' && renderPerformance()}
-        {activeTab === 'training' && renderTraining()}
-        {activeTab === 'benefits' && renderComingSoon('Benefits Management', 'Employee benefits and compensation packages', Award, 'Add Benefits Plan')}
-        {activeTab === 'leave' && renderLeaveManagement()}
-        {activeTab === 'payroll' && renderPayroll()}
+        <div className="space-y-6">
+          {activeTab === 'dashboard' && renderDashboard()}
+          {activeTab === 'employees' && renderEmployees()}
+          {activeTab === 'timeTracking' && renderTimesheet()}
+          {activeTab === 'attendance' && renderAttendance()}
+          {activeTab === 'recruitment' && <RecruitmentDashboard />}
+          {activeTab === 'employee-exit' && <EmployeeExit employees={employees} />}
+          {activeTab === 'performance' && renderPerformance()}
+          {activeTab === 'training' && renderTraining()}
+          {activeTab === 'benefits' && renderComingSoon('Benefits Management', 'Employee benefits and compensation packages', Award, 'Add Benefits Plan')}
+          {activeTab === 'leave' && renderLeaveManagement()}
+          {activeTab === 'payroll' && renderPayroll()}
+        </div>
       </div>
 
       {/* Employee Form Modal */}
@@ -1238,7 +1240,7 @@ export function HRManagementPage() {
       {showPerformanceForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-background p-6 rounded-lg max-w-md w-full mx-4">
-            <h2 className="text-xl font-semibent mb-4">Add Performance Review</h2>
+            <h2 className="text-xl font-semibold mb-4">Add Performance Review</h2>
             <p className="text-muted-foreground mb-4">Performance review functionality coming soon!</p>
             <Button onClick={() => setShowPerformanceForm(false)}>Close</Button>
           </div>
