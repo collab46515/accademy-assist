@@ -186,6 +186,22 @@ export function useTransportData() {
         setDrivers(driversData as Driver[]);
       }
 
+      // Load routes from database
+      const { data: routesData, error: routesError } = await supabase
+        .from('transport_routes')
+        .select('*')
+        .eq('school_id', currentSchool.id)
+        .order('created_at', { ascending: false });
+
+      if (routesError) {
+        console.error('Error loading routes:', routesError);
+        // Use empty array if no routes found
+        setRoutes([]);
+      } else {
+        console.log('Routes loaded from database:', routesData);
+        setRoutes(routesData as TransportRoute[]);
+      }
+
       // Mock data for other entities (until they're implemented)
       const mockVehicles: Vehicle[] = [
         { 
@@ -226,26 +242,8 @@ export function useTransportData() {
         }
       ];
       
-      const mockRoutes: TransportRoute[] = [
-        { 
-          id: '1', 
-          school_id: currentSchool.id, 
-          route_name: 'Route 1 - City Center', 
-          start_time: '07:30', 
-          end_time: '08:15', 
-          status: 'active', 
-          days_of_week: [1,2,3,4,5],
-          vehicle_id: '1',
-          driver_id: '1',
-          estimated_duration: 45,
-          distance: 12.5,
-          created_at: new Date().toISOString(), 
-          updated_at: new Date().toISOString() 
-        }
-      ];
-
       setVehicles(mockVehicles);
-      setRoutes(mockRoutes);
+      // Routes are now loaded from database above
       setStudentTransports([]);
       setMaintenance([]);
       setIncidents([]);
@@ -402,8 +400,9 @@ export function useTransportData() {
     if (!currentSchool?.id) return null;
     
     try {
-      const newRoute: TransportRoute = {
-        id: `route-${Date.now()}`,
+      console.log('🚌 Adding route to database...', routeData);
+      
+      const routePayload = {
         school_id: currentSchool.id,
         route_name: routeData.route_name || '',
         start_time: routeData.start_time || '08:00',
@@ -416,16 +415,31 @@ export function useTransportData() {
         distance: routeData.distance,
         vehicle_id: routeData.vehicle_id,
         driver_id: routeData.driver_id,
-        notes: routeData.notes,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        notes: routeData.notes
       };
 
-      setRoutes(prev => [...prev, newRoute]);
+      console.log('🚌 Route payload:', routePayload);
+
+      const { data, error } = await supabase
+        .from('transport_routes')
+        .insert([routePayload])
+        .select('*')
+        .single();
+
+      if (error) {
+        console.error('❌ Database error:', error);
+        toast.error(`Failed to add route: ${error.message}`);
+        return null;
+      }
+
+      console.log('✅ Route added to database:', data);
+
+      // Add to local state
+      setRoutes(prev => [...prev, data as TransportRoute]);
       toast.success("Route added successfully");
-      return newRoute;
+      return data as TransportRoute;
     } catch (error) {
-      console.error('Error adding route:', error);
+      console.error('❌ Error adding route:', error);
       toast.error("Failed to add route");
       return null;
     }
