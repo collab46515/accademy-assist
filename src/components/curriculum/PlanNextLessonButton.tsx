@@ -176,6 +176,11 @@ export const PlanNextLessonButton: React.FC<PlanNextLessonButtonProps> = ({
       }
     } catch (error) {
       console.error('Error creating quick lesson plan:', error);
+      toast({
+        title: "Error Creating Lesson Plan",
+        description: "There was an issue creating the lesson plan. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
