@@ -182,8 +182,9 @@ export function useTransportData() {
 
       if (driversError) {
         console.error('Error loading drivers:', driversError);
+        setDrivers([]);
       } else {
-        setDrivers(driversData as Driver[]);
+        setDrivers((driversData || []) as any);
       }
 
       // Load routes from database with related data
@@ -201,10 +202,10 @@ export function useTransportData() {
         setRoutes([]);
       } else {
         console.log('Routes loaded from database:', routesData);
-        setRoutes(routesData as TransportRoute[]);
+        setRoutes((routesData || []) as any);
       }
 
-      // Load vehicles from database (create table if needed)
+      // Load vehicles from database
       const { data: vehiclesData, error: vehiclesError } = await supabase
         .from('vehicles')
         .select('*')
@@ -213,52 +214,33 @@ export function useTransportData() {
 
       if (vehiclesError) {
         console.error('Error loading vehicles:', vehiclesError);
-        // Fallback to mock data only if table doesn't exist
-        const mockVehicles: Vehicle[] = [
-          { 
-            id: '1', 
-            school_id: currentSchool.id, 
-            vehicle_number: 'BUS-001', 
-            vehicle_type: 'bus', 
-            make: 'Mercedes', 
-            model: 'Sprinter', 
-            year: 2022, 
-            capacity: 50, 
-            fuel_type: 'diesel', 
-            mileage: 45000, 
-            status: 'active',
-            registration_number: 'AB21 DEF',
-            insurance_expiry: '2024-12-31',
-            last_service_date: '2024-01-15',
-            next_service_date: '2024-07-15',
-            created_at: new Date().toISOString(), 
-            updated_at: new Date().toISOString() 
-          },
-          { 
-            id: '2', 
-            school_id: currentSchool.id, 
-            vehicle_number: 'VAN-001', 
-            vehicle_type: 'van', 
-            make: 'Ford', 
-            model: 'Transit', 
-            year: 2021, 
-            capacity: 25, 
-            fuel_type: 'diesel', 
-            mileage: 32000, 
-            status: 'maintenance',
-            registration_number: 'CD22 GHI',
-            insurance_expiry: '2024-11-30',
-            created_at: new Date().toISOString(), 
-            updated_at: new Date().toISOString() 
-          }
-        ];
-        setVehicles(mockVehicles);
+        setVehicles([]);
       } else {
-        setVehicles(vehiclesData as Vehicle[]);
+        setVehicles((vehiclesData || []) as any);
       }
-      // Routes are now loaded from database above
+
+      // Load student transport assignments from database
       setStudentTransports([]);
-      setMaintenance([]);
+
+      // Load vehicle maintenance records from database
+      try {
+        const maintenanceResponse = await supabase
+          .from('vehicle_maintenance')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (maintenanceResponse.error) {
+          console.error('Error loading maintenance records:', maintenanceResponse.error);
+          setMaintenance([]);
+        } else {
+          setMaintenance((maintenanceResponse.data || []) as any);
+        }
+      } catch (e) {
+        console.error('Maintenance query failed:', e);
+        setMaintenance([]);
+      }
+
+      // Load transport incidents from database (if table exists)
       setIncidents([]);
     } catch (error) {
       console.error('Error loading transport data:', error);
@@ -268,40 +250,45 @@ export function useTransportData() {
     }
   };
 
-  // Vehicle CRUD operations - mock implementation
+  // Vehicle CRUD operations - database implementation
   const addVehicle = async (vehicleData: Partial<Vehicle>) => {
     if (!currentSchool?.id) return null;
     
     try {
-      // Mock implementation
-      const newVehicle: Vehicle = {
-        id: `vehicle-${Date.now()}`,
-        school_id: currentSchool.id,
-        vehicle_number: vehicleData.vehicle_number || `VEH-${Date.now()}`,
-        vehicle_type: vehicleData.vehicle_type || 'van',
-        make: vehicleData.make || '',
-        model: vehicleData.model || '',
-        year: vehicleData.year || new Date().getFullYear(),
-        capacity: vehicleData.capacity || 20,
-        fuel_type: vehicleData.fuel_type || 'diesel',
-        mileage: vehicleData.mileage || 0,
-        status: vehicleData.status || 'active',
-        registration_number: vehicleData.registration_number,
-        insurance_expiry: vehicleData.insurance_expiry,
-        mot_expiry: vehicleData.mot_expiry,
-        last_service_date: vehicleData.last_service_date,
-        next_service_date: vehicleData.next_service_date,
-        purchase_date: vehicleData.purchase_date,
-        purchase_cost: vehicleData.purchase_cost,
-        notes: vehicleData.notes,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+      const { data, error } = await supabase
+        .from('vehicles')
+        .insert({
+          school_id: currentSchool.id,
+          vehicle_number: vehicleData.vehicle_number || `VEH-${Date.now()}`,
+          vehicle_type: vehicleData.vehicle_type || 'van',
+          make: vehicleData.make || '',
+          model: vehicleData.model || '',
+          year: vehicleData.year || new Date().getFullYear(),
+          capacity: vehicleData.capacity || 20,
+          fuel_type: vehicleData.fuel_type || 'diesel',
+          mileage: vehicleData.mileage || 0,
+          status: vehicleData.status || 'active',
+          registration_number: vehicleData.registration_number,
+          insurance_expiry: vehicleData.insurance_expiry,
+          mot_expiry: vehicleData.mot_expiry,
+          last_service_date: vehicleData.last_service_date,
+          next_service_date: vehicleData.next_service_date,
+          purchase_date: vehicleData.purchase_date,
+          purchase_cost: vehicleData.purchase_cost,
+          notes: vehicleData.notes
+        })
+        .select()
+        .single();
 
-      setVehicles(prev => [...prev, newVehicle]);
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
+
+      setVehicles(prev => [...prev, data as Vehicle]);
       toast.success("Vehicle added successfully");
       
-      return newVehicle;
+      return data as Vehicle;
     } catch (error) {
       console.error('Error adding vehicle:', error);
       toast.error("Failed to add vehicle");
@@ -311,10 +298,21 @@ export function useTransportData() {
 
   const updateVehicle = async (id: string, updates: Partial<Vehicle>) => {
     try {
-      const updatedVehicle = { ...updates, updated_at: new Date().toISOString() };
-      setVehicles(prev => prev.map(v => v.id === id ? { ...v, ...updatedVehicle } : v));
+      const { data, error } = await supabase
+        .from('vehicles')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
+
+      setVehicles(prev => prev.map(v => v.id === id ? data as Vehicle : v));
       toast.success("Vehicle updated successfully");
-      return updatedVehicle;
+      return data as Vehicle;
     } catch (error) {
       console.error('Error updating vehicle:', error);
       toast.error("Failed to update vehicle");
@@ -324,6 +322,16 @@ export function useTransportData() {
 
   const deleteVehicle = async (id: string) => {
     try {
+      const { error } = await supabase
+        .from('vehicles')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
+
       setVehicles(prev => prev.filter(v => v.id !== id));
       toast.success("Vehicle deleted successfully");
       return true;
@@ -397,10 +405,21 @@ export function useTransportData() {
 
   const updateDriver = async (id: string, updates: Partial<Driver>) => {
     try {
-      const updatedDriver = { ...updates, updated_at: new Date().toISOString() };
-      setDrivers(prev => prev.map(d => d.id === id ? { ...d, ...updatedDriver } : d));
+      const { data, error } = await supabase
+        .from('drivers')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
+
+      setDrivers(prev => prev.map(d => d.id === id ? data as Driver : d));
       toast.success("Driver updated successfully");
-      return updatedDriver;
+      return data as Driver;
     } catch (error) {
       console.error('Error updating driver:', error);
       toast.error("Failed to update driver");
@@ -484,30 +503,36 @@ export function useTransportData() {
     }
   };
 
-  // Maintenance operations
+  // Maintenance operations - database implementation
   const addMaintenance = async (maintenanceData: Partial<VehicleMaintenance>) => {
     try {
-      const newMaintenance: VehicleMaintenance = {
-        id: `maintenance-${Date.now()}`,
-        vehicle_id: maintenanceData.vehicle_id || '',
-        maintenance_type: maintenanceData.maintenance_type || 'service',
-        description: maintenanceData.description || '',
-        service_date: maintenanceData.service_date || new Date().toISOString().split('T')[0],
-        status: maintenanceData.status || 'scheduled',
-        cost: maintenanceData.cost,
-        mileage_at_service: maintenanceData.mileage_at_service,
-        service_provider: maintenanceData.service_provider,
-        next_service_due: maintenanceData.next_service_due,
-        parts_replaced: maintenanceData.parts_replaced,
-        warranty_expiry: maintenanceData.warranty_expiry,
-        notes: maintenanceData.notes,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+      const { data, error } = await supabase
+        .from('vehicle_maintenance')
+        .insert({
+          vehicle_id: maintenanceData.vehicle_id || '',
+          maintenance_type: maintenanceData.maintenance_type || 'service',
+          description: maintenanceData.description || '',
+          service_date: maintenanceData.service_date || new Date().toISOString().split('T')[0],
+          status: maintenanceData.status || 'scheduled',
+          cost: maintenanceData.cost,
+          mileage_at_service: maintenanceData.mileage_at_service,
+          service_provider: maintenanceData.service_provider,
+          next_service_due: maintenanceData.next_service_due,
+          parts_replaced: maintenanceData.parts_replaced,
+          warranty_expiry: maintenanceData.warranty_expiry,
+          notes: maintenanceData.notes
+        })
+        .select('*')
+        .single();
 
-      setMaintenance(prev => [...prev, newMaintenance]);
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
+
+      setMaintenance(prev => [...prev, data as VehicleMaintenance]);
       toast.success("Maintenance record added successfully");
-      return newMaintenance;
+      return data as VehicleMaintenance;
     } catch (error) {
       console.error('Error adding maintenance:', error);
       toast.error("Failed to add maintenance record");
@@ -515,28 +540,37 @@ export function useTransportData() {
     }
   };
 
-  // Student transport assignment operations
+  // Student transport assignment operations - database implementation
   const assignStudentToRoute = async (assignmentData: Partial<StudentTransport>) => {
+    if (!currentSchool?.id) return null;
+    
     try {
-      const newAssignment: StudentTransport = {
-        id: `assignment-${Date.now()}`,
-        student_id: assignmentData.student_id || '',
-        route_id: assignmentData.route_id || '',
-        start_date: assignmentData.start_date || new Date().toISOString().split('T')[0],
-        status: assignmentData.status || 'active',
-        payment_status: assignmentData.payment_status || 'pending',
-        pickup_stop_id: assignmentData.pickup_stop_id,
-        dropoff_stop_id: assignmentData.dropoff_stop_id,
-        end_date: assignmentData.end_date,
-        fee_amount: assignmentData.fee_amount,
-        notes: assignmentData.notes,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+      const { data, error } = await supabase
+        .from('student_transport')
+        .insert({
+          school_id: currentSchool.id,
+          student_id: assignmentData.student_id || '',
+          route_id: assignmentData.route_id || '',
+          start_date: assignmentData.start_date || new Date().toISOString().split('T')[0],
+          status: assignmentData.status || 'active',
+          payment_status: assignmentData.payment_status || 'pending',
+          pickup_stop_id: assignmentData.pickup_stop_id,
+          dropoff_stop_id: assignmentData.dropoff_stop_id,
+          end_date: assignmentData.end_date,
+          fee_amount: assignmentData.fee_amount,
+          notes: assignmentData.notes
+        })
+        .select('*')
+        .single();
 
-      setStudentTransports(prev => [...prev, newAssignment]);
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
+
+      setStudentTransports(prev => [...prev, data as StudentTransport]);
       toast.success("Student assigned to route successfully");
-      return newAssignment;
+      return data as StudentTransport;
     } catch (error) {
       console.error('Error assigning student:', error);
       toast.error("Failed to assign student to route");
