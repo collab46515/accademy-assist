@@ -157,6 +157,9 @@ export function useAttendanceData() {
           reason: attendance.reason,
           notes: attendance.notes,
           marked_at: new Date().toISOString(),
+        }, { 
+          onConflict: 'student_id,date,school_id',
+          ignoreDuplicates: false 
         });
 
       if (error) throw error;
@@ -200,7 +203,10 @@ export function useAttendanceData() {
 
       const { error } = await supabase
         .from('attendance_records')
-        .upsert(records);
+        .upsert(records, { 
+          onConflict: 'student_id,date,school_id',
+          ignoreDuplicates: false 
+        });
 
       if (error) throw error;
       
