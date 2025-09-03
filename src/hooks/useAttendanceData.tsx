@@ -144,26 +144,51 @@ export function useAttendanceData() {
     if (!currentSchool?.id || !user?.id) return false;
 
     try {
-      const { error } = await supabase
+      // Check if a record already exists for this student and date
+      const { data: existing, error: fetchError } = await supabase
         .from('attendance_records')
-        .upsert({
-          student_id: attendance.student_id,
-          school_id: currentSchool.id,
-          teacher_id: user.id,
-          date: attendance.date,
-          period: attendance.period,
-          status: attendance.status,
-          subject: attendance.subject,
-          reason: attendance.reason,
-          notes: attendance.notes,
-          marked_at: new Date().toISOString(),
-        }, { 
-          onConflict: 'student_id,date,school_id',
-          ignoreDuplicates: false 
-        });
+        .select('id')
+        .eq('school_id', currentSchool.id)
+        .eq('student_id', attendance.student_id)
+        .eq('date', attendance.date)
+        .maybeSingle();
 
-      if (error) throw error;
-      
+      if (fetchError) throw fetchError;
+
+      if (existing?.id) {
+        const { error: updateError } = await supabase
+          .from('attendance_records')
+          .update({
+            period: attendance.period,
+            status: attendance.status,
+            subject: attendance.subject,
+            reason: attendance.reason,
+            notes: attendance.notes,
+            teacher_id: user.id,
+            marked_at: new Date().toISOString(),
+          })
+          .eq('id', existing.id);
+
+        if (updateError) throw updateError;
+      } else {
+        const { error: insertError } = await supabase
+          .from('attendance_records')
+          .insert({
+            student_id: attendance.student_id,
+            school_id: currentSchool.id,
+            teacher_id: user.id,
+            date: attendance.date,
+            period: attendance.period,
+            status: attendance.status,
+            subject: attendance.subject,
+            reason: attendance.reason,
+            notes: attendance.notes,
+            marked_at: new Date().toISOString(),
+          });
+
+        if (insertError) throw insertError;
+      }
+
       return true;
     } catch (error: any) {
       console.error('Error marking attendance:', error);
@@ -188,25 +213,39 @@ export function useAttendanceData() {
     if (!currentSchool?.id || !user?.id) return false;
 
     try {
-      const records = attendanceList.map(attendance => ({
-        student_id: attendance.student_id,
+      const date = attendanceList[0]?.date;
+      const studentIds = attendanceList.map(a => a.student_id);
+
+      // Map existing records by student_id for this date
+      const existingMap = new Map<string, string>();
+      if (date && studentIds.length) {
+        const { data: existing, error: fetchErr } = await supabase
+          .from('attendance_records')
+          .select('id, student_id')
+          .eq('school_id', currentSchool.id)
+          .eq('date', date)
+          .in('student_id', studentIds);
+        if (fetchErr) throw fetchErr;
+        (existing || []).forEach((r: any) => existingMap.set(r.student_id, r.id));
+      }
+
+      const records = attendanceList.map(att => ({
+        id: existingMap.get(att.student_id) || undefined,
+        student_id: att.student_id,
         school_id: currentSchool.id,
         teacher_id: user.id,
-        date: attendance.date,
-        period: attendance.period,
-        status: attendance.status,
-        subject: attendance.subject,
-        reason: attendance.reason,
-        notes: attendance.notes,
+        date: att.date,
+        period: att.period,
+        status: att.status,
+        subject: att.subject,
+        reason: att.reason,
+        notes: att.notes,
         marked_at: new Date().toISOString(),
       }));
 
       const { error } = await supabase
         .from('attendance_records')
-        .upsert(records, { 
-          onConflict: 'student_id,date,school_id',
-          ignoreDuplicates: false 
-        });
+        .upsert(records);
 
       if (error) throw error;
       
