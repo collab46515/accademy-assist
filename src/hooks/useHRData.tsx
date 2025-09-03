@@ -145,107 +145,22 @@ export function useHRData() {
 
       if (payrollError) throw payrollError;
 
-      // For now, use mock data since the database migration hasn't been applied yet
-      const mockEmployees: Employee[] = [
-        {
-          id: '1',
-          user_id: 'teacher1',
-          employee_id: 'EMP001',
-          first_name: 'Dr. Sarah',
-          last_name: 'Johnson',
-          email: 'sarah.johnson@school.edu',
-          phone: '+44 7700 123456',
-          position: 'Head of Mathematics',
-          department_id: 'dept1',
-          department_name: 'Mathematics',
-          start_date: '2020-09-01',
-          work_type: 'full_time',
-          salary: 45000,
-          status: 'active',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: '2',
-          user_id: 'teacher2',
-          employee_id: 'EMP002',
-          first_name: 'Mr. David',
-          last_name: 'Williams',
-          email: 'david.williams@school.edu',
-          phone: '+44 7700 234567',
-          position: 'English Teacher',
-          department_id: 'dept2',
-          department_name: 'English',
-          start_date: '2019-01-15',
-          work_type: 'full_time',
-          salary: 38000,
-          status: 'active',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: '3',
-          user_id: 'teacher3',
-          employee_id: 'EMP003',
-          first_name: 'Ms. Emma',
-          last_name: 'Rodriguez',
-          email: 'emma.rodriguez@school.edu',
-          phone: '+44 7700 345678',
-          position: 'Science Teacher',
-          department_id: 'dept3',
-          department_name: 'Science',
-          start_date: '2021-09-01',
-          work_type: 'full_time',
-          salary: 40000,
-          status: 'active',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: '4',
-          user_id: 'teacher4',
-          employee_id: 'EMP004',
-          first_name: 'Dr. Michael',
-          last_name: 'Chen',
-          email: 'michael.chen@school.edu',
-          phone: '+44 7700 456789',
-          position: 'History Teacher',
-          department_id: 'dept4',
-          department_name: 'History',
-          start_date: '2018-08-20',
-          work_type: 'full_time',
-          salary: 42000,
-          status: 'active',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: '5',
-          user_id: 'teacher5',
-          employee_id: 'EMP005',
-          first_name: 'Mrs. Rebecca',
-          last_name: 'Taylor',
-          email: 'rebecca.taylor@school.edu',
-          phone: '+44 7700 567890',
-          position: 'Art Teacher',
-          department_id: 'dept5',
-          department_name: 'Arts',
-          start_date: '2022-01-10',
-          work_type: 'part_time',
-          salary: 28000,
-          status: 'active',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      ];
+      // Use real database data
+      const employeesList = (employeesData as Employee[]) || [];
+      
+      // Enrich employees with department names
+      const enrichedEmployees = employeesList.map(emp => ({
+        ...emp,
+        department_name: departmentsData?.find(dept => dept.id === emp.department_id)?.name || 'Unknown'
+      }));
 
-      setEmployees(mockEmployees);
+      setEmployees(enrichedEmployees);
       
       // Use the actual departments data from the database if available
       setDepartments(departmentsData as Department[] || []);
-      setLeaveRequests([]);
-      setAttendanceRecords([]);
-      setPayrollRecords(payrollData as PayrollRecord[] || []);
+      setLeaveRequests((leaveData as LeaveRequest[]) || []);
+      setAttendanceRecords((attendanceData as AttendanceRecord[]) || []);
+      setPayrollRecords((payrollData as PayrollRecord[]) || []);
 
     } catch (error) {
       console.error('Error fetching HR data:', error);
