@@ -186,63 +186,76 @@ export function useTransportData() {
         setDrivers(driversData as Driver[]);
       }
 
-      // Load routes from database
+      // Load routes from database with related data
       const { data: routesData, error: routesError } = await supabase
         .from('transport_routes')
-        .select('*')
+        .select(`
+          *,
+          driver:drivers(first_name, last_name)
+        `)
         .eq('school_id', currentSchool.id)
         .order('created_at', { ascending: false });
 
       if (routesError) {
         console.error('Error loading routes:', routesError);
-        // Use empty array if no routes found
         setRoutes([]);
       } else {
         console.log('Routes loaded from database:', routesData);
         setRoutes(routesData as TransportRoute[]);
       }
 
-      // Mock data for other entities (until they're implemented)
-      const mockVehicles: Vehicle[] = [
-        { 
-          id: '1', 
-          school_id: currentSchool.id, 
-          vehicle_number: 'BUS-001', 
-          vehicle_type: 'bus', 
-          make: 'Mercedes', 
-          model: 'Sprinter', 
-          year: 2022, 
-          capacity: 50, 
-          fuel_type: 'diesel', 
-          mileage: 45000, 
-          status: 'active',
-          registration_number: 'AB21 DEF',
-          insurance_expiry: '2024-12-31',
-          last_service_date: '2024-01-15',
-          next_service_date: '2024-07-15',
-          created_at: new Date().toISOString(), 
-          updated_at: new Date().toISOString() 
-        },
-        { 
-          id: '2', 
-          school_id: currentSchool.id, 
-          vehicle_number: 'VAN-001', 
-          vehicle_type: 'van', 
-          make: 'Ford', 
-          model: 'Transit', 
-          year: 2021, 
-          capacity: 25, 
-          fuel_type: 'diesel', 
-          mileage: 32000, 
-          status: 'maintenance',
-          registration_number: 'CD22 GHI',
-          insurance_expiry: '2024-11-30',
-          created_at: new Date().toISOString(), 
-          updated_at: new Date().toISOString() 
-        }
-      ];
-      
-      setVehicles(mockVehicles);
+      // Load vehicles from database (create table if needed)
+      const { data: vehiclesData, error: vehiclesError } = await supabase
+        .from('vehicles')
+        .select('*')
+        .eq('school_id', currentSchool.id)
+        .order('created_at', { ascending: false });
+
+      if (vehiclesError) {
+        console.error('Error loading vehicles:', vehiclesError);
+        // Fallback to mock data only if table doesn't exist
+        const mockVehicles: Vehicle[] = [
+          { 
+            id: '1', 
+            school_id: currentSchool.id, 
+            vehicle_number: 'BUS-001', 
+            vehicle_type: 'bus', 
+            make: 'Mercedes', 
+            model: 'Sprinter', 
+            year: 2022, 
+            capacity: 50, 
+            fuel_type: 'diesel', 
+            mileage: 45000, 
+            status: 'active',
+            registration_number: 'AB21 DEF',
+            insurance_expiry: '2024-12-31',
+            last_service_date: '2024-01-15',
+            next_service_date: '2024-07-15',
+            created_at: new Date().toISOString(), 
+            updated_at: new Date().toISOString() 
+          },
+          { 
+            id: '2', 
+            school_id: currentSchool.id, 
+            vehicle_number: 'VAN-001', 
+            vehicle_type: 'van', 
+            make: 'Ford', 
+            model: 'Transit', 
+            year: 2021, 
+            capacity: 25, 
+            fuel_type: 'diesel', 
+            mileage: 32000, 
+            status: 'maintenance',
+            registration_number: 'CD22 GHI',
+            insurance_expiry: '2024-11-30',
+            created_at: new Date().toISOString(), 
+            updated_at: new Date().toISOString() 
+          }
+        ];
+        setVehicles(mockVehicles);
+      } else {
+        setVehicles(vehiclesData as Vehicle[]);
+      }
       // Routes are now loaded from database above
       setStudentTransports([]);
       setMaintenance([]);
@@ -434,8 +447,8 @@ export function useTransportData() {
 
       console.log('✅ Route added to database:', data);
 
-      // Add to local state
-      setRoutes(prev => [...prev, data as TransportRoute]);
+      // Refresh data to get the updated route with relations
+      await fetchTransportData();
       toast.success("Route added successfully");
       return data as TransportRoute;
     } catch (error) {
@@ -447,10 +460,23 @@ export function useTransportData() {
 
   const updateRoute = async (id: string, updates: Partial<TransportRoute>) => {
     try {
-      const updatedRoute = { ...updates, updated_at: new Date().toISOString() };
-      setRoutes(prev => prev.map(r => r.id === id ? { ...r, ...updatedRoute } : r));
+      const { data, error } = await supabase
+        .from('transport_routes')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Database error:', error);
+        toast.error(`Failed to update route: ${error.message}`);
+        return null;
+      }
+
+      // Refresh data to get updated route with relations
+      await fetchTransportData();
       toast.success("Route updated successfully");
-      return updatedRoute;
+      return data as TransportRoute;
     } catch (error) {
       console.error('Error updating route:', error);
       toast.error("Failed to update route");
