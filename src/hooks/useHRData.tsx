@@ -175,7 +175,7 @@ export function useHRData() {
   };
 
   // Create new employee with proper user setup
-  const createEmployee = async (employeeData: Omit<Employee, 'id' | 'created_at' | 'updated_at'>) => {
+  const createEmployee = async (employeeData: Omit<Employee, 'id' | 'created_at' | 'updated_at'> & { school_id?: string }) => {
     try {
       const { data, error } = await supabase
         .rpc('create_employee_with_user', {
@@ -193,7 +193,8 @@ export function useHRData() {
             work_type: employeeData.work_type,
             location: employeeData.location,
             emergency_contact_name: employeeData.emergency_contact_name,
-            emergency_contact_phone: employeeData.emergency_contact_phone
+            emergency_contact_phone: employeeData.emergency_contact_phone,
+            school_id: employeeData.school_id
           }
         });
 

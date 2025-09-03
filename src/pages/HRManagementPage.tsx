@@ -56,6 +56,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useHRData } from '@/hooks/useHRData';
 import { useComprehensiveHR } from '@/hooks/useComprehensiveHR';
+import { supabase } from '@/integrations/supabase/client';
 import { RecruitmentDashboard } from '@/components/recruitment/RecruitmentDashboard';
 import { EmployeeForm } from '@/components/hr/EmployeeForm';
 import { EmployeeExit } from '@/components/hr/EmployeeExit';
@@ -195,6 +196,16 @@ export function HRManagementPage() {
 
   const handleCreateEmployee = async (employeeData: any) => {
     try {
+      // Get the first available school_id from user roles if user is not super_admin
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('school_id')
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+        .not('school_id', 'is', null)
+        .limit(1);
+
+      const schoolId = userRoles?.[0]?.school_id;
+
       await createEmployee({
         employee_id: `EMP${Date.now()}`,
         first_name: employeeData.first_name,
@@ -213,7 +224,8 @@ export function HRManagementPage() {
         emergency_contact_phone: employeeData.emergency_contact_phone,
         bank_account_details: {},
         tax_information: {},
-        benefits: {}
+        benefits: {},
+        school_id: schoolId
       });
       setShowEmployeeForm(false);
       await refreshData();
