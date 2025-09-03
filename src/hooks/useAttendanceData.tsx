@@ -89,6 +89,11 @@ export function useAttendanceData() {
   }) => {
     if (!currentSchool) return;
     
+    console.log('=== FETCHING ATTENDANCE RECORDS ===');
+    console.log('School ID:', currentSchool.id);
+    console.log('Date range:', startDate, 'to', endDate);
+    console.log('Filters:', filters);
+    
     setLoading(true);
     try {
       let query = supabase
@@ -115,6 +120,9 @@ export function useAttendanceData() {
 
       const { data, error } = await query;
 
+      console.log('Raw attendance data from DB:', data);
+      console.log('DB error:', error);
+
       if (error) throw error;
 
       // For now, create basic records without joined data since relationships aren't set up
@@ -126,6 +134,9 @@ export function useAttendanceData() {
         year_group: 'N/A',
         teacher_name: 'Teacher',
       }));
+
+      console.log('Formatted attendance records:', formattedRecords);
+      console.log('Total records found:', formattedRecords.length);
 
       setAttendanceRecords(formattedRecords);
     } catch (error: any) {
@@ -197,13 +208,21 @@ export function useAttendanceData() {
         teacher_id: user.id,
       }));
 
-      const { error } = await supabase
+      console.log('=== SAVING ATTENDANCE RECORDS ===');
+      console.log('Records to save:', recordsToInsert);
+
+      const { data, error } = await supabase
         .from('attendance_records')
-        .upsert(recordsToInsert);
+        .upsert(recordsToInsert)
+        .select();
+
+      console.log('Save response data:', data);
+      console.log('Save response error:', error);
 
       if (error) throw error;
 
       // Immediately refresh the local attendance records
+      console.log('Immediately refreshing attendance records after save...');
       const { start, end } = { 
         start: format(new Date(), 'yyyy-MM-dd'), 
         end: format(new Date(), 'yyyy-MM-dd') 
