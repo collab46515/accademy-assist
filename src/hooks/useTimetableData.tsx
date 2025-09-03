@@ -261,15 +261,32 @@ export function useTimetableData() {
 
       // Enrich with related data manually
       const enrichedEntries: TimetableEntry[] = (entriesToProcess || []).map(entry => {
-        const period = periods.find(p => p.id === entry.period_id) || mockPeriods.find(p => p.id === entry.period_id);
-        const subject = subjects.find(s => s.id === entry.subject_id) || mockSubjects.find(s => s.id === entry.subject_id);
-        const classroom = classrooms.find(c => c.id === entry.classroom_id) || mockClassrooms.find(c => c.id === entry.classroom_id);
+        // Try to find matching period, subject, classroom from database or mock data
+        let period = periods.find(p => p.id === entry.period_id) || mockPeriods.find(p => p.id === entry.period_id);
+        let subject = subjects.find(s => s.id === entry.subject_id) || mockSubjects.find(s => s.id === entry.subject_id);
+        let classroom = classrooms.find(c => c.id === entry.classroom_id) || mockClassrooms.find(c => c.id === entry.classroom_id);
         
         // Parse teacher and room info from notes field if available
         const notesParts = entry.notes?.split(' - ') || [];
         const subjectName = notesParts[0] || subject?.subject_name || 'Subject';
         const teacherName = notesParts[1] || 'Teacher';
         const roomName = notesParts[2] || classroom?.room_name || 'Room';
+        
+        // If we couldn't find the period in our data, create a basic period from database info
+        if (!period) {
+          // Try to fetch period info from database or create a default
+          console.log('Creating fallback period for:', entry.period_id);
+          period = {
+            id: entry.period_id,
+            school_id: entry.school_id,
+            period_number: entry.day_of_week, // Fallback
+            period_name: `Period ${entry.day_of_week}`,
+            start_time: '09:00:00',
+            end_time: '10:00:00',
+            is_break: false,
+            is_active: true
+          };
+        }
         
         return {
           ...entry,
@@ -345,10 +362,11 @@ export function useTimetableData() {
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
     const grid: Record<string, Record<string, TimetableEntry | null>> = {};
 
-    // Initialize grid
+    // Initialize grid with both database periods and mock periods
     days.forEach((day, dayIndex) => {
       grid[day] = {};
-      periods.forEach(period => {
+      // Use all available periods (both from database and mock)
+      [...periods, ...mockPeriods].forEach(period => {
         if (!period.is_break) {
           grid[day][period.id] = null;
         }
@@ -359,6 +377,7 @@ export function useTimetableData() {
     timetableEntries.forEach(entry => {
       const dayName = days[entry.day_of_week - 1]; // Convert 1-based to 0-based
       if (dayName && grid[dayName] && entry.period) {
+        // Use the actual period_id from the entry
         grid[dayName][entry.period_id] = entry;
       }
     });
