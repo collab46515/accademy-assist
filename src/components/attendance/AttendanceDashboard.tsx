@@ -60,24 +60,44 @@ export function AttendanceDashboard() {
   // Auto-refresh data every 5 seconds to ensure real-time updates
   useEffect(() => {
     const { start, end } = getDateRange();
+    console.log('=== DASHBOARD FETCHING ATTENDANCE ===');
+    console.log('Date range:', { start, end });
+    console.log('Time range:', timeRange);
+    console.log('Current school:', currentSchool);
+    
     fetchAttendanceRecords(start, end);
     
     const interval = setInterval(() => {
+      console.log('Dashboard auto-refresh fetch');
       fetchAttendanceRecords(start, end);
     }, 5000);
     
     return () => clearInterval(interval);
-  }, [timeRange, currentSchool]);
+  }, [timeRange, currentSchool, fetchAttendanceRecords]);
 
   // Calculate statistics
   const stats = getAttendanceStats(attendanceRecords);
   const totalStudents = students.length;
   
+  console.log('=== DASHBOARD DATA PROCESSING ===');
+  console.log('All attendance records:', attendanceRecords);
+  console.log('Total students:', totalStudents);
+  console.log('Students data:', students);
+  
   // Get today's attendance specifically
+  const todayFormatted = format(today, 'yyyy-MM-dd');
+  console.log('Today formatted for comparison:', todayFormatted);
+  
   const todayRecords = attendanceRecords.filter(
-    record => record.date === format(today, 'yyyy-MM-dd')
+    record => {
+      console.log(`Comparing record date "${record.date}" with today "${todayFormatted}"`);
+      return record.date === todayFormatted;
+    }
   );
+  console.log('Today records found:', todayRecords);
+  
   const todayStats = getAttendanceStats(todayRecords);
+  console.log('Today stats:', todayStats);
   const studentsMarkedToday = new Set(todayRecords.map(r => r.student_id)).size;
   const studentsNotMarkedToday = totalStudents - studentsMarkedToday;
 
