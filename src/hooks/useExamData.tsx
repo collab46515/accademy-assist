@@ -167,22 +167,11 @@ const mockExamResults: ExamResult[] = [
 ];
 
 export function useExamData() {
-  const [exams, setExams] = useState<Exam[]>([]);
+  const [exams, setExams] = useState<Exam[]>(mockExams);
   const [examSessions, setExamSessions] = useState<ExamSession[]>([]);
   const [examCandidates, setExamCandidates] = useState<ExamCandidate[]>([]);
-  const [examResults, setExamResults] = useState<ExamResult[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Simulate loading delay
-    const timer = setTimeout(() => {
-      setExams(mockExams);
-      setExamResults(mockExamResults);
-      setLoading(false);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, []);
+  const [examResults, setExamResults] = useState<ExamResult[]>(mockExamResults);
+  const [loading, setLoading] = useState(false);
 
   const createExam = async (examData: Omit<Exam, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'school_id'>) => {
     try {
