@@ -197,48 +197,61 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Simple Navigation - No Fixed Header */}
-      <div className="container mx-auto px-4 -my-24">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <img src="/lovable-uploads/5908f914-4b1a-4234-abb8-009537c792ee.png" alt="DOXA Logo" className="h-80 w-80" />
-          </div>
-          
-          <div className="hidden md:flex items-center gap-6">
-            <button 
-              onClick={() => setActiveSection("home")}
-              className={`text-sm hover:text-primary transition-colors ${activeSection === "home" ? "text-primary font-medium" : ""}`}
-            >
-              Home
-            </button>
-            <button 
-              onClick={() => setActiveSection("modules")}
-              className={`text-sm hover:text-primary transition-colors ${activeSection === "modules" ? "text-primary font-medium" : ""}`}
-            >
-              Modules
-            </button>
-            <button 
-              onClick={() => setActiveSection("workflows")}
-              className={`text-sm hover:text-primary transition-colors ${activeSection === "workflows" ? "text-primary font-medium" : ""}`}
-            >
-              Workflows
-            </button>
-            <button 
-              onClick={() => setIsSignInModalOpen(true)}
-              className="text-sm hover:text-primary transition-colors"
-            >
-              Login
-            </button>
-          </div>
+      {/* Integrated Header with Logo and Navigation */}
+      <header className="w-full bg-background/95 backdrop-blur-sm border-b border-border/10 sticky top-0 z-50">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo - Left Corner */}
+            <div className="flex items-center">
+              <img 
+                src="/lovable-uploads/5908f914-4b1a-4234-abb8-009537c792ee.png" 
+                alt="DOXA Logo" 
+                className="h-12 w-12 object-contain"
+              />
+              <span className="ml-3 text-xl font-bold text-foreground">DOXA</span>
+            </div>
+            
+            {/* Desktop Navigation - Center */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <button 
+                onClick={() => setActiveSection("home")}
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  activeSection === "home" ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                Home
+              </button>
+              <button 
+                onClick={() => setActiveSection("modules")}
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  activeSection === "modules" ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                Modules
+              </button>
+              <button 
+                onClick={() => setActiveSection("workflows")}
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  activeSection === "workflows" ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                Workflows
+              </button>
+            </nav>
 
-          <Button 
-            onClick={() => setIsSignInModalOpen(true)}
-            className="md:hidden"
-          >
-            Login
-          </Button>
+            {/* Login Button - Right */}
+            <div className="flex items-center">
+              <Button 
+                onClick={() => setIsSignInModalOpen(true)}
+                variant="default"
+                size="sm"
+              >
+                Login
+              </Button>
+            </div>
+          </div>
         </div>
-      </div>
+      </header>
 
       {/* Content Sections */}
       <div className="pt-16">
