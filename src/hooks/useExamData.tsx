@@ -132,19 +132,16 @@ export function useExamData() {
     try {
       console.log('Creating exam with data:', examData);
 
-      // Get current user and school
+      // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
-
-      const schoolId = await getUserSchoolId();
-      if (!schoolId) throw new Error('User school not found');
 
       const { data, error } = await supabase
         .from('exams')
         .insert({
           ...examData,
           created_by: user.id,
-          school_id: schoolId
+          school_id: null
         })
         .select()
         .single();
