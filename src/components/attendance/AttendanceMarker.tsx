@@ -79,65 +79,85 @@ export function AttendanceMarker() {
   // Initialize students attendance and fetch existing records
   useEffect(() => {
     const initializeAttendance = async () => {
-      if (!currentSchool) return;
+      if (!currentSchool || filteredStudents.length === 0) return;
       
-      console.log('Fetching existing attendance for:', {
-        school_id: currentSchool.id,
-        date: format(selectedDate, 'yyyy-MM-dd'),
-        period: selectedPeriod
-      });
-
-      // Fetch existing attendance records for the selected date
-      let query = supabase
-        .from('attendance_records')
-        .select('*')
-        .eq('school_id', currentSchool.id)
-        .eq('date', format(selectedDate, 'yyyy-MM-dd'));
-
-      // Handle period filtering - use .is() for null values, .eq() for actual values
-      if (selectedPeriod === null) {
-        query = query.is('period', null);
-      } else {
-        query = query.eq('period', selectedPeriod);
-      }
-
-      const { data: existingRecords, error } = await query;
-
-      console.log('Existing attendance records:', existingRecords);
+      console.log('=== INITIALIZING ATTENDANCE MARKER ===');
+      console.log('Current school:', currentSchool.id);
+      console.log('Selected date:', format(selectedDate, 'yyyy-MM-dd'));
+      console.log('Selected period:', selectedPeriod);
       console.log('Filtered students count:', filteredStudents.length);
 
-      if (error) {
-        console.error('Error fetching existing attendance:', error);
-      }
+      try {
+        // Fetch existing attendance records for the selected date
+        let query = supabase
+          .from('attendance_records')
+          .select('*')
+          .eq('school_id', currentSchool.id)
+          .eq('date', format(selectedDate, 'yyyy-MM-dd'));
 
-      const attendanceList: StudentAttendance[] = filteredStudents.map(student => {
-        // Find existing attendance record for this student
-        const existingRecord = existingRecords?.find(record => record.student_id === student.id);
+        // Handle period filtering - use .is() for null values, .eq() for actual values
+        if (selectedPeriod === null) {
+          query = query.is('period', null);
+        } else {
+          query = query.eq('period', selectedPeriod);
+        }
+
+        const { data: existingRecords, error } = await query;
+
+        console.log('Existing attendance query result:', existingRecords);
+        console.log('Query error:', error);
+
+        if (error) {
+          console.error('Error fetching existing attendance:', error);
+        }
+
+        const attendanceList: StudentAttendance[] = filteredStudents.map(student => {
+          // Find existing attendance record for this student
+          const existingRecord = existingRecords?.find(record => record.student_id === student.id);
+          
+          console.log(`Student ${student.id}: existing record =`, existingRecord);
+          
+          // Ensure status is valid or undefined
+          const validStatuses = ['present', 'absent', 'late', 'left_early'];
+          const status = existingRecord?.status && validStatuses.includes(existingRecord.status) 
+            ? existingRecord.status as 'present' | 'absent' | 'late' | 'left_early'
+            : undefined;
+          
+          return {
+            student_id: student.id,
+            student_name: `${student.profiles?.first_name || ''} ${student.profiles?.last_name || ''}`.trim(),
+            student_number: student.student_number,
+            form_class: student.form_class || '',
+            year_group: student.year_group,
+            avatar_url: student.profiles?.avatar_url,
+            status: status,
+            reason: existingRecord?.reason || '',
+            notes: existingRecord?.notes || '',
+          };
+        });
         
-        // Ensure status is valid or undefined
-        const validStatuses = ['present', 'absent', 'late', 'left_early'];
-        const status = existingRecord?.status && validStatuses.includes(existingRecord.status) 
-          ? existingRecord.status as 'present' | 'absent' | 'late' | 'left_early'
-          : undefined;
-        
-        return {
+        console.log('Final attendance list with existing data:', attendanceList);
+        setStudentsAttendance(attendanceList);
+      } catch (error) {
+        console.error('Error in initializeAttendance:', error);
+        // Fallback: initialize without existing data
+        const attendanceList: StudentAttendance[] = filteredStudents.map(student => ({
           student_id: student.id,
           student_name: `${student.profiles?.first_name || ''} ${student.profiles?.last_name || ''}`.trim(),
           student_number: student.student_number,
           form_class: student.form_class || '',
           year_group: student.year_group,
           avatar_url: student.profiles?.avatar_url,
-          status: status,
-          reason: existingRecord?.reason || '',
-          notes: existingRecord?.notes || '',
-        };
-      });
-      
-      setStudentsAttendance(attendanceList);
+          status: undefined,
+          reason: '',
+          notes: '',
+        }));
+        setStudentsAttendance(attendanceList);
+      }
     };
 
     initializeAttendance();
-  }, [filteredStudents.length, selectedDate, selectedPeriod, currentSchool]); // Use stable dependencies
+  }, [filteredStudents, selectedDate, selectedPeriod, currentSchool]);
 
   // Get current class suggestion
   const currentClass = getCurrentClass();
