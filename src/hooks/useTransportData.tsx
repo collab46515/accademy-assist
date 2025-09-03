@@ -325,9 +325,17 @@ export function useTransportData() {
 
   // Driver CRUD operations
   const addDriver = async (driverData: Partial<Driver>) => {
-    if (!currentSchool?.id) return null;
+    console.log('addDriver called with:', driverData);
+    console.log('currentSchool:', currentSchool);
+    
+    if (!currentSchool?.id) {
+      console.error('No current school found');
+      toast.error('No school selected. Please contact administrator.');
+      return null;
+    }
     
     try {
+      console.log('Inserting driver into database...');
       // Save to database
       const { data, error } = await supabase
         .from('drivers')
@@ -356,7 +364,14 @@ export function useTransportData() {
         .select()
         .single();
 
-      if (error) throw error;
+      console.log('Database response:', { data, error });
+
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
+
+      console.log('Driver successfully added to database:', data);
 
       // Update local state
       setDrivers(prev => [...prev, data as Driver]);
@@ -364,7 +379,7 @@ export function useTransportData() {
       return data as Driver;
     } catch (error) {
       console.error('Error adding driver:', error);
-      toast.error("Failed to add driver");
+      toast.error("Failed to add driver: " + (error as any)?.message);
       return null;
     }
   };

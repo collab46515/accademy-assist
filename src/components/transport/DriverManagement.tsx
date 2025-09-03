@@ -28,13 +28,24 @@ export function DriverManagement() {
   });
 
   const handleAddDriver = async () => {
+    console.log('handleAddDriver called with:', newDriver);
+    
     if (!newDriver.first_name || !newDriver.last_name || !newDriver.phone || !newDriver.license_number) {
+      console.log('Validation failed:', { 
+        first_name: newDriver.first_name, 
+        last_name: newDriver.last_name, 
+        phone: newDriver.phone, 
+        license_number: newDriver.license_number 
+      });
       return;
     }
 
+    console.log('Calling addDriver...');
     const result = await addDriver(newDriver);
+    console.log('addDriver result:', result);
     
     if (result) {
+      console.log('Driver added successfully, resetting form');
       setNewDriver({
         employee_id: '',
         first_name: '',
@@ -48,6 +59,8 @@ export function DriverManagement() {
       });
       setEditingDriver(null);
       setShowDialog(false);
+    } else {
+      console.log('Failed to add driver');
     }
   };
 
