@@ -61,15 +61,18 @@ export function ExamSchedulingForm({ onClose }: ExamSchedulingFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submission started');
     
     if (!formData.title || !formData.subject || !formData.exam_date) {
+      console.log('Validation failed:', { title: formData.title, subject: formData.subject, exam_date: formData.exam_date });
       toast.error('Please fill in all required fields');
       return;
     }
 
+    console.log('Validation passed, creating exam...');
     setSaving(true);
     try {
-      await createExam({
+      const examData = {
         title: formData.title,
         subject: formData.subject,
         exam_board: formData.exam_board,
@@ -84,10 +87,14 @@ export function ExamSchedulingForm({ onClose }: ExamSchedulingFormProps) {
         end_time: formData.end_time,
         instructions: formData.instructions,
         is_active: true
-      });
-
+      };
+      console.log('About to call createExam with:', examData);
+      
+      const result = await createExam(examData);
+      console.log('createExam returned:', result);
       // Small delay to ensure state update is processed
       setTimeout(() => {
+        console.log('Closing dialog after successful creation');
         onClose();
       }, 100);
     } catch (error) {

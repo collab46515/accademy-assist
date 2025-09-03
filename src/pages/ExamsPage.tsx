@@ -20,6 +20,7 @@ export default function ExamsPage() {
   const { exams, examResults, loading } = useExamData();
 
   console.log('ExamsPage render - exams:', exams);
+  console.log('ExamsPage render - exams.length:', exams.length);
 
   // Filter exams based on search term
   const filteredExams = exams.filter(exam =>
@@ -27,6 +28,9 @@ export default function ExamsPage() {
     exam.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
     exam.exam_board.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
+  console.log('Filtered exams:', filteredExams);
+  console.log('Search term:', searchTerm);
 
   // Helper function to get status badge color
   const getStatusBadge = (type: string) => {
