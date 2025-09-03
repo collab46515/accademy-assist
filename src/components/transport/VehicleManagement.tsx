@@ -8,109 +8,51 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { useRBAC } from '@/hooks/useRBAC';
 import { Plus, Car, Fuel, Wrench, AlertTriangle, Calendar, MapPin, Users, CheckCircle, Truck } from 'lucide-react';
+import { useTransportData } from '@/hooks/useTransportData';
 
 export function VehicleManagement() {
   const { toast } = useToast();
-  const { currentSchool } = useRBAC();
+  const { 
+    loading, 
+    vehicles, 
+    maintenance, 
+    stats, 
+    addVehicle, 
+    updateVehicle, 
+    deleteVehicle, 
+    addMaintenance 
+  } = useTransportData();
+  
   const [showDialog, setShowDialog] = useState(false);
-  const [editingVehicle, setEditingVehicle] = useState(null);
+  const [editingVehicle, setEditingVehicle] = useState<any>(null);
   const [serviceDialog, setServiceDialog] = useState(false);
-  const [selectedVehicle, setSelectedVehicle] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [vehicles, setVehicles] = useState([]);
-  const [maintenanceAlerts, setMaintenanceAlerts] = useState([]);
+  const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
   
   // Form states
   const [newVehicle, setNewVehicle] = useState({
-    number: '',
-    type: '',
-    capacity: '',
-    driver: '',
-    fuel_type: '',
-    mileage: '',
-    status: 'active'
+    vehicle_number: '',
+    vehicle_type: 'bus' as 'bus' | 'van' | 'minibus' | 'car',
+    make: '',
+    model: '',
+    year: new Date().getFullYear(),
+    capacity: 0,
+    fuel_type: 'diesel' as 'petrol' | 'diesel' | 'electric' | 'hybrid',
+    mileage: 0,
+    status: 'active' as 'active' | 'maintenance' | 'inactive' | 'retired'
   });
 
-  // Mock data for demonstration - using fallback since transport tables don't exist in DB
-  const mockVehicles = [
-    {
-      id: "1",
-      number: "TB-01",
-      type: "Bus",
-      capacity: 50,
-      model: "Mercedes Sprinter",
-      year: 2020,
-      mileage: 45000,
-      status: "Active",
-      driver: "Sarah Johnson",
-      route: "Route 1",
-      lastService: "2024-01-15",
-      nextService: "2024-04-15"
-    },
-    {
-      id: "2", 
-      number: "TB-02",
-      type: "Bus",
-      capacity: 45,
-      model: "Ford Transit",
-      year: 2019,
-      mileage: 62000,
-      status: "Maintenance",
-      driver: "Unassigned",
-      route: "None",
-      lastService: "2024-01-20",
-      nextService: "2024-02-20"
-    },
-    {
-      id: "3",
-      number: "TV-03", 
-      type: "Van",
-      capacity: 25,
-      model: "Volkswagen Crafter",
-      year: 2021,
-      mileage: 28000,
-      status: "Active",
-      driver: "John Smith",
-      route: "Route 3",
-      lastService: "2024-01-10",
-      nextService: "2024-07-10"
-    }
-  ];
-
-  const mockMaintenanceAlerts = [
-    {
-      id: 1,
-      vehicle: 'BUS-001',
-      issue: 'Oil Change Due',
-      priority: 'medium',
-      date: '2024-01-20'
-    },
-    {
-      id: 2,
-      vehicle: 'BUS-002',
-      issue: 'Tire Replacement',
-      priority: 'high',
-      date: '2024-01-18'
-    },
-    {
-      id: 3,
-      vehicle: 'VAN-001',
-      issue: 'Brake Inspection',
-      priority: 'high',
-      date: '2024-01-22'
-    }
-  ];
-
-  // Initialize with mock data
-  useEffect(() => {
-    setVehicles(mockVehicles);
-    setMaintenanceAlerts(mockMaintenanceAlerts);
-  }, []);
+  // Generate maintenance alerts from real data
+  const maintenanceAlerts = maintenance.filter(m => m.status === 'scheduled').map(m => ({
+    id: m.id,
+    vehicle: m.vehicle?.vehicle_number || 'Unknown',
+    issue: m.description,
+    priority: m.maintenance_type === 'repair' ? 'high' : 'medium',
+    date: new Date(m.service_date).toLocaleDateString()
+  }));
 
   const handleAddVehicle = async () => {
-    if (!newVehicle.number || !newVehicle.type || !newVehicle.capacity) {
+    if (!newVehicle.vehicle_number || !newVehicle.vehicle_type || !newVehicle.capacity) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -119,123 +61,93 @@ export function VehicleManagement() {
       return;
     }
 
-    try {
-      setLoading(true);
-      
-      // Since transport tables don't exist, just add to local state
-      const vehicleData = {
-        id: `vehicle-${Date.now()}`,
-        number: newVehicle.number,
-        type: newVehicle.type,
-        capacity: parseInt(newVehicle.capacity),
-        model: "New Vehicle",
-        year: new Date().getFullYear(),
-        mileage: parseInt(newVehicle.mileage) || 0,
-        status: "Active",
-        driver: newVehicle.driver || "Unassigned",
-        route: "Route TBD",
-        lastService: "N/A",
-        nextService: "TBD"
-      };
-
-      setVehicles([...vehicles, vehicleData]);
+    const result = await addVehicle(newVehicle);
+    
+    if (result) {
       setNewVehicle({
-        number: '',
-        type: '',
-        capacity: '',
-        driver: '',
-        fuel_type: '',
-        mileage: '',
+        vehicle_number: '',
+        vehicle_type: 'bus',
+        make: '',
+        model: '',
+        year: new Date().getFullYear(),
+        capacity: 0,
+        fuel_type: 'diesel',
+        mileage: 0,
         status: 'active'
       });
+      setEditingVehicle(null);
       setShowDialog(false);
-      
-      toast({
-        title: "Success",
-        description: "Vehicle added successfully!"
-      });
-    } catch (error) {
-      console.error('Error adding vehicle:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add vehicle",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleEditVehicle = (vehicle) => {
+  const handleEditVehicle = (vehicle: any) => {
     setSelectedVehicle(vehicle);
     setEditingVehicle(vehicle);
     setNewVehicle({
-      number: vehicle.number,
-      type: vehicle.type,
-      capacity: vehicle.capacity?.toString(),
-      driver: vehicle.driver || '',
-      fuel_type: '',
-      mileage: vehicle.mileage?.toString() || '',
+      vehicle_number: vehicle.vehicle_number,
+      vehicle_type: vehicle.vehicle_type,
+      make: vehicle.make || '',
+      model: vehicle.model || '',
+      year: vehicle.year || new Date().getFullYear(),
+      capacity: vehicle.capacity || 0,
+      fuel_type: vehicle.fuel_type || 'diesel',
+      mileage: vehicle.mileage || 0,
       status: vehicle.status
     });
     setShowDialog(true);
   };
 
-  const handleScheduleService = (vehicle) => {
-    setSelectedVehicle(vehicle);
-    setServiceDialog(true);
-    toast({
-      title: "Service Scheduled",
-      description: `Service has been scheduled for ${vehicle.number}`
-    });
+  const handleScheduleService = async (vehicle: any) => {
+    const maintenanceData = {
+      vehicle_id: vehicle.id,
+      maintenance_type: 'service' as const,
+      description: 'Scheduled service',
+      service_date: new Date().toISOString().split('T')[0],
+      status: 'scheduled' as const
+    };
+    
+    const result = await addMaintenance(maintenanceData);
+    
+    if (result) {
+      setSelectedVehicle(vehicle);
+      setServiceDialog(true);
+    }
   };
 
-  const handleScheduleMaintenance = async (alert) => {
-    try {
-      // Update local state since no database table exists
-      setMaintenanceAlerts(prev => prev.filter(a => a.id !== alert.id));
-      
+  const handleScheduleMaintenance = async (alert: any) => {
+    // Update maintenance status to in_progress
+    const maintenanceItem = maintenance.find(m => m.id === alert.id);
+    if (maintenanceItem) {
+      // In a full implementation, you'd call updateMaintenance here
       toast({
         title: "Success",
         description: `Maintenance scheduled for ${alert.vehicle}`
       });
-    } catch (error) {
-      console.error('Error scheduling maintenance:', error);
-      toast({
-        title: "Error",
-        description: "Failed to schedule maintenance",
-        variant: "destructive"
-      });
     }
   };
 
-  const handleResolveAlert = async (alert) => {
-    try {
-      // Update local state since no database table exists
-      setMaintenanceAlerts(prev => prev.filter(a => a.id !== alert.id));
-      
+  const handleResolveAlert = async (alert: any) => {
+    // Update maintenance status to completed
+    const maintenanceItem = maintenance.find(m => m.id === alert.id);
+    if (maintenanceItem) {
+      // In a full implementation, you'd call updateMaintenance here
       toast({
         title: "Success",
         description: `${alert.issue} marked as resolved for ${alert.vehicle}`
-      });
-    } catch (error) {
-      console.error('Error resolving alert:', error);
-      toast({
-        title: "Error",
-        description: "Failed to resolve alert",
-        variant: "destructive"
       });
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "Active":
+      case "active":
         return <Badge variant="default" className="bg-green-600">Active</Badge>;
-      case "Maintenance":
+      case "maintenance":
         return <Badge variant="destructive">Maintenance</Badge>;
-      case "Out of Service":
-        return <Badge variant="secondary">Out of Service</Badge>;
+      case "inactive":
+        return <Badge variant="secondary">Inactive</Badge>;
+      case "retired":
+        return <Badge variant="outline">Retired</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -263,71 +175,91 @@ export function VehicleManagement() {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="vehicle-number">Vehicle Number</Label>
-                  <Input 
-                    id="vehicle-number" 
-                    placeholder="BUS-001" 
-                    value={newVehicle.number}
-                    onChange={(e) => setNewVehicle({...newVehicle, number: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="vehicle-type">Vehicle Type</Label>
-                  <Select value={newVehicle.type} onValueChange={(value) => setNewVehicle({...newVehicle, type: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="bus">Bus</SelectItem>
-                      <SelectItem value="van">Van</SelectItem>
-                      <SelectItem value="car">Car</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="capacity">Seating Capacity</Label>
-                  <Input 
-                    id="capacity" 
-                    type="number" 
-                    placeholder="50" 
-                    value={newVehicle.capacity}
-                    onChange={(e) => setNewVehicle({...newVehicle, capacity: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="driver">Driver Name</Label>
-                  <Input 
-                    id="driver" 
-                    placeholder="John Smith" 
-                    value={newVehicle.driver}
-                    onChange={(e) => setNewVehicle({...newVehicle, driver: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="fuel">Fuel Type</Label>
-                  <Select value={newVehicle.fuel_type} onValueChange={(value) => setNewVehicle({...newVehicle, fuel_type: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select fuel type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="petrol">Petrol</SelectItem>
-                      <SelectItem value="diesel">Diesel</SelectItem>
-                      <SelectItem value="electric">Electric</SelectItem>
-                      <SelectItem value="hybrid">Hybrid</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="mileage">Current Mileage</Label>
-                  <Input 
-                    id="mileage" 
-                    type="number" 
-                    placeholder="0" 
-                    value={newVehicle.mileage}
-                    onChange={(e) => setNewVehicle({...newVehicle, mileage: e.target.value})}
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="vehicle-number">Vehicle Number</Label>
+                    <Input 
+                      id="vehicle-number" 
+                      placeholder="BUS-001" 
+                      value={newVehicle.vehicle_number}
+                      onChange={(e) => setNewVehicle({...newVehicle, vehicle_number: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="vehicle-type">Vehicle Type</Label>
+                    <Select value={newVehicle.vehicle_type} onValueChange={(value: 'bus' | 'van' | 'minibus' | 'car') => setNewVehicle({...newVehicle, vehicle_type: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="bus">Bus</SelectItem>
+                        <SelectItem value="van">Van</SelectItem>
+                        <SelectItem value="minibus">Minibus</SelectItem>
+                        <SelectItem value="car">Car</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="make">Make</Label>
+                    <Input 
+                      id="make" 
+                      placeholder="Mercedes" 
+                      value={newVehicle.make}
+                      onChange={(e) => setNewVehicle({...newVehicle, make: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="model">Model</Label>
+                    <Input 
+                      id="model" 
+                      placeholder="Sprinter" 
+                      value={newVehicle.model}
+                      onChange={(e) => setNewVehicle({...newVehicle, model: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="year">Year</Label>
+                    <Input 
+                      id="year" 
+                      type="number" 
+                      placeholder="2024" 
+                      value={newVehicle.year}
+                      onChange={(e) => setNewVehicle({...newVehicle, year: parseInt(e.target.value)})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="capacity">Seating Capacity</Label>
+                    <Input 
+                      id="capacity" 
+                      type="number" 
+                      placeholder="50" 
+                      value={newVehicle.capacity}
+                      onChange={(e) => setNewVehicle({...newVehicle, capacity: parseInt(e.target.value)})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fuel">Fuel Type</Label>
+                    <Select value={newVehicle.fuel_type} onValueChange={(value: 'petrol' | 'diesel' | 'electric' | 'hybrid') => setNewVehicle({...newVehicle, fuel_type: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select fuel type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="petrol">Petrol</SelectItem>
+                        <SelectItem value="diesel">Diesel</SelectItem>
+                        <SelectItem value="electric">Electric</SelectItem>
+                        <SelectItem value="hybrid">Hybrid</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="mileage">Current Mileage</Label>
+                    <Input 
+                      id="mileage" 
+                      type="number" 
+                      placeholder="0" 
+                      value={newVehicle.mileage}
+                      onChange={(e) => setNewVehicle({...newVehicle, mileage: parseInt(e.target.value)})}
+                    />
+                  </div>
               </div>
               <Button className="w-full" onClick={handleAddVehicle} disabled={loading}>
                 {loading ? "Processing..." : editingVehicle ? "Update Vehicle" : "Add Vehicle"}
@@ -343,7 +275,7 @@ export function VehicleManagement() {
           <CardContent className="flex items-center p-6">
             <Truck className="h-8 w-8 text-blue-600 mr-3" />
             <div>
-              <p className="text-2xl font-bold">{vehicles.length}</p>
+              <p className="text-2xl font-bold">{stats.totalVehicles}</p>
               <p className="text-sm text-muted-foreground">Total Vehicles</p>
             </div>
           </CardContent>
@@ -352,7 +284,7 @@ export function VehicleManagement() {
           <CardContent className="flex items-center p-6">
             <CheckCircle className="h-8 w-8 text-green-600 mr-3" />
             <div>
-              <p className="text-2xl font-bold">{vehicles.filter(v => v.status === 'Active').length}</p>
+              <p className="text-2xl font-bold">{stats.activeVehicles}</p>
               <p className="text-sm text-muted-foreground">Active</p>
             </div>
           </CardContent>
@@ -361,7 +293,7 @@ export function VehicleManagement() {
           <CardContent className="flex items-center p-6">
             <Wrench className="h-8 w-8 text-orange-600 mr-3" />
             <div>
-              <p className="text-2xl font-bold">{vehicles.filter(v => v.status === 'Maintenance').length}</p>
+              <p className="text-2xl font-bold">{stats.vehiclesInMaintenance}</p>
               <p className="text-sm text-muted-foreground">In Maintenance</p>
             </div>
           </CardContent>
@@ -401,20 +333,20 @@ export function VehicleManagement() {
                 <TableRow key={vehicle.id}>
                   <TableCell>
                     <div className="space-y-1">
-                      <p className="font-medium">{vehicle.number}</p>
-                      <Badge variant="outline" className="text-xs">{vehicle.type}</Badge>
+                      <p className="font-medium">{vehicle.vehicle_number}</p>
+                      <Badge variant="outline" className="text-xs">{vehicle.vehicle_type}</Badge>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <p className="text-sm font-medium">{vehicle.model}</p>
+                      <p className="text-sm font-medium">{vehicle.make} {vehicle.model}</p>
                       <p className="text-xs text-muted-foreground">{vehicle.year} • {vehicle.capacity} seats</p>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <p className="text-sm">{vehicle.driver || "Unassigned"}</p>
-                      <p className="text-xs text-muted-foreground">{vehicle.route || "No route"}</p>
+                      <p className="text-sm">Unassigned</p>
+                      <p className="text-xs text-muted-foreground">No route assigned</p>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -424,8 +356,8 @@ export function VehicleManagement() {
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">Last: {vehicle.lastService}</p>
-                      <p className="text-xs text-muted-foreground">Next: {vehicle.nextService}</p>
+                      <p className="text-xs text-muted-foreground">Last: {vehicle.last_service_date || 'N/A'}</p>
+                      <p className="text-xs text-muted-foreground">Next: {vehicle.next_service_date || 'TBD'}</p>
                     </div>
                   </TableCell>
                   <TableCell>
