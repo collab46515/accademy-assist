@@ -4,9 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   Calendar, 
   Clock, 
@@ -72,6 +74,10 @@ export function HRManagementPage() {
   const [filterDepartment, setFilterDepartment] = useState('all');
   const [showEmployeeForm, setShowEmployeeForm] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<any>(null);
+  const [showTimeEntryForm, setShowTimeEntryForm] = useState(false);
+  const [showLeaveForm, setShowLeaveForm] = useState(false);
+  const [showPerformanceForm, setShowPerformanceForm] = useState(false);
+  const [showTrainingForm, setShowTrainingForm] = useState(false);
 
   // Use real HR data from database
   const {
@@ -609,7 +615,11 @@ export function HRManagementPage() {
                 <Download className="h-4 w-4 mr-2" />
                 Export Timesheets
               </Button>
-              <Button size="sm" className="bg-gradient-to-r from-primary to-primary-glow">
+              <Button 
+                size="sm" 
+                className="bg-gradient-to-r from-primary to-primary-glow"
+                onClick={() => setShowTimeEntryForm(true)}
+              >
                 <Timer className="h-4 w-4 mr-2" />
                 Add Time Entry
               </Button>
@@ -757,34 +767,195 @@ export function HRManagementPage() {
     </div>
   );
 
-  const renderActiveTab = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return renderDashboard();
-      case 'employees':
-        return renderEmployees();
-      case 'timeTracking':
-        return renderTimesheet();
-      case 'attendance':
-        return renderAttendance();
-      case 'recruitment':
-        return <RecruitmentDashboard />;
-      case 'employee-exit':
-        return <EmployeeExit employees={employees} />;
-      case 'performance':
-        return renderComingSoon('Performance Management', 'Track and manage employee performance reviews and goals', Target, 'Add Performance Review');
-      case 'training':
-        return renderComingSoon('Training & Development', 'Employee learning and development programs', BookOpen, 'Add Training Course');
-      case 'benefits':
-        return renderComingSoon('Benefits Management', 'Employee benefits and compensation packages', Award, 'Add Benefits Plan');
-      case 'leave':
-        return renderComingSoon('Leave Management', 'Manage employee leave requests and approvals', CalendarIcon, 'Process Leave Request');
-      case 'payroll':
-        return renderComingSoon('Payroll Management', 'Payroll processing and management', DollarSign, 'Process Payroll');
-      default:
-        return renderDashboard();
-    }
-  };
+  // Render Leave Management
+  const renderLeaveManagement = () => (
+    <div className="space-y-6">
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80">
+        <CardHeader className="border-b border-border/50">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <CardTitle className="text-xl">Leave Management</CardTitle>
+              <CardDescription>Manage employee leave requests and approvals</CardDescription>
+            </div>
+            <Button 
+              size="sm" 
+              className="bg-gradient-to-r from-primary to-primary-glow"
+              onClick={() => setShowLeaveForm(true)}
+            >
+              <CalendarIcon className="h-4 w-4 mr-2" />
+              New Leave Request
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            {leaveRequests.map((leave) => (
+              <div key={leave.id} className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors border">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback>{leave.employeeName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{leave.employeeName}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {leave.type} • {leave.startDate} to {leave.endDate} • {leave.days} days
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge variant={leave.status === 'pending' ? 'secondary' : leave.status === 'approved' ? 'default' : 'destructive'}>
+                    {leave.status}
+                  </Badge>
+                  {leave.status === 'pending' && (
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={() => processLeaveRequest(leave.id, 'approved')}>
+                        Approve
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => processLeaveRequest(leave.id, 'rejected')}>
+                        Reject
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  // Render Performance Management
+  const renderPerformance = () => (
+    <div className="space-y-6">
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80">
+        <CardHeader className="border-b border-border/50">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <CardTitle className="text-xl">Performance Management</CardTitle>
+              <CardDescription>Track and manage employee performance reviews and goals</CardDescription>
+            </div>
+            <Button 
+              size="sm" 
+              className="bg-gradient-to-r from-primary to-primary-glow"
+              onClick={() => setShowPerformanceForm(true)}
+            >
+              <Target className="h-4 w-4 mr-2" />
+              Add Performance Review
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            {performanceReviews.map((review) => (
+              <div key={review.id} className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors border">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback>ER</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{review.review_type} Review</p>
+                    <p className="text-sm text-muted-foreground">Rating: {review.overall_rating || 'N/A'}/10</p>
+                  </div>
+                </div>
+                <Badge variant={review.status === 'final' ? 'default' : 'secondary'}>
+                  {review.status}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  // Render Training Management  
+  const renderTraining = () => (
+    <div className="space-y-6">
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80">
+        <CardHeader className="border-b border-border/50">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <CardTitle className="text-xl">Training & Development</CardTitle>
+              <CardDescription>Employee learning and development programs</CardDescription>
+            </div>
+            <Button 
+              size="sm" 
+              className="bg-gradient-to-r from-primary to-primary-glow"
+              onClick={() => setShowTrainingForm(true)}
+            >
+              <BookOpen className="h-4 w-4 mr-2" />
+              Add Training Course
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            {trainingCourses.map((course) => (
+              <div key={course.id} className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors border">
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <BookOpen className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{course.course_title}</p>
+                    <p className="text-sm text-muted-foreground">{course.course_description}</p>
+                  </div>
+                </div>
+                <Badge variant="default">
+                  Active
+                </Badge>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  // Render Payroll Management
+  const renderPayroll = () => (
+    <div className="space-y-6">
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80">
+        <CardHeader className="border-b border-border/50">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <CardTitle className="text-xl">Payroll Management</CardTitle>
+              <CardDescription>Payroll processing and management</CardDescription>
+            </div>
+            <Button 
+              size="sm" 
+              className="bg-gradient-to-r from-primary to-primary-glow"
+              onClick={() => toast({ title: "Payroll", description: "Payroll processing functionality coming soon!" })}
+            >
+              <DollarSign className="h-4 w-4 mr-2" />
+              Process Payroll
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            {payrollData.map((payroll) => (
+              <div key={payroll.id} className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors border">
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-full bg-success/10 flex items-center justify-center">
+                    <DollarSign className="h-5 w-5 text-success" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{payroll.employeeName}</p>
+                    <p className="text-sm text-muted-foreground">{payroll.payPeriod} • £{payroll.netSalary}</p>
+                  </div>
+                </div>
+                <Badge variant={payroll.status === 'paid' ? 'default' : payroll.status === 'processed' ? 'secondary' : 'outline'}>
+                  {payroll.status}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/5 to-background">
@@ -891,7 +1062,17 @@ export function HRManagementPage() {
           </CardContent>
         </Card>
 
-        {renderActiveTab()}
+        {activeTab === 'dashboard' && renderDashboard()}
+        {activeTab === 'employees' && renderEmployees()}
+        {activeTab === 'timeTracking' && renderTimesheet()}
+        {activeTab === 'attendance' && renderAttendance()}
+        {activeTab === 'recruitment' && <RecruitmentDashboard />}
+        {activeTab === 'employee-exit' && <EmployeeExit employees={employees} />}
+        {activeTab === 'performance' && renderPerformance()}
+        {activeTab === 'training' && renderTraining()}
+        {activeTab === 'benefits' && renderComingSoon('Benefits Management', 'Employee benefits and compensation packages', Award, 'Add Benefits Plan')}
+        {activeTab === 'leave' && renderLeaveManagement()}
+        {activeTab === 'payroll' && renderPayroll()}
       </div>
 
       {/* Employee Form Modal */}
@@ -911,6 +1092,218 @@ export function HRManagementPage() {
                 setEditingEmployee(null);
               }}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Time Entry Form Modal */}
+      {showTimeEntryForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background p-6 rounded-lg max-w-md w-full mx-4">
+            <h2 className="text-xl font-semibold mb-4">Add Time Entry</h2>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target as HTMLFormElement);
+              try {
+                await createTimeEntry({
+                  employee_id: formData.get('employee_id') as string,
+                  project_id: formData.get('project_id') as string,
+                  task_description: formData.get('task_description') as string,
+                  hours_worked: Number(formData.get('hours_worked')),
+                  start_time: `${formData.get('date')}T09:00:00`,
+                  end_time: `${formData.get('date')}T17:00:00`,
+                  is_billable: true,
+                  status: 'draft'
+                });
+                setShowTimeEntryForm(false);
+                toast({ title: "Success", description: "Time entry added successfully!" });
+              } catch (error) {
+                toast({ title: "Error", description: "Failed to add time entry" });
+              }
+            }} className="space-y-4">
+              <div>
+                <Label htmlFor="employee_id">Employee</Label>
+                <Select name="employee_id" required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select employee" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employees.map((emp) => (
+                      <SelectItem key={emp.id} value={emp.id}>{emp.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="task_description">Task Description</Label>
+                <Input name="task_description" required />
+              </div>
+              <div>
+                <Label htmlFor="hours_worked">Hours Worked</Label>
+                <Input name="hours_worked" type="number" step="0.5" required />
+              </div>
+              <div>
+                <Label htmlFor="date">Date</Label>
+                <Input name="date" type="date" required />
+              </div>
+              <div className="flex gap-3 justify-end">
+                <Button type="button" variant="outline" onClick={() => setShowTimeEntryForm(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Add Entry</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Leave Request Form Modal */}
+      {showLeaveForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background p-6 rounded-lg max-w-md w-full mx-4">
+            <h2 className="text-xl font-semibold mb-4">New Leave Request</h2>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target as HTMLFormElement);
+              const startDate = formData.get('start_date') as string;
+              const endDate = formData.get('end_date') as string;
+              const daysDiff = Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 3600 * 24)) + 1;
+              
+              try {
+                await createLeaveRequest({
+                  employee_id: formData.get('employee_id') as string,
+                  leave_type: formData.get('leave_type') as string,
+                  start_date: startDate,
+                  end_date: endDate,
+                  days_requested: daysDiff,
+                  reason: formData.get('reason') as string
+                });
+                setShowLeaveForm(false);
+                toast({ title: "Success", description: "Leave request submitted successfully!" });
+              } catch (error) {
+                toast({ title: "Error", description: "Failed to submit leave request" });
+              }
+            }} className="space-y-4">
+              <div>
+                <Label htmlFor="employee_id">Employee</Label>
+                <Select name="employee_id" required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select employee" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employees.map((emp) => (
+                      <SelectItem key={emp.id} value={emp.id}>{emp.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="leave_type">Leave Type</Label>
+                <Select name="leave_type" required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select leave type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="annual">Annual Leave</SelectItem>
+                    <SelectItem value="sick">Sick Leave</SelectItem>
+                    <SelectItem value="maternity">Maternity Leave</SelectItem>
+                    <SelectItem value="personal">Personal Leave</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="start_date">Start Date</Label>
+                <Input name="start_date" type="date" required />
+              </div>
+              <div>
+                <Label htmlFor="end_date">End Date</Label>
+                <Input name="end_date" type="date" required />
+              </div>
+              <div>
+                <Label htmlFor="reason">Reason</Label>
+                <Textarea name="reason" rows={3} />
+              </div>
+              <div className="flex gap-3 justify-end">
+                <Button type="button" variant="outline" onClick={() => setShowLeaveForm(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Submit Request</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Performance Review Form Modal */}
+      {showPerformanceForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background p-6 rounded-lg max-w-md w-full mx-4">
+            <h2 className="text-xl font-semibent mb-4">Add Performance Review</h2>
+            <p className="text-muted-foreground mb-4">Performance review functionality coming soon!</p>
+            <Button onClick={() => setShowPerformanceForm(false)}>Close</Button>
+          </div>
+        </div>
+      )}
+
+      {/* Training Course Form Modal */}
+      {showTrainingForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background p-6 rounded-lg max-w-md w-full mx-4">
+            <h2 className="text-xl font-semibold mb-4">Add Training Course</h2>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target as HTMLFormElement);
+              try {
+                await createTrainingCourse({
+                  course_title: formData.get('course_name') as string,
+                  course_description: formData.get('description') as string,
+                  course_type: 'online',
+                  max_participants: Number(formData.get('max_participants')),
+                  course_materials: {}
+                });
+                setShowTrainingForm(false);
+                toast({ title: "Success", description: "Training course added successfully!" });
+              } catch (error) {
+                toast({ title: "Error", description: "Failed to add training course" });
+              }
+            }} className="space-y-4">
+              <div>
+                <Label htmlFor="course_name">Course Name</Label>
+                <Input name="course_name" required />
+              </div>
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <Select name="category" required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="technical">Technical</SelectItem>
+                    <SelectItem value="leadership">Leadership</SelectItem>
+                    <SelectItem value="safety">Safety</SelectItem>
+                    <SelectItem value="compliance">Compliance</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="duration">Duration</Label>
+                <Input name="duration" placeholder="e.g., 2 hours, 1 day" required />
+              </div>
+              <div>
+                <Label htmlFor="max_participants">Max Participants</Label>
+                <Input name="max_participants" type="number" required />
+              </div>
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea name="description" rows={3} />
+              </div>
+              <div className="flex gap-3 justify-end">
+                <Button type="button" variant="outline" onClick={() => setShowTrainingForm(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Add Course</Button>
+              </div>
+            </form>
           </div>
         </div>
       )}
