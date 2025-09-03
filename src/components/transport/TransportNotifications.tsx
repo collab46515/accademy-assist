@@ -12,10 +12,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useTransportData } from "@/hooks/useTransportData";
 import { supabase } from "@/integrations/supabase/client";
+import { useRBAC } from "@/hooks/useRBAC";
 
 export function TransportNotifications() {
   const { toast } = useToast();
   const { routes, drivers } = useTransportData();
+  const { currentSchool } = useRBAC();
   const [open, setOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<any>(null);
@@ -149,6 +151,17 @@ export function TransportNotifications() {
       return;
     }
 
+    if (!currentSchool?.id) {
+      toast({
+        title: "Error",
+        description: "No school selected. Please contact administrator.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    console.log('Sending notification...', { currentSchool: currentSchool.id, user: currentUser?.id });
+
     try {
       // Calculate recipient count based on selection
       let recipientCount = 0;
@@ -173,7 +186,7 @@ export function TransportNotifications() {
       const { data, error } = await supabase
         .from('transport_notifications')
         .insert({
-          school_id: 'c8b1e1e0-7b8a-4c9d-9e2f-3a4b5c6d7e8f', // Demo school ID
+          school_id: currentSchool.id,
           type: formData.type,
           recipients: formData.recipients,
           title: formData.title,
@@ -181,14 +194,19 @@ export function TransportNotifications() {
           send_sms: formData.sendSms,
           send_email: formData.sendEmail,
           send_push: formData.sendPush,
-          sent_by: currentUser?.id || 'c8b1e1e0-7b8a-4c9d-9e2f-3a4b5c6d7e8f',
+          sent_by: currentUser?.id,
           recipient_count: recipientCount,
           status: 'sent'
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
+
+      console.log('Notification saved successfully:', data);
       
       toast({
         title: "Success",
