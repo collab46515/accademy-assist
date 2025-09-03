@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   User, 
   Calendar,
@@ -24,7 +25,8 @@ import {
   Briefcase,
   Building,
   Download,
-  Eye
+  Eye,
+  Loader2
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useStudentData } from '@/hooks/useStudentData';
@@ -35,17 +37,24 @@ export function ParentPortal() {
   const { user } = useAuth();
   const { students } = useStudentData();
   const [activeTab, setActiveTab] = useState('parent');
+  const [loading, setLoading] = useState(true);
   
   // Get parent's children from database using student_parents relationship
-  const [parentChildren, setParentChildren] = React.useState([]);
-  const [isStaffMember, setIsStaffMember] = React.useState(false);
-  const [parentData, setParentData] = React.useState(null);
+  const [parentChildren, setParentChildren] = useState([]);
+  const [isStaffMember, setIsStaffMember] = useState(false);
+  const [parentData, setParentData] = useState(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchParentData = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
       try {
+        setLoading(true);
+        console.log('Fetching parent data for user:', user.id);
+        
         // Get children this parent is linked to
         const { data: studentParents, error } = await supabase
           .from('student_parents')
@@ -54,6 +63,8 @@ export function ParentPortal() {
             relationship
           `)
           .eq('parent_id', user.id);
+
+        console.log('Student parents data:', studentParents, error);
 
         if (studentParents && !error) {
           // Get student details separately
@@ -126,20 +137,40 @@ export function ParentPortal() {
         }
       } catch (error) {
         console.error('Error fetching parent data:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchParentData();
   }, [user]);
 
-  const children = parentChildren.length > 0 ? parentChildren : [
-    { 
-      name: 'Loading...', 
-      class: '', 
-      attendance: 0,
-      recentGrades: []
-    }
-  ];
+  // Add loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading parent portal...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <Alert className="max-w-md">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            Please sign in to access the parent portal.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  const children = parentChildren.length > 0 ? parentChildren : [];
 
   const upcomingEvents = [
     { date: '2024-01-20', event: 'Parent-Teacher Conference', time: '2:00 PM', type: 'meeting' },
@@ -215,62 +246,83 @@ export function ParentPortal() {
   const ParentContent = () => (
     <div className="space-y-6">
       {/* Child Overview */}
-      {children.map((child, index) => (
-        <Card key={index} className="border-2 border-primary/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center text-white font-bold">
-                {child.name.split(' ').map(n => n[0]).join('')}
-              </div>
-              <div>
-                <h2 className="text-xl">{child.name}</h2>
-                <p className="text-sm text-muted-foreground">{child.class}</p>
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Attendance */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Attendance</span>
-                  <span className="text-sm font-bold">{child.attendance}%</span>
+      {children.length > 0 ? (
+        children.map((child, index) => (
+          <Card key={index} className="border-2 border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center text-white font-bold">
+                  {child.name.split(' ').map(n => n[0]).join('')}
                 </div>
-                <Progress value={child.attendance} className="h-2" />
-                <p className="text-xs text-muted-foreground">Excellent attendance this term</p>
-              </div>
-
-              {/* Recent Grades */}
-              <div className="space-y-2">
-                <span className="text-sm font-medium">Recent Grades</span>
-                <div className="space-y-1">
-                  {child.recentGrades.slice(0, 3).map((grade, idx) => (
-                    <div key={idx} className="flex items-center justify-between">
-                      <span className="text-xs">{grade.subject}</span>
-                      <Badge className={getGradeColor(grade.grade)}>{grade.grade}</Badge>
-                    </div>
-                  ))}
+                <div>
+                  <h2 className="text-xl">{child.name}</h2>
+                  <p className="text-sm text-muted-foreground">{child.class}</p>
                 </div>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="space-y-2">
-                <span className="text-sm font-medium">Quick Actions</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Attendance */}
                 <div className="space-y-2">
-                  <Button variant="outline" size="sm" className="w-full">
-                    <FileText className="h-4 w-4 mr-2" />
-                    View Report Card
-                  </Button>
-                  <Button variant="outline" size="sm" className="w-full">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Book Meeting
-                  </Button>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Attendance</span>
+                    <span className="text-sm font-bold">{child.attendance}%</span>
+                  </div>
+                  <Progress value={child.attendance} className="h-2" />
+                  <p className="text-xs text-muted-foreground">Excellent attendance this term</p>
+                </div>
+
+                {/* Recent Grades */}
+                <div className="space-y-2">
+                  <span className="text-sm font-medium">Recent Grades</span>
+                  <div className="space-y-1">
+                    {child.recentGrades.slice(0, 3).map((grade, idx) => (
+                      <div key={idx} className="flex items-center justify-between">
+                        <span className="text-xs">{grade.subject}</span>
+                        <Badge className={getGradeColor(grade.grade)}>{grade.grade}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="space-y-2">
+                  <span className="text-sm font-medium">Quick Actions</span>
+                  <div className="space-y-2">
+                    <Button variant="outline" size="sm" className="w-full">
+                      <FileText className="h-4 w-4 mr-2" />
+                      View Report Card
+                    </Button>
+                    <Button variant="outline" size="sm" className="w-full">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Book Meeting
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </CardContent>
+          </Card>
+        ))
+      ) : (
+        <Card className="border-2 border-dashed border-muted">
+          <CardContent className="p-8 text-center">
+            <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium mb-2">No Children Found</h3>
+            <p className="text-muted-foreground mb-4">
+              We couldn't find any children linked to your account. This might be because:
+            </p>
+            <ul className="text-sm text-muted-foreground text-left max-w-md mx-auto space-y-1">
+              <li>• Your parent profile is still being set up</li>
+              <li>• Children haven't been linked to your account yet</li>
+              <li>• There may be a delay in the system updates</li>
+            </ul>
+            <Button variant="outline" className="mt-4">
+              <Phone className="h-4 w-4 mr-2" />
+              Contact School Office
+            </Button>
           </CardContent>
         </Card>
-      ))}
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Upcoming Events */}

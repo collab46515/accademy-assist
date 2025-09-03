@@ -96,17 +96,17 @@ export function PortalRouter() {
   }
 
   // Check if user is admin (super admin or school admin)
-  // Temporary fix: explicitly check roles instead of using RBAC functions
-  const hasAdminRole = userRoles.some(role => 
+  const hasAdminRole = userRoles?.some(role => 
     role.role === 'super_admin' || role.role === 'school_admin'
-  );
+  ) || false;
   const isAdmin = hasAdminRole;
   
-  console.log('🔍 Admin Check:', {
+  console.log('🔍 Portal Router Debug:', {
     userEmail: user?.email,
-    userRoles: userRoles.map(r => r.role),
+    userRoles: userRoles?.map(r => r.role) || [],
     hasAdminRole,
-    isAdmin
+    isAdmin,
+    userRolesLength: userRoles?.length || 0
   });
 
   // If user is admin, show all portals with tabs
@@ -205,6 +205,8 @@ export function PortalRouter() {
 
   // For non-admin users, determine their specific portal
   const getUserType = () => {
+    if (!userRoles || userRoles.length === 0) return null;
+    
     // Check for HOD role
     const hasHODRole = userRoles.some(role => 
       role.role === 'hod'
@@ -213,7 +215,7 @@ export function PortalRouter() {
     
     // Check for teacher role
     const hasTeacherRole = userRoles.some(role => 
-      ['teacher'].includes(role.role)
+      role.role === 'teacher'
     );
     if (hasTeacherRole) return 'teacher';
     
@@ -233,6 +235,12 @@ export function PortalRouter() {
   };
 
   const userType = getUserType();
+  
+  console.log('🎯 User Type Detection:', {
+    userType,
+    userRoles: userRoles?.map(r => r.role) || [],
+    loading
+  });
 
   // If no specific role is found, show role selection or access denied
   if (!userType) {
@@ -302,26 +310,48 @@ export function PortalRouter() {
     );
   }
 
+  console.log('🎯 Portal Debug:', {
+    user: user?.email,
+    userType,
+    userRoles: userRoles?.map(r => r.role) || [],
+    loading,
+    isAdmin
+  });
+
   // Render the appropriate portal for non-admin users
-  switch (userType) {
-    case 'hod':
-      return <HODPortal />;
-    case 'teacher':
-      return <TeacherPortal />;
-    case 'parent':
-      return <ParentPortal />;
-    case 'student':
-      return <StudentPortal />;
-    default:
-      return (
-        <div className="min-h-screen flex items-center justify-center">
-          <Alert>
-            <Shield className="h-4 w-4" />
-            <AlertDescription>
-              Access denied. Contact your administrator for portal access.
-            </AlertDescription>
-          </Alert>
-        </div>
-      );
+  try {
+    switch (userType) {
+      case 'hod':
+        return <HODPortal />;
+      case 'teacher':
+        return <TeacherPortal />;
+      case 'parent':
+        return <ParentPortal />;
+      case 'student':
+        return <StudentPortal />;
+      default:
+        return (
+          <div className="min-h-screen flex items-center justify-center">
+            <Alert>
+              <Shield className="h-4 w-4" />
+              <AlertDescription>
+                Access denied. Contact your administrator for portal access.
+              </AlertDescription>
+            </Alert>
+          </div>
+        );
+    }
+  } catch (error) {
+    console.error('Portal rendering error:', error);
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Alert className="max-w-md">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            Something went wrong loading your portal. Please refresh the page or contact support.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
   }
 }
