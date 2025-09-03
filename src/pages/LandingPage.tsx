@@ -208,7 +208,6 @@ export default function LandingPage() {
                 alt="DOXA Logo" 
                 className="h-12 w-12 object-contain"
               />
-              <span className="ml-3 text-xl font-bold text-foreground">DOXA</span>
             </div>
             
             {/* Desktop Navigation - Center */}
