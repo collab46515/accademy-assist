@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,11 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useTransportData } from "@/hooks/useTransportData";
+import { supabase } from "@/integrations/supabase/client";
 
 export function TransportNotifications() {
   const { toast } = useToast();
   const { routes, drivers } = useTransportData();
   const [open, setOpen] = useState(false);
+  const [recentNotifications, setRecentNotifications] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     type: "",
     recipients: "",
@@ -25,7 +27,29 @@ export function TransportNotifications() {
     sendEmail: true,
     sendPush: false
   });
-  const recentNotifications = [
+
+  // Load notifications from database
+  useEffect(() => {
+    const loadNotifications = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('transport_notifications')
+          .select('*')
+          .order('sent_at', { ascending: false })
+          .limit(10);
+
+        if (error) throw error;
+        
+        setRecentNotifications(data || []);
+      } catch (error) {
+        console.error('Error loading notifications:', error);
+      }
+    };
+
+    loadNotifications();
+  }, []);
+
+  const staticNotifications = [
     {
       id: "1",
       type: "delay",
@@ -114,12 +138,49 @@ export function TransportNotifications() {
     }
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Calculate recipient count based on selection
+      let recipientCount = 0;
+      switch (formData.recipients) {
+        case 'all':
+          recipientCount = 100; // Approximate all users
+          break;
+        case 'route_specific':
+          recipientCount = routes.length > 0 ? 25 : 0; // Average route users
+          break;
+        case 'drivers':
+          recipientCount = drivers.length;
+          break;
+        case 'staff':
+          recipientCount = 15; // Approximate staff count
+          break;
+        default:
+          recipientCount = 1;
+      }
+
+      // Save notification to database
+      const { data, error } = await supabase
+        .from('transport_notifications')
+        .insert({
+          school_id: 'c8b1e1e0-7b8a-4c9d-9e2f-3a4b5c6d7e8f', // Demo school ID
+          type: formData.type,
+          recipients: formData.recipients,
+          title: formData.title,
+          message: formData.message,
+          send_sms: formData.sendSms,
+          send_email: formData.sendEmail,
+          send_push: formData.sendPush,
+          sent_by: 'c8b1e1e0-7b8a-4c9d-9e2f-3a4b5c6d7e8f', // Placeholder user ID
+          recipient_count: recipientCount,
+          status: 'sent'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
       
       toast({
         title: "Success",
-        description: `Notification sent successfully to ${formData.recipients === 'all' ? 'all users' : formData.recipients}`
+        description: `Notification sent successfully to ${recipientCount} ${formData.recipients === 'all' ? 'users' : formData.recipients}`
       });
 
       // Reset form and close dialog
@@ -133,7 +194,11 @@ export function TransportNotifications() {
         sendPush: false
       });
       setOpen(false);
+      
+      // Refresh the page to show the new notification
+      window.location.reload();
     } catch (error) {
+      console.error('Error sending notification:', error);
       toast({
         title: "Error",
         description: "Failed to send notification. Please try again.",
@@ -291,8 +356,8 @@ export function TransportNotifications() {
           <CardDescription>History of sent transport communications</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {recentNotifications.map((notification) => (
-            <div key={notification.id} className="border rounded-lg p-4 space-y-3">
+          {(recentNotifications.length > 0 ? recentNotifications : staticNotifications).map((notification, index) => (
+            <div key={notification.id || `static-${index}`} className="border rounded-lg p-4 space-y-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
                   {getTypeIcon(notification.type)}
@@ -306,8 +371,8 @@ export function TransportNotifications() {
               
               <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <div className="flex items-center gap-4">
-                  <span>Sent: {notification.timestamp}</span>
-                  <span>Recipients: {notification.recipients}</span>
+                  <span>Sent: {notification.sent_at ? new Date(notification.sent_at).toLocaleString() : notification.timestamp}</span>
+                  <span>Recipients: {notification.recipient_count || notification.recipients}</span>
                   <Badge variant="outline" className="text-xs">
                     {notification.status}
                   </Badge>

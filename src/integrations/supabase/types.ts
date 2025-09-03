@@ -7335,6 +7335,60 @@ export type Database = {
           },
         ]
       }
+      transport_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          recipient_count: number | null
+          recipients: string
+          school_id: string
+          send_email: boolean | null
+          send_push: boolean | null
+          send_sms: boolean | null
+          sent_at: string
+          sent_by: string
+          status: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          recipient_count?: number | null
+          recipients: string
+          school_id: string
+          send_email?: boolean | null
+          send_push?: boolean | null
+          send_sms?: boolean | null
+          sent_at?: string
+          sent_by: string
+          status?: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          recipient_count?: number | null
+          recipients?: string
+          school_id?: string
+          send_email?: boolean | null
+          send_push?: boolean | null
+          send_sms?: boolean | null
+          sent_at?: string
+          sent_by?: string
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       transport_routes: {
         Row: {
           created_at: string
