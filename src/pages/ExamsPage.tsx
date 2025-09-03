@@ -25,9 +25,9 @@ export default function ExamsPage() {
 
   // Filter exams based on search term
   const filteredExams = exams.filter(exam =>
-    exam.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    exam.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    exam.exam_board.toLowerCase().includes(searchTerm.toLowerCase())
+    exam.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    exam.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    exam.exam_board?.toLowerCase().includes(searchTerm.toLowerCase())
   );
   
   console.log('Filtered exams:', filteredExams);
@@ -236,9 +236,9 @@ export default function ExamsPage() {
                     {filteredExams.map((exam) => (
                       <TableRow key={exam.id}>
                         <TableCell className="font-medium">{exam.title}</TableCell>
-                        <TableCell>{exam.exam_board}</TableCell>
+                        <TableCell>{exam.exam_board || '-'}</TableCell>
                         <TableCell>{exam.subject}</TableCell>
-                        <TableCell>{getLevelBadge(exam.grade_level)}</TableCell>
+                        <TableCell>{exam.grade_level ? getLevelBadge(exam.grade_level) : '-'}</TableCell>
                         <TableCell>{format(new Date(exam.exam_date), "MMM dd, yyyy")}</TableCell>
                         <TableCell>{exam.duration_minutes} min</TableCell>
                         <TableCell>{exam.total_marks}</TableCell>
