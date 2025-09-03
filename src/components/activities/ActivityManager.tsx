@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Users, MapPin, Clock } from 'lucide-react';
 import { toast } from 'sonner';
@@ -187,6 +187,9 @@ export function ActivityManager() {
                 <DialogTitle>
                   {editingActivity ? 'Edit Activity' : 'Add New Activity'}
                 </DialogTitle>
+                <DialogDescription>
+                  {editingActivity ? 'Update the activity details below.' : 'Create a new extracurricular activity for students.'}
+                </DialogDescription>
               </DialogHeader>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
