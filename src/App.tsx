@@ -181,6 +181,7 @@ const App = () => (
                             </ProtectedRoute>
                           } />
                            <Route path="/integrations" element={<IntegrationsPage />} />
+                           <Route path="/technical-docs" element={<TechnicalDocsPage />} />
                            <Route path="/portals/*" element={<PortalsPage />} />
                            <Route path="*" element={<NotFound />} />
                         </Routes>
