@@ -84,18 +84,7 @@ export default function StudentsPage() {
             <Button 
               variant="outline"
               onClick={() => {
-                toast({
-                  title: "Bulk Import Started",
-                  description: "Student bulk import functionality is being prepared. This will allow CSV/Excel uploads.",
-                });
-              }}
-            >
-              Bulk Import
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={() => {
-                const csvData = students.map(student => ({
+                const csvData = filteredStudents.map(student => ({
                   id: student.student_number,
                   first_name: student.profiles?.first_name || '',
                   last_name: student.profiles?.last_name || '',
@@ -104,6 +93,15 @@ export default function StudentsPage() {
                   form_class: student.form_class || '',
                   status: student.is_enrolled ? 'Active' : 'Inactive'
                 }));
+                
+                if (csvData.length === 0) {
+                  toast({
+                    title: "No Data to Export",
+                    description: "No students match the current filters.",
+                    variant: "destructive",
+                  });
+                  return;
+                }
                 
                 const csvContent = [
                   Object.keys(csvData[0]).join(','),
@@ -114,12 +112,13 @@ export default function StudentsPage() {
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `students-export-${new Date().toISOString().split('T')[0]}.csv`;
+                const filterInfo = selectedYearGroup !== 'all' ? `-${selectedYearGroup}` : '';
+                a.download = `students-export${filterInfo}-${new Date().toISOString().split('T')[0]}.csv`;
                 a.click();
                 
                 toast({
                   title: "Export Complete",
-                  description: `Exported ${students.length} student records to CSV file.`,
+                  description: `Exported ${filteredStudents.length} student records to CSV file.`,
                 });
               }}
             >
