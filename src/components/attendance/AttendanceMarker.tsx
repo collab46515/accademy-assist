@@ -70,7 +70,7 @@ export function AttendanceMarker() {
     setAttendanceState(prev => ({
       ...prev,
       [studentId]: {
-        ...prev[studentId],
+        ...(prev[studentId] ?? { status: undefined as any, reason: '', notes: '' }),
         [field]: value,
       },
     }));
@@ -82,7 +82,7 @@ export function AttendanceMarker() {
     
     filteredStudents.forEach(student => {
       newState[student.id] = {
-        ...newState[student.id],
+        ...(newState[student.id] ?? { reason: '', notes: '' }),
         status,
       };
     });
