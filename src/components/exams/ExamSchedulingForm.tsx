@@ -1,350 +1,406 @@
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CalendarIcon, Clock, Users, FileText } from 'lucide-react';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
-import type { Exam } from '@/hooks/useExamData';
-import { toast } from 'sonner';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Card, CardContent } from '@/components/ui/card';
+import { CalendarIcon, Clock, FileText, Users } from 'lucide-react';
+import { useRBAC } from '@/hooks/useRBAC';
+import { CreateExamData } from '@/hooks/useExamData';
+
+const examSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  subject: z.string().min(1, 'Subject is required'),
+  exam_board: z.string().optional(),
+  exam_type: z.string().min(1, 'Exam type is required'),
+  grade_level: z.string().optional(),
+  academic_term: z.string().optional(),
+  academic_year: z.string().min(1, 'Academic year is required'),
+  exam_date: z.string().min(1, 'Exam date is required'),
+  start_time: z.string().min(1, 'Start time is required'),
+  end_time: z.string().min(1, 'End time is required'),
+  duration_minutes: z.number().min(1, 'Duration must be at least 1 minute'),
+  total_marks: z.number().min(1, 'Total marks must be at least 1'),
+  instructions: z.string().optional(),
+});
+
+type ExamFormData = z.infer<typeof examSchema>;
 
 interface ExamSchedulingFormProps {
+  createExam: (data: CreateExamData) => Promise<any>;
   onClose: () => void;
-  createExam: (examData: Omit<Exam, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'school_id'>) => Promise<Exam>;
 }
 
-export function ExamSchedulingForm({ onClose, createExam }: ExamSchedulingFormProps) {
-  
-  const [formData, setFormData] = useState({
-    title: '',
-    subject: '',
-    exam_board: '',
-    exam_type: 'internal' as 'internal' | 'external' | 'mock' | 'assessment',
-    grade_level: '',
-    academic_term: '',
-    academic_year: '2024-2025',
-    total_marks: 100,
-    duration_minutes: 60,
-    exam_date: undefined as Date | undefined,
-    start_time: '09:00',
-    end_time: '10:00',
-    instructions: '',
-    room: '',
-    invigilator: '',
-    max_candidates: 30
+export function ExamSchedulingForm({ createExam, onClose }: ExamSchedulingFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { currentSchool } = useRBAC();
+
+  const form = useForm<ExamFormData>({
+    resolver: zodResolver(examSchema),
+    defaultValues: {
+      title: '',
+      subject: '',
+      exam_board: '',
+      exam_type: 'internal',
+      grade_level: '',
+      academic_term: '',
+      academic_year: new Date().getFullYear().toString(),
+      exam_date: '',
+      start_time: '09:00',
+      end_time: '11:00',
+      duration_minutes: 120,
+      total_marks: 100,
+      instructions: '',
+    },
   });
 
-  const [saving, setSaving] = useState(false);
-
-  const subjects = [
-    'Mathematics', 'English Language', 'English Literature', 'Physics', 
-    'Chemistry', 'Biology', 'History', 'Geography', 'French', 'Spanish',
-    'Art & Design', 'Music', 'Physical Education', 'Computer Science'
-  ];
-
-  const examBoards = [
-    'Cambridge', 'Edexcel', 'AQA', 'OCR', 'WJEC', 'CIE', 'Internal'
-  ];
-
-  const gradeLevels = [
-    'Year 7', 'Year 8', 'Year 9', 'Year 10', 'Year 11', 'Year 12', 'Year 13'
-  ];
-
-  const academicTerms = [
-    'Term 1', 'Term 2', 'Term 3', 'Autumn Term', 'Spring Term', 'Summer Term'
-  ];
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Form submission started');
-    
-    if (!formData.title || !formData.subject || !formData.exam_date) {
-      console.log('Validation failed:', { title: formData.title, subject: formData.subject, exam_date: formData.exam_date });
-      toast.error('Please fill in all required fields');
-      return;
-    }
-
-    console.log('Validation passed, creating exam...');
-    setSaving(true);
+  const onSubmit = async (data: ExamFormData) => {
     try {
-      const examData = {
-        title: formData.title,
-        subject: formData.subject,
-        exam_board: formData.exam_board,
-        exam_type: formData.exam_type,
-        grade_level: formData.grade_level,
-        academic_term: formData.academic_term,
-        academic_year: formData.academic_year,
-        total_marks: formData.total_marks,
-        duration_minutes: formData.duration_minutes,
-        exam_date: format(formData.exam_date, 'yyyy-MM-dd'),
-        start_time: formData.start_time,
-        end_time: formData.end_time,
-        instructions: formData.instructions,
-        is_active: true
-      };
-      console.log('About to call createExam with:', examData);
-      
-      const result = await createExam(examData);
-      console.log('createExam returned:', result);
-      
-      // Close dialog immediately after successful creation
+      setIsSubmitting(true);
+      await createExam({
+        title: data.title,
+        subject: data.subject,
+        exam_board: data.exam_board,
+        exam_type: data.exam_type,
+        grade_level: data.grade_level,
+        academic_term: data.academic_term,
+        academic_year: data.academic_year,
+        exam_date: data.exam_date,
+        start_time: data.start_time,
+        end_time: data.end_time,
+        duration_minutes: data.duration_minutes,
+        total_marks: data.total_marks,
+        instructions: data.instructions,
+        school_id: currentSchool?.id
+      });
       onClose();
     } catch (error) {
-      console.error('Error scheduling exam:', error);
-      toast.error('Failed to schedule exam');
+      console.error('Error creating exam:', error);
     } finally {
-      setSaving(false);
+      setIsSubmitting(false);
     }
   };
 
-  const updateDuration = () => {
-    if (formData.start_time && formData.end_time) {
-      const start = new Date(`2024-01-01 ${formData.start_time}`);
-      const end = new Date(`2024-01-01 ${formData.end_time}`);
-      const diffMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
-      setFormData(prev => ({ ...prev, duration_minutes: Math.max(0, diffMinutes) }));
-    }
+  // Calculate duration when start/end times change
+  const calculateDuration = (startTime: string, endTime: string) => {
+    if (!startTime || !endTime) return 0;
+    
+    const start = new Date(`2000-01-01T${startTime}`);
+    const end = new Date(`2000-01-01T${endTime}`);
+    
+    if (end <= start) return 0;
+    
+    return Math.floor((end.getTime() - start.getTime()) / (1000 * 60));
   };
+
+  // Update duration when times change
+  React.useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'start_time' || name === 'end_time') {
+        const duration = calculateDuration(value.start_time || '', value.end_time || '');
+        if (duration > 0) {
+          form.setValue('duration_minutes', duration);
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Basic Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Basic Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="md:col-span-2">
-            <Label htmlFor="title">Exam Title *</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-              placeholder="e.g., Mathematics End of Term Assessment"
-              required
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Basic Information */}
+          <Card>
+            <CardContent className="p-4 space-y-4">
+              <div className="flex items-center gap-2 mb-3">
+                <FileText className="h-4 w-4" />
+                <h3 className="font-semibold">Basic Information</h3>
+              </div>
+              
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Exam Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Mathematics Mid-Term Exam" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="subject"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Subject</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Mathematics" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="exam_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Exam Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select exam type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="internal">Internal Assessment</SelectItem>
+                        <SelectItem value="external">External Exam</SelectItem>
+                        <SelectItem value="mock">Mock Exam</SelectItem>
+                        <SelectItem value="assessment">Continuous Assessment</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="exam_board"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Exam Board (Optional)</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select exam board" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="AQA">AQA</SelectItem>
+                        <SelectItem value="OCR">OCR</SelectItem>
+                        <SelectItem value="Edexcel">Edexcel</SelectItem>
+                        <SelectItem value="WJEC">WJEC</SelectItem>
+                        <SelectItem value="Internal">Internal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Academic Details */}
+          <Card>
+            <CardContent className="p-4 space-y-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Users className="h-4 w-4" />
+                <h3 className="font-semibold">Academic Details</h3>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="grade_level"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Grade Level</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select grade level" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Year 7">Year 7</SelectItem>
+                        <SelectItem value="Year 8">Year 8</SelectItem>
+                        <SelectItem value="Year 9">Year 9</SelectItem>
+                        <SelectItem value="Year 10">Year 10</SelectItem>
+                        <SelectItem value="Year 11">Year 11</SelectItem>
+                        <SelectItem value="Year 12">Year 12</SelectItem>
+                        <SelectItem value="Year 13">Year 13</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="academic_term"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Academic Term</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select term" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Autumn Term">Autumn Term</SelectItem>
+                        <SelectItem value="Spring Term">Spring Term</SelectItem>
+                        <SelectItem value="Summer Term">Summer Term</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="academic_year"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Academic Year</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., 2024" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="total_marks"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Total Marks</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="100" 
+                        {...field}
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Schedule Information */}
+        <Card>
+          <CardContent className="p-4 space-y-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Clock className="h-4 w-4" />
+              <h3 className="font-semibold">Schedule Information</h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <FormField
+                control={form.control}
+                name="exam_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Exam Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="start_time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start Time</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="end_time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>End Time</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="duration_minutes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Duration (minutes)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        {...field}
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        readOnly
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Instructions */}
+        <Card>
+          <CardContent className="p-4">
+            <FormField
+              control={form.control}
+              name="instructions"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Exam Instructions (Optional)</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Enter any special instructions for students..."
+                      className="min-h-[100px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          
-          <div>
-            <Label htmlFor="subject">Subject *</Label>
-            <Select value={formData.subject} onValueChange={(value) => setFormData(prev => ({ ...prev, subject: value }))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select subject" />
-              </SelectTrigger>
-              <SelectContent>
-                {subjects.map(subject => (
-                  <SelectItem key={subject} value={subject}>{subject}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          </CardContent>
+        </Card>
 
-          <div>
-            <Label htmlFor="exam_board">Exam Board</Label>
-            <Select value={formData.exam_board} onValueChange={(value) => setFormData(prev => ({ ...prev, exam_board: value }))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select exam board" />
-              </SelectTrigger>
-              <SelectContent>
-                {examBoards.map(board => (
-                  <SelectItem key={board} value={board}>{board}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="exam_type">Exam Type</Label>
-            <Select value={formData.exam_type} onValueChange={(value: any) => setFormData(prev => ({ ...prev, exam_type: value }))}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="internal">Internal</SelectItem>
-                <SelectItem value="external">External</SelectItem>
-                <SelectItem value="mock">Mock</SelectItem>
-                <SelectItem value="assessment">Assessment</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="grade_level">Grade Level</Label>
-            <Select value={formData.grade_level} onValueChange={(value) => setFormData(prev => ({ ...prev, grade_level: value }))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select grade level" />
-              </SelectTrigger>
-              <SelectContent>
-                {gradeLevels.map(level => (
-                  <SelectItem key={level} value={level}>{level}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="academic_term">Academic Term</Label>
-            <Select value={formData.academic_term} onValueChange={(value) => setFormData(prev => ({ ...prev, academic_term: value }))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select term" />
-              </SelectTrigger>
-              <SelectContent>
-                {academicTerms.map(term => (
-                  <SelectItem key={term} value={term}>{term}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="academic_year">Academic Year</Label>
-            <Input
-              id="academic_year"
-              value={formData.academic_year}
-              onChange={(e) => setFormData(prev => ({ ...prev, academic_year: e.target.value }))}
-              placeholder="2024-2025"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Scheduling Details */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Scheduling Details
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label>Exam Date *</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !formData.exam_date && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {formData.exam_date ? format(formData.exam_date, "PPP") : "Pick a date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={formData.exam_date}
-                  onSelect={(date) => setFormData(prev => ({ ...prev, exam_date: date }))}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          <div>
-            <Label htmlFor="duration_minutes">Duration (minutes)</Label>
-            <Input
-              id="duration_minutes"
-              type="number"
-              value={formData.duration_minutes}
-              onChange={(e) => setFormData(prev => ({ ...prev, duration_minutes: parseInt(e.target.value) || 0 }))}
-              min="1"
-              max="480"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="start_time">Start Time</Label>
-            <Input
-              id="start_time"
-              type="time"
-              value={formData.start_time}
-              onChange={(e) => {
-                setFormData(prev => ({ ...prev, start_time: e.target.value }));
-                setTimeout(updateDuration, 100);
-              }}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="end_time">End Time</Label>
-            <Input
-              id="end_time"
-              type="time"
-              value={formData.end_time}
-              onChange={(e) => {
-                setFormData(prev => ({ ...prev, end_time: e.target.value }));
-                setTimeout(updateDuration, 100);
-              }}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="total_marks">Total Marks</Label>
-            <Input
-              id="total_marks"
-              type="number"
-              value={formData.total_marks}
-              onChange={(e) => setFormData(prev => ({ ...prev, total_marks: parseInt(e.target.value) || 0 }))}
-              min="1"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="max_candidates">Max Candidates</Label>
-            <Input
-              id="max_candidates"
-              type="number"
-              value={formData.max_candidates}
-              onChange={(e) => setFormData(prev => ({ ...prev, max_candidates: parseInt(e.target.value) || 0 }))}
-              min="1"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Additional Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Additional Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="instructions">Exam Instructions</Label>
-            <Textarea
-              id="instructions"
-              value={formData.instructions}
-              onChange={(e) => setFormData(prev => ({ ...prev, instructions: e.target.value }))}
-              placeholder="Enter specific instructions for candidates..."
-              rows={4}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Action Buttons */}
-      <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={saving}>
-          {saving ? 'Scheduling...' : 'Schedule Exam'}
-        </Button>
-      </div>
-    </form>
+        {/* Form Actions */}
+        <div className="flex justify-end gap-4">
+          <Button type="button" variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Scheduling...' : 'Schedule Exam'}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }
