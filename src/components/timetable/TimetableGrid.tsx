@@ -88,18 +88,17 @@ export function TimetableGrid({
             ))}
 
             {/* Timetable grid */}
-            {classPeriods.map((period) => (
-              <React.Fragment key={period.id}>
-                {/* Time column */}
-                <div className="p-2 text-xs text-center border-r bg-muted/50 flex flex-col justify-center">
+            {classPeriods.map((period) => {
+              const periodElements = [
+                // Time column
+                <div key={`time-${period.id}`} className="p-2 text-xs text-center border-r bg-muted/50 flex flex-col justify-center">
                   <div className="font-medium">{period.period_name}</div>
                   <div className="text-muted-foreground">
                     {period.start_time} - {period.end_time}
                   </div>
-                </div>
-
-                {/* Day columns */}
-                {days.map((day) => (
+                </div>,
+                // Day columns
+                ...days.map((day) => (
                   <div key={`${day}-${period.id}`} className="p-1">
                     <TimetableCard
                       entry={timetableGrid[day]?.[period.id] || null}
@@ -114,9 +113,10 @@ export function TimetableGrid({
                       }}
                     />
                   </div>
-                ))}
-              </React.Fragment>
-            ))}
+                ))
+              ];
+              return periodElements;
+            })}
           </div>
         </div>
 
