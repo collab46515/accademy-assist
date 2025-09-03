@@ -15,6 +15,7 @@ import { CalendarIcon, Send, Clock, Users, FileText, Tag } from 'lucide-react';
 import { format } from 'date-fns';
 import { useCommunicationData, Communication, CommunicationTemplate } from '@/hooks/useCommunicationData';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
 interface CommunicationFormProps {
@@ -141,6 +142,16 @@ const CommunicationForm: React.FC<CommunicationFormProps> = ({
 
   const handleSubmit = async (action: 'save_draft' | 'submit_for_approval' | 'send_now') => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "You must be logged in to create communications.",
+          variant: "destructive"
+        });
+        return;
+      }
+
       const communicationData = {
         ...formData,
         audience_details: audienceDetails,
@@ -148,18 +159,32 @@ const CommunicationForm: React.FC<CommunicationFormProps> = ({
                action === 'submit_for_approval' ? 'pending_approval' : 'sent',
         sent_at: action === 'send_now' ? new Date().toISOString() : undefined,
         scheduled_for: formData.is_scheduled && formData.scheduled_for ? 
-                      formData.scheduled_for.toISOString() : undefined
+                      formData.scheduled_for.toISOString() : undefined,
+        created_by: user.id
       };
 
       if (editingCommunication) {
         await updateCommunication(editingCommunication.id, communicationData);
+        toast({
+          title: "Communication Updated",
+          description: "Communication has been updated successfully."
+        });
       } else {
         await createCommunication(communicationData);
+        toast({
+          title: "Communication Created",
+          description: `Communication has been ${action === 'save_draft' ? 'saved as draft' : 'submitted for approval'}.`
+        });
       }
 
       onClose();
     } catch (error) {
       console.error('Error saving communication:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save communication. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
