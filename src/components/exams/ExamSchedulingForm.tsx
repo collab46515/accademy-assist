@@ -10,15 +10,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CalendarIcon, Clock, Users, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { useExamData } from '@/hooks/useExamData';
+import type { Exam } from '@/hooks/useExamData';
 import { toast } from 'sonner';
 
 interface ExamSchedulingFormProps {
   onClose: () => void;
+  createExam: (examData: Omit<Exam, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'school_id'>) => Promise<Exam>;
 }
 
-export function ExamSchedulingForm({ onClose }: ExamSchedulingFormProps) {
-  const { createExam } = useExamData();
+export function ExamSchedulingForm({ onClose, createExam }: ExamSchedulingFormProps) {
   
   const [formData, setFormData] = useState({
     title: '',

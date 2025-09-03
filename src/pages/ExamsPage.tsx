@@ -17,7 +17,7 @@ export default function ExamsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("schedule");
-  const { exams, examResults, loading, refreshTrigger } = useExamData();
+  const { exams, examResults, loading, refreshTrigger, createExam } = useExamData();
 
   console.log('ExamsPage render - refreshTrigger:', refreshTrigger);
   console.log('ExamsPage render - exams:', exams);
@@ -96,7 +96,7 @@ export default function ExamsPage() {
                   Create a new examination session for your students.
                 </DialogDescription>
               </DialogHeader>
-              <ExamSchedulingForm onClose={() => setShowScheduleDialog(false)} />
+              <ExamSchedulingForm createExam={createExam} onClose={() => setShowScheduleDialog(false)} />
             </DialogContent>
           </Dialog>
         }

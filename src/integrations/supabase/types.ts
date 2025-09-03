@@ -3254,6 +3254,221 @@ export type Database = {
         }
         Relationships: []
       }
+      exam_candidates: {
+        Row: {
+          access_arrangements: string[] | null
+          exam_session_id: string | null
+          id: string
+          registered_at: string
+          seat_number: string | null
+          status: string
+          student_id: string | null
+        }
+        Insert: {
+          access_arrangements?: string[] | null
+          exam_session_id?: string | null
+          id?: string
+          registered_at?: string
+          seat_number?: string | null
+          status?: string
+          student_id?: string | null
+        }
+        Update: {
+          access_arrangements?: string[] | null
+          exam_session_id?: string | null
+          id?: string
+          registered_at?: string
+          seat_number?: string | null
+          status?: string
+          student_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_candidates_exam_session_id_fkey"
+            columns: ["exam_session_id"]
+            isOneToOne: false
+            referencedRelation: "exam_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_candidates_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_results: {
+        Row: {
+          exam_id: string | null
+          feedback: string | null
+          grade: string | null
+          id: string
+          marked_at: string
+          marked_by: string | null
+          marks_obtained: number
+          percentage: number
+          rank: number | null
+          student_id: string | null
+        }
+        Insert: {
+          exam_id?: string | null
+          feedback?: string | null
+          grade?: string | null
+          id?: string
+          marked_at?: string
+          marked_by?: string | null
+          marks_obtained: number
+          percentage: number
+          rank?: number | null
+          student_id?: string | null
+        }
+        Update: {
+          exam_id?: string | null
+          feedback?: string | null
+          grade?: string | null
+          id?: string
+          marked_at?: string
+          marked_by?: string | null
+          marks_obtained?: number
+          percentage?: number
+          rank?: number | null
+          student_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_results_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_results_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_sessions: {
+        Row: {
+          created_at: string
+          end_time: string
+          exam_id: string | null
+          id: string
+          invigilator_id: string | null
+          max_candidates: number
+          room: string | null
+          session_date: string
+          session_name: string
+          start_time: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          exam_id?: string | null
+          id?: string
+          invigilator_id?: string | null
+          max_candidates?: number
+          room?: string | null
+          session_date: string
+          session_name: string
+          start_time: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          exam_id?: string | null
+          id?: string
+          invigilator_id?: string | null
+          max_candidates?: number
+          room?: string | null
+          session_date?: string
+          session_name?: string
+          start_time?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_sessions_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exams: {
+        Row: {
+          academic_term: string | null
+          academic_year: string
+          created_at: string
+          created_by: string | null
+          duration_minutes: number
+          end_time: string
+          exam_board: string | null
+          exam_date: string
+          exam_type: string
+          grade_level: string | null
+          id: string
+          instructions: string | null
+          is_active: boolean
+          school_id: string | null
+          start_time: string
+          subject: string
+          title: string
+          total_marks: number
+          updated_at: string
+        }
+        Insert: {
+          academic_term?: string | null
+          academic_year: string
+          created_at?: string
+          created_by?: string | null
+          duration_minutes?: number
+          end_time: string
+          exam_board?: string | null
+          exam_date: string
+          exam_type: string
+          grade_level?: string | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          school_id?: string | null
+          start_time: string
+          subject: string
+          title: string
+          total_marks?: number
+          updated_at?: string
+        }
+        Update: {
+          academic_term?: string | null
+          academic_year?: string
+          created_at?: string
+          created_by?: string | null
+          duration_minutes?: number
+          end_time?: string
+          exam_board?: string | null
+          exam_date?: string
+          exam_type?: string
+          grade_level?: string | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          school_id?: string | null
+          start_time?: string
+          subject?: string
+          title?: string
+          total_marks?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       expense_items: {
         Row: {
           amount: number
