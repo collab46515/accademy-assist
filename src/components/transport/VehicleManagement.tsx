@@ -36,7 +36,7 @@ export function VehicleManagement() {
     make: '',
     model: '',
     year: new Date().getFullYear(),
-    capacity: 0,
+    capacity: 20,
     fuel_type: 'diesel' as 'petrol' | 'diesel' | 'electric' | 'hybrid',
     mileage: 0,
     status: 'active' as 'active' | 'maintenance' | 'inactive' | 'retired'
@@ -70,13 +70,16 @@ export function VehicleManagement() {
         make: '',
         model: '',
         year: new Date().getFullYear(),
-        capacity: 0,
+        capacity: 20,
         fuel_type: 'diesel',
         mileage: 0,
         status: 'active'
       });
       setEditingVehicle(null);
       setShowDialog(false);
+      toast({ title: 'Vehicle added', description: 'The vehicle was saved successfully.' });
+    } else {
+      toast({ title: 'Unable to add vehicle', description: 'Please ensure a school is selected and try again.', variant: 'destructive' });
     }
   };
 
