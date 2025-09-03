@@ -196,11 +196,11 @@ export function useExamData() {
       };
       
       setExams(prev => [...prev, newExam]);
-      toast.success('Exam created successfully');
+      toast.success('Exam scheduled successfully!');
       return newExam;
     } catch (error) {
       console.error('Error creating exam:', error);
-      toast.error('Failed to create exam');
+      toast.error('Failed to schedule exam');
       throw error;
     }
   };

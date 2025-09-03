@@ -86,8 +86,10 @@ export function ExamSchedulingForm({ onClose }: ExamSchedulingFormProps) {
         is_active: true
       });
 
-      toast.success('Exam scheduled successfully!');
-      onClose();
+      // Small delay to ensure state update is processed
+      setTimeout(() => {
+        onClose();
+      }, 100);
     } catch (error) {
       console.error('Error scheduling exam:', error);
       toast.error('Failed to schedule exam');
