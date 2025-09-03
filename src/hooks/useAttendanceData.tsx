@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useRBAC } from './useRBAC';
-import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from './useAuth';
+import { useToast } from '@/hooks/use-toast';
 
 export interface AttendanceRecord {
   id: string;
@@ -76,8 +77,8 @@ interface AttendanceFilters {
 }
 
 export function useAttendanceData() {
-  const { currentSchool, userRoles } = useRBAC();
-  const user = userRoles.find(role => role.user_id);
+  const { currentSchool } = useRBAC();
+  const { user } = useAuth();
   const { toast } = useToast();
   
   const [loading, setLoading] = useState(false);
@@ -170,7 +171,7 @@ export function useAttendanceData() {
       });
       return false;
     }
-  }, [currentSchool?.id, user?.user_id, toast]);
+  }, [currentSchool?.id, user?.id, toast]);
 
   const markBulkAttendance = useCallback(async (attendanceList: Array<{
     student_id: string;
@@ -218,7 +219,7 @@ export function useAttendanceData() {
       });
       return false;
     }
-  }, [currentSchool?.id, user?.user_id, toast]);
+  }, [currentSchool?.id, user?.id, toast]);
 
   const fetchAttendanceSettings = useCallback(async () => {
     if (!currentSchool?.id) return;
@@ -277,7 +278,7 @@ export function useAttendanceData() {
     } catch (error: any) {
       console.error('Error fetching class schedules:', error);
     }
-  }, [currentSchool?.id, user?.user_id]);
+  }, [currentSchool?.id, user?.id]);
 
   const getCurrentClass = useCallback(() => {
     const now = new Date();

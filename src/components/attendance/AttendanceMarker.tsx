@@ -266,7 +266,7 @@ export function AttendanceMarker() {
 
           <div className="space-y-4">
             {filteredStudents.map((student) => {
-              const attendance = attendanceState[student.id] || {};
+              const attendance = attendanceState[student.id] || { status: undefined, reason: '', notes: '' };
               const hasExistingRecord = attendanceRecords.some(r => 
                 r.student_id === student.id && r.date === selectedDate
               );
@@ -292,8 +292,8 @@ export function AttendanceMarker() {
                     </div>
                     
                     <div className="flex gap-2">
-                       <Button
-                        variant={attendance?.status === 'present' ? 'default' : 'outline'}
+                      <Button
+                        variant={attendance.status === 'present' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => updateAttendance(student.id, 'status', 'present')}
                         className="gap-1"
@@ -302,7 +302,7 @@ export function AttendanceMarker() {
                         Present
                       </Button>
                       <Button
-                        variant={attendance?.status === 'absent' ? 'destructive' : 'outline'}
+                        variant={attendance.status === 'absent' ? 'destructive' : 'outline'}
                         size="sm"
                         onClick={() => updateAttendance(student.id, 'status', 'absent')}
                         className="gap-1"
@@ -311,7 +311,7 @@ export function AttendanceMarker() {
                         Absent
                       </Button>
                       <Button
-                        variant={attendance?.status === 'late' ? 'default' : 'outline'}
+                        variant={attendance.status === 'late' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => updateAttendance(student.id, 'status', 'late')}
                         className="gap-1"
@@ -322,16 +322,16 @@ export function AttendanceMarker() {
                     </div>
                   </div>
 
-                  {(attendance?.status === 'absent' || attendance?.status === 'late') && (
+                  {(attendance.status === 'absent' || attendance.status === 'late') && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <Input
                         placeholder="Reason (optional)"
-                        value={attendance?.reason || ''}
+                        value={attendance.reason || ''}
                         onChange={(e) => updateAttendance(student.id, 'reason', e.target.value)}
                       />
                       <Textarea
                         placeholder="Notes (optional)"
-                        value={attendance?.notes || ''}
+                        value={attendance.notes || ''}
                         onChange={(e) => updateAttendance(student.id, 'notes', e.target.value)}
                         className="min-h-[38px]"
                       />
