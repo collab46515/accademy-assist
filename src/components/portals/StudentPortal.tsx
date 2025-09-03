@@ -57,7 +57,7 @@ export function StudentPortal() {
           profiles!inner(first_name, last_name, email)
         `)
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       setStudentData(data);
