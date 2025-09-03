@@ -10,6 +10,7 @@ import { ClassroomsManager } from '@/components/timetable/management/ClassroomsM
 import { TimetableEntriesManager } from '@/components/timetable/management/TimetableEntriesManager';
 import { AITimetableGenerator } from '@/components/ai-timetable/AITimetableGenerator';
 import { TeacherTimetableView } from '@/components/timetable/TeacherTimetableView';
+import { TimetableDebugger } from '@/components/timetable/TimetableDebugger';
 import { ensureSampleDataExists } from '@/components/timetable/SampleTimetableData';
 import { useRBAC } from '@/hooks/useRBAC';
 import { 
@@ -162,7 +163,7 @@ export default function TimetablePage() {
 
       {canViewTimetables && (
         <Tabs defaultValue="student-view" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
+          <TabsList className="grid w-full max-w-lg grid-cols-4">
             <TabsTrigger value="student-view" className="flex items-center gap-2">
               <GraduationCap className="h-4 w-4" />
               Student View
@@ -170,6 +171,10 @@ export default function TimetablePage() {
             <TabsTrigger value="teacher-view" className="flex items-center gap-2" disabled={!hasRole('teacher', currentSchool?.id) && !canManageTimetables}>
               <Users className="h-4 w-4" />
               Teacher View
+            </TabsTrigger>
+            <TabsTrigger value="debug" className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4" />
+              Debug
             </TabsTrigger>
             <TabsTrigger value="manage" className="flex items-center gap-2" disabled={!canManageTimetables}>
               <Settings className="h-4 w-4" />
@@ -202,6 +207,11 @@ export default function TimetablePage() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Debug Tab */}
+          <TabsContent value="debug" className="mt-6">
+            <TimetableDebugger />
           </TabsContent>
 
           {/* Admin Management View */}

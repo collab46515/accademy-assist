@@ -126,6 +126,7 @@ export function StudentTimetableView() {
     console.log('StudentTimetableView: selectedClass changed to:', selectedClass);
     if (selectedClass) {
       console.log('StudentTimetableView: calling fetchTimetableForClass with:', selectedClass);
+      console.log('StudentTimetableView: current available classes:', availableClasses);
       fetchTimetableForClass(selectedClass);
     }
   }, [selectedClass, fetchTimetableForClass]);
