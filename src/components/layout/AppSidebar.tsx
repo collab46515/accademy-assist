@@ -171,6 +171,7 @@ const erpModules = [
       { title: "System Settings", url: "/admin-management", icon: Settings },
       { title: "Master Data", url: "/master-data", icon: Database },
       { title: "Data Integrity Test", url: "/data-integrity-test", icon: CheckCircle },
+      { title: "Technical Docs", url: "/technical-docs", icon: FileText },
       { title: "Integrations", url: "/integrations", icon: Globe },
       { title: "Portals", url: "/portals", icon: ExternalLink },
     ]
@@ -217,6 +218,7 @@ function getCurrentModule(pathname: string) {
       pathname.startsWith('/user-management') || 
       pathname.startsWith('/master-data') || 
       pathname.startsWith('/data-integrity-test') ||
+      pathname.startsWith('/technical-docs') ||
       pathname.startsWith('/integrations') || 
       pathname.startsWith('/portals')) return 'Administration';
   
