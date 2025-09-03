@@ -11,16 +11,22 @@ import { useRBAC } from "@/hooks/useRBAC";
 import { useStudentData } from "@/hooks/useStudentData";
 import { useAcademicData } from "@/hooks/useAcademicData";
 import { StudentQuickView } from "@/components/shared/StudentQuickView";
+import { AddStudentForm } from "@/components/students/AddStudentForm";
 import { useToast } from "@/hooks/use-toast";
 
 export default function StudentsPage() {
-  const { students, loading } = useStudentData();
+  const { students, loading, fetchStudents } = useStudentData();
   const { yearGroups } = useAcademicData();
   const [filteredStudents, setFilteredStudents] = useState(students);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedYearGroup, setSelectedYearGroup] = useState("all");
   const { hasRole, currentSchool } = useRBAC();
   const { toast } = useToast();
+
+  const handleStudentAdded = () => {
+    // Refresh the students data when a new student is added
+    fetchStudents();
+  };
 
   useEffect(() => {
     let filtered = students.filter(student =>
@@ -119,15 +125,15 @@ export default function StudentsPage() {
             >
               Export Students
             </Button>
-            <Button onClick={() => {
-              toast({
-                title: "Add Student",
-                description: "Student creation form is being prepared. This will open the enrollment process.",
-              });
-            }}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Student
-            </Button>
+            <AddStudentForm 
+              onStudentAdded={handleStudentAdded}
+              trigger={
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Student
+                </Button>
+              }
+            />
           </div>
         )}
       </div>
