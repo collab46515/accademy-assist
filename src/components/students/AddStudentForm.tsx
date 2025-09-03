@@ -25,6 +25,9 @@ export function AddStudentForm({ onStudentAdded, trigger }: AddStudentFormProps)
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Debug logging
+  console.log('AddStudentForm - Dialog open state:', open);
+
   const [formData, setFormData] = useState({
     // Personal Information
     first_name: '',
@@ -190,15 +193,27 @@ export function AddStudentForm({ onStudentAdded, trigger }: AddStudentFormProps)
     }
   };
 
+  const handleDialogChange = (newOpen: boolean) => {
+    console.log('Dialog state changing from', open, 'to', newOpen);
+    setOpen(newOpen);
+  };
+
+  const handleTriggerClick = () => {
+    console.log('Trigger button clicked, current open state:', open);
+    setOpen(true);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogTrigger asChild>
-        {trigger || (
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Student
-          </Button>
-        )}
+        <div onClick={handleTriggerClick}>
+          {trigger || (
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Student
+            </Button>
+          )}
+        </div>
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
