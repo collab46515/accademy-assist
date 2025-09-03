@@ -170,7 +170,35 @@ export function ParentPortal() {
     );
   }
 
-  const children = parentChildren.length > 0 ? parentChildren : [];
+  // Use demo data if no children found (for demonstration purposes)
+  const demoChildren = [
+    {
+      id: 'demo-child-1',
+      name: 'Emma Wilson',
+      class: 'Year 8A',
+      relationship: 'Parent',
+      attendance: 94,
+      recentGrades: [
+        { subject: 'Mathematics', grade: 'A-', date: '2024-01-15' },
+        { subject: 'English', grade: 'B+', date: '2024-01-12' },
+        { subject: 'Science', grade: 'A', date: '2024-01-10' }
+      ]
+    },
+    {
+      id: 'demo-child-2',
+      name: 'James Wilson',
+      class: 'Year 10B',
+      relationship: 'Parent',
+      attendance: 97,
+      recentGrades: [
+        { subject: 'Physics', grade: 'A', date: '2024-01-14' },
+        { subject: 'Chemistry', grade: 'A-', date: '2024-01-11' },
+        { subject: 'Biology', grade: 'B+', date: '2024-01-09' }
+      ]
+    }
+  ];
+
+  const children = parentChildren.length > 0 ? parentChildren : demoChildren;
 
   const upcomingEvents = [
     { date: '2024-01-20', event: 'Parent-Teacher Conference', time: '2:00 PM', type: 'meeting' },
