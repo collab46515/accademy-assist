@@ -57,15 +57,49 @@ export function TransportDashboard() {
           <MapPin className="h-4 w-4" />
           Track Vehicles
         </Button>
-        <Button variant="outline" onClick={() => navigate('/transport/notifications')}>Emergency Contact</Button>
-        <Button variant="outline" onClick={() => navigate('/transport/routes')}>Route Planning</Button>
-        <Button variant="outline" onClick={() => navigate('/transport/drivers')}>Driver Check-in</Button>
+        <Button variant="outline" onClick={() => navigate('/transport/notifications')}>
+          Emergency Contact
+        </Button>
+        <Button variant="outline" onClick={() => navigate('/transport/routes')}>
+          + Add Route
+        </Button>
+        <Button variant="outline" onClick={() => navigate('/transport/vehicles')}>
+          + Add Vehicle
+        </Button>
+        <Button variant="outline" onClick={() => navigate('/transport/drivers')}>
+          + Add Driver
+        </Button>
       </div>
 
-      {/* Stats Grid */}
+      {/* Stats Grid - Now Clickable */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {dashboardStats.map((stat) => (
-          <Card key={stat.title}>
+          <Card 
+            key={stat.title} 
+            className="cursor-pointer hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
+            onClick={() => {
+              switch(stat.title) {
+                case "Active Routes":
+                  navigate('/transport/routes');
+                  toast.success(`Viewing ${stat.value} active routes`);
+                  break;
+                case "Students Transported":
+                  navigate('/transport/assignments');
+                  toast.success(`Managing ${stat.value} student assignments`);
+                  break;
+                case "Active Vehicles":
+                  navigate('/transport/vehicles');
+                  toast.success(`Managing ${stat.value} active vehicles`);
+                  break;
+                case "Drivers on Duty":
+                  navigate('/transport/drivers');
+                  toast.success(`Managing ${stat.value} drivers on duty`);
+                  break;
+                default:
+                  break;
+              }
+            }}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
               <stat.icon className="h-4 w-4 text-muted-foreground" />
@@ -76,6 +110,7 @@ export function TransportDashboard() {
                 <TrendingUp className="h-3 w-3" />
                 {stat.change}
               </p>
+              <p className="text-xs text-primary mt-2 font-medium">Click to manage →</p>
             </CardContent>
           </Card>
         ))}
@@ -84,47 +119,107 @@ export function TransportDashboard() {
       <div className="grid gap-6 md:grid-cols-2">
         {/* Recent Activity */}
         <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Latest transport updates</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div>
+              <CardTitle>Recent Activity</CardTitle>
+              <CardDescription>Latest transport updates</CardDescription>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/transport/reports')}
+            >
+              View All
+            </Button>
           </CardHeader>
           <CardContent className="space-y-4">
-            {recentActivity.map((activity, index) => (
-              <div key={index} className="flex items-center justify-between border-b pb-2 last:border-0">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">{activity.action}</p>
-                  <p className="text-xs text-muted-foreground">{activity.details}</p>
+            {recentActivity.length > 0 ? (
+              recentActivity.map((activity, index) => (
+                <div 
+                  key={index} 
+                  className="flex items-center justify-between border-b pb-2 last:border-0 cursor-pointer hover:bg-muted/50 p-2 rounded transition-colors"
+                  onClick={() => {
+                    toast.info(`Viewing details for: ${activity.action}`);
+                    navigate('/transport/reports');
+                  }}
+                >
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">{activity.action}</p>
+                    <p className="text-xs text-muted-foreground">{activity.details}</p>
+                  </div>
+                  <Badge variant="outline" className="text-xs">{activity.time}</Badge>
                 </div>
-                <Badge variant="outline" className="text-xs">{activity.time}</Badge>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p className="text-sm">No recent activity</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2"
+                  onClick={() => navigate('/transport/routes')}
+                >
+                  Create your first route
+                </Button>
               </div>
-            ))}
+            )}
           </CardContent>
         </Card>
 
         {/* Live Route Status */}
         <Card>
-          <CardHeader>
-            <CardTitle>Live Route Status</CardTitle>
-            <CardDescription>Current status of active routes</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div>
+              <CardTitle>Live Route Status</CardTitle>
+              <CardDescription>Current status of active routes</CardDescription>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/transport/tracking')}
+            >
+              Track All
+            </Button>
           </CardHeader>
           <CardContent className="space-y-4">
-            {routeStatus.map((route, index) => (
-              <div key={index} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-sm font-medium">{route.route}</p>
-                    <p className="text-xs text-muted-foreground">{route.students} students • {route.driver}</p>
+            {routeStatus.length > 0 ? (
+              routeStatus.map((route, index) => (
+                <div 
+                  key={index} 
+                  className="space-y-2 cursor-pointer hover:bg-muted/50 p-2 rounded transition-colors"
+                  onClick={() => {
+                    toast.info(`Tracking route: ${route.route}`);
+                    navigate('/transport/tracking');
+                  }}
+                >
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-sm font-medium">{route.route}</p>
+                      <p className="text-xs text-muted-foreground">{route.students} students • {route.driver}</p>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant={route.status === "On Time" ? "default" : "destructive"}>
+                        {route.status}
+                      </Badge>
+                      <p className="text-xs text-muted-foreground mt-1">Next: {route.nextStop}</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <Badge variant={route.status === "On Time" ? "default" : "destructive"}>
-                      {route.status}
-                    </Badge>
-                    <p className="text-xs text-muted-foreground mt-1">Next: {route.nextStop}</p>
-                  </div>
+                  <Progress value={75} className="h-2" />
                 </div>
-                <Progress value={75} className="h-2" />
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p className="text-sm">No active routes</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2"
+                  onClick={() => navigate('/transport/routes')}
+                >
+                  Create a route
+                </Button>
               </div>
-            ))}
+            )}
           </CardContent>
         </Card>
       </div>
