@@ -56,11 +56,13 @@ export function AttendanceMarker() {
     const initialState: AttendanceState = {};
     
     existingRecords.forEach(record => {
-      initialState[record.student_id] = {
-        status: record.status,
-        reason: record.reason || '',
-        notes: record.notes || '',
-      };
+      if (!initialState[record.student_id]) {
+        initialState[record.student_id] = {
+          status: record.status,
+          reason: record.reason || '',
+          notes: record.notes || '',
+        };
+      }
     });
 
     setAttendanceState(initialState);
