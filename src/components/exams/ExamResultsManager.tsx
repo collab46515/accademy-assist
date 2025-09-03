@@ -49,7 +49,7 @@ export function ExamResultsManager() {
   const filteredResults = examResults.filter(result => {
     const matchesSearch = searchTerm === '' || 
       result.student_id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesExam = selectedExam === '' || result.exam_id === selectedExam;
+    const matchesExam = selectedExam === '' || selectedExam === 'all' || result.exam_id === selectedExam;
     return matchesSearch && matchesExam;
   });
 
@@ -343,14 +343,14 @@ export function ExamResultsManager() {
               <SelectTrigger className="w-[250px]">
                 <SelectValue placeholder="Filter by exam" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">All Exams</SelectItem>
-                {exams.map((exam) => (
-                  <SelectItem key={exam.id} value={exam.id}>
-                    {exam.title} - {exam.subject}
-                  </SelectItem>
-                ))}
-              </SelectContent>
+            <SelectContent>
+              <SelectItem value="all">All Exams</SelectItem>
+              {exams.map((exam) => (
+                <SelectItem key={exam.id} value={exam.id}>
+                  {exam.title} - {exam.subject}
+                </SelectItem>
+              ))}
+            </SelectContent>
             </Select>
             <Button variant="outline">
               <Download className="h-4 w-4 mr-2" />
