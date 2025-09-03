@@ -247,7 +247,17 @@ export function RoutesSchedules() {
               <CardContent className="flex items-center p-6">
                 <Clock className="h-8 w-8 text-orange-600 mr-3" />
                 <div>
-                  <p className="text-2xl font-bold">40 min</p>
+                  <p className="text-2xl font-bold">
+                    {routes.length > 0 ? 
+                      Math.round(routes.reduce((sum, route) => {
+                        const [startHour, startMin] = route.start_time.split(':').map(Number);
+                        const [endHour, endMin] = route.end_time.split(':').map(Number);
+                        const duration = (endHour * 60 + endMin) - (startHour * 60 + startMin);
+                        return sum + duration;
+                      }, 0) / routes.length) + ' min' : 
+                      '0 min'
+                    }
+                  </p>
                   <p className="text-sm text-muted-foreground">Avg Duration</p>
                 </div>
               </CardContent>
@@ -279,7 +289,15 @@ export function RoutesSchedules() {
                       <TableCell>
                         <div className="space-y-1">
                           <p className="font-medium">{route.route_name}</p>
-                          <p className="text-sm text-muted-foreground">{route.route_stops?.length || 0} stops • {route.estimated_duration || 30} min</p>
+                          <p className="text-sm text-muted-foreground">
+                            {route.route_stops?.length || 0} stops • {
+                              (() => {
+                                const [startHour, startMin] = route.start_time.split(':').map(Number);
+                                const [endHour, endMin] = route.end_time.split(':').map(Number);
+                                return (endHour * 60 + endMin) - (startHour * 60 + startMin);
+                              })()
+                            } min
+                          </p>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -318,7 +336,13 @@ export function RoutesSchedules() {
                       <TableCell>
                         <div className="space-y-1">
                           <p className="text-sm font-medium">{route.start_time} - {route.end_time}</p>
-                          <p className="text-xs text-muted-foreground">{route.estimated_duration || 30} min</p>
+                          <p className="text-xs text-muted-foreground">
+                            {(() => {
+                              const [startHour, startMin] = route.start_time.split(':').map(Number);
+                              const [endHour, endMin] = route.end_time.split(':').map(Number);
+                              return (endHour * 60 + endMin) - (startHour * 60 + startMin);
+                            })()} min
+                          </p>
                         </div>
                       </TableCell>
                       <TableCell>
