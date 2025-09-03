@@ -241,7 +241,7 @@ export default function LandingPage() {
       </div>
 
       {/* Content Sections */}
-      <div>
+      <div className="pt-16">
         {activeSection === "home" && (
           <>
             <HeroSection onGetStarted={() => setIsSignInModalOpen(true)} />

@@ -9,6 +9,8 @@ import { SubjectsManager } from '@/components/timetable/management/SubjectsManag
 import { ClassroomsManager } from '@/components/timetable/management/ClassroomsManager';
 import { TimetableEntriesManager } from '@/components/timetable/management/TimetableEntriesManager';
 import { AITimetableGenerator } from '@/components/ai-timetable/AITimetableGenerator';
+import { TeacherTimetableView } from '@/components/timetable/TeacherTimetableView';
+import { ensureSampleDataExists } from '@/components/timetable/SampleTimetableData';
 import { useRBAC } from '@/hooks/useRBAC';
 import { 
   Calendar, 
