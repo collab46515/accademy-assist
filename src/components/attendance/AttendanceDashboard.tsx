@@ -72,7 +72,9 @@ export function AttendanceDashboard() {
   // Listen for attendance changes in localStorage (simple solution)
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
+      console.log('Storage event received:', e.key);
       if (e.key === 'attendance_updated') {
+        console.log('Refreshing dashboard data due to storage event');
         refreshData();
         localStorage.removeItem('attendance_updated'); // Clean up
       }
@@ -82,6 +84,7 @@ export function AttendanceDashboard() {
     
     // Also listen for custom events within the same window
     const handleCustomEvent = () => {
+      console.log('Custom attendance_updated event received, refreshing dashboard');
       refreshData();
     };
     
@@ -91,6 +94,16 @@ export function AttendanceDashboard() {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('attendance_updated', handleCustomEvent);
     };
+  }, [timeRange]);
+
+  // Force refresh every 30 seconds as backup
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log('Auto-refreshing dashboard data');
+      refreshData();
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, [timeRange]);
 
   // Calculate statistics

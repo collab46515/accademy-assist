@@ -194,8 +194,10 @@ export function AttendanceMarker() {
         console.log('Attendance successfully saved - keeping UI state');
         
         // Notify dashboard to refresh data
+        console.log('Dispatching attendance_updated event');
         window.dispatchEvent(new CustomEvent('attendance_updated'));
         localStorage.setItem('attendance_updated', Date.now().toString());
+        console.log('Set localStorage attendance_updated');
       }
     } catch (error) {
       console.error('Error saving attendance:', error);
