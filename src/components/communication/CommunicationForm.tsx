@@ -152,8 +152,11 @@ const CommunicationForm: React.FC<CommunicationFormProps> = ({
         return;
       }
 
+      // Remove is_scheduled from the data sent to database (it's only for UI state)
+      const { is_scheduled, ...dataToSend } = formData;
+      
       const communicationData = {
-        ...formData,
+        ...dataToSend,
         audience_details: audienceDetails,
         status: action === 'save_draft' ? 'draft' : 
                action === 'submit_for_approval' ? 'pending_approval' : 'sent',
