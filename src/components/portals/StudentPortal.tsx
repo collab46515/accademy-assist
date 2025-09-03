@@ -157,7 +157,7 @@ export function StudentPortal() {
         <Alert className="max-w-md">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Your student profile is being set up. Please contact the admissions office for assistance.
+            No student profile found for your account. You may not be registered as a student, or your profile is still being set up. Please contact the admissions office for assistance.
           </AlertDescription>
         </Alert>
       </div>
