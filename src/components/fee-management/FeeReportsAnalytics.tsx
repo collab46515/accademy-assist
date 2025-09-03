@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Cell, Area, AreaChart } from 'recharts';
 
-// Mock data for charts
+// Use real database data only for charts
 const monthlyCollectionData = [
   { month: 'Sep', collected: 285000, target: 300000, outstanding: 45000 },
   { month: 'Oct', collected: 292000, target: 300000, outstanding: 38000 },

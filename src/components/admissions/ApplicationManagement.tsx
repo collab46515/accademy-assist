@@ -82,16 +82,8 @@ export function ApplicationManagement({ initialFilter = 'all' }: ApplicationMana
         }
       } catch (error) {
         console.error('Error fetching stats:', error);
-        // Use mock data as fallback
-        setStats({
-          total: 11,
-          pending: 2,
-          reviewing: 3,
-          assessed: 2,
-          approved: 2,
-          waitlisted: 1,
-          rejected: 1
-        });
+        // Use real database data only
+        console.log('No real enrollment applications found');
       }
     };
 

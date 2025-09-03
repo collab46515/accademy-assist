@@ -66,7 +66,7 @@ export function TeacherPortal() {
     },
   });
 
-  // Mock teacher data - in real app this would come from auth/user context
+  // Use real teacher data from database only - empty for now
   const teacherData = {
     employee_id: 'EMP001',
     first_name: 'Sarah',

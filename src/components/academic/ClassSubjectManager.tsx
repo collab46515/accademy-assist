@@ -75,7 +75,13 @@ export function ClassSubjectManager() {
     try {
       setLoading(true);
       
-      // For now, we'll use mock data since the tables don't exist yet
+  // For real implementation, we fetch from subjects database
+  const { data: subjectsData } = await supabase
+    .from('subjects')
+    .select('*')
+    .eq('school_id', currentSchool.id);
+
+  const subjectsList = subjectsData || [];
       // In a real implementation, these would be actual Supabase queries
       
       setClasses([

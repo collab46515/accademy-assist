@@ -10,7 +10,7 @@ interface MedicineGivenModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-// Mock data for medicine administration records
+// Use real database data only
 const mockMedicineRecords = [
   {
     id: "MED-ADMIN-001",

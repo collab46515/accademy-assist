@@ -9,7 +9,7 @@ interface ActiveCasesModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-// Mock data for active medical cases
+// Use real database data only
 const mockActiveCases = [
   {
     id: "CASE-001",

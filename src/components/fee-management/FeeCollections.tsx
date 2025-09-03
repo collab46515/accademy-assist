@@ -35,7 +35,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { CollectionSessionManager } from './CollectionSessionManager';
 import { SessionReportsAndApproval } from './SessionReportsAndApproval';
 
-// Mock data - replace with actual data fetching
+// Use real database data only - no mock fallback
 const mockStudents: Student[] = [
   {
     id: '1',

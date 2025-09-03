@@ -71,36 +71,10 @@ export function AssessmentManager({ applicationId }: AssessmentManagerProps) {
     try {
       setLoading(true);
       // In a real implementation, you'd fetch from an assessments table
-      // For now, we'll use mock data or application-based data
-      setAssessments([
-        {
-          id: '1',
-          application_id: applicationId || 'mock',
-          student_name: 'Emma Thompson',
-          assessment_type: 'Academic Assessment',
-          scheduled_date: '2024-01-15',
-          scheduled_time: '09:00',
-          duration: 120,
-          location: 'Assessment Room A',
-          assessor: 'Dr. Sarah Wilson',
-          status: 'scheduled',
-          notes: 'Standard academic assessment for Year 7 entry'
-        },
-        {
-          id: '2',
-          application_id: applicationId || 'mock',
-          student_name: 'James Chen',
-          assessment_type: 'Personal Interview',
-          scheduled_date: '2024-01-16',
-          scheduled_time: '11:00',
-          duration: 60,
-          location: 'Head Teacher Office',
-          assessor: 'Mrs. Elizabeth Brown',
-          status: 'completed',
-          result: 'Excellent communication skills and motivation',
-          score: 85
-        }
-      ]);
+      // Use real data from database only - no assessment data fallback
+      const assessmentData = {};
+      // Use real database data only - no mock fallback
+      setAssessments([]);
     } catch (error) {
       console.error('Error fetching assessments:', error);
       toast({

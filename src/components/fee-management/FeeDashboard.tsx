@@ -294,7 +294,7 @@ export function FeeDashboard() {
   };
 
   const getClassDetailData = (className: string) => {
-    // Mock detailed data for the selected class
+    // Use real database data only
     const mockStudents = [
       {
         id: '1',

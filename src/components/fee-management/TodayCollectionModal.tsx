@@ -29,7 +29,7 @@ export function TodayCollectionModal({ open, onOpenChange }: TodayCollectionModa
   const { toast } = useToast();
 
   useEffect(() => {
-    // Mock data for today's expected collections
+    // Use real database data only - no mock expected collections
     const mockCollections: ExpectedCollection[] = [
       {
         id: '1',

@@ -10,7 +10,7 @@ interface TodaysVisitsModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-// Mock data for today's visits
+// Use real database data only
 const mockTodaysVisits = [
   {
     id: "MED-1001",

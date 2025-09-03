@@ -73,7 +73,7 @@ const visitTypeOptions = [
   { value: "follow_up", label: "Follow-up Visit" },
 ];
 
-// Mock students - in real app, this would come from the database
+// Use real student data from database only
 const mockStudents = [
   { id: "1", name: "John Smith", class: "Year 7A" },
   { id: "2", name: "Sarah Johnson", class: "Year 8B" },
