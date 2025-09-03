@@ -9,8 +9,11 @@ import { UserCheck, Plus, Phone, FileText, Calendar, Award } from "lucide-react"
 import { useTransportData } from "@/hooks/useTransportData";
 import { useState } from "react";
 
+import { useToast } from "@/hooks/use-toast";
+
 export function DriverManagement() {
   const { loading, drivers, stats, addDriver, updateDriver } = useTransportData();
+  const { toast } = useToast();
   const [showDialog, setShowDialog] = useState(false);
   const [editingDriver, setEditingDriver] = useState<any>(null);
   
@@ -64,6 +67,53 @@ export function DriverManagement() {
     }
   };
 
+  const handleRemindRenewal = async (driver: string, document: string, expiry: string) => {
+    try {
+      // Here you would typically send an actual reminder (email/SMS)
+      // For now, we'll simulate the action
+      console.log(`Sending reminder for ${document} renewal to ${driver}`);
+      
+      // Show success message
+      toast({
+        title: "Reminder Sent",
+        description: `Renewal reminder sent to ${driver} for ${document} expiring ${expiry}`,
+      });
+    } catch (error) {
+      console.error('Error sending reminder:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send reminder",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleRenewDocument = async (driver: string, document: string) => {
+    try {
+      // Here you would typically open a renewal form or process
+      // For now, we'll simulate the action
+      console.log(`Starting renewal process for ${document} for ${driver}`);
+      
+      // Show success message
+      toast({
+        title: "Renewal Process Started",
+        description: `Renewal process initiated for ${driver}'s ${document}`,
+      });
+      
+      // In a real implementation, this might:
+      // 1. Open a form dialog for new expiry date
+      // 2. Update the driver's record
+      // 3. Generate renewal documents
+      // 4. Send notifications
+    } catch (error) {
+      console.error('Error starting renewal:', error);
+      toast({
+        title: "Error", 
+        description: "Failed to start renewal process",
+        variant: "destructive"
+      });
+    }
+  };
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
@@ -326,8 +376,19 @@ export function DriverManagement() {
                     {renewal.daysLeft} days left
                   </Badge>
                   <div className="flex gap-2 mt-2">
-                    <Button variant="outline" size="sm">Remind</Button>
-                    <Button size="sm">Renew</Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleRemindRenewal(renewal.driver, renewal.document, renewal.expiry)}
+                    >
+                      Remind
+                    </Button>
+                    <Button 
+                      size="sm"
+                      onClick={() => handleRenewDocument(renewal.driver, renewal.document)}
+                    >
+                      Renew
+                    </Button>
                   </div>
                 </div>
               </div>
