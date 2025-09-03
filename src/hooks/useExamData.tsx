@@ -172,6 +172,7 @@ export function useExamData() {
   const [examCandidates, setExamCandidates] = useState<ExamCandidate[]>([]);
   const [examResults, setExamResults] = useState<ExamResult[]>(mockExamResults);
   const [loading, setLoading] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const createExam = async (examData: Omit<Exam, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'school_id'>) => {
     try {
@@ -188,14 +189,15 @@ export function useExamData() {
       
       console.log('New exam created:', newExam);
       
-      // Force state update with functional update
+      // Force immediate state update
       setExams(prevExams => {
-        console.log('Previous exams count:', prevExams.length);
         const updatedExams = [...prevExams, newExam];
-        console.log('Updated exams count:', updatedExams.length);
-        console.log('New exam added with ID:', newExam.id);
+        console.log('Setting exams to:', updatedExams.length, 'exams');
         return updatedExams;
       });
+      
+      // Force re-render by updating trigger
+      setRefreshTrigger(prev => prev + 1);
       
       toast.success('Exam scheduled successfully!');
       return newExam;
@@ -292,6 +294,7 @@ export function useExamData() {
     examCandidates,
     examResults,
     loading,
+    refreshTrigger,
     createExam,
     updateExam,
     createExamSession,

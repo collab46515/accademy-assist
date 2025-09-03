@@ -17,8 +17,9 @@ export default function ExamsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("schedule");
-  const { exams, examResults, loading } = useExamData();
+  const { exams, examResults, loading, refreshTrigger } = useExamData();
 
+  console.log('ExamsPage render - refreshTrigger:', refreshTrigger);
   console.log('ExamsPage render - exams:', exams);
   console.log('ExamsPage render - exams.length:', exams.length);
 
