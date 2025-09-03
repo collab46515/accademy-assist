@@ -188,11 +188,13 @@ export function useExamData() {
       
       console.log('New exam created:', newExam);
       
-      setExams(prev => {
-        console.log('Previous exams:', prev);
-        const updated = [...prev, newExam];
-        console.log('Updated exams:', updated);
-        return updated;
+      // Force state update with functional update
+      setExams(prevExams => {
+        console.log('Previous exams count:', prevExams.length);
+        const updatedExams = [...prevExams, newExam];
+        console.log('Updated exams count:', updatedExams.length);
+        console.log('New exam added with ID:', newExam.id);
+        return updatedExams;
       });
       
       toast.success('Exam scheduled successfully!');

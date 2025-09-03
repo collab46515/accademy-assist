@@ -92,11 +92,11 @@ export function ExamSchedulingForm({ onClose }: ExamSchedulingFormProps) {
       
       const result = await createExam(examData);
       console.log('createExam returned:', result);
-      // Small delay to ensure state update is processed
-      setTimeout(() => {
-        console.log('Closing dialog after successful creation');
-        onClose();
-      }, 100);
+      
+      // Wait a bit longer for state update to propagate before closing
+      await new Promise(resolve => setTimeout(resolve, 200));
+      console.log('Closing dialog after successful creation');
+      onClose();
     } catch (error) {
       console.error('Error scheduling exam:', error);
       toast.error('Failed to schedule exam');
