@@ -12,6 +12,7 @@ import { useExamData } from "@/hooks/useExamData";
 import { format } from "date-fns";
 import { ExamBoardManager } from "@/components/exams/ExamBoardManager";
 import { ExamSchedulingForm } from "@/components/exams/ExamSchedulingForm";
+import { ExamResultsManager } from "@/components/exams/ExamResultsManager";
 
 export default function ExamsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -253,44 +254,7 @@ export default function ExamsPage() {
         </TabsContent>
 
         <TabsContent value="results" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Examination Results</CardTitle>
-              <CardDescription>View and manage student exam results</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Student</TableHead>
-                      <TableHead>Exam</TableHead>
-                      <TableHead>Marks</TableHead>
-                      <TableHead>Percentage</TableHead>
-                      <TableHead>Grade</TableHead>
-                      <TableHead>Rank</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {examResults.map((result) => (
-                      <TableRow key={result.id}>
-                        <TableCell className="font-medium">{result.student_id}</TableCell>
-                        <TableCell>{result.exam_id}</TableCell>
-                        <TableCell>{result.marks_obtained}</TableCell>
-                        <TableCell>{result.percentage}%</TableCell>
-                        <TableCell>
-                          <Badge variant={result.grade === "A*" || result.grade === "A" ? "default" : "secondary"}>
-                            {result.grade}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{result.rank || '-'}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
+          <ExamResultsManager />
         </TabsContent>
 
         <TabsContent value="boards" className="space-y-4">
