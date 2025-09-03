@@ -19,6 +19,8 @@ export default function ExamsPage() {
   const [activeTab, setActiveTab] = useState("schedule");
   const { exams, examResults, loading } = useExamData();
 
+  console.log('ExamsPage render - exams:', exams);
+
   // Filter exams based on search term
   const filteredExams = exams.filter(exam =>
     exam.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

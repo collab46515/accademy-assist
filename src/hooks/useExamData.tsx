@@ -175,6 +175,8 @@ export function useExamData() {
 
   const createExam = async (examData: Omit<Exam, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'school_id'>) => {
     try {
+      console.log('Creating exam with data:', examData);
+      
       const newExam: Exam = {
         ...examData,
         id: Date.now().toString(),
@@ -184,7 +186,15 @@ export function useExamData() {
         updated_at: new Date().toISOString()
       };
       
-      setExams(prev => [...prev, newExam]);
+      console.log('New exam created:', newExam);
+      
+      setExams(prev => {
+        console.log('Previous exams:', prev);
+        const updated = [...prev, newExam];
+        console.log('Updated exams:', updated);
+        return updated;
+      });
+      
       toast.success('Exam scheduled successfully!');
       return newExam;
     } catch (error) {
