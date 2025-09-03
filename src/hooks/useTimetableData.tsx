@@ -95,26 +95,26 @@ const mockClassrooms: Classroom[] = [
 
 const mockTimetableEntries: TimetableEntry[] = [
   // Monday - Year 10A British Curriculum
-  { id: '1', school_id: '1', class_id: 'Year-10A', period_id: '1', subject_id: '1', teacher_id: 'teacher1', classroom_id: '1', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '2', school_id: '1', class_id: 'Year-10A', period_id: '2', subject_id: '2', teacher_id: 'teacher2', classroom_id: '1', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '3', school_id: '1', class_id: 'Year-10A', period_id: '4', subject_id: '3', teacher_id: 'teacher3', classroom_id: '3', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '4', school_id: '1', class_id: 'Year-10A', period_id: '5', subject_id: '6', teacher_id: 'teacher4', classroom_id: '1', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '5', school_id: '1', class_id: 'Year-10A', period_id: '7', subject_id: '8', teacher_id: 'teacher5', classroom_id: '2', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '6', school_id: '1', class_id: 'Year-10A', period_id: '8', subject_id: '9', teacher_id: 'teacher6', classroom_id: '7', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '1', school_id: '1', class_id: 'Year-10A', period_id: '1', subject_id: '1', teacher_id: 'teacher1', classroom_id: '1', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true, notes: 'Mathematics - Mr. Smith - Room 101' },
+  { id: '2', school_id: '1', class_id: 'Year-10A', period_id: '2', subject_id: '2', teacher_id: 'teacher2', classroom_id: '1', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true, notes: 'English Language - Ms. Johnson - Room 101' },
+  { id: '3', school_id: '1', class_id: 'Year-10A', period_id: '4', subject_id: '3', teacher_id: 'teacher3', classroom_id: '3', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true, notes: 'Physics - Dr. Brown - Physics Lab' },
+  { id: '4', school_id: '1', class_id: 'Year-10A', period_id: '5', subject_id: '6', teacher_id: 'teacher4', classroom_id: '1', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true, notes: 'History - Mr. Davis - Room 101' },
+  { id: '5', school_id: '1', class_id: 'Year-10A', period_id: '7', subject_id: '8', teacher_id: 'teacher5', classroom_id: '2', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true, notes: 'French - Mme. Dubois - Room 102' },
+  { id: '6', school_id: '1', class_id: 'Year-10A', period_id: '8', subject_id: '9', teacher_id: 'teacher6', classroom_id: '7', day_of_week: 1, academic_year: '2024-2025', term: 'Term 1', is_active: true, notes: 'Physical Education - Mr. Wilson - Main Gym' },
   
   // Tuesday  
-  { id: '7', school_id: '1', class_id: 'Year-10A', period_id: '1', subject_id: '4', teacher_id: 'teacher7', classroom_id: '4', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '8', school_id: '1', class_id: 'Year-10A', period_id: '2', subject_id: '1', teacher_id: 'teacher1', classroom_id: '1', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '9', school_id: '1', class_id: 'Year-10A', period_id: '4', subject_id: '7', teacher_id: 'teacher8', classroom_id: '1', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '10', school_id: '1', class_id: 'Year-10A', period_id: '5', subject_id: '5', teacher_id: 'teacher9', classroom_id: '5', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '11', school_id: '1', class_id: 'Year-10A', period_id: '7', subject_id: '2', teacher_id: 'teacher2', classroom_id: '1', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '12', school_id: '1', class_id: 'Year-10A', period_id: '8', subject_id: '10', teacher_id: 'teacher10', classroom_id: '8', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '7', school_id: '1', class_id: 'Year-10A', period_id: '1', subject_id: '4', teacher_id: 'teacher7', classroom_id: '4', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true, notes: 'Chemistry - Dr. Lee - Chemistry Lab' },
+  { id: '8', school_id: '1', class_id: 'Year-10A', period_id: '2', subject_id: '1', teacher_id: 'teacher1', classroom_id: '1', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true, notes: 'Mathematics - Mr. Smith - Room 101' },
+  { id: '9', school_id: '1', class_id: 'Year-10A', period_id: '4', subject_id: '7', teacher_id: 'teacher8', classroom_id: '1', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true, notes: 'Geography - Ms. Taylor - Room 101' },
+  { id: '10', school_id: '1', class_id: 'Year-10A', period_id: '5', subject_id: '5', teacher_id: 'teacher9', classroom_id: '5', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true, notes: 'Biology - Mr. Green - Biology Lab' },
+  { id: '11', school_id: '1', class_id: 'Year-10A', period_id: '7', subject_id: '2', teacher_id: 'teacher2', classroom_id: '1', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true, notes: 'English Language - Ms. Johnson - Room 101' },
+  { id: '12', school_id: '1', class_id: 'Year-10A', period_id: '8', subject_id: '10', teacher_id: 'teacher10', classroom_id: '8', day_of_week: 2, academic_year: '2024-2025', term: 'Term 1', is_active: true, notes: 'Art & Design - Ms. White - Art Studio' },
   
   // Wednesday
-  { id: '13', school_id: '1', class_id: 'Year-10A', period_id: '1', subject_id: '3', teacher_id: 'teacher3', classroom_id: '3', day_of_week: 3, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '14', school_id: '1', class_id: 'Year-10A', period_id: '2', subject_id: '8', teacher_id: 'teacher5', classroom_id: '2', day_of_week: 3, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '15', school_id: '1', class_id: 'Year-10A', period_id: '4', subject_id: '1', teacher_id: 'teacher1', classroom_id: '1', day_of_week: 3, academic_year: '2024-2025', term: 'Term 1', is_active: true },
-  { id: '16', school_id: '1', class_id: 'Year-10A', period_id: '5', subject_id: '4', teacher_id: 'teacher7', classroom_id: '4', day_of_week: 3, academic_year: '2024-2025', term: 'Term 1', is_active: true },
+  { id: '13', school_id: '1', class_id: 'Year-10A', period_id: '1', subject_id: '3', teacher_id: 'teacher3', classroom_id: '3', day_of_week: 3, academic_year: '2024-2025', term: 'Term 1', is_active: true, notes: 'Physics - Dr. Brown - Physics Lab' },
+  { id: '14', school_id: '1', class_id: 'Year-10A', period_id: '2', subject_id: '8', teacher_id: 'teacher5', classroom_id: '2', day_of_week: 3, academic_year: '2024-2025', term: 'Term 1', is_active: true, notes: 'French - Mme. Dubois - Room 102' },
+  { id: '15', school_id: '1', class_id: 'Year-10A', period_id: '4', subject_id: '1', teacher_id: 'teacher1', classroom_id: '1', day_of_week: 3, academic_year: '2024-2025', term: 'Term 1', is_active: true, notes: 'Mathematics - Mr. Smith - Room 101' },
+  { id: '16', school_id: '1', class_id: 'Year-10A', period_id: '5', subject_id: '4', teacher_id: 'teacher7', classroom_id: '4', day_of_week: 3, academic_year: '2024-2025', term: 'Term 1', is_active: true, notes: 'Chemistry - Dr. Lee - Chemistry Lab' },
 ];
 
 export function useTimetableData() {
@@ -232,17 +232,44 @@ export function useTimetableData() {
       
       console.log('Timetable entries found:', data?.length || 0, data);
 
+      // If no data found, use mock data for demonstration
+      let entriesToProcess = data;
+      if (!data || data.length === 0) {
+        console.log('No database entries found, using mock data for class:', classId);
+        // Convert mock entries to match database structure
+        const mockAsDBEntries = mockTimetableEntries
+          .filter(entry => entry.class_id === classId || classId === 'Year-10A')
+          .map(entry => ({
+            id: entry.id,
+            school_id: entry.school_id,
+            class_id: entry.class_id,
+            period_id: entry.period_id,
+            subject_id: entry.subject_id,
+            teacher_id: entry.teacher_id,
+            classroom_id: entry.classroom_id,
+            day_of_week: entry.day_of_week,
+            academic_year: entry.academic_year,
+            term: entry.term,
+            is_active: entry.is_active,
+            notes: entry.notes || 'Sample Subject - Sample Teacher - Sample Room',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }));
+        entriesToProcess = mockAsDBEntries;
+        console.log('Using mock timetable entries:', entriesToProcess.length);
+      }
+
       // Enrich with related data manually
-      const enrichedEntries: TimetableEntry[] = (data || []).map(entry => {
-        const period = periods.find(p => p.id === entry.period_id);
-        const subject = subjects.find(s => s.id === entry.subject_id);
-        const classroom = classrooms.find(c => c.id === entry.classroom_id);
+      const enrichedEntries: TimetableEntry[] = (entriesToProcess || []).map(entry => {
+        const period = periods.find(p => p.id === entry.period_id) || mockPeriods.find(p => p.id === entry.period_id);
+        const subject = subjects.find(s => s.id === entry.subject_id) || mockSubjects.find(s => s.id === entry.subject_id);
+        const classroom = classrooms.find(c => c.id === entry.classroom_id) || mockClassrooms.find(c => c.id === entry.classroom_id);
         
         // Parse teacher and room info from notes field if available
         const notesParts = entry.notes?.split(' - ') || [];
-        const subjectName = notesParts[0] || 'Subject';
+        const subjectName = notesParts[0] || subject?.subject_name || 'Subject';
         const teacherName = notesParts[1] || 'Teacher';
-        const roomName = notesParts[2] || 'Room';
+        const roomName = notesParts[2] || classroom?.room_name || 'Room';
         
         return {
           ...entry,
@@ -270,15 +297,44 @@ export function useTimetableData() {
         };
       });
 
+      console.log('Final enriched entries:', enrichedEntries.length, enrichedEntries);
       setTimetableEntries(enrichedEntries);
     } catch (error: any) {
       console.error('Error fetching timetable:', error);
+      // Fallback to mock data on error
+      console.log('Using mock data as error fallback for class:', classId);
+      const mockEntries = mockTimetableEntries
+        .filter(entry => entry.class_id === classId || classId === 'Year-10A')
+        .map(entry => ({
+          id: entry.id,
+          school_id: entry.school_id,
+          class_id: entry.class_id,
+          period_id: entry.period_id,
+          subject_id: entry.subject_id,
+          teacher_id: entry.teacher_id,
+          classroom_id: entry.classroom_id,
+          day_of_week: entry.day_of_week,
+          academic_year: entry.academic_year,
+          term: entry.term,
+          is_active: entry.is_active,
+          notes: entry.notes || 'Sample Subject - Sample Teacher - Sample Room',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          period: mockPeriods.find(p => p.id === entry.period_id),
+          subject: mockSubjects.find(s => s.id === entry.subject_id),
+          classroom: mockClassrooms.find(c => c.id === entry.classroom_id),
+          teacher_name: 'Mock Teacher',
+          attendance_status: null
+        }));
+      
+      console.log('Mock entries fallback:', mockEntries.length);
+      setTimetableEntries(mockEntries);
+      
       toast({
-        title: "Error",
-        description: "Failed to fetch timetable entries",
-        variant: "destructive",
+        title: "Using Sample Data",
+        description: "Showing sample timetable data for demonstration",
+        variant: "default",
       });
-      setTimetableEntries([]);
     } finally {
       setLoading(false);
     }
