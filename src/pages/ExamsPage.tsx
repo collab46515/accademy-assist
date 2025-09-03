@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Calendar, Clock, Users, FileText, Search, Plus, Download, Filter } from "lucide-react";
 import { useExamData } from "@/hooks/useExamData";
 import { format } from "date-fns";
+import { ExamBoardManager } from "@/components/exams/ExamBoardManager";
+import { ExamSchedulingForm } from "@/components/exams/ExamSchedulingForm";
 
 export default function ExamsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -87,9 +89,7 @@ export default function ExamsPage() {
                   Create a new examination session for your students.
                 </DialogDescription>
               </DialogHeader>
-              <div className="text-center py-4">
-                <p className="text-muted-foreground">Exam scheduling form will be implemented here.</p>
-              </div>
+              <ExamSchedulingForm onClose={() => setShowScheduleDialog(false)} />
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>
                   Cancel
@@ -295,25 +295,7 @@ export default function ExamsPage() {
         </TabsContent>
 
         <TabsContent value="boards" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Exam Boards</CardTitle>
-              <CardDescription>Manage exam board partnerships and requirements</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Exam Board Management</h3>
-                <p className="text-muted-foreground mb-4">
-                  Configure exam board partnerships, entry requirements, and submission deadlines
-                </p>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Exam Board
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <ExamBoardManager />
         </TabsContent>
       </Tabs>
     </div>

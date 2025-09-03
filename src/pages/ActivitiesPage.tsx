@@ -24,6 +24,8 @@ import {
   Star,
   CheckCircle
 } from "lucide-react";
+import { ActivityManager } from "@/components/activities/ActivityManager";
+import { HousePointsManager } from "@/components/activities/HousePointsManager";
 
 interface Activity {
   id: string;
@@ -304,10 +306,7 @@ const ActivitiesPage = () => {
                   </CardTitle>
                   <CardDescription>Manage extracurricular activities and clubs</CardDescription>
                 </div>
-                <Button className="shadow-[var(--shadow-elegant)]">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Activity
-                </Button>
+                <ActivityManager />
               </div>
             </CardHeader>
             <CardContent>
@@ -453,10 +452,7 @@ const ActivitiesPage = () => {
                   </CardTitle>
                   <CardDescription>Award and track house points for student achievements</CardDescription>
                 </div>
-                <Button className="shadow-[var(--shadow-elegant)]">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Award Points
-                </Button>
+                <HousePointsManager />
               </div>
             </CardHeader>
             <CardContent>

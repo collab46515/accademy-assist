@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AttendanceDashboard } from '@/components/attendance/AttendanceDashboard';
 import { AttendanceMarker } from '@/components/attendance/AttendanceMarker';
+import { AttendanceReports } from '@/components/attendance/AttendanceReports';
 import { useRBAC } from '@/hooks/useRBAC';
 import { BarChart3, UserCheck, Settings, Users, AlertTriangle } from 'lucide-react';
 
@@ -75,23 +76,7 @@ export default function AttendancePage() {
         </TabsContent>
 
         <TabsContent value="reports" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Attendance Reports
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">
-                  Attendance reports and analytics will be available here.
-                  <br />
-                  Features include: PDF exports, Excel downloads, historical trends, and compliance reporting.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <AttendanceReports />
         </TabsContent>
       </Tabs>
     </div>
