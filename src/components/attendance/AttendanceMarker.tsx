@@ -192,6 +192,10 @@ export function AttendanceMarker() {
         // Don't reset the form - keep the marked attendance visible
         // The attendance has been successfully saved to the database
         console.log('Attendance successfully saved - keeping UI state');
+        
+        // Notify dashboard to refresh data
+        window.dispatchEvent(new CustomEvent('attendance_updated'));
+        localStorage.setItem('attendance_updated', Date.now().toString());
       }
     } catch (error) {
       console.error('Error saving attendance:', error);

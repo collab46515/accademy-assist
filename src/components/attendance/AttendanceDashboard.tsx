@@ -63,6 +63,36 @@ export function AttendanceDashboard() {
     fetchAttendanceRecords(start, end);
   }, [timeRange, currentSchool]);
 
+  // Refresh data function that can be called externally
+  const refreshData = () => {
+    const { start, end } = getDateRange();
+    fetchAttendanceRecords(start, end);
+  };
+
+  // Listen for attendance changes in localStorage (simple solution)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'attendance_updated') {
+        refreshData();
+        localStorage.removeItem('attendance_updated'); // Clean up
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom events within the same window
+    const handleCustomEvent = () => {
+      refreshData();
+    };
+    
+    window.addEventListener('attendance_updated', handleCustomEvent);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('attendance_updated', handleCustomEvent);
+    };
+  }, [timeRange]);
+
   // Calculate statistics
   const stats = getAttendanceStats(attendanceRecords);
   const totalStudents = students.length;
