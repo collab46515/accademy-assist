@@ -71,6 +71,7 @@ import AdministrationPage from "./pages/AdministrationPage";
 import SchoolSettingsPage from "./pages/SchoolSettingsPage";
 import VirtualClassroomPage from "./pages/VirtualClassroomPage";
 import AIClassroomPage from "./pages/AIClassroomPage";
+import TechnicalDocsPage from "./pages/TechnicalDocsPage";
 import EnrollmentTestPage from "./pages/EnrollmentTestPage";
 import DataIntegrityTestPage from "./pages/DataIntegrityTestPage";
 
