@@ -145,15 +145,9 @@ export function AttendanceMarker() {
       const success = await markBulkAttendance(attendanceToSave);
       
       if (success) {
-        // Reset form after successful save
-        setStudentsAttendance(prev => 
-          prev.map(student => ({ 
-            ...student, 
-            status: undefined, 
-            reason: '', 
-            notes: '' 
-          }))
-        );
+        // Don't reset the form - keep the marked attendance visible
+        // The attendance has been successfully saved to the database
+        console.log('Attendance successfully saved - keeping UI state');
       }
     } catch (error) {
       console.error('Error saving attendance:', error);
