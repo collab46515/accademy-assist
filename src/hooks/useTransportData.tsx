@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRBAC } from './useRBAC';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 // Transport Types
 export interface Vehicle {
@@ -166,13 +167,26 @@ export function useTransportData() {
   const [maintenance, setMaintenance] = useState<VehicleMaintenance[]>([]);
   const [incidents, setIncidents] = useState<TransportIncident[]>([]);
 
-  // Fetch all transport data - using mock data until database is ready
+  // Fetch all transport data
   const fetchTransportData = async () => {
     if (!currentSchool?.id) return;
     
     setLoading(true);
     try {
-      // Mock data with realistic values
+      // Load drivers from database
+      const { data: driversData, error: driversError } = await supabase
+        .from('drivers')
+        .select('*')
+        .eq('school_id', currentSchool.id)
+        .order('created_at', { ascending: false });
+
+      if (driversError) {
+        console.error('Error loading drivers:', driversError);
+      } else {
+        setDrivers(driversData as Driver[]);
+      }
+
+      // Mock data for other entities (until they're implemented)
       const mockVehicles: Vehicle[] = [
         { 
           id: '1', 
@@ -212,27 +226,6 @@ export function useTransportData() {
         }
       ];
       
-      const mockDrivers: Driver[] = [
-        { 
-          id: '1', 
-          school_id: currentSchool.id, 
-          employee_id: 'DR001', 
-          first_name: 'John', 
-          last_name: 'Smith', 
-          phone: '+44123456789', 
-          license_number: 'DL123456', 
-          license_expiry: '2025-12-31', 
-          license_type: ['D1'], 
-          hire_date: '2020-01-15', 
-          status: 'active',
-          email: 'john.smith@school.com',
-          dbs_check_date: '2023-01-01',
-          dbs_expiry: '2026-01-01',
-          created_at: new Date().toISOString(), 
-          updated_at: new Date().toISOString() 
-        }
-      ];
-      
       const mockRoutes: TransportRoute[] = [
         { 
           id: '1', 
@@ -252,7 +245,6 @@ export function useTransportData() {
       ];
 
       setVehicles(mockVehicles);
-      setDrivers(mockDrivers);
       setRoutes(mockRoutes);
       setStudentTransports([]);
       setMaintenance([]);
@@ -336,35 +328,40 @@ export function useTransportData() {
     if (!currentSchool?.id) return null;
     
     try {
-      const newDriver: Driver = {
-        id: `driver-${Date.now()}`,
-        school_id: currentSchool.id,
-        employee_id: driverData.employee_id || `DR${Date.now()}`,
-        first_name: driverData.first_name || '',
-        last_name: driverData.last_name || '',
-        phone: driverData.phone || '',
-        license_number: driverData.license_number || '',
-        license_expiry: driverData.license_expiry || '',
-        license_type: driverData.license_type || ['D1'],
-        hire_date: driverData.hire_date || new Date().toISOString().split('T')[0],
-        status: driverData.status || 'active',
-        email: driverData.email,
-        birth_date: driverData.birth_date,
-        address: driverData.address,
-        emergency_contact_name: driverData.emergency_contact_name,
-        emergency_contact_phone: driverData.emergency_contact_phone,
-        dbs_check_date: driverData.dbs_check_date,
-        dbs_expiry: driverData.dbs_expiry,
-        first_aid_cert_date: driverData.first_aid_cert_date,
-        first_aid_expiry: driverData.first_aid_expiry,
-        notes: driverData.notes,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+      // Save to database
+      const { data, error } = await supabase
+        .from('drivers')
+        .insert({
+          school_id: currentSchool.id,
+          employee_id: driverData.employee_id || `DR${Date.now()}`,
+          first_name: driverData.first_name || '',
+          last_name: driverData.last_name || '',
+          phone: driverData.phone || '',
+          license_number: driverData.license_number || '',
+          license_expiry: driverData.license_expiry || '',
+          license_type: driverData.license_type || ['D1'],
+          hire_date: driverData.hire_date || new Date().toISOString().split('T')[0],
+          status: driverData.status || 'active',
+          email: driverData.email,
+          birth_date: driverData.birth_date,
+          address: driverData.address,
+          emergency_contact_name: driverData.emergency_contact_name,
+          emergency_contact_phone: driverData.emergency_contact_phone,
+          dbs_check_date: driverData.dbs_check_date,
+          dbs_expiry: driverData.dbs_expiry,
+          first_aid_cert_date: driverData.first_aid_cert_date,
+          first_aid_expiry: driverData.first_aid_expiry,
+          notes: driverData.notes
+        })
+        .select()
+        .single();
 
-      setDrivers(prev => [...prev, newDriver]);
+      if (error) throw error;
+
+      // Update local state
+      setDrivers(prev => [...prev, data as Driver]);
       toast.success("Driver added successfully");
-      return newDriver;
+      return data as Driver;
     } catch (error) {
       console.error('Error adding driver:', error);
       toast.error("Failed to add driver");
