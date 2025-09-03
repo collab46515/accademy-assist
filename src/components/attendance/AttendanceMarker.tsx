@@ -127,11 +127,11 @@ export function AttendanceMarker() {
         .map(student => ({
           student_id: student.student_id,
           date: format(selectedDate, 'yyyy-MM-dd'),
-          period: selectedPeriod || undefined,
-          subject: currentClass?.subject || undefined,
+          period: selectedPeriod || null,
+          subject: currentClass?.subject || null,
           status: student.status!,
-          reason: student.reason || undefined,
-          notes: student.notes || undefined,
+          reason: student.reason || null,
+          notes: student.notes || null,
         }));
 
       if (attendanceToSave.length === 0) {
