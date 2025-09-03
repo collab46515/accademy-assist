@@ -141,20 +141,20 @@ export function AttendanceMarker() {
 
       console.log('Saving attendance:', attendanceToSave);
       
-      // For now, simulate successful save since database isn't fully connected
-      // await markBulkAttendance(attendanceToSave);
+      // Save to database
+      const success = await markBulkAttendance(attendanceToSave);
       
-      alert(`Successfully saved attendance for ${attendanceToSave.length} students!`);
-      
-      // Reset form after successful save
-      setStudentsAttendance(prev => 
-        prev.map(student => ({ 
-          ...student, 
-          status: undefined, 
-          reason: '', 
-          notes: '' 
-        }))
-      );
+      if (success) {
+        // Reset form after successful save
+        setStudentsAttendance(prev => 
+          prev.map(student => ({ 
+            ...student, 
+            status: undefined, 
+            reason: '', 
+            notes: '' 
+          }))
+        );
+      }
     } catch (error) {
       console.error('Error saving attendance:', error);
       alert('Failed to save attendance. Please try again.');
