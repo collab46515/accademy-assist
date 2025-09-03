@@ -18,11 +18,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-
-interface DateRange {
-  from?: Date;
-  to?: Date;
-}
+import { DateRange } from 'react-day-picker';
 
 interface AttendanceData {
   studentId: string;
@@ -37,7 +33,7 @@ interface AttendanceData {
 }
 
 export function AttendanceReports() {
-  const [dateRange, setDateRange] = useState<DateRange>({
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: new Date(2024, 0, 1),
     to: new Date()
   });
@@ -175,7 +171,7 @@ export function AttendanceReports() {
                     variant="outline"
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      !dateRange.from && "text-muted-foreground"
+                      !dateRange?.from && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -193,7 +189,7 @@ export function AttendanceReports() {
                     mode="range"
                     defaultMonth={dateRange?.from}
                     selected={dateRange}
-                    onSelect={(range) => setDateRange(range || {})}
+                    onSelect={setDateRange}
                     numberOfMonths={2}
                   />
                 </PopoverContent>
