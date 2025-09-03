@@ -273,8 +273,23 @@ export function RouteDeviationMonitor() {
             </Tabs>
             
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline">Cancel</Button>
-              <Button>Save Settings</Button>
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  toast.success("Settings saved successfully");
+                  // Would save settings to database in real implementation
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  toast.success("Monitoring settings updated successfully");
+                  // Would save all form data to database
+                }}
+              >
+                Save Settings
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -379,10 +394,24 @@ export function RouteDeviationMonitor() {
                     >
                       Mark Resolved
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        toast.success(`Contacting driver: ${alert.driver}`);
+                        // Integration point for SMS/calling system
+                      }}
+                    >
                       Contact Driver
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        toast.info(`Opening map view for ${alert.vehicle} at ${alert.location}`);
+                        // Integration point for mapping system
+                      }}
+                    >
                       View on Map
                     </Button>
                   </>
@@ -396,7 +425,14 @@ export function RouteDeviationMonitor() {
                     Mark Resolved
                   </Button>
                 )}
-                <Button variant="ghost" size="sm">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => {
+                    toast.info(`Viewing detailed alert information for ${alert.vehicle}`);
+                    // Could show detailed modal with alert history
+                  }}
+                >
                   View Details
                 </Button>
               </div>

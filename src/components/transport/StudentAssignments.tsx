@@ -1,77 +1,107 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Users, Search, MapPin, Route, Clock } from "lucide-react";
+import { Users, Search, MapPin, Route, Clock, Plus } from "lucide-react";
 import { useTransportData } from "@/hooks/useTransportData";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useRBAC } from "@/hooks/useRBAC";
 
 export function StudentAssignments() {
-  const { loading, studentTransports, routes, assignStudentToRoute } = useTransportData();
+  const navigate = useNavigate();
+  const { currentSchool } = useRBAC();
+  const { loading, studentTransports, routes, drivers, vehicles, assignStudentToRoute, refetch } = useTransportData();
+  const [students, setStudents] = useState<any[]>([]);
+  const [filteredAssignments, setFilteredAssignments] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRoute, setSelectedRoute] = useState("all");
+  const [selectedYear, setSelectedYear] = useState("all");
+  const [showAssignDialog, setShowAssignDialog] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<any>(null);
+  const [assignmentForm, setAssignmentForm] = useState({
+    route_id: '',
+    pickup_stop: '',
+    dropoff_stop: ''
+  });
 
-  // Mock assignments data - in real implementation this would come from studentTransports
-  const assignments = [
-    {
-      id: "1",
-      studentName: "Emma Watson",
-      studentId: "ST001",
-      year: "Year 9",
-      route: routes[0]?.route_name || "Unassigned",
-      pickupPoint: "Main Street Stop",
-      pickupTime: "07:45",
-      dropoffTime: "15:30",
-      homeAddress: "123 Main Street, City Center",
-      parentContact: "+44 7700 900123",
-      status: "Active"
-    },
-    {
-      id: "2",
-      studentName: "John Smith", 
-      studentId: "ST002",
-      year: "Year 8",
-      route: routes[1]?.route_name || "Unassigned",
-      pickupPoint: "Riverside Park",
-      pickupTime: "08:00",
-      dropoffTime: "15:45",
-      homeAddress: "456 River Road, Riverside",
-      parentContact: "+44 7700 900124",
-      status: "Active"
-    },
-    {
-      id: "3",
-      studentName: "Sarah Johnson",
-      studentId: "ST003", 
-      year: "Year 10",
-      route: routes[2]?.route_name || "Unassigned",
-      pickupPoint: "Hill View Corner",
-      pickupTime: "08:15",
-      dropoffTime: "16:00",
-      homeAddress: "789 Hill View Lane, Hillside",
-      parentContact: "+44 7700 900125",
-      status: "Temporary Route"
-    },
-    {
-      id: "4",
-      studentName: "Mike Brown",
-      studentId: "ST004",
-      year: "Year 7", 
-      route: "Unassigned",
-      pickupPoint: "N/A",
-      pickupTime: "N/A",
-      dropoffTime: "N/A",
-      homeAddress: "321 Oak Street, Suburbs",
-      parentContact: "+44 7700 900126",
-      status: "Pending Assignment"
+  // Load students on mount
+  useEffect(() => {
+    const loadStudents = async () => {
+      if (!currentSchool?.id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('students')
+          .select(`
+            *,
+            profiles(first_name, last_name, email, phone)
+          `)
+          .eq('school_id', currentSchool.id)
+          .eq('is_enrolled', true);
+
+        if (error) throw error;
+        console.log('Students loaded:', data);
+        setStudents(data || []);
+      } catch (error) {
+        console.error('Error loading students:', error);
+        toast.error('Failed to load students');
+      }
+    };
+    
+    loadStudents();
+  }, [currentSchool?.id]);
+
+  // Filter students based on search and filters
+  useEffect(() => {
+    let filtered = students.map(student => {
+      const transport = studentTransports.find(st => st.student_id === student.id);
+      return {
+        id: student.id,
+        studentName: `${student.profiles?.first_name} ${student.profiles?.last_name}`,
+        studentId: student.student_number,
+        year: student.year_group,
+        route: transport ? routes.find(r => r.id === transport.route_id)?.route_name || 'Route Not Found' : 'Unassigned',
+        pickupPoint: transport?.pickup_stop?.stop_name || 'N/A',
+        pickupTime: transport ? routes.find(r => r.id === transport.route_id)?.start_time || 'N/A' : 'N/A',
+        dropoffTime: transport ? routes.find(r => r.id === transport.route_id)?.end_time || 'N/A' : 'N/A',
+        homeAddress: 'Address not available', // Would need address field in students table
+        parentContact: student.emergency_contact_phone || 'N/A',
+        status: transport?.status === 'active' ? 'Active' : transport ? 'Inactive' : 'Unassigned',
+        transport: transport
+      };
+    });
+
+    if (searchTerm) {
+      filtered = filtered.filter(a => 
+        a.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        a.studentId.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
-  ];
 
-  // Calculate route summary from real routes data
-  const routeSummary = routes.slice(0, 4).map((route, index) => ({
-    route: route.route_name,
-    students: Math.floor(Math.random() * 30) + 20, // Simulated student count
-    capacity: route.vehicle?.capacity || 50,
-    utilization: Math.floor(Math.random() * 40) + 60 // Simulated utilization
-  }));
+    if (selectedRoute !== "all") {
+      if (selectedRoute === "unassigned") {
+        filtered = filtered.filter(a => a.route === 'Unassigned');
+      } else {
+        filtered = filtered.filter(a => {
+          const route = routes.find(r => r.id === selectedRoute);
+          return a.route === route?.route_name;
+        });
+      }
+    }
+
+    if (selectedYear !== "all") {
+      filtered = filtered.filter(a => a.year === selectedYear);
+    }
+
+    setFilteredAssignments(filtered);
+  }, [students, studentTransports, routes, searchTerm, selectedRoute, selectedYear]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -79,10 +109,70 @@ export function StudentAssignments() {
         return <Badge variant="default" className="bg-green-600">Active</Badge>;
       case "Temporary Route":
         return <Badge variant="secondary">Temporary</Badge>;
-      case "Pending Assignment":
-        return <Badge variant="destructive">Pending</Badge>;
+      case "Unassigned":
+        return <Badge variant="destructive">Unassigned</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const handleBulkAssignment = async () => {
+    const unassigned = filteredAssignments.filter(a => a.status === 'Unassigned');
+    
+    if (unassigned.length === 0) {
+      toast.info('No unassigned students found');
+      return;
+    }
+
+    if (routes.length === 0) {
+      toast.error('No routes available for assignment');
+      return;
+    }
+
+    // Auto-assign to routes with available capacity
+    let assigned = 0;
+    for (const student of unassigned.slice(0, 10)) { // Limit to 10 for demo
+      const availableRoute = routes.find(r => {
+        const routeTransports = studentTransports.filter(st => st.route_id === r.id && st.status === 'active');
+        const vehicleCapacity = vehicles.find(v => v.id === r.vehicle_id)?.capacity || 50;
+        return routeTransports.length < vehicleCapacity;
+      });
+
+      if (availableRoute) {
+        await assignStudentToRoute({
+          student_id: student.id,
+          route_id: availableRoute.id,
+          start_date: new Date().toISOString().split('T')[0],
+          status: 'active',
+          payment_status: 'pending'
+        });
+        assigned++;
+      }
+    }
+
+    toast.success(`Successfully assigned ${assigned} students`);
+    refetch();
+  };
+
+  const handleAssignStudent = async () => {
+    if (!selectedStudent || !assignmentForm.route_id) {
+      toast.error('Please select a route');
+      return;
+    }
+
+    const result = await assignStudentToRoute({
+      student_id: selectedStudent.id,
+      route_id: assignmentForm.route_id,
+      start_date: new Date().toISOString().split('T')[0],
+      status: 'active',
+      payment_status: 'pending'
+    });
+
+    if (result) {
+      setShowAssignDialog(false);
+      setSelectedStudent(null);
+      setAssignmentForm({ route_id: '', pickup_stop: '', dropoff_stop: '' });
+      refetch();
     }
   };
 
@@ -96,8 +186,67 @@ export function StudentAssignments() {
         </div>
         
         <div className="flex gap-2">
-          <Button variant="outline">Bulk Assignment</Button>
-          <Button>Auto-Assign Students</Button>
+          <Button 
+            variant="outline"
+            onClick={handleBulkAssignment}
+            disabled={loading}
+          >
+            Bulk Assignment
+          </Button>
+          <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Assign Student
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Assign Student to Route</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Student</Label>
+                  <Select 
+                    value={selectedStudent?.id || ''} 
+                    onValueChange={(value) => setSelectedStudent(students.find(s => s.id === value))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select student" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {students.filter(s => !studentTransports.some(st => st.student_id === s.id && st.status === 'active')).map(student => (
+                        <SelectItem key={student.id} value={student.id}>
+                          {student.profiles?.first_name} {student.profiles?.last_name} - {student.student_number}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Route</Label>
+                  <Select 
+                    value={assignmentForm.route_id} 
+                    onValueChange={(value) => setAssignmentForm({...assignmentForm, route_id: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select route" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {routes.filter(r => r.status === 'active').map(route => (
+                        <SelectItem key={route.id} value={route.id}>
+                          {route.route_name} - {route.start_time} to {route.end_time}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button onClick={handleAssignStudent} className="w-full">
+                  Assign to Route
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -107,47 +256,98 @@ export function StudentAssignments() {
           <div className="flex gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search students..." className="pl-8" />
+              <Input 
+                placeholder="Search students..." 
+                className="pl-8" 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
-            <select className="p-2 border rounded w-48">
-              <option value="all">All Routes</option>
-              {routes.map((route) => (
-                <option key={route.id} value={route.id}>{route.route_name}</option>
-              ))}
-              <option value="unassigned">Unassigned</option>
-            </select>
-            <select className="p-2 border rounded w-48">
-              <option value="all">All Years</option>
-              <option value="year-7">Year 7</option>
-              <option value="year-8">Year 8</option>
-              <option value="year-9">Year 9</option>
-              <option value="year-10">Year 10</option>
-            </select>
+            <Select value={selectedRoute} onValueChange={setSelectedRoute}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="All Routes" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Routes</SelectItem>
+                {routes.map((route) => (
+                  <SelectItem key={route.id} value={route.id}>{route.route_name}</SelectItem>
+                ))}
+                <SelectItem value="unassigned">Unassigned</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={selectedYear} onValueChange={setSelectedYear}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="All Years" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Years</SelectItem>
+                <SelectItem value="Year 1">Year 1</SelectItem>
+                <SelectItem value="Year 2">Year 2</SelectItem>
+                <SelectItem value="Year 3">Year 3</SelectItem>
+                <SelectItem value="Year 4">Year 4</SelectItem>
+                <SelectItem value="Year 5">Year 5</SelectItem>
+                <SelectItem value="Year 6">Year 6</SelectItem>
+                <SelectItem value="Year 7">Year 7</SelectItem>
+                <SelectItem value="Year 8">Year 8</SelectItem>
+                <SelectItem value="Year 9">Year 9</SelectItem>
+                <SelectItem value="Year 10">Year 10</SelectItem>
+                <SelectItem value="Year 11">Year 11</SelectItem>
+                <SelectItem value="Year 12">Year 12</SelectItem>
+                <SelectItem value="Year 13">Year 13</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
 
       {/* Route Utilization Summary */}
       <div className="grid gap-4 md:grid-cols-4">
-        {routeSummary.map((route, index) => (
-          <Card key={index}>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold">{route.route}</h3>
-                <Badge variant="outline">{route.utilization}%</Badge>
-              </div>
-              <p className="text-sm text-muted-foreground mb-2">
-                {route.students} / {route.capacity} students
-              </p>
-              <div className="w-full bg-secondary rounded-full h-2">
-                <div 
-                  className="bg-primary h-2 rounded-full" 
-                  style={{ width: `${route.utilization}%` }}
-                />
-              </div>
+        {routes.slice(0, 4).map((route) => {
+          const routeStudents = studentTransports.filter(st => st.route_id === route.id && st.status === 'active').length;
+          const vehicleCapacity = vehicles.find(v => v.id === route.vehicle_id)?.capacity || 50;
+          const utilization = Math.round((routeStudents / vehicleCapacity) * 100);
+          
+          return (
+            <Card 
+              key={route.id}
+              className="cursor-pointer hover:shadow-md transition-all duration-200"
+              onClick={() => {
+                toast.info(`Viewing route: ${route.route_name}`);
+                navigate('/transport/routes');
+              }}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-semibold">{route.route_name}</h3>
+                  <Badge variant="outline">{utilization}%</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">
+                  {routeStudents} / {vehicleCapacity} students
+                </p>
+                <div className="w-full bg-secondary rounded-full h-2">
+                  <div 
+                    className="bg-primary h-2 rounded-full" 
+                    style={{ width: `${utilization}%` }}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+        {routes.length === 0 && (
+          <Card className="col-span-4">
+            <CardContent className="p-6 text-center">
+              <p className="text-muted-foreground">No routes available</p>
+              <Button 
+                variant="outline" 
+                className="mt-2"
+                onClick={() => navigate('/transport/routes')}
+              >
+                Create your first route
+              </Button>
             </CardContent>
           </Card>
-        ))}
+        )}
       </div>
 
       {/* Student Assignments Table */}
@@ -169,95 +369,94 @@ export function StudentAssignments() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {assignments.map((assignment) => (
-                <TableRow key={assignment.id}>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <p className="font-medium">{assignment.studentName}</p>
-                      <p className="text-sm text-muted-foreground">{assignment.studentId} • {assignment.year}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1">
-                        <Route className="h-3 w-3" />
-                        <span className="text-sm font-medium">{assignment.route}</span>
+              {filteredAssignments.length > 0 ? (
+                filteredAssignments.map((assignment) => (
+                  <TableRow key={assignment.id}>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <p className="font-medium">{assignment.studentName}</p>
+                        <p className="text-sm text-muted-foreground">{assignment.studentId} • {assignment.year}</p>
                       </div>
-                      {assignment.pickupPoint !== "N/A" && (
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">{assignment.pickupPoint}</span>
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {assignment.pickupTime !== "N/A" ? (
+                    </TableCell>
+                    <TableCell>
                       <div className="space-y-1">
                         <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          <span className="text-sm">Pickup: {assignment.pickupTime}</span>
+                          <Route className="h-3 w-3" />
+                          <span className="text-sm font-medium">{assignment.route}</span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          <span className="text-sm">Drop: {assignment.dropoffTime}</span>
-                        </div>
+                        {assignment.pickupPoint !== "N/A" && (
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">{assignment.pickupPoint}</span>
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <span className="text-sm text-muted-foreground">Not assigned</span>
+                    </TableCell>
+                    <TableCell>
+                      {assignment.pickupTime !== "N/A" ? (
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span className="text-sm">Pickup: {assignment.pickupTime}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span className="text-sm">Drop: {assignment.dropoffTime}</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">Not assigned</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <p className="text-sm">{assignment.parentContact}</p>
+                        <p className="text-xs text-muted-foreground">{assignment.homeAddress}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {getStatusBadge(assignment.status)}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setSelectedStudent(students.find(s => s.id === assignment.id));
+                            setShowAssignDialog(true);
+                          }}
+                        >
+                          {assignment.route === "Unassigned" ? "Assign" : "Edit"}
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            toast.info(`Viewing location for ${assignment.studentName}`);
+                            navigate('/transport/tracking');
+                          }}
+                        >
+                          <MapPin className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    No students found matching your criteria
+                    {students.length === 0 && (
+                      <div className="mt-2">
+                        <Button variant="outline" size="sm">Load demo students</Button>
+                      </div>
                     )}
                   </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <p className="text-sm">{assignment.parentContact}</p>
-                      <p className="text-xs text-muted-foreground">{assignment.homeAddress}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {getStatusBadge(assignment.status)}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        {assignment.route === "Unassigned" ? "Assign" : "Edit"}
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <MapPin className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
-
-      {/* Unassigned Students Alert */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-orange-600" />
-            Unassigned Students
-          </CardTitle>
-          <CardDescription>Students requiring transport route assignment</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
-              <div>
-                <p className="font-medium">Mike Brown (ST004)</p>
-                <p className="text-sm text-muted-foreground">321 Oak Street, Suburbs • Year 7</p>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">View Map</Button>
-                <Button size="sm">Assign Route</Button>
-              </div>
-            </div>
-            <div className="text-center p-4">
-              <Button variant="outline">Bulk Assign Unassigned Students</Button>
-            </div>
-          </div>
         </CardContent>
       </Card>
 
@@ -271,19 +470,21 @@ export function StudentAssignments() {
           <CardContent className="space-y-4">
             <div className="flex justify-between">
               <span>Total Students</span>
-              <span className="font-medium">{assignments.length}</span>
+              <span className="font-medium">{students.length}</span>
             </div>
             <div className="flex justify-between">
               <span>Assigned Students</span>
-              <span className="font-medium text-green-600">{assignments.filter(a => a.status === "Active").length}</span>
+              <span className="font-medium text-green-600">{filteredAssignments.filter(a => a.status === "Active").length}</span>
             </div>
             <div className="flex justify-between">
-              <span>Pending Assignment</span>
-              <span className="font-medium text-red-600">{assignments.filter(a => a.status === "Pending Assignment").length}</span>
+              <span>Unassigned Students</span>
+              <span className="font-medium text-red-600">{filteredAssignments.filter(a => a.status === "Unassigned").length}</span>
             </div>
             <div className="flex justify-between">
               <span>Assignment Rate</span>
-              <span className="font-medium">85%</span>
+              <span className="font-medium">
+                {students.length > 0 ? Math.round((filteredAssignments.filter(a => a.status === "Active").length / students.length) * 100) : 0}%
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -295,14 +496,37 @@ export function StudentAssignments() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="p-3 border rounded-lg">
-              <p className="font-medium text-blue-900">Route 4 at Capacity</p>
-              <p className="text-sm text-blue-700">Consider adding overflow route for this area</p>
-              <Button size="sm" variant="outline" className="mt-2">View Details</Button>
+              <p className="font-medium text-blue-900">Route Capacity Available</p>
+              <p className="text-sm text-blue-700">
+                {routes.filter(route => {
+                  const routeStudents = studentTransports.filter(st => st.route_id === route.id && st.status === 'active').length;
+                  const vehicleCapacity = vehicles.find(v => v.id === route.vehicle_id)?.capacity || 50;
+                  return routeStudents < vehicleCapacity * 0.9;
+                }).length} routes have available capacity
+              </p>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="mt-2"
+                onClick={() => navigate('/transport/routes')}
+              >
+                View Routes
+              </Button>
             </div>
             <div className="p-3 border rounded-lg">
-              <p className="font-medium text-green-900">Route 3 Underutilized</p>
-              <p className="text-sm text-green-700">Can accommodate 5 more students</p>
-              <Button size="sm" variant="outline" className="mt-2">Add Students</Button>
+              <p className="font-medium text-green-900">Auto-Assignment Ready</p>
+              <p className="text-sm text-green-700">
+                {filteredAssignments.filter(a => a.status === "Unassigned").length} students ready for auto-assignment
+              </p>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="mt-2"
+                onClick={handleBulkAssignment}
+                disabled={filteredAssignments.filter(a => a.status === "Unassigned").length === 0}
+              >
+                Auto-Assign
+              </Button>
             </div>
           </CardContent>
         </Card>

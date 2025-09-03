@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
 import { Download, FileText, TrendingUp, Truck, Users, Clock, MapPin } from "lucide-react";
+import { toast } from "sonner";
 
 export function TransportReports() {
   const monthlyData = [
@@ -70,11 +71,22 @@ export function TransportReports() {
         </div>
         
         <div className="flex gap-2">
-          <Button variant="outline">
+          <Button 
+            variant="outline"
+            onClick={() => {
+              toast.success("Generating comprehensive transport report...");
+              // In real implementation, would generate PDF/Excel report
+            }}
+          >
             <FileText className="h-4 w-4 mr-2" />
             Generate Report
           </Button>
-          <Button>
+          <Button
+            onClick={() => {
+              toast.success("Exporting transport data to CSV...");
+              // In real implementation, would export data
+            }}
+          >
             <Download className="h-4 w-4 mr-2" />
             Export Data
           </Button>

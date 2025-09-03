@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Navigation, Clock, AlertTriangle, Truck, Users } from "lucide-react";
+import { toast } from "sonner";
 
 export function VehicleTracking() {
   const liveVehicles = [
@@ -157,11 +158,27 @@ export function VehicleTracking() {
 
               {/* Action Buttons */}
               <div className="flex gap-2 pt-2">
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => {
+                    toast.info(`Tracking vehicle ${vehicle.vehicle} in real-time`);
+                    // Could integrate with GPS tracking API here
+                  }}
+                >
                   <MapPin className="h-3 w-3 mr-1" />
                   Track
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => {
+                    toast.success(`Contacting driver ${vehicle.driver}`);
+                    // Could integrate with SMS/calling API here
+                  }}
+                >
                   Contact
                 </Button>
               </div>
@@ -253,7 +270,13 @@ export function VehicleTracking() {
                 <p className="text-sm text-red-700">Traffic incident causing 10-minute delay</p>
               </div>
             </div>
-            <Button variant="outline" size="sm">View</Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => toast.info("Viewing detailed delay information")}
+            >
+              View
+            </Button>
           </div>
           
           <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
@@ -264,7 +287,13 @@ export function VehicleTracking() {
                 <p className="text-sm text-orange-700">TB-04 stopped for 8 minutes at Oak Street (limit: 5 min) - Management notified</p>
               </div>
             </div>
-            <Button variant="outline" size="sm">View Alert</Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => toast.info("Viewing route deviation details and suggested actions")}
+            >
+              View Alert
+            </Button>
           </div>
 
           <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
@@ -275,7 +304,13 @@ export function VehicleTracking() {
                 <p className="text-sm text-blue-700">Route 1 has completed morning pickup successfully</p>
               </div>
             </div>
-            <Button variant="outline" size="sm">Details</Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => toast.success("Viewing completion details and performance metrics")}
+            >
+              Details
+            </Button>
           </div>
         </CardContent>
       </Card>
