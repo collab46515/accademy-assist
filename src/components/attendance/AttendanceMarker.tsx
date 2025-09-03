@@ -11,6 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { useAttendanceData } from '@/hooks/useAttendanceData';
 import { useStudentData } from '@/hooks/useStudentData';
 import { useRBAC } from '@/hooks/useRBAC';
+import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { 
   CalendarIcon, 
@@ -75,25 +76,51 @@ export function AttendanceMarker() {
     return matchesSearch && matchesClass;
   });
 
-  // Initialize students attendance when filters change
+  // Initialize students attendance and fetch existing records
   useEffect(() => {
-    const initializeAttendance = () => {
-      const attendanceList: StudentAttendance[] = filteredStudents.map(student => ({
-        student_id: student.id,
-        student_name: `${student.profiles?.first_name || ''} ${student.profiles?.last_name || ''}`.trim(),
-        student_number: student.student_number,
-        form_class: student.form_class || '',
-        year_group: student.year_group,
-        avatar_url: student.profiles?.avatar_url,
-        status: undefined,
-        reason: '',
-        notes: '',
-      }));
+    const initializeAttendance = async () => {
+      if (!currentSchool) return;
+      
+      // Fetch existing attendance records for the selected date
+      const { data: existingRecords, error } = await supabase
+        .from('attendance_records')
+        .select('*')
+        .eq('school_id', currentSchool.id)
+        .eq('date', format(selectedDate, 'yyyy-MM-dd'))
+        .eq('period', selectedPeriod);
+
+      if (error) {
+        console.error('Error fetching existing attendance:', error);
+      }
+
+      const attendanceList: StudentAttendance[] = filteredStudents.map(student => {
+        // Find existing attendance record for this student
+        const existingRecord = existingRecords?.find(record => record.student_id === student.id);
+        
+        // Ensure status is valid or undefined
+        const validStatuses = ['present', 'absent', 'late', 'left_early'];
+        const status = existingRecord?.status && validStatuses.includes(existingRecord.status) 
+          ? existingRecord.status as 'present' | 'absent' | 'late' | 'left_early'
+          : undefined;
+        
+        return {
+          student_id: student.id,
+          student_name: `${student.profiles?.first_name || ''} ${student.profiles?.last_name || ''}`.trim(),
+          student_number: student.student_number,
+          form_class: student.form_class || '',
+          year_group: student.year_group,
+          avatar_url: student.profiles?.avatar_url,
+          status: status,
+          reason: existingRecord?.reason || '',
+          notes: existingRecord?.notes || '',
+        };
+      });
+      
       setStudentsAttendance(attendanceList);
     };
 
     initializeAttendance();
-  }, [students.length, selectedClass, searchTerm, selectedDate, selectedPeriod]); // Use stable dependencies
+  }, [filteredStudents.length, selectedDate, selectedPeriod, currentSchool]); // Use stable dependencies
 
   // Get current class suggestion
   const currentClass = getCurrentClass();
