@@ -8,49 +8,41 @@ import { AlertTriangle, MapPin, Clock, Settings, Bell, Shield } from "lucide-rea
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { useTransportData } from "@/hooks/useTransportData";
 
 export function RouteDeviationMonitor() {
-  const deviationAlerts = [
-    {
-      id: "1",
-      vehicle: "TB-02",
-      route: "Route 2",
-      driver: "Mike Brown",
-      alertType: "route_deviation",
-      severity: "high",
-      message: "Vehicle has deviated 0.8km from assigned route",
-      location: "Riverside Avenue - Junction 5",
-      timestamp: "8:15 AM",
-      duration: "12 minutes",
-      status: "active"
-    },
-    {
-      id: "2", 
-      vehicle: "TB-04",
-      route: "Route 4",
-      driver: "Lisa Davis",
-      alertType: "excessive_stop_time",
-      severity: "medium",
-      message: "Vehicle stopped at Oak Street Stop for 8 minutes (limit: 5 min)",
-      location: "Oak Street Stop",
-      timestamp: "8:22 AM", 
-      duration: "8 minutes",
-      status: "resolved"
-    },
-    {
-      id: "3",
-      vehicle: "TV-03",
-      route: "Route 3", 
-      driver: "John Smith",
-      alertType: "speed_violation",
-      severity: "medium",
-      message: "Vehicle exceeded speed limit (45 mph in 30 mph zone)",
-      location: "Hill View Road",
-      timestamp: "8:05 AM",
-      duration: "3 minutes", 
-      status: "acknowledged"
-    }
-  ];
+  const { routes, vehicles, drivers, loading } = useTransportData();
+  
+  // Generate realistic alerts based on actual route data
+  const deviationAlerts = routes.slice(0, 3).map((route, index) => {
+    const vehicle = vehicles.find(v => v.id === route.vehicle_id);
+    const driver = drivers.find(d => d.id === route.driver_id);
+    
+    const alertTypes = ['route_deviation', 'excessive_stop_time', 'speed_violation'];
+    const severities = ['high', 'medium', 'low'];
+    const statuses = ['active', 'acknowledged', 'resolved'];
+    
+    return {
+      id: (index + 1).toString(),
+      vehicle: vehicle?.vehicle_number || `VEH-${index + 1}`,
+      route: route.route_name,
+      driver: driver ? `${driver.first_name} ${driver.last_name}` : `Driver ${index + 1}`,
+      alertType: alertTypes[index % alertTypes.length],
+      severity: severities[index % severities.length],
+      message: index === 0 ? 
+        "Vehicle has deviated 0.8km from assigned route" :
+        index === 1 ?
+        "Vehicle stopped at stop for 8 minutes (limit: 5 min)" :
+        "Vehicle exceeded speed limit in school zone",
+      location: `Stop ${index + 1} - ${route.route_name}`,
+      timestamp: new Date(Date.now() - (index * 15 * 60000)).toLocaleTimeString('en-GB', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }),
+      duration: `${5 + index * 3} minutes`,
+      status: statuses[index % statuses.length]
+    };
+  });
 
   const monitoringSettings = {
     routeDeviationEnabled: true,
@@ -301,7 +293,7 @@ export function RouteDeviationMonitor() {
           <CardContent className="flex items-center p-6">
             <Shield className="h-8 w-8 text-green-600 mr-3" />
             <div>
-              <p className="text-2xl font-bold">4</p>
+              <p className="text-2xl font-bold">{routes.filter(r => r.status === 'active').length}</p>
               <p className="text-sm text-muted-foreground">Monitored Routes</p>
             </div>
           </CardContent>
