@@ -19,6 +19,11 @@ import {
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
+interface DateRange {
+  from?: Date;
+  to?: Date;
+}
+
 interface AttendanceData {
   studentId: string;
   studentName: string;
@@ -32,10 +37,7 @@ interface AttendanceData {
 }
 
 export function AttendanceReports() {
-  const [dateRange, setDateRange] = useState<{
-    from: Date | undefined;
-    to: Date | undefined;
-  }>({
+  const [dateRange, setDateRange] = useState<DateRange>({
     from: new Date(2024, 0, 1),
     to: new Date()
   });
@@ -113,7 +115,7 @@ export function AttendanceReports() {
   const generateReport = () => {
     // Simulate report generation
     const reportData = {
-      dateRange: `${format(dateRange.from!, 'dd/MM/yyyy')} - ${format(dateRange.to!, 'dd/MM/yyyy')}`,
+      dateRange: `${dateRange?.from ? format(dateRange.from, 'dd/MM/yyyy') : 'N/A'} - ${dateRange?.to ? format(dateRange.to, 'dd/MM/yyyy') : 'N/A'}`,
       class: selectedClass,
       type: reportType,
       generated: new Date().toISOString()
@@ -177,9 +179,9 @@ export function AttendanceReports() {
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateRange.from && dateRange.to 
+                    {dateRange?.from && dateRange?.to 
                       ? `${format(dateRange.from, "dd/MM/yyyy")} - ${format(dateRange.to, "dd/MM/yyyy")}`
-                      : dateRange.from 
+                      : dateRange?.from 
                         ? format(dateRange.from, "dd/MM/yyyy")
                         : "Pick a date range"
                     }
@@ -189,9 +191,9 @@ export function AttendanceReports() {
                   <Calendar
                     initialFocus
                     mode="range"
-                    defaultMonth={dateRange.from}
+                    defaultMonth={dateRange?.from}
                     selected={dateRange}
-                    onSelect={(range) => setDateRange(range || { from: undefined, to: undefined })}
+                    onSelect={(range) => setDateRange(range || {})}
                     numberOfMonths={2}
                   />
                 </PopoverContent>
