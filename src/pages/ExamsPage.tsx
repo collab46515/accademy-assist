@@ -82,7 +82,7 @@ export default function ExamsPage() {
                 Schedule Exam
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Schedule New Exam</DialogTitle>
                 <DialogDescription>
@@ -90,14 +90,6 @@ export default function ExamsPage() {
                 </DialogDescription>
               </DialogHeader>
               <ExamSchedulingForm onClose={() => setShowScheduleDialog(false)} />
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={() => setShowScheduleDialog(false)}>
-                  Schedule Exam
-                </Button>
-              </DialogFooter>
             </DialogContent>
           </Dialog>
         }
