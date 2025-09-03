@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -5,8 +6,25 @@ import { Bell, Send, MessageSquare, AlertTriangle, Phone, Mail } from "lucide-re
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import { useTransportData } from "@/hooks/useTransportData";
 
 export function TransportNotifications() {
+  const { toast } = useToast();
+  const { routes, drivers } = useTransportData();
+  const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    type: "",
+    recipients: "",
+    title: "",
+    message: "",
+    sendSms: true,
+    sendEmail: true,
+    sendPush: false
+  });
   const recentNotifications = [
     {
       id: "1",
@@ -85,6 +103,54 @@ export function TransportNotifications() {
     }
   };
 
+  const handleSendNotification = async () => {
+    if (!formData.type || !formData.recipients || !formData.title || !formData.message) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast({
+        title: "Success",
+        description: `Notification sent successfully to ${formData.recipients === 'all' ? 'all users' : formData.recipients}`
+      });
+
+      // Reset form and close dialog
+      setFormData({
+        type: "",
+        recipients: "",
+        title: "",
+        message: "",
+        sendSms: true,
+        sendEmail: true,
+        sendPush: false
+      });
+      setOpen(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send notification. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleTemplateClick = (template: { name: string; type: string }) => {
+    setFormData(prev => ({
+      ...prev,
+      type: template.type,
+      title: template.name
+    }));
+    setOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -94,7 +160,7 @@ export function TransportNotifications() {
           <p className="text-muted-foreground">Send updates and alerts to parents, students, and staff</p>
         </div>
         
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>
               <Send className="h-4 w-4 mr-2" />
@@ -109,30 +175,40 @@ export function TransportNotifications() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Notification Type</Label>
-                  <select className="w-full p-2 border rounded">
-                    <option value="delay">Route Delay</option>
-                    <option value="emergency">Emergency Alert</option>
-                    <option value="route_change">Route Change</option>
-                    <option value="weather">Weather Update</option>
-                    <option value="general">General Notice</option>
-                  </select>
+                  <Select value={formData.type} onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select notification type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="delay">Route Delay</SelectItem>
+                      <SelectItem value="emergency">Emergency Alert</SelectItem>
+                      <SelectItem value="route_change">Route Change</SelectItem>
+                      <SelectItem value="weather">Weather Update</SelectItem>
+                      <SelectItem value="general">General Notice</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Send To</Label>
-                  <select className="w-full p-2 border rounded">
-                    <option value="all">All Parents & Students</option>
-                    <option value="route_specific">Specific Route</option>
-                    <option value="drivers">All Drivers</option>
-                    <option value="staff">Transport Staff</option>
-                  </select>
+                  <Select value={formData.recipients} onValueChange={(value) => setFormData(prev => ({ ...prev, recipients: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select recipients" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Parents & Students</SelectItem>
+                      <SelectItem value="route_specific">Specific Route</SelectItem>
+                      <SelectItem value="drivers">All Drivers</SelectItem>
+                      <SelectItem value="staff">Transport Staff</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               
               <div className="space-y-2">
                 <Label>Title</Label>
-                <input 
-                  type="text" 
-                  className="w-full p-2 border rounded" 
+                <Input 
+                  value={formData.title}
+                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Notification title"
                 />
               </div>
@@ -140,29 +216,43 @@ export function TransportNotifications() {
               <div className="space-y-2">
                 <Label>Message</Label>
                 <Textarea 
+                  value={formData.message}
+                  onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
                   placeholder="Type your notification message here..."
                   className="min-h-24"
                 />
               </div>
               
-              <div className="flex gap-2">
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" defaultChecked />
-                  <span className="text-sm">Send SMS</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" defaultChecked />
-                  <span className="text-sm">Send Email</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" />
-                  <span className="text-sm">Push Notification</span>
-                </label>
+              <div className="flex gap-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="sms"
+                    checked={formData.sendSms}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, sendSms: checked as boolean }))}
+                  />
+                  <Label htmlFor="sms" className="text-sm">Send SMS</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="email"
+                    checked={formData.sendEmail}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, sendEmail: checked as boolean }))}
+                  />
+                  <Label htmlFor="email" className="text-sm">Send Email</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="push"
+                    checked={formData.sendPush}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, sendPush: checked as boolean }))}
+                  />
+                  <Label htmlFor="push" className="text-sm">Push Notification</Label>
+                </div>
               </div>
               
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1">Save as Template</Button>
-                <Button className="flex-1">Send Notification</Button>
+                <Button onClick={handleSendNotification} className="flex-1">Send Notification</Button>
               </div>
             </div>
           </DialogContent>
@@ -182,6 +272,7 @@ export function TransportNotifications() {
                 key={index} 
                 variant="outline" 
                 className="justify-start h-auto p-4"
+                onClick={() => handleTemplateClick(template)}
               >
                 <div className="text-left">
                   <p className="font-medium">{template.name}</p>
