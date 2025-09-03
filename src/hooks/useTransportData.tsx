@@ -220,7 +220,19 @@ export function useTransportData() {
       }
 
       // Load student transport assignments from database
-      setStudentTransports([]);
+      const { data: studentTransportData, error: studentTransportError } = await supabase
+        .from('student_transport')
+        .select('*')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+      if (studentTransportError) {
+        console.error('Error loading student transport assignments:', studentTransportError);
+        setStudentTransports([]);
+      } else {
+        console.log('Student transport assignments loaded:', studentTransportData);
+        setStudentTransports((studentTransportData || []) as any);
+      }
 
       // Load vehicle maintenance records from database
       try {
@@ -542,13 +554,10 @@ export function useTransportData() {
 
   // Student transport assignment operations - database implementation
   const assignStudentToRoute = async (assignmentData: Partial<StudentTransport>) => {
-    if (!currentSchool?.id) return null;
-    
     try {
       const { data, error } = await supabase
         .from('student_transport')
         .insert({
-          school_id: currentSchool.id,
           student_id: assignmentData.student_id || '',
           route_id: assignmentData.route_id || '',
           start_date: assignmentData.start_date || new Date().toISOString().split('T')[0],
