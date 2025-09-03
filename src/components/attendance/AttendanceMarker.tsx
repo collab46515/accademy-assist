@@ -81,6 +81,12 @@ export function AttendanceMarker() {
     const initializeAttendance = async () => {
       if (!currentSchool) return;
       
+      console.log('Fetching existing attendance for:', {
+        school_id: currentSchool.id,
+        date: format(selectedDate, 'yyyy-MM-dd'),
+        period: selectedPeriod
+      });
+
       // Fetch existing attendance records for the selected date
       let query = supabase
         .from('attendance_records')
@@ -96,6 +102,9 @@ export function AttendanceMarker() {
       }
 
       const { data: existingRecords, error } = await query;
+
+      console.log('Existing attendance records:', existingRecords);
+      console.log('Filtered students count:', filteredStudents.length);
 
       if (error) {
         console.error('Error fetching existing attendance:', error);
