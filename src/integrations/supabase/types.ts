@@ -7774,20 +7774,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "transport_routes_assistant_id_fkey"
-            columns: ["assistant_id"]
-            isOneToOne: false
-            referencedRelation: "drivers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "transport_routes_driver_id_fkey"
-            columns: ["driver_id"]
-            isOneToOne: false
-            referencedRelation: "drivers"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "transport_routes_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
