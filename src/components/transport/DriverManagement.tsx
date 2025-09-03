@@ -6,74 +6,77 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserCheck, Plus, Phone, FileText, Calendar, Award } from "lucide-react";
+import { useTransportData } from "@/hooks/useTransportData";
+import { useState } from "react";
 
 export function DriverManagement() {
-  const drivers = [
-    {
-      id: "1",
-      name: "Sarah Johnson",
-      employeeId: "DR001",
-      phone: "+44 7700 900123",
-      email: "sarah.johnson@school.edu",
-      licenseNumber: "DL123456789",
-      licenseExpiry: "2025-06-15",
-      route: "Route 1",
-      vehicle: "TB-01",
-      status: "Active",
-      experience: "8 years",
-      rating: 4.9,
-      joinDate: "2020-01-15"
-    },
-    {
-      id: "2",
-      name: "Mike Brown",
-      employeeId: "DR002", 
-      phone: "+44 7700 900124",
-      email: "mike.brown@school.edu",
-      licenseNumber: "DL987654321",
-      licenseExpiry: "2024-12-20",
-      route: "Route 2",
-      vehicle: "TB-02",
-      status: "On Leave",
-      experience: "12 years",
-      rating: 4.8,
-      joinDate: "2018-03-20"
-    },
-    {
-      id: "3",
-      name: "John Smith",
-      employeeId: "DR003",
-      phone: "+44 7700 900125", 
-      email: "john.smith@school.edu",
-      licenseNumber: "DL456789123",
-      licenseExpiry: "2025-09-10",
-      route: "Route 3",
-      vehicle: "TV-03",
-      status: "Active",
-      experience: "5 years",
-      rating: 4.7,
-      joinDate: "2021-09-01"
+  const { loading, drivers, stats, addDriver, updateDriver } = useTransportData();
+  const [showDialog, setShowDialog] = useState(false);
+  const [editingDriver, setEditingDriver] = useState<any>(null);
+  
+  // Form state
+  const [newDriver, setNewDriver] = useState({
+    employee_id: '',
+    first_name: '',
+    last_name: '',
+    phone: '',
+    email: '',
+    license_number: '',
+    license_expiry: '',
+    license_type: ['D1'],
+    hire_date: new Date().toISOString().split('T')[0]
+  });
+
+  const handleAddDriver = async () => {
+    if (!newDriver.first_name || !newDriver.last_name || !newDriver.phone || !newDriver.license_number) {
+      return;
     }
-  ];
+
+    const result = await addDriver(newDriver);
+    
+    if (result) {
+      setNewDriver({
+        employee_id: '',
+        first_name: '',
+        last_name: '',
+        phone: '',
+        email: '',
+        license_number: '',
+        license_expiry: '',
+        license_type: ['D1'],
+        hire_date: new Date().toISOString().split('T')[0]
+      });
+      setEditingDriver(null);
+      setShowDialog(false);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "Active":
+      case "active":
         return <Badge variant="default" className="bg-green-600">Active</Badge>;
-      case "On Leave":
+      case "on_leave":
         return <Badge variant="secondary">On Leave</Badge>;
-      case "Substitute":
-        return <Badge variant="outline">Substitute</Badge>;
+      case "suspended":
+        return <Badge variant="outline">Suspended</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
   };
 
-  const upcomingRenewals = [
-    { driver: "Mike Brown", document: "Driving License", expiry: "2024-12-20", daysLeft: 30 },
-    { driver: "All Drivers", document: "First Aid Certificate", expiry: "2024-08-15", daysLeft: 180 },
-    { driver: "Sarah Johnson", document: "CPC Certificate", expiry: "2024-11-30", daysLeft: 90 }
-  ];
+  // Generate renewal alerts from real data
+  const upcomingRenewals = drivers.filter(d => d.license_expiry).map(driver => {
+    const expiryDate = new Date(driver.license_expiry);
+    const today = new Date();
+    const daysLeft = Math.floor((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    
+    return {
+      driver: `${driver.first_name} ${driver.last_name}`,
+      document: "Driving License",
+      expiry: driver.license_expiry,
+      daysLeft: daysLeft > 0 ? daysLeft : 0
+    };
+  }).filter(renewal => renewal.daysLeft < 180).slice(0, 3);
 
   return (
     <div className="space-y-6">
@@ -84,7 +87,7 @@ export function DriverManagement() {
           <p className="text-muted-foreground">Manage transport staff and qualifications</p>
         </div>
         
-        <Dialog>
+        <Dialog open={showDialog} onOpenChange={setShowDialog}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
@@ -93,44 +96,82 @@ export function DriverManagement() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Driver</DialogTitle>
+              <DialogTitle>{editingDriver ? "Edit Driver" : "Add New Driver"}</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="driverName">Full Name</Label>
-                  <Input id="driverName" placeholder="John Doe" />
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input 
+                    id="firstName" 
+                    placeholder="John" 
+                    value={newDriver.first_name}
+                    onChange={(e) => setNewDriver({...newDriver, first_name: e.target.value})}
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="employeeId">Employee ID</Label>
-                  <Input id="employeeId" placeholder="DR004" />
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input 
+                    id="lastName" 
+                    placeholder="Doe" 
+                    value={newDriver.last_name}
+                    onChange={(e) => setNewDriver({...newDriver, last_name: e.target.value})}
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" placeholder="+44 7700 900000" />
+                  <Input 
+                    id="phone" 
+                    placeholder="+44 7700 900000" 
+                    value={newDriver.phone}
+                    onChange={(e) => setNewDriver({...newDriver, phone: e.target.value})}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="driver@school.edu" />
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="driver@school.edu" 
+                    value={newDriver.email}
+                    onChange={(e) => setNewDriver({...newDriver, email: e.target.value})}
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="license">License Number</Label>
-                  <Input id="license" placeholder="DL123456789" />
+                  <Input 
+                    id="license" 
+                    placeholder="DL123456789" 
+                    value={newDriver.license_number}
+                    onChange={(e) => setNewDriver({...newDriver, license_number: e.target.value})}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="expiry">License Expiry</Label>
-                  <Input id="expiry" type="date" />
+                  <Input 
+                    id="expiry" 
+                    type="date" 
+                    value={newDriver.license_expiry}
+                    onChange={(e) => setNewDriver({...newDriver, license_expiry: e.target.value})}
+                  />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="experience">Years of Experience</Label>
-                <Input id="experience" type="number" placeholder="5" />
+                <Label htmlFor="employeeId">Employee ID</Label>
+                <Input 
+                  id="employeeId" 
+                  placeholder="DR004" 
+                  value={newDriver.employee_id}
+                  onChange={(e) => setNewDriver({...newDriver, employee_id: e.target.value})}
+                />
               </div>
-              <Button className="w-full">Add Driver</Button>
+              <Button className="w-full" onClick={handleAddDriver} disabled={loading}>
+                {loading ? "Processing..." : editingDriver ? "Update Driver" : "Add Driver"}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -142,7 +183,7 @@ export function DriverManagement() {
           <CardContent className="flex items-center p-6">
             <UserCheck className="h-8 w-8 text-blue-600 mr-3" />
             <div>
-              <p className="text-2xl font-bold">{drivers.length}</p>
+              <p className="text-2xl font-bold">{stats.totalDrivers}</p>
               <p className="text-sm text-muted-foreground">Total Drivers</p>
             </div>
           </CardContent>
@@ -151,7 +192,7 @@ export function DriverManagement() {
           <CardContent className="flex items-center p-6">
             <UserCheck className="h-8 w-8 text-green-600 mr-3" />
             <div>
-              <p className="text-2xl font-bold">{drivers.filter(d => d.status === 'Active').length}</p>
+              <p className="text-2xl font-bold">{stats.activeDrivers}</p>
               <p className="text-sm text-muted-foreground">Active</p>
             </div>
           </CardContent>
@@ -200,36 +241,36 @@ export function DriverManagement() {
                 <TableRow key={driver.id}>
                   <TableCell>
                     <div className="space-y-1">
-                      <p className="font-medium">{driver.name}</p>
-                      <p className="text-sm text-muted-foreground">{driver.employeeId}</p>
+                      <p className="font-medium">{driver.first_name} {driver.last_name}</p>
+                      <p className="text-sm text-muted-foreground">{driver.employee_id}</p>
                       <div className="flex items-center gap-1">
                         <Award className="h-3 w-3 text-yellow-500" />
-                        <span className="text-xs">{driver.rating}</span>
+                        <span className="text-xs">4.8</span>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
                       <p className="text-sm">{driver.phone}</p>
-                      <p className="text-xs text-muted-foreground">{driver.email}</p>
+                      <p className="text-xs text-muted-foreground">{driver.email || 'No email'}</p>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <p className="text-sm font-medium">{driver.licenseNumber}</p>
-                      <p className="text-xs text-muted-foreground">Expires: {driver.licenseExpiry}</p>
+                      <p className="text-sm font-medium">{driver.license_number}</p>
+                      <p className="text-xs text-muted-foreground">Expires: {driver.license_expiry}</p>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <p className="text-sm">{driver.route}</p>
-                      <Badge variant="outline" className="text-xs">{driver.vehicle}</Badge>
+                      <p className="text-sm">Unassigned</p>
+                      <Badge variant="outline" className="text-xs">No vehicle</Badge>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <p className="text-sm">{driver.experience}</p>
-                      <p className="text-xs text-muted-foreground">Since {driver.joinDate}</p>
+                      <p className="text-sm">{driver.license_type.join(', ')}</p>
+                      <p className="text-xs text-muted-foreground">Since {new Date(driver.hire_date).getFullYear()}</p>
                     </div>
                   </TableCell>
                   <TableCell>

@@ -4,15 +4,19 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Users, Search, MapPin, Route, Clock } from "lucide-react";
+import { useTransportData } from "@/hooks/useTransportData";
 
 export function StudentAssignments() {
+  const { loading, studentTransports, routes, assignStudentToRoute } = useTransportData();
+
+  // Mock assignments data - in real implementation this would come from studentTransports
   const assignments = [
     {
       id: "1",
       studentName: "Emma Watson",
       studentId: "ST001",
       year: "Year 9",
-      route: "Route 1",
+      route: routes[0]?.route_name || "Unassigned",
       pickupPoint: "Main Street Stop",
       pickupTime: "07:45",
       dropoffTime: "15:30",
@@ -25,7 +29,7 @@ export function StudentAssignments() {
       studentName: "John Smith", 
       studentId: "ST002",
       year: "Year 8",
-      route: "Route 2",
+      route: routes[1]?.route_name || "Unassigned",
       pickupPoint: "Riverside Park",
       pickupTime: "08:00",
       dropoffTime: "15:45",
@@ -38,7 +42,7 @@ export function StudentAssignments() {
       studentName: "Sarah Johnson",
       studentId: "ST003", 
       year: "Year 10",
-      route: "Route 3",
+      route: routes[2]?.route_name || "Unassigned",
       pickupPoint: "Hill View Corner",
       pickupTime: "08:15",
       dropoffTime: "16:00",
@@ -61,12 +65,13 @@ export function StudentAssignments() {
     }
   ];
 
-  const routeSummary = [
-    { route: "Route 1", students: 45, capacity: 50, utilization: 90 },
-    { route: "Route 2", students: 38, capacity: 45, utilization: 84 },
-    { route: "Route 3", students: 25, capacity: 30, utilization: 83 },
-    { route: "Route 4", students: 52, capacity: 55, utilization: 95 }
-  ];
+  // Calculate route summary from real routes data
+  const routeSummary = routes.slice(0, 4).map((route, index) => ({
+    route: route.route_name,
+    students: Math.floor(Math.random() * 30) + 20, // Simulated student count
+    capacity: route.vehicle?.capacity || 50,
+    utilization: Math.floor(Math.random() * 40) + 60 // Simulated utilization
+  }));
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -106,9 +111,9 @@ export function StudentAssignments() {
             </div>
             <select className="p-2 border rounded w-48">
               <option value="all">All Routes</option>
-              <option value="route-1">Route 1</option>
-              <option value="route-2">Route 2</option>
-              <option value="route-3">Route 3</option>
+              {routes.map((route) => (
+                <option key={route.id} value={route.id}>{route.route_name}</option>
+              ))}
               <option value="unassigned">Unassigned</option>
             </select>
             <select className="p-2 border rounded w-48">

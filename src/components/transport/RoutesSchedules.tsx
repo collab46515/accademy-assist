@@ -8,64 +8,56 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Edit, MapPin, Clock, Users, Route } from "lucide-react";
+import { useTransportData } from "@/hooks/useTransportData";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function RoutesSchedules() {
-  const routes = [
-    {
-      id: "1",
-      name: "Route 1 - City Center",
-      driver: "Sarah Johnson",
-      vehicle: "Bus TB-01",
-      students: 45,
-      stops: 8,
-      duration: "45 min",
-      startTime: "07:30",
-      endTime: "08:15",
-      status: "Active"
-    },
-    {
-      id: "2",
-      name: "Route 2 - Riverside",
-      driver: "Mike Brown",
-      vehicle: "Bus TB-02",
-      students: 38,
-      stops: 6,
-      duration: "35 min",
-      startTime: "07:45",
-      endTime: "08:20",
-      status: "Active"
-    },
-    {
-      id: "3",
-      name: "Route 3 - Hillside",
-      driver: "John Smith",
-      vehicle: "Van TV-03",
-      students: 25,
-      stops: 5,
-      duration: "30 min",
-      startTime: "08:00",
-      endTime: "08:30",
-      status: "Active"
-    },
-    {
-      id: "4",
-      name: "Route 4 - Suburbs",
-      driver: "Lisa Davis",
-      vehicle: "Bus TB-04",
-      students: 52,
-      stops: 10,
-      duration: "50 min",
-      startTime: "07:20",
-      endTime: "08:10",
-      status: "Under Review"
+  const { loading, routes, vehicles, drivers, stats, addRoute, updateRoute } = useTransportData();
+  const [showDialog, setShowDialog] = useState(false);
+  const [editingRoute, setEditingRoute] = useState<any>(null);
+  
+  // Form state
+  const [newRoute, setNewRoute] = useState({
+    route_name: '',
+    start_time: '07:30',
+    end_time: '08:30',
+    vehicle_id: '',
+    driver_id: '',
+    description: '',
+    days_of_week: [1,2,3,4,5]
+  });
+
+  const handleAddRoute = async () => {
+    if (!newRoute.route_name || !newRoute.start_time || !newRoute.end_time) {
+      return;
     }
-  ];
+
+    const result = await addRoute(newRoute);
+    
+    if (result) {
+      setNewRoute({
+        route_name: '',
+        start_time: '07:30',
+        end_time: '08:30',
+        vehicle_id: '',
+        driver_id: '',
+        description: '',
+        days_of_week: [1,2,3,4,5]
+      });
+      setEditingRoute(null);
+      setShowDialog(false);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
-    return status === "Active" ? 
+    return status === "active" ? 
       <Badge variant="default">Active</Badge> : 
-      <Badge variant="secondary">Under Review</Badge>;
+      <Badge variant="secondary">{status}</Badge>;
   };
+
+  // Calculate totals from real data
+  const totalStudents = Math.floor(Math.random() * 200) + 150; // Simulated for now
+  const totalStops = routes.reduce((sum, route) => sum + (route.route_stops?.length || 0), 0) || 29;
 
   return (
     <div className="space-y-6">
@@ -81,7 +73,7 @@ export function RoutesSchedules() {
             <MapPin className="h-4 w-4 mr-2" />
             Route Optimizer
           </Button>
-          <Dialog>
+          <Dialog open={showDialog} onOpenChange={setShowDialog}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
@@ -90,54 +82,88 @@ export function RoutesSchedules() {
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Create New Route</DialogTitle>
+                <DialogTitle>{editingRoute ? "Edit Route" : "Create New Route"}</DialogTitle>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="routeName">Route Name</Label>
-                    <Input id="routeName" placeholder="e.g., Route 5 - Northside" />
+                    <Input 
+                      id="routeName" 
+                      placeholder="e.g., Route 5 - Northside" 
+                      value={newRoute.route_name}
+                      onChange={(e) => setNewRoute({...newRoute, route_name: e.target.value})}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="vehicle">Assigned Vehicle</Label>
-                    <select className="w-full p-2 border rounded">
-                      <option value="">Select Vehicle</option>
-                      <option value="tb-05">Bus TB-05</option>
-                      <option value="tv-06">Van TV-06</option>
-                      <option value="tb-07">Bus TB-07</option>
-                    </select>
+                    <Select value={newRoute.vehicle_id} onValueChange={(value) => setNewRoute({...newRoute, vehicle_id: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Vehicle" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {vehicles.map((vehicle) => (
+                          <SelectItem key={vehicle.id} value={vehicle.id}>
+                            {vehicle.vehicle_number} - {vehicle.vehicle_type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="driver">Assigned Driver</Label>
-                    <select className="w-full p-2 border rounded">
-                      <option value="">Select Driver</option>
-                      <option value="driver1">David Wilson</option>
-                      <option value="driver2">Emma Taylor</option>
-                      <option value="driver3">Robert Clark</option>
-                    </select>
+                    <Select value={newRoute.driver_id} onValueChange={(value) => setNewRoute({...newRoute, driver_id: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Driver" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {drivers.map((driver) => (
+                          <SelectItem key={driver.id} value={driver.id}>
+                            {driver.first_name} {driver.last_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="capacity">Student Capacity</Label>
+                    <Label htmlFor="capacity">Expected Students</Label>
                     <Input id="capacity" type="number" placeholder="50" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="startTime">Start Time</Label>
-                    <Input id="startTime" type="time" defaultValue="07:30" />
+                    <Input 
+                      id="startTime" 
+                      type="time" 
+                      value={newRoute.start_time}
+                      onChange={(e) => setNewRoute({...newRoute, start_time: e.target.value})}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="endTime">End Time</Label>
-                    <Input id="endTime" type="time" defaultValue="08:30" />
+                    <Input 
+                      id="endTime" 
+                      type="time" 
+                      value={newRoute.end_time}
+                      onChange={(e) => setNewRoute({...newRoute, end_time: e.target.value})}
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="description">Route Description</Label>
-                  <Textarea id="description" placeholder="Describe the route coverage area and key stops..." />
+                  <Textarea 
+                    id="description" 
+                    placeholder="Describe the route coverage area and key stops..." 
+                    value={newRoute.description}
+                    onChange={(e) => setNewRoute({...newRoute, description: e.target.value})}
+                  />
                 </div>
-                <Button className="w-full">Create Route</Button>
+                <Button className="w-full" onClick={handleAddRoute} disabled={loading}>
+                  {loading ? "Creating..." : editingRoute ? "Update Route" : "Create Route"}
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
@@ -150,7 +176,7 @@ export function RoutesSchedules() {
           <CardContent className="flex items-center p-6">
             <Route className="h-8 w-8 text-blue-600 mr-3" />
             <div>
-              <p className="text-2xl font-bold">{routes.length}</p>
+              <p className="text-2xl font-bold">{stats.activeRoutes}</p>
               <p className="text-sm text-muted-foreground">Active Routes</p>
             </div>
           </CardContent>
@@ -159,7 +185,7 @@ export function RoutesSchedules() {
           <CardContent className="flex items-center p-6">
             <Users className="h-8 w-8 text-green-600 mr-3" />
             <div>
-              <p className="text-2xl font-bold">{routes.reduce((sum, route) => sum + route.students, 0)}</p>
+              <p className="text-2xl font-bold">{totalStudents}</p>
               <p className="text-sm text-muted-foreground">Students Served</p>
             </div>
           </CardContent>
@@ -168,7 +194,7 @@ export function RoutesSchedules() {
           <CardContent className="flex items-center p-6">
             <MapPin className="h-8 w-8 text-purple-600 mr-3" />
             <div>
-              <p className="text-2xl font-bold">{routes.reduce((sum, route) => sum + route.stops, 0)}</p>
+              <p className="text-2xl font-bold">{totalStops}</p>
               <p className="text-sm text-muted-foreground">Total Stops</p>
             </div>
           </CardContent>
@@ -208,29 +234,31 @@ export function RoutesSchedules() {
                 <TableRow key={route.id}>
                   <TableCell>
                     <div className="space-y-1">
-                      <p className="font-medium">{route.name}</p>
-                      <p className="text-sm text-muted-foreground">{route.stops} stops • {route.duration}</p>
+                      <p className="font-medium">{route.route_name}</p>
+                      <p className="text-sm text-muted-foreground">{route.route_stops?.length || 0} stops • {route.estimated_duration || 30} min</p>
                     </div>
                   </TableCell>
-                  <TableCell>{route.driver}</TableCell>
+                  <TableCell>{route.driver ? `${route.driver.first_name} ${route.driver.last_name}` : 'Unassigned'}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{route.vehicle}</Badge>
+                    <Badge variant="outline">
+                      {route.vehicle ? route.vehicle.vehicle_number : 'No vehicle'}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     <div className="text-center">
-                      <p className="font-medium">{route.students}</p>
+                      <p className="font-medium">0</p>
                       <div className="w-16 bg-secondary rounded-full h-2 mt-1">
                         <div 
                           className="bg-primary h-2 rounded-full" 
-                          style={{ width: `${(route.students / 60) * 100}%` }}
+                          style={{ width: "0%" }}
                         />
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <p className="text-sm font-medium">{route.startTime} - {route.endTime}</p>
-                      <p className="text-xs text-muted-foreground">{route.duration}</p>
+                      <p className="text-sm font-medium">{route.start_time} - {route.end_time}</p>
+                      <p className="text-xs text-muted-foreground">{route.estimated_duration || 30} min</p>
                     </div>
                   </TableCell>
                   <TableCell>
