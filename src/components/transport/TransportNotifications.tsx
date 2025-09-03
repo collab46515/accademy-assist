@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Bell, Send, MessageSquare, AlertTriangle, Phone, Mail } from "lucide-react";
+import { Bell, Send, MessageSquare, AlertTriangle, Phone, Mail, Eye, RefreshCw, Save } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -17,7 +17,10 @@ export function TransportNotifications() {
   const { toast } = useToast();
   const { routes, drivers } = useTransportData();
   const [open, setOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState<any>(null);
   const [recentNotifications, setRecentNotifications] = useState<any[]>([]);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [formData, setFormData] = useState({
     type: "",
     recipients: "",
@@ -28,24 +31,33 @@ export function TransportNotifications() {
     sendPush: false
   });
 
-  // Load notifications from database
+  // Get current user
   useEffect(() => {
-    const loadNotifications = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('transport_notifications')
-          .select('*')
-          .order('sent_at', { ascending: false })
-          .limit(10);
-
-        if (error) throw error;
-        
-        setRecentNotifications(data || []);
-      } catch (error) {
-        console.error('Error loading notifications:', error);
-      }
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user);
     };
+    getCurrentUser();
+  }, []);
 
+  // Load notifications from database
+  const loadNotifications = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('transport_notifications')
+        .select('*')
+        .order('sent_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      
+      setRecentNotifications(data || []);
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+    }
+  };
+
+  useEffect(() => {
     loadNotifications();
   }, []);
 
@@ -169,7 +181,7 @@ export function TransportNotifications() {
           send_sms: formData.sendSms,
           send_email: formData.sendEmail,
           send_push: formData.sendPush,
-          sent_by: 'c8b1e1e0-7b8a-4c9d-9e2f-3a4b5c6d7e8f', // Placeholder user ID
+          sent_by: currentUser?.id || 'c8b1e1e0-7b8a-4c9d-9e2f-3a4b5c6d7e8f',
           recipient_count: recipientCount,
           status: 'sent'
         })
@@ -195,8 +207,8 @@ export function TransportNotifications() {
       });
       setOpen(false);
       
-      // Refresh the page to show the new notification
-      window.location.reload();
+      // Refresh notifications list
+      loadNotifications();
     } catch (error) {
       console.error('Error sending notification:', error);
       toast({
@@ -214,6 +226,85 @@ export function TransportNotifications() {
       title: template.name
     }));
     setOpen(true);
+  };
+
+  const handleSaveAsTemplate = async () => {
+    if (!formData.title || !formData.message) {
+      toast({
+        title: "Error",
+        description: "Please fill in title and message to save as template",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('communication_templates')
+        .insert({
+          school_id: 'c8b1e1e0-7b8a-4c9d-9e2f-3a4b5c6d7e8f',
+          template_name: formData.title,
+          subject_template: formData.title,
+          content_template: formData.message,
+          template_type: 'announcement',
+          created_by: currentUser?.id || 'c8b1e1e0-7b8a-4c9d-9e2f-3a4b5c6d7e8f'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Template saved successfully"
+      });
+    } catch (error) {
+      console.error('Error saving template:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save template. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleResendNotification = async (notification: any) => {
+    try {
+      const { error } = await supabase
+        .from('transport_notifications')
+        .insert({
+          school_id: notification.school_id,
+          type: notification.type,
+          recipients: notification.recipients,
+          title: `[RESEND] ${notification.title}`,
+          message: notification.message,
+          send_sms: notification.send_sms,
+          send_email: notification.send_email,
+          send_push: notification.send_push,
+          sent_by: currentUser?.id || 'c8b1e1e0-7b8a-4c9d-9e2f-3a4b5c6d7e8f',
+          recipient_count: notification.recipient_count,
+          status: 'sent'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Notification resent successfully"
+      });
+
+      loadNotifications();
+    } catch (error) {
+      console.error('Error resending notification:', error);
+      toast({
+        title: "Error",
+        description: "Failed to resend notification. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleViewDetails = (notification: any) => {
+    setSelectedNotification(notification);
+    setDetailsOpen(true);
   };
 
   return (
@@ -316,8 +407,14 @@ export function TransportNotifications() {
               </div>
               
               <div className="flex gap-2">
-                <Button variant="outline" className="flex-1">Save as Template</Button>
-                <Button onClick={handleSendNotification} className="flex-1">Send Notification</Button>
+                <Button variant="outline" className="flex-1" onClick={handleSaveAsTemplate}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save as Template
+                </Button>
+                <Button onClick={handleSendNotification} className="flex-1">
+                  <Send className="h-4 w-4 mr-2" />
+                  Send Notification
+                </Button>
               </div>
             </div>
           </DialogContent>
@@ -378,8 +475,22 @@ export function TransportNotifications() {
                   </Badge>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="sm">Resend</Button>
-                  <Button variant="ghost" size="sm">View Details</Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => handleResendNotification(notification)}
+                  >
+                    <RefreshCw className="h-4 w-4 mr-1" />
+                    Resend
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => handleViewDetails(notification)}
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    View Details
+                  </Button>
                 </div>
               </div>
             </div>
@@ -490,6 +601,63 @@ export function TransportNotifications() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Notification Details Dialog */}
+      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Notification Details</DialogTitle>
+          </DialogHeader>
+          {selectedNotification && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="font-medium">Type</Label>
+                  <p className="text-sm text-muted-foreground">{selectedNotification.type}</p>
+                </div>
+                <div>
+                  <Label className="font-medium">Recipients</Label>
+                  <p className="text-sm text-muted-foreground">{selectedNotification.recipients}</p>
+                </div>
+              </div>
+              <div>
+                <Label className="font-medium">Title</Label>
+                <p className="text-sm text-muted-foreground">{selectedNotification.title}</p>
+              </div>
+              <div>
+                <Label className="font-medium">Message</Label>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{selectedNotification.message}</p>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label className="font-medium">SMS</Label>
+                  <p className="text-sm text-muted-foreground">{selectedNotification.send_sms ? 'Enabled' : 'Disabled'}</p>
+                </div>
+                <div>
+                  <Label className="font-medium">Email</Label>
+                  <p className="text-sm text-muted-foreground">{selectedNotification.send_email ? 'Enabled' : 'Disabled'}</p>
+                </div>
+                <div>
+                  <Label className="font-medium">Push</Label>
+                  <p className="text-sm text-muted-foreground">{selectedNotification.send_push ? 'Enabled' : 'Disabled'}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="font-medium">Sent At</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedNotification.sent_at ? new Date(selectedNotification.sent_at).toLocaleString() : 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <Label className="font-medium">Recipient Count</Label>
+                  <p className="text-sm text-muted-foreground">{selectedNotification.recipient_count || 'N/A'}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
