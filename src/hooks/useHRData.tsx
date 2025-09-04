@@ -194,7 +194,7 @@ export function useHRData() {
             location: employeeData.location,
             emergency_contact_name: employeeData.emergency_contact_name,
             emergency_contact_phone: employeeData.emergency_contact_phone,
-            school_id: employeeData.school_id || 'c8b1e1e0-7b8a-4c9d-9e2f-3a4b5c6d7e8f' // demo school as fallback
+            school_id: employeeData.school_id || null // Remove demo school fallback
           }
         });
 

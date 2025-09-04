@@ -49,9 +49,8 @@ export function AuthSection() {
 
 
   const demoCredentials = [
-    { role: "School Admin", email: "admin@demoschool.edu", password: "demo123456" },
-    { role: "Teacher", email: "teacher@demoschool.edu", password: "demo123456" },
-    { role: "HOD", email: "hod@demoschool.edu", password: "demo123456" },
+    { role: "Super Admin", email: "dominic@pappayacloud.com", password: "Use your actual password" },
+    { role: "Demo User", email: "demo@doxa.com", password: "Use your actual password" },
   ];
 
   return (
