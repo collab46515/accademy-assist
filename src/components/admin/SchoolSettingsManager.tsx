@@ -200,6 +200,13 @@ export function SchoolSettingsManager() {
   const { toast } = useToast();
   const { currentSchool, isSchoolAdmin, isSuperAdmin, schools } = useRBAC();
 
+  // All hooks must be called before any conditional returns
+  useEffect(() => {
+    if (currentSchool) {
+      fetchSchoolData();
+    }
+  }, [currentSchool]);
+
   // Show school creation for super admins when no schools exist
   if (isSuperAdmin() && (!schools || schools.length === 0)) {
     return (
@@ -227,12 +234,6 @@ export function SchoolSettingsManager() {
       </div>
     );
   }
-
-  useEffect(() => {
-    if (currentSchool) {
-      fetchSchoolData();
-    }
-  }, [currentSchool]);
 
   // Check admin access
   if (!isSuperAdmin() && !isSchoolAdmin()) {
