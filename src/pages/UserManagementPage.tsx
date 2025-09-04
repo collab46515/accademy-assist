@@ -57,6 +57,31 @@ export function UserManagementPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [activeTab, setActiveTab] = useState<'users' | 'roles' | 'permissions'>('users');
 
+  const anySuperAdmin = Object.values(userRoles).some((roles) => roles.some(r => r.role === 'super_admin' && r.is_active));
+
+  const bootstrapDominic = async () => {
+    setIsCreating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-create-user', {
+        body: {
+          email: 'dominic@pappayacloud.com',
+          first_name: 'Dominic',
+          last_name: 'Smith',
+          password: 'TempPass123!',
+          bootstrap: true,
+        },
+      });
+      if (error) throw error;
+      const tempPassword = (data as any)?.temp_password || 'TempPass123!';
+      toast({ title: 'Super Admin Bootstrapped', description: `Created. Temporary password: ${tempPassword}` });
+      fetchUsers();
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message || 'Failed to bootstrap super admin', variant: 'destructive' });
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
   }, [currentSchool]);
@@ -330,6 +355,17 @@ export function UserManagementPage() {
           </Dialog>
         )}
       </div>
+
+      {!anySuperAdmin && (
+        <Alert className="mb-6">
+          <AlertDescription>
+            No super admin found. Click to bootstrap dominic@pappayacloud.com as Super Admin.
+          </AlertDescription>
+          <div className="mt-3">
+            <Button onClick={bootstrapDominic} disabled={isCreating}>Bootstrap Super Admin</Button>
+          </div>
+        </Alert>
+      )}
 
       {/* Quick Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">

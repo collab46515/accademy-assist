@@ -40,7 +40,11 @@ serve(async (req) => {
     // Read input
     let payload: any = {};
     if (isPost) {
-      payload = await req.json();
+      try {
+        payload = await req.json();
+      } catch (_) {
+        payload = {};
+      }
     } else {
       // GET bootstrap support
       payload = {
@@ -48,6 +52,7 @@ serve(async (req) => {
         first_name: url.searchParams.get('first_name') ?? undefined,
         last_name: url.searchParams.get('last_name') ?? undefined,
         password: url.searchParams.get('password') ?? undefined,
+        bootstrap: url.searchParams.get('bootstrap') === '1'
       };
     }
 
@@ -77,8 +82,8 @@ serve(async (req) => {
       allowed = Boolean(isSA);
     }
 
-    // Bootstrap path: if no super_admin exists yet and bootstrap=1, allow creating the first super admin
-    const bootstrap = url.searchParams.get('bootstrap') === '1';
+    // Bootstrap path: if no super_admin exists yet and bootstrap=true, allow creating the first super admin
+    const bootstrap = Boolean(payload.bootstrap) || url.searchParams.get('bootstrap') === '1';
     if (!allowed && bootstrap) {
       const { count, error: countErr } = await adminClient
         .from('user_roles')
@@ -143,7 +148,7 @@ serve(async (req) => {
       // Continue, but report
     }
 
-    // If bootstrap mode, assign super_admin role immediately
+    // If bootstrap mode, assign super_admin role immediately; otherwise assign on demand if requested and caller is SA
     let bootstrapped = false;
     if (bootstrap) {
       const { error: roleErr } = await adminClient
