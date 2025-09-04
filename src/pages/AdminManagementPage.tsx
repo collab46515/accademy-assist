@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { WorkflowDashboard } from '@/components/admissions/workflow/WorkflowDashboard';
+import { SystemResetManager } from '@/components/admin/SystemResetManager';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -766,6 +767,9 @@ export default function AdminManagementPage() {
                 </CardContent>
               </Card>
             </div>
+            
+            {/* System Reset Section */}
+            <SystemResetManager />
           </TabsContent>
         </Tabs>
       </div>

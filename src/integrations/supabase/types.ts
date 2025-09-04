@@ -8123,6 +8123,10 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: boolean
       }
+      reset_public_data_preserve_auth: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
     }
     Enums: {
       academic_period_type: "term" | "semester" | "quarter" | "year" | "custom"
