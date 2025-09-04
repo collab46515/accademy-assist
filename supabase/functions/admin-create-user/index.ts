@@ -95,8 +95,8 @@ serve(async (req) => {
         console.error('Count super_admins error:', countErr);
       }
 
-      if ((count ?? 0) === 0 && email === 'dominic@pappayacloud.com') {
-        allowed = true;
+      if ((count ?? 0) === 0) {
+        allowed = true; // Allow first super admin for any email
       }
     }
 

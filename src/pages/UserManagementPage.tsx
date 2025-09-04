@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRBAC, AppRole } from '@/hooks/useRBAC';
+import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,6 +48,7 @@ const roleOptions: { value: AppRole; label: string }[] = [
 
 export function UserManagementPage() {
   const { schools, currentSchool, isSuperAdmin, isSchoolAdmin } = useRBAC();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [userRoles, setUserRoles] = useState<Record<string, UserRole[]>>({});
@@ -57,6 +59,8 @@ export function UserManagementPage() {
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [isCreating, setIsCreating] = useState(false);
   const [activeTab, setActiveTab] = useState<'users' | 'roles' | 'permissions'>('users');
+  const [bootstrapOpen, setBootstrapOpen] = useState(false);
+  const [bootstrapLoading, setBootstrapLoading] = useState(false);
 
   const anySuperAdmin = Object.values(userRoles).some((roles) => roles.some(r => r.role === 'super_admin' && r.is_active));
 
@@ -234,6 +238,42 @@ export function UserManagementPage() {
       setIsCreating(false);
     }
   };
+
+  const bootstrapFirstSuperAdmin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setBootstrapLoading(true);
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const firstName = formData.get('firstName') as string;
+    const lastName = formData.get('lastName') as string;
+    const password = formData.get('password') as string;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-create-user', {
+        body: {
+          email,
+          first_name: firstName,
+          last_name: lastName,
+          password,
+          bootstrap: true,
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Super Admin Created',
+        description: `First Super Admin ${email} created. Use the password to sign in and manage the system.`,
+      });
+      setBootstrapOpen(false);
+      fetchUsers();
+    } catch (err: any) {
+      toast({ title: 'Bootstrap Failed', description: err.message || 'Could not create Super Admin', variant: 'destructive' });
+    } finally {
+      setBootstrapLoading(false);
+    }
+  };
+
   const assignRole = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsCreating(true);
@@ -243,6 +283,13 @@ export function UserManagementPage() {
     const schoolId = formData.get('schoolId') as string;
     const department = formData.get('department') as string;
     const yearGroup = formData.get('yearGroup') as string;
+
+    // Prevent self-assign SA if not already SA
+    if (role === 'super_admin' && user?.id === selectedUserId && !isSuperAdmin()) {
+      toast({ title: 'Not allowed', description: 'You cannot assign Super Admin to yourself. Use bootstrap (if first admin) or ask an existing Super Admin.', variant: 'destructive' });
+      setIsCreating(false);
+      return;
+    }
 
     // Super admin doesn't need a school_id
     const finalSchoolId = role === 'super_admin' ? null : (schoolId || null);
@@ -411,13 +458,50 @@ export function UserManagementPage() {
       {!anySuperAdmin && (
         <Alert className="mb-6">
           <AlertDescription>
-            No super admin found. Click to bootstrap dominic@pappayacloud.com as Super Admin.
+            No super admin found. Bootstrap the first Super Admin to unlock user management.
           </AlertDescription>
           <div className="mt-3">
-            <Button onClick={bootstrapDominic} disabled={isCreating}>Bootstrap Super Admin</Button>
+            <Button onClick={() => setBootstrapOpen(true)} disabled={bootstrapLoading}>Bootstrap Super Admin</Button>
           </div>
         </Alert>
       )}
+
+      <Dialog open={bootstrapOpen} onOpenChange={setBootstrapOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Bootstrap First Super Admin</DialogTitle>
+            <DialogDescription>
+              Create the first system-wide administrator. This user will have access to all schools and settings.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={bootstrapFirstSuperAdmin} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input id="firstName" name="firstName" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input id="lastName" name="lastName" required />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" name="email" type="email" required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Temporary Password</Label>
+              <Input id="password" name="password" type="password" required />
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={bootstrapLoading}>
+                {bootstrapLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Bootstrap Super Admin
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Quick Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
