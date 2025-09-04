@@ -50,6 +50,7 @@ export function UserManagementPage() {
   const { toast } = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [userRoles, setUserRoles] = useState<Record<string, UserRole[]>>({});
+  const [selectedRole, setSelectedRole] = useState<AppRole | ''>('');
   const [loading, setLoading] = useState(true);
   const [createUserOpen, setCreateUserOpen] = useState(false);
   const [assignRoleOpen, setAssignRoleOpen] = useState(false);
@@ -243,27 +244,30 @@ export function UserManagementPage() {
     const department = formData.get('department') as string;
     const yearGroup = formData.get('yearGroup') as string;
 
+    // Super admin doesn't need a school_id
+    const finalSchoolId = role === 'super_admin' ? null : (schoolId || null);
+
     console.log('Attempting to assign role:', {
       user_id: selectedUserId,
       role,
-      school_id: schoolId,
+      school_id: finalSchoolId,
       department: department || null,
       year_group: yearGroup || null
     });
 
     try {
-      // Check if user already has this role in this school
+      // Check if user already has this role in this school (or globally for super_admin)
       const existingRoles = userRoles[selectedUserId] || [];
       const duplicateRole = existingRoles.find(existingRole => 
         existingRole.role === role && 
-        existingRole.school_id === schoolId &&
+        existingRole.school_id === finalSchoolId &&
         existingRole.is_active === true
       );
 
       if (duplicateRole) {
         toast({
           title: "Role Already Assigned",
-          description: `User already has the ${role.replace('_', ' ')} role in this school.`,
+          description: `User already has the ${role.replace('_', ' ')} role${finalSchoolId ? ' in this school' : ' (system-wide)'}.`,
           variant: "destructive"
         });
         setIsCreating(false);
@@ -275,7 +279,7 @@ export function UserManagementPage() {
         .insert({
           user_id: selectedUserId,
           role,
-          school_id: schoolId,
+          school_id: finalSchoolId,
           department: department || null,
           year_group: yearGroup || null,
           is_active: true
@@ -288,7 +292,7 @@ export function UserManagementPage() {
 
       toast({
         title: "Success",
-        description: "Role assigned successfully",
+        description: `${role === 'super_admin' ? 'System-wide' : 'School'} role assigned successfully`,
       });
 
       setAssignRoleOpen(false);
@@ -785,7 +789,10 @@ export function UserManagementPage() {
           <form onSubmit={assignRole} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="role">Role</Label>
-              <Select name="role" required>
+              <Select name="role" required onValueChange={(value) => {
+                // Force re-render to show/hide school field
+                setSelectedRole(value as AppRole);
+              }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
@@ -799,21 +806,31 @@ export function UserManagementPage() {
               </Select>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="schoolId">School</Label>
-              <Select name="schoolId" required>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a school" />
-                </SelectTrigger>
-                <SelectContent>
-                  {schools.map((school) => (
-                    <SelectItem key={school.id} value={school.id}>
-                      {school.name} ({school.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {selectedRole !== 'super_admin' && (
+              <div className="space-y-2">
+                <Label htmlFor="schoolId">School</Label>
+                <Select name="schoolId" required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a school" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {schools.map((school) => (
+                      <SelectItem key={school.id} value={school.id}>
+                        {school.name} ({school.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {selectedRole === 'super_admin' && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-700">
+                  <strong>System-wide role:</strong> Super Admin has access to the entire system and all schools.
+                </p>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
