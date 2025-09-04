@@ -67,7 +67,7 @@ export function UserManagementPage() {
         .from('profiles')
         .select('user_id')
         .eq('email', 'dominic@pappayacloud.com')
-        .single();
+        .maybeSingle();
 
       let userId = existingProfile?.user_id;
       
@@ -103,10 +103,10 @@ export function UserManagementPage() {
         // Assign super_admin role (no school_id needed for super_admin)
         const { error: roleError } = await supabase
           .from('user_roles')
-          .insert({
-            user_id: userId,
-            role: 'super_admin' as AppRole,
-            school_id: null, // Super admins don't need school_id
+          .insert<any>({
+            user_id: userId as any,
+            role: 'super_admin' as any,
+            school_id: null as any,
             is_active: true
           });
 

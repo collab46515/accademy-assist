@@ -107,7 +107,8 @@ serve(async (req) => {
       );
     }
 
-    // Create auth user via Admin API
+    // Create auth user via Admin API (handles existing user gracefully)
+    let newUserId: string | null = null;
     const { data: created, error: createErr } = await adminClient.auth.admin.createUser({
       email,
       password,
@@ -117,13 +118,39 @@ serve(async (req) => {
 
     if (createErr) {
       console.error('auth.admin.createUser error:', createErr);
-      return new Response(
-        JSON.stringify({ error: createErr.message || 'Failed to create auth user' }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      // If the user already exists, try to bootstrap using the current authenticated user or existing profile
+      // This supports the case where the email was previously registered
+      if ((createErr as any).status === 422 || (createErr as any).code === 'email_exists') {
+        // If the requester is authenticated and matches the email, trust that identity
+        if (auth?.user && auth.user.email?.toLowerCase() === email) {
+          newUserId = auth.user.id;
+        } else {
+          // Fallback: try to find an existing profile with this email
+          const { data: existingProfile, error: lookupErr } = await adminClient
+            .from('profiles')
+            .select('user_id')
+            .eq('email', email)
+            .maybeSingle();
+          if (lookupErr) console.error('Lookup existing profile error:', lookupErr);
+          newUserId = existingProfile?.user_id ?? null;
+        }
+
+        if (!newUserId) {
+          return new Response(
+            JSON.stringify({ error: 'User already exists. Please sign in with this email and try again.' }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      } else {
+        return new Response(
+          JSON.stringify({ error: createErr.message || 'Failed to create auth user' }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    } else {
+      newUserId = created.user?.id ?? null;
     }
 
-    const newUserId = created.user?.id;
     if (!newUserId) {
       return new Response(
         JSON.stringify({ error: 'Auth user creation returned no user id' }),
