@@ -62,18 +62,63 @@ export function UserManagementPage() {
   const bootstrapDominic = async () => {
     setIsCreating(true);
     try {
-      const { data, error } = await supabase.functions.invoke('admin-create-user', {
-        body: {
-          email: 'dominic@pappayacloud.com',
-          first_name: 'Dominic',
-          last_name: 'Smith',
-          password: 'TempPass123!',
-          bootstrap: true,
-        },
+      // First check if user already exists
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('user_id')
+        .eq('email', 'dominic@pappayacloud.com')
+        .single();
+
+      let userId = existingProfile?.user_id;
+      
+      if (!userId) {
+        // User doesn't exist, create them
+        const { data, error } = await supabase.functions.invoke('admin-create-user', {
+          body: {
+            email: 'dominic@pappayacloud.com',
+            first_name: 'Dominic',
+            last_name: 'Smith',
+            password: 'TempPass123!',
+            bootstrap: true,
+          },
+        });
+
+        if (error) throw error;
+        userId = (data as any)?.user_id;
+        console.log('User created:', data);
+      } else {
+        console.log('User already exists, userId:', userId);
+      }
+
+      // Check if user already has super_admin role
+      const { data: existingRole } = await supabase
+        .from('user_roles')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('role', 'super_admin')
+        .eq('is_active', true)
+        .single();
+
+      if (!existingRole) {
+        // Assign super_admin role (no school_id needed for super_admin)
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert({
+            user_id: userId,
+            role: 'super_admin' as AppRole,
+            school_id: null, // Super admins don't need school_id
+            is_active: true
+          });
+
+        if (roleError) throw roleError;
+        console.log('Super admin role assigned');
+      }
+
+      const tempPassword = existingProfile ? 'existing password' : 'TempPass123!';
+      toast({ 
+        title: 'Super Admin Ready', 
+        description: `dominic@pappayacloud.com is now super admin. ${!existingProfile ? `Password: ${tempPassword}` : 'Use existing password to login.'}` 
       });
-      if (error) throw error;
-      const tempPassword = (data as any)?.temp_password || 'TempPass123!';
-      toast({ title: 'Super Admin Bootstrapped', description: `Created. Temporary password: ${tempPassword}` });
       fetchUsers();
     } catch (e: any) {
       toast({ title: 'Error', description: e.message || 'Failed to bootstrap super admin', variant: 'destructive' });
