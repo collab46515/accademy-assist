@@ -101,6 +101,7 @@ const erpModules = [
       { title: "Dashboard", url: "/student-services", icon: LayoutDashboard },
       { title: "Student Directory", url: "/students", icon: Users },
       { title: "Attendance Tracking", url: "/attendance", icon: CheckSquare },
+      { title: "Transport Management", url: "/transport", icon: Truck },
       { title: "Library Services", url: "/library", icon: Library },
       { title: "Behavior Tracking", url: "/behavior-tracking", icon: Target },
       { title: "Student Welfare", url: "/student-welfare", icon: Heart },
@@ -134,7 +135,6 @@ const erpModules = [
       { title: "Financial Reports", url: "/accounting/reports", icon: BarChart3 },
       { title: "Budget Planning", url: "/accounting/budget", icon: Target },
       { title: "Vendor Management", url: "/accounting/vendors", icon: Building2 },
-      { title: "Transport Management", url: "/transport", icon: Truck },
       { title: "Purchase Orders", url: "/accounting/purchase-orders", icon: ShoppingCart },
     ]
   },
@@ -193,6 +193,7 @@ function getCurrentModule(pathname: string) {
   if (pathname.startsWith('/student-services') || 
       pathname.startsWith('/students') || 
       pathname.startsWith('/attendance') || 
+      pathname.startsWith('/transport') ||
       pathname.startsWith('/library') || 
       pathname.startsWith('/student-welfare') ||
       pathname.startsWith('/safeguarding') || 
@@ -205,8 +206,7 @@ function getCurrentModule(pathname: string) {
   
   if (pathname.startsWith('/finance-operations') || 
       pathname.startsWith('/school-management/fee-management') || 
-      pathname.startsWith('/accounting') ||
-      pathname.startsWith('/transport')) return 'Finance & Operations';
+      pathname.startsWith('/accounting')) return 'Finance & Operations';
   
   if (pathname.startsWith('/ai-suite') || pathname.startsWith('/ai-classroom')) return 'AI Suite';
   
