@@ -32,9 +32,10 @@ export type PermissionType = 'read' | 'write' | 'delete' | 'approve' | 'escalate
 
 interface UserRole {
   role: AppRole;
-  school_id: string;
+  school_id: string | null;
   department?: string;
   year_group?: string;
+  is_active: boolean;
 }
 
 interface School {
@@ -87,6 +88,7 @@ export function useRBAC() {
         school_id: item.school_id,
         department: item.department,
         year_group: item.year_group,
+        is_active: true, // Already filtered by is_active = true in query
       })) || [];
 
       const uniqueSchools: School[] = [];
@@ -160,8 +162,20 @@ export function useRBAC() {
   };
 
   const getCurrentSchoolRoles = (): UserRole[] => {
-    if (!currentSchool) return [];
-    return userRoles.filter(role => role.school_id === currentSchool.id);
+    // Super admin roles (school_id is null) should always be shown
+    const superAdminRoles = userRoles.filter(role => 
+      role.role === 'super_admin' && role.is_active
+    );
+    
+    // If no current school, just return super admin roles
+    if (!currentSchool) return superAdminRoles;
+    
+    // Return school-specific roles plus super admin roles
+    const schoolSpecificRoles = userRoles.filter(role => 
+      role.school_id === currentSchool.id && role.is_active
+    );
+    
+    return [...superAdminRoles, ...schoolSpecificRoles];
   };
 
   const switchSchool = (school: School) => {
