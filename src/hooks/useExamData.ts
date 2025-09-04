@@ -164,7 +164,7 @@ export function useExamData() {
     }
   };
 
-  // Record exam result
+  // Record exam result (upsert by exam_id + student_id)
   const recordExamResult = async (resultData: {
     exam_id: string;
     student_id: string;
@@ -186,18 +186,45 @@ export function useExamData() {
         ? Math.round((resultData.marks_obtained / exam.total_marks) * 100 * 100) / 100 
         : 0;
 
-      const { data, error } = await supabase
+      const { data: existing, error: existingErr } = await supabase
         .from('exam_results')
-        .insert({
-          ...resultData,
-          percentage,
-          marked_by: user?.id,
-          marked_at: new Date().toISOString()
-        })
-        .select()
-        .single();
+        .select('id')
+        .eq('exam_id', resultData.exam_id)
+        .eq('student_id', resultData.student_id)
+        .maybeSingle();
+      if (existingErr) throw existingErr;
 
-      if (error) throw error;
+      let data;
+      if (existing?.id) {
+        const updateRes = await supabase
+          .from('exam_results')
+          .update({
+            marks_obtained: resultData.marks_obtained,
+            grade: resultData.grade,
+            feedback: resultData.feedback,
+            percentage,
+            marked_by: user?.id,
+            marked_at: new Date().toISOString()
+          })
+          .eq('id', existing.id)
+          .select()
+          .single();
+        if (updateRes.error) throw updateRes.error;
+        data = updateRes.data;
+      } else {
+        const insertRes = await supabase
+          .from('exam_results')
+          .insert({
+            ...resultData,
+            percentage,
+            marked_by: user?.id,
+            marked_at: new Date().toISOString()
+          })
+          .select()
+          .single();
+        if (insertRes.error) throw insertRes.error;
+        data = insertRes.data;
+      }
 
       toast({
         title: "Success",

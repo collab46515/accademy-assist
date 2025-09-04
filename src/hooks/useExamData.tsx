@@ -230,23 +230,50 @@ export function useExamData() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      const { data, error } = await supabase
+      // If a result already exists for this exam and student, update it; otherwise insert
+      const { data: existing, error: existingErr } = await supabase
         .from('exam_results')
-        .insert({
-          ...resultData,
-          marked_by: user.id
-        })
-        .select()
-        .single();
+        .select('id')
+        .eq('exam_id', resultData.exam_id)
+        .eq('student_id', resultData.student_id)
+        .maybeSingle();
+      if (existingErr) throw existingErr;
 
-      if (error) throw error;
-
-      setExamResults(prev => [data as ExamResult, ...prev]);
-      toast.success('Exam result recorded successfully');
-      return data as ExamResult;
+      if (existing?.id) {
+        const { data, error } = await supabase
+          .from('exam_results')
+          .update({
+            marks_obtained: resultData.marks_obtained,
+            grade: resultData.grade,
+            feedback: resultData.feedback,
+            marked_by: user.id,
+            marked_at: new Date().toISOString(),
+          })
+          .eq('id', existing.id)
+          .select()
+          .single();
+        if (error) throw error;
+        setExamResults(prev => prev.map(r => r.id === existing.id ? (data as ExamResult) : r));
+        toast.success('Exam result updated');
+        return data as ExamResult;
+      } else {
+        const { data, error } = await supabase
+          .from('exam_results')
+          .insert({
+            ...resultData,
+            marked_by: user.id,
+            marked_at: new Date().toISOString(),
+          })
+          .select()
+          .single();
+        if (error) throw error;
+        setExamResults(prev => [data as ExamResult, ...prev]);
+        toast.success('Exam result recorded');
+        return data as ExamResult;
+      }
     } catch (error) {
-      console.error('Error recording exam result:', error);
-      toast.error('Failed to record exam result');
+      console.error('Error recording/updating exam result:', error);
+      toast.error('Failed to save exam result');
       throw error;
     }
   };

@@ -156,7 +156,8 @@ export function useAttendanceData() {
       if (fetchError) throw fetchError;
 
       if (existing?.id) {
-        const { error: updateError } = await supabase
+        // Only allow updating if you originally marked the record (RLS requires this)
+        const { data: updated, error: updateError } = await supabase
           .from('attendance_records')
           .update({
             period: attendance.period,
@@ -167,7 +168,10 @@ export function useAttendanceData() {
             teacher_id: user.id,
             marked_at: new Date().toISOString(),
           })
-          .eq('id', existing.id);
+          .eq('id', existing.id)
+          .eq('teacher_id', user.id)
+          .select()
+          .single();
 
         if (updateError) throw updateError;
       } else {
