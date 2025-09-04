@@ -298,7 +298,7 @@ export const VehiclesManager = () => {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="">Unassigned</SelectItem>
+                              <SelectItem value="unassigned">Unassigned</SelectItem>
                               {drivers.filter(d => d.status === 'active').map((driver) => (
                                 <SelectItem key={driver.id} value={driver.id}>
                                   {driver.first_name} {driver.last_name}
@@ -323,7 +323,7 @@ export const VehiclesManager = () => {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="">None</SelectItem>
+                              <SelectItem value="none">None</SelectItem>
                               {drivers.filter(d => d.status === 'active').map((driver) => (
                                 <SelectItem key={driver.id} value={driver.id}>
                                   {driver.first_name} {driver.last_name}

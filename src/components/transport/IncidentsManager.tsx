@@ -232,7 +232,7 @@ export const IncidentsManager = () => {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="">Not on route</SelectItem>
+                              <SelectItem value="no-route">Not on route</SelectItem>
                               {routes.map((route) => (
                                 <SelectItem key={route.id} value={route.id}>
                                   {route.route_name} ({route.route_code})

@@ -310,7 +310,7 @@ export const RoutesManager = () => {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="">Unassigned</SelectItem>
+                              <SelectItem value="unassigned">Unassigned</SelectItem>
                               {vehicles.filter(v => v.status === 'active').map((vehicle) => (
                                 <SelectItem key={vehicle.id} value={vehicle.id}>
                                   {vehicle.vehicle_number} ({vehicle.vehicle_type})
@@ -335,7 +335,7 @@ export const RoutesManager = () => {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="">Unassigned</SelectItem>
+                              <SelectItem value="unassigned">Unassigned</SelectItem>
                               {drivers.filter(d => d.status === 'active').map((driver) => (
                                 <SelectItem key={driver.id} value={driver.id}>
                                   {driver.first_name} {driver.last_name}
@@ -360,7 +360,7 @@ export const RoutesManager = () => {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="">None</SelectItem>
+                              <SelectItem value="none">None</SelectItem>
                               {drivers.filter(d => d.status === 'active').map((driver) => (
                                 <SelectItem key={driver.id} value={driver.id}>
                                   {driver.first_name} {driver.last_name}
