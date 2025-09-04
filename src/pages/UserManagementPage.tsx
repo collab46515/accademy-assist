@@ -160,7 +160,7 @@ export function UserManagementPage() {
           department,
           year_group,
           is_active,
-          schools!inner(name)
+          schools(name)
         `)
         .eq('is_active', true);
 
@@ -178,7 +178,7 @@ export function UserManagementPage() {
           school_id: role.school_id,
           department: role.department,
           year_group: role.year_group,
-          school_name: (role.schools as any).name,
+          school_name: role.schools ? (role.schools as any).name : 'System-wide',
           is_active: role.is_active
         });
       });
