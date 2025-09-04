@@ -134,6 +134,7 @@ const erpModules = [
       { title: "Financial Reports", url: "/accounting/reports", icon: BarChart3 },
       { title: "Budget Planning", url: "/accounting/budget", icon: Target },
       { title: "Vendor Management", url: "/accounting/vendors", icon: Building2 },
+      { title: "Transport Management", url: "/transport", icon: Truck },
       { title: "Purchase Orders", url: "/accounting/purchase-orders", icon: ShoppingCart },
     ]
   },

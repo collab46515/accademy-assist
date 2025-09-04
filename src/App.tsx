@@ -40,6 +40,7 @@ import { HRManagementPage } from "./pages/HRManagementPage";
 import { AccountingPage } from "./pages/AccountingPage";
 import { MasterDataPage } from "./pages/MasterDataPage";
 import TimetablePage from "./pages/TimetablePage";
+import TransportPage from "./pages/TransportPage";
 import LessonPlanningPage from "./pages/LessonPlanningPage";
 import AcademicsPage from "./pages/AcademicsPage";
 import AcademicManagementPage from "./pages/AcademicManagementPage";
@@ -173,8 +174,9 @@ const App = () => (
                           <Route path="/accounting/purchase-orders" element={<AccountingPage />} />
                           <Route path="/accounting/reports" element={<AccountingPage />} />
                           <Route path="/accounting/accounts" element={<AccountingPage />} />
-                          <Route path="/accounting/budget" element={<AccountingPage />} />
-                          <Route path="/accounting/transactions/new" element={<AccountingPage />} />
+                           <Route path="/accounting/budget" element={<AccountingPage />} />
+                           <Route path="/transport" element={<TransportPage />} />
+                           <Route path="/accounting/transactions/new" element={<AccountingPage />} />
                           <Route path="/accounting/settings" element={<AccountingPage />} />
                           <Route path="/user-management" element={
                             <ProtectedRoute>
