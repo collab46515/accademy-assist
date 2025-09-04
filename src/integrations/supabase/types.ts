@@ -7859,7 +7859,7 @@ export type Database = {
           id: string
           is_active: boolean
           role: Database["public"]["Enums"]["app_role"]
-          school_id: string
+          school_id: string | null
           user_id: string
           year_group: string | null
         }
@@ -7873,7 +7873,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           role: Database["public"]["Enums"]["app_role"]
-          school_id: string
+          school_id?: string | null
           user_id: string
           year_group?: string | null
         }
@@ -7887,7 +7887,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           role?: Database["public"]["Enums"]["app_role"]
-          school_id?: string
+          school_id?: string | null
           user_id?: string
           year_group?: string | null
         }
