@@ -86,6 +86,110 @@ interface SchoolSettings {
   };
 }
 
+// First School Creator Component for Super Admins
+function FirstSchoolCreator() {
+  const [creating, setCreating] = useState(false);
+  const { toast } = useToast();
+
+  const handleCreateSchool = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setCreating(true);
+
+    const formData = new FormData(e.currentTarget);
+    const schoolData = {
+      name: formData.get('name') as string,
+      code: formData.get('code') as string,
+      address: formData.get('address') as string,
+      phone: formData.get('phone') as string,
+      email: formData.get('email') as string,
+      website: formData.get('website') as string,
+      principal_name: formData.get('principal_name') as string,
+      establishment_type: formData.get('establishment_type') as string,
+    };
+
+    try {
+      const { error } = await supabase
+        .from('schools')
+        .insert([schoolData]);
+
+      if (error) throw error;
+
+      toast({
+        title: "School Created",
+        description: "First school created successfully. You can now access school settings.",
+      });
+
+      // Refresh the page to load the new school
+      window.location.reload();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create school",
+        variant: "destructive"
+      });
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleCreateSchool} className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="name">School Name</Label>
+          <Input id="name" name="name" required placeholder="e.g., St. Mary's Primary School" />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="code">School Code</Label>
+          <Input id="code" name="code" required placeholder="e.g., SMPS001" />
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="address">Address</Label>
+        <Textarea id="address" name="address" required placeholder="Full school address" />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="phone">Phone</Label>
+          <Input id="phone" name="phone" required placeholder="+44 20 1234 5678" />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" name="email" type="email" required placeholder="admin@school.edu" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="website">Website</Label>
+          <Input id="website" name="website" placeholder="https://www.school.edu" />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="principal_name">Principal Name</Label>
+          <Input id="principal_name" name="principal_name" placeholder="Dr. John Smith" />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="establishment_type">Establishment Type</Label>
+        <select name="establishment_type" id="establishment_type" className="w-full p-2 border border-border rounded-md" required>
+          <option value="primary">Primary School</option>
+          <option value="secondary">Secondary School</option>
+          <option value="combined">Combined School</option>
+          <option value="college">College</option>
+        </select>
+      </div>
+
+      <Button type="submit" className="w-full" disabled={creating}>
+        {creating && <span className="animate-spin mr-2">⏳</span>}
+        Create First School
+      </Button>
+    </form>
+  );
+}
+
 export function SchoolSettingsManager() {
   const [schoolInfo, setSchoolInfo] = useState<SchoolInfo | null>(null);
   const [schoolSettings, setSchoolSettings] = useState<SchoolSettings | null>(null);
@@ -94,13 +198,55 @@ export function SchoolSettingsManager() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const { toast } = useToast();
-  const { currentSchool, isSchoolAdmin, isSuperAdmin } = useRBAC();
+  const { currentSchool, isSchoolAdmin, isSuperAdmin, schools } = useRBAC();
+
+  // Show school creation for super admins when no schools exist
+  if (isSuperAdmin() && (!schools || schools.length === 0)) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card className="max-w-2xl mx-auto">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building className="h-5 w-5" />
+              Create First School
+            </CardTitle>
+            <CardDescription>
+              As a Super Admin, you need to create the first school before accessing school settings.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Alert className="mb-6">
+              <School className="h-4 w-4" />
+              <AlertDescription>
+                No schools exist in the system yet. Create your first school to get started.
+              </AlertDescription>
+            </Alert>
+            <FirstSchoolCreator />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (currentSchool) {
       fetchSchoolData();
     }
   }, [currentSchool]);
+
+  // Check admin access
+  if (!isSuperAdmin() && !isSchoolAdmin()) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Alert>
+          <Shield className="h-4 w-4" />
+          <AlertDescription>
+            Access denied. Only administrators can access School Settings.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   const fetchSchoolData = async () => {
     if (!currentSchool) return;
