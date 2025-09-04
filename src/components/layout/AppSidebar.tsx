@@ -205,7 +205,8 @@ function getCurrentModule(pathname: string) {
   
   if (pathname.startsWith('/finance-operations') || 
       pathname.startsWith('/school-management/fee-management') || 
-      pathname.startsWith('/accounting')) return 'Finance & Operations';
+      pathname.startsWith('/accounting') ||
+      pathname.startsWith('/transport')) return 'Finance & Operations';
   
   if (pathname.startsWith('/ai-suite') || pathname.startsWith('/ai-classroom')) return 'AI Suite';
   
