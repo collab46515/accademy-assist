@@ -8119,6 +8119,10 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: boolean
       }
+      remove_demo_profiles_and_roles: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       request_password_reset: {
         Args: { target_user_id: string }
         Returns: boolean
