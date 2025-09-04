@@ -69,12 +69,11 @@ export function MasterDataPage() {
     refreshData
   } = useMasterData();
 
-  // Allow access for super admins, school admins, or when no super admin exists (bootstrap mode)
-  // Check if user has any meaningful role data to determine if system is bootstrapped
-  const hasAccessOrCanBootstrap = isSuperAdmin() || isSchoolAdmin() || true; // Allow access for bootstrap
+  // Allow access for super admins or school admins only
+  const hasAccess = isSuperAdmin() || isSchoolAdmin();
 
   // Check admin access
-  if (!hasAccessOrCanBootstrap) {
+  if (!hasAccess) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Alert>
