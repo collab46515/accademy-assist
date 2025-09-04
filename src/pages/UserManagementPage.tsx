@@ -140,11 +140,10 @@ export function UserManagementPage() {
     try {
       setLoading(true);
       
-      // Fetch all users (profiles)
+      // Fetch all users (profiles) - show both active and inactive
       const { data: usersData, error: usersError } = await supabase
         .from('profiles')
         .select('*')
-        .eq('is_active', true)
         .order('created_at', { ascending: false });
 
       if (usersError) throw usersError;
