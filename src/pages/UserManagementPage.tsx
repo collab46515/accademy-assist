@@ -133,41 +133,36 @@ export function UserManagementPage() {
     const password = formData.get('password') as string;
 
     try {
-      // Use regular signup instead of admin API
-      const redirectUrl = `${window.location.origin}/`;
-      
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            first_name: firstName,
-            last_name: lastName
-          }
-        }
+      const { data, error } = await supabase.functions.invoke('admin-create-user', {
+        body: {
+          email,
+          first_name: firstName,
+          last_name: lastName,
+          password,
+        },
       });
 
       if (error) throw error;
 
+      const tempPassword = (data as any)?.temp_password || password;
+
       toast({
-        title: "Success", 
-        description: `User ${email} created successfully. They will receive a confirmation email.`,
+        title: 'User Created',
+        description: `User ${email} created. Temporary password: ${tempPassword}`,
       });
 
       setCreateUserOpen(false);
       fetchUsers();
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to create user",
-        variant: "destructive"
+        title: 'Error',
+        description: error.message || 'Failed to create user',
+        variant: 'destructive',
       });
     } finally {
       setIsCreating(false);
     }
   };
-
   const assignRole = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsCreating(true);
@@ -290,7 +285,7 @@ export function UserManagementPage() {
           </div>
         </div>
         
-        <div className="flex gap-2">
+        {isSuperAdmin() && (
           <Dialog open={createUserOpen} onOpenChange={setCreateUserOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -302,7 +297,7 @@ export function UserManagementPage() {
               <DialogHeader>
                 <DialogTitle>Create New User</DialogTitle>
                 <DialogDescription>
-                  Create a new user account in the system
+                  Create a new user account (super admins only)
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={createUser} className="space-y-4">
@@ -333,7 +328,7 @@ export function UserManagementPage() {
               </form>
             </DialogContent>
           </Dialog>
-        </div>
+        )}
       </div>
 
       {/* Quick Action Cards */}

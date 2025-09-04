@@ -52,19 +52,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, metadata?: any) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: metadata
-      }
-    });
+    const error = { message: 'Sign-ups are disabled. Please contact a super admin.' } as any;
+    console.warn('Attempted sign-up blocked:', { email });
     return { error };
   };
-
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
