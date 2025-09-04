@@ -284,7 +284,10 @@ export function UserManagementPage() {
     }
   };
 
-  if (!isSuperAdmin() && !isSchoolAdmin()) {
+  // Allow access for bootstrapping if no super admin exists
+  const hasAccessOrCanBootstrap = isSuperAdmin() || isSchoolAdmin() || !anySuperAdmin;
+  
+  if (!hasAccessOrCanBootstrap) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="w-full max-w-md text-center">
