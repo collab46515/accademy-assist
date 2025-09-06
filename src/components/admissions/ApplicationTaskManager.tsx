@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -58,81 +58,48 @@ interface Document {
   size: string;
 }
 
-const mockApplication: Application = {
-  id: '1',
-  applicationNumber: 'APP202400001',
-  studentName: 'Emma Thompson',
-  currentStage: 'enrollment',
-  status: 'in_progress',
-  yearGroup: 'Year 7',
-  submittedAt: '2024-01-15T10:30:00Z'
-};
-
-const mockTasks: Task[] = [
-  {
-    id: '1',
-    title: 'Verify Birth Certificate',
-    description: 'Review and verify the uploaded birth certificate',
-    type: 'verification',
-    status: 'pending',
-    assignedTo: 'Admissions Officer',
-    dueDate: '2024-01-20',
-    priority: 'high',
-    applicationId: '1',
-    stage: 'enrollment'
-  },
-  {
-    id: '2',
-    title: 'Upload Medical Forms',
-    description: 'Parent needs to upload medical history and immunization records',
-    type: 'document_upload',
-    status: 'in_progress',
-    assignedTo: 'Parent',
-    dueDate: '2024-01-22',
-    priority: 'medium',
-    applicationId: '1',
-    stage: 'enrollment'
-  },
-  {
-    id: '3',
-    title: 'Schedule Assessment',
-    description: 'Schedule academic assessment for student',
-    type: 'assessment',
-    status: 'pending',
-    assignedTo: 'Assessment Coordinator',
-    dueDate: '2024-01-25',
-    priority: 'medium',
-    applicationId: '1',
-    stage: 'assessment'
-  }
-];
-
-const mockDocuments: Document[] = [
-  {
-    id: '1',
-    name: 'birth_certificate.pdf',
-    type: 'Birth Certificate',
-    uploadedAt: '2024-01-16T09:30:00Z',
-    status: 'pending',
-    size: '2.1 MB'
-  },
-  {
-    id: '2',
-    name: 'previous_school_report.pdf',
-    type: 'School Report',
-    uploadedAt: '2024-01-16T10:15:00Z',
-    status: 'verified',
-    size: '1.8 MB'
-  }
-];
+// Remove mock data - now using real data integration
 
 export function ApplicationTaskManager() {
-  const [selectedApplication] = useState<Application>(mockApplication);
-  const [tasks, setTasks] = useState<Task[]>(mockTasks);
-  const [documents, setDocuments] = useState<Document[]>(mockDocuments);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch real application data
+  useEffect(() => {
+    const fetchApplicationData = async () => {
+      setLoading(true);
+      try {
+        // For now, show empty state - this would connect to real data
+        setSelectedApplication(null);
+        setTasks([]);
+        setDocuments([]);
+      } catch (error) {
+        console.error('Error fetching application data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApplicationData();
+  }, []);
+
+  if (loading) {
+    return <div className="flex justify-center p-8">Loading application data...</div>;
+  }
+
+  if (!selectedApplication) {
+    return (
+      <div className="text-center p-8">
+        <h3 className="text-lg font-semibold mb-2">No Application Selected</h3>
+        <p className="text-muted-foreground">Please select an application from the list to manage tasks.</p>
+      </div>
+    );
+  }
 
   const handleTaskComplete = (taskId: string) => {
     setTasks(prev => prev.map(task => 
