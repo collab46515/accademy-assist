@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useRBAC } from '@/hooks/useRBAC';
 import { supabase } from '@/integrations/supabase/client';
-import { useAcademicData } from '@/hooks/useAcademicData';
+import { useMasterData } from '@/hooks/useMasterData';
 import { Plus, User, Phone, Mail, Calendar, MapPin, FileText } from 'lucide-react';
 
 interface AddStudentFormProps {
@@ -21,7 +21,7 @@ interface AddStudentFormProps {
 export function AddStudentForm({ onStudentAdded, trigger }: AddStudentFormProps) {
   const { toast } = useToast();
   const { currentSchool } = useRBAC();
-  const { yearGroups } = useAcademicData();
+  const { yearGroups, classes } = useMasterData();
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -306,8 +306,8 @@ export function AddStudentForm({ onStudentAdded, trigger }: AddStudentFormProps)
                   </SelectTrigger>
                   <SelectContent>
                     {yearGroups.map((yearGroup) => (
-                      <SelectItem key={yearGroup.id} value={yearGroup.name}>
-                        {yearGroup.name}
+                      <SelectItem key={yearGroup.id} value={yearGroup.year_name}>
+                        {yearGroup.year_name}
                       </SelectItem>
                     ))}
                     {/* Fallback options if no year groups loaded */}
