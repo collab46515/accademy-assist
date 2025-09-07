@@ -335,19 +335,86 @@ export function AppSidebar() {
 
   // Filter modules based on permissions
   const accessibleModules = useMemo(() => {
+    // Map sidebar titles to database module names
+    const moduleNameMap: Record<string, string> = {
+      'Dashboard': 'Dashboard',
+      'Admissions Workflow': 'Admissions',
+      'Enrollment Test': 'Admissions',
+      'Student Exit': 'Admissions',
+      'Curriculum & Lessons': 'Curriculum',
+      'Academic Management': 'Academics',
+      'Timetable Management': 'Timetable',
+      'Exams & Assessment': 'Academics',
+      'Assignments': 'Assignments',
+      'Report Cards': 'Reports',
+      'Gradebook': 'Gradebook',
+      'HOD Dashboard': 'Dashboard',
+      'Student Directory': 'Students',
+      'Attendance Tracking': 'Attendance',
+      'Transport Management': 'Transport',
+      'Library Services': 'Library',
+      'Behavior Tracking': 'Behavior Tracking',
+      'Student Welfare': 'Safeguarding',
+      'Infirmary': 'Infirmary',
+      'Complaints': 'Safeguarding',
+      'Safeguarding': 'Safeguarding',
+      'Activities & Events': 'Activities',
+      'Events Management': 'Events',
+      'Communication': 'Communication',
+      'Employee Management': 'HR Management',
+      'Staff Directory': 'Staff',
+      'Recruitment': 'HR Management',
+      'Employee Exit': 'HR Management',
+      'Performance & Training': 'HR Management',
+      'Payroll & Benefits': 'HR Management',
+      'Time & Attendance': 'HR Management',
+      'Fee Management': 'Fee Management',
+      'Accounting': 'Finance',
+      'Financial Reports': 'Finance',
+      'Budget Planning': 'Finance',
+      'Vendor Management': 'Finance',
+      'Purchase Orders': 'Finance',
+      'Finance Hub': 'Finance',
+      'AI Classroom': 'AI Suite',
+      'Virtual Classroom': 'AI Suite',
+      'AI Assistants': 'AI Suite',
+      'AI Timetable Generator': 'AI Suite',
+      'Lesson Planner': 'AI Suite',
+      'AI Grading Assistant': 'AI Suite',
+      'Comment Generator': 'AI Suite',
+      'Predictive Analytics': 'AI Suite',
+      'AI Settings': 'AI Suite',
+      'School Settings': 'Settings',
+      'User Management': 'User Management',
+      'Permission Management': 'User Management',
+      'System Settings': 'System Settings',
+      'Master Data': 'Master Data',
+      'Data Integrity Test': 'Data Integrity Test',
+      'Technical Docs': 'Technical Docs',
+      'Integrations': 'Integrations',
+      'Portals': 'Portals',
+      'Footer CMS': 'Settings'
+    };
+    
     // Filter existing ERP modules based on user permissions
     return erpModules.map(category => ({
       ...category,
       subItems: category.subItems.filter(item => {
-        // Check if user has permission to view this module
-        const hasPermission = hasModulePermission(item.title, 'view');
+        // Get the database module name for this sidebar item
+        const dbModuleName = moduleNameMap[item.title];
         
         // Special handling for admin-only modules
         if (item.title === 'User Management' || item.title === 'Permission Management') {
           return isSuperAdmin();
         }
         
-        return hasPermission;
+        // If we have a mapping, check permission using the mapped name
+        if (dbModuleName) {
+          return hasModulePermission(dbModuleName, 'view');
+        }
+        
+        // Fall back to original title if no mapping exists
+        return hasModulePermission(item.title, 'view');
       })
     })).filter(category => category.subItems.length > 0); // Remove empty categories
   }, [hasModulePermission, isSuperAdmin]);
