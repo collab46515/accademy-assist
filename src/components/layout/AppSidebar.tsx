@@ -54,6 +54,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRBAC } from "@/hooks/useRBAC";
+import { usePermissions } from "@/hooks/usePermissions";
 import { 
   Sidebar, 
   SidebarContent, 
@@ -168,6 +169,7 @@ const erpModules = [
       { title: "Dashboard", url: "/administration", icon: LayoutDashboard },
       { title: "School Settings", url: "/school-settings", icon: Building },
       { title: "User Management", url: "/user-management", icon: UserCog },
+      { title: "Permission Management", url: "/permission-management", icon: Shield },
       { title: "System Settings", url: "/admin-management", icon: Settings },
       { title: "Master Data", url: "/master-data", icon: Database },
       { title: "Data Integrity Test", url: "/data-integrity-test", icon: CheckCircle },
@@ -315,13 +317,34 @@ export function AppSidebar() {
   const location = useLocation();
   const { state } = useSidebar();
   const { signOut, user } = useAuth();
-  const { currentSchool } = useRBAC();
+  const { currentSchool, isSuperAdmin } = useRBAC();
+  const { getAccessibleModules, hasModulePermission } = usePermissions();
   
   // Memoize current module calculation
   const currentModule = useMemo(() => getCurrentModule(location.pathname), [location.pathname]);
+
+  // Filter modules based on permissions
+  const accessibleModules = useMemo(() => {
+    // Filter existing ERP modules based on user permissions
+    return erpModules.map(category => ({
+      ...category,
+      subItems: category.subItems.filter(item => {
+        // Check if user has permission to view this module
+        const hasPermission = hasModulePermission(item.title, 'view');
+        
+        // Special handling for admin-only modules
+        if (item.title === 'User Management' || item.title === 'Permission Management') {
+          return isSuperAdmin();
+        }
+        
+        return hasPermission;
+      })
+    })).filter(category => category.subItems.length > 0); // Remove empty categories
+  }, [hasModulePermission, isSuperAdmin]);
+
   const currentModuleData = useMemo(() => 
-    erpModules.find(module => module.title === currentModule), 
-    [currentModule]
+    accessibleModules.find(module => module.title === currentModule), 
+    [accessibleModules, currentModule]
   );
 
   const handleLogout = useCallback(async () => {
@@ -352,7 +375,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
-              {erpModules.map((module) => (
+              {accessibleModules.map((module) => (
                 <SidebarMenuItem key={module.title}>
                   <SidebarMenuButton 
                     asChild 

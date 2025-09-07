@@ -74,6 +74,7 @@ import VirtualClassroomPage from "./pages/VirtualClassroomPage";
 import AIClassroomPage from "./pages/AIClassroomPage";
 import TechnicalDocsPage from "./pages/TechnicalDocsPage";
 import EnrollmentTestPage from "./pages/EnrollmentTestPage";
+import PermissionManagementPage from "./pages/PermissionManagementPage";
 import DataIntegrityTestPage from "./pages/DataIntegrityTestPage";
 
 const queryClient = new QueryClient();
@@ -178,12 +179,17 @@ const App = () => (
                            <Route path="/transport" element={<TransportPage />} />
                            <Route path="/accounting/transactions/new" element={<AccountingPage />} />
                           <Route path="/accounting/settings" element={<AccountingPage />} />
-                          <Route path="/user-management" element={
-                            <ProtectedRoute>
-                              <UserManagementPage />
-                            </ProtectedRoute>
-                          } />
-                           <Route path="/integrations" element={<IntegrationsPage />} />
+                           <Route path="/user-management" element={
+                             <ProtectedRoute>
+                               <UserManagementPage />
+                             </ProtectedRoute>
+                           } />
+                           <Route path="/permission-management" element={
+                             <ProtectedRoute>
+                               <PermissionManagementPage />
+                             </ProtectedRoute>
+                           } />
+                            <Route path="/integrations" element={<IntegrationsPage />} />
                            <Route path="/technical-docs" element={<TechnicalDocsPage />} />
                            <Route path="/portals/*" element={<PortalsPage />} />
                            <Route path="*" element={<NotFound />} />

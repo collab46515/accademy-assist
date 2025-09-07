@@ -3823,6 +3823,50 @@ export type Database = {
         }
         Relationships: []
       }
+      field_permissions: {
+        Row: {
+          created_at: string
+          field_name: string
+          id: string
+          is_editable: boolean
+          is_required: boolean
+          is_visible: boolean
+          module_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          field_name: string
+          id?: string
+          is_editable?: boolean
+          is_required?: boolean
+          is_visible?: boolean
+          module_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          field_name?: string
+          id?: string
+          is_editable?: boolean
+          is_required?: boolean
+          is_visible?: boolean
+          module_id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "field_permissions_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grading_results: {
         Row: {
           assignment_id: string | null
@@ -5199,6 +5243,56 @@ export type Database = {
         }
         Relationships: []
       }
+      modules: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          name: string
+          parent_module_id: string | null
+          route: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          parent_module_id?: string | null
+          route: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          parent_module_id?: string | null
+          route?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modules_parent_module_id_fkey"
+            columns: ["parent_module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       onboarding_progress: {
         Row: {
           buddy_assigned: string | null
@@ -6177,6 +6271,53 @@ export type Database = {
           year_group?: string
         }
         Relationships: []
+      }
+      role_module_permissions: {
+        Row: {
+          can_approve: boolean
+          can_create: boolean
+          can_delete: boolean
+          can_edit: boolean
+          can_view: boolean
+          created_at: string
+          id: string
+          module_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+        }
+        Insert: {
+          can_approve?: boolean
+          can_create?: boolean
+          can_delete?: boolean
+          can_edit?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          module_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Update: {
+          can_approve?: boolean
+          can_create?: boolean
+          can_delete?: boolean
+          can_edit?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          module_id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_module_permissions_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       role_permissions: {
         Row: {
