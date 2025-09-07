@@ -106,7 +106,9 @@ const erpModules = [
       { title: "Library Services", url: "/library", icon: Library },
       { title: "Behavior Tracking", url: "/behavior-tracking", icon: Target },
       { title: "Student Welfare", url: "/student-welfare", icon: Heart },
+      { title: "Safeguarding", url: "/safeguarding", icon: Shield },
       { title: "Activities & Events", url: "/activities", icon: Calendar },
+      { title: "Events Management", url: "/events", icon: CalendarDays },
       { title: "Communication", url: "/communication", icon: MessageSquare },
     ]
   },
@@ -137,6 +139,7 @@ const erpModules = [
       { title: "Budget Planning", url: "/accounting/budget", icon: Target },
       { title: "Vendor Management", url: "/accounting/vendors", icon: Building2 },
       { title: "Purchase Orders", url: "/accounting/purchase-orders", icon: ShoppingCart },
+      { title: "Finance Hub", url: "/finance", icon: DollarSign },
     ]
   },
   {
@@ -146,6 +149,7 @@ const erpModules = [
     subItems: [
       { title: "Dashboard", url: "/ai-suite", icon: LayoutDashboard },
       { title: "AI Classroom", url: "/ai-classroom", icon: Monitor },
+      { title: "Virtual Classroom", url: "/virtual-classroom", icon: Monitor },
       { title: "AI Assistants", url: "/ai-suite", icon: Brain },
       { title: "AI Timetable Generator", url: "/ai-suite/timetable", icon: Clock },
       { title: "Lesson Planner", url: "/ai-suite/lesson-planner", icon: BookOpen },
@@ -176,6 +180,7 @@ const erpModules = [
       { title: "Technical Docs", url: "/technical-docs", icon: FileText },
       { title: "Integrations", url: "/integrations", icon: Globe },
       { title: "Portals", url: "/portals", icon: ExternalLink },
+      { title: "Footer CMS", url: "/footer-cms", icon: FileText },
     ]
   },
 ];
@@ -199,7 +204,9 @@ function getCurrentModule(pathname: string) {
       pathname.startsWith('/library') || 
       pathname.startsWith('/student-welfare') ||
       pathname.startsWith('/safeguarding') || 
+      pathname.startsWith('/behavior-tracking') ||
       pathname.startsWith('/activities') || 
+      pathname.startsWith('/events') ||
       pathname.startsWith('/communication')) return 'Student Services';
   
   if (pathname.startsWith('/staff-hr') || 
@@ -208,9 +215,12 @@ function getCurrentModule(pathname: string) {
   
   if (pathname.startsWith('/finance-operations') || 
       pathname.startsWith('/school-management/fee-management') || 
+      pathname.startsWith('/finance') ||
       pathname.startsWith('/accounting')) return 'Finance & Operations';
   
-  if (pathname.startsWith('/ai-suite') || pathname.startsWith('/ai-classroom')) return 'AI Suite';
+  if (pathname.startsWith('/ai-suite') || 
+      pathname.startsWith('/ai-classroom') || 
+      pathname.startsWith('/virtual-classroom')) return 'AI Suite';
   
   if (pathname.startsWith('/analytics')) return 'Analytics & Reports';
   
@@ -218,10 +228,12 @@ function getCurrentModule(pathname: string) {
       pathname.startsWith('/school-settings') ||
       pathname.startsWith('/admin-management') || 
       pathname.startsWith('/user-management') || 
+      pathname.startsWith('/permission-management') ||
       pathname.startsWith('/master-data') || 
       pathname.startsWith('/data-integrity-test') ||
       pathname.startsWith('/technical-docs') ||
       pathname.startsWith('/integrations') || 
+      pathname.startsWith('/footer-cms') ||
       pathname.startsWith('/portals')) return 'Administration';
   
   return 'EDU ERP';
