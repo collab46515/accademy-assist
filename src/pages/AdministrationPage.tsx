@@ -21,11 +21,15 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { UserGuidesSection } from '@/components/admin/UserGuidesSection';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useRBAC } from '@/hooks/useRBAC';
 
 export default function AdministrationPage() {
   const navigate = useNavigate();
+  const { hasModulePermission } = usePermissions();
+  const { isSuperAdmin } = useRBAC();
 
-  const adminModules = [
+  const allAdminModules = [
     {
       title: "User Management",
       description: "System user accounts, roles, and permissions management",
@@ -33,7 +37,18 @@ export default function AdministrationPage() {
       url: "/user-management",
       stats: "45 system users",
       color: "bg-blue-500",
-      features: ["User Accounts", "Role Management", "Permission Control", "Access Logs"]
+      features: ["User Accounts", "Role Management", "Permission Control", "Access Logs"],
+      permission: "User Management"
+    },
+    {
+      title: "Permission Management",
+      description: "Configure role-based access control and manage system permissions",
+      icon: Shield,
+      url: "/permission-management",
+      stats: "5 roles configured",
+      color: "bg-indigo-500",
+      features: ["Role Permissions", "Module Access", "Field Permissions", "Security Policies"],
+      permission: "Permission Management"
     },
     {
       title: "System Settings",
@@ -42,7 +57,8 @@ export default function AdministrationPage() {
       url: "/admin-management",
       stats: "12 configurations",
       color: "bg-green-500",
-      features: ["System Config", "Security Settings", "Backup Management", "Audit Trails"]
+      features: ["System Config", "Security Settings", "Backup Management", "Audit Trails"],
+      permission: "System Settings"
     },
     {
       title: "Master Data",
@@ -51,9 +67,24 @@ export default function AdministrationPage() {
       url: "/master-data",
       stats: "8 data sets",
       color: "bg-purple-500",
-      features: ["Academic Data", "Fee Structures", "HR Master Data", "System References"]
+      features: ["Academic Data", "Fee Structures", "HR Master Data", "System References"],
+      permission: "Master Data"
     }
   ];
+
+  // Filter modules based on user permissions
+  const adminModules = allAdminModules.filter(module => {
+    // Super admins can see everything
+    if (isSuperAdmin()) return true;
+    
+    // For Permission Management, only super admins can access
+    if (module.permission === "Permission Management") {
+      return isSuperAdmin();
+    }
+    
+    // Check other module permissions
+    return hasModulePermission(module.permission, 'view');
+  });
 
   const portalModules = [
     {
