@@ -71,12 +71,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 // Logical Business-Focused ERP Module Structure
 const erpModules = [
   {
-    title: "EDU ERP",
-    url: "/dashboard",
-    icon: LayoutDashboard,
-    subItems: []
-  },
-  {
     title: "Academic Operations",
     url: "/academic-operations",
     icon: GraduationCap,
@@ -186,7 +180,7 @@ const erpModules = [
 ];
 
 function getCurrentModule(pathname: string) {
-  if (pathname === '/dashboard') return 'EDU ERP';
+  if (pathname === '/dashboard') return 'Dashboard';
   
   if (pathname.startsWith('/academic-operations') || 
       pathname.startsWith('/admissions') || 
@@ -384,10 +378,34 @@ export function AppSidebar() {
       </SidebarHeader>
       
       <SidebarContent>
+        {/* Dashboard Section - Always visible at top */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
-              {accessibleModules.map((module) => (
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={location.pathname === '/dashboard'}
+                  tooltip={state === "collapsed" ? "Dashboard" : undefined}
+                  className="h-11 rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors duration-200 group"
+                >
+                  <NavLink to="/dashboard" className="flex items-center gap-3 px-3 py-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-200">
+                      <LayoutDashboard className="h-4 w-4" />
+                    </div>
+                    <span className="font-medium text-foreground text-base">Dashboard</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Main ERP Modules */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu className="space-y-1">
+              {accessibleModules.filter(module => module.title !== 'EDU ERP').map((module) => (
                 <SidebarMenuItem key={module.title}>
                   <SidebarMenuButton 
                     asChild 
