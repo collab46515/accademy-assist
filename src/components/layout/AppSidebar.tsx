@@ -77,6 +77,8 @@ const erpModules = [
     subItems: [
       { title: "Dashboard", url: "/academic-operations", icon: LayoutDashboard },
       { title: "Admissions Workflow", url: "/admissions", icon: UserPlus },
+      { title: "Enrollment Test", url: "/admissions/test", icon: CheckCircle },
+      { title: "Student Exit", url: "/admissions/exit", icon: UserMinus },
       { title: "Curriculum & Lessons", url: "/curriculum", icon: BookOpen },
       { title: "Academic Management", url: "/academic-management", icon: GraduationCap },
       { title: "Timetable Management", url: "/timetable", icon: Clock },
@@ -100,6 +102,8 @@ const erpModules = [
       { title: "Library Services", url: "/library", icon: Library },
       { title: "Behavior Tracking", url: "/behavior-tracking", icon: Target },
       { title: "Student Welfare", url: "/student-welfare", icon: Heart },
+      { title: "Infirmary", url: "/student-welfare/infirmary", icon: Plus },
+      { title: "Complaints", url: "/student-welfare/complaints", icon: AlertTriangle },
       { title: "Safeguarding", url: "/safeguarding", icon: Shield },
       { title: "Activities & Events", url: "/activities", icon: Calendar },
       { title: "Events Management", url: "/events", icon: CalendarDays },
