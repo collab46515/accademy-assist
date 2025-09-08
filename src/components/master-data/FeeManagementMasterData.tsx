@@ -268,7 +268,7 @@ export function FeeManagementMasterData() {
           console.log('Updating discount:', editingItem.id);
           await updateDiscount(editingItem.id, {
             name: data.name,
-            discount_type: data.discount_type,
+            discount_type: data.discount_type || 'percentage',
             value: parseFloat(data.value || '0'),
             applicable_fee_head_ids: data.applicable_fee_head_ids || [],
             validity_start: data.validity_start || null,
@@ -280,10 +280,10 @@ export function FeeManagementMasterData() {
           await createDiscount({
             school_id: '2f21656b-0848-40ee-bbec-12e5e8137545',
             name: data.name,
-            discount_type: data.discount_type,
+            discount_type: data.discount_type || 'percentage',
             value: parseFloat(data.value || '0'),
             applicable_fee_head_ids: data.applicable_fee_head_ids || [],
-            criteria: {},
+            criteria: data.criteria || {},
             validity_start: data.validity_start || null,
             validity_end: data.validity_end || null,
             status: 'active'
