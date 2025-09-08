@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useForm } from 'react-hook-form';
+import { useFeeData } from '@/hooks/useFeeData';
 import { CreditCard, Plus, Search, Download, Upload, Edit, Trash } from 'lucide-react';
 
 // Mock fee heads data with INR amounts
@@ -190,10 +191,29 @@ export function FeeManagementMasterData() {
   const [editingItem, setEditingItem] = useState<any>(null);
   const form = useForm();
 
-  const handleCreate = (data: any) => {
-    console.log('Creating:', data);
-    setDialogOpen(false);
-    form.reset();
+  // Use real fee data
+  const { feeStructures, createFeeStructure, loading } = useFeeData();
+
+  const handleCreate = async (data: any) => {
+    try {
+      if (activeTab === 'structures') {
+        await createFeeStructure({
+          school_id: data.school_id || '2f21656b-0848-40ee-bbec-12e5e8137545', // Default school
+          name: data.name,
+          description: data.description || '',
+          academic_year: data.academic_year,
+          term: data.term || 'Full Year',
+          fee_heads: data.fee_heads || [],
+          total_amount: parseFloat(data.total_amount || '0'),
+          applicable_year_groups: data.applicable_year_groups || [],
+          status: 'active'
+        });
+      }
+      setDialogOpen(false);
+      form.reset();
+    } catch (error) {
+      console.error('Error creating:', error);
+    }
   };
 
   const handleEdit = (item: any) => {
@@ -253,7 +273,7 @@ export function FeeManagementMasterData() {
         <div className="flex space-x-8">
           {[
             { id: 'fee-heads', label: 'Fee Heads', count: mockFeeHeads.length },
-            { id: 'structures', label: 'Fee Structures', count: mockFeeStructures.length },
+            { id: 'structures', label: 'Fee Structures', count: feeStructures.length },
             { id: 'payment-plans', label: 'Payment Plans', count: mockPaymentPlans.length },
             { id: 'discounts', label: 'Discounts & Waivers', count: mockDiscounts.length }
           ].map((tab) => (
@@ -360,36 +380,48 @@ export function FeeManagementMasterData() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockFeeStructures
-                    .filter(item =>
-                      item.structure_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      item.academic_year.toLowerCase().includes(searchTerm.toLowerCase())
-                    )
-                    .map((structure, index) => (
-                    <TableRow key={index}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{structure.structure_name}</div>
-                          <div className="text-sm text-gray-500">
-                            Created: {structure.created_date}, Modified: {structure.last_modified}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{structure.academic_year}</TableCell>
-                      <TableCell>{structure.applicable_classes.join(', ')}</TableCell>
-                      <TableCell>{formatCurrency(structure.total_annual_amount)}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => handleEdit(structure)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(structure.id)}>
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </div>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center">Loading...</TableCell>
+                    </TableRow>
+                  ) : feeStructures.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center text-gray-500">
+                        No fee structures found. Click "Add New" to create one.
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    feeStructures
+                      .filter(item =>
+                        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        item.academic_year.toLowerCase().includes(searchTerm.toLowerCase())
+                      )
+                      .map((structure) => (
+                      <TableRow key={structure.id}>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{structure.name}</div>
+                            <div className="text-sm text-gray-500">
+                              {structure.description}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{structure.academic_year}</TableCell>
+                        <TableCell>{structure.applicable_year_groups?.join(', ') || 'All'}</TableCell>
+                        <TableCell>{formatCurrency(structure.total_amount)}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button variant="ghost" size="sm" onClick={() => handleEdit(structure)}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleDelete(structure.id)}>
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
