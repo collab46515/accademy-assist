@@ -271,16 +271,18 @@ export function FeeManagementMasterData() {
             status: 'active'
           });
         } else {
-          console.log('Creating discount');
-          await createDiscount({
+          console.log('Creating discount with data:', data);
+          const discountData = {
             school_id: '2f21656b-0848-40ee-bbec-12e5e8137545',
             name: data.name,
             discount_type: data.discount_type || 'percentage',
             value: parseFloat(data.value || '0'),
-            valid_from: (data.validity_start as string) || new Date().toISOString().split('T')[0],
-            valid_to: (data.validity_end as string) || null,
+            valid_from: data.validity_start || new Date().toISOString().split('T')[0],
+            valid_to: data.validity_end || null,
             status: 'active'
-          });
+          };
+          console.log('Sending to createDiscount:', discountData);
+          await createDiscount(discountData);
         }
       }
       setDialogOpen(false);
