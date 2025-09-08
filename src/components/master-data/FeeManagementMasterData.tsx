@@ -610,7 +610,7 @@ export function FeeManagementMasterData() {
                        </TableCell>
                        <TableCell>{discount.discount_type}</TableCell>
                        <TableCell>{discount.value}{discount.discount_type === 'percentage' ? '%' : ' ₹'}</TableCell>
-                       <TableCell>{discount.applicable_fee_head_ids.length} selected</TableCell>
+                       <TableCell>-</TableCell>
                        <TableCell>
                          <div className="flex gap-2">
                            <Button variant="ghost" size="sm" onClick={() => handleEdit(discount)}>

@@ -25,8 +25,6 @@ export interface FeeDiscount {
   name: string;
   discount_type: 'percentage' | 'fixed';
   value: number;
-  applicable_fee_head_ids?: string[];
-  criteria?: any;
   validity_start?: string | null;
   validity_end?: string | null;
   status: string;
@@ -129,9 +127,18 @@ export const usePaymentData = (schoolId?: string) => {
 
   const createDiscount = async (discount: Omit<FeeDiscount, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      const insertPayload = {
+        school_id: discount.school_id,
+        name: discount.name,
+        discount_type: discount.discount_type,
+        value: discount.value,
+        validity_start: discount.validity_start ?? null,
+        validity_end: discount.validity_end ?? null,
+        status: discount.status,
+      };
       const { data, error } = await (supabase as any)
         .from('fee_discounts')
-        .insert([discount])
+        .insert([insertPayload])
         .select()
         .single();
       if (error) throw error;
