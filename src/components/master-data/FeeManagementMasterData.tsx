@@ -575,52 +575,106 @@ export function FeeManagementMasterData() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{editingItem ? 'Edit' : 'Create'} Fee Head</DialogTitle>
+            <DialogTitle>
+              {editingItem ? 'Edit' : 'Create'} {activeTab === 'structures' ? 'Fee Structure' : 'Fee Head'}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={form.handleSubmit(handleCreate)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Name</label>
-                <Input {...form.register('name')} placeholder="Fee head name" />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Category</label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="tuition">Tuition</SelectItem>
-                    <SelectItem value="examination">Examination</SelectItem>
-                    <SelectItem value="transport">Transport</SelectItem>
-                    <SelectItem value="meals">Meals</SelectItem>
-                    <SelectItem value="activities">Activities</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Default Amount (₹)</label>
-                <Input {...form.register('default_amount')} type="number" placeholder="0" />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Currency</label>
-                <Input {...form.register('currency')} value="INR" disabled />
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Description</label>
-              <Textarea {...form.register('description')} placeholder="Fee head description" />
-            </div>
-            <div className="flex gap-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox {...form.register('is_mandatory')} />
-                <label className="text-sm">Mandatory</label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox {...form.register('is_recurring')} />
-                <label className="text-sm">Recurring</label>
-              </div>
-            </div>
+            {activeTab === 'structures' ? (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Structure Name *</label>
+                    <Input 
+                      {...form.register('name', { required: 'Name is required' })} 
+                      placeholder="e.g., Year 7 2024-25 Fees" 
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Academic Year *</label>
+                    <Input 
+                      {...form.register('academic_year', { required: 'Academic year is required' })} 
+                      placeholder="e.g., 2024-25" 
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Description</label>
+                  <Input {...form.register('description')} placeholder="Fee structure description" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Total Amount (₹) *</label>
+                    <Input 
+                      {...form.register('total_amount', { required: 'Total amount is required' })} 
+                      type="number" 
+                      placeholder="0.00" 
+                      step="0.01"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Term</label>
+                    <Input {...form.register('term')} placeholder="Full Year, Term 1, etc." />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Applicable Year Groups</label>
+                  <Input 
+                    {...form.register('applicable_year_groups')} 
+                    placeholder="Year 7, Year 8 (comma-separated)" 
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Name</label>
+                    <Input {...form.register('name')} placeholder="Fee head name" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Category</label>
+                    <Input {...form.register('category')} placeholder="e.g., Tuition, Transport" />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Description</label>
+                  <Input {...form.register('description')} placeholder="Brief description" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Default Amount (₹)</label>
+                    <Input 
+                      {...form.register('default_amount')} 
+                      type="number" 
+                      placeholder="0.00" 
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Recurrence Frequency</label>
+                    <Input {...form.register('recurrence_frequency')} placeholder="Monthly, Yearly, etc." />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Applicable Classes</label>
+                  <Input {...form.register('applicable_classes')} placeholder="All, 1-5, 6-10, etc." />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Applicable Genders</label>
+                  <Input {...form.register('applicable_genders')} placeholder="All, Male, Female" />
+                </div>
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox {...form.register('is_mandatory')} />
+                    <label className="text-sm">Mandatory</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox {...form.register('is_recurring')} />
+                    <label className="text-sm">Recurring</label>
+                  </div>
+                </div>
+              </>
+            )}
             <div className="flex gap-2 justify-end">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancel
