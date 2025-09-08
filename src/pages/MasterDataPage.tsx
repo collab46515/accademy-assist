@@ -503,7 +503,7 @@ export function MasterDataPage() {
               </div>
               <div>
                 <label className="text-sm font-medium">Contact Phone</label>
-                <Input {...form.register('contact_phone')} placeholder="+44 20 1234 5678" />
+                <Input {...form.register('contact_phone')} placeholder="+91 11 xxxx xxxx" />
               </div>
             </div>
             <div>

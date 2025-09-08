@@ -105,9 +105,9 @@ export function ParentDetailsSection() {
                 <Phone className="h-4 w-4" />
                 Phone Number *
               </FormLabel>
-              <FormControl>
-                <Input type="tel" placeholder="07xxx xxxxxx" {...field} />
-              </FormControl>
+               <FormControl>
+                 <Input type="tel" placeholder="+91 98765 43210" {...field} />
+               </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -139,13 +139,13 @@ export function ParentDetailsSection() {
               control={form.control}
               name="postal_code"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Postcode *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="SW1A 1AA" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+                 <FormItem>
+                   <FormLabel>PIN Code *</FormLabel>
+                   <FormControl>
+                     <Input placeholder="110001" {...field} />
+                   </FormControl>
+                   <FormMessage />
+                 </FormItem>
               )}
             />
 
@@ -155,9 +155,9 @@ export function ParentDetailsSection() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Country</FormLabel>
-                  <FormControl>
-                    <Input placeholder="United Kingdom" {...field} />
-                  </FormControl>
+                 <FormControl>
+                   <Input placeholder="India" {...field} />
+                 </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -368,9 +368,9 @@ function ReferralInformationSection() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Contact Phone *</FormLabel>
-              <FormControl>
-                <Input type="tel" placeholder="020 xxxx xxxx" {...field} />
-              </FormControl>
+               <FormControl>
+                 <Input type="tel" placeholder="+91 11 xxxx xxxx" {...field} />
+               </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -410,9 +410,9 @@ function EmergencyContactSection() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Emergency Phone *</FormLabel>
-              <FormControl>
-                <Input type="tel" placeholder="07xxx xxxxxx" {...field} />
-              </FormControl>
+               <FormControl>
+                 <Input type="tel" placeholder="+91 98765 43210" {...field} />
+               </FormControl>
               <FormMessage />
             </FormItem>
           )}

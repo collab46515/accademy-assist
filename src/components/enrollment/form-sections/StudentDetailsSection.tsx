@@ -197,9 +197,9 @@ export function StudentDetailsSection() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Nationality</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., British, American" {...field} />
-                </FormControl>
+                 <FormControl>
+                   <Input placeholder="e.g., Indian, American" {...field} />
+                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -240,9 +240,9 @@ export function StudentDetailsSection() {
                   <Phone className="h-4 w-4" />
                   Student Phone
                 </FormLabel>
-                <FormControl>
-                  <Input type="tel" placeholder="07xxx xxxxxx" {...field} />
-                </FormControl>
+                 <FormControl>
+                   <Input type="tel" placeholder="+91 98765 43210" {...field} />
+                 </FormControl>
                 <FormDescription>
                   Optional - for Year 9+ students
                 </FormDescription>
@@ -310,9 +310,9 @@ export function StudentDetailsSection() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Immigration Status</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., British Citizen, EU Settled Status" {...field} />
-                  </FormControl>
+                 <FormControl>
+                   <Input placeholder="e.g., Indian Citizen, OCI Card" {...field} />
+                 </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

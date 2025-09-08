@@ -286,7 +286,7 @@ export function FooterContentManager() {
                     id="phone"
                     value={content.contact.phone}
                     onChange={(e) => updateContent('contact.phone', e.target.value)}
-                    placeholder="+44 (0) 1932 123 456"
+                    placeholder="+91 11 xxxx xxxx"
                   />
                 </div>
                 

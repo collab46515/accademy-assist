@@ -537,7 +537,7 @@ const AdmissionsPage = () => {
                           id="parentPhone"
                           value={enrollmentData.parentPhone}
                           onChange={(e) => setEnrollmentData(prev => ({ ...prev, parentPhone: e.target.value }))}
-                          placeholder="+44 7700 900000"
+                           placeholder="+91 98765 43210"
                         />
                       </div>
                       <div>
@@ -567,7 +567,7 @@ const AdmissionsPage = () => {
                           id="emergencyPhone"
                           value={enrollmentData.emergencyPhone}
                           onChange={(e) => setEnrollmentData(prev => ({ ...prev, emergencyPhone: e.target.value }))}
-                          placeholder="+44 7700 900000"
+                           placeholder="+91 98765 43210"
                         />
                       </div>
                     </div>
@@ -853,7 +853,7 @@ const AdmissionsPage = () => {
                       id="studentPhone"
                       value={newApplication.phone}
                       onChange={(e) => setNewApplication(prev => ({ ...prev, phone: e.target.value }))}
-                      placeholder="+44 7700 900000"
+                       placeholder="+91 98765 43210"
                     />
                   </div>
                 </div>
@@ -911,7 +911,7 @@ const AdmissionsPage = () => {
                       id="parentPhone"
                       value={newApplication.parentPhone}
                       onChange={(e) => setNewApplication(prev => ({ ...prev, parentPhone: e.target.value }))}
-                      placeholder="+44 7700 900000"
+                       placeholder="+91 98765 43210"
                     />
                   </div>
                 </div>
@@ -932,7 +932,7 @@ const AdmissionsPage = () => {
                       id="emergencyPhone"
                       value={newApplication.emergencyPhone}
                       onChange={(e) => setNewApplication(prev => ({ ...prev, emergencyPhone: e.target.value }))}
-                      placeholder="+44 7700 900000"
+                      placeholder="+91 98765 43210"
                     />
                   </div>
                 </div>

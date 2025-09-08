@@ -515,7 +515,7 @@ export function ApplicationDetail({ applicationId, onBack, getStatusColor }: App
                       <div className="text-sm bg-slate-50 p-3 rounded">
                         <p>{application.home_address}</p>
                         {application.postal_code && <p>{application.postal_code}</p>}
-                        <p>{application.country || 'United Kingdom'}</p>
+                        <p>{application.country || 'India'}</p>
                       </div>
                     </div>
                   )}

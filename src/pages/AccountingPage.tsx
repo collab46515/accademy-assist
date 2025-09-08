@@ -631,7 +631,7 @@ export function AccountingPage() {
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <label className="text-sm font-medium">Phone</label>
-                              <Input {...form.register('phone')} placeholder="+44 20 1234 5678" />
+                              <Input {...form.register('phone')} placeholder="+91 11 xxxx xxxx" />
                             </div>
                             <div>
                               <label className="text-sm font-medium">Tax Number</label>

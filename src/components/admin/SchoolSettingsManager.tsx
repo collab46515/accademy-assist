@@ -153,7 +153,7 @@ function FirstSchoolCreator() {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="phone">Phone</Label>
-          <Input id="phone" name="phone" required placeholder="+44 20 1234 5678" />
+          <Input id="phone" name="phone" required placeholder="+91 11 xxxx xxxx" />
         </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
@@ -562,7 +562,7 @@ export function SchoolSettingsManager() {
                       id="phone"
                       value={schoolInfo.phone}
                       onChange={(e) => setSchoolInfo({ ...schoolInfo, phone: e.target.value })}
-                      placeholder="+44 20 1234 5678"
+                      placeholder="+91 11 xxxx xxxx"
                     />
                   </div>
                   <div>

@@ -183,7 +183,7 @@ export function EmployeeForm({
               <FormItem>
                 <FormLabel>Phone</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="+44 7700 900123" />
+                  <Input {...field} placeholder="+91 98765 43210" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -351,7 +351,7 @@ export function EmployeeForm({
               <FormItem>
                 <FormLabel>Emergency Contact Phone</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="+44 7700 900456" />
+                  <Input {...field} placeholder="+91 98765 43210" />
                 </FormControl>
                 <FormMessage />
               </FormItem>

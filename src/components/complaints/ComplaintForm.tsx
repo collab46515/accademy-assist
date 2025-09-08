@@ -310,7 +310,7 @@ export const ComplaintForm: React.FC<ComplaintFormProps> = ({ onSubmit }) => {
                     <FormItem>
                       <FormLabel>Phone Number</FormLabel>
                       <FormControl>
-                        <Input placeholder="+44 123 456 7890" {...field} />
+                        <Input placeholder="+91 98765 43210" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

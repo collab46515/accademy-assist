@@ -365,7 +365,7 @@ Receipt No: ${receiptData.receiptNumber}
 Date: ${receiptData.date}
 Application ID: ${receiptData.applicationId}
 Description: ${receiptData.description}
-Amount: £${receiptData.amount}
+Amount: ₹${receiptData.amount}
 Status: Payment Processed
                 `.trim();
                 
