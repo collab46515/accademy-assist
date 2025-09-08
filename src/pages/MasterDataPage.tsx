@@ -55,14 +55,20 @@ export function MasterDataPage() {
     students,
     parents,
     classes,
+    yearGroups,
+    houses,
     createSchool,
     createSubject,
     createStudent,
     createClass,
+    createYearGroup,
+    createHouse,
     updateSchool,
     updateSubject,
     updateStudent,
     updateClass,
+    updateYearGroup,
+    updateHouse,
     deleteRecord,
     getEntityCounts,
     getActiveEntities,
@@ -382,6 +388,12 @@ export function MasterDataPage() {
           case 'students':
             await updateStudent(editingItem.id, { ...data, school_id: currentSchool?.id });
             break;
+          case 'yearGroups':
+            await updateYearGroup(editingItem.id, data);
+            break;
+          case 'houses':
+            await updateHouse(editingItem.id, data);
+            break;
         }
       } else {
         // Create new item
@@ -402,6 +414,12 @@ export function MasterDataPage() {
               school_id: currentSchool?.id || schools[0]?.id || '',
               is_enrolled: true 
             });
+            break;
+          case 'yearGroups':
+            await createYearGroup({ ...data, school_id: currentSchool?.id || schools[0]?.id, is_active: true });
+            break;
+          case 'houses':
+            await createHouse({ ...data, school_id: currentSchool?.id || schools[0]?.id, is_active: true, points: 0 });
             break;
         }
       }
@@ -452,6 +470,14 @@ export function MasterDataPage() {
       (item.relationship_type && item.relationship_type.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (item.id && item.id.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (item.student_id && item.student_id.toLowerCase().includes(searchTerm.toLowerCase()))
+    ),
+    yearGroups: yearGroups.filter(item => 
+      item.year_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.year_code.toLowerCase().includes(searchTerm.toLowerCase())
+    ),
+    houses: houses.filter(item => 
+      item.house_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.house_code.toLowerCase().includes(searchTerm.toLowerCase())
     )
   };
 
@@ -607,6 +633,60 @@ export function MasterDataPage() {
             </div>
           </div>
         );
+      case 'yearGroups':
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Year Code</label>
+                <Input {...form.register('year_code')} placeholder="Y7" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Year Name</label>
+                <Input {...form.register('year_name')} placeholder="Year 7" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Key Stage</label>
+                <Input {...form.register('key_stage')} placeholder="Key Stage 3" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Sort Order</label>
+                <Input {...form.register('sort_order')} type="number" placeholder="7" />
+              </div>
+            </div>
+          </div>
+        );
+      case 'houses':
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">House Code</label>
+                <Input {...form.register('house_code')} placeholder="RED" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">House Name</label>
+                <Input {...form.register('house_name')} placeholder="Red House" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">House Color</label>
+                <Input {...form.register('house_color')} placeholder="#EF4444" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">House Points</label>
+                <Input {...form.register('points')} type="number" placeholder="0" />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium">House Motto</label>
+              <Input {...form.register('house_motto')} placeholder="Strength and Courage" />
+            </div>
+          </div>
+        );
       default:
         return null;
     }
@@ -622,6 +702,8 @@ export function MasterDataPage() {
             {type === 'classes' && <Building2 className="h-12 w-12" />}
             {type === 'students' && <GraduationCap className="h-12 w-12" />}
             {type === 'parents' && <Home className="h-12 w-12" />}
+            {type === 'yearGroups' && <GraduationCap className="h-12 w-12" />}
+            {type === 'houses' && <Home className="h-12 w-12" />}
           </div>
           <h3 className="text-lg font-semibold mb-2">No {type} found</h3>
           <p className="text-muted-foreground">Create your first {type.slice(0, -1)} to get started.</p>
@@ -634,7 +716,9 @@ export function MasterDataPage() {
       subjects: ['Subject', 'Code', 'Lab Required', 'Status', 'Actions'],
       classes: ['Class', 'Year Group', 'Capacity', 'Status', 'Actions'],
       students: ['Student', 'Number', 'Year Group', 'Status', 'Actions'],
-      parents: ['ID', 'Student ID', 'Relationship', 'Actions']
+      parents: ['ID', 'Student ID', 'Relationship', 'Actions'],
+      yearGroups: ['Year', 'Code', 'Key Stage', 'Order', 'Actions'],
+      houses: ['House', 'Code', 'Color', 'Points', 'Actions']
     };
 
     return (

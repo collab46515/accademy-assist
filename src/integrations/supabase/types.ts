@@ -3969,6 +3969,56 @@ export type Database = {
         }
         Relationships: []
       }
+      houses: {
+        Row: {
+          created_at: string
+          head_of_house_id: string | null
+          house_code: string
+          house_color: string | null
+          house_motto: string | null
+          house_name: string
+          id: string
+          is_active: boolean
+          points: number | null
+          school_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          head_of_house_id?: string | null
+          house_code: string
+          house_color?: string | null
+          house_motto?: string | null
+          house_name: string
+          id?: string
+          is_active?: boolean
+          points?: number | null
+          school_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          head_of_house_id?: string | null
+          house_code?: string
+          house_color?: string | null
+          house_motto?: string | null
+          house_name?: string
+          id?: string
+          is_active?: boolean
+          points?: number | null
+          school_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "houses_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       installment_plans: {
         Row: {
           created_at: string
@@ -8162,6 +8212,50 @@ export type Database = {
           vendor_name?: string
         }
         Relationships: []
+      }
+      year_groups: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          key_stage: string | null
+          school_id: string | null
+          sort_order: number
+          updated_at: string
+          year_code: string
+          year_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key_stage?: string | null
+          school_id?: string | null
+          sort_order?: number
+          updated_at?: string
+          year_code: string
+          year_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key_stage?: string | null
+          school_id?: string | null
+          sort_order?: number
+          updated_at?: string
+          year_code?: string
+          year_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "year_groups_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

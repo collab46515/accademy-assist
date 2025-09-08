@@ -343,7 +343,71 @@ export function useMasterData() {
     }
   };
 
-  // Update functions
+  // Create Year Group
+  const createYearGroup = async (yearGroupData: Omit<YearGroup, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      const defaultSchoolId = (yearGroupData as any).school_id || currentSchool?.id || schools[0]?.id;
+      const payload = {
+        ...yearGroupData,
+        school_id: defaultSchoolId,
+      };
+      const { data, error } = await supabase
+        .from('year_groups')
+        .insert([payload])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setYearGroups(prev => [...prev, data as YearGroup]);
+      toast({
+        title: "Success",
+        description: "Year group created successfully",
+      });
+      return data;
+    } catch (error: any) {
+      console.error('Error creating year group:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create year group",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  // Create House
+  const createHouse = async (houseData: Omit<House, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      const defaultSchoolId = (houseData as any).school_id || currentSchool?.id || schools[0]?.id;
+      const payload = {
+        ...houseData,
+        school_id: defaultSchoolId,
+      };
+      const { data, error } = await supabase
+        .from('houses')
+        .insert([payload])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setHouses(prev => [...prev, data as House]);
+      toast({
+        title: "Success",
+        description: "House created successfully",
+      });
+      return data;
+    } catch (error: any) {
+      console.error('Error creating house:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create house",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
   const updateSchool = async (id: string, updates: Partial<School>) => {
     try {
       const { data, error } = await supabase
@@ -454,10 +518,64 @@ export function useMasterData() {
       });
       throw error;
     }
+  // Update Year Group
+  const updateYearGroup = async (id: string, updates: Partial<YearGroup>) => {
+    try {
+      const { data, error } = await supabase
+        .from('year_groups')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setYearGroups(prev => prev.map(yg => yg.id === id ? data as YearGroup : yg));
+      toast({
+        title: "Success",
+        description: "Year group updated successfully",
+      });
+      return data;
+    } catch (error: any) {
+      console.error('Error updating year group:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update year group",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
+  // Update House
+  const updateHouse = async (id: string, updates: Partial<House>) => {
+    try {
+      const { data, error } = await supabase
+        .from('houses')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setHouses(prev => prev.map(house => house.id === id ? data as House : house));
+      toast({
+        title: "Success",
+        description: "House updated successfully",
+      });
+      return data;
+    } catch (error: any) {
+      console.error('Error updating house:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update house",
+        variant: "destructive",
+      });
+      throw error;
+    }
   // Delete functions
-  const deleteRecord = async (tableName: 'schools' | 'subjects' | 'students' | 'classes', id: string) => {
+  const deleteRecord = async (tableName: 'schools' | 'subjects' | 'students' | 'classes' | 'year_groups' | 'houses', id: string) => {
     try {
       const { error } = await supabase
         .from(tableName)
@@ -479,6 +597,12 @@ export function useMasterData() {
           break;
         case 'classes':
           setClasses(prev => prev.filter(item => item.id !== id));
+          break;
+        case 'year_groups':
+          setYearGroups(prev => prev.filter(item => item.id !== id));
+          break;
+        case 'houses':
+          setHouses(prev => prev.filter(item => item.id !== id));
           break;
       }
 
@@ -517,7 +641,9 @@ export function useMasterData() {
       schools: schools.filter(s => s.is_active).length,
       subjects: subjects.filter(s => s.is_active).length,
       students: students.filter(s => s.is_enrolled === true).length,
-      classes: classes.filter(c => c.is_active).length
+      classes: classes.filter(c => c.is_active).length,
+      yearGroups: yearGroups.filter(yg => yg.is_active).length,
+      houses: houses.filter(h => h.is_active).length
     };
   };
 
@@ -544,10 +670,14 @@ export function useMasterData() {
     createSubject,
     createStudent,
     createClass,
+    createYearGroup,
+    createHouse,
     updateSchool,
     updateSubject,
     updateStudent,
     updateClass,
+    updateYearGroup,
+    updateHouse,
     deleteRecord,
     getEntityCounts,
     getActiveEntities,
