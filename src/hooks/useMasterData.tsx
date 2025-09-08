@@ -32,7 +32,7 @@ export interface Subject {
 
 export interface Student {
   id: string;
-  user_id: string;
+  user_id?: string; // Made optional since it's now nullable
   school_id: string;
   student_number: string;
   year_group: string;
