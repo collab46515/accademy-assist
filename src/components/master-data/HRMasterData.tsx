@@ -233,17 +233,40 @@ const MASTER_DOCUMENT_CATEGORIES = [
 
 export function HRMasterData() {
   const [existingDepartments, setExistingDepartments] = useState<any[]>([]);
-  const [existingAssetCategories, setExistingAssetCategories] = useState<string[]>([]);
-  const [existingBenefitPlans, setExistingBenefitPlans] = useState<string[]>([]);
-  const [existingDocumentCategories, setExistingDocumentCategories] = useState<string[]>([]);
+  const [existingAssetCategories, setExistingAssetCategories] = useState<any[]>([]);
+  const [existingBenefitPlans, setExistingBenefitPlans] = useState<any[]>([]);
+  const [existingDocumentCategories, setExistingDocumentCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [installing, setInstalling] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showAddAssetForm, setShowAddAssetForm] = useState(false);
+  const [showAddBenefitForm, setShowAddBenefitForm] = useState(false);
+  const [showAddDocumentForm, setShowAddDocumentForm] = useState(false);
   const [newDepartment, setNewDepartment] = useState({
     name: '',
     description: '',
     cost_center: '',
     is_active: true
+  });
+  const [newAssetCategory, setNewAssetCategory] = useState({
+    category_name: '',
+    description: '',
+    depreciation_rate: 10.0
+  });
+  const [newBenefitPlan, setNewBenefitPlan] = useState({
+    plan_name: '',
+    plan_type: 'health',
+    plan_description: '',
+    provider_name: '',
+    employer_contribution: 0,
+    employee_contribution: 0,
+    is_active: true
+  });
+  const [newDocumentCategory, setNewDocumentCategory] = useState({
+    category_name: '',
+    description: '',
+    is_confidential: false,
+    retention_period_months: 12
   });
   const { toast } = useToast();
 
@@ -260,15 +283,15 @@ export function HRMasterData() {
         documentCategoriesResult
       ] = await Promise.all([
         supabase.from('departments').select('*').order('name'),
-        supabase.from('asset_categories').select('category_name'),
-        supabase.from('benefit_plans').select('plan_name'),
-        supabase.from('document_categories').select('category_name')
+        supabase.from('asset_categories').select('*').order('category_name'),
+        supabase.from('benefit_plans').select('*').order('plan_name'),
+        supabase.from('document_categories').select('*').order('category_name')
       ]);
 
       setExistingDepartments(departmentsResult.data || []);
-      setExistingAssetCategories(assetCategoriesResult.data?.map(a => a.category_name) || []);
-      setExistingBenefitPlans(benefitPlansResult.data?.map(b => b.plan_name) || []);
-      setExistingDocumentCategories(documentCategoriesResult.data?.map(d => d.category_name) || []);
+      setExistingAssetCategories(assetCategoriesResult.data || []);
+      setExistingBenefitPlans(benefitPlansResult.data || []);
+      setExistingDocumentCategories(documentCategoriesResult.data || []);
     } catch (error) {
       console.error('Error fetching existing HR data:', error);
     } finally {
@@ -292,7 +315,7 @@ export function HRMasterData() {
 
       // Install asset categories
       const newAssetCategories = MASTER_ASSET_CATEGORIES.filter(cat => 
-        !existingAssetCategories.includes(cat.category_name)
+        !existingAssetCategories.some(existing => existing.category_name === cat.category_name)
       );
       if (newAssetCategories.length > 0) {
         await supabase.from('asset_categories').insert(newAssetCategories);
@@ -300,7 +323,7 @@ export function HRMasterData() {
 
       // Install benefit plans
       const newBenefitPlans = MASTER_BENEFIT_PLANS.filter(plan => 
-        !existingBenefitPlans.includes(plan.plan_name)
+        !existingBenefitPlans.some(existing => existing.plan_name === plan.plan_name)
       );
       if (newBenefitPlans.length > 0) {
         await supabase.from('benefit_plans').insert(newBenefitPlans);
@@ -308,7 +331,7 @@ export function HRMasterData() {
 
       // Install document categories
       const newDocumentCategories = MASTER_DOCUMENT_CATEGORIES.filter(cat => 
-        !existingDocumentCategories.includes(cat.category_name)
+        !existingDocumentCategories.some(existing => existing.category_name === cat.category_name)
       );
       if (newDocumentCategories.length > 0) {
         await supabase.from('document_categories').insert(newDocumentCategories);
@@ -342,15 +365,15 @@ export function HRMasterData() {
           break;
         case 'asset_categories':
           await supabase.from('asset_categories').insert([item]);
-          setExistingAssetCategories([...existingAssetCategories, item.category_name]);
+          await fetchExistingData();
           break;
         case 'benefit_plans':
           await supabase.from('benefit_plans').insert([item]);
-          setExistingBenefitPlans([...existingBenefitPlans, item.plan_name]);
+          await fetchExistingData();
           break;
         case 'document_categories':
           await supabase.from('document_categories').insert([item]);
-          setExistingDocumentCategories([...existingDocumentCategories, item.category_name]);
+          await fetchExistingData();
           break;
       }
 
@@ -427,6 +450,155 @@ export function HRMasterData() {
     }
   };
 
+  const addNewAssetCategory = async () => {
+    if (!newAssetCategory.category_name.trim()) {
+      toast({
+        title: "Error",
+        description: "Asset category name is required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await supabase.from('asset_categories').insert([newAssetCategory]);
+      
+      toast({
+        title: "Success",
+        description: "Asset category added successfully.",
+      });
+      
+      setNewAssetCategory({
+        category_name: '',
+        description: '',
+        depreciation_rate: 10.0
+      });
+      setShowAddAssetForm(false);
+      await fetchExistingData();
+    } catch (error) {
+      console.error('Error adding asset category:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add asset category.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleAssetCategoryStatus = async (categoryId: string, currentStatus: boolean) => {
+    // Archive/restore functionality will be available after database migration
+    toast({
+      title: "Info",
+      description: "Archive functionality will be available after database migration is complete.",
+    });
+  };
+
+  const addNewBenefitPlan = async () => {
+    if (!newBenefitPlan.plan_name.trim()) {
+      toast({
+        title: "Error",
+        description: "Benefit plan name is required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await supabase.from('benefit_plans').insert([newBenefitPlan]);
+      
+      toast({
+        title: "Success",
+        description: "Benefit plan added successfully.",
+      });
+      
+      setNewBenefitPlan({
+        plan_name: '',
+        plan_type: 'health',
+        plan_description: '',
+        provider_name: '',
+        employer_contribution: 0,
+        employee_contribution: 0,
+        is_active: true
+      });
+      setShowAddBenefitForm(false);
+      await fetchExistingData();
+    } catch (error) {
+      console.error('Error adding benefit plan:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add benefit plan.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleBenefitPlanStatus = async (planId: string, currentStatus: boolean) => {
+    try {
+      await supabase
+        .from('benefit_plans')
+        .update({ is_active: !currentStatus })
+        .eq('id', planId);
+      
+      toast({
+        title: "Success",
+        description: `Benefit plan ${!currentStatus ? 'activated' : 'archived'} successfully.`,
+      });
+      
+      await fetchExistingData();
+    } catch (error) {
+      console.error('Error updating benefit plan status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update benefit plan status.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const addNewDocumentCategory = async () => {
+    if (!newDocumentCategory.category_name.trim()) {
+      toast({
+        title: "Error",
+        description: "Document category name is required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await supabase.from('document_categories').insert([newDocumentCategory]);
+      
+      toast({
+        title: "Success",
+        description: "Document category added successfully.",
+      });
+      
+      setNewDocumentCategory({
+        category_name: '',
+        description: '',
+        is_confidential: false,
+        retention_period_months: 12
+      });
+      setShowAddDocumentForm(false);
+      await fetchExistingData();
+    } catch (error) {
+      console.error('Error adding document category:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add document category.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleDocumentCategoryStatus = async (categoryId: string, currentStatus: boolean) => {
+    // Archive/restore functionality will be available after database migration
+    toast({
+      title: "Info",
+      description: "Archive functionality will be available after database migration is complete.",
+    });
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -437,8 +609,7 @@ export function HRMasterData() {
 
   const totalMasterItems = MASTER_DEPARTMENTS.length + MASTER_ASSET_CATEGORIES.length + 
                           MASTER_BENEFIT_PLANS.length + MASTER_DOCUMENT_CATEGORIES.length;
-  const installedItems = existingDepartments.filter(d => existingDepartments.some(existing => existing.name === d.name)).length + 
-                        existingAssetCategories.length + existingBenefitPlans.length + existingDocumentCategories.length;
+  const installedItems = existingDepartments.length + existingAssetCategories.length + existingBenefitPlans.length + existingDocumentCategories.length;
   const availableItems = totalMasterItems - installedItems;
 
   return (
@@ -649,38 +820,115 @@ export function HRMasterData() {
         </TabsContent>
 
         <TabsContent value="assets" className="space-y-4">
+          {/* Add New Asset Category Form */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Add New Asset Category
+                </div>
+                <Button
+                  onClick={() => setShowAddAssetForm(!showAddAssetForm)}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  {showAddAssetForm ? 'Cancel' : 'Add Category'}
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            {showAddAssetForm && (
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="category_name">Category Name*</Label>
+                    <Input
+                      id="category_name"
+                      value={newAssetCategory.category_name}
+                      onChange={(e) => setNewAssetCategory({...newAssetCategory, category_name: e.target.value})}
+                      placeholder="e.g., Laboratory Equipment"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="depreciation_rate">Depreciation Rate (%)</Label>
+                    <Input
+                      id="depreciation_rate"
+                      type="number"
+                      value={newAssetCategory.depreciation_rate}
+                      onChange={(e) => setNewAssetCategory({...newAssetCategory, depreciation_rate: parseFloat(e.target.value)})}
+                      placeholder="10"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={newAssetCategory.description}
+                    onChange={(e) => setNewAssetCategory({...newAssetCategory, description: e.target.value})}
+                    placeholder="Brief description of the asset category"
+                    rows={3}
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Label htmlFor="depreciation_rate">Depreciation Rate (%): {newAssetCategory.depreciation_rate}</Label>
+                </div>
+                <Button onClick={addNewAssetCategory} className="w-full">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Asset Category
+                </Button>
+              </CardContent>
+            )}
+          </Card>
+
+          {/* Asset Categories Management */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Asset Categories
+                Asset Categories Management
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Installed Categories</CardTitle>
+                    <CardTitle className="text-lg">Active Categories</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
                       {existingAssetCategories.map((cat, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                          <span>{cat}</span>
+                        <div key={cat.id || index} className="flex items-center justify-between p-2 border rounded">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <div>
+                              <div className="font-medium">{cat.category_name}</div>
+                              {cat.description && (
+                                <div className="text-sm text-muted-foreground">{cat.description}</div>
+                              )}
+                              <div className="text-sm text-muted-foreground">Depreciation: {cat.depreciation_rate}%</div>
+                            </div>
+                          </div>
                         </div>
                       ))}
+                      {existingAssetCategories.length === 0 && (
+                        <p className="text-muted-foreground">No categories yet.</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Available Categories</CardTitle>
+                    <CardTitle className="text-lg">Available Master Templates</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {MASTER_ASSET_CATEGORIES.filter(cat => !existingAssetCategories.includes(cat.category_name)).map((cat, index) => (
+                      {MASTER_ASSET_CATEGORIES.filter(cat => !existingAssetCategories.some(existing => existing.category_name === cat.category_name)).map((cat, index) => (
                         <div key={index} className="flex items-center justify-between p-2 border rounded">
                           <div>
                             <div className="font-medium">{cat.category_name}</div>
@@ -695,47 +943,181 @@ export function HRMasterData() {
                           </Button>
                         </div>
                       ))}
+                      {MASTER_ASSET_CATEGORIES.filter(cat => !existingAssetCategories.some(existing => existing.category_name === cat.category_name)).length === 0 && (
+                        <p className="text-muted-foreground">All master templates installed.</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Future: Archived Asset Categories section will be available after database migration */}
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="benefits" className="space-y-4">
+          {/* Add New Benefit Plan Form */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Add New Benefit Plan
+                </div>
+                <Button
+                  onClick={() => setShowAddBenefitForm(!showAddBenefitForm)}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  {showAddBenefitForm ? 'Cancel' : 'Add Plan'}
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            {showAddBenefitForm && (
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="plan_name">Plan Name*</Label>
+                    <Input
+                      id="plan_name"
+                      value={newBenefitPlan.plan_name}
+                      onChange={(e) => setNewBenefitPlan({...newBenefitPlan, plan_name: e.target.value})}
+                      placeholder="e.g., Premium Health Plan"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="plan_type">Plan Type</Label>
+                    <select
+                      id="plan_type"
+                      value={newBenefitPlan.plan_type}
+                      onChange={(e) => setNewBenefitPlan({...newBenefitPlan, plan_type: e.target.value})}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      <option value="health">Health</option>
+                      <option value="dental">Dental</option>
+                      <option value="vision">Vision</option>
+                      <option value="life">Life Insurance</option>
+                      <option value="pension">Pension</option>
+                      <option value="disability">Disability</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="provider_name">Provider Name</Label>
+                  <Input
+                    id="provider_name"
+                    value={newBenefitPlan.provider_name}
+                    onChange={(e) => setNewBenefitPlan({...newBenefitPlan, provider_name: e.target.value})}
+                    placeholder="e.g., NHS Plus"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="plan_description">Description</Label>
+                  <Textarea
+                    id="plan_description"
+                    value={newBenefitPlan.plan_description}
+                    onChange={(e) => setNewBenefitPlan({...newBenefitPlan, plan_description: e.target.value})}
+                    placeholder="Brief description of the benefit plan"
+                    rows={3}
+                  />
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="employer_contribution">Employer Contribution (£)</Label>
+                    <Input
+                      id="employer_contribution"
+                      type="number"
+                      value={newBenefitPlan.employer_contribution}
+                      onChange={(e) => setNewBenefitPlan({...newBenefitPlan, employer_contribution: parseFloat(e.target.value)})}
+                      placeholder="500"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="employee_contribution">Employee Contribution (£)</Label>
+                    <Input
+                      id="employee_contribution"
+                      type="number"
+                      value={newBenefitPlan.employee_contribution}
+                      onChange={(e) => setNewBenefitPlan({...newBenefitPlan, employee_contribution: parseFloat(e.target.value)})}
+                      placeholder="100"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="is_active"
+                    checked={newBenefitPlan.is_active}
+                    onCheckedChange={(checked) => setNewBenefitPlan({...newBenefitPlan, is_active: checked})}
+                  />
+                  <Label htmlFor="is_active">Active Plan</Label>
+                </div>
+                <Button onClick={addNewBenefitPlan} className="w-full">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Benefit Plan
+                </Button>
+              </CardContent>
+            )}
+          </Card>
+
+          {/* Benefit Plans Management */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
-                Benefit Plans
+                Benefit Plans Management
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Installed Plans</CardTitle>
+                    <CardTitle className="text-lg">Active Plans</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {existingBenefitPlans.map((plan, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                          <span>{plan}</span>
+                      {existingBenefitPlans.filter(plan => plan.is_active !== false).map((plan, index) => (
+                        <div key={plan.id || index} className="flex items-center justify-between p-2 border rounded">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <div>
+                              <div className="font-medium">{plan.plan_name}</div>
+                              {plan.plan_description && (
+                                <div className="text-sm text-muted-foreground">{plan.plan_description}</div>
+                              )}
+                              <div className="text-sm text-muted-foreground">
+                                Employer: £{plan.employer_contribution} | Employee: £{plan.employee_contribution}
+                              </div>
+                            </div>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => toggleBenefitPlanStatus(plan.id, plan.is_active)}
+                          >
+                            <Archive className="h-4 w-4" />
+                          </Button>
                         </div>
                       ))}
+                      {existingBenefitPlans.filter(plan => plan.is_active !== false).length === 0 && (
+                        <p className="text-muted-foreground">No active plans yet.</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Available Plans</CardTitle>
+                    <CardTitle className="text-lg">Available Master Templates</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {MASTER_BENEFIT_PLANS.filter(plan => !existingBenefitPlans.includes(plan.plan_name)).map((plan, index) => (
+                      {MASTER_BENEFIT_PLANS.filter(plan => !existingBenefitPlans.some(existing => existing.plan_name === plan.plan_name)).map((plan, index) => (
                         <div key={index} className="flex items-center justify-between p-2 border rounded">
                           <div>
                             <div className="font-medium">{plan.plan_name}</div>
@@ -752,47 +1134,169 @@ export function HRMasterData() {
                           </Button>
                         </div>
                       ))}
+                      {MASTER_BENEFIT_PLANS.filter(plan => !existingBenefitPlans.some(existing => existing.plan_name === plan.plan_name)).length === 0 && (
+                        <p className="text-muted-foreground">All master templates installed.</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Archived Benefit Plans */}
+              {existingBenefitPlans.some(plan => plan.is_active === false) && (
+                <Card className="mt-4">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Archive className="h-4 w-4" />
+                      Archived Plans
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {existingBenefitPlans.filter(plan => plan.is_active === false).map((plan, index) => (
+                        <div key={plan.id || index} className="flex items-center justify-between p-2 border rounded bg-muted/50">
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="h-4 w-4 text-orange-600" />
+                            <div>
+                              <div className="font-medium text-muted-foreground">{plan.plan_name}</div>
+                              {plan.plan_description && (
+                                <div className="text-sm text-muted-foreground">{plan.plan_description}</div>
+                              )}
+                            </div>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => toggleBenefitPlanStatus(plan.id, plan.is_active)}
+                          >
+                            <ArchiveRestore className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="documents" className="space-y-4">
+          {/* Add New Document Category Form */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Add New Document Category
+                </div>
+                <Button
+                  onClick={() => setShowAddDocumentForm(!showAddDocumentForm)}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  {showAddDocumentForm ? 'Cancel' : 'Add Category'}
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            {showAddDocumentForm && (
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="category_name">Category Name*</Label>
+                    <Input
+                      id="category_name"
+                      value={newDocumentCategory.category_name}
+                      onChange={(e) => setNewDocumentCategory({...newDocumentCategory, category_name: e.target.value})}
+                      placeholder="e.g., Student Records"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="retention_period">Retention Period (months)</Label>
+                    <Input
+                      id="retention_period"
+                      type="number"
+                      value={newDocumentCategory.retention_period_months}
+                      onChange={(e) => setNewDocumentCategory({...newDocumentCategory, retention_period_months: parseInt(e.target.value)})}
+                      placeholder="12"
+                      min="1"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={newDocumentCategory.description}
+                    onChange={(e) => setNewDocumentCategory({...newDocumentCategory, description: e.target.value})}
+                    placeholder="Brief description of the document category"
+                    rows={3}
+                  />
+                </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="is_confidential"
+                      checked={newDocumentCategory.is_confidential}
+                      onCheckedChange={(checked) => setNewDocumentCategory({...newDocumentCategory, is_confidential: checked})}
+                    />
+                    <Label htmlFor="is_confidential">Confidential Category</Label>
+                  </div>
+                <Button onClick={addNewDocumentCategory} className="w-full">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Document Category
+                </Button>
+              </CardContent>
+            )}
+          </Card>
+
+          {/* Document Categories Management */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Document Categories
+                Document Categories Management
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Installed Categories</CardTitle>
+                    <CardTitle className="text-lg">Active Categories</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
                       {existingDocumentCategories.map((cat, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                          <span>{cat}</span>
+                        <div key={cat.id || index} className="flex items-center justify-between p-2 border rounded">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <div>
+                              <div className="font-medium">{cat.category_name}</div>
+                              {cat.description && (
+                                <div className="text-sm text-muted-foreground">{cat.description}</div>
+                              )}
+                              <div className="text-sm text-muted-foreground">
+                                Retention: {Math.floor(cat.retention_period_months / 12)} years
+                                {cat.is_confidential && <Badge variant="outline" className="ml-2">Confidential</Badge>}
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       ))}
+                      {existingDocumentCategories.length === 0 && (
+                        <p className="text-muted-foreground">No categories yet.</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Available Categories</CardTitle>
+                    <CardTitle className="text-lg">Available Master Templates</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {MASTER_DOCUMENT_CATEGORIES.filter(cat => !existingDocumentCategories.includes(cat.category_name)).map((cat, index) => (
+                      {MASTER_DOCUMENT_CATEGORIES.filter(cat => !existingDocumentCategories.some(existing => existing.category_name === cat.category_name)).map((cat, index) => (
                         <div key={index} className="flex items-center justify-between p-2 border rounded">
                           <div>
                             <div className="font-medium">{cat.category_name}</div>
@@ -810,10 +1314,15 @@ export function HRMasterData() {
                           </Button>
                         </div>
                       ))}
+                      {MASTER_DOCUMENT_CATEGORIES.filter(cat => !existingDocumentCategories.some(existing => existing.category_name === cat.category_name)).length === 0 && (
+                        <p className="text-muted-foreground">All master templates installed.</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Future: Archived Document Categories section will be available after database migration */}
             </CardContent>
           </Card>
         </TabsContent>
