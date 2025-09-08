@@ -7111,7 +7111,7 @@ export type Database = {
           school_id: string
           student_number: string
           updated_at: string
-          user_id: string
+          user_id: string | null
           year_group: string
         }
         Insert: {
@@ -7128,7 +7128,7 @@ export type Database = {
           school_id: string
           student_number: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
           year_group: string
         }
         Update: {
@@ -7145,7 +7145,7 @@ export type Database = {
           school_id?: string
           student_number?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
           year_group?: string
         }
         Relationships: [

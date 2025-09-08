@@ -396,12 +396,10 @@ export function MasterDataPage() {
             await createClass({ ...data, school_id: currentSchool?.id || '', is_active: true, current_enrollment: 0 });
             break;
           case 'students':
-            // Generate a temporary user_id that's a valid UUID
-            const tempUserId = crypto.randomUUID();
+            // No need to generate user_id - we'll set it to null for now
             await createStudent({ 
               ...data, 
               school_id: currentSchool?.id || '',
-              user_id: tempUserId,
               is_enrolled: true 
             });
             break;

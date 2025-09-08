@@ -285,6 +285,7 @@ export function useMasterData() {
       const payload = {
         ...studentData,
         school_id: defaultSchoolId,
+        user_id: null, // Will be set later when student gets user account
       } as any;
       const { data, error } = await supabase
         .from('students')
