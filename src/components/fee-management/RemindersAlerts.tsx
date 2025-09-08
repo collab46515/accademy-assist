@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Bell, Mail, Phone, MessageSquare, Plus, Settings, Send, Clock, Users } from 'lucide-react';
+import { formatCurrency, getUserCurrency } from '@/lib/currency';
 
 interface ReminderTemplate {
   id: string;
