@@ -4024,14 +4024,14 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
-          end_date: string
+          end_date: string | null
           frequency: string
           id: string
           interest_rate: number | null
           name: string
           number_of_installments: number
           school_id: string
-          start_date: string
+          start_date: string | null
           status: string
           total_amount: number
           updated_at: string
@@ -4040,14 +4040,14 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
-          end_date: string
+          end_date?: string | null
           frequency: string
           id?: string
           interest_rate?: number | null
           name: string
           number_of_installments: number
           school_id: string
-          start_date: string
+          start_date?: string | null
           status?: string
           total_amount: number
           updated_at?: string
@@ -4056,14 +4056,14 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
-          end_date?: string
+          end_date?: string | null
           frequency?: string
           id?: string
           interest_rate?: number | null
           name?: string
           number_of_installments?: number
           school_id?: string
-          start_date?: string
+          start_date?: string | null
           status?: string
           total_amount?: number
           updated_at?: string

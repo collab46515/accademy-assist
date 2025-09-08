@@ -9,8 +9,8 @@ export interface PaymentPlan {
   description?: string;
   total_amount: number;
   number_of_installments: number;
-  start_date: string | null;
-  end_date: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
   interest_rate?: number | null;
   frequency: string;
   created_by?: string | null;

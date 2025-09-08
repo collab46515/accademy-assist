@@ -243,8 +243,6 @@ export function FeeManagementMasterData() {
             description: data.description,
             total_amount: parseFloat(data.total_amount || '0'),
             number_of_installments: parseInt(data.number_of_installments || '1'),
-            start_date: data.start_date || new Date().toISOString().split('T')[0],
-            end_date: data.end_date || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
             frequency: data.frequency || 'monthly',
             interest_rate: parseFloat(data.interest_rate || '0'),
             status: 'active'
@@ -257,8 +255,6 @@ export function FeeManagementMasterData() {
             description: data.description,
             total_amount: parseFloat(data.total_amount || '0'),
             number_of_installments: parseInt(data.number_of_installments || '1'),
-            start_date: data.start_date || new Date().toISOString().split('T')[0],
-            end_date: data.end_date || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
             frequency: data.frequency || 'monthly',
             interest_rate: parseFloat(data.interest_rate || '0'),
             status: 'active'
