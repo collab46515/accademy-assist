@@ -317,6 +317,10 @@ export function useMasterData() {
       const payload = {
         ...classData,
         school_id: (classData as any).school_id || currentSchool?.id || schools[0]?.id,
+        capacity: Number(classData.capacity) || 30,
+        current_enrollment: Number(classData.current_enrollment) || 0,
+        is_active: classData.is_active !== undefined ? classData.is_active : true,
+        academic_year: classData.academic_year || new Date().getFullYear().toString(),
       } as any;
       const { data, error } = await supabase
         .from('classes')
