@@ -308,7 +308,7 @@ export const AISettingsPage = () => {
               <div className="space-y-2">
                 <p className="text-sm font-medium">Cost Optimization</p>
                 <p className="text-xs text-muted-foreground">
-                  Estimated monthly cost: <span className="font-medium">$23.50</span>
+                  Estimated monthly cost: <span className="font-medium">₹1,950</span>
                 </p>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div className="h-2 bg-green-500 rounded-full" style={{ width: "35%" }}></div>

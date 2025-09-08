@@ -32,7 +32,7 @@ const PAYMENT_GATEWAYS: Omit<PaymentGateway, 'isEnabled' | 'apiKey' | 'secretKey
     name: 'Stripe',
     description: 'Global payment processing with excellent international support',
     icon: CreditCard,
-    supportedCurrencies: ['GBP', 'USD', 'EUR', 'CAD', 'AUD'],
+    supportedCurrencies: ['INR', 'GBP', 'EUR'],
     fees: { percentage: 2.9, fixedFee: 30 }
   },
   {
@@ -40,7 +40,7 @@ const PAYMENT_GATEWAYS: Omit<PaymentGateway, 'isEnabled' | 'apiKey' | 'secretKey
     name: 'PayPal',
     description: 'Widely trusted payment platform with buyer protection',
     icon: Wallet,
-    supportedCurrencies: ['GBP', 'USD', 'EUR', 'CAD', 'AUD'],
+    supportedCurrencies: ['INR', 'GBP', 'EUR'],
     fees: { percentage: 3.4, fixedFee: 20 }
   },
   {
@@ -48,7 +48,7 @@ const PAYMENT_GATEWAYS: Omit<PaymentGateway, 'isEnabled' | 'apiKey' | 'secretKey
     name: 'Razorpay',
     description: 'Popular payment gateway for Indian and international markets',
     icon: Globe,
-    supportedCurrencies: ['INR', 'USD', 'EUR', 'GBP'],
+    supportedCurrencies: ['INR', 'EUR', 'GBP'],
     fees: { percentage: 2.0, fixedFee: 0 }
   },
   {
@@ -56,7 +56,7 @@ const PAYMENT_GATEWAYS: Omit<PaymentGateway, 'isEnabled' | 'apiKey' | 'secretKey
     name: 'Square',
     description: 'Comprehensive payment solution with POS integration',
     icon: DollarSign,
-    supportedCurrencies: ['USD', 'CAD', 'GBP', 'AUD', 'JPY'],
+    supportedCurrencies: ['INR', 'GBP', 'JPY'],
     fees: { percentage: 2.9, fixedFee: 30 }
   }
 ];

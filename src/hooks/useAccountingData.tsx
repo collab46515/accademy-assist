@@ -486,8 +486,8 @@ export function useAccountingData() {
   const formatCurrency = (amount: number, currency: string = 'INR') => {
     const currencyMap: { [key: string]: string } = {
       'INR': '₹',
-      'USD': '$',
-      'EUR': '€'
+      'EUR': '€',
+      'GBP': '£'
     };
     return `${currencyMap[currency] || '£'}${amount.toLocaleString()}`;
   };

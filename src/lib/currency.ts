@@ -7,14 +7,13 @@ export const formatCurrency = (amount: number | string, currency: string = 'INR'
   }
 
   const currencySymbols: Record<string, string> = {
-    'USD': '$',
     'EUR': '€',
     'GBP': '£',
     'INR': '₹',
     'JPY': '¥',
     'CNY': '¥',
-    'CAD': 'C$',
-    'AUD': 'A$',
+    'CAD': 'C',
+    'AUD': 'A',
     'NGN': '₦',
     'ZAR': 'R',
     'KES': 'KSh',
@@ -31,14 +30,13 @@ export const formatCurrency = (amount: number | string, currency: string = 'INR'
 
 export const getCurrencySymbol = (currency: string = 'INR'): string => {
   const currencySymbols: Record<string, string> = {
-    'USD': '$',
     'EUR': '€', 
     'GBP': '£',
     'INR': '₹',
     'JPY': '¥',
     'CNY': '¥',
-    'CAD': 'C$',
-    'AUD': 'A$',
+    'CAD': 'C',
+    'AUD': 'A',
     'NGN': '₦',
     'ZAR': 'R',
     'KES': 'KSh',

@@ -660,8 +660,8 @@ export function AccountingPage() {
                                   <SelectValue placeholder="Select currency" />
                                 </SelectTrigger>
                                 <SelectContent>
+                                  <SelectItem value="INR">₹ INR</SelectItem>
                                   <SelectItem value="GBP">£ GBP</SelectItem>
-                                  <SelectItem value="USD">$ USD</SelectItem>
                                   <SelectItem value="EUR">€ EUR</SelectItem>
                                 </SelectContent>
                               </Select>
@@ -845,8 +845,8 @@ export function AccountingPage() {
                                 <SelectValue placeholder="Select currency" />
                               </SelectTrigger>
                               <SelectContent>
+                                <SelectItem value="INR">₹ INR</SelectItem>
                                 <SelectItem value="GBP">£ GBP</SelectItem>
-                                <SelectItem value="USD">$ USD</SelectItem>
                                 <SelectItem value="EUR">€ EUR</SelectItem>
                               </SelectContent>
                             </Select>
@@ -1187,8 +1187,8 @@ export function AccountingPage() {
                                   <SelectValue placeholder="Select currency" />
                                 </SelectTrigger>
                                 <SelectContent>
+                                  <SelectItem value="INR">₹ INR</SelectItem>
                                   <SelectItem value="GBP">£ GBP</SelectItem>
-                                  <SelectItem value="USD">$ USD</SelectItem>
                                   <SelectItem value="EUR">€ EUR</SelectItem>
                                 </SelectContent>
                               </Select>
@@ -1513,8 +1513,8 @@ export function AccountingPage() {
                                 <SelectValue placeholder="Select currency" />
                               </SelectTrigger>
                               <SelectContent>
+                                <SelectItem value="INR">₹ INR</SelectItem>
                                 <SelectItem value="GBP">£ GBP</SelectItem>
-                                <SelectItem value="USD">$ USD</SelectItem>
                                 <SelectItem value="EUR">€ EUR</SelectItem>
                               </SelectContent>
                             </Select>
