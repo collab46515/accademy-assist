@@ -21,17 +21,19 @@ const baseStudentSchema = z.object({
 const baseParentSchema = z.object({
   parent_name: z.string().min(2, "Parent/guardian name is required"),
   parent_email: emailSchema,
-  parent_phone: ukPhoneSchema,
+  parent_phone: z.string().regex(/^(\+91\s?[6-9]\d{9}|\+91\d{10})$/, "Please enter a valid Indian phone number"),
+  parent_aadhaar: z.string().optional().refine((val) => !val || /^\d{4}\s?\d{4}\s?\d{4}$/.test(val), "Please enter a valid 12-digit Aadhaar number"),
+  parent_pan: z.string().optional().refine((val) => !val || /^[A-Z]{5}\d{4}[A-Z]$/.test(val), "Please enter a valid 10-character PAN number"),
   parent_relationship: z.string().default("Parent"),
   home_address: z.string().min(10, "Please enter a full address"),
-  postal_code: postcodeSchema,
-  country: z.string().default("United Kingdom"),
+  postal_code: z.string().regex(/^\d{6}$/, "Please enter a valid 6-digit PIN code"),
+  country: z.string().default("India"),
 });
 
 // Emergency contact schema
 const emergencyContactSchema = z.object({
   emergency_contact_name: z.string().min(2, "Emergency contact name is required"),
-  emergency_contact_phone: ukPhoneSchema,
+  emergency_contact_phone: z.string().regex(/^(\+91\s?[6-9]\d{9}|\+91\d{10})$/, "Please enter a valid Indian phone number"),
   emergency_contact_relationship: z.string().min(1, "Relationship is required"),
 });
 

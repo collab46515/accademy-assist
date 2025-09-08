@@ -112,6 +112,49 @@ export function ParentDetailsSection() {
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="parent_aadhaar"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Aadhaar Card Number</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="1234 5678 9012" 
+                  maxLength={14}
+                  {...field} 
+                />
+              </FormControl>
+              <FormDescription>
+                12-digit Aadhaar number (optional)
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="parent_pan"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>PAN Card Number</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="ABCDE1234F" 
+                  maxLength={10}
+                  style={{ textTransform: 'uppercase' }}
+                  {...field} 
+                />
+              </FormControl>
+              <FormDescription>
+                10-character PAN number (optional)
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
 
       <div className="space-y-4">

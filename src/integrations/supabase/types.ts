@@ -5881,6 +5881,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          aadhaar_number: string | null
           avatar_url: string | null
           created_at: string
           email: string
@@ -5890,12 +5891,14 @@ export type Database = {
           last_login: string | null
           last_name: string
           must_change_password: boolean | null
+          pan_number: string | null
           password_reset_at: string | null
           phone: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          aadhaar_number?: string | null
           avatar_url?: string | null
           created_at?: string
           email: string
@@ -5905,12 +5908,14 @@ export type Database = {
           last_login?: string | null
           last_name: string
           must_change_password?: boolean | null
+          pan_number?: string | null
           password_reset_at?: string | null
           phone?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          aadhaar_number?: string | null
           avatar_url?: string | null
           created_at?: string
           email?: string
@@ -5920,6 +5925,7 @@ export type Database = {
           last_login?: string | null
           last_name?: string
           must_change_password?: boolean | null
+          pan_number?: string | null
           password_reset_at?: string | null
           phone?: string | null
           updated_at?: string
