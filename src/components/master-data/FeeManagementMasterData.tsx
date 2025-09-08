@@ -210,7 +210,7 @@ export function FeeManagementMasterData() {
           await updateFeeStructure(editingItem.id, {
             name: data.name,
             description: data.description || '',
-            academic_year: data.academic_year,
+            academic_year: data.academic_year || '2024-25', // Add fallback
             term: data.term || 'Full Year',
             fee_heads: data.fee_heads || [],
             total_amount: parseFloat(data.total_amount || '0'),
@@ -223,7 +223,7 @@ export function FeeManagementMasterData() {
             school_id: data.school_id || '2f21656b-0848-40ee-bbec-12e5e8137545', // Default school
             name: data.name,
             description: data.description || '',
-            academic_year: data.academic_year,
+            academic_year: data.academic_year || '2024-25', // Add fallback
             term: data.term || 'Full Year',
             fee_heads: data.fee_heads || [],
             total_amount: parseFloat(data.total_amount || '0'),
@@ -595,6 +595,7 @@ export function FeeManagementMasterData() {
                     <Input 
                       {...form.register('academic_year', { required: 'Academic year is required' })} 
                       placeholder="e.g., 2024-25" 
+                      defaultValue="2024-25"
                     />
                   </div>
                 </div>
