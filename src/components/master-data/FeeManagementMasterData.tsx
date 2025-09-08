@@ -194,10 +194,11 @@ export function FeeManagementMasterData() {
 
   // Use real fee data and payment data
   const { feeStructures, createFeeStructure, updateFeeStructure, deleteFeeStructure, loading } = useFeeData();
-  const { paymentPlans, discounts, createPaymentPlan, updatePaymentPlan, deletePaymentPlan, createDiscount, updateDiscount, deleteDiscount, loading: paymentLoading } = usePaymentData();
+  const { paymentPlans, discounts, createPaymentPlan, updatePaymentPlan, deletePaymentPlan, createDiscount, updateDiscount, deleteDiscount, loading: paymentLoading } = usePaymentData('2f21656b-0848-40ee-bbec-12e5e8137545');
 
   const handleCreate = async (data: any) => {
     console.log('Form data received:', data);
+    console.log('Active tab:', activeTab);
     try {
       if (activeTab === 'structures') {
         // Convert comma-separated string to array for applicable_year_groups
@@ -234,7 +235,9 @@ export function FeeManagementMasterData() {
           });
         }
       } else if (activeTab === 'payment-plans') {
+        console.log('Processing payment plan');
         if (editingItem) {
+          console.log('Updating payment plan:', editingItem.id);
           await updatePaymentPlan(editingItem.id, {
             name: data.name,
             description: data.description,
@@ -245,6 +248,7 @@ export function FeeManagementMasterData() {
             status: 'active'
           });
         } else {
+          console.log('Creating payment plan');
           await createPaymentPlan({
             school_id: '2f21656b-0848-40ee-bbec-12e5e8137545',
             name: data.name,
@@ -259,7 +263,9 @@ export function FeeManagementMasterData() {
           });
         }
       } else if (activeTab === 'discounts') {
+        console.log('Processing discount');
         if (editingItem) {
+          console.log('Updating discount:', editingItem.id);
           await updateDiscount(editingItem.id, {
             name: data.name,
             discount_type: data.discount_type,
@@ -270,6 +276,7 @@ export function FeeManagementMasterData() {
             status: 'active'
           });
         } else {
+          console.log('Creating discount');
           await createDiscount({
             school_id: '2f21656b-0848-40ee-bbec-12e5e8137545',
             name: data.name,

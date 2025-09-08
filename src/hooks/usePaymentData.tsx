@@ -43,6 +43,7 @@ export const usePaymentData = (schoolId?: string) => {
 
   const fetchPaymentPlans = async () => {
     try {
+      console.log('Fetching payment plans for schoolId:', schoolId);
       let query = (supabase as any)
         .from('installment_plans')
         .select('*')
@@ -50,6 +51,7 @@ export const usePaymentData = (schoolId?: string) => {
       if (schoolId) query = query.eq('school_id', schoolId);
       const { data, error } = await query;
       if (error) throw error;
+      console.log('Fetched payment plans:', data);
       setPaymentPlans(data || []);
     } catch (error) {
       console.error('Error fetching payment plans:', error);
@@ -59,6 +61,7 @@ export const usePaymentData = (schoolId?: string) => {
 
   const fetchDiscounts = async () => {
     try {
+      console.log('Fetching discounts for schoolId:', schoolId);
       let query = (supabase as any)
         .from('fee_discounts')
         .select('*')
@@ -66,6 +69,7 @@ export const usePaymentData = (schoolId?: string) => {
       if (schoolId) query = query.eq('school_id', schoolId);
       const { data, error } = await query;
       if (error) throw error;
+      console.log('Fetched discounts:', data);
       setDiscounts(data || []);
     } catch (error) {
       console.error('Error fetching discounts:', error);
