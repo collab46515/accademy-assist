@@ -249,9 +249,10 @@ export function useMasterData() {
 
   const createSubject = async (subjectData: Omit<Subject, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      const defaultSchoolId = currentSchool?.id || schools[0]?.id;
       const payload = {
         ...subjectData,
-        school_id: subjectData.school_id || currentSchool?.id,
+        school_id: subjectData.school_id || defaultSchoolId,
       };
       const { data, error } = await supabase
         .from('subjects')
