@@ -1,7 +1,6 @@
 import { useState } from "react";
 import React from "react";
 import { ApplicationManagement } from "@/components/admissions/ApplicationManagement";
-import { TestEnrollmentProcessor } from "@/components/admissions/TestEnrollmentProcessor";
 import { ResendEnrollmentEmails } from "@/components/admin/ResendEnrollmentEmails";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -315,13 +314,6 @@ const AdmissionsPage = () => {
         <p className="text-muted-foreground">End-to-end digital admissions with e-signatures and document management</p>
       </div>
 
-      {/* Debug Test Component - Immediately Visible */}
-      <div className="mb-8 p-6 bg-red-50 border-2 border-red-300 rounded-lg">
-        <h2 className="text-xl font-bold text-red-800 mb-2">🚨 ENROLLMENT DEBUG TEST</h2>
-        <p className="text-red-700 mb-4">Click the button below to run the enrollment test and check console for detailed logs</p>
-        <TestEnrollmentProcessor />
-      </div>
-
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {stats.map((stat, index) => {
@@ -351,13 +343,6 @@ const AdmissionsPage = () => {
         </TabsList>
 
         <TabsContent value="management" className="space-y-6">
-          {/* Debug Test Component - Remove after fixing enrollment issues */}
-          <div className="mb-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <h2 className="text-lg font-semibold text-yellow-800 mb-2">🔧 Debug Test (Temporary)</h2>
-            <p className="text-yellow-700 text-sm mb-4">Use this to test the enrollment process and get detailed error logs</p>
-            <TestEnrollmentProcessor />
-          </div>
-          
           {/* Resend Enrollment Emails */}
           <div className="mb-8 p-4 bg-green-50 border border-green-200 rounded-lg">
             <h2 className="text-lg font-semibold text-green-800 mb-2">📧 Resend Enrollment Emails</h2>

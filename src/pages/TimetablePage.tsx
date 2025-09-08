@@ -11,7 +11,6 @@ import { TimetableEntriesManager } from '@/components/timetable/management/Timet
 import { AITimetableGenerator } from '@/components/ai-timetable/AITimetableGenerator';
 import { TeacherTimetableView } from '@/components/timetable/TeacherTimetableView';
 import { TimetableDebugger } from '@/components/timetable/TimetableDebugger';
-import { ensureSampleDataExists } from '@/components/timetable/SampleTimetableData';
 import { useRBAC } from '@/hooks/useRBAC';
 import { 
   Calendar, 
@@ -94,13 +93,6 @@ export default function TimetablePage() {
 
   // Debug logging
   console.log('Timetable Debug:', { currentSchool, userRoles, loading });
-
-  // Initialize sample data when school is available
-  useEffect(() => {
-    if (currentSchool?.id) {
-      ensureSampleDataExists(currentSchool.id);
-    }
-  }, [currentSchool]);
 
   if (loading) {
     return (
