@@ -21,7 +21,7 @@ serve(async (req) => {
     );
 
     // Get request body
-    const { amount, currency = "gbp", description, metadata } = await req.json();
+    const { amount, currency = "inr", description, metadata } = await req.json();
 
     // Validate required fields
     if (!amount || amount <= 0) {

@@ -60,8 +60,8 @@ export function PaymentManager({ applicationId, applicationData, onPaymentComple
       // Create Stripe checkout session
       const { data, error } = await supabase.functions.invoke('create-payment-session', {
         body: {
-          amount: Math.round((parseFloat(paymentAmount) || currentStagePayment?.amount || 0) * 100), // Convert to cents
-          currency: 'gbp',
+          amount: Math.round((parseFloat(paymentAmount) || currentStagePayment?.amount || 0) * 100), // Convert to minor units
+          currency: 'inr',
           description: `${currentStagePayment?.name} - ${applicationData.student_name}`,
           metadata: {
             application_id: applicationId,
@@ -104,7 +104,7 @@ export function PaymentManager({ applicationId, applicationData, onPaymentComple
       const paymentRecord = {
         application_id: applicationId,
         amount: parseFloat(paymentAmount) || currentStagePayment?.amount || 0,
-        currency: 'GBP',
+        currency: 'INR',
         payment_method: 'bank_transfer',
         status: 'pending_verification',
         payment_stage: applicationData.status,
@@ -260,7 +260,7 @@ export function PaymentManager({ applicationId, applicationData, onPaymentComple
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-700">£{currentStagePayment.amount}</div>
+              <div className="text-2xl font-bold text-blue-700">₹{currentStagePayment.amount}</div>
               <div className="text-sm text-blue-600">Amount Due</div>
             </div>
             <div className="text-center p-4 bg-yellow-50 rounded-lg">
@@ -317,7 +317,7 @@ export function PaymentManager({ applicationId, applicationData, onPaymentComple
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-bold">£{payment.amount}</div>
+                    <div className="font-bold">₹{payment.amount}</div>
                     <Badge variant={payment.status === 'completed' ? 'default' : 'secondary'}>
                       {payment.status.replace('_', ' ')}
                     </Badge>
@@ -341,7 +341,7 @@ export function PaymentManager({ applicationId, applicationData, onPaymentComple
                 {applicationData.additional_data.payment_plan.type} Plan
               </Badge>
               <p className="text-sm text-muted-foreground">
-                Total: £{applicationData.additional_data.payment_plan.total_amount}
+                Total: ₹{applicationData.additional_data.payment_plan.total_amount}
               </p>
             </div>
             
@@ -355,7 +355,7 @@ export function PaymentManager({ applicationId, applicationData, onPaymentComple
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">£{installment.amount}</span>
+                    <span className="font-medium">₹{installment.amount}</span>
                     <Badge variant={installment.status === 'paid' ? 'default' : 'secondary'} className="text-xs">
                       {installment.status}
                     </Badge>
@@ -380,7 +380,7 @@ export function PaymentManager({ applicationId, applicationData, onPaymentComple
             <div>
               <label className="text-sm font-medium">Payment Amount</label>
               <Input 
-                placeholder={`£${currentStagePayment.amount}`}
+                placeholder={`₹${currentStagePayment.amount}`}
                 value={paymentAmount}
                 onChange={(e) => setPaymentAmount(e.target.value)}
               />
@@ -425,7 +425,7 @@ export function PaymentManager({ applicationId, applicationData, onPaymentComple
           <DialogHeader>
             <DialogTitle>Set Up Payment Plan</DialogTitle>
             <DialogDescription>
-              Choose a payment plan for {currentStagePayment.name} (£{currentStagePayment.amount})
+              Choose a payment plan for {currentStagePayment.name} (₹{currentStagePayment.amount})
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -446,17 +446,17 @@ export function PaymentManager({ applicationId, applicationData, onPaymentComple
               <h4 className="font-medium text-blue-800 mb-2">Plan Details</h4>
               {paymentPlanType === 'monthly' && (
                 <p className="text-sm text-blue-700">
-                  12 monthly payments of approximately £{Math.round((currentStagePayment.amount) / 12)}
+                  12 monthly payments of approximately ₹{Math.round((currentStagePayment.amount) / 12)}
                 </p>
               )}
               {paymentPlanType === 'termly' && (
                 <p className="text-sm text-blue-700">
-                  3 termly payments of approximately £{Math.round((currentStagePayment.amount) / 3)}
+                  3 termly payments of approximately ₹{Math.round((currentStagePayment.amount) / 3)}
                 </p>
               )}
               {paymentPlanType === 'half_yearly' && (
                 <p className="text-sm text-blue-700">
-                  2 half-yearly payments of approximately £{Math.round((currentStagePayment.amount) / 2)}
+                  2 half-yearly payments of approximately ₹{Math.round((currentStagePayment.amount) / 2)}
                 </p>
               )}
             </div>
