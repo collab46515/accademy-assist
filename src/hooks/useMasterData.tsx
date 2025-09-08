@@ -518,6 +518,8 @@ export function useMasterData() {
       });
       throw error;
     }
+  };
+
   // Update Year Group
   const updateYearGroup = async (id: string, updates: Partial<YearGroup>) => {
     try {
@@ -574,6 +576,8 @@ export function useMasterData() {
       });
       throw error;
     }
+  };
+
   // Delete functions
   const deleteRecord = async (tableName: 'schools' | 'subjects' | 'students' | 'classes' | 'year_groups' | 'houses', id: string) => {
     try {
