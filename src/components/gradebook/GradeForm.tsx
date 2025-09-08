@@ -49,6 +49,7 @@ export const GradeForm: React.FC<GradeFormProps> = ({ studentId, onSuccess }) =>
         max_score: Number(data.max_score) || 100,
         grade: data.grade,
         effort: data.effort,
+        behavior: data.behavior || data.effort || 'satisfactory', // Add missing behavior field
         comments: data.comments,
         date_recorded: data.date_recorded,
         term: data.term,

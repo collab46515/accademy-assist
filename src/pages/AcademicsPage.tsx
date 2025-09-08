@@ -183,8 +183,8 @@ const AcademicsPage = () => {
                       <div className="flex-1">
                         <h3 className="font-semibold mb-1">{classItem.name}</h3>
                         <div className="flex gap-4 text-sm text-muted-foreground">
-                          <span>Subject: {classItem.subject.name}</span>
-                          <span>Year: {classItem.yearGroup.name}</span>
+                          <span>Subject: {classItem.subject || 'N/A'}</span>
+                          <span>Year: {classItem.year_group}</span>
                           {classItem.room && <span>Room: {classItem.room}</span>}
                         </div>
                       </div>
