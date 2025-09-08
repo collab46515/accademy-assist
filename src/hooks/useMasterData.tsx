@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useRBAC } from '@/hooks/useRBAC';
 
 // Core Master Data Types - matching actual database schema
 export interface School {
@@ -139,6 +140,7 @@ export function useMasterData() {
   const [departments, setDepartments] = useState<DBDepartment[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
   const { toast } = useToast();
+  const { currentSchool } = useRBAC();
 
   // Fetch all master data
   const fetchAllData = async () => {
@@ -247,9 +249,13 @@ export function useMasterData() {
 
   const createSubject = async (subjectData: Omit<Subject, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      const payload = {
+        ...subjectData,
+        school_id: subjectData.school_id || currentSchool?.id,
+      };
       const { data, error } = await supabase
         .from('subjects')
-        .insert([subjectData])
+        .insert([payload])
         .select()
         .single();
 
@@ -301,9 +307,13 @@ export function useMasterData() {
 
   const createClass = async (classData: Omit<Class, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      const payload = {
+        ...classData,
+        school_id: (classData as any).school_id || currentSchool?.id,
+      } as any;
       const { data, error } = await supabase
         .from('classes')
-        .insert([classData])
+        .insert([payload])
         .select()
         .single();
 

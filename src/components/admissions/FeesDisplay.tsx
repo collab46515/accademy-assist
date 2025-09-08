@@ -55,15 +55,15 @@ export function FeesDisplay({ applicationId, applicationData, currentStage }: Fe
         {assignedFees.length > 0 && (
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center p-3 bg-blue-50 rounded-lg">
-              <div className="text-lg font-bold text-blue-700">£{totalFees}</div>
+              <div className="text-lg font-bold text-blue-700">₹{totalFees}</div>
               <div className="text-sm text-blue-600">Total Fees</div>
             </div>
             <div className="text-center p-3 bg-green-50 rounded-lg">
-              <div className="text-lg font-bold text-green-700">£{paidFees}</div>
+              <div className="text-lg font-bold text-green-700">₹{paidFees}</div>
               <div className="text-sm text-green-600">Paid</div>
             </div>
             <div className="text-center p-3 bg-orange-50 rounded-lg">
-              <div className="text-lg font-bold text-orange-700">£{outstandingFees}</div>
+              <div className="text-lg font-bold text-orange-700">₹{outstandingFees}</div>
               <div className="text-sm text-orange-600">Outstanding</div>
             </div>
           </div>
@@ -108,7 +108,7 @@ export function FeesDisplay({ applicationId, applicationData, currentStage }: Fe
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-bold">£{fee.amount}</div>
+                    <div className="font-bold">₹{fee.amount}</div>
                     <Badge variant={fee.status === 'paid' ? 'default' : fee.status === 'pending' ? 'secondary' : 'destructive'}>
                       {fee.status === 'paid' ? (
                         <><CheckCircle className="h-3 w-3 mr-1" />Paid</>
@@ -130,7 +130,7 @@ export function FeesDisplay({ applicationId, applicationData, currentStage }: Fe
             <div className="flex gap-2">
               <Button className="flex-1">
                 <CreditCard className="h-4 w-4 mr-2" />
-                Pay Outstanding Fees (£{outstandingFees})
+                Pay Outstanding Fees (₹{outstandingFees})
               </Button>
               <Button variant="outline">
                 View Payment History

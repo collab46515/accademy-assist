@@ -252,7 +252,7 @@ export function ActivityManager() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="cost">Cost (£)</Label>
+                  <Label htmlFor="cost">Cost (₹)</Label>
                   <Input
                     id="cost"
                     type="number"
@@ -325,7 +325,7 @@ export function ActivityManager() {
                   <div className="flex items-center justify-between text-sm">
                     <div>
                       <span className="font-medium">Enrollment:</span> {activity.enrolled}/{activity.capacity}
-                      {activity.cost && <span className="ml-4 font-medium">Cost: £{activity.cost}</span>}
+                      {activity.cost && <span className="ml-4 font-medium">Cost: ₹{activity.cost}</span>}
                     </div>
                     <div className="flex gap-1">
                       <Button
