@@ -380,7 +380,7 @@ export const PaymentGatewaySettings = () => {
                             disabled={!isConfigured}
                             className="w-full"
                           >
-                            Test £1.00 Payment
+                            Test ₹1.00 Payment
                           </Button>
                         </CardContent>
                       </Card>

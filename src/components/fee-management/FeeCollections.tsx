@@ -1427,24 +1427,24 @@ export default function FeeCollections() {
                   </div>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span>£50 notes:</span>
-                      <span>8 × £400.00</span>
+                      <span>₹50 notes:</span>
+                      <span>8 × {formatCurrency(400, getUserCurrency())}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>£20 notes:</span>
-                      <span>25 × £500.00</span>
+                      <span>₹20 notes:</span>
+                      <span>25 × {formatCurrency(500, getUserCurrency())}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>£10 notes:</span>
-                      <span>15 × £150.00</span>
+                      <span>₹10 notes:</span>
+                      <span>15 × {formatCurrency(150, getUserCurrency())}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>£5 notes:</span>
-                      <span>20 × £100.00</span>
+                      <span>₹5 notes:</span>
+                      <span>20 × {formatCurrency(100, getUserCurrency())}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Coins:</span>
-                      <span>£50.00</span>
+                      <span>{formatCurrency(50, getUserCurrency())}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -1462,7 +1462,7 @@ export default function FeeCollections() {
                       <p className="font-medium">John Smith (7A)</p>
                       <p className="text-sm text-muted-foreground">Tuition Fee • 09:15 AM</p>
                     </div>
-                    <p className="font-semibold">£450.00</p>
+                    <p className="font-semibold">{formatCurrency(450, getUserCurrency())}</p>
                   </div>
                   
                   <div className="flex items-center justify-between p-3 border rounded">
@@ -1470,7 +1470,7 @@ export default function FeeCollections() {
                       <p className="font-medium">Sarah Williams (8C)</p>
                       <p className="text-sm text-muted-foreground">Transport Fee • 09:45 AM</p>
                     </div>
-                    <p className="font-semibold">£120.00</p>
+                    <p className="font-semibold">{formatCurrency(120, getUserCurrency())}</p>
                   </div>
                   
                   <div className="flex items-center justify-between p-3 border rounded">
@@ -1478,7 +1478,7 @@ export default function FeeCollections() {
                       <p className="font-medium">Michael Brown (9A)</p>
                       <p className="text-sm text-muted-foreground">Lunch Fee • 10:20 AM</p>
                     </div>
-                    <p className="font-semibold">£80.00</p>
+                    <p className="font-semibold">{formatCurrency(80, getUserCurrency())}</p>
                   </div>
                   
                   <div className="flex items-center justify-between p-3 border rounded">
@@ -1486,7 +1486,7 @@ export default function FeeCollections() {
                       <p className="font-medium">Lucy Davis (7B)</p>
                       <p className="text-sm text-muted-foreground">Tuition Fee • 11:00 AM</p>
                     </div>
-                    <p className="font-semibold">£450.00</p>
+                    <p className="font-semibold">{formatCurrency(450, getUserCurrency())}</p>
                   </div>
                   
                   <div className="flex items-center justify-between p-3 border rounded">
@@ -1494,7 +1494,7 @@ export default function FeeCollections() {
                       <p className="font-medium">James Wilson (8A)</p>
                       <p className="text-sm text-muted-foreground">Activity Fee • 11:30 AM</p>
                     </div>
-                    <p className="font-semibold">£100.00</p>
+                    <p className="font-semibold">{formatCurrency(100, getUserCurrency())}</p>
                   </div>
                 </div>
               </CardContent>
@@ -1516,7 +1516,7 @@ export default function FeeCollections() {
                 <CardContent className="p-4 text-center">
                   <AlertCircle className="h-8 w-8 mx-auto mb-2 text-destructive" />
                   <p className="text-sm text-muted-foreground">Total Pending Amount</p>
-                  <p className="text-xl font-bold">£2,250.00</p>
+                  <p className="text-xl font-bold">{formatCurrency(2250, getUserCurrency())}</p>
                   <p className="text-xs text-muted-foreground">5 students outstanding</p>
                 </CardContent>
               </Card>
@@ -1757,16 +1757,16 @@ export default function FeeCollections() {
                 const timeData = [
                   {
                     'Time Period': 'Morning (8:00-12:00)',
-                    'Total Collections': '£1,650.00',
+                    'Total Collections': formatCurrency(1650, getUserCurrency()),
                     'Number of Transactions': '18',
-                    'Average Payment': '£91.67',
+                    'Average Payment': formatCurrency(91.67, getUserCurrency()),
                     'Payment Methods': 'Cash: 60%, Bank: 25%, Online: 15%'
                   },
                   {
                     'Time Period': 'Afternoon (12:00-17:00)',
-                    'Total Collections': '£1,200.00',
+                    'Total Collections': formatCurrency(1200, getUserCurrency()),
                     'Number of Transactions': '14',
-                    'Average Payment': '£85.71',
+                    'Average Payment': formatCurrency(85.71, getUserCurrency()),
                     'Payment Methods': 'Cash: 45%, Bank: 35%, Online: 20%'
                   }
                 ];
@@ -1792,7 +1792,7 @@ export default function FeeCollections() {
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span>Total Collected:</span>
-                      <span className="font-bold text-success">£1,650.00</span>
+                      <span className="font-bold text-success">{formatCurrency(1650, getUserCurrency())}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Transactions:</span>
@@ -1800,7 +1800,7 @@ export default function FeeCollections() {
                     </div>
                     <div className="flex justify-between">
                       <span>Average Payment:</span>
-                      <span className="font-semibold">£91.67</span>
+                      <span className="font-semibold">{formatCurrency(91.67, getUserCurrency())}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Peak Hour:</span>
@@ -1815,15 +1815,15 @@ export default function FeeCollections() {
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
                         <span>Cash:</span>
-                        <span>60% (£990.00)</span>
+                        <span>60% ({formatCurrency(990, getUserCurrency())})</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Bank Transfer:</span>
-                        <span>25% (£412.50)</span>
+                        <span>25% ({formatCurrency(412.50, getUserCurrency())})</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Online:</span>
-                        <span>15% (£247.50)</span>
+                        <span>15% ({formatCurrency(247.50, getUserCurrency())})</span>
                       </div>
                     </div>
                   </div>
@@ -1841,7 +1841,7 @@ export default function FeeCollections() {
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span>Total Collected:</span>
-                      <span className="font-bold text-success">£1,200.00</span>
+                      <span className="font-bold text-success">{formatCurrency(1200, getUserCurrency())}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Transactions:</span>
@@ -1849,7 +1849,7 @@ export default function FeeCollections() {
                     </div>
                     <div className="flex justify-between">
                       <span>Average Payment:</span>
-                      <span className="font-semibold">£85.71</span>
+                      <span className="font-semibold">{formatCurrency(85.71, getUserCurrency())}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Peak Hour:</span>
@@ -1864,15 +1864,15 @@ export default function FeeCollections() {
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
                         <span>Cash:</span>
-                        <span>45% (£540.00)</span>
+                        <span>45% ({formatCurrency(540, getUserCurrency())})</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Bank Transfer:</span>
-                        <span>35% (£420.00)</span>
+                        <span>35% ({formatCurrency(420, getUserCurrency())})</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Online:</span>
-                        <span>20% (£240.00)</span>
+                        <span>20% ({formatCurrency(240, getUserCurrency())})</span>
                       </div>
                     </div>
                   </div>
@@ -1944,7 +1944,7 @@ export default function FeeCollections() {
                 <CardContent className="p-4 text-center">
                   <Banknote className="h-6 w-6 mx-auto mb-2 text-warning" />
                   <p className="text-sm text-muted-foreground">Cash Float Start</p>
-                  <p className="text-lg font-bold">£500.00</p>
+                  <p className="text-lg font-bold">{formatCurrency(500, getUserCurrency())}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -1965,7 +1965,7 @@ export default function FeeCollections() {
                 <CardContent className="p-4 text-center">
                   <CheckCircle className="h-6 w-6 mx-auto mb-2 text-success" />
                   <p className="text-sm text-muted-foreground">Till Variance</p>
-                  <p className="text-lg font-bold text-success">£0.00</p>
+                  <p className="text-lg font-bold text-success">{formatCurrency(0, getUserCurrency())}</p>
                 </CardContent>
               </Card>
             </div>
@@ -1979,15 +1979,15 @@ export default function FeeCollections() {
                   <div className="space-y-2">
                     <div className="flex justify-between items-center p-2 border rounded">
                       <span className="font-medium">John Smith (7A)</span>
-                      <span className="font-bold">£450.00</span>
+                      <span className="font-bold">{formatCurrency(450, getUserCurrency())}</span>
                     </div>
                     <div className="flex justify-between items-center p-2 border rounded">
                       <span className="font-medium">Lucy Davis (7B)</span>
-                      <span className="font-bold">£450.00</span>
+                      <span className="font-bold">{formatCurrency(450, getUserCurrency())}</span>
                     </div>
                     <div className="flex justify-between items-center p-2 border rounded">
                       <span className="font-medium">Sarah Williams (8C)</span>
-                      <span className="font-bold">£120.00</span>
+                      <span className="font-bold">{formatCurrency(120, getUserCurrency())}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -2000,15 +2000,15 @@ export default function FeeCollections() {
                 <CardContent>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span>£400+ payments:</span>
+                      <span>₹400+ payments:</span>
                       <span className="font-semibold">3 payments</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>£100-399 payments:</span>
+                      <span>₹100-399 payments:</span>
                       <span className="font-semibold">8 payments</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Under £100 payments:</span>
+                      <span>Under ₹100 payments:</span>
                       <span className="font-semibold">4 payments</span>
                     </div>
                     <Separator />

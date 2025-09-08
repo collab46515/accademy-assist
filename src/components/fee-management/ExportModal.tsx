@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Download, FileSpreadsheet, FileText, File, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { formatCurrency, getUserCurrency } from '@/lib/currency';
 
 interface ExportModalProps {
   open: boolean;
@@ -168,11 +169,11 @@ export function ExportModal({ open, onOpenChange, dataType }: ExportModalProps) 
   const generateCSVContent = () => {
     const header = ['Category', 'Description', 'Amount', 'Status', 'Date'];
     const rows = [
-      ['Total Collected', 'Sum of all payments received', '£125,000', 'Complete', new Date().toLocaleDateString()],
-      ['Outstanding Fees', 'Pending payments from students', '£45,000', 'Pending', new Date().toLocaleDateString()],
+      ['Total Collected', 'Sum of all payments received', formatCurrency(125000, getUserCurrency()), 'Complete', new Date().toLocaleDateString()],
+      ['Outstanding Fees', 'Pending payments from students', formatCurrency(45000, getUserCurrency()), 'Pending', new Date().toLocaleDateString()],
       ['Collection Rate', 'Percentage of fees collected', '73.5%', 'Good', new Date().toLocaleDateString()],
       ['Overdue Accounts', 'Number of overdue payments', '12', 'Attention Required', new Date().toLocaleDateString()],
-      ['Today Expected', 'Expected collections today', '£2,100', 'Pending', new Date().toLocaleDateString()]
+      ['Today Expected', 'Expected collections today', formatCurrency(2100, getUserCurrency()), 'Pending', new Date().toLocaleDateString()]
     ];
 
     // Add data based on selected categories
@@ -197,11 +198,11 @@ export function ExportModal({ open, onOpenChange, dataType }: ExportModalProps) 
       content += `- ${category}\n`;
     });
     content += `\nSUMMARY METRICS:\n`;
-    content += `Total Collected: £125,000\n`;
-    content += `Outstanding Fees: £45,000\n`;
+    content += `Total Collected: ${formatCurrency(125000, getUserCurrency())}\n`;
+    content += `Outstanding Fees: ${formatCurrency(45000, getUserCurrency())}\n`;
     content += `Collection Rate: 73.5%\n`;
     content += `Overdue Accounts: 12\n`;
-    content += `Today Expected: £2,100\n\n`;
+    content += `Today Expected: ${formatCurrency(2100, getUserCurrency())}\n\n`;
     content += `This report contains fee management data as requested.\n`;
     content += `For detailed analysis, please review the exported data.\n`;
     

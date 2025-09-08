@@ -103,7 +103,7 @@ const MOCK_ALERTS: Alert[] = [
     id: '2',
     type: 'large_payment',
     title: 'Large Payment Received',
-    message: 'Payment of £15,000 received from Wilson Family Trust',
+    message: `Payment of ${formatCurrency(15000, getUserCurrency())} received from Wilson Family Trust`,
     severity: 'low',
     timestamp: '2024-01-23T09:15:00Z',
     isRead: false,

@@ -229,7 +229,7 @@ export function FeePaymentStage({ applicationId, onMoveToNext }: FeePaymentStage
                   </div>
                   <div>
                     <label className="text-sm font-medium">Payment Amount</label>
-                    <Input placeholder="£500" />
+                    <Input placeholder="₹500" />
                   </div>
                 </div>
                 
@@ -261,7 +261,7 @@ export function FeePaymentStage({ applicationId, onMoveToNext }: FeePaymentStage
               </div>
               
               <div className="mt-4 p-4 bg-green-50 rounded-lg">
-                <p className="font-medium text-green-800">Total Scholarship Awards: £3,000</p>
+                <p className="font-medium text-green-800">Total Scholarship Awards: {formatCurrency(3000, getUserCurrency())}</p>
                 <p className="text-sm text-green-700">Adjusted fee total: £{(feeStructure.total - 3000).toLocaleString()}</p>
               </div>
             </CardContent>
@@ -323,7 +323,7 @@ export function FeePaymentStage({ applicationId, onMoveToNext }: FeePaymentStage
                     <p className="text-sm text-muted-foreground">Jan 10, 2024 • Bank Transfer</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium text-green-600">£100</p>
+                    <p className="font-medium text-green-600">{formatCurrency(100, getUserCurrency())}</p>
                     <Badge variant="default" className="bg-green-100 text-green-800">Completed</Badge>
                   </div>
                 </div>

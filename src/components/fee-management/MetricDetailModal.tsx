@@ -49,7 +49,7 @@ export function MetricDetailModal({ open, onOpenChange, metricType, data }: Metr
                 </Card>
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold">£132</div>
+                    <div className="text-2xl font-bold">{formatCurrency(132, getUserCurrency())}</div>
                     <div className="text-sm text-muted-foreground">Avg Payment</div>
                   </CardContent>
                 </Card>
@@ -128,7 +128,7 @@ export function MetricDetailModal({ open, onOpenChange, metricType, data }: Metr
               <div className="grid grid-cols-3 gap-4">
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold text-destructive">£8,450</div>
+                    <div className="text-2xl font-bold text-destructive">{formatCurrency(8450, getUserCurrency())}</div>
                     <div className="text-sm text-muted-foreground">Total Outstanding</div>
                   </CardContent>
                 </Card>
@@ -206,19 +206,19 @@ export function MetricDetailModal({ open, onOpenChange, metricType, data }: Metr
                 </Card>
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold">£42,800</div>
+                    <div className="text-2xl font-bold">{formatCurrency(42800, getUserCurrency())}</div>
                     <div className="text-sm text-muted-foreground">Collected</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold text-red-600">£8,450</div>
+                    <div className="text-2xl font-bold text-red-600">{formatCurrency(8450, getUserCurrency())}</div>
                     <div className="text-sm text-muted-foreground">Outstanding</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold">£51,250</div>
+                    <div className="text-2xl font-bold">{formatCurrency(51250, getUserCurrency())}</div>
                     <div className="text-sm text-muted-foreground">Total Expected</div>
                   </CardContent>
                 </Card>
@@ -293,13 +293,13 @@ export function MetricDetailModal({ open, onOpenChange, metricType, data }: Metr
                 </Card>
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold text-red-600">£4,250</div>
+                    <div className="text-2xl font-bold text-red-600">{formatCurrency(4250, getUserCurrency())}</div>
                     <div className="text-sm text-muted-foreground">Total Overdue</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold">£250</div>
+                    <div className="text-2xl font-bold">{formatCurrency(250, getUserCurrency())}</div>
                     <div className="text-sm text-muted-foreground">Avg Overdue</div>
                   </CardContent>
                 </Card>
@@ -373,7 +373,7 @@ export function MetricDetailModal({ open, onOpenChange, metricType, data }: Metr
               <div className="grid grid-cols-3 gap-4">
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold">£2,100</div>
+                    <div className="text-2xl font-bold">{formatCurrency(2100, getUserCurrency())}</div>
                     <div className="text-sm text-muted-foreground">Expected Today</div>
                   </CardContent>
                 </Card>
@@ -385,7 +385,7 @@ export function MetricDetailModal({ open, onOpenChange, metricType, data }: Metr
                 </Card>
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold">£262</div>
+                    <div className="text-2xl font-bold">{formatCurrency(262, getUserCurrency())}</div>
                     <div className="text-sm text-muted-foreground">Avg Expected</div>
                   </CardContent>
                 </Card>

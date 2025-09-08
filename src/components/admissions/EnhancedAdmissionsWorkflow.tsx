@@ -497,7 +497,7 @@ export function EnhancedAdmissionsWorkflow() {
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium">Payment Amount</label>
-              <Input placeholder="£75.00" />
+              <Input placeholder="₹75.00" />
             </div>
             <div>
               <label className="text-sm font-medium">Payment Method</label>

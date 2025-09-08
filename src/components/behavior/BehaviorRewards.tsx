@@ -63,7 +63,7 @@ export function BehaviorRewards() {
     {
       id: 4,
       name: 'School Store Voucher',
-      description: '£5 voucher for school store',
+      description: '₹5 voucher for school store',
       pointsRequired: 75,
       category: 'Tangible',
       availability: 'Monthly',
