@@ -192,27 +192,50 @@ export function FeeManagementMasterData() {
   const form = useForm();
 
   // Use real fee data
-  const { feeStructures, createFeeStructure, loading } = useFeeData();
+  const { feeStructures, createFeeStructure, updateFeeStructure, deleteFeeStructure, loading } = useFeeData();
 
   const handleCreate = async (data: any) => {
+    console.log('Form data received:', data);
     try {
       if (activeTab === 'structures') {
-        await createFeeStructure({
-          school_id: data.school_id || '2f21656b-0848-40ee-bbec-12e5e8137545', // Default school
-          name: data.name,
-          description: data.description || '',
-          academic_year: data.academic_year,
-          term: data.term || 'Full Year',
-          fee_heads: data.fee_heads || [],
-          total_amount: parseFloat(data.total_amount || '0'),
-          applicable_year_groups: data.applicable_year_groups || [],
-          status: 'active'
-        });
+        // Convert comma-separated string to array for applicable_year_groups
+        const yearGroups = data.applicable_year_groups 
+          ? data.applicable_year_groups.split(',').map((s: string) => s.trim()).filter(Boolean)
+          : [];
+          
+        console.log('Processed year groups:', yearGroups);
+          
+        if (editingItem) {
+          console.log('Updating existing structure:', editingItem.id);
+          await updateFeeStructure(editingItem.id, {
+            name: data.name,
+            description: data.description || '',
+            academic_year: data.academic_year,
+            term: data.term || 'Full Year',
+            fee_heads: data.fee_heads || [],
+            total_amount: parseFloat(data.total_amount || '0'),
+            applicable_year_groups: yearGroups,
+            status: 'active'
+          });
+        } else {
+          console.log('Creating new structure');
+          await createFeeStructure({
+            school_id: data.school_id || '2f21656b-0848-40ee-bbec-12e5e8137545', // Default school
+            name: data.name,
+            description: data.description || '',
+            academic_year: data.academic_year,
+            term: data.term || 'Full Year',
+            fee_heads: data.fee_heads || [],
+            total_amount: parseFloat(data.total_amount || '0'),
+            applicable_year_groups: yearGroups,
+            status: 'active'
+          });
+        }
       }
       setDialogOpen(false);
       form.reset();
     } catch (error) {
-      console.error('Error creating:', error);
+      console.error('Error creating/updating:', error);
     }
   };
 
@@ -222,8 +245,19 @@ export function FeeManagementMasterData() {
     form.reset(item);
   };
 
-  const handleDelete = (id: string) => {
-    console.log('Deleting:', id);
+  const handleDelete = async (id: string) => {
+    console.log('Delete called with ID:', id, 'for tab:', activeTab);
+    if (confirm('Are you sure you want to delete this item?')) {
+      try {
+        if (activeTab === 'structures') {
+          console.log('Deleting fee structure:', id);
+          await deleteFeeStructure(id);
+        }
+        // Add other delete handlers for other tabs as needed
+      } catch (error) {
+        console.error('Error deleting:', error);
+      }
+    }
   };
 
   const formatCurrency = (amount: number) => {

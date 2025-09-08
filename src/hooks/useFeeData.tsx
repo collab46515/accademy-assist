@@ -214,6 +214,57 @@ export const useFeeData = (schoolId?: string) => {
     }
   };
 
+  const updateFeeStructure = async (id: string, updates: Partial<FeeStructure>) => {
+    try {
+      const { data, error } = await (supabase as any)
+        .from('fee_structures')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setFeeStructures(prev => prev.map(structure => structure.id === id ? data : structure));
+      toast({
+        title: "Success",
+        description: "Fee structure updated successfully",
+      });
+      return data;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update fee structure",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const deleteFeeStructure = async (id: string) => {
+    try {
+      const { error } = await (supabase as any)
+        .from('fee_structures')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setFeeStructures(prev => prev.filter(structure => structure.id !== id));
+      toast({
+        title: "Success",
+        description: "Fee structure deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete fee structure",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -237,6 +288,8 @@ export const useFeeData = (schoolId?: string) => {
     updateFeeHead,
     deleteFeeHead,
     createFeeStructure,
+    updateFeeStructure,
+    deleteFeeStructure,
     refetch: () => {
       fetchFeeHeads();
       fetchFeeStructures();
