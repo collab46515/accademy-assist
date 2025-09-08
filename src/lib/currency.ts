@@ -1,9 +1,9 @@
 // Currency formatting utility
-export const formatCurrency = (amount: number | string, currency: string = 'USD'): string => {
+export const formatCurrency = (amount: number | string, currency: string = 'INR'): string => {
   const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
   
   if (isNaN(numAmount)) {
-    return currency === 'USD' ? '$0.00' : '$0.00';
+    return currency === 'INR' ? '₹0.00' : '₹0.00';
   }
 
   const currencySymbols: Record<string, string> = {
@@ -21,7 +21,7 @@ export const formatCurrency = (amount: number | string, currency: string = 'USD'
     'GHS': '₵'
   };
 
-  const symbol = currencySymbols[currency] || '$';
+  const symbol = currencySymbols[currency] || '₹';
   
   return `${symbol}${numAmount.toLocaleString('en-US', {
     minimumFractionDigits: 2,
@@ -29,7 +29,7 @@ export const formatCurrency = (amount: number | string, currency: string = 'USD'
   })}`;
 };
 
-export const getCurrencySymbol = (currency: string = 'USD'): string => {
+export const getCurrencySymbol = (currency: string = 'INR'): string => {
   const currencySymbols: Record<string, string> = {
     'USD': '$',
     'EUR': '€', 
@@ -45,11 +45,11 @@ export const getCurrencySymbol = (currency: string = 'USD'): string => {
     'GHS': '₵'
   };
   
-  return currencySymbols[currency] || '$';
+  return currencySymbols[currency] || '₹';
 };
 
-// Get currency from user preferences or default to USD
+// Get currency from user preferences or default to INR
 export const getUserCurrency = (): string => {
   // You can later integrate this with user settings/preferences
-  return 'USD'; // Default to USD instead of GBP
+  return 'INR'; // Default to INR (Indian Rupees)
 };
