@@ -19,7 +19,7 @@ export function OfferLetterForm() {
     position: '',
     startDate: '',
     baseSalary: '',
-    currency: 'GBP',
+    currency: 'INR',
     employmentType: 'full-time',
     probationPeriod: '6',
     workingHours: '37.5',

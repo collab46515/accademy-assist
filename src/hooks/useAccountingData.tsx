@@ -483,9 +483,9 @@ export function useAccountingData() {
   };
 
   // Utility functions
-  const formatCurrency = (amount: number, currency: string = 'GBP') => {
+  const formatCurrency = (amount: number, currency: string = 'INR') => {
     const currencyMap: { [key: string]: string } = {
-      'GBP': '£',
+      'INR': '₹',
       'USD': '$',
       'EUR': '€'
     };

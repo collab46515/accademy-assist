@@ -61,8 +61,8 @@ export const downloadJSON = (data: any[], filename: string) => {
   document.body.removeChild(link);
 };
 
-export const formatCurrency = (amount: number, currency: string = 'GBP'): string => {
-  return new Intl.NumberFormat('en-GB', {
+export const formatCurrency = (amount: number, currency: string = 'INR'): string => {
+  return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: currency
   }).format(amount);

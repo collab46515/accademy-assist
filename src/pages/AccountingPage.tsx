@@ -112,15 +112,15 @@ export function AccountingPage() {
 
   // Mock data for dashboard overview - would be calculated from real data
   const mockDashboardData = {
-    totalRevenue: { amount: 2450000, currency: 'GBP' },
-    totalExpenses: { amount: 1850000, currency: 'GBP' },
-    netProfit: { amount: 600000, currency: 'GBP' },
-    outstandingFees: { amount: 285000, currency: 'GBP' },
+    totalRevenue: { amount: 19600000, currency: 'INR' }, // ₹1.96 crore (equivalent to £2.45M)
+    totalExpenses: { amount: 14800000, currency: 'INR' }, // ₹1.48 crore
+    netProfit: { amount: 4800000, currency: 'INR' }, // ₹48 lakh
+    outstandingFees: { amount: 2280000, currency: 'INR' }, // ₹22.8 lakh
     recentTransactions: [
-      { id: '1', date: '2024-01-15', description: 'Tuition Fee - Year 7', amount: 1200, currency: 'GBP', type: 'income', status: 'completed' },
-      { id: '2', date: '2024-01-14', description: 'Office Supplies', amount: -150, currency: 'GBP', type: 'expense', status: 'completed' },
-      { id: '3', date: '2024-01-13', description: 'Lunch Fee - Student ID: ST001', amount: 25, currency: 'GBP', type: 'income', status: 'pending' },
-      { id: '4', date: '2024-01-12', description: 'Utilities Payment', amount: -850, currency: 'GBP', type: 'expense', status: 'completed' }
+      { id: '1', date: '2024-01-15', description: 'Tuition Fee - Year 7', amount: 96000, currency: 'INR', type: 'income', status: 'completed' }, // ₹96,000
+      { id: '2', date: '2024-01-14', description: 'Office Supplies', amount: -12000, currency: 'INR', type: 'expense', status: 'completed' }, // ₹12,000
+      { id: '3', date: '2024-01-13', description: 'Lunch Fee - Student ID: ST001', amount: 2000, currency: 'INR', type: 'income', status: 'pending' }, // ₹2,000
+      { id: '4', date: '2024-01-12', description: 'Utilities Payment', amount: -68000, currency: 'INR', type: 'expense', status: 'completed' } // ₹68,000
     ]
   };
 
