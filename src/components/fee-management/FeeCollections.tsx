@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import { formatCurrency, getUserCurrency } from '@/lib/currency';
 import { 
   Search, 
   Filter, 
@@ -1224,7 +1225,7 @@ export default function FeeCollections() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">£450.00</p>
+                      <p className="font-semibold">{formatCurrency(450, getUserCurrency())}</p>
                       <p className="text-xs text-muted-foreground">09:15 AM</p>
                     </div>
                   </div>
@@ -1238,7 +1239,7 @@ export default function FeeCollections() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">£100.00</p>
+                      <p className="font-semibold">{formatCurrency(100, getUserCurrency())}</p>
                       <p className="text-xs text-muted-foreground">10:30 AM</p>
                     </div>
                   </div>
@@ -1252,7 +1253,7 @@ export default function FeeCollections() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">£450.00</p>
+                      <p className="font-semibold">{formatCurrency(450, getUserCurrency())}</p>
                       <p className="text-xs text-muted-foreground">11:45 AM</p>
                     </div>
                   </div>

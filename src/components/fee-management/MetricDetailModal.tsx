@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Search, Download, Send, Calendar, TrendingUp, Users } from 'lucide-react';
+import { formatCurrency, getUserCurrency } from '@/lib/currency';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LineChart, Line } from 'recharts';
 
@@ -36,7 +37,7 @@ export function MetricDetailModal({ open, onOpenChange, metricType, data }: Metr
               <div className="grid grid-cols-3 gap-4">
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold">£42,800</div>
+                    <div className="text-2xl font-bold">{formatCurrency(42800, getUserCurrency())}</div>
                     <div className="text-sm text-muted-foreground">Total Collected</div>
                   </CardContent>
                 </Card>

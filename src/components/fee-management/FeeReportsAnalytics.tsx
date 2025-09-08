@@ -18,6 +18,7 @@ import {
   FileText,
   Target
 } from 'lucide-react';
+import { formatCurrency, getUserCurrency } from '@/lib/currency';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Cell, Area, AreaChart } from 'recharts';
 
 // Use real database data only for charts
@@ -253,7 +254,7 @@ export const FeeReportsAnalytics = () => {
                   <p className="text-sm text-muted-foreground">Average Collection Rate</p>
                 </div>
                 <div className="text-center p-4 bg-muted/50 rounded-lg">
-                  <p className="text-2xl font-bold text-primary">£297k</p>
+                  <p className="text-2xl font-bold text-primary">{formatCurrency(297000, getUserCurrency())}</p>
                   <p className="text-sm text-muted-foreground">Average Monthly Collection</p>
                 </div>
                 <div className="text-center p-4 bg-muted/50 rounded-lg">

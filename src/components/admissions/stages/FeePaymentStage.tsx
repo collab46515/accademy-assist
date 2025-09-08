@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CreditCard, DollarSign, Receipt, Mail, CheckCircle, Clock, AlertTriangle, Download } from 'lucide-react';
+import { formatCurrency, getUserCurrency } from '@/lib/currency';
 
 interface FeePaymentStageProps {
   applicationId: string;
@@ -80,19 +81,19 @@ export function FeePaymentStage({ applicationId, onMoveToNext }: FeePaymentStage
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">£{totalPaid.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-green-600">{formatCurrency(totalPaid, getUserCurrency())}</div>
               <div className="text-sm text-muted-foreground">Paid</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">£{totalPending.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-yellow-600">{formatCurrency(totalPending, getUserCurrency())}</div>
               <div className="text-sm text-muted-foreground">Pending</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-600">£{totalScheduled.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-gray-600">{formatCurrency(totalScheduled, getUserCurrency())}</div>
               <div className="text-sm text-muted-foreground">Scheduled</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-primary">£{feeStructure.total.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-primary">{formatCurrency(feeStructure.total, getUserCurrency())}</div>
               <div className="text-sm text-muted-foreground">Total</div>
             </div>
           </div>
