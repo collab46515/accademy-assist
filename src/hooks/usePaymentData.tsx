@@ -132,8 +132,6 @@ export const usePaymentData = (schoolId?: string) => {
         name: discount.name,
         discount_type: discount.discount_type,
         value: discount.value,
-        validity_start: discount.validity_start ?? null,
-        validity_end: discount.validity_end ?? null,
         status: discount.status,
       };
       const { data, error } = await (supabase as any)

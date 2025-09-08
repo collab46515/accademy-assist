@@ -268,8 +268,6 @@ export function FeeManagementMasterData() {
             name: data.name,
             discount_type: data.discount_type || 'percentage',
             value: parseFloat(data.value || '0'),
-            validity_start: data.validity_start || null,
-            validity_end: data.validity_end || null,
             status: 'active'
           });
         } else {
@@ -279,8 +277,6 @@ export function FeeManagementMasterData() {
             name: data.name,
             discount_type: data.discount_type || 'percentage',
             value: parseFloat(data.value || '0'),
-            validity_start: data.validity_start || null,
-            validity_end: data.validity_end || null,
             status: 'active'
           });
         }
