@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useForm } from 'react-hook-form';
 import { useFeeData } from '@/hooks/useFeeData';
+import { usePaymentData } from '@/hooks/usePaymentData';
 import { CreditCard, Plus, Search, Download, Upload, Edit, Trash } from 'lucide-react';
 
 // Mock fee heads data with INR amounts
@@ -191,8 +192,9 @@ export function FeeManagementMasterData() {
   const [editingItem, setEditingItem] = useState<any>(null);
   const form = useForm();
 
-  // Use real fee data
+  // Use real fee data and payment data
   const { feeStructures, createFeeStructure, updateFeeStructure, deleteFeeStructure, loading } = useFeeData();
+  const { paymentPlans, discounts, createPaymentPlan, updatePaymentPlan, deletePaymentPlan, createDiscount, updateDiscount, deleteDiscount, loading: paymentLoading } = usePaymentData();
 
   const handleCreate = async (data: any) => {
     console.log('Form data received:', data);
@@ -231,6 +233,55 @@ export function FeeManagementMasterData() {
             status: 'active'
           });
         }
+      } else if (activeTab === 'payment-plans') {
+        if (editingItem) {
+          await updatePaymentPlan(editingItem.id, {
+            name: data.name,
+            description: data.description,
+            total_amount: parseFloat(data.total_amount || '0'),
+            number_of_installments: parseInt(data.number_of_installments || '1'),
+            frequency: data.frequency,
+            interest_rate: parseFloat(data.interest_rate || '0'),
+            status: 'active'
+          });
+        } else {
+          await createPaymentPlan({
+            school_id: '2f21656b-0848-40ee-bbec-12e5e8137545',
+            name: data.name,
+            description: data.description,
+            total_amount: parseFloat(data.total_amount || '0'),
+            number_of_installments: parseInt(data.number_of_installments || '1'),
+            start_date: data.start_date || null,
+            end_date: data.end_date || null,
+            frequency: data.frequency,
+            interest_rate: parseFloat(data.interest_rate || '0'),
+            status: 'active'
+          });
+        }
+      } else if (activeTab === 'discounts') {
+        if (editingItem) {
+          await updateDiscount(editingItem.id, {
+            name: data.name,
+            discount_type: data.discount_type,
+            value: parseFloat(data.value || '0'),
+            applicable_fee_head_ids: data.applicable_fee_head_ids || [],
+            validity_start: data.validity_start || null,
+            validity_end: data.validity_end || null,
+            status: 'active'
+          });
+        } else {
+          await createDiscount({
+            school_id: '2f21656b-0848-40ee-bbec-12e5e8137545',
+            name: data.name,
+            discount_type: data.discount_type,
+            value: parseFloat(data.value || '0'),
+            applicable_fee_head_ids: data.applicable_fee_head_ids || [],
+            criteria: {},
+            validity_start: data.validity_start || null,
+            validity_end: data.validity_end || null,
+            status: 'active'
+          });
+        }
       }
       setDialogOpen(false);
       form.reset();
@@ -252,8 +303,13 @@ export function FeeManagementMasterData() {
         if (activeTab === 'structures') {
           console.log('Deleting fee structure:', id);
           await deleteFeeStructure(id);
+        } else if (activeTab === 'payment-plans') {
+          console.log('Deleting payment plan:', id);
+          await deletePaymentPlan(id);
+        } else if (activeTab === 'discounts') {
+          console.log('Deleting discount:', id);
+          await deleteDiscount(id);
         }
-        // Add other delete handlers for other tabs as needed
       } catch (error) {
         console.error('Error deleting:', error);
       }
@@ -308,8 +364,8 @@ export function FeeManagementMasterData() {
           {[
             { id: 'fee-heads', label: 'Fee Heads', count: mockFeeHeads.length },
             { id: 'structures', label: 'Fee Structures', count: feeStructures.length },
-            { id: 'payment-plans', label: 'Payment Plans', count: mockPaymentPlans.length },
-            { id: 'discounts', label: 'Discounts & Waivers', count: mockDiscounts.length }
+            { id: 'payment-plans', label: 'Payment Plans', count: paymentPlans.length },
+            { id: 'discounts', label: 'Discounts & Waivers', count: discounts.length }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -481,35 +537,36 @@ export function FeeManagementMasterData() {
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {mockPaymentPlans
-                    .filter(item =>
-                      item.plan_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      item.description.toLowerCase().includes(searchTerm.toLowerCase())
-                    )
-                    .map((plan, index) => (
-                    <TableRow key={index}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{plan.plan_name}</div>
-                          <div className="text-sm text-gray-500">{plan.description}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{plan.installments}</TableCell>
-                      <TableCell>{plan.interest_rate}%</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => handleEdit(plan)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(plan.id)}>
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
+                 <TableBody>
+                   {paymentPlans
+                     .filter(item =>
+                       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                       (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()))
+                     )
+                     .map((plan) => (
+                     <TableRow key={plan.id}>
+                       <TableCell>
+                         <div>
+                           <div className="font-medium">{plan.name}</div>
+                           <div className="text-sm text-gray-500">{plan.description}</div>
+                         </div>
+                       </TableCell>
+                       <TableCell>{plan.description}</TableCell>
+                       <TableCell>{plan.number_of_installments} ({plan.frequency})</TableCell>
+                       <TableCell>{plan.interest_rate || 0}%</TableCell>
+                       <TableCell>
+                         <div className="flex gap-2">
+                           <Button variant="ghost" size="sm" onClick={() => handleEdit(plan)}>
+                             <Edit className="h-4 w-4" />
+                           </Button>
+                           <Button variant="ghost" size="sm" onClick={() => handleDelete(plan.id)}>
+                             <Trash className="h-4 w-4" />
+                           </Button>
+                         </div>
+                       </TableCell>
+                     </TableRow>
+                   ))}
+                 </TableBody>
               </Table>
             </CardContent>
           </Card>
@@ -534,37 +591,37 @@ export function FeeManagementMasterData() {
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {mockDiscounts
-                    .filter(item =>
-                      item.discount_name.toLowerCase().includes(searchTerm.toLowerCase())
-                    )
-                    .map((discount, index) => (
-                    <TableRow key={index}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{discount.discount_name}</div>
-                          <div className="text-sm text-gray-500">
-                            {discount.validity_start} - {discount.validity_end}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{discount.discount_type}</TableCell>
-                      <TableCell>{discount.discount_value}</TableCell>
-                      <TableCell>{discount.applicable_fee_heads.join(', ')}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => handleEdit(discount)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(discount.id)}>
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
+                 <TableBody>
+                   {discounts
+                     .filter(item =>
+                       item.name.toLowerCase().includes(searchTerm.toLowerCase())
+                     )
+                     .map((discount) => (
+                     <TableRow key={discount.id}>
+                       <TableCell>
+                         <div>
+                           <div className="font-medium">{discount.name}</div>
+                           <div className="text-sm text-gray-500">
+                             {discount.validity_start} - {discount.validity_end}
+                           </div>
+                         </div>
+                       </TableCell>
+                       <TableCell>{discount.discount_type}</TableCell>
+                       <TableCell>{discount.value}{discount.discount_type === 'percentage' ? '%' : ' ₹'}</TableCell>
+                       <TableCell>{discount.applicable_fee_head_ids.length} selected</TableCell>
+                       <TableCell>
+                         <div className="flex gap-2">
+                           <Button variant="ghost" size="sm" onClick={() => handleEdit(discount)}>
+                             <Edit className="h-4 w-4" />
+                           </Button>
+                           <Button variant="ghost" size="sm" onClick={() => handleDelete(discount.id)}>
+                             <Trash className="h-4 w-4" />
+                           </Button>
+                         </div>
+                       </TableCell>
+                     </TableRow>
+                   ))}
+                 </TableBody>
               </Table>
             </CardContent>
           </Card>
@@ -576,7 +633,11 @@ export function FeeManagementMasterData() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              {editingItem ? 'Edit' : 'Create'} {activeTab === 'structures' ? 'Fee Structure' : 'Fee Head'}
+              {editingItem ? 'Edit' : 'Create'} {
+                activeTab === 'structures' ? 'Fee Structure' : 
+                activeTab === 'payment-plans' ? 'Payment Plan' : 
+                activeTab === 'discounts' ? 'Discount' : 'Fee Head'
+              }
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={form.handleSubmit(handleCreate)} className="space-y-4">
@@ -624,6 +685,81 @@ export function FeeManagementMasterData() {
                     {...form.register('applicable_year_groups')} 
                     placeholder="Year 7, Year 8 (comma-separated)" 
                   />
+                </div>
+              </>
+            ) : activeTab === 'payment-plans' ? (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Plan Name *</label>
+                    <Input {...form.register('name', { required: 'Name is required' })} placeholder="Payment plan name" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Number of Installments *</label>
+                    <Input {...form.register('number_of_installments', { required: 'Installments required' })} type="number" placeholder="1" />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Description</label>
+                  <Input {...form.register('description')} placeholder="Payment plan description" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Total Amount (₹)</label>
+                    <Input {...form.register('total_amount')} type="number" placeholder="0.00" step="0.01" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Frequency</label>
+                    <Select onValueChange={(value) => form.setValue('frequency', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select frequency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="termly">Termly</SelectItem>
+                        <SelectItem value="annually">Annually</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Interest Rate (%)</label>
+                  <Input {...form.register('interest_rate')} type="number" placeholder="0" step="0.1" />
+                </div>
+              </>
+            ) : activeTab === 'discounts' ? (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Discount Name *</label>
+                    <Input {...form.register('name', { required: 'Name is required' })} placeholder="Discount name" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Discount Type *</label>
+                    <Select onValueChange={(value) => form.setValue('discount_type', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="percentage">Percentage</SelectItem>
+                        <SelectItem value="fixed">Fixed Amount</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Value *</label>
+                  <Input {...form.register('value', { required: 'Value is required' })} type="number" placeholder="0" step="0.01" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Valid From</label>
+                    <Input {...form.register('validity_start')} type="date" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Valid To</label>
+                    <Input {...form.register('validity_end')} type="date" />
+                  </div>
                 </div>
               </>
             ) : (
