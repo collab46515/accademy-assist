@@ -5,6 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -17,7 +21,10 @@ import {
   Upload,
   CheckCircle,
   AlertCircle,
-  Clock
+  Clock,
+  Plus,
+  Archive,
+  ArchiveRestore
 } from 'lucide-react';
 
 // Master HR Data Definitions
@@ -225,12 +232,19 @@ const MASTER_DOCUMENT_CATEGORIES = [
 ];
 
 export function HRMasterData() {
-  const [existingDepartments, setExistingDepartments] = useState<string[]>([]);
+  const [existingDepartments, setExistingDepartments] = useState<any[]>([]);
   const [existingAssetCategories, setExistingAssetCategories] = useState<string[]>([]);
   const [existingBenefitPlans, setExistingBenefitPlans] = useState<string[]>([]);
   const [existingDocumentCategories, setExistingDocumentCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [installing, setInstalling] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newDepartment, setNewDepartment] = useState({
+    name: '',
+    description: '',
+    cost_center: '',
+    is_active: true
+  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -245,13 +259,13 @@ export function HRMasterData() {
         benefitPlansResult,
         documentCategoriesResult
       ] = await Promise.all([
-        supabase.from('departments').select('name'),
+        supabase.from('departments').select('*').order('name'),
         supabase.from('asset_categories').select('category_name'),
         supabase.from('benefit_plans').select('plan_name'),
         supabase.from('document_categories').select('category_name')
       ]);
 
-      setExistingDepartments(departmentsResult.data?.map(d => d.name) || []);
+      setExistingDepartments(departmentsResult.data || []);
       setExistingAssetCategories(assetCategoriesResult.data?.map(a => a.category_name) || []);
       setExistingBenefitPlans(benefitPlansResult.data?.map(b => b.plan_name) || []);
       setExistingDocumentCategories(documentCategoriesResult.data?.map(d => d.category_name) || []);
@@ -267,7 +281,7 @@ export function HRMasterData() {
     try {
       // Install departments
       const newDepartments = MASTER_DEPARTMENTS.filter(dept => 
-        !existingDepartments.includes(dept.name)
+        !existingDepartments.some(existing => existing.name === dept.name)
       );
       if (newDepartments.length > 0) {
         await supabase.from('departments').insert(newDepartments);
@@ -324,7 +338,7 @@ export function HRMasterData() {
       switch (type) {
         case 'departments':
           await supabase.from('departments').insert([item]);
-          setExistingDepartments([...existingDepartments, item.name]);
+          await fetchExistingData(); // Refresh full data including new item
           break;
         case 'asset_categories':
           await supabase.from('asset_categories').insert([item]);
@@ -354,6 +368,65 @@ export function HRMasterData() {
     }
   };
 
+  const addNewDepartment = async () => {
+    if (!newDepartment.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Department name is required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await supabase.from('departments').insert([newDepartment]);
+      
+      toast({
+        title: "Success",
+        description: "Department added successfully.",
+      });
+      
+      setNewDepartment({
+        name: '',
+        description: '',
+        cost_center: '',
+        is_active: true
+      });
+      setShowAddForm(false);
+      await fetchExistingData();
+    } catch (error) {
+      console.error('Error adding department:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add department.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleDepartmentStatus = async (departmentId: string, currentStatus: boolean) => {
+    try {
+      await supabase
+        .from('departments')
+        .update({ is_active: !currentStatus })
+        .eq('id', departmentId);
+      
+      toast({
+        title: "Success",
+        description: `Department ${!currentStatus ? 'activated' : 'archived'} successfully.`,
+      });
+      
+      await fetchExistingData();
+    } catch (error) {
+      console.error('Error updating department status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update department status.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -364,8 +437,8 @@ export function HRMasterData() {
 
   const totalMasterItems = MASTER_DEPARTMENTS.length + MASTER_ASSET_CATEGORIES.length + 
                           MASTER_BENEFIT_PLANS.length + MASTER_DOCUMENT_CATEGORIES.length;
-  const installedItems = existingDepartments.length + existingAssetCategories.length + 
-                        existingBenefitPlans.length + existingDocumentCategories.length;
+  const installedItems = existingDepartments.filter(d => existingDepartments.some(existing => existing.name === d.name)).length + 
+                        existingAssetCategories.length + existingBenefitPlans.length + existingDocumentCategories.length;
   const availableItems = totalMasterItems - installedItems;
 
   return (
@@ -399,29 +472,110 @@ export function HRMasterData() {
         </TabsList>
 
         <TabsContent value="departments" className="space-y-4">
+          {/* Add New Department Form */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  Add New Department
+                </div>
+                <Button
+                  onClick={() => setShowAddForm(!showAddForm)}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  {showAddForm ? 'Cancel' : 'Add Department'}
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            {showAddForm && (
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Department Name*</Label>
+                    <Input
+                      id="name"
+                      value={newDepartment.name}
+                      onChange={(e) => setNewDepartment({...newDepartment, name: e.target.value})}
+                      placeholder="e.g., Science Department"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cost_center">Cost Center</Label>
+                    <Input
+                      id="cost_center"
+                      value={newDepartment.cost_center}
+                      onChange={(e) => setNewDepartment({...newDepartment, cost_center: e.target.value})}
+                      placeholder="e.g., SCI001"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={newDepartment.description}
+                    onChange={(e) => setNewDepartment({...newDepartment, description: e.target.value})}
+                    placeholder="Brief description of the department"
+                    rows={3}
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="is_active"
+                    checked={newDepartment.is_active}
+                    onCheckedChange={(checked) => setNewDepartment({...newDepartment, is_active: checked})}
+                  />
+                  <Label htmlFor="is_active">Active Department</Label>
+                </div>
+                <Button onClick={addNewDepartment} className="w-full">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Department
+                </Button>
+              </CardContent>
+            )}
+          </Card>
+
+          {/* Existing Departments */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5" />
-                Departments
+                Departments Management
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Installed Departments</CardTitle>
+                    <CardTitle className="text-lg">Active Departments</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {existingDepartments.map((dept, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                          <span>{dept}</span>
+                      {existingDepartments.filter(dept => dept.is_active !== false).map((dept, index) => (
+                        <div key={dept.id || index} className="flex items-center justify-between p-2 border rounded">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <div>
+                              <div className="font-medium">{dept.name}</div>
+                              {dept.description && (
+                                <div className="text-sm text-muted-foreground">{dept.description}</div>
+                              )}
+                            </div>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => toggleDepartmentStatus(dept.id, dept.is_active)}
+                          >
+                            <Archive className="h-4 w-4" />
+                          </Button>
                         </div>
                       ))}
-                      {existingDepartments.length === 0 && (
-                        <p className="text-muted-foreground">No departments installed yet.</p>
+                      {existingDepartments.filter(dept => dept.is_active !== false).length === 0 && (
+                        <p className="text-muted-foreground">No active departments yet.</p>
                       )}
                     </div>
                   </CardContent>
@@ -429,11 +583,11 @@ export function HRMasterData() {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Available Departments</CardTitle>
+                    <CardTitle className="text-lg">Available Master Templates</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {MASTER_DEPARTMENTS.filter(dept => !existingDepartments.includes(dept.name)).map((dept, index) => (
+                      {MASTER_DEPARTMENTS.filter(dept => !existingDepartments.some(existing => existing.name === dept.name)).map((dept, index) => (
                         <div key={index} className="flex items-center justify-between p-2 border rounded">
                           <div>
                             <div className="font-medium">{dept.name}</div>
@@ -447,10 +601,49 @@ export function HRMasterData() {
                           </Button>
                         </div>
                       ))}
+                      {MASTER_DEPARTMENTS.filter(dept => !existingDepartments.some(existing => existing.name === dept.name)).length === 0 && (
+                        <p className="text-muted-foreground">All master templates installed.</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Archived Departments */}
+              {existingDepartments.some(dept => dept.is_active === false) && (
+                <Card className="mt-4">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Archive className="h-4 w-4" />
+                      Archived Departments
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {existingDepartments.filter(dept => dept.is_active === false).map((dept, index) => (
+                        <div key={dept.id || index} className="flex items-center justify-between p-2 border rounded bg-muted/50">
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="h-4 w-4 text-orange-600" />
+                            <div>
+                              <div className="font-medium text-muted-foreground">{dept.name}</div>
+                              {dept.description && (
+                                <div className="text-sm text-muted-foreground">{dept.description}</div>
+                              )}
+                            </div>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => toggleDepartmentStatus(dept.id, dept.is_active)}
+                          >
+                            <ArchiveRestore className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
