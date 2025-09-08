@@ -25,8 +25,8 @@ export interface FeeDiscount {
   name: string;
   discount_type: 'percentage' | 'fixed';
   value: number;
-  validity_start?: string | null;
-  validity_end?: string | null;
+  valid_from: string;
+  valid_to?: string | null;
   status: string;
   created_by?: string | null;
   created_at: string;
@@ -132,6 +132,8 @@ export const usePaymentData = (schoolId?: string) => {
         name: discount.name,
         discount_type: discount.discount_type,
         value: discount.value,
+        valid_from: discount.valid_from,
+        valid_to: discount.valid_to ?? null,
         status: discount.status,
       };
       const { data, error } = await (supabase as any)

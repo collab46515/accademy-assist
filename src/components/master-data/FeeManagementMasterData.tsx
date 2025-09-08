@@ -277,6 +277,8 @@ export function FeeManagementMasterData() {
             name: data.name,
             discount_type: data.discount_type || 'percentage',
             value: parseFloat(data.value || '0'),
+            valid_from: (data.validity_start as string) || new Date().toISOString().split('T')[0],
+            valid_to: (data.validity_end as string) || null,
             status: 'active'
           });
         }
@@ -600,7 +602,7 @@ export function FeeManagementMasterData() {
                          <div>
                            <div className="font-medium">{discount.name}</div>
                            <div className="text-sm text-gray-500">
-                             {discount.validity_start} - {discount.validity_end}
+                             {discount.valid_from} - {discount.valid_to ?? ''}
                            </div>
                          </div>
                        </TableCell>
