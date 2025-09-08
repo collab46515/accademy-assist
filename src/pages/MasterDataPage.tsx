@@ -390,16 +390,16 @@ export function MasterDataPage() {
             await createSchool({ ...data, is_active: true, settings: {} });
             break;
           case 'subjects':
-            await createSubject({ ...data, school_id: currentSchool?.id, is_active: true });
+            await createSubject({ ...data, school_id: currentSchool?.id || schools[0]?.id, is_active: true });
             break;
           case 'classes':
-            await createClass({ ...data, school_id: currentSchool?.id || '', is_active: true, current_enrollment: 0 });
+            await createClass({ ...data, school_id: currentSchool?.id || schools[0]?.id || '', is_active: true, current_enrollment: 0 });
             break;
           case 'students':
             // No need to generate user_id - we'll set it to null for now
             await createStudent({ 
               ...data, 
-              school_id: currentSchool?.id || '',
+              school_id: currentSchool?.id || schools[0]?.id || '',
               is_enrolled: true 
             });
             break;
