@@ -281,9 +281,14 @@ export function useMasterData() {
 
   const createStudent = async (studentData: Omit<Student, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      const defaultSchoolId = (studentData as any).school_id || currentSchool?.id || schools[0]?.id;
+      const payload = {
+        ...studentData,
+        school_id: defaultSchoolId,
+      } as any;
       const { data, error } = await supabase
         .from('students')
-        .insert([studentData])
+        .insert([payload])
         .select()
         .single();
 
@@ -310,7 +315,7 @@ export function useMasterData() {
     try {
       const payload = {
         ...classData,
-        school_id: (classData as any).school_id || currentSchool?.id,
+        school_id: (classData as any).school_id || currentSchool?.id || schools[0]?.id,
       } as any;
       const { data, error } = await supabase
         .from('classes')
