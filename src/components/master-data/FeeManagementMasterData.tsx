@@ -268,7 +268,6 @@ export function FeeManagementMasterData() {
             name: data.name,
             discount_type: data.discount_type || 'percentage',
             value: parseFloat(data.value || '0'),
-            applicable_fee_head_ids: data.applicable_fee_head_ids || [],
             validity_start: data.validity_start || null,
             validity_end: data.validity_end || null,
             status: 'active'
@@ -280,7 +279,6 @@ export function FeeManagementMasterData() {
             name: data.name,
             discount_type: data.discount_type || 'percentage',
             value: parseFloat(data.value || '0'),
-            applicable_fee_head_ids: data.applicable_fee_head_ids || [],
             criteria: data.criteria || {},
             validity_start: data.validity_start || null,
             validity_end: data.validity_end || null,

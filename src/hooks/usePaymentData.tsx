@@ -25,7 +25,7 @@ export interface FeeDiscount {
   name: string;
   discount_type: 'percentage' | 'fixed';
   value: number;
-  applicable_fee_head_ids: string[];
+  applicable_fee_head_ids?: string[];
   criteria?: any;
   validity_start?: string | null;
   validity_end?: string | null;
