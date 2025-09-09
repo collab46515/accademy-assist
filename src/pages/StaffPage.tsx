@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,6 +100,7 @@ const mockStaff: Staff[] = [
 ];
 
 const StaffPage = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [staff] = useState(mockStaff);
 
@@ -200,7 +202,10 @@ const StaffPage = () => {
                   </CardTitle>
                   <CardDescription>Manage academic and non-academic staff records</CardDescription>
                 </div>
-                <Button className="shadow-[var(--shadow-elegant)]">
+                <Button 
+                  className="shadow-[var(--shadow-elegant)]"
+                  onClick={() => navigate('/hr?tab=employees')}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Staff Member
                 </Button>
