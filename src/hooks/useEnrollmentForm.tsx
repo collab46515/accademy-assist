@@ -9,9 +9,10 @@ import { enrollmentFormSchema, type EnrollmentFormData, type PathwayType, pathwa
 interface UseEnrollmentFormProps {
   pathway: PathwayType;
   applicationId?: string;
+  schoolId?: string;
 }
 
-export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormProps) {
+export function useEnrollmentForm({ pathway, applicationId, schoolId }: UseEnrollmentFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -20,6 +21,9 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(applicationId || null);
   const { currentSchool } = useRBAC();
   const { toast } = useToast();
+  
+  // Use provided schoolId or currentSchool.id, with fallback to Demo School for unauthenticated users
+  const effectiveSchoolId = schoolId || currentSchool?.id || 'c8b1e1e0-7b8a-4c9d-9e2f-3a4b5c6d7e8f';
   
   const config = pathwayConfig[pathway];
   const totalSteps = config.totalSteps;
@@ -99,7 +103,7 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
 
   // Auto-save functionality with debouncing
   const saveAsDraft = useCallback(async (data: Partial<EnrollmentFormData>, silent = false) => {
-    if (!currentSchool) return;
+    if (!effectiveSchoolId) return;
     
     setIsSaving(true);
     try {
@@ -110,7 +114,7 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
         // Required fields for database
         application_number: `DRAFT-${Date.now()}`,
         pathway: mapPathwayToDatabase(pathway) as any,
-        school_id: currentSchool.id,
+        school_id: effectiveSchoolId,
         
         // Map extracted common fields
         student_name: commonFields.studentName,
@@ -147,7 +151,7 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
           .from('enrollment_applications')
           .select('id')
           .eq('status', 'draft')
-          .eq('school_id', currentSchool.id)
+          .eq('school_id', effectiveSchoolId)
           .eq('pathway', mapPathwayToDatabase(pathway) as any)
           .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Within last 24 hours
           .order('created_at', { ascending: false })
@@ -202,7 +206,7 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
     } finally {
       setIsSaving(false);
     }
-  }, [currentSchool, currentStep, totalSteps, pathway, applicationId, toast, extractCommonFields, mapPathwayToDatabase]);
+  }, [effectiveSchoolId, currentStep, totalSteps, pathway, applicationId, toast, extractCommonFields, mapPathwayToDatabase]);
 
   // Watch for form changes and trigger auto-save
   useEffect(() => {
@@ -280,7 +284,7 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
 
   // Submit final application
   const submitApplication = useCallback(async (data: EnrollmentFormData) => {
-    if (!currentSchool || isSubmitted || isLoading) return;
+    if (!effectiveSchoolId || isSubmitted || isLoading) return;
 
     setIsLoading(true);
     try {
@@ -290,7 +294,7 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
         // Required fields for database
         application_number: `APP-${Date.now()}`,
         pathway: mapPathwayToDatabase(pathway) as any,
-        school_id: currentSchool.id,
+        school_id: effectiveSchoolId,
         
         // Map extracted common fields
         student_name: commonFields.studentName,
@@ -352,7 +356,7 @@ export function useEnrollmentForm({ pathway, applicationId }: UseEnrollmentFormP
     } finally {
       setIsLoading(false);
     }
-  }, [currentSchool, applicationId, totalSteps, config.name, toast, extractCommonFields, pathway, mapPathwayToDatabase, isSubmitted, isLoading]);
+  }, [effectiveSchoolId, applicationId, totalSteps, config.name, toast, extractCommonFields, pathway, mapPathwayToDatabase, isSubmitted, isLoading]);
 
   // Get field validation status
   const getFieldErrors = useCallback((fieldPath: string) => {
