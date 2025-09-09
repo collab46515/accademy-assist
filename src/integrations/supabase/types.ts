@@ -8381,6 +8381,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      self_serve_create_school: {
+        Args: { school_data: Json }
+        Returns: string
+      }
     }
     Enums: {
       academic_period_type: "term" | "semester" | "quarter" | "year" | "custom"

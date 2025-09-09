@@ -86,10 +86,11 @@ interface SchoolSettings {
   };
 }
 
-// First School Creator Component for Super Admins
+// First School Creator Component (available when user has no school)
 function FirstSchoolCreator() {
   const [creating, setCreating] = useState(false);
   const { toast } = useToast();
+  const { fetchUserData } = useRBAC();
 
   const handleCreateSchool = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -108,19 +109,26 @@ function FirstSchoolCreator() {
     };
 
     try {
-      const { error } = await supabase
-        .from('schools')
-        .insert([schoolData]);
+      const { data: newSchoolId, error } = await supabase.rpc('self_serve_create_school', {
+        school_data: {
+          name: schoolData.name,
+          code: schoolData.code,
+          address: schoolData.address,
+          contact_phone: schoolData.phone,
+          contact_email: schoolData.email,
+          website: schoolData.website,
+          establishment_type: schoolData.establishment_type,
+        }
+      });
 
       if (error) throw error;
 
       toast({
         title: "School Created",
-        description: "First school created successfully. You can now access school settings.",
+        description: "Your school was created and you are now its administrator.",
       });
 
-      // Refresh the page to load the new school
-      window.location.reload();
+      await fetchUserData();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -207,25 +215,25 @@ export function SchoolSettingsManager() {
     }
   }, [currentSchool]);
 
-  // Show school creation for super admins when no schools exist
-  if (isSuperAdmin() && (!schools || schools.length === 0)) {
+  // Show school creation when the user has no schools linked to their account
+  if (!schools || schools.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Card className="max-w-2xl mx-auto">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building className="h-5 w-5" />
-              Create First School
+              Create Your School
             </CardTitle>
             <CardDescription>
-              As a Super Admin, you need to create the first school before accessing school settings.
+              No school is linked to your account yet. Create your school to get started.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Alert className="mb-6">
               <School className="h-4 w-4" />
               <AlertDescription>
-                No schools exist in the system yet. Create your first school to get started.
+                You will automatically be assigned the School Admin role for the school you create.
               </AlertDescription>
             </Alert>
             <FirstSchoolCreator />

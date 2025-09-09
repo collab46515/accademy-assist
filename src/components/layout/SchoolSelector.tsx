@@ -25,7 +25,7 @@ export function SchoolSelector() {
             {currentSchool?.name}
           </SelectValue>
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="z-50">
           {schools.map((school) => (
             <SelectItem key={school.id} value={school.id}>
               <div className="flex flex-col">
