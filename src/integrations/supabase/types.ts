@@ -158,6 +158,7 @@ export type Database = {
           depreciation_rate: number | null
           description: string | null
           id: string
+          is_active: boolean
         }
         Insert: {
           category_name: string
@@ -165,6 +166,7 @@ export type Database = {
           depreciation_rate?: number | null
           description?: string | null
           id?: string
+          is_active?: boolean
         }
         Update: {
           category_name?: string
@@ -172,6 +174,7 @@ export type Database = {
           depreciation_rate?: number | null
           description?: string | null
           id?: string
+          is_active?: boolean
         }
         Relationships: []
       }
@@ -2078,6 +2081,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          is_active: boolean
           is_confidential: boolean | null
           retention_period_months: number | null
         }
@@ -2086,6 +2090,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_active?: boolean
           is_confidential?: boolean | null
           retention_period_months?: number | null
         }
@@ -2094,6 +2099,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_active?: boolean
           is_confidential?: boolean | null
           retention_period_months?: number | null
         }
