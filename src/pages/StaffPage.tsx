@@ -204,7 +204,7 @@ const StaffPage = () => {
                 </div>
                 <Button 
                   className="shadow-[var(--shadow-elegant)]"
-                  onClick={() => navigate('/hr?tab=employees')}
+                  onClick={() => navigate('/hr-management')}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Staff Member
