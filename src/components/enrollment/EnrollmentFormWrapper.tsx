@@ -153,7 +153,7 @@ export function EnrollmentFormWrapper({ pathway, applicationId, children }: Enro
                 {isLastStep ? (
                   <Button
                     type="button"
-                    onClick={() => formHook.submitApplication(formHook.form.getValues())}
+                    onClick={() => formHook.form.handleSubmit((values) => formHook.submitApplication(values as any))()}
                     disabled={isLoading || isSubmitted}
                     variant={isSubmitted ? "secondary" : "default"}
                     className="gap-2"
