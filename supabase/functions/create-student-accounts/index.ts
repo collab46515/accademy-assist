@@ -107,38 +107,38 @@ const handler = async (req: Request): Promise<Response> => {
       studentNumber = `STU${String((count || 0) + 1).padStart(4, '0')}`;
     }
 
-    // Create profile records
+    // Create or update student profile (idempotent)
     console.log("Creating profile records...");
     const { error: studentProfileError } = await supabaseAdmin
       .from('profiles')
-      .insert({
+      .upsert({
         user_id: studentUser.user.id,
         email: student_data.email,
         first_name: student_data.first_name,
         last_name: student_data.last_name,
         phone: student_data.phone,
         must_change_password: true
-      });
+      }, { onConflict: 'user_id' });
 
     if (studentProfileError) {
-      console.error("Error creating student profile:", studentProfileError);
-      throw new Error(`Failed to create student profile: ${studentProfileError.message}`);
+      console.error("Error creating/updating student profile:", studentProfileError);
+      throw new Error(`Failed to upsert student profile: ${studentProfileError.message}`);
     }
 
     if (parentUser) {
       const { error: parentProfileError } = await supabaseAdmin
         .from('profiles')
-        .insert({
+        .upsert({
           user_id: parentUser.id,
           email: parent_data!.email,
           first_name: parent_data!.first_name,
           last_name: parent_data!.last_name,
           phone: parent_data!.phone,
           must_change_password: true
-        });
+        }, { onConflict: 'user_id' });
 
       if (parentProfileError) {
-        console.error("Error creating parent profile:", parentProfileError);
+        console.error("Error creating/updating parent profile:", parentProfileError);
         // Continue without failing
       }
     }
