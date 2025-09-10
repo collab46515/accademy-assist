@@ -122,7 +122,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (studentProfileError) {
       console.error("Error creating/updating student profile:", studentProfileError);
-      throw new Error(`Failed to upsert student profile: ${studentProfileError.message}`);
+      // Non-fatal: continue if the profile already exists
+      // Only throw for errors other than unique violations
+      // @ts-ignore - edge runtime types may not include code
+      if (studentProfileError.code && studentProfileError.code !== '23505') {
+        throw new Error(`Failed to upsert student profile: ${studentProfileError.message}`);
+      }
     }
 
     if (parentUser) {
