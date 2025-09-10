@@ -70,7 +70,7 @@ export function EnrollmentProcessor() {
       const studentData = {
         first_name: firstName,
         last_name: lastName,
-        email: enrollmentSourceData.student_email || `${application.application_number.replace(/[^0-9a-z]/gi, '')}@school.edu`,
+        email: (enrollmentSourceData.student_email || `${application.application_number.replace(/[^0-9a-z]/gi, '')}@school.edu`).toLowerCase(),
         student_number: application.application_number.replace(/[^0-9]/g, '') || `STU${Date.now().toString().slice(-6)}`,
         year_group: enrollmentSourceData.year_group || application.year_group || 'Year 7',
         form_class: enrollmentSourceData.form_class_preference || application.form_class_preference || null,

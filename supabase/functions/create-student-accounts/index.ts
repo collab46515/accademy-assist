@@ -43,6 +43,10 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { student_data, parent_data, school_id, application_id }: CreateAccountsRequest = await req.json();
 
+    // Normalize emails to lower-case to avoid case-sensitivity issues
+    const normalizedStudentEmail = student_data.email?.toLowerCase();
+    const normalizedParentEmail = parent_data?.email ? parent_data.email.toLowerCase() : undefined;
+
     console.log("Creating student accounts for:", student_data.email);
 
     // Create admin Supabase client for user creation
@@ -55,7 +59,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Creating student auth user...");
     let studentUserId: string | null = null;
     const { data: studentUser, error: studentAuthError } = await supabaseAdmin.auth.admin.createUser({
-      email: student_data.email,
+      email: normalizedStudentEmail,
       password: student_data.password,
       email_confirm: true, // Auto-confirm email
       user_metadata: {
@@ -71,7 +75,7 @@ const handler = async (req: Request): Promise<Response> => {
       const { data: existingProfile } = await supabaseAdmin
         .from('profiles')
         .select('user_id')
-        .eq('email', student_data.email)
+        .ilike('email', normalizedStudentEmail)
         .maybeSingle();
       if (existingProfile?.user_id) {
         studentUserId = existingProfile.user_id;
@@ -89,7 +93,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (parent_data && parent_data.email) {
       console.log("Creating parent auth user...");
       const { data: parentUserData, error: parentAuthError } = await supabaseAdmin.auth.admin.createUser({
-        email: parent_data.email,
+        email: normalizedParentEmail,
         password: parent_data.password,
         email_confirm: true, // Auto-confirm email
         user_metadata: {
@@ -105,7 +109,7 @@ const handler = async (req: Request): Promise<Response> => {
         const { data: existingParent } = await supabaseAdmin
           .from('profiles')
           .select('user_id')
-          .eq('email', parent_data.email)
+          .ilike('email', normalizedParentEmail)
           .maybeSingle();
         if (existingParent?.user_id) {
           parentUserId = existingParent.user_id;
@@ -136,7 +140,7 @@ const handler = async (req: Request): Promise<Response> => {
       .from('profiles')
       .upsert({
         user_id: studentUserId!,
-        email: student_data.email,
+         email: normalizedStudentEmail,
         first_name: student_data.first_name,
         last_name: student_data.last_name,
         phone: student_data.phone,
@@ -158,7 +162,7 @@ const handler = async (req: Request): Promise<Response> => {
         .from('profiles')
         .upsert({
           user_id: parentUserId,
-          email: parent_data!.email,
+          email: normalizedParentEmail!,
           first_name: parent_data!.first_name,
           last_name: parent_data!.last_name,
           phone: parent_data!.phone,
@@ -291,11 +295,11 @@ const handler = async (req: Request): Promise<Response> => {
       success: true,
       student_record_id: studentRecord.id,
       student_user_id: studentUserId,
-      student_email: student_data.email,
+      student_email: normalizedStudentEmail,
       student_temp_password: student_data.password,
       student_number: studentNumber,
       parent_user_id: parentUserId,
-      parent_email: parent_data?.email,
+      parent_email: normalizedParentEmail,
       parent_temp_password: parent_data?.password,
       enrollment_complete: true
     }), {
