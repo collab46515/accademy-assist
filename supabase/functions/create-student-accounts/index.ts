@@ -51,8 +51,9 @@ const handler = async (req: Request): Promise<Response> => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Create student auth user
+    // Create or reuse student auth user
     console.log("Creating student auth user...");
+    let studentUserId: string | null = null;
     const { data: studentUser, error: studentAuthError } = await supabaseAdmin.auth.admin.createUser({
       email: student_data.email,
       password: student_data.password,
@@ -66,13 +67,25 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (studentAuthError) {
       console.error("Error creating student auth user:", studentAuthError);
-      throw new Error(`Failed to create student auth user: ${studentAuthError.message}`);
+      // If the user already exists, try to look up by email in profiles
+      const { data: existingProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('user_id')
+        .eq('email', student_data.email)
+        .maybeSingle();
+      if (existingProfile?.user_id) {
+        studentUserId = existingProfile.user_id;
+        console.log("Reusing existing student user:", studentUserId);
+      } else {
+        throw new Error(`Failed to create student auth user: ${studentAuthError.message}`);
+      }
+    } else {
+      studentUserId = studentUser!.user.id;
+      console.log("Student auth user created:", studentUserId);
     }
 
-    console.log("Student auth user created:", studentUser.user.id);
-
-    // Create parent auth user if provided
-    let parentUser = null;
+    // Create or reuse parent auth user if provided
+    let parentUserId: string | null = null;
     if (parent_data && parent_data.email) {
       console.log("Creating parent auth user...");
       const { data: parentUserData, error: parentAuthError } = await supabaseAdmin.auth.admin.createUser({
@@ -88,11 +101,21 @@ const handler = async (req: Request): Promise<Response> => {
 
       if (parentAuthError) {
         console.error("Error creating parent auth user:", parentAuthError);
-        // Don't fail the entire process if parent creation fails
-        console.warn("Continuing without parent account...");
+        // Try to reuse existing profile by email
+        const { data: existingParent } = await supabaseAdmin
+          .from('profiles')
+          .select('user_id')
+          .eq('email', parent_data.email)
+          .maybeSingle();
+        if (existingParent?.user_id) {
+          parentUserId = existingParent.user_id;
+          console.log("Reusing existing parent user:", parentUserId);
+        } else {
+          console.warn("Continuing without parent account...");
+        }
       } else {
-        parentUser = parentUserData.user;
-        console.log("Parent auth user created:", parentUser.id);
+        parentUserId = parentUserData!.user.id;
+        console.log("Parent auth user created:", parentUserId);
       }
     }
 
@@ -112,7 +135,7 @@ const handler = async (req: Request): Promise<Response> => {
     const { error: studentProfileError } = await supabaseAdmin
       .from('profiles')
       .upsert({
-        user_id: studentUser.user.id,
+        user_id: studentUserId!,
         email: student_data.email,
         first_name: student_data.first_name,
         last_name: student_data.last_name,
@@ -130,11 +153,11 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    if (parentUser) {
+    if (parentUserId) {
       const { error: parentProfileError } = await supabaseAdmin
         .from('profiles')
         .upsert({
-          user_id: parentUser.id,
+          user_id: parentUserId,
           email: parent_data!.email,
           first_name: parent_data!.first_name,
           last_name: parent_data!.last_name,
@@ -148,12 +171,13 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    // Create student record
+    // Create student record (idempotent)
     console.log("Creating student record...");
-    const { data: studentRecord, error: studentRecordError } = await supabaseAdmin
+    let studentRecord: any = null;
+    const { data: studentInsert, error: studentRecordError } = await supabaseAdmin
       .from('students')
       .insert({
-        user_id: studentUser.user.id,
+        user_id: studentUserId!,
         school_id: school_id,
         student_number: studentNumber,
         year_group: student_data.year_group,
@@ -169,29 +193,48 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (studentRecordError) {
       console.error("Error creating student record:", studentRecordError);
-      throw new Error(`Failed to create student record: ${studentRecordError.message}`);
+      // If duplicate, fetch existing student by user_id
+      // @ts-ignore
+      if (studentRecordError.code === '23505') {
+        const { data: existingStudent } = await supabaseAdmin
+          .from('students')
+          .select('*')
+          .eq('user_id', studentUserId!)
+          .maybeSingle();
+        if (existingStudent) {
+          studentRecord = existingStudent;
+          console.log("Reusing existing student record:", studentRecord.id);
+        } else {
+          throw new Error(`Failed to create student record: ${studentRecordError.message}`);
+        }
+      } else {
+        throw new Error(`Failed to create student record: ${studentRecordError.message}`);
+      }
+    } else {
+      studentRecord = studentInsert;
     }
 
-    // Create user roles
+    // Create user roles (idempotent)
     console.log("Creating user roles...");
     const { error: studentRoleError } = await supabaseAdmin
       .from('user_roles')
       .insert({
-        user_id: studentUser.user.id,
+        user_id: studentUserId!,
         school_id: school_id,
         role: 'student',
         is_active: true
       });
 
     if (studentRoleError) {
+      // Ignore duplicates
       console.error("Error creating student role:", studentRoleError);
     }
 
-    if (parentUser) {
+    if (parentUserId) {
       const { error: parentRoleError } = await supabaseAdmin
         .from('user_roles')
         .insert({
-          user_id: parentUser.id,
+          user_id: parentUserId,
           school_id: school_id,
           role: 'parent',
           is_active: true
@@ -201,17 +244,25 @@ const handler = async (req: Request): Promise<Response> => {
         console.error("Error creating parent role:", parentRoleError);
       }
 
-      // Link parent to student
-      const { error: linkError } = await supabaseAdmin
+      // Link parent to student (idempotent)
+      const { data: existingLink } = await supabaseAdmin
         .from('student_parents')
-        .insert({
-          student_id: studentRecord.id,
-          parent_id: parentUser.id,
-          relationship: parent_data!.relationship || 'Parent'
-        });
+        .select('id')
+        .eq('student_id', studentRecord.id)
+        .eq('parent_id', parentUserId)
+        .maybeSingle();
 
-      if (linkError) {
-        console.error("Error linking parent to student:", linkError);
+      if (!existingLink) {
+        const { error: linkError } = await supabaseAdmin
+          .from('student_parents')
+          .insert({
+            student_id: studentRecord.id,
+            parent_id: parentUserId,
+            relationship: parent_data!.relationship || 'Parent'
+          });
+        if (linkError) {
+          console.error("Error linking parent to student:", linkError);
+        }
       }
     }
 
