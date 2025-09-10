@@ -48,22 +48,11 @@ export function EnrollmentProcessor() {
         return { success: true, message: 'Already processed' };
       }
 
-      // Check if student already exists by email or similar application data
+      // Determine email to use; even if it exists, we proceed idempotently
       const sourceData = application.additional_data?.submitted_data || application.additional_data?.pathway_data || {};
       const potentialEmail = sourceData.student_email || 
                            `${application.application_number.replace(/[^0-9a-z]/gi, '').toLowerCase()}@school.edu`;
-      
-      // First check if email already exists in profiles table
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('user_id')
-        .eq('email', potentialEmail)
-        .maybeSingle();
-
-      if (existingProfile) {
-        console.log(`Email ${potentialEmail} already exists - skipping application ${application.application_number}`);
-        return { success: false, error: `Email ${potentialEmail} already in use` };
-      }
+      console.log(`Using email ${potentialEmail} for ${application.application_number} (will reuse if existing)`);
 
       // Extract student and parent data from the application
       const applicationData = application.additional_data as any;

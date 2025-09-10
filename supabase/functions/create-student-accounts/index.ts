@@ -276,8 +276,8 @@ const handler = async (req: Request): Promise<Response> => {
         additional_data: {
           enrollment_completed_at: new Date().toISOString(),
           student_record_id: studentRecord.id,
-          student_user_id: studentUser.user.id,
-          parent_user_id: parentUser?.id,
+          student_user_id: studentUserId,
+          parent_user_id: parentUserId,
           credentials_generated: true
         }
       })
@@ -290,11 +290,11 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(JSON.stringify({
       success: true,
       student_record_id: studentRecord.id,
-      student_user_id: studentUser.user.id,
+      student_user_id: studentUserId,
       student_email: student_data.email,
       student_temp_password: student_data.password,
       student_number: studentNumber,
-      parent_user_id: parentUser?.id,
+      parent_user_id: parentUserId,
       parent_email: parent_data?.email,
       parent_temp_password: parent_data?.password,
       enrollment_complete: true
