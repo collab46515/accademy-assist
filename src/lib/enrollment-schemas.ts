@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 // Common validation schemas
-const ukPhoneRegex = /^(\+44\s?7\d{3}|\(?07\d{3}\)?)\s?\d{3}\s?\d{3}$/;
+const phoneRegex = /^(\+91\s?[6-9]\d{9}|\+91\d{10}|[6-9]\d{9})$/;
 const emailSchema = z.string().email("Please enter a valid email address");
-const ukPhoneSchema = z.string().regex(ukPhoneRegex, "Please enter a valid UK phone number");
-const postcodeSchema = z.string().regex(/^[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}$/i, "Please enter a valid UK postcode");
+const phoneSchema = z.string().regex(phoneRegex, "Please enter a valid Indian phone number");
+const postcodeSchema = z.string().regex(/^\d{6}$/, "Please enter a valid 6-digit PIN code");
 
 // Base student schema
 const baseStudentSchema = z.object({
@@ -21,13 +21,13 @@ const baseStudentSchema = z.object({
 const baseParentSchema = z.object({
   parent_name: z.string().min(2, "Parent/guardian name is required"),
   parent_email: emailSchema,
-  parent_phone: ukPhoneSchema,
+  parent_phone: phoneSchema,
   parent_aadhaar: z.string().optional().refine((val) => !val || /^\d{4}\s?\d{4}\s?\d{4}$/.test(val), "Please enter a valid 12-digit Aadhaar number"),
   parent_pan: z.string().optional().refine((val) => !val || /^[A-Z]{5}\d{4}[A-Z]$/.test(val), "Please enter a valid 10-character PAN number"),
   parent_relationship: z.string().default("Parent"),
   home_address: z.string().min(10, "Please enter a full address"),
   postal_code: postcodeSchema,
-  country: z.string().default("United Kingdom"),
+  country: z.string().default("India"),
 });
 
 // Emergency contact schema
@@ -114,7 +114,7 @@ const staffChildSchema = z.object({
   
   // Simplified fields
   emergency_contact_name: z.string().min(2, "Emergency contact name is required"),
-  emergency_contact_phone: ukPhoneSchema,
+  emergency_contact_phone: phoneSchema,
   medical_information: z.string().optional(),
   
   // Consent
@@ -137,7 +137,7 @@ const emergencyEnrollmentSchema = z.object({
   referral_source_type: z.enum(["Social Worker", "LA", "DSL", "Charity", "Other"]),
   referral_source_name: z.string().min(2, "Referral source name is required"),
   referral_source_email: emailSchema,
-  referral_source_phone: ukPhoneSchema,
+  referral_source_phone: phoneSchema,
   referral_date: z.date(),
   
   // Urgent needs
