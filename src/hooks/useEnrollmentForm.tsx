@@ -398,7 +398,7 @@ export function useEnrollmentForm({ pathway, applicationId, schoolId }: UseEnrol
     isStepValid,
     
     // Progress
-    progress: (currentStep / totalSteps) * 100,
+    progress: totalSteps > 0 ? Math.round((currentStep / totalSteps) * 100) : 0,
     isFirstStep: currentStep === 1,
     isLastStep: currentStep === totalSteps,
   };
