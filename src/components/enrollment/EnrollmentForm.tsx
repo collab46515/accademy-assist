@@ -4,6 +4,8 @@ import { EnrollmentFormWrapper, useEnrollmentContext } from './EnrollmentFormWra
 import { StudentDetailsSection } from './form-sections/StudentDetailsSection';
 import { ParentDetailsSection } from './form-sections/ParentDetailsSection';
 import { MedicalSENSection } from './form-sections/MedicalSENSection';
+import { DocumentsSection } from './form-sections/DocumentsSection';
+import { AssessmentSection } from './form-sections/AssessmentSection';
 import { ReviewSection } from './form-sections/ReviewSection';
 import { PathwayType } from '@/lib/enrollment-schemas';
 
@@ -24,6 +26,10 @@ function EnrollmentFormContent() {
         return <ParentDetailsSection />;
       case 3:
         return <MedicalSENSection />;
+      case 4:
+        return <DocumentsSection />;
+      case 5:
+        return <AssessmentSection />;
       default:
         return <ReviewSection />;
     }
