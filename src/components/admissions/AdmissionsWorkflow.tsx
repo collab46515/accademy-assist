@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AdmissionsFeeService } from '@/services/AdmissionsFeeService';
 import { FeesDisplay } from './FeesDisplay';
@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { useToast } from '@/hooks/use-toast';
 import { 
   UserPlus, 
   FileCheck, 
@@ -106,12 +107,9 @@ export function AdmissionsWorkflow() {
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  useEffect(() => {
-    fetchRealApplications();
-  }, []);
-
-  const fetchRealApplications = async () => {
+  const fetchRealApplications = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -144,7 +142,39 @@ export function AdmissionsWorkflow() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchRealApplications();
+
+    // Set up real-time subscription for enrollment_applications table
+    const channel = supabase
+      .channel('enrollment_applications_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'enrollment_applications'
+        },
+        (payload) => {
+          console.log('Real-time update received:', payload);
+          // Show a subtle notification that data has been updated
+          toast({
+            title: "Applications Updated",
+            description: "Application status has been updated automatically.",
+            duration: 2000,
+          });
+          // Refresh applications when any change occurs
+          fetchRealApplications();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchRealApplications]);
 
   const mapPathwayToSource = (pathway: string): 'online' | 'referral' | 'call_centre' | 'walk_in' => {
     switch (pathway) {
