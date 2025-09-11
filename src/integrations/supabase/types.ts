@@ -98,6 +98,53 @@ export type Database = {
         }
         Relationships: []
       }
+      application_notes: {
+        Row: {
+          application_id: string
+          author_id: string
+          author_name: string
+          author_role: string | null
+          category: string | null
+          content: string
+          created_at: string
+          id: string
+          is_private: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          author_id: string
+          author_name: string
+          author_role?: string | null
+          category?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          is_private?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          author_id?: string
+          author_name?: string
+          author_role?: string | null
+          category?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          is_private?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_application_notes_application_id"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "enrollment_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessment_tests: {
         Row: {
           created_at: string | null
