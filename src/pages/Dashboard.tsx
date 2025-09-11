@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStudentData } from '@/hooks/useStudentData';
 import { useHRData } from '@/hooks/useHRData';
@@ -12,6 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useRBAC } from '@/hooks/useRBAC';
+import { supabase } from '@/integrations/supabase/client';
 
 import { AISystemAdminAssistant } from '@/components/shared/AISystemAdminAssistant';
 import { 
@@ -49,6 +51,20 @@ export default function Dashboard() {
   const { feeHeads, loading: feesLoading } = useFeeData();
   const { attendanceRecords } = useAttendanceData();
   const { subjects } = useAcademicData();
+  const { currentSchool } = useRBAC();
+  const [studentCount, setStudentCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!currentSchool?.id) return;
+    (async () => {
+      const { count, error } = await supabase
+        .from('students')
+        .select('*', { count: 'exact', head: true })
+        .eq('school_id', currentSchool.id);
+      if (!error) setStudentCount(count ?? null);
+      else console.warn('Student count error:', error);
+    })();
+  }, [currentSchool?.id, students.length]);
 
   // Memoize filtered data to prevent unnecessary recalculations
   const filteredStudents = useMemo(() => 
@@ -67,11 +83,11 @@ export default function Dashboard() {
 
   // Memoize calculated stats to prevent recalculation on every render
   const { totalStudents, totalTeachers, pendingFees, todayAttendance } = useMemo(() => ({
-    totalStudents: students.length,
+    totalStudents: studentCount ?? students.length,
     totalTeachers: employees.filter(emp => emp.position?.includes('Teacher')).length,
     pendingFees: 450, // Mock data
-    todayAttendance: Math.round((students.length * 0.92)) // Mock 92% attendance
-  }), [students.length, employees]);
+    todayAttendance: Math.round(((studentCount ?? students.length) * 0.92)) // Mock 92% attendance
+  }), [studentCount, students.length, employees]);
 
   const quickStats = [
     { 
