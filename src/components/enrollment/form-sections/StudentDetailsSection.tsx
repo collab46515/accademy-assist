@@ -184,6 +184,35 @@ export function StudentDetailsSection() {
 
         <FormField
           control={form.control}
+          name="form_class_preference"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Form Class Preference</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select preferred form class (optional)" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="bg-background border shadow-md z-50">
+                  <SelectItem value="A">Class A</SelectItem>
+                  <SelectItem value="B">Class B</SelectItem>
+                  <SelectItem value="C">Class C</SelectItem>
+                  <SelectItem value="D">Class D</SelectItem>
+                  <SelectItem value="E">Class E</SelectItem>
+                  <SelectItem value="no_preference">No Preference - Assign Automatically</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="text-xs text-muted-foreground mt-1">
+                Form classes help organize students within the same year group. If you have no preference, we'll assign the student automatically to balance class sizes.
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="previous_school"
           render={({ field }) => (
             <FormItem>

@@ -66,14 +66,26 @@ export function EnrollmentProcessor() {
       const firstName = nameParts[0] || 'Unknown';
       const lastName = nameParts.slice(1).join(' ') || 'Student';
       
+      // Handle form class preference - convert "no_preference" to null for automatic assignment  
+      let formClassPreference = enrollmentSourceData.form_class_preference || application.form_class_preference;
+      if (formClassPreference === "no_preference") {
+        formClassPreference = null;
+      }
+      
+      // If preference exists, format it as YearGroup + Class (e.g., "Year 7A", "Year 10B")
+      const yearGroup = enrollmentSourceData.year_group || application.year_group || 'Year 7';
+      const formattedFormClass = formClassPreference 
+        ? `${yearGroup}${formClassPreference}`
+        : null;
+      
       // Build robust student data
       const studentData = {
         first_name: firstName,
         last_name: lastName,
         email: (enrollmentSourceData.student_email || `${application.application_number.replace(/[^0-9a-z]/gi, '')}@school.edu`).toLowerCase(),
         student_number: application.application_number.replace(/[^0-9]/g, '') || `STU${Date.now().toString().slice(-6)}`,
-        year_group: enrollmentSourceData.year_group || application.year_group || 'Year 7',
-        form_class: enrollmentSourceData.form_class_preference || application.form_class_preference || null,
+        year_group: yearGroup,
+        form_class: formattedFormClass,
         date_of_birth: enrollmentSourceData.date_of_birth || application.date_of_birth || null,
         emergency_contact_name: enrollmentSourceData.emergency_contact_name || application.emergency_contact_name || `${firstName} Emergency Contact`,
         emergency_contact_phone: enrollmentSourceData.emergency_contact_phone || enrollmentSourceData.parent_phone || application.parent_phone || null,

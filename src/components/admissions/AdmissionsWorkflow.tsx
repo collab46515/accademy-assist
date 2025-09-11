@@ -294,17 +294,28 @@ export function AdmissionsWorkflow() {
         return;
       }
 
-      // Extract student data from the application
       const additionalData = application.additional_data as any;
       const pathwayData = additionalData?.pathway_data || additionalData?.submitted_data || {};
+      
+      // Handle form class preference - convert "no_preference" to null for automatic assignment
+      let formClassPreference = pathwayData.form_class_preference || application.form_class_preference;
+      if (formClassPreference === "no_preference") {
+        formClassPreference = null;
+      }
+      
+      // If preference exists, format it as YearGroup + Class (e.g., "Year 7A", "Year 10B")
+      const yearGroup = pathwayData.year_group || application.year_group;
+      const formattedFormClass = formClassPreference 
+        ? `${yearGroup}${formClassPreference}`
+        : null;
       
       const studentData = {
         first_name: pathwayData.student_name?.split(' ')[0] || application.student_name?.split(' ')[0] || 'Unknown',
         last_name: pathwayData.student_name?.split(' ').slice(1).join(' ') || application.student_name?.split(' ').slice(1).join(' ') || 'Student',
         email: pathwayData.student_email || pathwayData.parent_email || application.student_email || application.parent_email,
         student_number: `STU${Date.now().toString().slice(-6)}`, // Generate unique student number
-        year_group: pathwayData.year_group || application.year_group,
-        form_class: pathwayData.form_class_preference || application.form_class_preference,
+        year_group: yearGroup,
+        form_class: formattedFormClass,
         date_of_birth: pathwayData.date_of_birth || application.date_of_birth,
         emergency_contact_name: pathwayData.emergency_contact_name || application.emergency_contact_name,
         emergency_contact_phone: pathwayData.emergency_contact_phone || application.emergency_contact_phone,
