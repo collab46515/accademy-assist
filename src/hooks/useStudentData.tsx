@@ -156,16 +156,17 @@ export function useStudentData() {
             avatar_url
           )
         `)
-        .eq('school_id', currentSchool.id)
-        .eq('is_enrolled', true);
+        .eq('school_id', currentSchool.id);
 
       if (error) {
         console.error('Error fetching students:', error);
         setStudents(mockStudents); // Fallback to mock data
       } else {
         // Transform the data to match our Student interface
-        const transformedStudents = (data || []).map(student => ({
+        const transformedStudents = (data || []).map((student: any) => ({
           ...student,
+          // Default to enrolled when field is missing in DB
+          is_enrolled: student.is_enrolled ?? true,
           profiles: student.profiles || undefined
         })) as Student[];
         setStudents(transformedStudents);
@@ -220,7 +221,8 @@ export function useStudentData() {
       // Transform the data to match our Student interface
       const transformedStudent = {
         ...data,
-        profiles: data.profiles || undefined
+        is_enrolled: (data as any).is_enrolled ?? true,
+        profiles: (data as any).profiles || undefined
       } as Student;
       return transformedStudent;
     } catch (error) {
@@ -248,8 +250,9 @@ export function useStudentData() {
 
       if (error) throw error;
       // Transform the data to match our Student interface
-      const transformedStudents = (data || []).map(student => ({
+      const transformedStudents = (data || []).map((student: any) => ({
         ...student,
+        is_enrolled: student.is_enrolled ?? true,
         profiles: student.profiles || undefined
       })) as Student[];
       return transformedStudents;
