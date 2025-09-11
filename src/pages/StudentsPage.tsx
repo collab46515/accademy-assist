@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +23,8 @@ export default function StudentsPage() {
   const [selectedYearGroup, setSelectedYearGroup] = useState("all");
   const { hasRole, currentSchool } = useRBAC();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const highlightStudentId = searchParams.get('highlight');
 
   const handleStudentAdded = () => {
     // Refresh the students data when a new student is added
@@ -42,6 +45,34 @@ export default function StudentsPage() {
 
     setFilteredStudents(filtered);
   }, [searchTerm, selectedYearGroup, students]);
+
+  // Handle highlighting when coming from admissions
+  useEffect(() => {
+    if (highlightStudentId && students.length > 0) {
+      const highlightedStudent = students.find(s => s.id === highlightStudentId);
+      if (highlightedStudent) {
+        // Show a toast to indicate the student
+        toast({
+          title: "Student Found",
+          description: `Showing profile for ${highlightedStudent.profiles?.first_name} ${highlightedStudent.profiles?.last_name}`,
+        });
+        
+        // Scroll to the student row after a short delay
+        setTimeout(() => {
+          const element = document.getElementById(`student-${highlightStudentId}`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 500);
+      } else {
+        toast({
+          title: "Student Not Found",
+          description: "The student record could not be located.",
+          variant: "destructive"
+        });
+      }
+    }
+  }, [highlightStudentId, students, toast]);
 
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
@@ -255,7 +286,11 @@ export default function StudentsPage() {
               </TableHeader>
               <TableBody>
                 {filteredStudents.map((student) => (
-                  <TableRow key={student.id}>
+                  <TableRow 
+                    key={student.id}
+                    id={`student-${student.id}`}
+                    className={highlightStudentId === student.id ? "bg-primary/5 ring-2 ring-primary/20" : ""}
+                  >
                     <TableCell>
                       <div className="flex items-center space-x-3">
                         <Avatar>

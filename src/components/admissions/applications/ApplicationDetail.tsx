@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 import { ApplicationWorkflow } from './ApplicationWorkflow';
 import { ApplicationTimeline } from './ApplicationTimeline';
 import { ApplicationDocuments } from './ApplicationDocuments';
@@ -71,6 +72,7 @@ export function ApplicationDetail({ applicationId, onBack, getStatusColor }: App
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchApplication();
@@ -212,6 +214,20 @@ export function ApplicationDetail({ applicationId, onBack, getStatusColor }: App
     });
   };
 
+  const handleViewStudentProfile = () => {
+    if (!application?.additional_data?.student_record_id) {
+      toast({
+        title: "Error",
+        description: "Student record not found. The enrollment may not be complete.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Navigate to students page with the specific student ID as a parameter
+    navigate(`/students?highlight=${application.additional_data.student_record_id}`);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
@@ -309,7 +325,7 @@ export function ApplicationDetail({ applicationId, onBack, getStatusColor }: App
         { label: 'Reconsider Application', action: () => handleStatusUpdate('under_review'), variant: 'outline' as const }
       ],
       enrolled: [
-        { label: 'View Student Profile', action: () => {}, variant: 'outline' as const }
+        { label: 'View Student Profile', action: handleViewStudentProfile, variant: 'outline' as const }
       ]
     };
     return actions[status as keyof typeof actions] || [];
