@@ -61,6 +61,22 @@ export interface ExamResult {
   marked_at: string;
 }
 
+export interface CreateExamData {
+  title: string;
+  subject: string;
+  exam_board?: string;
+  exam_type: 'internal' | 'external' | 'mock' | 'assessment';
+  grade_level?: string;
+  academic_term?: string;
+  academic_year: string;
+  exam_date: string;
+  start_time: string;
+  end_time: string;
+  duration_minutes: number;
+  total_marks: number;
+  instructions?: string;
+}
+
 export function useExamData() {
   const [exams, setExams] = useState<Exam[]>([]);
   const [examSessions, setExamSessions] = useState<ExamSession[]>([]);

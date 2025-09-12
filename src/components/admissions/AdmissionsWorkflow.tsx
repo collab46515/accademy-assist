@@ -205,7 +205,7 @@ export function AdmissionsWorkflow() {
       case 'draft': return 'pending';
       case 'submitted': case 'under_review': case 'assessment_scheduled': return 'in_progress';
       case 'approved': case 'confirmed': case 'enrolled': return 'completed';
-      case 'rejected': return 'rejected';
+      case 'rejected': case 'failed': return 'rejected';
       case 'on_hold': return 'on_hold';
       default: return 'pending';
     }
@@ -220,7 +220,8 @@ export function AdmissionsWorkflow() {
       case 'approved': return 80;
       case 'confirmed': return 90;
       case 'enrolled': return 100;
-      default: return 0;
+      case 'rejected': case 'failed': return 0;
+      default: return 5;
     }
   };
 

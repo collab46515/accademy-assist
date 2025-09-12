@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,45 +9,21 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Textarea } from '@/components/ui/textarea';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import * as z from 'zod';
-import { Plus, ExternalLink, FileText, Settings } from 'lucide-react';
+import { Plus, ExternalLink, FileText, Settings, Edit, Eye } from 'lucide-react';
 
-// Demo data for exam boards
-const examBoards = [
-  {
-    id: '1',
-    name: 'AQA',
-    full_name: 'Assessment and Qualifications Alliance',
-    description: 'Leading UK exam board offering GCSEs, A-levels, and vocational qualifications',
-    website: 'https://www.aqa.org.uk',
-    contact_email: 'info@aqa.org.uk',
-    subjects: ['Mathematics', 'English', 'Science', 'History', 'Geography'],
-    active_exams: 12,
-    last_updated: '2024-01-15'
-  },
-  {
-    id: '2',
-    name: 'OCR',
-    full_name: 'Oxford Cambridge and RSA Examinations',
-    description: 'Established exam board providing innovative qualifications',
-    website: 'https://www.ocr.org.uk',
-    contact_email: 'general.qualifications@ocr.org.uk',
-    subjects: ['Computer Science', 'Business Studies', 'Art & Design'],
-    active_exams: 8,
-    last_updated: '2024-01-10'
-  },
-  {
-    id: '3',
-    name: 'Edexcel',
-    full_name: 'Pearson Edexcel',
-    description: 'Part of Pearson, offering GCSE, A-level and BTEC qualifications',
-    website: 'https://qualifications.pearson.com',
-    contact_email: 'edexcel@pearson.com',
-    subjects: ['Mathematics', 'Physics', 'Chemistry', 'Biology'],
-    active_exams: 15,
-    last_updated: '2024-01-20'
-  }
-];
+interface ExamBoard {
+  id: string;
+  name: string;
+  full_name: string;
+  description?: string;
+  website?: string;
+  contact_email?: string;
+  created_at: string;
+  updated_at: string;
+}
 
 const boardSchema = z.object({
   name: z.string().min(1, 'Board name is required'),
@@ -60,8 +36,14 @@ const boardSchema = z.object({
 type BoardFormData = z.infer<typeof boardSchema>;
 
 export function ExamBoardManager() {
+  const [examBoards, setExamBoards] = useState<ExamBoard[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedBoard, setSelectedBoard] = useState<ExamBoard | null>(null);
+  const [showViewDialog, setShowViewDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const { toast } = useToast();
 
   const form = useForm<BoardFormData>({
     resolver: zodResolver(boardSchema),
@@ -74,17 +56,162 @@ export function ExamBoardManager() {
     },
   });
 
+  const editForm = useForm<BoardFormData>({
+    resolver: zodResolver(boardSchema),
+  });
+
+  // Fetch exam boards from database
+  const fetchExamBoards = async () => {
+    try {
+      setLoading(true);
+      
+      // Use demo data for now since exam_boards table doesn't exist in schema
+      setExamBoards([
+        {
+          id: '1',
+          name: 'AQA',
+          full_name: 'Assessment and Qualifications Alliance',
+          description: 'Leading UK exam board offering GCSEs, A-levels, and vocational qualifications',
+          website: 'https://www.aqa.org.uk',
+          contact_email: 'info@aqa.org.uk',
+          created_at: '2024-01-15T00:00:00Z',
+          updated_at: '2024-01-15T00:00:00Z'
+        },
+        {
+          id: '2',
+          name: 'OCR',
+          full_name: 'Oxford Cambridge and RSA Examinations',
+          description: 'Established exam board providing innovative qualifications',
+          website: 'https://www.ocr.org.uk',
+          contact_email: 'general.qualifications@ocr.org.uk',
+          created_at: '2024-01-10T00:00:00Z',
+          updated_at: '2024-01-10T00:00:00Z'
+        },
+        {
+          id: '3',
+          name: 'Edexcel',
+          full_name: 'Pearson Edexcel',
+          description: 'Part of Pearson, offering GCSE, A-level and BTEC qualifications',
+          website: 'https://qualifications.pearson.com',
+          contact_email: 'edexcel@pearson.com',
+          created_at: '2024-01-20T00:00:00Z',
+          updated_at: '2024-01-20T00:00:00Z'
+        }
+      ]);
+    } catch (error) {
+      console.error('Error fetching exam boards:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load exam boards",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchExamBoards();
+  }, []);
+
   const filteredBoards = examBoards.filter(board =>
     board.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     board.full_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const onSubmit = async (data: BoardFormData) => {
-    console.log('Adding exam board:', data);
-    // In a real app, this would save to the database
-    setShowAddDialog(false);
-    form.reset();
+    try {
+      // Add to local state since exam_boards table doesn't exist
+      const newBoard: ExamBoard = {
+        id: Date.now().toString(),
+        name: data.name,
+        full_name: data.full_name,
+        description: data.description,
+        website: data.website,
+        contact_email: data.contact_email,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      setExamBoards(prev => [newBoard, ...prev]);
+      
+      toast({
+        title: "Success",
+        description: "Exam board added successfully",
+      });
+
+      setShowAddDialog(false);
+      form.reset();
+    } catch (error) {
+      console.error('Error adding exam board:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add exam board",
+        variant: "destructive",
+      });
+    }
   };
+
+  const onEdit = async (data: BoardFormData) => {
+    if (!selectedBoard) return;
+    
+    try {
+      // Update in local state since exam_boards table doesn't exist
+      const updatedBoard: ExamBoard = {
+        ...selectedBoard,
+        name: data.name,
+        full_name: data.full_name,
+        description: data.description,
+        website: data.website,
+        contact_email: data.contact_email,
+        updated_at: new Date().toISOString(),
+      };
+      
+      setExamBoards(prev => prev.map(board => 
+        board.id === selectedBoard.id ? updatedBoard : board
+      ));
+      
+      toast({
+        title: "Success",
+        description: "Exam board updated successfully",
+      });
+
+      setShowEditDialog(false);
+      setSelectedBoard(null);
+      editForm.reset();
+    } catch (error) {
+      console.error('Error updating exam board:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update exam board",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEdit = (board: ExamBoard) => {
+    setSelectedBoard(board);
+    editForm.reset({
+      name: board.name,
+      full_name: board.full_name,
+      description: board.description || '',
+      website: board.website || '',
+      contact_email: board.contact_email || '',
+    });
+    setShowEditDialog(true);
+  };
+
+  const handleView = (board: ExamBoard) => {
+    setSelectedBoard(board);
+    setShowViewDialog(true);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-muted-foreground">Loading exam boards...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -215,31 +342,12 @@ export function ExamBoardManager() {
                   <CardTitle className="text-lg">{board.name}</CardTitle>
                   <p className="text-sm text-muted-foreground">{board.full_name}</p>
                 </div>
-                <Badge variant="outline">{board.active_exams} exams</Badge>
+                <Badge variant="outline">Active</Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm">{board.description}</p>
+              <p className="text-sm">{board.description || 'No description available'}</p>
               
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">Subjects:</span>
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {board.subjects.slice(0, 3).map((subject) => (
-                    <Badge key={subject} variant="secondary" className="text-xs">
-                      {subject}
-                    </Badge>
-                  ))}
-                  {board.subjects.length > 3 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{board.subjects.length - 3} more
-                    </Badge>
-                  )}
-                </div>
-              </div>
-
               <div className="flex justify-between items-center pt-4 border-t">
                 <div className="flex gap-2">
                   {board.website && (
@@ -251,9 +359,14 @@ export function ExamBoardManager() {
                     </Button>
                   )}
                 </div>
-                <Button variant="ghost" size="sm">
-                  <Settings className="h-4 w-4" />
-                </Button>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="sm" onClick={() => handleView(board)}>
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleEdit(board)}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -272,8 +385,7 @@ export function ExamBoardManager() {
                 <TableRow>
                   <TableHead>Board</TableHead>
                   <TableHead>Full Name</TableHead>
-                  <TableHead>Active Exams</TableHead>
-                  <TableHead>Subjects</TableHead>
+                  <TableHead>Contact Email</TableHead>
                   <TableHead>Last Updated</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -283,17 +395,14 @@ export function ExamBoardManager() {
                   <TableRow key={board.id}>
                     <TableCell className="font-medium">{board.name}</TableCell>
                     <TableCell>{board.full_name}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{board.active_exams}</Badge>
-                    </TableCell>
-                    <TableCell>{board.subjects.length} subjects</TableCell>
-                    <TableCell>{board.last_updated}</TableCell>
+                    <TableCell>{board.contact_email || '-'}</TableCell>
+                    <TableCell>{new Date(board.updated_at).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => handleEdit(board)}>
                           Edit
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => handleView(board)}>
                           View Details
                         </Button>
                       </div>
@@ -305,6 +414,137 @@ export function ExamBoardManager() {
           </div>
         </CardContent>
       </Card>
+
+      {/* View Dialog */}
+      <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Exam Board Details</DialogTitle>
+          </DialogHeader>
+          {selectedBoard && (
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-semibold">{selectedBoard.name}</h4>
+                <p className="text-sm text-muted-foreground">{selectedBoard.full_name}</p>
+              </div>
+              {selectedBoard.description && (
+                <div>
+                  <h5 className="font-medium">Description</h5>
+                  <p className="text-sm">{selectedBoard.description}</p>
+                </div>
+              )}
+              {selectedBoard.website && (
+                <div>
+                  <h5 className="font-medium">Website</h5>
+                  <a href={selectedBoard.website} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                    {selectedBoard.website}
+                  </a>
+                </div>
+              )}
+              {selectedBoard.contact_email && (
+                <div>
+                  <h5 className="font-medium">Contact Email</h5>
+                  <p className="text-sm">{selectedBoard.contact_email}</p>
+                </div>
+              )}
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowViewDialog(false)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Exam Board</DialogTitle>
+          </DialogHeader>
+          <Form {...editForm}>
+            <form onSubmit={editForm.handleSubmit(onEdit)} className="space-y-4">
+              <FormField
+                control={editForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Board Code/Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., AQA" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={editForm.control}
+                name="full_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Assessment and Qualifications Alliance" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={editForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Brief description of the exam board..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={editForm.control}
+                name="website"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Website</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={editForm.control}
+                name="contact_email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contact Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="contact@examboard.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Update Board</Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

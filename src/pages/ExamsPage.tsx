@@ -195,11 +195,23 @@ export default function ExamsPage() {
                   <CardDescription>Manage and track examination schedules</CardDescription>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => {
+                    // Filter functionality - could add advanced filters
+                    console.log('Filter clicked');
+                  }}>
                     <Filter className="h-4 w-4 mr-2" />
                     Filter
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => {
+                    // Export functionality
+                    const dataStr = JSON.stringify(filteredExams, null, 2);
+                    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                    const url = URL.createObjectURL(dataBlob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'exam-schedule.json';
+                    link.click();
+                  }}>
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>

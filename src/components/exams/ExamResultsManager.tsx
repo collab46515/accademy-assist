@@ -88,7 +88,9 @@ export function ExamResultsManager() {
         exam_id: data.exam_id,
         student_id: data.student_id,
         marks_obtained: data.marks_obtained,
+        percentage: percentage,
         grade: data.grade || autoGrade,
+        rank: null,
         feedback: data.feedback,
       });
 
@@ -118,7 +120,9 @@ export function ExamResultsManager() {
             exam_id: exam.id,
             student_id: student.id,
             marks_obtained: marks,
+            percentage: percentage,
             grade,
+            rank: null,
             feedback: `Good performance in ${exam.subject}`,
           });
         } catch (error) {
@@ -176,12 +180,21 @@ export function ExamResultsManager() {
                     <div className="bg-muted p-3 rounded-md text-sm font-mono">
                       student_id,exam_id,marks_obtained,grade,feedback
                     </div>
-                    <Input type="file" accept=".csv" />
+                    <Input type="file" accept=".csv" onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        console.log('File selected:', file.name);
+                        // TODO: Implement CSV parsing and bulk import
+                      }
+                    }} />
                     <div className="flex justify-end gap-2">
                       <Button variant="outline" onClick={() => setShowBulkDialog(false)}>
                         Cancel
                       </Button>
-                      <Button>Import Results</Button>
+                      <Button onClick={() => {
+                        console.log('Bulk import functionality coming soon');
+                        setShowBulkDialog(false);
+                      }}>Import Results</Button>
                     </div>
                   </div>
                 </DialogContent>
@@ -352,7 +365,15 @@ export function ExamResultsManager() {
               ))}
             </SelectContent>
             </Select>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => {
+              const dataStr = JSON.stringify(filteredResults, null, 2);
+              const dataBlob = new Blob([dataStr], {type: 'application/json'});
+              const url = URL.createObjectURL(dataBlob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = 'exam-results.json';
+              link.click();
+            }}>
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>

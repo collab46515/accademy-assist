@@ -45,7 +45,7 @@ export function ExamSchedulingForm({ createExam, onClose }: ExamSchedulingFormPr
       title: '',
       subject: '',
       exam_board: '',
-      exam_type: 'internal',
+      exam_type: 'internal' as const,
       grade_level: '',
       academic_term: '',
       academic_year: new Date().getFullYear().toString(),
@@ -65,7 +65,7 @@ export function ExamSchedulingForm({ createExam, onClose }: ExamSchedulingFormPr
         title: data.title,
         subject: data.subject,
         exam_board: data.exam_board,
-        exam_type: data.exam_type,
+        exam_type: data.exam_type as 'internal' | 'external' | 'mock' | 'assessment',
         grade_level: data.grade_level,
         academic_term: data.academic_term,
         academic_year: data.academic_year,
@@ -75,7 +75,6 @@ export function ExamSchedulingForm({ createExam, onClose }: ExamSchedulingFormPr
         duration_minutes: data.duration_minutes,
         total_marks: data.total_marks,
         instructions: data.instructions,
-        school_id: currentSchool?.id
       });
       onClose();
     } catch (error) {
