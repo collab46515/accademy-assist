@@ -31,6 +31,8 @@ export function ExamResultsManager() {
   const [selectedExam, setSelectedExam] = useState('');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showBulkDialog, setShowBulkDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editingResult, setEditingResult] = useState<any>(null);
   const { exams, examResults, recordExamResult, loading } = useExamData();
   const { students } = useStudentData();
 
@@ -45,10 +47,25 @@ export function ExamResultsManager() {
     },
   });
 
+  const editForm = useForm<ResultFormData>({
+    resolver: zodResolver(resultSchema),
+    defaultValues: {
+      exam_id: '',
+      student_id: '',
+      marks_obtained: 0,
+      grade: '',
+      feedback: '',
+    },
+  });
+
   // Filter results based on search and selected exam
   const filteredResults = examResults.filter(result => {
+    const studentName = getStudentName(result.student_id);
+    const examTitle = getExamTitle(result.exam_id);
     const matchesSearch = searchTerm === '' || 
-      result.student_id.toLowerCase().includes(searchTerm.toLowerCase());
+      studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      examTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      result.grade?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesExam = selectedExam === '' || selectedExam === 'all' || result.exam_id === selectedExam;
     return matchesSearch && matchesExam;
   });
@@ -99,6 +116,46 @@ export function ExamResultsManager() {
     } catch (error) {
       console.error('Error recording result:', error);
     }
+  };
+
+  const onEditResult = async (data: ResultFormData) => {
+    if (!editingResult) return;
+    
+    try {
+      const exam = exams.find(e => e.id === data.exam_id);
+      if (!exam) return;
+
+      const percentage = (data.marks_obtained / exam.total_marks) * 100;
+      const autoGrade = calculateGrade(percentage);
+
+      await recordExamResult({
+        ...editingResult,
+        exam_id: data.exam_id,
+        student_id: data.student_id,
+        marks_obtained: data.marks_obtained,
+        percentage: percentage,
+        grade: data.grade || autoGrade,
+        feedback: data.feedback,
+      });
+
+      setShowEditDialog(false);
+      setEditingResult(null);
+      editForm.reset();
+    } catch (error) {
+      console.error('Error updating result:', error);
+    }
+  };
+
+  const handleEditResult = (result: any) => {
+    setEditingResult(result);
+    editForm.reset({
+      exam_id: result.exam_id,
+      student_id: result.student_id,
+      marks_obtained: result.marks_obtained,
+      grade: result.grade || '',
+      feedback: result.feedback || '',
+    });
+    setShowEditDialog(true);
   };
 
   // Generate demo results for demonstration
@@ -332,6 +389,135 @@ export function ExamResultsManager() {
                   </Form>
                 </DialogContent>
               </Dialog>
+
+              {/* Edit Result Dialog */}
+              <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Edit Exam Result</DialogTitle>
+                  </DialogHeader>
+                  <Form {...editForm}>
+                    <form onSubmit={editForm.handleSubmit(onEditResult)} className="space-y-4">
+                      <FormField
+                        control={editForm.control}
+                        name="exam_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Exam</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select exam" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {exams.map((exam) => (
+                                  <SelectItem key={exam.id} value={exam.id}>
+                                    {exam.title} - {exam.subject} ({exam.total_marks} marks)
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={editForm.control}
+                        name="student_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Student</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select student" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {students.map((student) => (
+                                  <SelectItem key={student.id} value={student.id}>
+                                    {student.profiles?.first_name} {student.profiles?.last_name} ({student.student_number})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={editForm.control}
+                        name="marks_obtained"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Marks Obtained</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                placeholder="85" 
+                                {...field}
+                                onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={editForm.control}
+                        name="grade"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Grade (Optional)</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Auto-calculated from marks" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="A*">A*</SelectItem>
+                                <SelectItem value="A">A</SelectItem>
+                                <SelectItem value="B">B</SelectItem>
+                                <SelectItem value="C">C</SelectItem>
+                                <SelectItem value="D">D</SelectItem>
+                                <SelectItem value="E">E</SelectItem>
+                                <SelectItem value="F">F</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={editForm.control}
+                        name="feedback"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Feedback (Optional)</FormLabel>
+                            <FormControl>
+                              <Textarea placeholder="Teacher feedback..." {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="flex justify-end gap-2">
+                        <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
+                          Cancel
+                        </Button>
+                        <Button type="submit">Update Result</Button>
+                      </div>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </CardHeader>
@@ -437,7 +623,7 @@ export function ExamResultsManager() {
                         {result.marked_at ? format(new Date(result.marked_at), 'MMM dd, yyyy') : '-'}
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => handleEditResult(result)}>
                           <Edit className="h-4 w-4" />
                         </Button>
                       </TableCell>

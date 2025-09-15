@@ -204,11 +204,19 @@ export const AssignmentDashboard = () => {
                 <Plus className="h-4 w-4 mr-2" />
                 Create Assignment
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => console.log('View all submissions')}
+              >
                 <Users className="h-4 w-4 mr-2" />
                 View All Submissions
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => console.log('Grade pending work')}
+              >
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Grade Pending Work
               </Button>

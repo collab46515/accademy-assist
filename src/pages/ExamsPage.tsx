@@ -196,11 +196,12 @@ export default function ExamsPage() {
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={() => {
-                    // Filter functionality - could add advanced filters
-                    console.log('Filter clicked');
+                    // Reset filters
+                    setSearchTerm("");
+                    setActiveTab("schedule");
                   }}>
                     <Filter className="h-4 w-4 mr-2" />
-                    Filter
+                    Clear Filters
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => {
                     // Export functionality

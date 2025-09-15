@@ -177,19 +177,22 @@ export const AssignmentsList: React.FC<AssignmentsListProps> = ({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => console.log('View assignment details:', assignment.id)}>
                         <Eye className="h-4 w-4 mr-2" />
                         View Details
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => console.log('Edit assignment:', assignment.id)}>
                         <Edit className="h-4 w-4 mr-2" />
                         Edit Assignment
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => console.log('View submissions for:', assignment.id)}>
                         <Users className="h-4 w-4 mr-2" />
                         View Submissions
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
+                      <DropdownMenuItem 
+                        className="text-destructive" 
+                        onClick={() => console.log('Delete assignment:', assignment.id)}
+                      >
                         <Trash2 className="h-4 w-4 mr-2" />
                         Delete
                       </DropdownMenuItem>
