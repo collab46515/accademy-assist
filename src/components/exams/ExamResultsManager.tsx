@@ -552,16 +552,32 @@ export function ExamResultsManager() {
             </SelectContent>
             </Select>
             <Button variant="outline" onClick={() => {
-              const dataStr = JSON.stringify(filteredResults, null, 2);
-              const dataBlob = new Blob([dataStr], {type: 'application/json'});
-              const url = URL.createObjectURL(dataBlob);
+              // Export as CSV instead of JSON
+              const headers = ['Student', 'Exam', 'Marks Obtained', 'Percentage', 'Grade', 'Rank', 'Date Marked'];
+              const csvData = filteredResults.map(result => [
+                getStudentName(result.student_id),
+                getExamTitle(result.exam_id),
+                result.marks_obtained,
+                `${result.percentage}%`,
+                result.grade || '',
+                result.rank || '',
+                result.marked_at ? format(new Date(result.marked_at), 'MMM dd, yyyy') : ''
+              ]);
+              
+              const csvContent = [
+                headers.join(','),
+                ...csvData.map(row => row.map(field => `"${field}"`).join(','))
+              ].join('\n');
+              
+              const blob = new Blob([csvContent], { type: 'text/csv' });
+              const url = URL.createObjectURL(blob);
               const link = document.createElement('a');
               link.href = url;
-              link.download = 'exam-results.json';
+              link.download = 'exam-results.csv';
               link.click();
             }}>
               <Download className="h-4 w-4 mr-2" />
-              Export
+              Export CSV
             </Button>
           </div>
         </CardContent>

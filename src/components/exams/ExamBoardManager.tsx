@@ -65,39 +65,18 @@ export function ExamBoardManager() {
     try {
       setLoading(true);
       
-      // Use demo data for now since exam_boards table doesn't exist in schema
-      setExamBoards([
-        {
-          id: '1',
-          name: 'AQA',
-          full_name: 'Assessment and Qualifications Alliance',
-          description: 'Leading UK exam board offering GCSEs, A-levels, and vocational qualifications',
-          website: 'https://www.aqa.org.uk',
-          contact_email: 'info@aqa.org.uk',
-          created_at: '2024-01-15T00:00:00Z',
-          updated_at: '2024-01-15T00:00:00Z'
-        },
-        {
-          id: '2',
-          name: 'OCR',
-          full_name: 'Oxford Cambridge and RSA Examinations',
-          description: 'Established exam board providing innovative qualifications',
-          website: 'https://www.ocr.org.uk',
-          contact_email: 'general.qualifications@ocr.org.uk',
-          created_at: '2024-01-10T00:00:00Z',
-          updated_at: '2024-01-10T00:00:00Z'
-        },
-        {
-          id: '3',
-          name: 'Edexcel',
-          full_name: 'Pearson Edexcel',
-          description: 'Part of Pearson, offering GCSE, A-level and BTEC qualifications',
-          website: 'https://qualifications.pearson.com',
-          contact_email: 'edexcel@pearson.com',
-          created_at: '2024-01-20T00:00:00Z',
-          updated_at: '2024-01-20T00:00:00Z'
-        }
-      ]);
+      const { data, error } = await supabase
+        .from('exam_boards')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      setExamBoards(data || []);
     } catch (error) {
       console.error('Error fetching exam boards:', error);
       toast({
@@ -121,19 +100,21 @@ export function ExamBoardManager() {
 
   const onSubmit = async (data: BoardFormData) => {
     try {
-      // Add to local state since exam_boards table doesn't exist
-      const newBoard: ExamBoard = {
-        id: Date.now().toString(),
-        name: data.name,
-        full_name: data.full_name,
-        description: data.description,
-        website: data.website,
-        contact_email: data.contact_email,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-      setExamBoards(prev => [newBoard, ...prev]);
-      
+      const { error } = await supabase
+        .from('exam_boards')
+        .insert([{
+          name: data.name,
+          full_name: data.full_name,
+          description: data.description || null,
+          website: data.website || null,
+          contact_email: data.contact_email || null,
+        }]);
+
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
       toast({
         title: "Success",
         description: "Exam board added successfully",
@@ -141,6 +122,7 @@ export function ExamBoardManager() {
 
       setShowAddDialog(false);
       form.reset();
+      fetchExamBoards(); // Refresh the list
     } catch (error) {
       console.error('Error adding exam board:', error);
       toast({
@@ -155,20 +137,21 @@ export function ExamBoardManager() {
     if (!selectedBoard) return;
     
     try {
-      // Update in local state since exam_boards table doesn't exist
-      const updatedBoard: ExamBoard = {
-        ...selectedBoard,
-        name: data.name,
-        full_name: data.full_name,
-        description: data.description,
-        website: data.website,
-        contact_email: data.contact_email,
-        updated_at: new Date().toISOString(),
-      };
-      
-      setExamBoards(prev => prev.map(board => 
-        board.id === selectedBoard.id ? updatedBoard : board
-      ));
+      const { error } = await supabase
+        .from('exam_boards')
+        .update({
+          name: data.name,
+          full_name: data.full_name,
+          description: data.description || null,
+          website: data.website || null,
+          contact_email: data.contact_email || null,
+        })
+        .eq('id', selectedBoard.id);
+
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
       
       toast({
         title: "Success",
@@ -178,6 +161,7 @@ export function ExamBoardManager() {
       setShowEditDialog(false);
       setSelectedBoard(null);
       editForm.reset();
+      fetchExamBoards(); // Refresh the list
     } catch (error) {
       console.error('Error updating exam board:', error);
       toast({

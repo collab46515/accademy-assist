@@ -3310,6 +3310,42 @@ export type Database = {
         }
         Relationships: []
       }
+      exam_boards: {
+        Row: {
+          contact_email: string | null
+          created_at: string
+          description: string | null
+          full_name: string
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          contact_email?: string | null
+          created_at?: string
+          description?: string | null
+          full_name: string
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          contact_email?: string | null
+          created_at?: string
+          description?: string | null
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       exam_candidates: {
         Row: {
           access_arrangements: string[] | null

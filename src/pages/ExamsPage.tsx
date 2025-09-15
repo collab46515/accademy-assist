@@ -204,17 +204,33 @@ export default function ExamsPage() {
                     Clear Filters
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => {
-                    // Export functionality
-                    const dataStr = JSON.stringify(filteredExams, null, 2);
-                    const dataBlob = new Blob([dataStr], {type: 'application/json'});
-                    const url = URL.createObjectURL(dataBlob);
+                    // Export as CSV instead of JSON
+                    const headers = ['Title', 'Board', 'Subject', 'Level', 'Date', 'Duration (min)', 'Total Marks', 'Type'];
+                    const csvData = filteredExams.map(exam => [
+                      exam.title,
+                      exam.exam_board || '',
+                      exam.subject,
+                      exam.grade_level || '',
+                      format(new Date(exam.exam_date), "MMM dd, yyyy"),
+                      exam.duration_minutes,
+                      exam.total_marks,
+                      exam.exam_type
+                    ]);
+                    
+                    const csvContent = [
+                      headers.join(','),
+                      ...csvData.map(row => row.map(field => `"${field}"`).join(','))
+                    ].join('\n');
+                    
+                    const blob = new Blob([csvContent], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
                     const link = document.createElement('a');
                     link.href = url;
-                    link.download = 'exam-schedule.json';
+                    link.download = 'exam-schedule.csv';
                     link.click();
                   }}>
                     <Download className="h-4 w-4 mr-2" />
-                    Export
+                    Export CSV
                   </Button>
                 </div>
               </div>
