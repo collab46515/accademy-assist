@@ -191,11 +191,17 @@ export function AdmissionsWorkflow() {
       case 'draft': return 'submission';
       case 'submitted': return 'application_fee';
       case 'under_review': return 'review';
-      case 'assessment_scheduled': return 'assessment';
+      case 'documents_pending': return 'enrollment';
+      case 'assessment_scheduled': 
+      case 'assessment_complete':
+      case 'interview_scheduled':
+      case 'interview_complete': return 'assessment';
+      case 'pending_approval':
       case 'approved': return 'decision';
-      case 'fee_payment': return 'deposit';
+      case 'offer_sent':
+      case 'offer_accepted': return 'deposit';
       case 'confirmed': return 'confirmed';
-      case 'enrolled': return 'class_allocation';
+      case 'enrolled': return 'class_allocation'; // Enrolled students are in final stage
       default: return 'submission';
     }
   };
@@ -203,10 +209,24 @@ export function AdmissionsWorkflow() {
   const mapStatusToWorkflowStatus = (status: string): 'pending' | 'in_progress' | 'completed' | 'rejected' | 'on_hold' => {
     switch (status) {
       case 'draft': return 'pending';
-      case 'submitted': case 'under_review': case 'assessment_scheduled': return 'in_progress';
-      case 'approved': case 'confirmed': case 'enrolled': return 'completed';
-      case 'rejected': case 'failed': return 'rejected';
-      case 'on_hold': return 'on_hold';
+      case 'submitted': 
+      case 'under_review': 
+      case 'documents_pending':
+      case 'assessment_scheduled': 
+      case 'assessment_complete':
+      case 'interview_scheduled':
+      case 'interview_complete':
+      case 'pending_approval': return 'in_progress';
+      case 'approved': 
+      case 'offer_sent':
+      case 'offer_accepted':
+      case 'confirmed': 
+      case 'enrolled': return 'completed'; // Enrolled students should show as completed
+      case 'rejected': 
+      case 'offer_declined': 
+      case 'withdrawn': return 'rejected';
+      case 'on_hold': 
+      case 'requires_override': return 'on_hold';
       default: return 'pending';
     }
   };
@@ -216,11 +236,18 @@ export function AdmissionsWorkflow() {
       case 'draft': return 10;
       case 'submitted': return 20;
       case 'under_review': return 40;
-      case 'assessment_scheduled': return 60;
+      case 'documents_pending': return 35;
+      case 'assessment_scheduled': return 50;
+      case 'assessment_complete': return 55;
+      case 'interview_scheduled': return 60;
+      case 'interview_complete': return 65;
+      case 'pending_approval': return 70;
       case 'approved': return 80;
-      case 'confirmed': return 90;
-      case 'enrolled': return 100;
-      case 'rejected': case 'failed': return 0;
+      case 'offer_sent': return 85;
+      case 'offer_accepted': return 90;
+      case 'enrolled': return 100; // Enrolled students should show 100% progress
+      case 'confirmed': return 95;
+      case 'rejected': case 'offer_declined': case 'withdrawn': return 0;
       default: return 5;
     }
   };
