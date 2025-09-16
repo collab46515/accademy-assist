@@ -44,6 +44,107 @@ export type Database = {
         }
         Relationships: []
       }
+      activities: {
+        Row: {
+          capacity: number
+          category: string
+          cost: number | null
+          created_at: string
+          description: string | null
+          enrolled: number
+          id: string
+          instructor: string
+          location: string | null
+          name: string
+          requirements: string[] | null
+          schedule: string
+          school_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number
+          category: string
+          cost?: number | null
+          created_at?: string
+          description?: string | null
+          enrolled?: number
+          id?: string
+          instructor: string
+          location?: string | null
+          name: string
+          requirements?: string[] | null
+          schedule: string
+          school_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number
+          category?: string
+          cost?: number | null
+          created_at?: string
+          description?: string | null
+          enrolled?: number
+          id?: string
+          instructor?: string
+          location?: string | null
+          name?: string
+          requirements?: string[] | null
+          schedule?: string
+          school_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      activities_participants: {
+        Row: {
+          achievements: string[] | null
+          activity_id: string
+          attendance_count: number | null
+          created_at: string
+          enrollment_date: string
+          id: string
+          school_id: string
+          status: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          achievements?: string[] | null
+          activity_id: string
+          attendance_count?: number | null
+          created_at?: string
+          enrollment_date?: string
+          id?: string
+          school_id: string
+          status?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          achievements?: string[] | null
+          activity_id?: string
+          attendance_count?: number | null
+          created_at?: string
+          enrollment_date?: string
+          id?: string
+          school_id?: string
+          status?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_participants_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       application_documents: {
         Row: {
           application_id: string
@@ -4060,6 +4161,53 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      house_points: {
+        Row: {
+          activity_id: string | null
+          awarded_by: string
+          awarded_date: string
+          created_at: string
+          house: string
+          id: string
+          points: number
+          reason: string
+          school_id: string
+          student_id: string
+        }
+        Insert: {
+          activity_id?: string | null
+          awarded_by: string
+          awarded_date?: string
+          created_at?: string
+          house: string
+          id?: string
+          points?: number
+          reason: string
+          school_id: string
+          student_id: string
+        }
+        Update: {
+          activity_id?: string | null
+          awarded_by?: string
+          awarded_date?: string
+          created_at?: string
+          house?: string
+          id?: string
+          points?: number
+          reason?: string
+          school_id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "house_points_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       houses: {
         Row: {

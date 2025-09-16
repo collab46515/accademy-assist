@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,42 +7,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Users, MapPin, Clock } from 'lucide-react';
+import { Plus, Edit, Trash2, Users, MapPin, Clock, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-
-interface Activity {
-  id: string;
-  name: string;
-  category: "sports" | "arts" | "academic" | "service" | "duke-of-edinburgh";
-  instructor: string;
-  schedule: string;
-  location: string;
-  capacity: number;
-  enrolled: number;
-  status: "active" | "full" | "cancelled" | "completed";
-  cost?: number;
-  description: string;
-  requirements: string[];
-  created_at: string;
-}
+import { useActivities, Activity } from '@/hooks/useActivities';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 export function ActivityManager() {
-  const [activities, setActivities] = useState<Activity[]>([
-    {
-      id: '1',
-      name: 'Football Club',
-      category: 'sports',
-      instructor: 'Mr. Johnson',
-      schedule: 'Wednesday 15:30-16:30',
-      location: 'Sports Field',
-      capacity: 25,
-      enrolled: 22,
-      status: 'active',
-      description: 'Develop football skills and teamwork through training and matches.',
-      requirements: ['Football boots', 'Sports kit'],
-      created_at: '2024-01-01T00:00:00Z'
-    }
-  ]);
+  const { user } = useAuth();
+  const { activities, loading, addActivity, updateActivity, deleteActivity } = useActivities();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
@@ -57,6 +30,28 @@ export function ActivityManager() {
     description: '',
     requirements: ''
   });
+
+  // Get user's school_id for new activities
+  const [userSchoolId, setUserSchoolId] = useState<string>('');
+
+  useEffect(() => {
+    const fetchUserSchool = async () => {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from('user_roles')
+        .select('school_id')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .single();
+      
+      if (data?.school_id) {
+        setUserSchoolId(data.school_id);
+      }
+    };
+
+    fetchUserSchool();
+  }, [user]);
 
   const categories = [
     { value: 'sports', label: 'Sports' },
@@ -102,46 +97,51 @@ export function ActivityManager() {
     setIsDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.name || !formData.instructor || !formData.schedule) {
       toast.error('Please fill in required fields');
       return;
     }
 
-    const activityData: Activity = {
-      id: editingActivity?.id || Date.now().toString(),
-      name: formData.name,
-      category: formData.category,
-      instructor: formData.instructor,
-      schedule: formData.schedule,
-      location: formData.location,
-      capacity: formData.capacity,
-      enrolled: editingActivity?.enrolled || 0,
-      status: 'active',
-      cost: formData.cost > 0 ? formData.cost : undefined,
-      description: formData.description,
-      requirements: formData.requirements.split(',').map(r => r.trim()).filter(Boolean),
-      created_at: editingActivity?.created_at || new Date().toISOString()
-    };
-
-    if (editingActivity) {
-      setActivities(prev => prev.map(activity => 
-        activity.id === editingActivity.id ? activityData : activity
-      ));
-      toast.success('Activity updated successfully');
-    } else {
-      setActivities(prev => [...prev, activityData]);
-      toast.success('Activity added successfully');
+    if (!userSchoolId) {
+      toast.error('Unable to determine school. Please refresh and try again.');
+      return;
     }
 
-    setIsDialogOpen(false);
-    resetForm();
+    try {
+      const activityData = {
+        school_id: userSchoolId,
+        name: formData.name,
+        category: formData.category,
+        instructor: formData.instructor,
+        schedule: formData.schedule,
+        location: formData.location,
+        capacity: formData.capacity,
+        cost: formData.cost > 0 ? formData.cost : undefined,
+        description: formData.description,
+        requirements: formData.requirements.split(',').map(r => r.trim()).filter(Boolean),
+      };
+
+      if (editingActivity) {
+        await updateActivity(editingActivity.id, activityData);
+      } else {
+        await addActivity(activityData);
+      }
+
+      setIsDialogOpen(false);
+      resetForm();
+    } catch (error) {
+      // Error handling is done in the hook
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this activity?')) {
-      setActivities(prev => prev.filter(activity => activity.id !== id));
-      toast.success('Activity deleted successfully');
+      try {
+        await deleteActivity(id);
+      } catch (error) {
+        // Error handling is done in the hook
+      }
     }
   };
 
@@ -287,7 +287,8 @@ export function ActivityManager() {
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button onClick={handleSave}>
+                <Button onClick={handleSave} disabled={loading}>
+                  {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                   {editingActivity ? 'Update' : 'Add'} Activity
                 </Button>
               </div>
@@ -296,8 +297,14 @@ export function ActivityManager() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {activities.map((activity) => (
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <span className="ml-2">Loading activities...</span>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {activities.map((activity) => (
             <Card key={activity.id} className="p-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -364,12 +371,13 @@ export function ActivityManager() {
             </Card>
           ))}
           
-          {activities.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              No activities created yet. Click "Add Activity" to get started.
-            </div>
-          )}
-        </div>
+            {activities.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                No activities created yet. Click "Add Activity" to get started.
+              </div>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
