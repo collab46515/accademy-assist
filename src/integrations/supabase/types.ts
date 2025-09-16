@@ -8562,6 +8562,10 @@ export type Database = {
         Args: { created_by?: string; school_id: string; student_data: Json }
         Returns: Json
       }
+      decrement_activity_enrollment: {
+        Args: { activity_id: string }
+        Returns: undefined
+      }
       generate_receipt_number: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -8591,6 +8595,10 @@ export type Database = {
           user_uuid: string
         }
         Returns: boolean
+      }
+      increment_activity_enrollment: {
+        Args: { activity_id: string }
+        Returns: undefined
       }
       is_super_admin: {
         Args: { user_uuid: string }

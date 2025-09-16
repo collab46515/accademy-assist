@@ -117,6 +117,7 @@ export function ActivityManager() {
         schedule: formData.schedule,
         location: formData.location,
         capacity: formData.capacity,
+        status: 'active' as const,
         cost: formData.cost > 0 ? formData.cost : undefined,
         description: formData.description,
         requirements: formData.requirements.split(',').map(r => r.trim()).filter(Boolean),

@@ -73,9 +73,9 @@ export const useActivities = () => {
       if (participantsRes.error) throw participantsRes.error;
       if (housePointsRes.error) throw housePointsRes.error;
 
-      setActivities(activitiesRes.data || []);
-      setParticipants(participantsRes.data || []);
-      setHousePoints(housePointsRes.data || []);
+      setActivities(activitiesRes.data as Activity[] || []);
+      setParticipants(participantsRes.data as ActivityParticipant[] || []);
+      setHousePoints(housePointsRes.data as HousePoint[] || []);
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch activities data');
@@ -96,9 +96,9 @@ export const useActivities = () => {
 
       if (error) throw error;
 
-      setActivities(prev => [...prev, data]);
+      setActivities(prev => [...prev, data as Activity]);
       toast.success('Activity added successfully');
-      return data;
+      return data as Activity;
     } catch (err) {
       toast.error('Failed to add activity');
       throw err;
@@ -116,9 +116,9 @@ export const useActivities = () => {
 
       if (error) throw error;
 
-      setActivities(prev => prev.map(activity => activity.id === id ? data : activity));
+      setActivities(prev => prev.map(activity => activity.id === id ? data as Activity : activity));
       toast.success('Activity updated successfully');
-      return data;
+      return data as Activity;
     } catch (err) {
       toast.error('Failed to update activity');
       throw err;
@@ -153,13 +153,16 @@ export const useActivities = () => {
 
       if (error) throw error;
 
-      // Update enrolled count
-      await supabase.rpc('increment_activity_enrollment', { activity_id: participantData.activity_id });
+      // Update enrolled count using database function
+      const { error: updateError } = await supabase.rpc('increment_activity_enrollment', { 
+        activity_id: participantData.activity_id 
+      });
+      if (updateError) console.warn('Failed to update enrollment count:', updateError);
 
-      setParticipants(prev => [...prev, data]);
+      setParticipants(prev => [...prev, data as ActivityParticipant]);
       toast.success('Participant enrolled successfully');
       fetchActivitiesData(); // Refresh to get updated enrollment count
-      return data;
+      return data as ActivityParticipant;
     } catch (err) {
       toast.error('Failed to enroll participant');
       throw err;
@@ -177,9 +180,9 @@ export const useActivities = () => {
 
       if (error) throw error;
 
-      setParticipants(prev => prev.map(participant => participant.id === id ? data : participant));
+      setParticipants(prev => prev.map(participant => participant.id === id ? data as ActivityParticipant : participant));
       toast.success('Participant updated successfully');
-      return data;
+      return data as ActivityParticipant;
     } catch (err) {
       toast.error('Failed to update participant');
       throw err;
@@ -197,9 +200,9 @@ export const useActivities = () => {
 
       if (error) throw error;
 
-      setHousePoints(prev => [data, ...prev]);
+      setHousePoints(prev => [data as HousePoint, ...prev]);
       toast.success('House points awarded successfully');
-      return data;
+      return data as HousePoint;
     } catch (err) {
       toast.error('Failed to award house points');
       throw err;
