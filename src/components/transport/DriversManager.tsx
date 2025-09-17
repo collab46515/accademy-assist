@@ -34,24 +34,20 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 const driverFormSchema = z.object({
-  employee_id: z.string().min(1, "Employee ID is required"),
-  first_name: z.string().min(1, "First name is required"),
-  last_name: z.string().min(1, "Last name is required"),
-  email: z.string().email().optional().or(z.literal("")),
-  phone: z.string().min(1, "Phone number is required"),
-  license_number: z.string().min(1, "License number is required"),
-  license_expiry: z.date({
-    required_error: "License expiry date is required",
-  }),
+  employee_id: z.string().optional(),
+  first_name: z.string().optional(),
+  last_name: z.string().optional(),
+  email: z.string().optional(),
+  phone: z.string().optional(),
+  license_number: z.string().optional(),
+  license_expiry: z.date().optional(),
   license_type: z.array(z.string()).default([]),
-  hire_date: z.date({
-    required_error: "Hire date is required",
-  }),
+  hire_date: z.date().optional(),
   birth_date: z.date().optional(),
   address: z.string().optional(),
   emergency_contact_name: z.string().optional(),
   emergency_contact_phone: z.string().optional(),
-  status: z.string().min(1, "Status is required"),
+  status: z.string().default('active'),
   dbs_check_date: z.date().optional(),
   dbs_expiry: z.date().optional(),
   first_aid_cert_date: z.date().optional(),
@@ -71,6 +67,7 @@ export const DriversManager = () => {
   const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
 
   const form = useForm<DriverFormData>({
+    resolver: zodResolver(driverFormSchema),
     defaultValues: {
       employee_id: '',
       first_name: '',
@@ -80,6 +77,8 @@ export const DriversManager = () => {
       license_number: '',
       license_type: ['B'],
       status: 'active',
+      license_expiry: new Date(),
+      hire_date: new Date(),
     }
   });
 
@@ -98,20 +97,20 @@ export const DriversManager = () => {
   const handleSubmit = async (data: DriverFormData) => {
     try {
       const driverData: Omit<Driver, "id" | "created_at" | "updated_at"> = {
-        employee_id: data.employee_id,
-        first_name: data.first_name,
-        last_name: data.last_name,
+        employee_id: data.employee_id || '',
+        first_name: data.first_name || '',
+        last_name: data.last_name || '',
         email: data.email || null,
-        phone: data.phone,
-        license_number: data.license_number,
-        license_expiry: format(data.license_expiry, 'yyyy-MM-dd'),
-        license_type: data.license_type,
-        hire_date: format(data.hire_date, 'yyyy-MM-dd'),
+        phone: data.phone || '',
+        license_number: data.license_number || '',
+        license_expiry: data.license_expiry ? format(data.license_expiry, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
+        license_type: data.license_type || ['B'],
+        hire_date: data.hire_date ? format(data.hire_date, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
         birth_date: data.birth_date ? format(data.birth_date, 'yyyy-MM-dd') : null,
         address: data.address || null,
         emergency_contact_name: data.emergency_contact_name || null,
         emergency_contact_phone: data.emergency_contact_phone || null,
-        status: data.status,
+        status: data.status || 'active',
         dbs_check_date: data.dbs_check_date ? format(data.dbs_check_date, 'yyyy-MM-dd') : null,
         dbs_expiry: data.dbs_expiry ? format(data.dbs_expiry, 'yyyy-MM-dd') : null,
         first_aid_cert_date: data.first_aid_cert_date ? format(data.first_aid_cert_date, 'yyyy-MM-dd') : null,
@@ -217,7 +216,7 @@ export const DriversManager = () => {
                       name="employee_id"
                       render={({ field }) => (
                          <FormItem>
-                           <FormLabel>Employee ID *</FormLabel>
+                           <FormLabel>Employee ID</FormLabel>
                           <FormControl>
                             <Input {...field} placeholder="EMP001" />
                           </FormControl>
@@ -231,7 +230,7 @@ export const DriversManager = () => {
                         name="first_name"
                         render={({ field }) => (
                            <FormItem>
-                             <FormLabel>First Name *</FormLabel>
+                             <FormLabel>First Name</FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
@@ -244,7 +243,7 @@ export const DriversManager = () => {
                         name="last_name"
                         render={({ field }) => (
                            <FormItem>
-                             <FormLabel>Last Name *</FormLabel>
+                             <FormLabel>Last Name</FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
@@ -271,7 +270,7 @@ export const DriversManager = () => {
                       name="phone"
                       render={({ field }) => (
                          <FormItem>
-                           <FormLabel>Phone *</FormLabel>
+                           <FormLabel>Phone</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
@@ -302,7 +301,7 @@ export const DriversManager = () => {
                       name="license_number"
                       render={({ field }) => (
                          <FormItem>
-                           <FormLabel>License Number *</FormLabel>
+                           <FormLabel>License Number</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
@@ -315,7 +314,7 @@ export const DriversManager = () => {
                        name="license_expiry"
                        render={({ field }) => (
                          <FormItem className="flex flex-col">
-                           <FormLabel>License Expiry *</FormLabel>
+                           <FormLabel>License Expiry</FormLabel>
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
@@ -354,7 +353,7 @@ export const DriversManager = () => {
                       name="status"
                       render={({ field }) => (
                          <FormItem>
-                           <FormLabel>Status *</FormLabel>
+                           <FormLabel>Status</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
@@ -376,7 +375,7 @@ export const DriversManager = () => {
                        name="hire_date"
                        render={({ field }) => (
                          <FormItem className="flex flex-col">
-                           <FormLabel>Hire Date *</FormLabel>
+                           <FormLabel>Hire Date</FormLabel>
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
