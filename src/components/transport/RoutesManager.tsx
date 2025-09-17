@@ -26,6 +26,7 @@ import {
 import { useTransportData, type TransportRoute } from '@/hooks/useTransportData';
 import { useAuth } from '@/hooks/useAuth';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 interface RouteFormData {
   route_name: string;
@@ -42,7 +43,7 @@ interface RouteFormData {
 }
 
 export const RoutesManager = () => {
-  const { routes, vehicles, drivers, loading, addRoute, updateRoute, deleteRoute } = useTransportData();
+  const { routes, vehicles, drivers, loading, addRoute, updateRoute, deleteRoute, userSchoolId } = useTransportData();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRoute, setSelectedRoute] = useState<TransportRoute | null>(null);
@@ -66,10 +67,18 @@ export const RoutesManager = () => {
   );
 
   const handleSubmit = async (data: RouteFormData) => {
+    if (!userSchoolId) {
+      toast.error('No school association found. Please contact administrator.');
+      return;
+    }
+
     try {
       const routeData = {
         ...data,
-        school_id: user?.user_metadata?.school_id || '',
+        school_id: userSchoolId,
+        vehicle_id: data.vehicle_id && data.vehicle_id !== 'unassigned' ? data.vehicle_id : null,
+        driver_id: data.driver_id && data.driver_id !== 'unassigned' ? data.driver_id : null,
+        assistant_id: data.assistant_id && data.assistant_id !== 'none' ? data.assistant_id : null,
       };
 
       if (editingRoute) {

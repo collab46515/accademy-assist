@@ -33,6 +33,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface IncidentFormData {
   vehicle_id: string;
@@ -50,7 +51,7 @@ interface IncidentFormData {
 }
 
 export const IncidentsManager = () => {
-  const { incidents, vehicles, routes, loading, addIncident, updateIncident } = useTransportData();
+  const { incidents, vehicles, routes, loading, addIncident, updateIncident, userSchoolId } = useTransportData();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIncident, setSelectedIncident] = useState<TransportIncident | null>(null);
@@ -84,10 +85,15 @@ export const IncidentsManager = () => {
   });
 
   const handleSubmit = async (data: IncidentFormData) => {
+    if (!userSchoolId) {
+      toast.error('No school association found. Please contact administrator.');
+      return;
+    }
+
     try {
       const incidentData = {
         ...data,
-        school_id: user?.user_metadata?.school_id || '',
+        school_id: userSchoolId,
         reported_by: user?.id || '',
         incident_date: data.incident_date.toISOString(),
       };

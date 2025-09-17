@@ -136,6 +136,39 @@ export const useTransportData = () => {
   const [incidents, setIncidents] = useState<TransportIncident[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userSchoolId, setUserSchoolId] = useState<string | null>(null);
+
+  // Get user's school_id from their roles
+  const getUserSchoolId = async () => {
+    if (!user) return null;
+
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('school_id')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .not('school_id', 'is', null)
+        .single();
+
+      if (error || !data) {
+        console.log('No school found for user, using default school');
+        // If no school found, get the first active school
+        const { data: schoolData } = await supabase
+          .from('schools')
+          .select('id')
+          .eq('is_active', true)
+          .single();
+        
+        return schoolData?.id || null;
+      }
+
+      return data.school_id;
+    } catch (err) {
+      console.error('Error getting user school:', err);
+      return null;
+    }
+  };
 
   // Fetch all transport data
   const fetchTransportData = async () => {
@@ -145,13 +178,22 @@ export const useTransportData = () => {
       setLoading(true);
       setError(null);
 
+      // Get user's school ID first
+      const schoolId = await getUserSchoolId();
+      setUserSchoolId(schoolId);
+
+      if (!schoolId) {
+        toast.error('No school association found. Please contact administrator.');
+        return;
+      }
+
       const [driversRes, vehiclesRes, routesRes, stopsRes, studentTransportRes, incidentsRes] = await Promise.all([
-        supabase.from('drivers').select('*').order('first_name'),
-        supabase.from('vehicles').select('*').order('vehicle_number'),
-        supabase.from('transport_routes').select('*').order('route_name'),
+        supabase.from('drivers').select('*').eq('school_id', schoolId).order('first_name'),
+        supabase.from('vehicles').select('*').eq('school_id', schoolId).order('vehicle_number'),
+        supabase.from('transport_routes').select('*').eq('school_id', schoolId).order('route_name'),
         supabase.from('route_stops').select('*').order('stop_order'),
-        supabase.from('student_transport').select('*').order('created_at', { ascending: false }),
-        supabase.from('transport_incidents').select('*').order('incident_date', { ascending: false })
+        supabase.from('student_transport').select('*').eq('school_id', schoolId).order('created_at', { ascending: false }),
+        supabase.from('transport_incidents').select('*').eq('school_id', schoolId).order('incident_date', { ascending: false })
       ]);
 
       if (driversRes.error) throw driversRes.error;
@@ -400,6 +442,7 @@ export const useTransportData = () => {
     incidents,
     loading,
     error,
+    userSchoolId,
     refetch: fetchTransportData,
     // Driver operations
     addDriver,

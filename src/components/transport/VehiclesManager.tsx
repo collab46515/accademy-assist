@@ -30,6 +30,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface VehicleFormData {
   vehicle_number: string;
@@ -48,7 +49,7 @@ interface VehicleFormData {
 }
 
 export const VehiclesManager = () => {
-  const { vehicles, drivers, loading, addVehicle, updateVehicle, deleteVehicle } = useTransportData();
+  const { vehicles, drivers, loading, addVehicle, updateVehicle, deleteVehicle, userSchoolId } = useTransportData();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
@@ -73,13 +74,20 @@ export const VehiclesManager = () => {
   );
 
   const handleSubmit = async (data: VehicleFormData) => {
+    if (!userSchoolId) {
+      toast.error('No school association found. Please contact administrator.');
+      return;
+    }
+
     try {
       const vehicleData = {
         ...data,
-        school_id: user?.user_metadata?.school_id || '',
-        insurance_expiry: data.insurance_expiry ? format(data.insurance_expiry, 'yyyy-MM-dd') : undefined,
-        last_maintenance: data.last_maintenance ? format(data.last_maintenance, 'yyyy-MM-dd') : undefined,
-        next_maintenance: data.next_maintenance ? format(data.next_maintenance, 'yyyy-MM-dd') : undefined,
+        school_id: userSchoolId,
+        driver_id: data.driver_id && data.driver_id !== 'unassigned' ? data.driver_id : null,
+        assistant_id: data.assistant_id && data.assistant_id !== 'none' ? data.assistant_id : null,
+        insurance_expiry: data.insurance_expiry ? format(data.insurance_expiry, 'yyyy-MM-dd') : null,
+        last_maintenance: data.last_maintenance ? format(data.last_maintenance, 'yyyy-MM-dd') : null,
+        next_maintenance: data.next_maintenance ? format(data.next_maintenance, 'yyyy-MM-dd') : null,
       };
 
       if (editingVehicle) {

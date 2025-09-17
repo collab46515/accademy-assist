@@ -32,6 +32,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const driverFormSchema = z.object({
   employee_id: z.string().optional(),
@@ -58,7 +59,7 @@ const driverFormSchema = z.object({
 type DriverFormData = z.infer<typeof driverFormSchema>;
 
 export const DriversManager = () => {
-  const { drivers, loading, addDriver, updateDriver, deleteDriver } = useTransportData();
+  const { drivers, loading, addDriver, updateDriver, deleteDriver, userSchoolId } = useTransportData();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
@@ -95,6 +96,11 @@ export const DriversManager = () => {
   };
 
   const handleSubmit = async (data: DriverFormData) => {
+    if (!userSchoolId) {
+      toast.error('No school association found. Please contact administrator.');
+      return;
+    }
+
     try {
       const driverData: Omit<Driver, "id" | "created_at" | "updated_at"> = {
         employee_id: data.employee_id || '',
@@ -116,7 +122,7 @@ export const DriversManager = () => {
         first_aid_cert_date: data.first_aid_cert_date ? format(data.first_aid_cert_date, 'yyyy-MM-dd') : null,
         first_aid_expiry: data.first_aid_expiry ? format(data.first_aid_expiry, 'yyyy-MM-dd') : null,
         notes: data.notes || null,
-        school_id: user?.user_metadata?.school_id || '',
+        school_id: userSchoolId,
       };
 
       if (editingDriver) {
