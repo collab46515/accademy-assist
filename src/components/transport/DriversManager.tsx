@@ -82,18 +82,23 @@ export const DriversManager = () => {
     driver.phone.includes(searchTerm)
   );
 
+  const formatDateSafely = (date: Date | undefined) => {
+    if (!date || isNaN(date.getTime())) return undefined;
+    return format(date, 'yyyy-MM-dd');
+  };
+
   const handleSubmit = async (data: DriverFormData) => {
     try {
       const driverData = {
         ...data,
         school_id: user?.user_metadata?.school_id || '',
-        license_expiry: format(data.license_expiry, 'yyyy-MM-dd'),
-        hire_date: format(data.hire_date, 'yyyy-MM-dd'),
-        birth_date: data.birth_date ? format(data.birth_date, 'yyyy-MM-dd') : undefined,
-        dbs_check_date: data.dbs_check_date ? format(data.dbs_check_date, 'yyyy-MM-dd') : undefined,
-        dbs_expiry: data.dbs_expiry ? format(data.dbs_expiry, 'yyyy-MM-dd') : undefined,
-        first_aid_cert_date: data.first_aid_cert_date ? format(data.first_aid_cert_date, 'yyyy-MM-dd') : undefined,
-        first_aid_expiry: data.first_aid_expiry ? format(data.first_aid_expiry, 'yyyy-MM-dd') : undefined,
+        license_expiry: formatDateSafely(data.license_expiry) || '',
+        hire_date: formatDateSafely(data.hire_date) || '',
+        birth_date: formatDateSafely(data.birth_date),
+        dbs_check_date: formatDateSafely(data.dbs_check_date),
+        dbs_expiry: formatDateSafely(data.dbs_expiry),
+        first_aid_cert_date: formatDateSafely(data.first_aid_cert_date),
+        first_aid_expiry: formatDateSafely(data.first_aid_expiry),
       };
 
       if (editingDriver) {
