@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
   Table, 
   TableBody, 
@@ -23,88 +25,82 @@ import {
   Calendar,
   Award,
   BookOpen,
-  Shield
+  Shield,
+  Eye,
+  Edit,
+  Trash2,
+  Download,
+  Filter,
+  Clock,
+  AlertCircle
 } from "lucide-react";
+import { useHRData } from "@/hooks/useHRData";
+import { useComprehensiveHR } from "@/hooks/useComprehensiveHR";
+import { EmployeeForm } from "@/components/hr/EmployeeForm";
+import { useToast } from "@/hooks/use-toast";
 
-interface Staff {
+interface StaffMember {
   id: string;
+  employeeId: string;
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
   role: string;
   department: string;
-  employeeId: string;
   startDate: string;
-  status: "active" | "on-leave" | "inactive";
+  status: "active" | "on-leave" | "inactive" | "terminated";
   subjects?: string[];
   qualifications?: string[];
+  salary?: number;
+  location?: string;
 }
-
-const mockStaff: Staff[] = [
-  {
-    id: "1",
-    firstName: "Sarah",
-    lastName: "Johnson",
-    email: "s.johnson@school.edu",
-    phone: "+44 20 7946 0958",
-    role: "Head of Mathematics",
-    department: "Mathematics",
-    employeeId: "EMP001",
-    startDate: "2020-09-01",
-    status: "active",
-    subjects: ["Mathematics", "Further Mathematics"],
-    qualifications: ["BSc Mathematics", "PGCE", "MSc Applied Mathematics"]
-  },
-  {
-    id: "2",
-    firstName: "David",
-    lastName: "Smith",
-    email: "d.smith@school.edu",
-    phone: "+44 20 7946 0959",
-    role: "English Teacher",
-    department: "English",
-    employeeId: "EMP002",
-    startDate: "2019-01-15",
-    status: "active",
-    subjects: ["English Literature", "English Language"],
-    qualifications: ["BA English Literature", "PGCE"]
-  },
-  {
-    id: "3",
-    firstName: "Maria",
-    lastName: "Garcia",
-    email: "m.garcia@school.edu",
-    phone: "+44 20 7946 0960",
-    role: "Physics Teacher",
-    department: "Science",
-    employeeId: "EMP003",
-    startDate: "2021-09-01",
-    status: "on-leave",
-    subjects: ["Physics", "Chemistry"],
-    qualifications: ["PhD Physics", "PGCE Science"]
-  },
-  {
-    id: "4",
-    firstName: "James",
-    lastName: "Wilson",
-    email: "j.wilson@school.edu",
-    phone: "+44 20 7946 0961",
-    role: "Assistant Head",
-    department: "Leadership",
-    employeeId: "EMP004",
-    startDate: "2018-04-20",
-    status: "active",
-    qualifications: ["MA Education Management", "NPQH"]
-  }
-];
 
 const StaffPage = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
-  const [staff] = useState(mockStaff);
+  const [filterDepartment, setFilterDepartment] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [showEmployeeForm, setShowEmployeeForm] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<any>(null);
+  const [viewingEmployee, setViewingEmployee] = useState<any>(null);
+  const [selectedTab, setSelectedTab] = useState("directory");
 
-  const getStatusBadge = (status: Staff["status"]) => {
+  // Use real HR data from database
+  const {
+    loading,
+    employees: dbEmployees,
+    departments: dbDepartments,
+    createEmployee,
+    updateEmployee,
+    refreshData
+  } = useHRData();
+
+  // Use comprehensive HR data for time tracking
+  const {
+    timeEntries,
+    createTimeEntry,
+    refreshData: refreshComprehensiveData
+  } = useComprehensiveHR();
+
+  // Transform database data to UI format
+  const staff: StaffMember[] = dbEmployees.map(emp => ({
+    id: emp.id,
+    employeeId: emp.employee_id,
+    firstName: emp.first_name,
+    lastName: emp.last_name,
+    email: emp.email,
+    phone: emp.phone || '',
+    role: emp.position,
+    department: emp.department_name || 'Unknown',
+    startDate: emp.start_date,
+    status: emp.status as "active" | "on-leave" | "inactive" | "terminated",
+    salary: emp.salary,
+    location: emp.location || ''
+  }));
+
+  const getStatusBadge = (status: StaffMember["status"]) => {
     switch (status) {
       case "active":
         return <Badge className="bg-success text-success-foreground">Active</Badge>;
@@ -112,21 +108,151 @@ const StaffPage = () => {
         return <Badge variant="secondary">On Leave</Badge>;
       case "inactive":
         return <Badge variant="destructive">Inactive</Badge>;
+      case "terminated":
+        return <Badge variant="destructive">Terminated</Badge>;
     }
   };
 
-  const filteredStaff = staff.filter(member =>
-    member.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.role.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredStaff = staff.filter(member => {
+    const matchesSearch = member.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.role.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesDepartment = filterDepartment === "all" || member.department === filterDepartment;
+    const matchesStatus = filterStatus === "all" || member.status === filterStatus;
+    
+    return matchesSearch && matchesDepartment && matchesStatus;
+  });
 
   const totalStaff = staff.length;
   const activeStaff = staff.filter(s => s.status === "active").length;
   const onLeave = staff.filter(s => s.status === "on-leave").length;
   const departments = [...new Set(staff.map(s => s.department))].length;
+
+  const handleViewEmployee = (employee: StaffMember) => {
+    setViewingEmployee(employee);
+  };
+
+  const handleEditEmployee = (employee: StaffMember) => {
+    setEditingEmployee(employee);
+    setShowEmployeeForm(true);
+  };
+
+  const handleDeleteEmployee = async (employeeId: string) => {
+    if (confirm("Are you sure you want to delete this employee?")) {
+      try {
+        await updateEmployee(employeeId, { status: 'terminated' });
+        toast({
+          title: "Success",
+          description: "Employee has been terminated.",
+        });
+        await refreshData();
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to terminate employee.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleExportData = () => {
+    const csvContent = [
+      ['Name', 'Employee ID', 'Email', 'Phone', 'Department', 'Role', 'Status', 'Start Date'],
+      ...filteredStaff.map(member => [
+        `${member.firstName} ${member.lastName}`,
+        member.employeeId,
+        member.email,
+        member.phone,
+        member.department,
+        member.role,
+        member.status,
+        member.startDate
+      ])
+    ].map(row => row.join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'staff_directory.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Success",
+      description: "Staff data exported successfully.",
+    });
+  };
+
+  const handleCreateEmployee = async (employeeData: any) => {
+    try {
+      await createEmployee({
+        employee_id: `EMP${Date.now()}`,
+        first_name: employeeData.firstName,
+        last_name: employeeData.lastName,
+        email: employeeData.email,
+        phone: employeeData.phone,
+        department_id: employeeData.departmentId,
+        position: employeeData.position,
+        manager_id: employeeData.managerId,
+        start_date: employeeData.startDate,
+        salary: employeeData.salary,
+        status: employeeData.status || 'active',
+        work_type: employeeData.workType || 'full_time',
+        location: employeeData.location,
+        emergency_contact_name: employeeData.emergencyContactName,
+        emergency_contact_phone: employeeData.emergencyContactPhone
+      });
+      setShowEmployeeForm(false);
+      setEditingEmployee(null);
+      await refreshData();
+    } catch (error) {
+      console.error('Error creating employee:', error);
+    }
+  };
+
+  const handleUpdateEmployee = async (employeeData: any) => {
+    if (!editingEmployee) return;
+    try {
+      await updateEmployee(editingEmployee.id, {
+        first_name: employeeData.firstName,
+        last_name: employeeData.lastName,
+        email: employeeData.email,
+        phone: employeeData.phone,
+        department_id: employeeData.departmentId,
+        position: employeeData.position,
+        manager_id: employeeData.managerId,
+        salary: employeeData.salary,
+        status: employeeData.status,
+        work_type: employeeData.workType,
+        location: employeeData.location,
+        emergency_contact_name: employeeData.emergencyContactName,
+        emergency_contact_phone: employeeData.emergencyContactPhone
+      });
+      setShowEmployeeForm(false);
+      setEditingEmployee(null);
+      await refreshData();
+    } catch (error) {
+      console.error('Error updating employee:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/20 to-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-lg text-muted-foreground">Loading staff data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -184,10 +310,10 @@ const StaffPage = () => {
       </div>
 
       {/* Main Tabs */}
-      <Tabs defaultValue="directory" className="space-y-6">
+      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="directory">Staff Directory</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
+          <TabsTrigger value="timesheet">Time Sheet</TabsTrigger>
           <TabsTrigger value="cpd">CPD Tracking</TabsTrigger>
         </TabsList>
 
@@ -202,17 +328,26 @@ const StaffPage = () => {
                   </CardTitle>
                   <CardDescription>Manage academic and non-academic staff records</CardDescription>
                 </div>
-                <Button 
-                  className="shadow-[var(--shadow-elegant)]"
-                  onClick={() => navigate('/hr-management')}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Staff Member
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline"
+                    onClick={handleExportData}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                  <Button 
+                    className="shadow-[var(--shadow-elegant)]"
+                    onClick={() => setShowEmployeeForm(true)}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Staff Member
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="mb-6">
+              <div className="mb-6 space-y-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -221,6 +356,36 @@ const StaffPage = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
                   />
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-muted-foreground" />
+                    <Select value={filterDepartment} onValueChange={setFilterDepartment}>
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="Filter by department" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Departments</SelectItem>
+                        {dbDepartments.map((dept) => (
+                          <SelectItem key={dept.id} value={dept.name}>
+                            {dept.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Select value={filterStatus} onValueChange={setFilterStatus}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="on-leave">On Leave</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                      <SelectItem value="terminated">Terminated</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -276,7 +441,30 @@ const StaffPage = () => {
                         <TableCell>{member.startDate}</TableCell>
                         <TableCell>{getStatusBadge(member.status)}</TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">View</Button>
+                          <div className="flex gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleViewEmployee(member)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleEditEmployee(member)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleDeleteEmployee(member.id)}
+                              disabled={member.status === 'terminated'}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -287,20 +475,95 @@ const StaffPage = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="performance">
+        <TabsContent value="timesheet">
           <Card className="shadow-[var(--shadow-card)]">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Award className="h-5 w-5 text-primary" />
-                <span>Performance Reviews</span>
-              </CardTitle>
-              <CardDescription>Track staff performance and development</CardDescription>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Clock className="h-5 w-5 text-primary" />
+                    <span>Time Sheet Management</span>
+                  </CardTitle>
+                  <CardDescription>Track staff working hours and attendance</CardDescription>
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      // Export time sheet data
+                      const csvContent = [
+                        ['Employee', 'Date', 'Hours', 'Project', 'Description'],
+                        ...timeEntries.map(entry => [
+                          entry.employee_id,
+                          entry.start_time,
+                          entry.hours_worked,
+                          entry.project_id || 'N/A',
+                          entry.task_description || 'N/A'
+                        ])
+                      ].map(row => row.join(',')).join('\n');
+
+                      const blob = new Blob([csvContent], { type: 'text/csv' });
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = 'timesheet_data.csv';
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      window.URL.revokeObjectURL(url);
+                      
+                      toast({
+                        title: "Success",
+                        description: "Timesheet data exported successfully.",
+                      });
+                    }}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12">
-                <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Performance Management</h3>
-                <p className="text-muted-foreground">Staff appraisals and performance tracking coming soon</p>
+              <div className="space-y-4">
+                {timeEntries.length > 0 ? (
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Employee</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Hours</TableHead>
+                          <TableHead>Project</TableHead>
+                          <TableHead>Description</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {timeEntries.slice(0, 10).map((entry) => (
+                          <TableRow key={entry.id}>
+                            <TableCell>{entry.employee_id}</TableCell>
+                            <TableCell>{new Date(entry.start_time).toLocaleDateString()}</TableCell>
+                            <TableCell>{entry.hours_worked}h</TableCell>
+                            <TableCell>{entry.project_id || 'N/A'}</TableCell>
+                            <TableCell>{entry.task_description || 'N/A'}</TableCell>
+                            <TableCell className="text-right">
+                              <Button variant="ghost" size="sm">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No Time Entries</h3>
+                    <p className="text-muted-foreground">No time sheet entries found</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -325,6 +588,93 @@ const StaffPage = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Employee Form Dialog */}
+      <Dialog open={showEmployeeForm} onOpenChange={setShowEmployeeForm}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingEmployee ? 'Edit Employee' : 'Add New Employee'}</DialogTitle>
+            <DialogDescription>
+              {editingEmployee ? 'Update employee information' : 'Enter details for the new employee'}
+            </DialogDescription>
+          </DialogHeader>
+          <EmployeeForm
+            employee={editingEmployee}
+            departments={dbDepartments}
+            employees={dbEmployees}
+            onSubmit={editingEmployee ? handleUpdateEmployee : handleCreateEmployee}
+            onCancel={() => {
+              setShowEmployeeForm(false);
+              setEditingEmployee(null);
+            }}
+            isSubmitting={loading}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* View Employee Dialog */}
+      <Dialog open={!!viewingEmployee} onOpenChange={() => setViewingEmployee(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Employee Details</DialogTitle>
+          </DialogHeader>
+          {viewingEmployee && (
+            <div className="space-y-6">
+              <div className="flex items-center space-x-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarFallback className="text-lg">
+                    {viewingEmployee.firstName[0]}{viewingEmployee.lastName[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="text-xl font-semibold">{viewingEmployee.firstName} {viewingEmployee.lastName}</h3>
+                  <p className="text-muted-foreground">{viewingEmployee.role}</p>
+                  {getStatusBadge(viewingEmployee.status)}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-medium text-sm text-muted-foreground">Employee ID</h4>
+                  <p>{viewingEmployee.employeeId}</p>
+                </div>
+                <div>
+                  <h4 className="font-medium text-sm text-muted-foreground">Department</h4>
+                  <p>{viewingEmployee.department}</p>
+                </div>
+                <div>
+                  <h4 className="font-medium text-sm text-muted-foreground">Email</h4>
+                  <p>{viewingEmployee.email}</p>
+                </div>
+                <div>
+                  <h4 className="font-medium text-sm text-muted-foreground">Phone</h4>
+                  <p>{viewingEmployee.phone}</p>
+                </div>
+                <div>
+                  <h4 className="font-medium text-sm text-muted-foreground">Start Date</h4>
+                  <p>{viewingEmployee.startDate}</p>
+                </div>
+                <div>
+                  <h4 className="font-medium text-sm text-muted-foreground">Location</h4>
+                  <p>{viewingEmployee.location || 'Not specified'}</p>
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setViewingEmployee(null)}>
+                  Close
+                </Button>
+                <Button onClick={() => {
+                  setViewingEmployee(null);
+                  handleEditEmployee(viewingEmployee);
+                }}>
+                  Edit Employee
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
