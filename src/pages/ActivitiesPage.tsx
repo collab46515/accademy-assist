@@ -22,170 +22,26 @@ import {
   MapPin,
   Clock,
   Star,
-  CheckCircle
+  CheckCircle,
+  Eye,
+  Edit,
+  Loader2
 } from "lucide-react";
 import { ActivityManager } from "@/components/activities/ActivityManager";
 import { HousePointsManager } from "@/components/activities/HousePointsManager";
-
-interface Activity {
-  id: string;
-  name: string;
-  category: "sports" | "arts" | "academic" | "service" | "duke-of-edinburgh";
-  instructor: string;
-  schedule: string;
-  location: string;
-  capacity: number;
-  enrolled: number;
-  status: "active" | "full" | "cancelled" | "completed";
-  cost?: number;
-}
-
-interface Participation {
-  id: string;
-  studentId: string;
-  studentName: string;
-  activity: string;
-  category: string;
-  enrolledDate: string;
-  status: "active" | "completed" | "withdrawn";
-  attendance: number;
-  achievements?: string[];
-}
-
-interface HousePoint {
-  id: string;
-  studentId: string;
-  studentName: string;
-  house: string;
-  points: number;
-  reason: string;
-  awardedBy: string;
-  date: string;
-}
-
-const mockActivities: Activity[] = [
-  {
-    id: "1",
-    name: "Football Club",
-    category: "sports",
-    instructor: "Mr. Johnson",
-    schedule: "Wednesday 15:30-16:30",
-    location: "Sports Field",
-    capacity: 25,
-    enrolled: 22,
-    status: "active"
-  },
-  {
-    id: "2",
-    name: "Drama Society",
-    category: "arts",
-    instructor: "Ms. Williams",
-    schedule: "Thursday 16:00-17:30",
-    location: "Drama Studio",
-    capacity: 20,
-    enrolled: 18,
-    status: "active"
-  },
-  {
-    id: "3",
-    name: "Duke of Edinburgh Bronze",
-    category: "duke-of-edinburgh",
-    instructor: "Mrs. Davis",
-    schedule: "Saturday 09:00-15:00",
-    location: "Various",
-    capacity: 15,
-    enrolled: 15,
-    status: "full",
-    cost: 150
-  },
-  {
-    id: "4",
-    name: "Chess Club",
-    category: "academic",
-    instructor: "Mr. Smith",
-    schedule: "Tuesday 12:30-13:30",
-    location: "Library",
-    capacity: 16,
-    enrolled: 12,
-    status: "active"
-  }
-];
-
-const mockParticipation: Participation[] = [
-  {
-    id: "1",
-    studentId: "STU001",
-    studentName: "Emma Thompson",
-    activity: "Drama Society",
-    category: "arts",
-    enrolledDate: "2024-01-08",
-    status: "active",
-    attendance: 95,
-    achievements: ["Lead Role - Romeo & Juliet"]
-  },
-  {
-    id: "2",
-    studentId: "STU002",
-    studentName: "James Wilson",
-    activity: "Football Club",
-    category: "sports",
-    enrolledDate: "2024-01-05",
-    status: "active",
-    attendance: 88
-  },
-  {
-    id: "3",
-    studentId: "STU003",
-    studentName: "Sophie Chen",
-    activity: "Duke of Edinburgh Bronze",
-    category: "duke-of-edinburgh",
-    enrolledDate: "2024-01-10",
-    status: "active",
-    attendance: 100,
-    achievements: ["Expedition Complete", "Volunteering 20hrs"]
-  }
-];
-
-const mockHousePoints: HousePoint[] = [
-  {
-    id: "1",
-    studentId: "STU001",
-    studentName: "Emma Thompson",
-    house: "Gryffindor",
-    points: 10,
-    reason: "Outstanding drama performance",
-    awardedBy: "Ms. Williams",
-    date: "2024-01-15"
-  },
-  {
-    id: "2",
-    studentId: "STU002",
-    studentName: "James Wilson",
-    house: "Hufflepuff",
-    points: 5,
-    reason: "Team spirit in football",
-    awardedBy: "Mr. Johnson",
-    date: "2024-01-14"
-  },
-  {
-    id: "3",
-    studentId: "STU003",
-    studentName: "Sophie Chen",
-    house: "Ravenclaw",
-    points: 15,
-    reason: "DofE expedition leadership",
-    awardedBy: "Mrs. Davis",
-    date: "2024-01-13"
-  }
-];
+import { useActivities } from "@/hooks/useActivities";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 const ActivitiesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [activities] = useState(mockActivities);
-  const [participation] = useState(mockParticipation);
-  const [housePoints] = useState(mockHousePoints);
+  const { activities, participants, housePoints, loading } = useActivities();
+  const [selectedActivity, setSelectedActivity] = useState<any>(null);
+  const [selectedParticipant, setSelectedParticipant] = useState<any>(null);
+  const [showActivityDialog, setShowActivityDialog] = useState(false);
+  const [showParticipantDialog, setShowParticipantDialog] = useState(false);
 
-  const getStatusBadge = (status: Activity["status"]) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
         return <Badge className="bg-success text-success-foreground"><CheckCircle className="h-3 w-3 mr-1" />Active</Badge>;
@@ -198,7 +54,7 @@ const ActivitiesPage = () => {
     }
   };
 
-  const getCategoryBadge = (category: Activity["category"]) => {
+  const getCategoryBadge = (category: string) => {
     const colors = {
       sports: "bg-blue-500 text-white",
       arts: "bg-purple-500 text-white",
@@ -231,6 +87,16 @@ const ActivitiesPage = () => {
   const activeActivities = activities.filter(a => a.status === "active").length;
   const totalParticipants = activities.reduce((sum, activity) => sum + activity.enrolled, 0);
   const totalHousePoints = housePoints.reduce((sum, hp) => sum + hp.points, 0);
+
+  const handleManageActivity = (activity: any) => {
+    setSelectedActivity(activity);
+    setShowActivityDialog(true);
+  };
+
+  const handleViewParticipant = (participant: any) => {
+    setSelectedParticipant(participant);
+    setShowParticipantDialog(true);
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -322,53 +188,74 @@ const ActivitiesPage = () => {
                 </div>
               </div>
 
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Activity Name</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Instructor</TableHead>
-                      <TableHead>Schedule</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Enrollment</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredActivities.map((activity) => (
-                      <TableRow key={activity.id}>
-                        <TableCell className="font-medium">{activity.name}</TableCell>
-                        <TableCell>{getCategoryBadge(activity.category)}</TableCell>
-                        <TableCell>{activity.instructor}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-1 text-sm">
-                            <Clock className="h-3 w-3" />
-                            <span>{activity.schedule}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-1">
-                            <MapPin className="h-3 w-3" />
-                            <span>{activity.location}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-1">
-                            <Users className="h-4 w-4" />
-                            <span>{activity.enrolled}/{activity.capacity}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>{getStatusBadge(activity.status)}</TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">Manage</Button>
-                        </TableCell>
+              {loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                  <span className="ml-2">Loading activities...</span>
+                </div>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Activity Name</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Instructor</TableHead>
+                        <TableHead>Schedule</TableHead>
+                        <TableHead>Location</TableHead>
+                        <TableHead>Enrollment</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredActivities.map((activity) => (
+                        <TableRow key={activity.id}>
+                          <TableCell className="font-medium">{activity.name}</TableCell>
+                          <TableCell>{getCategoryBadge(activity.category)}</TableCell>
+                          <TableCell>{activity.instructor}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center space-x-1 text-sm">
+                              <Clock className="h-3 w-3" />
+                              <span>{activity.schedule}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center space-x-1">
+                              <MapPin className="h-3 w-3" />
+                              <span>{activity.location || 'Not specified'}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center space-x-1">
+                              <Users className="h-4 w-4" />
+                              <span>{activity.enrolled}/{activity.capacity}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>{getStatusBadge(activity.status)}</TableCell>
+                          <TableCell className="text-right">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleManageActivity(activity)}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              Manage
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {activities.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                            No activities found. Use the Activity Manager to add new activities.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -383,60 +270,83 @@ const ActivitiesPage = () => {
               <CardDescription>Track individual student involvement in activities</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Student</TableHead>
-                      <TableHead>Activity</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Enrolled</TableHead>
-                      <TableHead>Attendance</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Achievements</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {participation.map((record) => (
-                      <TableRow key={record.id}>
-                        <TableCell className="font-medium">{record.studentName}</TableCell>
-                        <TableCell>{record.activity}</TableCell>
-                        <TableCell>{getCategoryBadge(record.category as Activity["category"])}</TableCell>
-                        <TableCell>{record.enrolledDate}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-2">
-                            <div className="text-sm">{record.attendance}%</div>
-                            {record.attendance >= 90 && <CheckCircle className="h-4 w-4 text-success" />}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={record.status === "active" ? "bg-success text-success-foreground" : "bg-secondary text-secondary-foreground"}>
-                            {record.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {record.achievements && record.achievements.length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
-                              {record.achievements.map((achievement, index) => (
-                                <Badge key={index} variant="outline" className="text-xs">
-                                  <Award className="h-3 w-3 mr-1" />
-                                  {achievement}
-                                </Badge>
-                              ))}
-                            </div>
-                          ) : (
-                            "-"
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">View</Button>
-                        </TableCell>
+              {loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                  <span className="ml-2">Loading participants...</span>
+                </div>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Student</TableHead>
+                        <TableHead>Activity</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Enrolled</TableHead>
+                        <TableHead>Attendance</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Achievements</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {participants.map((record) => (
+                        <TableRow key={record.id}>
+                          <TableCell className="font-medium">Student {record.student_id}</TableCell>
+                          <TableCell>Activity {record.activity_id}</TableCell>
+                          <TableCell>
+                            <Badge className="bg-blue-500 text-white">Active</Badge>
+                          </TableCell>
+                          <TableCell>{new Date(record.enrollment_date).toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center space-x-2">
+                              <div className="text-sm">{record.attendance_count || 0} sessions</div>
+                              {(record.attendance_count || 0) >= 10 && <CheckCircle className="h-4 w-4 text-success" />}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={record.status === "active" ? "bg-success text-success-foreground" : "bg-secondary text-secondary-foreground"}>
+                              {record.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {record.achievements && record.achievements.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {record.achievements.map((achievement, index) => (
+                                  <Badge key={index} variant="outline" className="text-xs">
+                                    <Award className="h-3 w-3 mr-1" />
+                                    {achievement}
+                                  </Badge>
+                                ))}
+                              </div>
+                            ) : (
+                              "-"
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleViewParticipant(record)}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {participants.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                            No participants found. Students will appear here when they enroll in activities.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -456,41 +366,55 @@ const ActivitiesPage = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Student</TableHead>
-                      <TableHead>House</TableHead>
-                      <TableHead>Points</TableHead>
-                      <TableHead>Reason</TableHead>
-                      <TableHead>Awarded By</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {housePoints.map((point) => (
-                      <TableRow key={point.id}>
-                        <TableCell className="font-medium">{point.studentName}</TableCell>
-                        <TableCell>{getHouseBadge(point.house)}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-1">
-                            <Star className="h-4 w-4 text-warning" />
-                            <span className="font-bold">{point.points}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>{point.reason}</TableCell>
-                        <TableCell>{point.awardedBy}</TableCell>
-                        <TableCell>{point.date}</TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">Edit</Button>
-                        </TableCell>
+              {loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                  <span className="ml-2">Loading house points...</span>
+                </div>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Student</TableHead>
+                        <TableHead>House</TableHead>
+                        <TableHead>Points</TableHead>
+                        <TableHead>Reason</TableHead>
+                        <TableHead>Awarded By</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {housePoints.map((point) => (
+                        <TableRow key={point.id}>
+                          <TableCell className="font-medium">Student {point.student_id}</TableCell>
+                          <TableCell>{getHouseBadge(point.house)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center space-x-1">
+                              <Star className="h-4 w-4 text-warning" />
+                              <span className="font-bold">{point.points}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>{point.reason}</TableCell>
+                          <TableCell>{point.awarded_by}</TableCell>
+                          <TableCell>{new Date(point.awarded_date).toLocaleDateString()}</TableCell>
+                          <TableCell className="text-right">
+                            <Button variant="ghost" size="sm">Edit</Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {housePoints.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                            No house points awarded yet. Use the House Points Manager to award points.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
