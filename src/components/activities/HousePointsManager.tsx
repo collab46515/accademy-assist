@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,20 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Star, Award, Search } from 'lucide-react';
+import { Plus, Star, Award, Search, Edit } from 'lucide-react';
 import { toast } from 'sonner';
-
-interface HousePoint {
-  id: string;
-  studentId: string;
-  studentName: string;
-  house: string;
-  points: number;
-  reason: string;
-  category: string;
-  awardedBy: string;
-  date: string;
-}
+import { useActivities } from '@/hooks/useActivities';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Student {
   id: string;
@@ -32,26 +23,10 @@ interface Student {
 }
 
 export function HousePointsManager() {
-  const [housePoints, setHousePoints] = useState<HousePoint[]>([
-    {
-      id: '1',
-      studentId: 'STU001',
-      studentName: 'Emma Thompson',
-      house: 'Gryffindor',
-      points: 10,
-      reason: 'Outstanding drama performance',
-      category: 'Academic Excellence',
-      awardedBy: 'Ms. Williams',
-      date: '2024-01-15'
-    }
-  ]);
-
-  const [students] = useState<Student[]>([
-    { id: 'STU001', name: 'Emma Thompson', house: 'Gryffindor', yearGroup: 'Year 10', formClass: '10A' },
-    { id: 'STU002', name: 'James Wilson', house: 'Hufflepuff', yearGroup: 'Year 9', formClass: '9B' },
-    { id: 'STU003', name: 'Sophie Chen', house: 'Ravenclaw', yearGroup: 'Year 11', formClass: '11C' },
-    { id: 'STU004', name: 'Michael Brown', house: 'Slytherin', yearGroup: 'Year 8', formClass: '8A' }
-  ]);
+  const { user } = useAuth();
+  const { housePoints, addHousePoint, loading } = useActivities();
+  const [students, setStudents] = useState<Student[]>([]);
+  const [editingPoint, setEditingPoint] = useState<any>(null);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -61,6 +36,32 @@ export function HousePointsManager() {
     reason: '',
     category: 'Academic Excellence'
   });
+
+  // Fetch students data
+  useEffect(() => {
+    const fetchStudents = async () => {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from('user_roles')
+        .select('school_id')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .single();
+      
+      if (data?.school_id) {
+        // Mock student data for now - would fetch from students table in real implementation
+        setStudents([
+          { id: 'STU001', name: 'Emma Thompson', house: 'Gryffindor', yearGroup: 'Year 10', formClass: '10A' },
+          { id: 'STU002', name: 'James Wilson', house: 'Hufflepuff', yearGroup: 'Year 9', formClass: '9B' },
+          { id: 'STU003', name: 'Sophie Chen', house: 'Ravenclaw', yearGroup: 'Year 11', formClass: '11C' },
+          { id: 'STU004', name: 'Michael Brown', house: 'Slytherin', yearGroup: 'Year 8', formClass: '8A' }
+        ]);
+      }
+    };
+
+    fetchStudents();
+  }, [user]);
 
   const houses = ['Gryffindor', 'Hufflepuff', 'Ravenclaw', 'Slytherin'];
   const categories = [
@@ -89,6 +90,7 @@ export function HousePointsManager() {
       reason: '',
       category: 'Academic Excellence'
     });
+    setEditingPoint(null);
   };
 
   const handleAdd = () => {
@@ -96,9 +98,26 @@ export function HousePointsManager() {
     setIsDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleEdit = (point: any) => {
+    setEditingPoint(point);
+    const student = students.find(s => s.name === point.student_id || s.id === point.student_id);
+    setFormData({
+      studentId: student?.id || '',
+      points: point.points,
+      reason: point.reason,
+      category: 'Academic Excellence'
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleSave = async () => {
     if (!formData.studentId || !formData.reason) {
       toast.error('Please select a student and provide a reason');
+      return;
+    }
+
+    if (!user) {
+      toast.error('User not authenticated');
       return;
     }
 
@@ -108,23 +127,37 @@ export function HousePointsManager() {
       return;
     }
 
-    const newHousePoint: HousePoint = {
-      id: Date.now().toString(),
-      studentId: selectedStudent.id,
-      studentName: selectedStudent.name,
-      house: selectedStudent.house,
-      points: formData.points,
-      reason: formData.reason,
-      category: formData.category,
-      awardedBy: 'Current User', // Would be actual logged-in user
-      date: new Date().toISOString().split('T')[0]
-    };
+    // Get user's school_id
+    const { data: userRole } = await supabase
+      .from('user_roles')
+      .select('school_id')
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+      .single();
 
-    setHousePoints(prev => [newHousePoint, ...prev]);
-    toast.success(`${formData.points} house points awarded to ${selectedStudent.name}!`);
-    
-    setIsDialogOpen(false);
-    resetForm();
+    if (!userRole?.school_id) {
+      toast.error('Unable to determine school');
+      return;
+    }
+
+    try {
+      const housePointData = {
+        student_id: selectedStudent.id,
+        school_id: userRole.school_id,
+        house: selectedStudent.house,
+        points: formData.points,
+        reason: formData.reason,
+        awarded_by: user.email || 'Unknown User',
+        awarded_date: new Date().toISOString().split('T')[0]
+      };
+
+      await addHousePoint(housePointData);
+      
+      setIsDialogOpen(false);
+      resetForm();
+    } catch (error) {
+      console.error('Error saving house point:', error);
+    }
   };
 
   const getHouseBadge = (house: string) => {
@@ -211,9 +244,9 @@ export function HousePointsManager() {
               </DialogTrigger>
               <DialogContent className="max-w-lg">
                 <DialogHeader>
-                  <DialogTitle>Award House Points</DialogTitle>
+                  <DialogTitle>{editingPoint ? 'Edit House Points' : 'Award House Points'}</DialogTitle>
                   <DialogDescription>
-                    Search for a student and award house points for their achievements.
+                    {editingPoint ? 'Update the house point details.' : 'Search for a student and award house points for their achievements.'}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
@@ -298,8 +331,8 @@ export function HousePointsManager() {
                   <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button onClick={handleSave}>
-                    Award Points
+                  <Button onClick={handleSave} disabled={loading}>
+                    {editingPoint ? 'Update Points' : 'Award Points'}
                   </Button>
                 </div>
               </DialogContent>
@@ -318,12 +351,13 @@ export function HousePointsManager() {
                   <TableHead>Reason</TableHead>
                   <TableHead>Awarded By</TableHead>
                   <TableHead>Date</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {housePoints.map((point) => (
                   <TableRow key={point.id}>
-                    <TableCell className="font-medium">{point.studentName}</TableCell>
+                    <TableCell className="font-medium">Student {point.student_id}</TableCell>
                     <TableCell>{getHouseBadge(point.house)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
@@ -331,10 +365,19 @@ export function HousePointsManager() {
                         <span className="font-semibold">{point.points}</span>
                       </div>
                     </TableCell>
-                    <TableCell>{getCategoryBadge(point.category)}</TableCell>
+                    <TableCell>{getCategoryBadge('Academic Excellence')}</TableCell>
                     <TableCell className="max-w-xs truncate">{point.reason}</TableCell>
-                    <TableCell>{point.awardedBy}</TableCell>
-                    <TableCell>{new Date(point.date).toLocaleDateString()}</TableCell>
+                    <TableCell>{point.awarded_by}</TableCell>
+                    <TableCell>{new Date(point.awarded_date).toLocaleDateString()}</TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(point)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

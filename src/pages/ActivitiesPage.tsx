@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Table, 
@@ -419,6 +420,129 @@ const ActivitiesPage = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Activity Management Dialog */}
+      <Dialog open={showActivityDialog} onOpenChange={setShowActivityDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Activity Details</DialogTitle>
+            <DialogDescription>
+              View and manage activity information
+            </DialogDescription>
+          </DialogHeader>
+          {selectedActivity && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Activity Name</Label>
+                  <p className="text-sm text-muted-foreground">{selectedActivity.name}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Category</Label>
+                  <div className="mt-1">{getCategoryBadge(selectedActivity.category)}</div>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Instructor</Label>
+                  <p className="text-sm text-muted-foreground">{selectedActivity.instructor}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Schedule</Label>
+                  <p className="text-sm text-muted-foreground">{selectedActivity.schedule}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Location</Label>
+                  <p className="text-sm text-muted-foreground">{selectedActivity.location || 'Not specified'}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Capacity</Label>
+                  <p className="text-sm text-muted-foreground">{selectedActivity.enrolled}/{selectedActivity.capacity}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Status</Label>
+                  <div className="mt-1">{getStatusBadge(selectedActivity.status)}</div>
+                </div>
+                {selectedActivity.cost && (
+                  <div>
+                    <Label className="text-sm font-medium">Cost</Label>
+                    <p className="text-sm text-muted-foreground">₹{selectedActivity.cost}</p>
+                  </div>
+                )}
+              </div>
+              {selectedActivity.description && (
+                <div>
+                  <Label className="text-sm font-medium">Description</Label>
+                  <p className="text-sm text-muted-foreground mt-1">{selectedActivity.description}</p>
+                </div>
+              )}
+              {selectedActivity.requirements?.length > 0 && (
+                <div>
+                  <Label className="text-sm font-medium">Requirements</Label>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {selectedActivity.requirements.map((req: string, index: number) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {req}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Participant Details Dialog */}
+      <Dialog open={showParticipantDialog} onOpenChange={setShowParticipantDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Participant Details</DialogTitle>
+            <DialogDescription>
+              View participant information and progress
+            </DialogDescription>
+          </DialogHeader>
+          {selectedParticipant && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Student ID</Label>
+                  <p className="text-sm text-muted-foreground">{selectedParticipant.student_id}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Activity ID</Label>
+                  <p className="text-sm text-muted-foreground">{selectedParticipant.activity_id}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Enrollment Date</Label>
+                  <p className="text-sm text-muted-foreground">{new Date(selectedParticipant.enrollment_date).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Status</Label>
+                  <Badge className={selectedParticipant.status === "active" ? "bg-success text-success-foreground" : "bg-secondary text-secondary-foreground"}>
+                    {selectedParticipant.status}
+                  </Badge>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Attendance Count</Label>
+                  <p className="text-sm text-muted-foreground">{selectedParticipant.attendance_count || 0} sessions</p>
+                </div>
+              </div>
+              {selectedParticipant.achievements?.length > 0 && (
+                <div>
+                  <Label className="text-sm font-medium">Achievements</Label>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {selectedParticipant.achievements.map((achievement: string, index: number) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        <Award className="h-3 w-3 mr-1" />
+                        {achievement}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
