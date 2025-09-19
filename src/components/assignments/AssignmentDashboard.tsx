@@ -207,7 +207,10 @@ export const AssignmentDashboard = () => {
               <Button 
                 variant="outline" 
                 className="w-full justify-start"
-                onClick={() => console.log('View all submissions')}
+                onClick={() => {
+                  // Navigate to submissions view
+                  window.location.href = '/assignments?tab=submissions';
+                }}
               >
                 <Users className="h-4 w-4 mr-2" />
                 View All Submissions
@@ -215,7 +218,10 @@ export const AssignmentDashboard = () => {
               <Button 
                 variant="outline" 
                 className="w-full justify-start"
-                onClick={() => console.log('Grade pending work')}
+                onClick={() => {
+                  // Navigate to grading view
+                  window.location.href = '/assignments?tab=grading';
+                }}
               >
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Grade Pending Work

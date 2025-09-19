@@ -171,30 +171,33 @@ export const StudentTransportManager = () => {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="stop_id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Main Stop</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select stop" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {stops.map((stop) => (
-                                <SelectItem key={stop.id} value={stop.id}>
-                                  {stop.stop_name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                     <FormField
+                       control={form.control}
+                       name="stop_id"
+                       render={({ field }) => (
+                         <FormItem>
+                           <FormLabel>Main Stop</FormLabel>
+                           <Select onValueChange={field.onChange} defaultValue={field.value}>
+                             <FormControl>
+                               <SelectTrigger>
+                                 <SelectValue placeholder="Select stop" />
+                               </SelectTrigger>
+                             </FormControl>
+                             <SelectContent>
+                               {stops.filter(stop => {
+                                 const selectedRouteId = form.watch('route_id');
+                                 return !selectedRouteId || stop.route_id === selectedRouteId;
+                               }).map((stop) => (
+                                 <SelectItem key={stop.id} value={stop.id}>
+                                   {stop.stop_name}
+                                 </SelectItem>
+                               ))}
+                             </SelectContent>
+                           </Select>
+                           <FormMessage />
+                         </FormItem>
+                       )}
+                     />
                     <FormField
                       control={form.control}
                       name="status"

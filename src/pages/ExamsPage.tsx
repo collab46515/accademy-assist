@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, Clock, Users, FileText, Search, Plus, Download, Filter } from "lucide-react";
 import { useExamData } from "@/hooks/useExamData";
 import { format } from "date-fns";
@@ -18,18 +19,25 @@ export default function ExamsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("schedule");
+  const [examTypeFilter, setExamTypeFilter] = useState("all");
+  const [gradeLevelFilter, setGradeLevelFilter] = useState("all");
   const { exams, examResults, loading, refreshTrigger, createExam } = useExamData();
 
   console.log('ExamsPage render - refreshTrigger:', refreshTrigger);
   console.log('ExamsPage render - exams:', exams);
   console.log('ExamsPage render - exams.length:', exams.length);
 
-  // Filter exams based on search term
-  const filteredExams = exams.filter(exam =>
-    exam.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    exam.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    exam.exam_board?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter exams based on search term and filters
+  const filteredExams = exams.filter(exam => {
+    const matchesSearch = exam.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      exam.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      exam.exam_board?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesType = examTypeFilter === "all" || exam.exam_type === examTypeFilter;
+    const matchesLevel = gradeLevelFilter === "all" || exam.grade_level === gradeLevelFilter;
+    
+    return matchesSearch && matchesType && matchesLevel;
+  });
   
   console.log('Filtered exams:', filteredExams);
   console.log('Search term:', searchTerm);
@@ -194,15 +202,43 @@ export default function ExamsPage() {
                   <CardTitle>Exam Schedule</CardTitle>
                   <CardDescription>Manage and track examination schedules</CardDescription>
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => {
-                    // Reset filters
-                    setSearchTerm("");
-                    setActiveTab("schedule");
-                  }}>
-                    <Filter className="h-4 w-4 mr-2" />
-                    Clear Filters
-                  </Button>
+                 <div className="flex gap-2">
+                   <Select value={examTypeFilter} onValueChange={setExamTypeFilter}>
+                     <SelectTrigger className="w-32">
+                       <SelectValue placeholder="Type" />
+                     </SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="all">All Types</SelectItem>
+                       <SelectItem value="internal">Internal</SelectItem>
+                       <SelectItem value="external">External</SelectItem>
+                       <SelectItem value="mock">Mock</SelectItem>
+                       <SelectItem value="assessment">Assessment</SelectItem>
+                     </SelectContent>
+                   </Select>
+                   <Select value={gradeLevelFilter} onValueChange={setGradeLevelFilter}>
+                     <SelectTrigger className="w-32">
+                       <SelectValue placeholder="Level" />
+                     </SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="all">All Levels</SelectItem>
+                       <SelectItem value="Year 7">Year 7</SelectItem>
+                       <SelectItem value="Year 8">Year 8</SelectItem>
+                       <SelectItem value="Year 9">Year 9</SelectItem>
+                       <SelectItem value="Year 10">Year 10</SelectItem>
+                       <SelectItem value="Year 11">Year 11</SelectItem>
+                       <SelectItem value="Year 12">Year 12</SelectItem>
+                       <SelectItem value="Year 13">Year 13</SelectItem>
+                     </SelectContent>
+                   </Select>
+                   <Button variant="outline" size="sm" onClick={() => {
+                     // Reset filters
+                     setSearchTerm("");
+                     setExamTypeFilter("all");
+                     setGradeLevelFilter("all");
+                   }}>
+                     <Filter className="h-4 w-4 mr-2" />
+                     Clear Filters
+                   </Button>
                   <Button variant="outline" size="sm" onClick={() => {
                     // Export as CSV instead of JSON
                     const headers = ['Title', 'Board', 'Subject', 'Level', 'Date', 'Duration (min)', 'Total Marks', 'Type'];
