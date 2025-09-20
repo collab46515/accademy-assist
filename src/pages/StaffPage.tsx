@@ -612,6 +612,23 @@ const StaffPage = () => {
         </TabsContent>
       </Tabs>
 
+      {/* Test Dialog - Simple version */}
+      <Dialog open={!!viewingEmployee} onOpenChange={(open) => {
+        console.log('Dialog onOpenChange:', open, 'viewingEmployee:', viewingEmployee);
+        if (!open) setViewingEmployee(null);
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Test Dialog</DialogTitle>
+          </DialogHeader>
+          <div>
+            <p>This is a test dialog</p>
+            {viewingEmployee && <p>Employee: {viewingEmployee.firstName} {viewingEmployee.lastName}</p>}
+            <Button onClick={() => setViewingEmployee(null)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Employee Form Dialog */}
       <Dialog open={showEmployeeForm} onOpenChange={setShowEmployeeForm}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -632,73 +649,6 @@ const StaffPage = () => {
             }}
             isSubmitting={loading}
           />
-        </DialogContent>
-      </Dialog>
-
-      {/* View Employee Dialog */}
-      <Dialog open={!!viewingEmployee} onOpenChange={(open) => {
-        console.log('Dialog onOpenChange:', open, 'viewingEmployee:', viewingEmployee);
-        if (!open) setViewingEmployee(null);
-      }}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Employee Details</DialogTitle>
-          </DialogHeader>
-          {viewingEmployee && (
-            <div className="space-y-6">
-              <div className="flex items-center space-x-4">
-                <Avatar className="h-16 w-16">
-                  <AvatarFallback className="text-lg">
-                    {viewingEmployee.firstName[0]}{viewingEmployee.lastName[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="text-xl font-semibold">{viewingEmployee.firstName} {viewingEmployee.lastName}</h3>
-                  <p className="text-muted-foreground">{viewingEmployee.role}</p>
-                  {getStatusBadge(viewingEmployee.status)}
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground">Employee ID</h4>
-                  <p>{viewingEmployee.employeeId}</p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground">Department</h4>
-                  <p>{viewingEmployee.department}</p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground">Email</h4>
-                  <p>{viewingEmployee.email}</p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground">Phone</h4>
-                  <p>{viewingEmployee.phone}</p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground">Start Date</h4>
-                  <p>{viewingEmployee.startDate}</p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground">Location</h4>
-                  <p>{viewingEmployee.location || 'Not specified'}</p>
-                </div>
-              </div>
-              
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setViewingEmployee(null)}>
-                  Close
-                </Button>
-                <Button onClick={() => {
-                  setViewingEmployee(null);
-                  handleEditEmployee(viewingEmployee);
-                }}>
-                  Edit Employee
-                </Button>
-              </div>
-            </div>
-          )}
         </DialogContent>
       </Dialog>
     </div>
