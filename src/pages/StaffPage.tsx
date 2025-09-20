@@ -137,10 +137,13 @@ const StaffPage = () => {
   const handleViewEmployee = (employee: StaffMember) => {
     console.log('Viewing employee:', employee.firstName, employee.lastName);
     console.log('Setting viewingEmployee to:', employee);
+    console.log('About to close other dialogs and set viewingEmployee...');
     // Close any other dialogs first
     setShowEmployeeForm(false);
     setEditingEmployee(null);
+    console.log('Setting viewingEmployee state now...');
     setViewingEmployee(employee);
+    console.log('viewingEmployee should now be set to:', employee);
   };
 
   const handleEditEmployee = (employee: StaffMember) => {
@@ -459,7 +462,13 @@ const StaffPage = () => {
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              onClick={() => handleViewEmployee(member)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log('Eye button clicked for:', member.firstName, member.lastName);
+                                alert(`Clicked eye for ${member.firstName} ${member.lastName}`);
+                                handleViewEmployee(member);
+                              }}
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
