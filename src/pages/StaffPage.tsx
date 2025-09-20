@@ -133,6 +133,7 @@ const StaffPage = () => {
 
   const handleViewEmployee = (employee: StaffMember) => {
     console.log('Viewing employee:', employee.firstName, employee.lastName);
+    console.log('Setting viewingEmployee to:', employee);
     setViewingEmployee(employee);
   };
 
@@ -614,7 +615,10 @@ const StaffPage = () => {
       </Dialog>
 
       {/* View Employee Dialog */}
-      <Dialog open={!!viewingEmployee} onOpenChange={() => setViewingEmployee(null)}>
+      <Dialog open={!!viewingEmployee} onOpenChange={(open) => {
+        console.log('Dialog onOpenChange:', open, 'viewingEmployee:', viewingEmployee);
+        if (!open) setViewingEmployee(null);
+      }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Employee Details</DialogTitle>
