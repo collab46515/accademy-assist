@@ -65,6 +65,9 @@ const StaffPage = () => {
   const [showEmployeeForm, setShowEmployeeForm] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<any>(null);
   const [viewingEmployee, setViewingEmployee] = useState<any>(null);
+  
+  // Debug logging for viewingEmployee state
+  console.log('StaffPage render - viewingEmployee:', viewingEmployee);
   const [selectedTab, setSelectedTab] = useState("directory");
 
   // Use real HR data from database
@@ -134,10 +137,15 @@ const StaffPage = () => {
   const handleViewEmployee = (employee: StaffMember) => {
     console.log('Viewing employee:', employee.firstName, employee.lastName);
     console.log('Setting viewingEmployee to:', employee);
+    // Close any other dialogs first
+    setShowEmployeeForm(false);
+    setEditingEmployee(null);
     setViewingEmployee(employee);
   };
 
   const handleEditEmployee = (employee: StaffMember) => {
+    // Close view dialog first
+    setViewingEmployee(null);
     setEditingEmployee(employee);
     setShowEmployeeForm(true);
   };
@@ -340,7 +348,11 @@ const StaffPage = () => {
                   </Button>
                   <Button 
                     className="shadow-[var(--shadow-elegant)]"
-                    onClick={() => setShowEmployeeForm(true)}
+                    onClick={() => {
+                      // Close view dialog first
+                      setViewingEmployee(null);
+                      setShowEmployeeForm(true);
+                    }}
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Add Staff Member
