@@ -132,6 +132,7 @@ const StaffPage = () => {
   const departments = [...new Set(staff.map(s => s.department))].length;
 
   const handleViewEmployee = (employee: StaffMember) => {
+    console.log('Viewing employee:', employee.firstName, employee.lastName);
     setViewingEmployee(employee);
   };
 
