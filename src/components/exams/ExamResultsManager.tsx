@@ -58,18 +58,6 @@ export function ExamResultsManager() {
     },
   });
 
-  // Filter results based on search and selected exam
-  const filteredResults = examResults.filter(result => {
-    const studentName = getStudentName(result.student_id);
-    const examTitle = getExamTitle(result.exam_id);
-    const matchesSearch = searchTerm === '' || 
-      studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      examTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      result.grade?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesExam = selectedExam === '' || selectedExam === 'all' || result.exam_id === selectedExam;
-    return matchesSearch && matchesExam;
-  });
-
   // Get exam title by ID
   const getExamTitle = (examId: string) => {
     const exam = exams.find(e => e.id === examId);
@@ -81,6 +69,18 @@ export function ExamResultsManager() {
     const student = students.find(s => s.id === studentId);
     return student ? `${student.profiles?.first_name} ${student.profiles?.last_name}` : 'Unknown Student';
   };
+
+  // Filter results based on search and selected exam
+  const filteredResults = examResults.filter(result => {
+    const studentName = getStudentName(result.student_id);
+    const examTitle = getExamTitle(result.exam_id);
+    const matchesSearch = searchTerm === '' || 
+      studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      examTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      result.grade?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesExam = selectedExam === '' || selectedExam === 'all' || result.exam_id === selectedExam;
+    return matchesSearch && matchesExam;
+  });
 
   // Calculate grade from percentage
   const calculateGrade = (percentage: number) => {
