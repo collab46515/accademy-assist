@@ -462,13 +462,7 @@ const StaffPage = () => {
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                console.log('Eye button clicked for:', member.firstName, member.lastName);
-                                alert(`Clicked eye for ${member.firstName} ${member.lastName}`);
-                                handleViewEmployee(member);
-                              }}
+                              onClick={() => handleViewEmployee(member)}
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
@@ -612,20 +606,100 @@ const StaffPage = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Test Dialog - Simple version */}
+      {/* Employee Details Dialog */}
       <Dialog open={!!viewingEmployee} onOpenChange={(open) => {
-        console.log('Dialog onOpenChange:', open, 'viewingEmployee:', viewingEmployee);
         if (!open) setViewingEmployee(null);
       }}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Test Dialog</DialogTitle>
+            <DialogTitle>Employee Details</DialogTitle>
+            <DialogDescription>
+              View complete employee information
+            </DialogDescription>
           </DialogHeader>
-          <div>
-            <p>This is a test dialog</p>
-            {viewingEmployee && <p>Employee: {viewingEmployee.firstName} {viewingEmployee.lastName}</p>}
-            <Button onClick={() => setViewingEmployee(null)}>Close</Button>
-          </div>
+          {viewingEmployee && (
+            <div className="space-y-6">
+              <div className="flex items-center space-x-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarFallback className="text-lg">
+                    {viewingEmployee.firstName[0]}{viewingEmployee.lastName[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="text-xl font-semibold">{viewingEmployee.firstName} {viewingEmployee.lastName}</h3>
+                  <p className="text-muted-foreground">{viewingEmployee.role}</p>
+                  {getStatusBadge(viewingEmployee.status)}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Employee ID</label>
+                    <p className="text-sm">{viewingEmployee.employeeId}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Department</label>
+                    <p className="text-sm">{viewingEmployee.department}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Start Date</label>
+                    <p className="text-sm">{new Date(viewingEmployee.startDate).toLocaleDateString()}</p>
+                  </div>
+                  {viewingEmployee.location && (
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Location</label>
+                      <p className="text-sm">{viewingEmployee.location}</p>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Email</label>
+                    <p className="text-sm flex items-center space-x-1">
+                      <Mail className="h-3 w-3" />
+                      <span>{viewingEmployee.email}</span>
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Phone</label>
+                    <p className="text-sm flex items-center space-x-1">
+                      <Phone className="h-3 w-3" />
+                      <span>{viewingEmployee.phone || 'Not provided'}</span>
+                    </p>
+                  </div>
+                  {viewingEmployee.salary && (
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Salary</label>
+                      <p className="text-sm">${viewingEmployee.salary.toLocaleString()}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {viewingEmployee.subjects && viewingEmployee.subjects.length > 0 && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Subjects</label>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {viewingEmployee.subjects.map((subject, index) => (
+                      <Badge key={index} variant="secondary">{subject}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex justify-end space-x-2 pt-4 border-t">
+                <Button variant="outline" onClick={() => setViewingEmployee(null)}>
+                  Close
+                </Button>
+                <Button onClick={() => handleEditEmployee(viewingEmployee)}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Employee
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
