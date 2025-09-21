@@ -28,7 +28,7 @@ export default function ExamsPage() {
   console.log('ExamsPage render - exams.length:', exams.length);
 
   // Filter exams based on search term and filters
-  const filteredExams = exams.filter(exam => {
+  const filteredExams = (exams || []).filter(exam => {
     const matchesSearch = exam.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       exam.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       exam.exam_board?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -122,7 +122,7 @@ export default function ExamsPage() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{exams.length}</div>
+            <div className="text-2xl font-bold">{exams?.length || 0}</div>
             <p className="text-xs text-muted-foreground">
               Click to view all exams
             </p>
@@ -141,7 +141,7 @@ export default function ExamsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {exams.filter(e => e.exam_type === "internal").length}
+              {(exams || []).filter(e => e.exam_type === "internal").length}
             </div>
             <p className="text-xs text-muted-foreground">
               Click to filter internal exams
@@ -161,7 +161,7 @@ export default function ExamsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {exams.filter(e => e.exam_type === "external").length}
+              {(exams || []).filter(e => e.exam_type === "external").length}
             </div>
             <p className="text-xs text-muted-foreground">
               Click to filter external exams
