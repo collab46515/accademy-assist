@@ -350,19 +350,23 @@ const StaffPage = () => {
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>
-                  {/* Test button for debugging */}
-                  {filteredStaff.length > 0 && (
-                    <Button 
-                      variant="outline"
-                      onClick={() => {
-                        console.log('🧪 TEST BUTTON: Opening dialog for first employee');
-                        handleViewEmployee(filteredStaff[0]);
-                      }}
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      Test View
-                    </Button>
-                  )}
+                  <Button 
+                    variant="destructive"
+                    onClick={() => {
+                      console.log('🚨 FORCE DIALOG OPEN');
+                      console.log('filteredStaff.length:', filteredStaff.length);
+                      console.log('staff:', staff);
+                      if (staff.length > 0) {
+                        console.log('Setting viewingEmployee to first staff member:', staff[0]);
+                        setViewingEmployee(staff[0]);
+                      } else {
+                        console.log('No staff members available');
+                      }
+                    }}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    FORCE OPEN DIALOG
+                  </Button>
                   <Button 
                     className="shadow-[var(--shadow-elegant)]"
                     onClick={() => {
