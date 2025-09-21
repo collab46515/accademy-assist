@@ -135,15 +135,16 @@ const StaffPage = () => {
   const departments = [...new Set(staff.map(s => s.department))].length;
 
   const handleViewEmployee = (employee: StaffMember) => {
-    console.log('Viewing employee:', employee.firstName, employee.lastName);
-    console.log('Setting viewingEmployee to:', employee);
-    console.log('About to close other dialogs and set viewingEmployee...');
+    console.log('🔍 VIEW EMPLOYEE CLICKED:', employee.firstName, employee.lastName);
     // Close any other dialogs first
     setShowEmployeeForm(false);
     setEditingEmployee(null);
-    console.log('Setting viewingEmployee state now...');
     setViewingEmployee(employee);
-    console.log('viewingEmployee should now be set to:', employee);
+    
+    // Force a brief delay to ensure state is set
+    setTimeout(() => {
+      console.log('🔍 ViewingEmployee state after timeout:', viewingEmployee);
+    }, 100);
   };
 
   const handleEditEmployee = (employee: StaffMember) => {
@@ -349,6 +350,19 @@ const StaffPage = () => {
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>
+                  {/* Test button for debugging */}
+                  {filteredStaff.length > 0 && (
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        console.log('🧪 TEST BUTTON: Opening dialog for first employee');
+                        handleViewEmployee(filteredStaff[0]);
+                      }}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      Test View
+                    </Button>
+                  )}
                   <Button 
                     className="shadow-[var(--shadow-elegant)]"
                     onClick={() => {
@@ -425,7 +439,12 @@ const StaffPage = () => {
                       <TableRow 
                         key={member.id}
                         className="cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => handleViewEmployee(member)}
+                        onClick={(e) => {
+                          console.log('🟢 ROW CLICKED for:', member.firstName, member.lastName);
+                          e.preventDefault();
+                          handleViewEmployee(member);
+                        }}
+                        data-testid={`employee-row-${member.id}`}
                       >
                         <TableCell>
                           <div className="flex items-center space-x-3">
