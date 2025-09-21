@@ -422,7 +422,11 @@ const StaffPage = () => {
                   </TableHeader>
                   <TableBody>
                     {filteredStaff.map((member) => (
-                      <TableRow key={member.id}>
+                      <TableRow 
+                        key={member.id}
+                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => handleViewEmployee(member)}
+                      >
                         <TableCell>
                           <div className="flex items-center space-x-3">
                             <Avatar>
@@ -462,21 +466,20 @@ const StaffPage = () => {
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              onClick={() => handleViewEmployee(member)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleEditEmployee(member)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditEmployee(member);
+                              }}
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              onClick={() => handleDeleteEmployee(member.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteEmployee(member.id);
+                              }}
                               disabled={member.status === 'terminated'}
                             >
                               <Trash2 className="h-4 w-4" />
