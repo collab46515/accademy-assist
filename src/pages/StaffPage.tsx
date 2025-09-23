@@ -136,15 +136,20 @@ const StaffPage = () => {
 
   const handleViewEmployee = (employee: StaffMember) => {
     console.log('🔍 VIEW EMPLOYEE CLICKED:', employee.firstName, employee.lastName);
-    // Close any other dialogs first
-    setShowEmployeeForm(false);
-    setEditingEmployee(null);
-    setViewingEmployee(employee);
-    
-    // Force a brief delay to ensure state is set
-    setTimeout(() => {
-      console.log('🔍 ViewingEmployee state after timeout:', viewingEmployee);
-    }, 100);
+    try {
+      // Close any other dialogs first
+      setShowEmployeeForm(false);
+      setEditingEmployee(null);
+      setViewingEmployee(employee);
+      console.log('✅ Employee set for viewing:', employee);
+    } catch (error) {
+      console.error('❌ Error setting viewing employee:', error);
+      toast({
+        title: "Error",
+        description: "Failed to open employee details",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleEditEmployee = (employee: StaffMember) => {
@@ -349,23 +354,6 @@ const StaffPage = () => {
                   >
                     <Download className="h-4 w-4 mr-2" />
                     Export
-                  </Button>
-                  <Button 
-                    variant="destructive"
-                    onClick={() => {
-                      console.log('🚨 FORCE DIALOG OPEN');
-                      console.log('filteredStaff.length:', filteredStaff.length);
-                      console.log('staff:', staff);
-                      if (staff.length > 0) {
-                        console.log('Setting viewingEmployee to first staff member:', staff[0]);
-                        setViewingEmployee(staff[0]);
-                      } else {
-                        console.log('No staff members available');
-                      }
-                    }}
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    FORCE OPEN DIALOG
                   </Button>
                   <Button 
                     className="shadow-[var(--shadow-elegant)]"
