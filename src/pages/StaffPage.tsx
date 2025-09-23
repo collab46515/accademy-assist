@@ -634,6 +634,7 @@ const StaffPage = () => {
 
       {/* Employee Details Dialog */}
       <Dialog open={!!viewingEmployee} onOpenChange={(open) => {
+        console.log('🔧 Dialog onOpenChange called with:', open);
         if (!open) setViewingEmployee(null);
       }}>
         <DialogContent className="max-w-2xl">
@@ -644,16 +645,18 @@ const StaffPage = () => {
             </DialogDescription>
           </DialogHeader>
           {viewingEmployee && (
-            <div className="space-y-6">
-              <div className="flex items-center space-x-4">
+            <div className="space-y-4">
+              <div className="flex items-start space-x-4">
                 <Avatar className="h-16 w-16">
                   <AvatarFallback className="text-lg">
-                    {viewingEmployee.firstName[0]}{viewingEmployee.lastName[0]}
+                    {viewingEmployee.firstName?.[0] || 'U'}{viewingEmployee.lastName?.[0] || 'N'}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h3 className="text-xl font-semibold">{viewingEmployee.firstName} {viewingEmployee.lastName}</h3>
-                  <p className="text-muted-foreground">{viewingEmployee.role}</p>
+                  <h3 className="text-xl font-semibold">
+                    {viewingEmployee.firstName || 'Unknown'} {viewingEmployee.lastName || 'Name'}
+                  </h3>
+                  <p className="text-muted-foreground">{viewingEmployee.role || 'No role specified'}</p>
                   {getStatusBadge(viewingEmployee.status)}
                 </div>
               </div>
@@ -662,15 +665,20 @@ const StaffPage = () => {
                 <div className="space-y-3">
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Employee ID</label>
-                    <p className="text-sm">{viewingEmployee.employeeId}</p>
+                    <p className="text-sm">{viewingEmployee.employeeId || 'Not assigned'}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Department</label>
-                    <p className="text-sm">{viewingEmployee.department}</p>
+                    <p className="text-sm">{viewingEmployee.department || 'No department'}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Start Date</label>
-                    <p className="text-sm">{new Date(viewingEmployee.startDate).toLocaleDateString()}</p>
+                    <p className="text-sm">
+                      {viewingEmployee.startDate 
+                        ? new Date(viewingEmployee.startDate).toLocaleDateString()
+                        : 'Not specified'
+                      }
+                    </p>
                   </div>
                   {viewingEmployee.location && (
                     <div>
@@ -685,7 +693,7 @@ const StaffPage = () => {
                     <label className="text-sm font-medium text-muted-foreground">Email</label>
                     <p className="text-sm flex items-center space-x-1">
                       <Mail className="h-3 w-3" />
-                      <span>{viewingEmployee.email}</span>
+                      <span>{viewingEmployee.email || 'No email provided'}</span>
                     </p>
                   </div>
                   <div>
@@ -695,16 +703,16 @@ const StaffPage = () => {
                       <span>{viewingEmployee.phone || 'Not provided'}</span>
                     </p>
                   </div>
-                  {viewingEmployee.salary && (
+                  {viewingEmployee.salary != null && viewingEmployee.salary > 0 && (
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Salary</label>
-                      <p className="text-sm">${viewingEmployee.salary.toLocaleString()}</p>
+                      <p className="text-sm">${Number(viewingEmployee.salary).toLocaleString()}</p>
                     </div>
                   )}
                 </div>
               </div>
               
-              {viewingEmployee.subjects && viewingEmployee.subjects.length > 0 && (
+              {viewingEmployee.subjects && Array.isArray(viewingEmployee.subjects) && viewingEmployee.subjects.length > 0 && (
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Subjects</label>
                   <div className="flex flex-wrap gap-2 mt-1">
