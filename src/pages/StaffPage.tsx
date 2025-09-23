@@ -431,10 +431,11 @@ const StaffPage = () => {
                       <TableRow 
                         key={member.id}
                         className="cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={(e) => {
-                          console.log('🟢 ROW CLICKED for:', member.firstName, member.lastName);
-                          e.preventDefault();
+                        onClick={() => {
+                          console.log('🟢 ENTIRE ROW CLICKED for:', member.firstName, member.lastName);
+                          console.log('🟢 viewingEmployee state before:', viewingEmployee);
                           handleViewEmployee(member);
+                          console.log('🟢 viewingEmployee state after:', member);
                         }}
                         data-testid={`employee-row-${member.id}`}
                       >
@@ -474,6 +475,18 @@ const StaffPage = () => {
                         <TableCell>{getStatusBadge(member.status)}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                console.log('👁️ VIEW BUTTON CLICKED for:', member.firstName, member.lastName);
+                                handleViewEmployee(member);
+                              }}
+                              title="View Employee Details"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
                             <Button 
                               variant="ghost" 
                               size="sm"
@@ -622,7 +635,7 @@ const StaffPage = () => {
 
       {/* Employee Details Dialog */}
       <Dialog open={!!viewingEmployee} onOpenChange={(open) => {
-        console.log('🔧 Dialog onOpenChange called with:', open);
+        console.log('🔧 Dialog onOpenChange called with:', open, 'viewingEmployee:', !!viewingEmployee);
         if (!open) setViewingEmployee(null);
       }}>
         <DialogContent className="max-w-2xl">
