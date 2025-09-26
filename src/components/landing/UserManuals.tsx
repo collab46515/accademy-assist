@@ -36,62 +36,147 @@ export function UserManuals({ modules }: UserManualsProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Navigation helpers
+  // Generate role-specific guide PDFs
   const handleRoleGuideClick = (guide: string, roleName: string) => {
-    toast({
-      title: "Guide Available",
-      description: `${guide} documentation is available in the ${roleName.toLowerCase()} portal`,
-    });
-    
-    // Navigate to appropriate section based on role
-    if (roleName === "School Administrators") {
-      navigate("/admin-management");
-    } else if (roleName === "Teachers") {
-      navigate("/portals");
-    } else {
-      navigate("/dashboard");
+    try {
+      const doc = new jsPDF();
+      
+      // Add branded header
+      doc.setFillColor(59, 130, 246);
+      doc.rect(0, 0, 210, 25, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.text('DOXA', 20, 15);
+      doc.setFontSize(10);
+      doc.text('School Management System', 20, 20);
+      
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(18);
+      doc.text(`${guide} - ${roleName}`, 20, 45);
+      
+      doc.setFontSize(12);
+      doc.text('Role-Specific Guide', 20, 58);
+      doc.setFontSize(10);
+      doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 68);
+      
+      // Add role-specific content
+      const roleContent = {
+        "School Administrators": [
+          { title: "System Overview", content: "Complete administrative control and system management capabilities." },
+          { title: "User Management", content: "Add, edit, and manage all users including teachers, students, and parents." },
+          { title: "School Configuration", content: "Set up academic years, terms, classes, and school-wide settings." },
+          { title: "Reports & Analytics", content: "Access comprehensive reports and performance analytics." }
+        ],
+        "Teachers": [
+          { title: "Classroom Management", content: "Tools for managing your classes, students, and daily activities." },
+          { title: "Lesson Planning", content: "Create and manage lesson plans, assignments, and curriculum." },
+          { title: "Assessment Tools", content: "Grade assignments, track progress, and communicate with parents." },
+          { title: "Communication", content: "Connect with students, parents, and administration." }
+        ],
+        "Students": [
+          { title: "Portal Access", content: "How to access and navigate your student portal." },
+          { title: "Assignments", content: "View, submit, and track your assignments and homework." },
+          { title: "Grades & Progress", content: "Monitor your academic progress and performance." },
+          { title: "Communication", content: "Connect with teachers and access school announcements." }
+        ],
+        "Parents": [
+          { title: "Monitoring Progress", content: "Track your child's academic performance and attendance." },
+          { title: "Communication", content: "Connect with teachers and stay informed about school activities." },
+          { title: "Fee Management", content: "View and pay school fees online." },
+          { title: "Events & Activities", content: "Stay updated on school events and your child's participation." }
+        ]
+      };
+      
+      const content = roleContent[roleName as keyof typeof roleContent] || [];
+      let yPosition = 85;
+      
+      content.forEach((section) => {
+        if (yPosition > 270) {
+          doc.addPage();
+          doc.setFillColor(59, 130, 246);
+          doc.rect(0, 0, 210, 25, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(16);
+          doc.text('DOXA', 20, 15);
+          doc.setFontSize(10);
+          doc.text('School Management System', 20, 20);
+          doc.setTextColor(0, 0, 0);
+          yPosition = 40;
+        }
+        
+        doc.setFontSize(13);
+        doc.text(section.title, 20, yPosition);
+        yPosition += 12;
+        
+        doc.setFontSize(10);
+        const lines = doc.splitTextToSize(section.content, 170);
+        doc.text(lines, 20, yPosition);
+        yPosition += lines.length * 4 + 15;
+      });
+      
+      doc.save(`${guide.toLowerCase().replace(/\s+/g, '-')}-${roleName.toLowerCase().replace(/\s+/g, '-')}.pdf`);
+    } catch (error) {
+      console.error('PDF generation failed:', error);
     }
   };
 
   const handleModuleDocumentation = (moduleName: string) => {
-    // Navigate to module or show external documentation
-    const moduleRoutes: { [key: string]: string } = {
-      "Student Management": "/students",
-      "Finance & Fees": "/fee-management", 
-      "Academics": "/academics",
-      "HR Management": "/hr-management",
-      "Communication": "/communication",
-      "AI Suite": "/ai-suite",
-      "Reports": "/report-cards"
-    };
-    
-    const route = moduleRoutes[moduleName];
-    if (route) {
-      navigate(route);
-      toast({
-        title: "Navigating to Module",
-        description: `Opening ${moduleName} section`,
-      });
-    } else {
-      toast({
-        title: "Module Documentation",
-        description: `${moduleName} documentation will be available soon`,
-      });
-    }
+    handlePDFDownload(moduleName, `${moduleName.toLowerCase().replace(/\s+/g, '-')}-manual.pdf`);
   };
 
 
   const handleTrainingRequest = () => {
-    toast({
-      title: "Training Request",
-      description: "Personal training request submitted. Our team will contact you within 24 hours.",
-    });
+    try {
+      const doc = new jsPDF();
+      
+      doc.setFillColor(59, 130, 246);
+      doc.rect(0, 0, 210, 25, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.text('DOXA', 20, 15);
+      doc.setFontSize(10);
+      doc.text('School Management System', 20, 20);
+      
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(18);
+      doc.text('Personal Training Guide', 20, 45);
+      
+      doc.setFontSize(12);
+      doc.text('Customized Training Materials', 20, 58);
+      doc.setFontSize(10);
+      doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 68);
+      
+      // Add training content
+      const trainingContent = [
+        { title: "Training Schedule", content: "Personalized training sessions designed for your specific needs and role requirements." },
+        { title: "Learning Objectives", content: "Clear goals and outcomes for each training session to maximize learning effectiveness." },
+        { title: "Resource Materials", content: "Additional resources, practice exercises, and reference materials for continued learning." },
+        { title: "Support Contact", content: "Direct contact information for ongoing support and assistance after training completion." }
+      ];
+      
+      let yPosition = 85;
+      
+      trainingContent.forEach((section) => {
+        doc.setFontSize(13);
+        doc.text(section.title, 20, yPosition);
+        yPosition += 12;
+        
+        doc.setFontSize(10);
+        const lines = doc.splitTextToSize(section.content, 170);
+        doc.text(lines, 20, yPosition);
+        yPosition += lines.length * 4 + 15;
+      });
+      
+      doc.save('personal-training-guide.pdf');
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+    }
   };
 
   const handlePDFDownload = (title: string, filename: string) => {
-    // Import jsPDF dynamically or ensure it's available
-    if (typeof window !== 'undefined' && (window as any).jsPDF) {
-      const { jsPDF } = (window as any);
+    try {
       const doc = new jsPDF();
       
       // Add branded header
@@ -174,25 +259,13 @@ export function UserManuals({ modules }: UserManualsProps) {
       
       // Save the PDF
       doc.save(filename);
-      
-      toast({
-        title: "PDF Downloaded",
-        description: `${title} guide has been downloaded`,
-      });
-    } else {
-      // Fallback if jsPDF is not available
-      toast({
-        title: "Download Error",
-        description: "PDF generation library not available. Please try again.",
-        variant: "destructive"
-      });
+    } catch (error) {
+      console.error('PDF generation failed:', error);
     }
   };
 
   const handleQuickStartGuide = (guide: any) => {
-    // Import jsPDF dynamically or ensure it's available
-    if (typeof window !== 'undefined' && (window as any).jsPDF) {
-      const { jsPDF } = (window as any);
+    try {
       const doc = new jsPDF();
       
       // Add branded header
@@ -294,18 +367,8 @@ export function UserManuals({ modules }: UserManualsProps) {
       
       // Save the PDF
       doc.save(`${guide.title.toLowerCase().replace(/\s+/g, '-')}.pdf`);
-      
-      toast({
-        title: "Guide Downloaded",
-        description: `${guide.title} has been downloaded as PDF`,
-      });
-    } else {
-      // Fallback if jsPDF is not available
-      toast({
-        title: "Download Error", 
-        description: "PDF generation library not available. Please try again.",
-        variant: "destructive"
-      });
+    } catch (error) {
+      console.error('PDF generation failed:', error);
     }
   };
 
