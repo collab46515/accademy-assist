@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import jsPDF from 'jspdf';
 import { 
   BookOpen, 
   PlayCircle, 
@@ -88,31 +89,224 @@ export function UserManuals({ modules }: UserManualsProps) {
   };
 
   const handlePDFDownload = (title: string, filename: string) => {
-    // Create and trigger download of a sample PDF
-    const link = document.createElement('a');
-    link.href = 'data:application/pdf;base64,JVBERi0xLjMKJcTl8uXrp/Og0MTGCjQgMCBvYmoKPDwKL1R5cGUgL0NhdGFsb2cKL091dGxpbmVzIDIgMCBSCi9QYWdlcyAzIDAgUgo+PgplbmRvYmoKMiAwIG9iago8PAovVHlwZSAvT3V0bGluZXMKL0NvdW50IDAKPD4KZW5kb2JqCjMgMCBvYmoKPDwKL1R5cGUgL1BhZ2VzCi9Db3VudCAxCi9LaWRzIFs0IDAgUl0KPj4KZW5kb2JqCjQgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAzIDAgUgovUmVzb3VyY2VzIDw8Ci9Gb250IDw8Ci9GMSA5IDAgUgo+Pgo+PgovTWVkaWFCb3ggWzAgMCA2MTIgNzkyXQovQ29udGVudHMgNSAwIFIKPj4KZW5kb2JqCjUgMCBvYmoKPDwKL0xlbmd0aCA0NAo+PgpzdHJlYW0KQlQKL0YxIDEyIFRmCjcyIDcyMCBUZAooSGVsbG8gV29ybGQhKSBUagpFVApzdHJlYW0KZW5kb2JqCjkgMCBvYmoKPDwKL1R5cGUgL0ZvbnQKL1N1YnR5cGUgL1R5cGUxCi9OYW1lIC9GMQovQmFzZUZvbnQgL0hlbHZldGljYQovRW5jb2RpbmcgL01hY1JvbWFuRW5jb2RpbmcKPj4KZW5kb2JqCnhyZWYKMCAxMAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMDkgMDAwMDAgbiAKMDAwMDAwMDA3NCAwMDAwMCBuIAowMDAwMDAwMTIwIDAwMDAwIG4gCjAwMDAwMDAxNzggMDAwMDAgbiAKMDAwMDAwMDQ0NyAwMDAwMCBuIAowMDAwMDAwNTQzIDAwMDAwIG4gCjAwMDAwMDA2MjIgMDAwMDAgbiAKMDAwMDAwMDY1NCAwMDAwMCBuIAowMDAwMDAwNzI4IDAwMDAwIG4gCnRyYWlsZXIKPDwKL1NpemUgMTAKL1Jvb3QgMSAwIFIKPj4Kc3RhcnR4cmVmCjgzNgolJUVPRg==';
-    link.download = filename;
-    link.click();
-    
-    toast({
-      title: "PDF Downloaded",
-      description: `${title} guide has been downloaded`,
-    });
+    // Import jsPDF dynamically or ensure it's available
+    if (typeof window !== 'undefined' && (window as any).jsPDF) {
+      const { jsPDF } = (window as any);
+      const doc = new jsPDF();
+      
+      // Add branded header
+      doc.setFillColor(59, 130, 246); // Primary blue color
+      doc.rect(0, 0, 210, 25, 'F'); // Header background
+      
+      // Add school name/logo text in header
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.text('DOXA', 20, 15);
+      doc.setFontSize(10);
+      doc.text('School Management System', 20, 20);
+      
+      // Reset text color for content
+      doc.setTextColor(0, 0, 0);
+      
+      // Add title
+      doc.setFontSize(18);
+      doc.text(`${title} Documentation`, 20, 45);
+      
+      // Add metadata
+      doc.setFontSize(12);
+      doc.text('Module Guide', 20, 58);
+      doc.setFontSize(10);
+      doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 68);
+      
+      // Add content sections
+      doc.setFontSize(11);
+      let yPosition = 85;
+      
+      const sections = [
+        {
+          title: "Getting Started",
+          content: `This guide will help you understand and effectively use the ${title} module. Learn the basics of navigation, key features, and common workflows.`
+        },
+        {
+          title: "Key Features", 
+          content: `Explore the main capabilities of ${title}, including user management, data entry, reporting features, and integration options.`
+        },
+        {
+          title: "Step-by-Step Workflows",
+          content: `Follow detailed instructions for common tasks and processes within the ${title} module. Includes screenshots and tips for efficient usage.`
+        },
+        {
+          title: "Best Practices",
+          content: `Learn recommended approaches, shortcuts, and optimization techniques to get the most out of the ${title} system.`
+        },
+        {
+          title: "Troubleshooting", 
+          content: `Common issues and solutions, FAQ section, and contact information for additional support when needed.`
+        }
+      ];
+      
+      sections.forEach((section) => {
+        if (yPosition > 270) {
+          doc.addPage();
+          // Add header to new page
+          doc.setFillColor(59, 130, 246);
+          doc.rect(0, 0, 210, 25, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(16);
+          doc.text('DOXA', 20, 15);
+          doc.setFontSize(10);
+          doc.text('School Management System', 20, 20);
+          doc.setTextColor(0, 0, 0);
+          yPosition = 40;
+        }
+        
+        // Section title
+        doc.setFontSize(13);
+        doc.text(section.title, 20, yPosition);
+        yPosition += 12;
+        
+        // Section content
+        doc.setFontSize(10);
+        const lines = doc.splitTextToSize(section.content, 170);
+        doc.text(lines, 20, yPosition);
+        yPosition += lines.length * 4 + 15;
+      });
+      
+      // Save the PDF
+      doc.save(filename);
+      
+      toast({
+        title: "PDF Downloaded",
+        description: `${title} guide has been downloaded`,
+      });
+    } else {
+      // Fallback if jsPDF is not available
+      toast({
+        title: "Download Error",
+        description: "PDF generation library not available. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleQuickStartGuide = (guide: any) => {
-    // Create and trigger download of a sample guide
-    const content = `# ${guide.title}\n\n${guide.description}\n\nThis is a sample quick start guide that would contain detailed instructions for getting started with the system.`;
-    const blob = new Blob([content], { type: 'text/markdown' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `${guide.title.toLowerCase().replace(/\s+/g, '-')}.md`;
-    link.click();
-    
-    toast({
-      title: "Guide Downloaded",
-      description: `${guide.title} has been downloaded as a markdown file`,
-    });
+    // Import jsPDF dynamically or ensure it's available
+    if (typeof window !== 'undefined' && (window as any).jsPDF) {
+      const { jsPDF } = (window as any);
+      const doc = new jsPDF();
+      
+      // Add branded header
+      doc.setFillColor(59, 130, 246); // Primary blue color
+      doc.rect(0, 0, 210, 25, 'F'); // Header background
+      
+      // Add school name/logo text in header
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.text('DOXA', 20, 15);
+      doc.setFontSize(10);
+      doc.text('School Management System', 20, 20);
+      
+      // Reset text color for content
+      doc.setTextColor(0, 0, 0);
+      
+      // Add title
+      doc.setFontSize(18);
+      doc.text(guide.title, 20, 45);
+      
+      // Add metadata
+      doc.setFontSize(12);
+      doc.text('Quick Start Guide', 20, 58);
+      doc.setFontSize(10);
+      doc.text(`Duration: ${guide.duration}`, 20, 68);
+      doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 75);
+      
+      // Add content
+      doc.setFontSize(11);
+      let yPosition = 90;
+      
+      // Add guide description
+      doc.setFontSize(13);
+      doc.text('Overview', 20, yPosition);
+      yPosition += 12;
+      
+      doc.setFontSize(10);
+      const descLines = doc.splitTextToSize(guide.description, 170);
+      doc.text(descLines, 20, yPosition);
+      yPosition += descLines.length * 4 + 15;
+      
+      // Add step-by-step content based on guide type
+      const getQuickStartContent = (title: string) => {
+        const contentMap: { [key: string]: any[] } = {
+          "Getting Started with Doxa": [
+            { title: "Step 1: System Access", content: "Log into your Doxa account using your provided credentials. Ensure you have a stable internet connection and use a supported browser (Chrome, Firefox, Safari, or Edge)." },
+            { title: "Step 2: Dashboard Overview", content: "Familiarize yourself with the main dashboard. Explore the navigation menu, quick access buttons, and key performance indicators relevant to your role." },
+            { title: "Step 3: Profile Setup", content: "Complete your user profile with accurate information. Upload a profile picture and configure your notification preferences." },
+            { title: "Step 4: Initial Configuration", content: "Set up your workspace preferences, language settings, and any module-specific configurations required for your role." },
+            { title: "Step 5: Help Resources", content: "Locate and bookmark the help section, documentation links, and support contact information for future reference." }
+          ],
+          "First Week Setup Checklist": [
+            { title: "Day 1: Foundation", content: "Complete initial login, profile setup, and basic navigation training. Ensure all credentials are working and access levels are correct." },
+            { title: "Day 2-3: Core Features", content: "Learn the essential features for your role. Practice data entry, basic reporting, and key workflows you'll use daily." },
+            { title: "Day 4-5: Advanced Setup", content: "Configure advanced settings, integrate with existing systems, and set up automated processes where applicable." },
+            { title: "Week End: Review", content: "Complete knowledge check, review best practices, and ensure you're comfortable with all basic operations." }
+          ],
+          "User Onboarding Best Practices": [
+            { title: "Preparation Phase", content: "Gather all necessary information, credentials, and resources before starting the onboarding process. Ensure technical requirements are met." },
+            { title: "Structured Learning", content: "Follow a systematic approach to learning features. Start with basics and gradually progress to advanced functionality." },
+            { title: "Hands-on Practice", content: "Use training data to practice key workflows. Don't hesitate to experiment with features in a safe environment." },
+            { title: "Support Network", content: "Connect with administrators, colleagues, and support resources. Build relationships that will help you succeed long-term." }
+          ]
+        };
+        return contentMap[title] || [
+          { title: "Getting Started", content: "This guide will help you begin using the system effectively." },
+          { title: "Key Steps", content: "Follow these important steps to set up and configure your access." },
+          { title: "Best Practices", content: "Learn recommended approaches for optimal system usage." }
+        ];
+      };
+      
+      const content = getQuickStartContent(guide.title);
+      content.forEach((section) => {
+        if (yPosition > 270) {
+          doc.addPage();
+          // Add header to new page
+          doc.setFillColor(59, 130, 246);
+          doc.rect(0, 0, 210, 25, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(16);
+          doc.text('DOXA', 20, 15);
+          doc.setFontSize(10);
+          doc.text('School Management System', 20, 20);
+          doc.setTextColor(0, 0, 0);
+          yPosition = 40;
+        }
+        
+        // Section title
+        doc.setFontSize(13);
+        doc.text(section.title, 20, yPosition);
+        yPosition += 12;
+        
+        // Section content
+        doc.setFontSize(10);
+        const lines = doc.splitTextToSize(section.content, 170);
+        doc.text(lines, 20, yPosition);
+        yPosition += lines.length * 4 + 15;
+      });
+      
+      // Save the PDF
+      doc.save(`${guide.title.toLowerCase().replace(/\s+/g, '-')}.pdf`);
+      
+      toast({
+        title: "Guide Downloaded",
+        description: `${guide.title} has been downloaded as PDF`,
+      });
+    } else {
+      // Fallback if jsPDF is not available
+      toast({
+        title: "Download Error", 
+        description: "PDF generation library not available. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const userRoles = [
