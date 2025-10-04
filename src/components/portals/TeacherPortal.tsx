@@ -39,6 +39,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useHRData } from '@/hooks/useHRData';
 import { useToast } from '@/hooks/use-toast';
+import { useTeacherDashboard } from '@/hooks/useTeacherDashboard';
+import { useAuth } from '@/hooks/useAuth';
 
 const leaveSchema = z.object({
   leave_type: z.string().min(1, 'Leave type is required'),
@@ -51,8 +53,10 @@ type LeaveFormData = z.infer<typeof leaveSchema>;
 
 export function TeacherPortal() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { toast } = useToast();
-  const { leaveRequests, createLeaveRequest, loading } = useHRData();
+  const { leaveRequests, createLeaveRequest, loading: hrLoading } = useHRData();
+  const { loading, stats, todayClasses, pendingTasks, employeeData } = useTeacherDashboard();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
 
@@ -66,63 +70,39 @@ export function TeacherPortal() {
     },
   });
 
-  // Use real teacher data from database only - empty for now
-  const teacherData = {
-    employee_id: 'EMP001',
-    first_name: 'Sarah',
-    last_name: 'Johnson',
-    email: 'sarah.johnson@school.edu',
-    phone: '+44 7700 900123',
-    department: 'Mathematics',
-    position: 'Senior Mathematics Teacher',
-    start_date: '2020-09-01',
-    salary: 45000,
+  const teacherData = employeeData || {
+    employee_id: 'N/A',
+    first_name: 'Teacher',
+    last_name: 'User',
+    email: user?.email || '',
+    phone: '',
+    department: '',
+    position: 'Teacher',
+    start_date: new Date().toISOString().split('T')[0],
+    salary: 0,
     status: 'active',
     work_type: 'full_time',
-    location: 'Main Campus',
-    manager: 'Dr. Emily Watson',
-    emergency_contact_name: 'John Johnson',
-    emergency_contact_phone: '+44 7700 900456',
+    location: '',
+    emergency_contact_name: '',
+    emergency_contact_phone: '',
   };
-
-  const payrollData = [
-    { month: 'November 2024', gross: '£3,750.00', deductions: '£912.50', net: '£2,837.50', status: 'Paid', date: '2024-11-30' },
-    { month: 'October 2024', gross: '£3,750.00', deductions: '£912.50', net: '£2,837.50', status: 'Paid', date: '2024-10-31' },
-    { month: 'September 2024', gross: '£3,750.00', deductions: '£912.50', net: '£2,837.50', status: 'Paid', date: '2024-09-30' },
-  ];
-
-  const leaveBalance = {
-    annual: { total: 25, used: 8, remaining: 17 },
-    sick: { total: 10, used: 2, remaining: 8 },
-    personal: { total: 3, used: 1, remaining: 2 },
-  };
-
-  const myLeaveRequests = [
-    { id: '1', type: 'Annual Leave', dates: '15-17 Dec 2024', days: 3, status: 'approved', reason: 'Christmas holidays' },
-    { id: '2', type: 'Sick Leave', dates: '2 Nov 2024', days: 1, status: 'approved', reason: 'Flu symptoms' },
-    { id: '3', type: 'Personal Leave', dates: '20 Jan 2025', days: 1, status: 'pending', reason: 'Medical appointment' },
-  ];
 
   const todayStats = [
-    { title: 'Classes Today', value: '6', icon: BookOpen, color: 'text-blue-600' },
-    { title: 'Students', value: '127', icon: Users, color: 'text-green-600' },
-    { title: 'Assignments Due', value: '8', icon: FileText, color: 'text-orange-600' },
-    { title: 'Messages', value: '3', icon: MessageSquare, color: 'text-purple-600' }
+    { title: 'Classes Today', value: stats.classesToday.toString(), icon: BookOpen, color: 'text-blue-600' },
+    { title: 'Students', value: stats.totalStudents.toString(), icon: Users, color: 'text-green-600' },
+    { title: 'Assignments Due', value: stats.assignmentsDue.toString(), icon: FileText, color: 'text-orange-600' },
+    { title: 'Messages', value: stats.unreadMessages.toString(), icon: MessageSquare, color: 'text-purple-600' }
   ];
 
-  const todayClasses = [
-    { time: '09:00-09:45', subject: 'Mathematics', class: 'Year 7A', room: 'M101', students: 28 },
-    { time: '09:45-10:30', subject: 'Mathematics', class: 'Year 7B', room: 'M101', students: 26 },
-    { time: '11:00-11:45', subject: 'Mathematics', class: 'Year 8A', room: 'M102', students: 30 },
-    { time: '13:30-14:15', subject: 'Mathematics', class: 'Year 9A', room: 'M101', students: 24 }
-  ];
+  const payrollData: any[] = []; // Would come from payroll system
 
-  const pendingTasks = [
-    { task: 'Grade Year 8 Math Test', due: 'Today', priority: 'high', type: 'grading' },
-    { task: 'Submit lesson plans for next week', due: 'Tomorrow', priority: 'medium', type: 'planning' },
-    { task: 'Parent meeting - Sarah Johnson', due: 'Friday', priority: 'medium', type: 'meeting' },
-    { task: 'Update student progress reports', due: 'Next week', priority: 'low', type: 'reports' }
-  ];
+  const leaveBalance = {
+    annual: { total: 25, used: 0, remaining: 25 },
+    sick: { total: 10, used: 0, remaining: 10 },
+    personal: { total: 3, used: 0, remaining: 3 },
+  };
+
+  const myLeaveRequests = leaveRequests || [];
 
   const quickActions = [
     { title: 'Take Attendance', description: 'Mark student attendance', icon: CheckCircle, path: '/attendance', color: 'bg-green-500' },
@@ -735,8 +715,8 @@ export function TeacherPortal() {
             {myLeaveRequests.map((request) => (
               <div key={request.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50">
                 <div className="space-y-1">
-                  <p className="font-medium">{request.type}</p>
-                  <p className="text-sm text-muted-foreground">{request.dates} • {request.days} day(s)</p>
+                  <p className="font-medium">{request.leave_type}</p>
+                  <p className="text-sm text-muted-foreground">{request.start_date} to {request.end_date} • {request.days_requested || 0} day(s)</p>
                   {request.reason && (
                     <p className="text-sm text-muted-foreground">Reason: {request.reason}</p>
                   )}

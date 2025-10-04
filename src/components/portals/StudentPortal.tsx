@@ -25,105 +25,20 @@ import {
 } from 'lucide-react';
 import { StudentAssignmentView } from '../assignments/StudentAssignmentView';
 import { StudentTimetableView } from '../timetable/StudentTimetableView';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/use-toast';
+import { useStudentDashboard } from '@/hooks/useStudentDashboard';
 
 export function StudentPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [studentData, setStudentData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [attendance, setAttendance] = useState<any[]>([]);
   const { user } = useAuth();
-
-  useEffect(() => {
-    if (user) {
-      fetchStudentData();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (studentData?.id) {
-      fetchAttendance();
-    }
-  }, [studentData]);
-
-  const fetchStudentData = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('students')
-        .select(`
-          *,
-          profiles!inner(first_name, last_name, email)
-        `)
-        .eq('user_id', user?.id)
-        .maybeSingle();
-
-      if (error) throw error;
-      setStudentData(data);
-    } catch (error: any) {
-      console.error('Error fetching student data:', error);
-      if (error.code === 'PGRST116') {
-        // No student record found - show helpful message
-        toast({
-          title: "Student Record Not Found",
-          description: "Your student profile is still being set up. Please contact the admissions office.",
-          variant: "destructive"
-        });
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchAttendance = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('attendance_records')
-        .select('*')
-        .eq('student_id', studentData.id)
-        .order('date', { ascending: false })
-        .limit(30);
-
-      if (error) throw error;
-      setAttendance(data || []);
-    } catch (error) {
-      console.error('Error fetching attendance:', error);
-    }
-  };
-
-  const calculateAttendancePercentage = () => {
-    if (attendance.length === 0) return 0;
-    const present = attendance.filter(record => record.status === 'present').length;
-    return Math.round((present / attendance.length) * 100);
-  };
-
-  const getTodaySchedule = () => {
-    // This would come from timetable data - placeholder for now
-    return [
-      { time: '09:00-09:45', subject: 'Mathematics', teacher: 'Ms. Smith', room: 'M101' },
-      { time: '09:45-10:30', subject: 'English', teacher: 'Mr. Wilson', room: 'E203' },
-      { time: '11:00-11:45', subject: 'Science', teacher: 'Dr. Brown', room: 'S105' },
-    ];
-  };
-
-  const getUpcomingAssignments = () => {
-    // Placeholder assignments - would come from assignments system
-    return [
-      { subject: 'Mathematics', task: 'Algebra Quiz', due: 'Tomorrow', priority: 'high', completed: false },
-      { subject: 'English', task: 'Essay: Romeo and Juliet', due: 'Friday', priority: 'medium', completed: false },
-      { subject: 'Science', task: 'Lab Report', due: 'Next week', priority: 'medium', completed: true },
-    ];
-  };
-
-  const getRecentGrades = () => {
-    // Placeholder grades - would come from gradebook system
-    return [
-      { subject: 'Mathematics', assignment: 'Geometry Test', grade: 'A-', date: '2024-01-15' },
-      { subject: 'English', assignment: 'Creative Writing', grade: 'B+', date: '2024-01-12' },
-      { subject: 'Science', assignment: 'Physics Quiz', grade: 'A', date: '2024-01-10' },
-    ];
-  };
+  const {
+    loading,
+    stats,
+    studentData,
+    todaySchedule,
+    upcomingAssignments,
+    recentGrades
+  } = useStudentDashboard();
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -151,27 +66,21 @@ export function StudentPortal() {
     );
   }
 
-  // Use demo data if no student record found (for demonstration purposes)
-  const demoStudentData = {
-    id: 'demo-student-id',
+  const finalStudentData = studentData || {
+    id: 'no-data',
     user_id: user?.id,
-    student_number: 'STU2024001',
-    year_group: 'Year 11',
-    form_class: '11A',
+    student_number: 'N/A',
+    year_group: 'N/A',
+    form_class: 'N/A',
     profiles: {
-      first_name: 'Demo',
-      last_name: 'Student',
-      email: user?.email || 'demo.student@school.edu'
+      first_name: 'Student',
+      last_name: 'User',
+      email: user?.email || ''
     }
   };
 
-  const finalStudentData = studentData || demoStudentData;
-
   const studentName = `${finalStudentData.profiles?.first_name || ''} ${finalStudentData.profiles?.last_name || ''}`.trim() || 'Student';
-  const attendancePercentage = studentData ? calculateAttendancePercentage() : 92; // Demo attendance
-  const todaySchedule = getTodaySchedule();
-  const upcomingAssignments = getUpcomingAssignments();
-  const recentGrades = getRecentGrades();
+  const attendancePercentage = stats.attendancePercentage;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -220,9 +129,9 @@ export function StudentPortal() {
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {[
-                { title: 'Classes Today', value: todaySchedule.length.toString(), icon: BookOpen, color: 'text-blue-600' },
-                { title: 'Pending Tasks', value: upcomingAssignments.filter(a => !a.completed).length.toString(), icon: Target, color: 'text-orange-600' },
-                { title: 'Recent Grades', value: recentGrades.length.toString(), icon: Trophy, color: 'text-green-600' },
+                { title: 'Classes Today', value: stats.classesToday.toString(), icon: BookOpen, color: 'text-blue-600' },
+                { title: 'Pending Tasks', value: stats.pendingTasks.toString(), icon: Target, color: 'text-orange-600' },
+                { title: 'Recent Grades', value: stats.recentGrades.toString(), icon: Trophy, color: 'text-green-600' },
                 { title: 'Attendance', value: `${attendancePercentage}%`, icon: CheckCircle, color: 'text-purple-600' }
               ].map((stat, index) => (
                 <Card key={index} className="hover:shadow-lg transition-shadow">
