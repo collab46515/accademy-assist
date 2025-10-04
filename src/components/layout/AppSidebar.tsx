@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -333,6 +333,11 @@ export function AppSidebar() {
   const { getAccessibleModules, hasModulePermission } = usePermissions();
   const { modules: schoolModules, isModuleEnabled } = useSchoolModules(currentSchool?.id);
   
+  // Log whenever currentSchool changes
+  useEffect(() => {
+    console.log('🏫 Sidebar - Current School Changed:', currentSchool?.name);
+  }, [currentSchool]);
+  
   // Memoize current module calculation
   const currentModule = useMemo(() => getCurrentModule(location.pathname), [location.pathname]);
 
@@ -453,7 +458,7 @@ export function AppSidebar() {
   }, [signOut]);
 
   return (
-    <Sidebar collapsible="icon" className="border-r">
+    <Sidebar collapsible="icon" className="border-r" key={currentSchool?.id}>
       <SidebarHeader className="border-b bg-gradient-to-r from-primary/5 to-primary-glow/5 h-16 overflow-hidden">
         <div className="flex items-center justify-center px-3 py-3 h-full">
           {state !== "collapsed" ? (
