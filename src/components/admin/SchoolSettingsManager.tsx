@@ -39,6 +39,7 @@ interface SchoolInfo {
   phone: string;
   email: string;
   website: string;
+  custom_domain?: string;
   logo_url?: string;
   principal_name: string;
   establishment_type: string;
@@ -282,6 +283,7 @@ export function SchoolSettingsManager() {
         phone: schoolData.contact_phone || '',
         email: schoolData.contact_email || '',
         website: schoolDataExtended.website || '',
+        custom_domain: schoolDataExtended.custom_domain || '',
         logo_url: schoolDataExtended.logo_url || '',
         principal_name: schoolDataExtended.principal_name || '',
         establishment_type: schoolDataExtended.establishment_type || 'secondary',
@@ -395,6 +397,7 @@ export function SchoolSettingsManager() {
           contact_phone: schoolInfo.phone,
           contact_email: schoolInfo.email,
           website: schoolInfo.website,
+          custom_domain: schoolInfo.custom_domain,
           logo_url: logoUrl,
           principal_name: schoolInfo.principal_name,
           establishment_type: schoolInfo.establishment_type,
@@ -593,6 +596,22 @@ export function SchoolSettingsManager() {
                     onChange={(e) => setSchoolInfo({ ...schoolInfo, website: e.target.value })}
                     placeholder="https://www.school.edu"
                   />
+                </div>
+
+                <div>
+                  <Label htmlFor="custom-domain" className="flex items-center gap-2">
+                    <Globe className="h-4 w-4" />
+                    Custom Domain
+                  </Label>
+                  <Input
+                    id="custom-domain"
+                    value={schoolInfo.custom_domain || ''}
+                    onChange={(e) => setSchoolInfo({ ...schoolInfo, custom_domain: e.target.value })}
+                    placeholder="school.yourdomain.com"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Enter your custom domain (without https://). Example: school.yourdomain.com
+                  </p>
                 </div>
               </CardContent>
             </Card>
