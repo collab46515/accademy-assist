@@ -38,10 +38,14 @@ export function useModuleFeatures(moduleId?: string) {
   }, [currentSchoolId, moduleId]);
 
   const fetchFeatures = async () => {
-    if (!currentSchoolId || !moduleId) return;
+    if (!currentSchoolId || !moduleId) {
+      console.log('❌ useModuleFeatures: Missing schoolId or moduleId', { currentSchoolId, moduleId });
+      return;
+    }
 
     try {
       setLoading(true);
+      console.log('🔍 useModuleFeatures: Fetching features for', { moduleId, currentSchoolId });
 
       // Fetch all features for this module
       const { data: featuresData, error: featuresError } = await supabase
@@ -51,7 +55,12 @@ export function useModuleFeatures(moduleId?: string) {
         .eq('is_active', true)
         .order('sort_order');
 
-      if (featuresError) throw featuresError;
+      if (featuresError) {
+        console.error('❌ Error fetching module features:', featuresError);
+        throw featuresError;
+      }
+
+      console.log('✅ Found features:', featuresData?.length, featuresData);
 
       // Fetch school's enabled features
       const { data: schoolFeaturesData, error: schoolFeaturesError } = await supabase
@@ -63,7 +72,12 @@ export function useModuleFeatures(moduleId?: string) {
         .eq('school_id', currentSchoolId)
         .eq('module_id', moduleId);
 
-      if (schoolFeaturesError) throw schoolFeaturesError;
+      if (schoolFeaturesError) {
+        console.error('❌ Error fetching school features:', schoolFeaturesError);
+        throw schoolFeaturesError;
+      }
+
+      console.log('✅ Found school features:', schoolFeaturesData?.length, schoolFeaturesData);
 
       setFeatures(featuresData || []);
       setSchoolFeatures((schoolFeaturesData as any) || []);
