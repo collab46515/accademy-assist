@@ -101,7 +101,14 @@ export function usePermissions() {
       .upsert({
         role,
         module_id: moduleId,
+        can_view: false,
+        can_create: false,
+        can_edit: false,
+        can_delete: false,
+        can_approve: false,
         ...permissions
+      }, {
+        onConflict: 'role,module_id'
       });
 
     if (error) {
