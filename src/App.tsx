@@ -88,14 +88,14 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/auth" element={<Index />} />
-            <Route path="/landing" element={<LandingPage />} />
-            <Route path="/welcome" element={<Index />} />
-            <Route path="/" element={<Index />} />
-            <Route path="/*" element={
-              <ProtectedRoute>
-                <RBACProvider>
+          <RBACProvider>
+            <Routes>
+              <Route path="/auth" element={<Index />} />
+              <Route path="/landing" element={<LandingPage />} />
+              <Route path="/welcome" element={<Index />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/*" element={
+                <ProtectedRoute>
                   <SidebarProvider defaultOpen={false}>
                     <div className="flex min-h-screen w-full bg-background">
                       <AppSidebar />
@@ -199,13 +199,13 @@ const App = () => (
                            <Route path="*" element={<NotFound />} />
                         </Routes>
                       </main>
-                     </SidebarInset>
+                      </SidebarInset>
                   </div>
                 </SidebarProvider>
-              </RBACProvider>
               </ProtectedRoute>
             } />
             </Routes>
+          </RBACProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
