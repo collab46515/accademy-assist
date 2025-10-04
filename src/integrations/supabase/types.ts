@@ -5533,6 +5533,53 @@ export type Database = {
         }
         Relationships: []
       }
+      module_features: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          feature_key: string
+          feature_name: string
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          module_id: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          feature_key: string
+          feature_name: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          module_id: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          feature_key?: string
+          feature_name?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          module_id?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_features_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modules: {
         Row: {
           category: string
@@ -6928,6 +6975,61 @@ export type Database = {
             columns: ["framework_id"]
             isOneToOne: false
             referencedRelation: "curriculum_frameworks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_module_features: {
+        Row: {
+          created_at: string | null
+          feature_id: string
+          id: string
+          is_enabled: boolean | null
+          module_id: string
+          school_id: string
+          settings: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          feature_id: string
+          id?: string
+          is_enabled?: boolean | null
+          module_id: string
+          school_id: string
+          settings?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          feature_id?: string
+          id?: string
+          is_enabled?: boolean | null
+          module_id?: string
+          school_id?: string
+          settings?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_module_features_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "module_features"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_module_features_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_module_features_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
             referencedColumns: ["id"]
           },
         ]

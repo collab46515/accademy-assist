@@ -15,6 +15,7 @@ import {
   UserCheck,
   BarChart3,
   Settings,
+  Settings2,
   Library,
   Truck,
   Shield,
@@ -171,6 +172,7 @@ const erpModules = [
     subItems: [
       { title: "Dashboard", url: "/administration", icon: LayoutDashboard },
       { title: "School Settings", url: "/school-settings", icon: Building },
+      { title: "Module Features", url: "/admin/module-features", icon: Settings2 },
       { title: "School Switcher", url: "/school-switcher", icon: Building },
       { title: "User Management", url: "/user-management", icon: UserCog },
       { title: "Permission Management", url: "/permission-management", icon: Shield },

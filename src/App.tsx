@@ -70,6 +70,7 @@ import AcademicOperationsPage from "./pages/AcademicOperationsPage";
 import StudentServicesPage from "./pages/StudentServicesPage";
 import StaffHRPage from "./pages/StaffHRPage";
 import FinanceOperationsPage from "./pages/FinanceOperationsPage";
+import ModuleFeaturesPage from "./pages/ModuleFeaturesPage";
 import AdministrationPage from "./pages/AdministrationPage";
 import SchoolSettingsPage from "./pages/SchoolSettingsPage";
 import VirtualClassroomPage from "./pages/VirtualClassroomPage";
@@ -114,9 +115,10 @@ const App = () => (
                           <Route path="/student-services" element={<StudentServicesPage />} />
                           <Route path="/staff-hr" element={<StaffHRPage />} />
                           <Route path="/finance-operations" element={<FinanceOperationsPage />} />
-                           <Route path="/administration" element={<AdministrationPage />} />
-                           <Route path="/school-settings" element={<SchoolSettingsPage />} />
-                           <Route path="/data-integrity-test" element={<DataIntegrityTestPage />} />
+           <Route path="/administration" element={<AdministrationPage />} />
+           <Route path="/school-settings" element={<SchoolSettingsPage />} />
+           <Route path="/admin/module-features" element={<ModuleFeaturesPage />} />
+           <Route path="/data-integrity-test" element={<DataIntegrityTestPage />} />
                           <Route path="/academic-management" element={<AcademicManagementPage />} />
                           <Route path="/students" element={<StudentsPage />} />
              <Route path="/admissions" element={<UnifiedAdmissionsPage />} />
