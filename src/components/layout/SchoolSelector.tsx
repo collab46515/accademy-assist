@@ -4,11 +4,29 @@ import { Badge } from '@/components/ui/badge';
 import { Building2 } from 'lucide-react';
 
 export function SchoolSelector() {
-  const { schools, currentSchool, switchSchool, getCurrentSchoolRoles, isSuperAdmin } = useRBAC();
+  const { schools, currentSchool, switchSchool, loading, isSuperAdmin } = useRBAC();
+
+  console.log('🏫 SchoolSelector Debug:', {
+    isSuperAdmin: isSuperAdmin(),
+    schoolsCount: schools.length,
+    schools: schools,
+    currentSchool: currentSchool,
+    loading: loading
+  });
 
   // Always show for super admins, or if there are multiple schools
   if (!isSuperAdmin() && schools.length <= 1) {
+    console.log('❌ SchoolSelector hidden: Not super admin and <= 1 school');
     return null;
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 px-4 py-2 rounded-lg border bg-card">
+        <Building2 className="h-4 w-4 text-primary animate-pulse" />
+        <span className="text-sm text-muted-foreground">Loading schools...</span>
+      </div>
+    );
   }
 
   return (
@@ -18,7 +36,10 @@ export function SchoolSelector() {
         value={currentSchool?.id || ''}
         onValueChange={(value) => {
           const school = schools.find(s => s.id === value);
-          if (school) switchSchool(school);
+          if (school) {
+            console.log('🔄 Switching to school:', school);
+            switchSchool(school);
+          }
         }}
       >
         <SelectTrigger className="w-56 border-0 focus:ring-0 bg-transparent">
