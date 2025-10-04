@@ -57,7 +57,7 @@ export const Navbar = () => {
   const { user, signOut } = useAuth();
   const { hasRole, isSuperAdmin, currentSchool, schools } = useRBAC();
 
-  console.log('🔍 Navbar - isSuperAdmin:', isSuperAdmin(), 'Schools:', schools.length);
+  console.log('🔍 Navbar rendering - User:', !!user, 'isSuperAdmin:', isSuperAdmin(), 'Schools:', schools.length, 'Current:', currentSchool?.name);
 
   const handleSignOut = async () => {
     await signOut();
