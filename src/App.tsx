@@ -76,6 +76,7 @@ import TechnicalDocsPage from "./pages/TechnicalDocsPage";
 import EnrollmentTestPage from "./pages/EnrollmentTestPage";
 import PermissionManagementPage from "./pages/PermissionManagementPage";
 import DataIntegrityTestPage from "./pages/DataIntegrityTestPage";
+import SchoolSwitcherPage from "./pages/SchoolSwitcherPage";
 
 const queryClient = new QueryClient();
 
@@ -178,8 +179,9 @@ const App = () => (
                            <Route path="/accounting/budget" element={<AccountingPage />} />
                            <Route path="/transport" element={<TransportPage />} />
                            <Route path="/accounting/transactions/new" element={<AccountingPage />} />
-                          <Route path="/accounting/settings" element={<AccountingPage />} />
-                           <Route path="/user-management" element={
+                           <Route path="/accounting/settings" element={<AccountingPage />} />
+                           <Route path="/school-switcher" element={<SchoolSwitcherPage />} />
+                            <Route path="/user-management" element={
                              <ProtectedRoute>
                                <UserManagementPage />
                              </ProtectedRoute>
