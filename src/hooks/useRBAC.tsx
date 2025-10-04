@@ -204,7 +204,11 @@ export function useRBAC() {
   const switchSchool = (school: School) => {
     console.log('🔄 useRBAC.switchSchool called with:', school);
     console.log('🔄 Current school before switch:', currentSchool?.name, 'ID:', currentSchool?.id);
-    setCurrentSchool(school);
+    
+    // Create a new object to force React to detect the change
+    const newSchool = { ...school };
+    setCurrentSchool(newSchool);
+    
     // Store in localStorage for persistence
     localStorage.setItem('currentSchoolId', school.id);
     console.log('✅ School switched to:', school.name, '- Stored in localStorage');
