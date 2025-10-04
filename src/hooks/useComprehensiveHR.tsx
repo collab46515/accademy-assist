@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useSchoolFilter } from '@/hooks/useSchoolFilter';
 
 // Performance Management Types
 export interface PerformanceReview {
@@ -223,6 +224,7 @@ export interface EngagementSurvey {
 
 export function useComprehensiveHR() {
   const { toast } = useToast();
+  const { currentSchoolId } = useSchoolFilter();
   const [loading, setLoading] = useState(false);
 
   // Performance Management State
@@ -256,6 +258,11 @@ export function useComprehensiveHR() {
 
   // Fetch all comprehensive HR data
   const fetchAllData = async () => {
+    if (!currentSchoolId) {
+      console.warn('No school context - skipping HR data fetch');
+      return;
+    }
+    
     setLoading(true);
     try {
       const [

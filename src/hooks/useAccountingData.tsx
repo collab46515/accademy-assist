@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useSchoolFilter } from '@/hooks/useSchoolFilter';
 
 // Types for accounting data
 export interface ChartOfAccount {
@@ -158,6 +159,7 @@ export interface AccountingSetting {
 }
 
 export function useAccountingData() {
+  const { currentSchoolId } = useSchoolFilter();
   const [isLoading, setIsLoading] = useState(false);
   const [chartOfAccounts, setChartOfAccounts] = useState<ChartOfAccount[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -172,6 +174,11 @@ export function useAccountingData() {
 
   // Fetch all accounting data
   const fetchAllData = async () => {
+    if (!currentSchoolId) {
+      console.warn('No school context - skipping accounting data fetch');
+      return;
+    }
+    
     setIsLoading(true);
     try {
       const [

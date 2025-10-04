@@ -50,6 +50,7 @@ export interface HousePoint {
 
 export const useActivities = () => {
   const { user } = useAuth();
+  const { currentSchoolId } = useSchoolFilter();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [participants, setParticipants] = useState<ActivityParticipant[]>([]);
   const [housePoints, setHousePoints] = useState<HousePoint[]>([]);
@@ -58,16 +59,16 @@ export const useActivities = () => {
 
   // Fetch all activities data
   const fetchActivitiesData = async () => {
-    if (!user) return;
+    if (!user || !currentSchoolId) return;
 
     try {
       setLoading(true);
       setError(null);
 
       const [activitiesRes, participantsRes, housePointsRes] = await Promise.all([
-        supabase.from('activities').select('*').order('name'),
-        supabase.from('activities_participants').select('*').order('enrollment_date', { ascending: false }),
-        supabase.from('house_points').select('*').order('awarded_date', { ascending: false })
+        supabase.from('activities').select('*').eq('school_id', currentSchoolId).order('name'),
+        supabase.from('activities_participants').select('*').eq('school_id', currentSchoolId).order('enrollment_date', { ascending: false }),
+        supabase.from('house_points').select('*').eq('school_id', currentSchoolId).order('awarded_date', { ascending: false })
       ]);
 
       if (activitiesRes.error) throw activitiesRes.error;

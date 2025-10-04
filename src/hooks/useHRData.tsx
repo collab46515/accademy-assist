@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useSchoolFilter } from '@/hooks/useSchoolFilter';
 
 export interface Employee {
   id: string;
@@ -92,6 +93,7 @@ export interface PayrollRecord {
 
 export function useHRData() {
   const { toast } = useToast();
+  const { currentSchoolId } = useSchoolFilter();
   const [loading, setLoading] = useState(false);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -101,13 +103,23 @@ export function useHRData() {
 
   // Fetch all HR data
   const fetchHRData = async () => {
+    if (!currentSchoolId) {
+      console.warn('No school context - skipping HR data fetch');
+      return;
+    }
+    
     try {
       setLoading(true);
       
-      // Fetch employees
+      // Fetch employees - filter by school through user_roles
       const { data: employeesData, error: employeesError } = await supabase
         .from('employees')
-        .select('*')
+        .select(`
+          *,
+          user_roles!inner(school_id, role, is_active)
+        `)
+        .eq('user_roles.school_id', currentSchoolId)
+        .eq('user_roles.is_active', true)
         .order('created_at', { ascending: false });
 
       if (employeesError) throw employeesError;
@@ -120,27 +132,51 @@ export function useHRData() {
 
       if (departmentsError) throw departmentsError;
 
-      // Fetch leave requests
+      // Fetch leave requests - filter by employee school
       const { data: leaveData, error: leaveError } = await supabase
         .from('leave_requests')
-        .select('*')
+        .select(`
+          *,
+          employees!inner(
+            user_id,
+            user_roles!inner(school_id, is_active)
+          )
+        `)
+        .eq('employees.user_roles.school_id', currentSchoolId)
+        .eq('employees.user_roles.is_active', true)
         .order('created_at', { ascending: false });
 
       if (leaveError) throw leaveError;
 
-      // Fetch attendance records
+      // Fetch attendance records - filter by employee school
       const { data: attendanceData, error: attendanceError } = await supabase
         .from('attendance_records_hr')
-        .select('*')
+        .select(`
+          *,
+          employees!inner(
+            user_id,
+            user_roles!inner(school_id, is_active)
+          )
+        `)
+        .eq('employees.user_roles.school_id', currentSchoolId)
+        .eq('employees.user_roles.is_active', true)
         .order('date', { ascending: false })
         .limit(100);
 
       if (attendanceError) throw attendanceError;
 
-      // Fetch payroll records
+      // Fetch payroll records - filter by employee school
       const { data: payrollData, error: payrollError } = await supabase
         .from('payroll_records')
-        .select('*')
+        .select(`
+          *,
+          employees!inner(
+            user_id,
+            user_roles!inner(school_id, is_active)
+          )
+        `)
+        .eq('employees.user_roles.school_id', currentSchoolId)
+        .eq('employees.user_roles.is_active', true)
         .order('created_at', { ascending: false });
 
       if (payrollError) throw payrollError;
