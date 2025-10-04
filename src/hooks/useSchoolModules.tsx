@@ -50,8 +50,7 @@ export function useSchoolModules(schoolId: string | undefined) {
           )
         `)
         .eq('school_id', schoolId)
-        .eq('is_enabled', true)
-        .order('module(sort_order)', { ascending: true });
+        .eq('is_enabled', true);
 
       if (fetchError) throw fetchError;
 
