@@ -99,8 +99,13 @@ const schoolManagementUserGuide = {
 export default function SchoolSettingsPage() {
   const { isSuperAdmin } = useRBAC();
   
+  // Reset scroll position when component mounts
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-full space-y-6">
       <PageHeader 
         title="School Settings" 
         description="Configure school information, branding, and system settings"
@@ -113,7 +118,7 @@ export default function SchoolSettingsPage() {
         }
       />
       
-      <div className="space-y-8">
+      <div className="w-full max-w-full space-y-8">
         <SchoolSettingsManager />
         
         {/* School Module Configuration - Super Admin Only */}

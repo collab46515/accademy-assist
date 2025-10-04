@@ -38,9 +38,18 @@ export function SchoolModuleManager() {
   const [saving, setSaving] = useState(false);
   const [configModule, setConfigModule] = useState<{ id: string; name: string } | null>(null);
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      setConfigModule(null);
+    };
+  }, []);
+
   useEffect(() => {
     if (currentSchool && isSuperAdmin()) {
       fetchData();
+    } else {
+      setLoading(false);
     }
   }, [currentSchool]);
 
@@ -167,7 +176,7 @@ export function SchoolModuleManager() {
   }, {} as Record<string, Module[]>);
 
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-full space-y-6">
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -183,9 +192,9 @@ export function SchoolModuleManager() {
             <CreateSchoolDialog onSchoolCreated={fetchData} />
           </div>
         </CardHeader>
-        <CardContent>
-          <Tabs defaultValue={Object.keys(groupedModules)[0]} className="space-y-4">
-            <TabsList>
+        <CardContent className="overflow-x-auto">
+          <Tabs defaultValue={Object.keys(groupedModules)[0]} className="w-full space-y-4">
+            <TabsList className="w-full flex flex-wrap justify-start">
               {Object.keys(groupedModules).map((category) => (
                 <TabsTrigger key={category} value={category}>
                   {category}
