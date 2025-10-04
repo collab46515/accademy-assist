@@ -203,10 +203,12 @@ export function useRBAC() {
 
   const switchSchool = (school: School) => {
     console.log('🔄 useRBAC.switchSchool called with:', school);
+    console.log('🔄 Current school before switch:', currentSchool?.name, 'ID:', currentSchool?.id);
     setCurrentSchool(school);
     // Store in localStorage for persistence
     localStorage.setItem('currentSchoolId', school.id);
     console.log('✅ School switched to:', school.name, '- Stored in localStorage');
+    console.log('✅ New currentSchool state should be:', school.name, 'ID:', school.id);
   };
 
   return {

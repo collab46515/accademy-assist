@@ -330,12 +330,15 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const { signOut, user } = useAuth();
   const { currentSchool, isSuperAdmin } = useRBAC();
+  
+  console.log('🔄 AppSidebar render - currentSchool:', currentSchool?.name, 'ID:', currentSchool?.id);
+  
   const { getAccessibleModules, hasModulePermission } = usePermissions();
   const { modules: schoolModules, isModuleEnabled } = useSchoolModules(currentSchool?.id);
   
   // Log whenever currentSchool changes
   useEffect(() => {
-    console.log('🏫 Sidebar - Current School Changed:', currentSchool?.name);
+    console.log('🏫 Sidebar - Current School Changed:', currentSchool?.name, 'ID:', currentSchool?.id);
   }, [currentSchool]);
   
   // Memoize current module calculation
