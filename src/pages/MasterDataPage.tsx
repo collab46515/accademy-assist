@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +13,7 @@ import { useForm } from 'react-hook-form';
 import { useMasterData } from '@/hooks/useMasterData';
 import { useRBAC } from '@/hooks/useRBAC';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ModuleGuard } from '@/components/modules/ModuleGuard';
 import { 
   Database,
   School as SchoolIcon,
@@ -38,6 +40,15 @@ import { HRMasterData } from '@/components/master-data/HRMasterData';
 import { AccountingMasterData } from '@/components/master-data/AccountingMasterData';
 
 export function MasterDataPage() {
+  return (
+    <ModuleGuard moduleName="Master Data Management">
+      <MasterDataPageContent />
+    </ModuleGuard>
+  );
+}
+
+function MasterDataPageContent() {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
   const [activeEntityTab, setActiveEntityTab] = useState('schools');
@@ -863,22 +874,30 @@ export function MasterDataPage() {
             <div>
               <h1 className="text-2xl font-bold">Master Data Management</h1>
               <p className="text-sm text-muted-foreground">
-                Centralized management of core school data entities
+                {currentSchool ? (
+                  <>School-specific data for <span className="font-semibold text-foreground">{currentSchool.name}</span></>
+                ) : (
+                  'Centralized management of core school data entities'
+                )}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {currentSchool && (
+              <Badge variant="secondary" className="gap-2">
+                <SchoolIcon className="h-3 w-3" />
+                {currentSchool.code}
+              </Badge>
+            )}
             <Badge variant="outline" className="gap-2">
               <CheckCircle className="h-3 w-3" />
               Data Synchronized
             </Badge>
+            <Button onClick={() => navigate('/master-data/import')} size="sm">
+              <Upload className="h-4 w-4 mr-2" />
+              Bulk Import
+            </Button>
             <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Upload className="h-4 w-4 mr-2" />
-                  Bulk Upload
-                </Button>
-              </DialogTrigger>
               <DialogContent className="max-w-2xl">
                 <DialogHeader>
                   <DialogTitle>Bulk Data Upload</DialogTitle>

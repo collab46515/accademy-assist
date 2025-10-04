@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRBAC } from '@/hooks/useRBAC';
+import { useSchoolFilter } from '@/hooks/useSchoolFilter';
 
 // Core Master Data Types - matching actual database schema
 export interface School {
@@ -140,12 +141,23 @@ export function useMasterData() {
   const [departments, setDepartments] = useState<DBDepartment[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
   const { toast } = useToast();
-  const { currentSchool } = useRBAC();
+  const { currentSchoolId, currentSchool, isSuperAdmin } = useSchoolFilter();
 
-  // Fetch all master data
+  // Fetch all master data - FILTERED BY CURRENT SCHOOL
   const fetchAllData = async () => {
+    if (!currentSchoolId) {
+      console.warn('No school context - skipping master data fetch');
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     try {
+      // Super admins can see all schools, regular admins see only their school
+      const schoolsQuery = isSuperAdmin 
+        ? supabase.from('schools').select('*').order('name')
+        : supabase.from('schools').select('*').eq('id', currentSchoolId).order('name');
+
       const [
         schoolsResponse,
         subjectsResponse,
@@ -157,20 +169,21 @@ export function useMasterData() {
         housesResponse,
         classesResponse
       ] = await Promise.all([
-        supabase.from('schools').select('*').order('name'),
-        supabase.from('subjects').select('*').order('subject_name'),
-        supabase.from('students').select('*').order('student_number'),
+        schoolsQuery,
+        // ALL other queries MUST filter by current school
+        supabase.from('subjects').select('*').eq('school_id', currentSchoolId).order('subject_name'),
+        supabase.from('students').select('*').eq('school_id', currentSchoolId).order('student_number'),
         supabase.from('student_parents').select(`
           id,
           parent_id,
           student_id,
           created_at
         `),
-        supabase.from('staff').select('*').order('last_name'),
+        supabase.from('staff').select('*').order('last_name'), // No school_id in staff table yet
         supabase.from('departments').select('*').order('name'),
-        supabase.from('year_groups' as any).select('*').order('sort_order'),
-        supabase.from('houses' as any).select('*').order('house_name'),
-        supabase.from('classes').select('*').order('year_group, class_name')
+        supabase.from('year_groups' as any).select('*').eq('school_id', currentSchoolId).order('sort_order'),
+        supabase.from('houses' as any).select('*').eq('school_id', currentSchoolId).order('house_name'),
+        supabase.from('classes').select('*').eq('school_id', currentSchoolId).order('year_group, class_name')
       ]);
 
       if (schoolsResponse.error) throw schoolsResponse.error;

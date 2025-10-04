@@ -40,6 +40,7 @@ import { UserManagementPage } from "./pages/UserManagementPage";
 import { HRManagementPage } from "./pages/HRManagementPage";
 import { AccountingPage } from "./pages/AccountingPage";
 import { MasterDataPage } from "./pages/MasterDataPage";
+import MasterDataImportPage from "./pages/MasterDataImportPage";
 import TimetablePage from "./pages/TimetablePage";
 import TransportPage from "./pages/TransportPage";
 import LessonPlanningPage from "./pages/LessonPlanningPage";
@@ -170,6 +171,7 @@ const App = () => (
                           <Route path="/ai-suite/settings" element={<AISettingsPage />} />
                           <Route path="/hr-management" element={<HRManagementPage />} />
                           <Route path="/master-data" element={<MasterDataPage />} />
+                          <Route path="/master-data/import" element={<MasterDataImportPage />} />
                           <Route path="/accounting" element={<AccountingPage />} />
                           <Route path="/accounting/student-fees" element={<AccountingPage />} />
                           <Route path="/accounting/invoices" element={<AccountingPage />} />
