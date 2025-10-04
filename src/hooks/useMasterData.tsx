@@ -177,10 +177,12 @@ export function useMasterData() {
           id,
           parent_id,
           student_id,
-          created_at
-        `),
-        supabase.from('staff').select('*').order('last_name'), // No school_id in staff table yet
-        supabase.from('departments').select('*').order('name'),
+          relationship,
+          created_at,
+          students!inner(school_id)
+        `).eq('students.school_id', currentSchoolId),
+        supabase.from('staff').select('*').eq('school_id', currentSchoolId).order('last_name'),
+        supabase.from('departments').select('*').order('name'), // No school_id in departments
         supabase.from('year_groups' as any).select('*').eq('school_id', currentSchoolId).order('sort_order'),
         supabase.from('houses' as any).select('*').eq('school_id', currentSchoolId).order('house_name'),
         supabase.from('classes').select('*').eq('school_id', currentSchoolId).order('year_group, class_name')
