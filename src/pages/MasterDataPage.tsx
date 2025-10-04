@@ -41,7 +41,7 @@ import { AccountingMasterData } from '@/components/master-data/AccountingMasterD
 
 export function MasterDataPage() {
   return (
-    <ModuleGuard moduleName="Master Data Management">
+    <ModuleGuard moduleName="Master Data">
       <MasterDataPageContent />
     </ModuleGuard>
   );

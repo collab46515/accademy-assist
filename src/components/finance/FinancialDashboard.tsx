@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { useFeeData } from '@/hooks/useFeeData';
 import { useAuth } from '@/hooks/useAuth';
+import { useSchoolFilter } from '@/hooks/useSchoolFilter';
 
 interface FinancialMetric {
   label: string;
@@ -61,7 +62,8 @@ interface OutstandingFee {
 
 export function FinancialDashboard() {
   const { user } = useAuth();
-  const { feeHeads, feeStructures, invoices, loading } = useFeeData();
+  const { currentSchoolId } = useSchoolFilter();
+  const { feeHeads, feeStructures, invoices, loading } = useFeeData(currentSchoolId);
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState({

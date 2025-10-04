@@ -22,8 +22,11 @@ import FeeCollections from "@/components/fee-management/FeeCollections";
 import { useFeeData } from "@/hooks/useFeeData";
 import { ModuleGuard } from "@/components/modules/ModuleGuard";
 
+import { useSchoolFilter } from '@/hooks/useSchoolFilter';
+
 const FeeManagementOverview = () => {
-  const { feeStructures, feeHeads, invoices, loading } = useFeeData();
+  const { currentSchoolId } = useSchoolFilter();
+  const { feeStructures, feeHeads, invoices, loading } = useFeeData(currentSchoolId);
 
   // Calculate real stats from database data
   const totalFeeHeads = feeHeads.length;

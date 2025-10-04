@@ -2,6 +2,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FinancialDashboard } from "@/components/finance/FinancialDashboard";
+import { ModuleGuard } from "@/components/modules/ModuleGuard";
+import { useSchoolFilter } from "@/hooks/useSchoolFilter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +24,7 @@ import {
 
 const FinancePage = () => {
   const navigate = useNavigate();
+  const { currentSchool } = useSchoolFilter();
 
   const financeModules = [
     {
@@ -82,27 +85,28 @@ const FinancePage = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <PageHeader 
-        title="Finance & Fee Management Hub" 
-        description="Comprehensive financial management system with automated processes and real-time analytics"
-        breadcrumbItems={[
-          { label: "Home", href: "/" },
-          { label: "Finance" }
-        ]}
-        actions={
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
-            </Button>
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              New Transaction
-            </Button>
-          </div>
-        }
-      />
+    <ModuleGuard moduleName="Finance">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+        <PageHeader 
+          title={`Finance & Fee Management Hub - ${currentSchool?.name || ''}`}
+          description="Comprehensive financial management system with automated processes and real-time analytics"
+          breadcrumbItems={[
+            { label: "Home", href: "/" },
+            { label: "Finance" }
+          ]}
+          actions={
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm">
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
+              <Button size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                New Transaction
+              </Button>
+            </div>
+          }
+        />
       
       <div className="p-6 space-y-8">
         {/* Financial Dashboard */}
@@ -162,6 +166,7 @@ const FinancePage = () => {
         </div>
       </div>
     </div>
+    </ModuleGuard>
   );
 };
 
