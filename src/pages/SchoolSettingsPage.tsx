@@ -1,7 +1,9 @@
 import React from 'react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { SchoolSettingsManager } from '@/components/admin/SchoolSettingsManager';
+import { SchoolModuleManager } from '@/components/admin/SchoolModuleManager';
 import { UserGuide } from '@/components/shared/UserGuide';
+import { useRBAC } from '@/hooks/useRBAC';
 
 // Create a school management user guide
 const schoolManagementUserGuide = {
@@ -95,6 +97,8 @@ const schoolManagementUserGuide = {
 };
 
 export default function SchoolSettingsPage() {
+  const { isSuperAdmin } = useRBAC();
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <PageHeader 
@@ -109,8 +113,13 @@ export default function SchoolSettingsPage() {
         }
       />
       
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-6 py-8 space-y-8">
         <SchoolSettingsManager />
+        
+        {/* School Module Configuration - Super Admin Only */}
+        {isSuperAdmin() && (
+          <SchoolModuleManager />
+        )}
       </div>
     </div>
   );
