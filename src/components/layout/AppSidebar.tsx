@@ -460,15 +460,17 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r">
       <SidebarHeader key={currentSchool?.id} className="border-b bg-gradient-to-r from-primary/5 to-primary-glow/5 h-16 overflow-hidden">
-        <div className="flex items-center justify-center px-3 py-3 h-full">
+        <div className="flex items-center justify-center px-3 py-3 h-full" key={`header-${currentSchool?.id}`}>
           {state !== "collapsed" ? (
             <div className="flex flex-col text-center w-full">
-              <span className="text-lg font-bold text-primary">{currentSchool?.name || 'Doxa AI Suite'}</span>
+              <span className="text-lg font-bold text-primary" key={`name-${currentSchool?.id}`}>
+                {currentSchool?.name || 'Doxa AI Suite'}
+              </span>
               <span className="text-sm text-muted-foreground font-medium">{currentModule}</span>
             </div>
           ) : (
             <div className="flex items-center justify-center w-full">
-              <span className="text-xl font-bold text-primary">
+              <span className="text-xl font-bold text-primary" key={`initial-${currentSchool?.id}`}>
                 {(currentSchool?.name || 'Doxa AI Suite').charAt(0)}
               </span>
             </div>
