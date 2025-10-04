@@ -16,9 +16,12 @@ import {
   Shield
 } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { useStaffHRDashboard } from '@/hooks/useStaffHRDashboard';
+import { Loader2 } from 'lucide-react';
 
 export default function StaffHRPage() {
   const navigate = useNavigate();
+  const { loading, stats } = useStaffHRDashboard();
 
   const hrModules = [
     {
@@ -26,7 +29,7 @@ export default function StaffHRPage() {
       description: "Comprehensive employee lifecycle and profile management",
       icon: Users,
       url: "/hr-management",
-      stats: "145 active employees",
+      stats: `${stats.totalEmployees} total employees`,
       color: "bg-blue-500",
       features: ["Employee Profiles", "Organizational Structure", "Role Management", "Performance Tracking"]
     },
@@ -35,7 +38,7 @@ export default function StaffHRPage() {
       description: "Detailed staff information and contact management",
       icon: UserCheck,
       url: "/staff",
-      stats: "12 departments",
+      stats: `${stats.activeStaff} active staff`,
       color: "bg-green-500",
       features: ["Contact Directory", "Department Structure", "Qualifications", "Emergency Contacts"]
     },
@@ -44,7 +47,7 @@ export default function StaffHRPage() {
       description: "End-to-end recruitment and hiring process management",
       icon: UserPlus,
       url: "/hr-management?tab=recruitment",
-      stats: "8 open positions",
+      stats: `${stats.openPositions} open positions`,
       color: "bg-purple-500",
       features: ["Job Postings", "Application Tracking", "Interview Scheduling", "Offer Management"]
     },
@@ -53,7 +56,7 @@ export default function StaffHRPage() {
       description: "Performance reviews and professional development programs",
       icon: Target,
       url: "/hr-management?tab=performance",
-      stats: "85% completion rate",
+      stats: `${stats.avgPerformance}/5 avg rating`,
       color: "bg-orange-500",
       features: ["Performance Reviews", "Goal Setting", "Training Programs", "Skill Development"]
     },
@@ -62,7 +65,7 @@ export default function StaffHRPage() {
       description: "Comprehensive payroll processing and benefits administration",
       icon: DollarSign,
       url: "/hr-management?tab=payroll",
-      stats: "£245k monthly",
+      stats: stats.monthlyPayroll > 0 ? `£${(stats.monthlyPayroll / 1000).toFixed(0)}k monthly` : 'Not configured',
       color: "bg-red-500",
       features: ["Salary Processing", "Benefits Management", "Tax Calculations", "Compensation Analysis"]
     },
@@ -71,18 +74,29 @@ export default function StaffHRPage() {
       description: "Work time tracking and attendance monitoring",
       icon: Clock,
       url: "/hr-management?tab=timeTracking",
-      stats: "96.8% attendance",
+      stats: `${stats.attendanceRate}% attendance`,
       color: "bg-indigo-500",
       features: ["Time Tracking", "Leave Management", "Overtime Calculation", "Attendance Reports"]
     }
   ];
 
   const hrStats = [
-    { label: "Total Employees", value: "145", trend: "+5 this month", icon: Users },
-    { label: "Active Staff", value: "142", trend: "98% retention", icon: UserCheck },
-    { label: "Avg Performance", value: "4.2/5", trend: "+0.3 this quarter", icon: Target },
-    { label: "Open Positions", value: "8", trend: "12 applications", icon: UserPlus },
+    { label: "Total Employees", value: stats.totalEmployees.toString(), trend: stats.employeeTrend + " this month", icon: Users },
+    { label: "Active Staff", value: stats.activeStaff.toString(), trend: stats.retentionRate + " retention", icon: UserCheck },
+    { label: "Avg Performance", value: stats.avgPerformance > 0 ? `${stats.avgPerformance}/5` : 'N/A', trend: stats.performanceTrend + " this quarter", icon: Target },
+    { label: "Open Positions", value: stats.openPositions.toString(), trend: `${stats.applicationCount} applications`, icon: UserPlus },
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading HR dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">

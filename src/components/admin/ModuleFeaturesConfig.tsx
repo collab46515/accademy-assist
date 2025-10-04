@@ -18,6 +18,8 @@ export const ModuleFeaturesConfig: React.FC<ModuleFeaturesConfigProps> = ({
 }) => {
   const { features, loading, isFeatureEnabled, toggleFeature } = useModuleFeatures(moduleId);
 
+  console.log('📊 ModuleFeaturesConfig:', { moduleId, moduleName, featuresCount: features.length, loading });
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">

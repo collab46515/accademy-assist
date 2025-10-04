@@ -24,6 +24,15 @@ export default function ModuleFeaturesPage() {
 
   const enabledModules = schoolModules.filter(sm => sm.is_enabled);
 
+  console.log('📋 ModuleFeaturesPage:', {
+    schoolId: currentSchool?.id,
+    schoolName: currentSchool?.name,
+    totalModules: schoolModules.length,
+    enabledModules: enabledModules.length,
+    activeModule,
+    modulesList: enabledModules.map(m => ({ id: m.module_id, name: m.module.name }))
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/5 to-background">
       <PageHeader
