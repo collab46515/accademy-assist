@@ -32,8 +32,10 @@ export function SchoolSelector() {
   console.log('✅ SchoolSelector RENDERING');
 
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 border-primary/20 bg-card hover:border-primary/40 hover:bg-accent transition-all cursor-pointer shadow-sm">
-      <Building2 className="h-5 w-5 text-primary flex-shrink-0" />
+    <div className="w-full">
+      <div className="text-xs font-semibold text-muted-foreground uppercase mb-2">
+        Current School
+      </div>
       <Select
         value={currentSchool?.id || ''}
         onValueChange={(value) => {
@@ -44,23 +46,21 @@ export function SchoolSelector() {
           }
         }}
       >
-        <SelectTrigger className="h-auto w-auto min-w-[200px] border-0 focus:ring-0 focus:ring-offset-0 bg-transparent hover:bg-transparent p-0">
-          <div className="flex items-center justify-between w-full gap-3">
-            <div className="flex flex-col items-start">
-              <span className="font-semibold text-sm">{currentSchool?.name || "No school"}</span>
+        <SelectTrigger className="w-full">
+          <div className="flex items-center gap-3">
+            <Building2 className="h-4 w-4 text-primary flex-shrink-0" />
+            <div className="flex flex-col items-start flex-1 text-left">
+              <span className="font-medium text-sm">{currentSchool?.name || "No school"}</span>
               <span className="text-xs text-muted-foreground">{currentSchool?.code || "Select school"}</span>
             </div>
-            <div className="flex items-center gap-1">
-              {schools.length > 1 && (
-                <Badge variant="secondary" className="text-xs">
-                  {schools.length}
-                </Badge>
-              )}
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            </div>
+            {schools.length > 1 && (
+              <Badge variant="secondary" className="text-xs">
+                {schools.length}
+              </Badge>
+            )}
           </div>
         </SelectTrigger>
-        <SelectContent className="z-[100] bg-popover border shadow-lg min-w-[280px]">
+        <SelectContent className="z-[200] bg-popover border shadow-lg w-full">
           {schools.length === 0 ? (
             <div className="px-4 py-3 text-sm text-muted-foreground text-center">
               No schools available
@@ -74,11 +74,14 @@ export function SchoolSelector() {
                 <SelectItem 
                   key={school.id} 
                   value={school.id}
-                  className="cursor-pointer hover:bg-accent"
+                  className="cursor-pointer"
                 >
-                  <div className="flex flex-col py-1">
-                    <span className="font-medium text-sm">{school.name}</span>
-                    <span className="text-xs text-muted-foreground">{school.code}</span>
+                  <div className="flex items-center gap-3">
+                    <Building2 className="h-4 w-4 text-primary" />
+                    <div className="flex flex-col py-1">
+                      <span className="font-medium text-sm">{school.name}</span>
+                      <span className="text-xs text-muted-foreground">{school.code}</span>
+                    </div>
                   </div>
                 </SelectItem>
               ))}

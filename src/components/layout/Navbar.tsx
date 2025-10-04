@@ -106,9 +106,6 @@ export const Navbar = () => {
                 }}
               />
             </Link>
-            <div className="flex items-center">
-              <SchoolSelector />
-            </div>
           </div>
 
           {/* Desktop Navigation */}
@@ -142,7 +139,7 @@ export const Navbar = () => {
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuContent className="w-80" align="end" forceMount>
                 <DropdownMenuItem className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{user?.email}</p>
@@ -151,6 +148,12 @@ export const Navbar = () => {
                     </p>
                   </div>
                 </DropdownMenuItem>
+                
+                {/* School Selector in Dropdown */}
+                <div className="px-2 py-2 border-t border-border">
+                  <SchoolSelector />
+                </div>
+                
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
