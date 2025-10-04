@@ -458,8 +458,8 @@ export function AppSidebar() {
   }, [signOut]);
 
   return (
-    <Sidebar collapsible="icon" className="border-r" key={currentSchool?.id}>
-      <SidebarHeader className="border-b bg-gradient-to-r from-primary/5 to-primary-glow/5 h-16 overflow-hidden">
+    <Sidebar collapsible="icon" className="border-r">
+      <SidebarHeader key={currentSchool?.id} className="border-b bg-gradient-to-r from-primary/5 to-primary-glow/5 h-16 overflow-hidden">
         <div className="flex items-center justify-center px-3 py-3 h-full">
           {state !== "collapsed" ? (
             <div className="flex flex-col text-center w-full">
