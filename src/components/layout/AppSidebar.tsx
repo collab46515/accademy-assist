@@ -55,6 +55,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useRBAC } from "@/hooks/useRBAC";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useSchoolModules } from "@/hooks/useSchoolModules";
 import { 
   Sidebar, 
   SidebarContent, 
@@ -329,11 +330,12 @@ export function AppSidebar() {
   const { signOut, user } = useAuth();
   const { currentSchool, isSuperAdmin } = useRBAC();
   const { getAccessibleModules, hasModulePermission } = usePermissions();
+  const { modules: schoolModules, isModuleEnabled } = useSchoolModules(currentSchool?.id);
   
   // Memoize current module calculation
   const currentModule = useMemo(() => getCurrentModule(location.pathname), [location.pathname]);
 
-  // Filter modules based on permissions
+  // Filter modules based on permissions AND school-specific module configuration
   const accessibleModules = useMemo(() => {
     // Map sidebar titles to database module names
     const moduleNameMap: Record<string, string> = {
@@ -396,28 +398,49 @@ export function AppSidebar() {
       'Footer CMS': 'Settings'
     };
     
-    // Filter existing ERP modules based on user permissions
+    console.log('🔍 Filtering modules - Super Admin:', isSuperAdmin(), '| School Modules Count:', schoolModules.length);
+    
+    // Filter existing ERP modules based on user permissions AND school configuration
     return erpModules.map(category => ({
       ...category,
       subItems: category.subItems.filter(item => {
         // Get the database module name for this sidebar item
         const dbModuleName = moduleNameMap[item.title];
         
-        // Special handling for admin-only modules
-        if (item.title === 'User Management' || item.title === 'Permission Management') {
-          return isSuperAdmin();
+        // Super admin bypasses all module restrictions
+        if (isSuperAdmin()) {
+          console.log(`✅ Super Admin - Always showing: ${item.title}`);
+          return true;
         }
         
-        // If we have a mapping, check permission using the mapped name
+        // Special handling for admin-only modules
+        if (item.title === 'User Management' || item.title === 'Permission Management') {
+          return false; // Only super admin can see these
+        }
+        
+        // Check if module is enabled for this school
+        if (dbModuleName && currentSchool) {
+          const moduleEnabled = isModuleEnabled(dbModuleName);
+          console.log(`🏫 Module Check: ${dbModuleName} - Enabled: ${moduleEnabled}`);
+          
+          if (!moduleEnabled) {
+            console.log(`❌ Module ${dbModuleName} disabled for school ${currentSchool.name}`);
+            return false; // Module not enabled for this school
+          }
+        }
+        
+        // Check role-based permissions
         if (dbModuleName) {
-          return hasModulePermission(dbModuleName, 'view');
+          const hasPermission = hasModulePermission(dbModuleName, 'view');
+          console.log(`👤 Permission Check: ${dbModuleName} - Has Permission: ${hasPermission}`);
+          return hasPermission;
         }
         
         // Fall back to original title if no mapping exists
         return hasModulePermission(item.title, 'view');
       })
     })).filter(category => category.subItems.length > 0); // Remove empty categories
-  }, [hasModulePermission, isSuperAdmin]);
+  }, [hasModulePermission, isSuperAdmin, isModuleEnabled, currentSchool, schoolModules]);
 
   const currentModuleData = useMemo(() => 
     accessibleModules.find(module => module.title === currentModule), 

@@ -7,8 +7,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { WorkflowDashboard } from '@/components/admissions/workflow/WorkflowDashboard';
 import { SystemResetManager } from '@/components/admin/SystemResetManager';
 import { SchoolModuleManager } from '@/components/admin/SchoolModuleManager';
+import { SchoolModuleSetupGuide } from '@/components/admin/SchoolModuleSetupGuide';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useRBAC } from '@/hooks/useRBAC';
 import { 
   Settings, 
   Users, 
@@ -33,6 +35,7 @@ export default function AdminManagementPage() {
   const [quickSetupOpen, setQuickSetupOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isSuperAdmin } = useRBAC();
 
   const systemStats = {
     totalUsers: 2847,
@@ -769,8 +772,13 @@ export default function AdminManagementPage() {
               </Card>
             </div>
             
-            {/* School Module Configuration */}
-            <SchoolModuleManager />
+            {/* School Module Configuration - Super Admin Only */}
+            {isSuperAdmin() && (
+              <>
+                <SchoolModuleSetupGuide />
+                <SchoolModuleManager />
+              </>
+            )}
             
             {/* System Reset Section */}
             <SystemResetManager />
