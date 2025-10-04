@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { RBACProvider } from "@/hooks/useRBAC";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
@@ -87,7 +88,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
+          <RBACProvider>
+            <Routes>
             <Route path="/auth" element={<Index />} />
             <Route path="/landing" element={<LandingPage />} />
             <Route path="/welcome" element={<Index />} />
@@ -202,7 +204,8 @@ const App = () => (
                 </SidebarProvider>
               </ProtectedRoute>
             } />
-          </Routes>
+            </Routes>
+          </RBACProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

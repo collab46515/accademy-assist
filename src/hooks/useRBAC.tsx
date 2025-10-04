@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -44,7 +44,23 @@ interface School {
   code: string;
 }
 
-export function useRBAC() {
+interface RBACContextType {
+  userRoles: UserRole[];
+  schools: School[];
+  currentSchool: School | null;
+  loading: boolean;
+  hasRole: (role: AppRole, schoolId?: string) => boolean;
+  hasPermission: (resource: ResourceType, permission: PermissionType, schoolId?: string) => Promise<boolean>;
+  isSuperAdmin: () => boolean;
+  isSchoolAdmin: (schoolId?: string) => boolean;
+  getCurrentSchoolRoles: () => UserRole[];
+  switchSchool: (school: School) => void;
+  fetchUserData: () => Promise<void>;
+}
+
+const RBACContext = createContext<RBACContextType | undefined>(undefined);
+
+export function RBACProvider({ children }: { children: ReactNode }) {
   const { user, loading: authLoading } = useAuth();
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [schools, setSchools] = useState<School[]>([]);
@@ -215,7 +231,7 @@ export function useRBAC() {
     console.log('✅ New currentSchool state should be:', school.name, 'ID:', school.id);
   };
 
-  return {
+  const value: RBACContextType = {
     userRoles,
     schools,
     currentSchool,
@@ -228,4 +244,18 @@ export function useRBAC() {
     switchSchool,
     fetchUserData,
   };
+
+  return (
+    <RBACContext.Provider value={value}>
+      {children}
+    </RBACContext.Provider>
+  );
+}
+
+export function useRBAC() {
+  const context = useContext(RBACContext);
+  if (context === undefined) {
+    throw new Error('useRBAC must be used within an RBACProvider');
+  }
+  return context;
 }
