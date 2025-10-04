@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useRBAC } from "@/hooks/useRBAC";
 import { Button } from "@/components/ui/button";
+import { SchoolSelector } from "./SchoolSelector";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
@@ -106,7 +107,7 @@ export const Navbar = () => {
               />
             </Link>
             <div className="flex items-center">
-              {/* SchoolSelector removed - single school system */}
+              <SchoolSelector />
             </div>
           </div>
 
