@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useSchoolFilter } from './useSchoolFilter';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
