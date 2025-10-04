@@ -58,6 +58,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useHRData } from '@/hooks/useHRData';
 import { useComprehensiveHR } from '@/hooks/useComprehensiveHR';
+import { useModuleFeatures } from '@/hooks/useModuleFeatures';
 import { supabase } from '@/integrations/supabase/client';
 import { RecruitmentDashboard } from '@/components/recruitment/RecruitmentDashboard';
 import { EmployeeForm } from '@/components/hr/EmployeeForm';
@@ -70,6 +71,9 @@ export function HRManagementPage() {
   const [activeTab, setActiveTab] = useState(() => {
     return searchParams.get('tab') || 'dashboard';
   });
+  
+  // Get module features configuration
+  const { isFeatureEnabled, loading: featuresLoading } = useModuleFeatures('hr-management');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDepartment, setFilterDepartment] = useState('all');
   const [showEmployeeForm, setShowEmployeeForm] = useState(false);
@@ -240,7 +244,7 @@ export function HRManagementPage() {
     }
   };
 
-  if (loading) {
+  if (loading || featuresLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/20 to-background">
         <div className="text-center">
@@ -977,7 +981,7 @@ export function HRManagementPage() {
               }} 
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10 h-auto p-1 bg-transparent gap-1">
+              <TabsList className="grid w-full h-auto p-1 bg-transparent gap-1" style={{ gridTemplateColumns: `repeat(${[true, isFeatureEnabled('employeeDirectory'), isFeatureEnabled('timeTracking'), isFeatureEnabled('staffAttendance'), isFeatureEnabled('leaveManagement'), isFeatureEnabled('recruitment'), isFeatureEnabled('performance'), isFeatureEnabled('training'), isFeatureEnabled('payroll'), isFeatureEnabled('benefits')].filter(Boolean).length}, minmax(0, 1fr))` }}>
                 <TabsTrigger 
                   value="dashboard" 
                   className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
@@ -986,77 +990,95 @@ export function HRManagementPage() {
                   <span className="text-xs font-medium">Dashboard</span>
                 </TabsTrigger>
                 
-                <TabsTrigger 
-                  value="employees" 
-                  className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
-                >
-                  <Users className="h-4 w-4" />
-                  <span className="text-xs font-medium">Employees</span>
-                </TabsTrigger>
+                {isFeatureEnabled('employeeDirectory') && (
+                  <TabsTrigger 
+                    value="employees" 
+                    className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
+                  >
+                    <Users className="h-4 w-4" />
+                    <span className="text-xs font-medium">Employees</span>
+                  </TabsTrigger>
+                )}
                 
-                <TabsTrigger 
-                  value="timeTracking" 
-                  className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
-                >
-                  <Timer className="h-4 w-4" />
-                  <span className="text-xs font-medium">Timesheet</span>
-                </TabsTrigger>
+                {isFeatureEnabled('timeTracking') && (
+                  <TabsTrigger 
+                    value="timeTracking" 
+                    className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
+                  >
+                    <Timer className="h-4 w-4" />
+                    <span className="text-xs font-medium">Timesheet</span>
+                  </TabsTrigger>
+                )}
                 
-                <TabsTrigger 
-                  value="attendance" 
-                  className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
-                >
-                  <ClipboardList className="h-4 w-4" />
-                  <span className="text-xs font-medium">Attendance</span>
-                </TabsTrigger>
+                {isFeatureEnabled('staffAttendance') && (
+                  <TabsTrigger 
+                    value="attendance" 
+                    className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
+                  >
+                    <ClipboardList className="h-4 w-4" />
+                    <span className="text-xs font-medium">Attendance</span>
+                  </TabsTrigger>
+                )}
                 
-                <TabsTrigger 
-                  value="leave" 
-                  className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
-                >
-                  <CalendarIcon className="h-4 w-4" />
-                  <span className="text-xs font-medium">Leave</span>
-                </TabsTrigger>
+                {isFeatureEnabled('leaveManagement') && (
+                  <TabsTrigger 
+                    value="leave" 
+                    className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
+                  >
+                    <CalendarIcon className="h-4 w-4" />
+                    <span className="text-xs font-medium">Leave</span>
+                  </TabsTrigger>
+                )}
                 
-                <TabsTrigger 
-                  value="recruitment" 
-                  className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
-                >
-                  <UserPlus className="h-4 w-4" />
-                  <span className="text-xs font-medium">Recruitment</span>
-                </TabsTrigger>
+                {isFeatureEnabled('recruitment') && (
+                  <TabsTrigger 
+                    value="recruitment" 
+                    className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
+                  >
+                    <UserPlus className="h-4 w-4" />
+                    <span className="text-xs font-medium">Recruitment</span>
+                  </TabsTrigger>
+                )}
                 
-                <TabsTrigger 
-                  value="performance" 
-                  className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
-                >
-                  <Target className="h-4 w-4" />
-                  <span className="text-xs font-medium">Performance</span>
-                </TabsTrigger>
+                {isFeatureEnabled('performance') && (
+                  <TabsTrigger 
+                    value="performance" 
+                    className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
+                  >
+                    <Target className="h-4 w-4" />
+                    <span className="text-xs font-medium">Performance</span>
+                  </TabsTrigger>
+                )}
                 
-                <TabsTrigger 
-                  value="training" 
-                  className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
-                >
-                  <BookOpen className="h-4 w-4" />
-                  <span className="text-xs font-medium">Training</span>
-                </TabsTrigger>
+                {isFeatureEnabled('training') && (
+                  <TabsTrigger 
+                    value="training" 
+                    className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    <span className="text-xs font-medium">Training</span>
+                  </TabsTrigger>
+                )}
                 
-                <TabsTrigger 
-                  value="payroll" 
-                  className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
-                >
-                  <DollarSign className="h-4 w-4" />
-                  <span className="text-xs font-medium">Payroll</span>
-                </TabsTrigger>
+                {isFeatureEnabled('payroll') && (
+                  <TabsTrigger 
+                    value="payroll" 
+                    className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
+                  >
+                    <DollarSign className="h-4 w-4" />
+                    <span className="text-xs font-medium">Payroll</span>
+                  </TabsTrigger>
+                )}
                 
-                <TabsTrigger 
-                  value="benefits" 
-                  className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
-                >
-                  <Award className="h-4 w-4" />
-                  <span className="text-xs font-medium">Benefits</span>
-                </TabsTrigger>
+                {isFeatureEnabled('benefits') && (
+                  <TabsTrigger 
+                    value="benefits" 
+                    className="flex flex-col gap-1.5 h-16 px-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 transition-all duration-200 rounded-lg"
+                  >
+                    <Award className="h-4 w-4" />
+                    <span className="text-xs font-medium">Benefits</span>
+                  </TabsTrigger>
+                )}
               </TabsList>
             </Tabs>
           </CardContent>
@@ -1064,16 +1086,16 @@ export function HRManagementPage() {
 
         <div className="space-y-6">
           {activeTab === 'dashboard' && renderDashboard()}
-          {activeTab === 'employees' && renderEmployees()}
-          {activeTab === 'timeTracking' && renderTimesheet()}
-          {activeTab === 'attendance' && renderAttendance()}
-          {activeTab === 'recruitment' && <RecruitmentDashboard />}
+          {activeTab === 'employees' && isFeatureEnabled('employeeDirectory') && renderEmployees()}
+          {activeTab === 'timeTracking' && isFeatureEnabled('timeTracking') && renderTimesheet()}
+          {activeTab === 'attendance' && isFeatureEnabled('staffAttendance') && renderAttendance()}
+          {activeTab === 'recruitment' && isFeatureEnabled('recruitment') && <RecruitmentDashboard />}
           {activeTab === 'employee-exit' && <EmployeeExit employees={employees} />}
-          {activeTab === 'performance' && renderPerformance()}
-          {activeTab === 'training' && renderTraining()}
-          {activeTab === 'benefits' && renderComingSoon('Benefits Management', 'Employee benefits and compensation packages', Award, 'Add Benefits Plan')}
-          {activeTab === 'leave' && renderLeaveManagement()}
-          {activeTab === 'payroll' && renderPayroll()}
+          {activeTab === 'performance' && isFeatureEnabled('performance') && renderPerformance()}
+          {activeTab === 'training' && isFeatureEnabled('training') && renderTraining()}
+          {activeTab === 'benefits' && isFeatureEnabled('benefits') && renderComingSoon('Benefits Management', 'Employee benefits and compensation packages', Award, 'Add Benefits Plan')}
+          {activeTab === 'leave' && isFeatureEnabled('leaveManagement') && renderLeaveManagement()}
+          {activeTab === 'payroll' && isFeatureEnabled('payroll') && renderPayroll()}
         </div>
       </div>
 

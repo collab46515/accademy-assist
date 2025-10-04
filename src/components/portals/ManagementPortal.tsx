@@ -14,18 +14,21 @@ import {
   Settings,
   FileText,
   Shield,
-  Clock
+  Clock,
+  Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useManagementDashboard } from '@/hooks/useManagementDashboard';
 
 export function ManagementPortal() {
   const navigate = useNavigate();
+  const { loading, stats, alerts, schedule } = useManagementDashboard();
 
   const quickStats = [
-    { title: 'Total Students', value: '1,247', change: '+12', icon: Users, color: 'text-blue-600' },
-    { title: 'Active Staff', value: '89', change: '+3', icon: GraduationCap, color: 'text-green-600' },
-    { title: 'Applications', value: '156', change: '+24', icon: FileText, color: 'text-purple-600' },
-    { title: 'Revenue (MTD)', value: '£45,230', change: '+8%', icon: DollarSign, color: 'text-orange-600' }
+    { title: 'Total Students', value: stats.totalStudents.toLocaleString(), change: stats.studentChange, icon: Users, color: 'text-blue-600' },
+    { title: 'Active Staff', value: stats.activeStaff.toString(), change: stats.staffChange, icon: GraduationCap, color: 'text-green-600' },
+    { title: 'Applications', value: stats.applications.toString(), change: stats.applicationChange, icon: FileText, color: 'text-purple-600' },
+    { title: 'Revenue (MTD)', value: `£${(stats.revenue / 1000).toFixed(1)}K`, change: stats.revenueChange, icon: DollarSign, color: 'text-orange-600' }
   ];
 
   const quickActions = [
@@ -35,12 +38,6 @@ export function ManagementPortal() {
     { title: 'System Settings', description: 'School configuration', icon: Settings, path: '/master-data', color: 'bg-purple-500' }
   ];
 
-  const alerts = [
-    { type: 'urgent', message: 'Staff meeting scheduled for 2:00 PM', time: '10 min ago' },
-    { type: 'info', message: 'New admission applications pending review', time: '1 hour ago' },
-    { type: 'warning', message: 'Attendance rate below 95% this week', time: '2 hours ago' }
-  ];
-
   const getAlertColor = (type: string) => {
     switch (type) {
       case 'urgent': return 'text-red-600 bg-red-50';
@@ -48,6 +45,17 @@ export function ManagementPortal() {
       default: return 'text-blue-600 bg-blue-50';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -161,12 +169,7 @@ export function ManagementPortal() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {[
-                { time: '09:00', event: 'Senior Leadership Team Meeting', location: 'Conference Room A' },
-                { time: '11:30', event: 'Parent-Teacher Conference Review', location: 'Main Office' },
-                { time: '14:00', event: 'Budget Planning Session', location: 'Finance Office' },
-                { time: '16:00', event: 'Safeguarding Committee Meeting', location: 'Conference Room B' }
-              ].map((item, index) => (
+              {schedule.map((item, index) => (
                 <div key={index} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50">
                   <div className="text-center">
                     <p className="text-sm font-medium">{item.time}</p>
