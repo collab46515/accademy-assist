@@ -68,15 +68,14 @@ export function useRBAC() {
     try {
       setLoading(true);
 
-      // Fetch user roles with LEFT JOIN to handle missing schools
+      // Fetch user roles
       const { data: rolesData, error: rolesError } = await supabase
         .from('user_roles')
         .select(`
           role,
           school_id,
           department,
-          year_group,
-          schools(id, name, code)
+          year_group
         `)
         .eq('user_id', user!.id)
         .eq('is_active', true);
@@ -88,31 +87,46 @@ export function useRBAC() {
         school_id: item.school_id,
         department: item.department,
         year_group: item.year_group,
-        is_active: true, // Already filtered by is_active = true in query
+        is_active: true,
       })) || [];
 
-      const uniqueSchools: School[] = [];
-      const schoolMap = new Map();
-
-      rolesData?.forEach(item => {
-        const school = item.schools;
-        // Only add school if it exists (handles LEFT JOIN nulls)
-        if (school && !schoolMap.has(school.id)) {
-          schoolMap.set(school.id, school);
-          uniqueSchools.push({
-            id: school.id,
-            name: school.name,
-            code: school.code,
-          });
-        }
-      });
-
       setUserRoles(roles);
-      setSchools(uniqueSchools);
+
+      // Check if user is super admin
+      const isSuperAdminUser = roles.some(role => role.role === 'super_admin');
+
+      let schoolsList: School[] = [];
+
+      if (isSuperAdminUser) {
+        // Super admins see ALL schools
+        const { data: allSchools, error: schoolsError } = await supabase
+          .from('schools')
+          .select('id, name, code')
+          .order('name');
+
+        if (schoolsError) throw schoolsError;
+        schoolsList = allSchools || [];
+      } else {
+        // Regular users only see schools they're assigned to
+        const schoolIds = [...new Set(roles.map(r => r.school_id).filter(Boolean))];
+        
+        if (schoolIds.length > 0) {
+          const { data: userSchools, error: schoolsError } = await supabase
+            .from('schools')
+            .select('id, name, code')
+            .in('id', schoolIds)
+            .order('name');
+
+          if (schoolsError) throw schoolsError;
+          schoolsList = userSchools || [];
+        }
+      }
+
+      setSchools(schoolsList);
       
       // Set current school to first school if none selected
-      if (uniqueSchools.length > 0 && !currentSchool) {
-        setCurrentSchool(uniqueSchools[0]);
+      if (schoolsList.length > 0 && !currentSchool) {
+        setCurrentSchool(schoolsList[0]);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
