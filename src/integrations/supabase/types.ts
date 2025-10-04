@@ -6932,6 +6932,54 @@ export type Database = {
           },
         ]
       }
+      school_modules: {
+        Row: {
+          created_at: string
+          custom_workflow: Json | null
+          id: string
+          is_enabled: boolean
+          module_id: string
+          school_id: string
+          settings: Json | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          custom_workflow?: Json | null
+          id?: string
+          is_enabled?: boolean
+          module_id: string
+          school_id: string
+          settings?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          custom_workflow?: Json | null
+          id?: string
+          is_enabled?: boolean
+          module_id?: string
+          school_id?: string
+          settings?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_modules_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_modules_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       school_periods: {
         Row: {
           created_at: string
@@ -6981,11 +7029,13 @@ export type Database = {
           contact_email: string | null
           contact_phone: string | null
           created_at: string
+          custom_domain: string | null
           establishment_type: string | null
           founded_year: number | null
           id: string
           is_active: boolean
           logo_url: string | null
+          module_config: Json | null
           motto: string | null
           name: string
           principal_name: string | null
@@ -7002,11 +7052,13 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          custom_domain?: string | null
           establishment_type?: string | null
           founded_year?: number | null
           id?: string
           is_active?: boolean
           logo_url?: string | null
+          module_config?: Json | null
           motto?: string | null
           name: string
           principal_name?: string | null
@@ -7023,11 +7075,13 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          custom_domain?: string | null
           establishment_type?: string | null
           founded_year?: number | null
           id?: string
           is_active?: boolean
           logo_url?: string | null
+          module_config?: Json | null
           motto?: string | null
           name?: string
           principal_name?: string | null

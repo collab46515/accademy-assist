@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { WorkflowDashboard } from '@/components/admissions/workflow/WorkflowDashboard';
 import { SystemResetManager } from '@/components/admin/SystemResetManager';
+import { SchoolModuleManager } from '@/components/admin/SchoolModuleManager';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -767,6 +768,9 @@ export default function AdminManagementPage() {
                 </CardContent>
               </Card>
             </div>
+            
+            {/* School Module Configuration */}
+            <SchoolModuleManager />
             
             {/* System Reset Section */}
             <SystemResetManager />
