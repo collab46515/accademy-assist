@@ -124,9 +124,18 @@ export function useRBAC() {
 
       setSchools(schoolsList);
       
-      // Set current school to first school if none selected
-      if (schoolsList.length > 0 && !currentSchool) {
+      // Check for stored school preference
+      const storedSchoolId = localStorage.getItem('currentSchoolId');
+      const storedSchool = schoolsList.find(s => s.id === storedSchoolId);
+      
+      // Set current school: prefer stored, then first in list
+      if (storedSchool) {
+        console.log('📍 Restoring school from localStorage:', storedSchool.name);
+        setCurrentSchool(storedSchool);
+      } else if (schoolsList.length > 0 && !currentSchool) {
+        console.log('📍 Setting first school as current:', schoolsList[0].name);
         setCurrentSchool(schoolsList[0]);
+        localStorage.setItem('currentSchoolId', schoolsList[0].id);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -193,7 +202,11 @@ export function useRBAC() {
   };
 
   const switchSchool = (school: School) => {
+    console.log('🔄 useRBAC.switchSchool called with:', school);
     setCurrentSchool(school);
+    // Store in localStorage for persistence
+    localStorage.setItem('currentSchoolId', school.id);
+    console.log('✅ School switched to:', school.name, '- Stored in localStorage');
   };
 
   return {
