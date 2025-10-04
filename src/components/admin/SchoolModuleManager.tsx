@@ -5,20 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save, Settings, Eye } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Loader2, Settings, Eye } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CreateSchoolDialog } from './CreateSchoolDialog';
+import { ModuleConfigDialog } from './ModuleConfigDialog';
 
 interface Module {
   id: string;
@@ -45,6 +36,7 @@ export function SchoolModuleManager() {
   const [schoolModules, setSchoolModules] = useState<SchoolModule[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [configModule, setConfigModule] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     if (currentSchool && isSuperAdmin()) {
@@ -178,13 +170,18 @@ export function SchoolModuleManager() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            Module Configuration
-          </CardTitle>
-          <CardDescription>
-            Configure which modules are enabled for {currentSchool?.name}
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Module Configuration
+              </CardTitle>
+              <CardDescription>
+                Configure which modules are enabled for {currentSchool?.name}
+              </CardDescription>
+            </div>
+            <CreateSchoolDialog onSchoolCreated={fetchData} />
+          </div>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue={Object.keys(groupedModules)[0]} className="space-y-4">
@@ -221,27 +218,14 @@ export function SchoolModuleManager() {
                       </div>
 
                       <div className="flex items-center gap-4">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4 mr-2" />
-                              Configure
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>{module.name} Configuration</DialogTitle>
-                              <DialogDescription>
-                                Customize workflow and settings for this module
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-4 pt-4">
-                              <p className="text-sm text-muted-foreground">
-                                Custom workflow and settings configuration will be available in the next update.
-                              </p>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setConfigModule({ id: module.id, name: module.name })}
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          Configure
+                        </Button>
 
                         <Switch
                           checked={enabled}
@@ -257,6 +241,17 @@ export function SchoolModuleManager() {
           </Tabs>
         </CardContent>
       </Card>
+
+      {configModule && currentSchool && (
+        <ModuleConfigDialog
+          open={!!configModule}
+          onOpenChange={(open) => !open && setConfigModule(null)}
+          moduleId={configModule.id}
+          moduleName={configModule.name}
+          schoolId={currentSchool.id}
+          onSaved={fetchData}
+        />
+      )}
     </div>
   );
 }
