@@ -150,10 +150,16 @@ export const Navbar = () => {
                 </DropdownMenuItem>
                 
                 {/* School Selector in Dropdown */}
-                <div className="px-2 py-2 border-t border-border">
-                  <SchoolSelector />
-                </div>
+                {isSuperAdmin() && (
+                  <>
+                    <div className="border-t border-border my-1" />
+                    <div className="px-2 py-2">
+                      <SchoolSelector />
+                    </div>
+                  </>
+                )}
                 
+                <div className="border-t border-border my-1" />
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>

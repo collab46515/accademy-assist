@@ -14,81 +14,74 @@ export function SchoolSelector() {
     loading: loading
   });
 
-  // Always show for super admins, or if there are multiple schools
-  if (!isSuperAdmin() && schools.length <= 1) {
-    console.log('❌ SchoolSelector hidden: Not super admin and <= 1 school');
-    return null;
+  // Don't hide for super admins - always show
+  if (!isSuperAdmin()) {
+    if (schools.length <= 1) {
+      console.log('❌ SchoolSelector hidden: Not super admin and <= 1 school');
+      return null;
+    }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center gap-2 px-4 py-2 rounded-lg border bg-card">
-        <Building2 className="h-4 w-4 text-primary animate-pulse" />
-        <span className="text-sm text-muted-foreground">Loading schools...</span>
-      </div>
-    );
-  }
-
-  console.log('✅ SchoolSelector RENDERING');
+  console.log('✅ SchoolSelector RENDERING for super admin or multi-school user');
 
   return (
-    <div className="w-full">
-      <div className="text-xs font-semibold text-muted-foreground uppercase mb-2">
-        Current School
+    <div className="w-full space-y-2">
+      <div className="text-xs font-semibold text-muted-foreground uppercase">
+        Switch School
       </div>
-      <Select
-        value={currentSchool?.id || ''}
-        onValueChange={(value) => {
-          const school = schools.find(s => s.id === value);
-          if (school) {
-            console.log('🔄 Switching to school:', school);
-            switchSchool(school);
-          }
-        }}
-      >
-        <SelectTrigger className="w-full">
-          <div className="flex items-center gap-3">
-            <Building2 className="h-4 w-4 text-primary flex-shrink-0" />
-            <div className="flex flex-col items-start flex-1 text-left">
-              <span className="font-medium text-sm">{currentSchool?.name || "No school"}</span>
-              <span className="text-xs text-muted-foreground">{currentSchool?.code || "Select school"}</span>
-            </div>
-            {schools.length > 1 && (
-              <Badge variant="secondary" className="text-xs">
-                {schools.length}
-              </Badge>
-            )}
-          </div>
-        </SelectTrigger>
-        <SelectContent className="z-[200] bg-popover border shadow-lg w-full">
-          {schools.length === 0 ? (
-            <div className="px-4 py-3 text-sm text-muted-foreground text-center">
-              No schools available
-            </div>
-          ) : (
-            <>
-              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                Switch School
+      {loading ? (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Building2 className="h-4 w-4 animate-pulse" />
+          <span>Loading schools...</span>
+        </div>
+      ) : schools.length === 0 ? (
+        <div className="text-sm text-muted-foreground">No schools found</div>
+      ) : (
+        <Select
+          value={currentSchool?.id || ''}
+          onValueChange={(value) => {
+            const school = schools.find(s => s.id === value);
+            if (school) {
+              console.log('🔄 Switching to school:', school);
+              switchSchool(school);
+            }
+          }}
+        >
+          <SelectTrigger className="w-full">
+            <div className="flex items-center gap-3">
+              <Building2 className="h-4 w-4 text-primary flex-shrink-0" />
+              <div className="flex flex-col items-start flex-1 text-left">
+                <span className="font-medium text-sm">{currentSchool?.name || "Select a school"}</span>
+                {currentSchool?.code && (
+                  <span className="text-xs text-muted-foreground">{currentSchool.code}</span>
+                )}
               </div>
-              {schools.map((school) => (
-                <SelectItem 
-                  key={school.id} 
-                  value={school.id}
-                  className="cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <Building2 className="h-4 w-4 text-primary" />
-                    <div className="flex flex-col py-1">
-                      <span className="font-medium text-sm">{school.name}</span>
-                      <span className="text-xs text-muted-foreground">{school.code}</span>
-                    </div>
+              {schools.length > 1 && (
+                <Badge variant="secondary" className="text-xs">
+                  {schools.length}
+                </Badge>
+              )}
+            </div>
+          </SelectTrigger>
+          <SelectContent className="z-[200] bg-popover border shadow-lg w-full">
+            {schools.map((school) => (
+              <SelectItem 
+                key={school.id} 
+                value={school.id}
+                className="cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <Building2 className="h-4 w-4 text-primary" />
+                  <div className="flex flex-col py-1">
+                    <span className="font-medium text-sm">{school.name}</span>
+                    <span className="text-xs text-muted-foreground">{school.code}</span>
                   </div>
-                </SelectItem>
-              ))}
-            </>
-          )}
-        </SelectContent>
-      </Select>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
     </div>
   );
 }
