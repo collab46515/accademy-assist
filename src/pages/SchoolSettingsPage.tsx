@@ -100,7 +100,7 @@ export default function SchoolSettingsPage() {
   const { isSuperAdmin } = useRBAC();
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="space-y-6">
       <PageHeader 
         title="School Settings" 
         description="Configure school information, branding, and system settings"
@@ -113,7 +113,7 @@ export default function SchoolSettingsPage() {
         }
       />
       
-      <div className="container mx-auto px-6 py-8 space-y-8">
+      <div className="space-y-8">
         <SchoolSettingsManager />
         
         {/* School Module Configuration - Super Admin Only */}
