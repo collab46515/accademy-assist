@@ -26,7 +26,8 @@ import {
   TrendingUp,
   Bot,
   Settings,
-  LogOut
+  LogOut,
+  Building2
 } from "lucide-react";
 
 const navigationItems = [
@@ -55,12 +56,20 @@ export const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
-  const { hasRole, isSuperAdmin, currentSchool, schools } = useRBAC();
+  const { hasRole, isSuperAdmin, currentSchool, schools, switchSchool } = useRBAC();
 
   console.log('🔍 Navbar rendering - User:', !!user, 'isSuperAdmin:', isSuperAdmin(), 'Schools:', schools.length, 'Current:', currentSchool?.name);
 
   const handleSignOut = async () => {
     await signOut();
+  };
+  
+  const handleSchoolChange = (schoolId: string) => {
+    const school = schools.find(s => s.id === schoolId);
+    if (school) {
+      console.log('🔄 SWITCHING SCHOOL TO:', school);
+      switchSchool(school);
+    }
   };
 
   // Filter navigation items based on user roles
@@ -129,6 +138,24 @@ export const Navbar = () => {
                 </Link>
               );
             })}
+            
+            {/* Simple School Switcher - VISIBLE TEST */}
+            {isSuperAdmin() && schools.length > 0 && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 border-primary bg-primary/10">
+                <Building2 className="h-4 w-4 text-primary" />
+                <select 
+                  value={currentSchool?.id || ''} 
+                  onChange={(e) => handleSchoolChange(e.target.value)}
+                  className="bg-transparent border-none text-sm font-medium cursor-pointer focus:outline-none"
+                >
+                  {schools.map(school => (
+                    <option key={school.id} value={school.id}>
+                      {school.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             
             {/* User Menu */}
             <DropdownMenu>
