@@ -55,7 +55,9 @@ export const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
-  const { hasRole, isSuperAdmin, currentSchool } = useRBAC();
+  const { hasRole, isSuperAdmin, currentSchool, schools } = useRBAC();
+
+  console.log('🔍 Navbar - isSuperAdmin:', isSuperAdmin(), 'Schools:', schools.length);
 
   const handleSignOut = async () => {
     await signOut();
@@ -149,15 +151,11 @@ export const Navbar = () => {
                   </div>
                 </DropdownMenuItem>
                 
-                {/* School Selector in Dropdown */}
-                {isSuperAdmin() && (
-                  <>
-                    <div className="border-t border-border my-1" />
-                    <div className="px-2 py-2">
-                      <SchoolSelector />
-                    </div>
-                  </>
-                )}
+                {/* School Selector in Dropdown - ALWAYS SHOW */}
+                <div className="border-t border-border my-1" />
+                <div className="px-2 py-2">
+                  <SchoolSelector />
+                </div>
                 
                 <div className="border-t border-border my-1" />
                 <DropdownMenuItem onClick={handleSignOut}>
