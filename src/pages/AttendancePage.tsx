@@ -6,9 +6,18 @@ import { AttendanceDashboard } from '@/components/attendance/AttendanceDashboard
 import { AttendanceMarker } from '@/components/attendance/AttendanceMarker';
 import { AttendanceReports } from '@/components/attendance/AttendanceReports';
 import { useRBAC } from '@/hooks/useRBAC';
+import { ModuleGuard } from '@/components/modules/ModuleGuard';
 import { BarChart3, UserCheck, Settings, Users, AlertTriangle } from 'lucide-react';
 
 export default function AttendancePage() {
+  return (
+    <ModuleGuard moduleName="Attendance Management">
+      <AttendancePageContent />
+    </ModuleGuard>
+  );
+}
+
+function AttendancePageContent() {
   const { currentSchool, hasRole } = useRBAC();
 
   if (!currentSchool) {

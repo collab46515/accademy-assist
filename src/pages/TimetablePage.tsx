@@ -12,6 +12,7 @@ import { AITimetableGenerator } from '@/components/ai-timetable/AITimetableGener
 import { TeacherTimetableView } from '@/components/timetable/TeacherTimetableView';
 import { TimetableDebugger } from '@/components/timetable/TimetableDebugger';
 import { useRBAC } from '@/hooks/useRBAC';
+import { ModuleGuard } from '@/components/modules/ModuleGuard';
 import { 
   Calendar, 
   Clock, 
@@ -24,6 +25,14 @@ import {
   Wand2,
   Brain
 } from 'lucide-react';
+
+export default function TimetablePage() {
+  return (
+    <ModuleGuard moduleName="Timetable Management">
+      <TimetablePageContent />
+    </ModuleGuard>
+  );
+}
 
 function AIAutoGeneratorCard() {
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
@@ -88,8 +97,11 @@ function AIAutoGeneratorCard() {
   );
 }
 
-export default function TimetablePage() {
+function TimetablePageContent() {
   const { currentSchool, hasRole, userRoles, loading } = useRBAC();
+
+  // Debug logging
+  console.log('Timetable Debug:', { currentSchool, userRoles, loading });
 
   // Debug logging
   console.log('Timetable Debug:', { currentSchool, userRoles, loading });

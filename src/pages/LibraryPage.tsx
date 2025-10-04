@@ -8,26 +8,29 @@ import { LibraryFines } from "@/components/library/LibraryFines";
 import { LibraryReports } from "@/components/library/LibraryReports";
 import { BookSearch } from "@/components/library/BookSearch";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { ModuleGuard } from "@/components/modules/ModuleGuard";
 
 export default function LibraryPage() {
   return (
-    <div className="space-y-6">
-      <PageHeader 
-        title="Library Management" 
-        description="Manage books, digital resources, and library operations"
-      />
-      
-      <Routes>
-        <Route path="/" element={<Navigate to="/library/dashboard" replace />} />
-        <Route path="/dashboard" element={<LibraryDashboard />} />
-        <Route path="/catalog" element={<BookCatalog />} />
-        <Route path="/borrowing" element={<BorrowingReturns />} />
-        <Route path="/reservations" element={<BookReservations />} />
-        <Route path="/digital" element={<DigitalResources />} />
-        <Route path="/fines" element={<LibraryFines />} />
-        <Route path="/reports" element={<LibraryReports />} />
-        <Route path="/search" element={<BookSearch />} />
-      </Routes>
-    </div>
+    <ModuleGuard moduleName="Library Management">
+      <div className="space-y-6">
+        <PageHeader 
+          title="Library Management" 
+          description="Manage books, digital resources, and library operations"
+        />
+        
+        <Routes>
+          <Route path="/" element={<Navigate to="/library/dashboard" replace />} />
+          <Route path="/dashboard" element={<LibraryDashboard />} />
+          <Route path="/catalog" element={<BookCatalog />} />
+          <Route path="/borrowing" element={<BorrowingReturns />} />
+          <Route path="/reservations" element={<BookReservations />} />
+          <Route path="/digital" element={<DigitalResources />} />
+          <Route path="/fines" element={<LibraryFines />} />
+          <Route path="/reports" element={<LibraryReports />} />
+          <Route path="/search" element={<BookSearch />} />
+        </Routes>
+      </div>
+    </ModuleGuard>
   );
 }

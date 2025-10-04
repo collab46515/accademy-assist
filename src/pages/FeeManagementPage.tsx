@@ -20,6 +20,7 @@ import { RemindersAlerts } from "@/components/fee-management/RemindersAlerts";
 import { FeeDashboard } from "@/components/fee-management/FeeDashboard";
 import FeeCollections from "@/components/fee-management/FeeCollections";
 import { useFeeData } from "@/hooks/useFeeData";
+import { ModuleGuard } from "@/components/modules/ModuleGuard";
 
 const FeeManagementOverview = () => {
   const { feeStructures, feeHeads, invoices, loading } = useFeeData();
@@ -180,19 +181,21 @@ const FeeManagementOverview = () => {
 
 const FeeManagementPage = () => {
   return (
-    <Routes>
-      <Route index element={<FeeDashboard />} />
-      <Route path="collections" element={<FeeCollections />} />
-      <Route path="structure" element={<FeeStructureTabs />} />
-      <Route path="invoices" element={<InvoiceGeneration />} />
-      <Route path="payments" element={<PaymentCollection />} />
-      <Route path="installments" element={<InstallmentPlans />} />
-      <Route path="discounts" element={<DiscountsWaivers />} />
-      <Route path="outstanding" element={<OutstandingFees />} />
-      <Route path="reports" element={<FeeReportsAnalytics />} />
-      <Route path="calendar" element={<FeeCalendar />} />
-      <Route path="reminders" element={<RemindersAlerts />} />
-    </Routes>
+    <ModuleGuard moduleName="Fee Management">
+      <Routes>
+        <Route index element={<FeeDashboard />} />
+        <Route path="collections" element={<FeeCollections />} />
+        <Route path="structure" element={<FeeStructureTabs />} />
+        <Route path="invoices" element={<InvoiceGeneration />} />
+        <Route path="payments" element={<PaymentCollection />} />
+        <Route path="installments" element={<InstallmentPlans />} />
+        <Route path="discounts" element={<DiscountsWaivers />} />
+        <Route path="outstanding" element={<OutstandingFees />} />
+        <Route path="reports" element={<FeeReportsAnalytics />} />
+        <Route path="calendar" element={<FeeCalendar />} />
+        <Route path="reminders" element={<RemindersAlerts />} />
+      </Routes>
+    </ModuleGuard>
   );
 };
 

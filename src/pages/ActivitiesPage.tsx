@@ -33,8 +33,17 @@ import { HousePointsManager } from "@/components/activities/HousePointsManager";
 import { useActivities } from "@/hooks/useActivities";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { ModuleGuard } from "@/components/modules/ModuleGuard";
 
 const ActivitiesPage = () => {
+  return (
+    <ModuleGuard moduleName="Activities Management">
+      <ActivitiesPageContent />
+    </ModuleGuard>
+  );
+};
+
+function ActivitiesPageContent() {
   const [searchTerm, setSearchTerm] = useState("");
   const { activities, participants, housePoints, loading } = useActivities();
   const [selectedActivity, setSelectedActivity] = useState<any>(null);

@@ -14,8 +14,17 @@ import { format } from "date-fns";
 import { ExamBoardManager } from "@/components/exams/ExamBoardManager";
 import { ExamSchedulingForm } from "@/components/exams/ExamSchedulingForm";
 import { ExamResultsManager } from "@/components/exams/ExamResultsManager";
+import { ModuleGuard } from "@/components/modules/ModuleGuard";
 
 export default function ExamsPage() {
+  return (
+    <ModuleGuard moduleName="Examinations">
+      <ExamsPageContent />
+    </ModuleGuard>
+  );
+}
+
+function ExamsPageContent() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("schedule");
