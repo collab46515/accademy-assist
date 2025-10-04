@@ -30,8 +30,8 @@ export function SchoolSelector() {
   }
 
   return (
-    <div className="flex items-center gap-2 px-4 py-2 rounded-lg border bg-card">
-      <Building2 className="h-4 w-4 text-primary" />
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-card hover:bg-accent transition-colors cursor-pointer">
+      <Building2 className="h-4 w-4 text-primary flex-shrink-0" />
       <Select
         value={currentSchool?.id || ''}
         onValueChange={(value) => {
@@ -42,25 +42,41 @@ export function SchoolSelector() {
           }
         }}
       >
-        <SelectTrigger className="w-56 border-0 focus:ring-0 bg-transparent">
+        <SelectTrigger className="w-56 border-0 focus:ring-0 focus:ring-offset-0 bg-transparent hover:bg-transparent">
           <SelectValue placeholder="Select school">
-            <span className="font-medium">{currentSchool?.name || "No school selected"}</span>
+            <div className="flex items-center justify-between w-full">
+              <span className="font-medium truncate">{currentSchool?.name || "No school selected"}</span>
+              {schools.length > 1 && (
+                <Badge variant="secondary" className="ml-2 text-xs">
+                  {schools.length} schools
+                </Badge>
+              )}
+            </div>
           </SelectValue>
         </SelectTrigger>
-        <SelectContent className="z-[100] bg-popover border shadow-lg">
+        <SelectContent className="z-[100] bg-popover border shadow-lg min-w-[280px]">
           {schools.length === 0 ? (
-            <div className="px-4 py-2 text-sm text-muted-foreground">
+            <div className="px-4 py-3 text-sm text-muted-foreground text-center">
               No schools available
             </div>
           ) : (
-            schools.map((school) => (
-              <SelectItem key={school.id} value={school.id}>
-                <div className="flex flex-col">
-                  <span className="font-medium">{school.name}</span>
-                  <span className="text-xs text-muted-foreground">{school.code}</span>
-                </div>
-              </SelectItem>
-            ))
+            <>
+              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase">
+                Switch School
+              </div>
+              {schools.map((school) => (
+                <SelectItem 
+                  key={school.id} 
+                  value={school.id}
+                  className="cursor-pointer"
+                >
+                  <div className="flex flex-col py-1">
+                    <span className="font-medium">{school.name}</span>
+                    <span className="text-xs text-muted-foreground">{school.code}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </>
           )}
         </SelectContent>
       </Select>
