@@ -416,21 +416,19 @@ export function AppSidebar() {
         // Get the database module name for this sidebar item
         const dbModuleName = moduleNameMap[item.title];
         
-        // Super admin bypasses all module restrictions
-        if (isSuperAdmin()) {
-          console.log(`✅ Super Admin - Always showing: ${item.title}`);
-          return true;
-        }
-        
-        // Special handling for admin-only modules
+        // Special handling for admin-only modules (only super admins can see these)
         if (item.title === 'User Management' || item.title === 'Permission Management') {
-          return false; // Only super admin can see these
+          if (isSuperAdmin()) {
+            console.log(`✅ Super Admin - Showing admin module: ${item.title}`);
+            return true;
+          }
+          return false;
         }
         
-        // Check if module is enabled for this school
+        // Check if module is enabled for this school (applies to all users including super admins)
         if (dbModuleName && currentSchool) {
           const moduleEnabled = isModuleEnabled(dbModuleName);
-          console.log(`🏫 Module Check: ${dbModuleName} - Enabled: ${moduleEnabled}`);
+          console.log(`🏫 Module Check: ${item.title} (${dbModuleName}) - Enabled: ${moduleEnabled}`);
           
           if (!moduleEnabled) {
             console.log(`❌ Module ${dbModuleName} disabled for school ${currentSchool.name}`);
@@ -438,7 +436,13 @@ export function AppSidebar() {
           }
         }
         
-        // Check role-based permissions
+        // Check role-based permissions (super admins bypass this check)
+        if (isSuperAdmin()) {
+          console.log(`✅ Super Admin - Has permission for: ${item.title}`);
+          return true;
+        }
+        
+        // Check role-based permissions for non-super-admin users
         if (dbModuleName) {
           const hasPermission = hasModulePermission(dbModuleName, 'view');
           console.log(`👤 Permission Check: ${dbModuleName} - Has Permission: ${hasPermission}`);
