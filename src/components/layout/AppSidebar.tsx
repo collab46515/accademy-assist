@@ -425,6 +425,12 @@ export function AppSidebar() {
           return false;
         }
         
+        // CRITICAL: Always show School Settings to super admins (needed to configure modules)
+        if (item.title === 'School Settings' && isSuperAdmin()) {
+          console.log(`✅ Super Admin - Always showing School Settings`);
+          return true;
+        }
+        
         // Check if module is enabled for this school (applies to all users including super admins)
         if (dbModuleName && currentSchool) {
           const moduleEnabled = isModuleEnabled(dbModuleName);
