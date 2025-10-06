@@ -3,8 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Settings, Info } from 'lucide-react';
+import { Loader2, Settings } from 'lucide-react';
 import { useModuleFeatures } from '@/hooks/useModuleFeatures';
 
 interface ModuleFeaturesConfigProps {
@@ -22,81 +21,73 @@ export const ModuleFeaturesConfig: React.FC<ModuleFeaturesConfigProps> = ({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <Card>
+        <CardContent className="flex items-center justify-center p-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </CardContent>
+      </Card>
     );
   }
 
   if (features.length === 0) {
     return (
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertDescription>
-          No configurable features available for this module yet.
-        </AlertDescription>
-      </Alert>
+      <Card>
+        <CardContent className="p-12 text-center">
+          <Settings className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+          <p className="text-muted-foreground">
+            No configurable features available for this module yet.
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <Card className="border-0 shadow-lg">
-      <CardHeader className="border-b">
-        <div className="flex items-center gap-2">
+    <Card>
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2">
           <Settings className="h-5 w-5" />
-          <div>
-            <CardTitle>{moduleName} Features</CardTitle>
-            <CardDescription>
-              Enable or disable specific features within this module
-            </CardDescription>
-          </div>
-        </div>
+          {moduleName} Features
+        </CardTitle>
+        <CardDescription>
+          Toggle features on or off for this module
+        </CardDescription>
       </CardHeader>
-      <CardContent className="p-6">
-        <div className="space-y-4">
-          {features.map((feature) => {
-            const enabled = isFeatureEnabled(feature.feature_key);
-            
-            return (
-              <div
-                key={feature.id}
-                className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/5 transition-colors"
-              >
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Label
-                      htmlFor={`feature-${feature.id}`}
-                      className="text-base font-medium cursor-pointer"
-                    >
-                      {feature.feature_name}
-                    </Label>
-                    <Badge variant={enabled ? "default" : "outline"}>
-                      {enabled ? 'Enabled' : 'Disabled'}
-                    </Badge>
-                  </div>
-                  {feature.description && (
-                    <p className="text-sm text-muted-foreground">
-                      {feature.description}
-                    </p>
-                  )}
+      <CardContent className="space-y-3">
+        {features.map((feature) => {
+          const enabled = isFeatureEnabled(feature.feature_key);
+          
+          return (
+            <div
+              key={feature.id}
+              className="flex items-center justify-between p-4 rounded-lg border hover:border-primary/50 transition-all"
+            >
+              <div className="flex-1 space-y-1 pr-4">
+                <div className="flex items-center gap-2">
+                  <Label
+                    htmlFor={`feature-${feature.id}`}
+                    className="font-medium cursor-pointer"
+                  >
+                    {feature.feature_name}
+                  </Label>
+                  <Badge variant={enabled ? "default" : "secondary"} className="text-xs">
+                    {enabled ? 'ON' : 'OFF'}
+                  </Badge>
                 </div>
-                <Switch
-                  id={`feature-${feature.id}`}
-                  checked={enabled}
-                  onCheckedChange={(checked) => toggleFeature(feature.id, checked)}
-                />
+                {feature.description && (
+                  <p className="text-sm text-muted-foreground">
+                    {feature.description}
+                  </p>
+                )}
               </div>
-            );
-          })}
-        </div>
-
-        <Alert className="mt-6">
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            Disabled features will not be visible to users in the module interface.
-            You can re-enable them at any time.
-          </AlertDescription>
-        </Alert>
+              <Switch
+                id={`feature-${feature.id}`}
+                checked={enabled}
+                onCheckedChange={(checked) => toggleFeature(feature.id, checked)}
+              />
+            </div>
+          );
+        })}
       </CardContent>
     </Card>
   );

@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ModuleFeaturesConfig } from '@/components/admin/ModuleFeaturesConfig';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Info, Settings2 } from 'lucide-react';
+import { Settings2, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useSchoolFilter } from '@/hooks/useSchoolFilter';
 import { useSchoolModules } from '@/hooks/useSchoolModules';
+import { cn } from '@/lib/utils';
 
 export default function ModuleFeaturesPage() {
   const navigate = useNavigate();
@@ -34,10 +33,10 @@ export default function ModuleFeaturesPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/5 to-background">
+    <div className="min-h-screen bg-background">
       <PageHeader
-        title="Module Features Configuration"
-        description={`Configure sub-features for ${currentSchool?.name || 'your school'}`}
+        title="Module Features"
+        description={`Configure features for ${currentSchool?.name || 'your school'}`}
         breadcrumbItems={[
           { label: "Home", href: "/" },
           { label: "Admin", href: "/admin/schools" },
@@ -45,56 +44,59 @@ export default function ModuleFeaturesPage() {
         ]}
       />
 
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            Each module can have configurable sub-features. Enable only the features
-            your school needs to keep the interface clean and focused.
-          </AlertDescription>
-        </Alert>
-
+      <div className="p-6 max-w-7xl mx-auto">
         {enabledModules.length === 0 ? (
           <Card>
-            <CardContent className="p-8 text-center">
+            <CardContent className="p-12 text-center">
               <Settings2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <h3 className="text-lg font-semibold mb-2">No Modules Enabled</h3>
-              <p className="text-muted-foreground mb-4">
+              <p className="text-muted-foreground">
                 Enable modules first before configuring their features.
               </p>
             </CardContent>
           </Card>
         ) : (
-          <Card className="border-0 shadow-lg">
-            <Tabs value={activeModule} onValueChange={setActiveModule}>
-              <CardContent className="p-6">
-                <TabsList className="grid w-full gap-2" style={{
-                  gridTemplateColumns: `repeat(${Math.min(enabledModules.length, 4)}, minmax(0, 1fr))`
-                }}>
-                  {enabledModules.map((sm) => (
-                    <TabsTrigger
-                      key={sm.module_id}
-                      value={sm.module_id}
-                      className="text-sm"
-                    >
-                      {sm.module.name}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
+          <div className="grid grid-cols-12 gap-6">
+            {/* Sidebar - Module List */}
+            <div className="col-span-3">
+              <Card>
+                <CardContent className="p-2">
+                  <nav className="space-y-1">
+                    {enabledModules.map((sm) => (
+                      <button
+                        key={sm.module_id}
+                        onClick={() => setActiveModule(sm.module_id)}
+                        className={cn(
+                          "w-full flex items-center justify-between px-3 py-2.5 text-sm rounded-md transition-colors",
+                          activeModule === sm.module_id
+                            ? "bg-primary text-primary-foreground font-medium"
+                            : "hover:bg-muted text-muted-foreground"
+                        )}
+                      >
+                        <span>{sm.module.name}</span>
+                        {activeModule === sm.module_id && (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
+                      </button>
+                    ))}
+                  </nav>
+                </CardContent>
+              </Card>
+            </div>
 
-                <div className="mt-6">
-                  {enabledModules.map((sm) => (
-                    <TabsContent key={sm.module_id} value={sm.module_id}>
-                      <ModuleFeaturesConfig
-                        moduleId={sm.module_id}
-                        moduleName={sm.module.name}
-                      />
-                    </TabsContent>
-                  ))}
-                </div>
-              </CardContent>
-            </Tabs>
-          </Card>
+            {/* Main Content - Features Config */}
+            <div className="col-span-9">
+              {enabledModules.map((sm) => (
+                activeModule === sm.module_id && (
+                  <ModuleFeaturesConfig
+                    key={sm.module_id}
+                    moduleId={sm.module_id}
+                    moduleName={sm.module.name}
+                  />
+                )
+              ))}
+            </div>
+          </div>
         )}
       </div>
     </div>
