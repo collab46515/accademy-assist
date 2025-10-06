@@ -140,28 +140,17 @@ export function UserManagementPage() {
     try {
       setLoading(true);
       
-      // Determine which users to fetch based on role and current school
-      let userIdsToShow: string[] = [];
+      let usersData: User[] = [];
       
-      if (isSuperAdmin() && currentSchool) {
-        // Super admins: show users from current school + system-wide users (super admins)
-        const { data: rolesData, error: rolesError } = await supabase
-          .from('user_roles')
-          .select('user_id, role, school_id')
-          .eq('is_active', true)
-          .or(`school_id.eq.${currentSchool.id},school_id.is.null`);
+      if (isSuperAdmin()) {
+        // Super admins: show ALL users (including those without roles)
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .order('created_at', { ascending: false });
         
-        if (rolesError) throw rolesError;
-        userIdsToShow = rolesData?.map(r => r.user_id) || [];
-      } else if (isSuperAdmin() && !currentSchool) {
-        // Super admin with no school selected - show all users
-        const { data: rolesData, error: rolesError } = await supabase
-          .from('user_roles')
-          .select('user_id')
-          .eq('is_active', true);
-        
-        if (rolesError) throw rolesError;
-        userIdsToShow = rolesData?.map(r => r.user_id) || [];
+        if (error) throw error;
+        usersData = data || [];
       } else if (isSchoolAdmin() && currentSchool) {
         // School admins: only show users from their school
         const { data: rolesData, error: rolesError } = await supabase
@@ -171,20 +160,23 @@ export function UserManagementPage() {
           .eq('school_id', currentSchool.id);
         
         if (rolesError) throw rolesError;
-        userIdsToShow = rolesData?.map(r => r.user_id) || [];
+        const userIdsToShow = rolesData?.map(r => r.user_id) || [];
+        
+        const { data, error: usersError } = await supabase
+          .from('profiles')
+          .select('*')
+          .in('user_id', userIdsToShow.length > 0 ? userIdsToShow : ['00000000-0000-0000-0000-000000000000'])
+          .order('created_at', { ascending: false });
+
+        if (usersError) throw usersError;
+        usersData = data || [];
       }
       
-      // Fetch filtered users
-      const { data: usersData, error: usersError } = await supabase
-        .from('profiles')
-        .select('*')
-        .in('user_id', userIdsToShow.length > 0 ? userIdsToShow : ['00000000-0000-0000-0000-000000000000']) // Use dummy ID if empty
-        .order('created_at', { ascending: false });
-
-      if (usersError) throw usersError;
-
-      // Fetch user roles with school information (filtered by current school)
-      let rolesQuery = supabase
+      // Get all user IDs for role fetching
+      const allUserIds = usersData.map(u => u.user_id);
+      
+      // Fetch user roles for all users
+      const { data: rolesData, error: rolesError } = await supabase
         .from('user_roles')
         .select(`
           id,
@@ -196,14 +188,8 @@ export function UserManagementPage() {
           is_active,
           schools(name)
         `)
+        .in('user_id', allUserIds.length > 0 ? allUserIds : ['00000000-0000-0000-0000-000000000000'])
         .eq('is_active', true);
-      
-      // Filter roles by school unless super admin viewing all
-      if (currentSchool) {
-        rolesQuery = rolesQuery.or(`school_id.eq.${currentSchool.id},school_id.is.null`);
-      }
-      
-      const { data: rolesData, error: rolesError } = await rolesQuery;
 
       if (rolesError) throw rolesError;
 
