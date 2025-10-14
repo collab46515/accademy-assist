@@ -53,6 +53,7 @@ export function UserManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [userRoles, setUserRoles] = useState<Record<string, UserRole[]>>({});
   const [selectedRole, setSelectedRole] = useState<AppRole | ''>('');
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [createUserOpen, setCreateUserOpen] = useState(false);
   const [assignRoleOpen, setAssignRoleOpen] = useState(false);
@@ -370,6 +371,8 @@ export function UserManagementPage() {
       });
 
       setAssignRoleOpen(false);
+      setSelectedRole('');
+      setSelectedSchoolId('');
       fetchUsers();
     } catch (error: any) {
       console.error('Role assignment error:', error);
@@ -900,8 +903,7 @@ export function UserManagementPage() {
           <form onSubmit={assignRole} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="role">Role</Label>
-              <Select name="role" required onValueChange={(value) => {
-                // Force re-render to show/hide school field
+              <Select value={selectedRole} onValueChange={(value) => {
                 setSelectedRole(value as AppRole);
               }}>
                 <SelectTrigger>
@@ -915,12 +917,13 @@ export function UserManagementPage() {
                   ))}
                 </SelectContent>
               </Select>
+              <input type="hidden" name="role" value={selectedRole} required />
             </div>
             
-            {selectedRole !== 'super_admin' && (
+            {selectedRole !== 'super_admin' && selectedRole !== '' && (
               <div className="space-y-2">
                 <Label htmlFor="schoolId">School</Label>
-                <Select name="schoolId" required>
+                <Select value={selectedSchoolId} onValueChange={setSelectedSchoolId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a school" />
                   </SelectTrigger>
@@ -932,6 +935,7 @@ export function UserManagementPage() {
                     ))}
                   </SelectContent>
                 </Select>
+                <input type="hidden" name="schoolId" value={selectedSchoolId} required />
               </div>
             )}
 
