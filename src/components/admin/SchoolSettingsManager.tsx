@@ -217,14 +217,15 @@ export function SchoolSettingsManager() {
   }, [currentSchool]);
 
   // Show school creation when the user has no schools linked to their account
-  if (!schools || schools.length === 0) {
+  // Super admins skip this check as they can access all schools
+  if (!isSuperAdmin() && (!schools || schools.length === 0)) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Card className="max-w-2xl mx-auto">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building className="h-5 w-5" />
-              Create Your School
+              Create Your First School
             </CardTitle>
             <CardDescription>
               No school is linked to your account yet. Create your school to get started.
