@@ -111,15 +111,23 @@ export function useHRData() {
     try {
       setLoading(true);
       
-      // Fetch employees - filter by school through user_roles
+      // Fetch employees - get user_ids from user_roles first
+      const { data: userRolesData, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('school_id', currentSchoolId)
+        .eq('is_active', true)
+        .in('role', ['teacher', 'school_admin', 'hod']);
+
+      if (rolesError) throw rolesError;
+
+      const userIds = userRolesData?.map(r => r.user_id) || [];
+      
+      // Then fetch employees for those users
       const { data: employeesData, error: employeesError } = await supabase
         .from('employees')
-        .select(`
-          *,
-          user_roles!inner(school_id, role, is_active)
-        `)
-        .eq('user_roles.school_id', currentSchoolId)
-        .eq('user_roles.is_active', true)
+        .select('*')
+        .in('user_id', userIds.length > 0 ? userIds : ['00000000-0000-0000-0000-000000000000'])
         .order('created_at', { ascending: false });
 
       if (employeesError) throw employeesError;
@@ -132,51 +140,31 @@ export function useHRData() {
 
       if (departmentsError) throw departmentsError;
 
-      // Fetch leave requests - filter by employee school
+      // Fetch leave requests - filter by employee user_ids
       const { data: leaveData, error: leaveError } = await supabase
         .from('leave_requests')
-        .select(`
-          *,
-          employees!inner(
-            user_id,
-            user_roles!inner(school_id, is_active)
-          )
-        `)
-        .eq('employees.user_roles.school_id', currentSchoolId)
-        .eq('employees.user_roles.is_active', true)
+        .select('*')
+        .in('employee_id', userIds.length > 0 ? userIds : ['00000000-0000-0000-0000-000000000000'])
         .order('created_at', { ascending: false });
 
       if (leaveError) throw leaveError;
 
-      // Fetch attendance records - filter by employee school
+      // Fetch attendance records using employee_id
+      const employeeIds = employeesData?.map(e => e.id) || [];
       const { data: attendanceData, error: attendanceError } = await supabase
         .from('attendance_records_hr')
-        .select(`
-          *,
-          employees!inner(
-            user_id,
-            user_roles!inner(school_id, is_active)
-          )
-        `)
-        .eq('employees.user_roles.school_id', currentSchoolId)
-        .eq('employees.user_roles.is_active', true)
+        .select('*')
+        .in('employee_id', employeeIds.length > 0 ? employeeIds : ['00000000-0000-0000-0000-000000000000'])
         .order('date', { ascending: false })
         .limit(100);
 
       if (attendanceError) throw attendanceError;
 
-      // Fetch payroll records - filter by employee school
+      // Fetch payroll records using employee_id
       const { data: payrollData, error: payrollError } = await supabase
         .from('payroll_records')
-        .select(`
-          *,
-          employees!inner(
-            user_id,
-            user_roles!inner(school_id, is_active)
-          )
-        `)
-        .eq('employees.user_roles.school_id', currentSchoolId)
-        .eq('employees.user_roles.is_active', true)
+        .select('*')
+        .in('employee_id', employeeIds.length > 0 ? employeeIds : ['00000000-0000-0000-0000-000000000000'])
         .order('created_at', { ascending: false });
 
       if (payrollError) throw payrollError;
