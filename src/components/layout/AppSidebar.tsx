@@ -427,13 +427,13 @@ export function AppSidebar() {
           return false;
         }
         
-        // CRITICAL: Always show School Settings to super admins (needed to configure modules)
-        if (item.title === 'School Settings' && isSuperAdmin()) {
-          console.log(`✅ Super Admin - Always showing School Settings`);
+        // CRITICAL: Super admins see ALL modules regardless of school enablement
+        if (isSuperAdmin()) {
+          console.log(`✅ Super Admin - Full access to: ${item.title}`);
           return true;
         }
         
-        // Check if module is enabled for this school (applies to all users including super admins)
+        // For non-super-admin users: Check if module is enabled for this school
         if (dbModuleName && currentSchool) {
           const moduleEnabled = isModuleEnabled(dbModuleName);
           console.log(`🏫 Module Check: ${item.title} (${dbModuleName}) - Enabled: ${moduleEnabled}`);
@@ -442,12 +442,6 @@ export function AppSidebar() {
             console.log(`❌ Module ${dbModuleName} disabled for school ${currentSchool.name}`);
             return false; // Module not enabled for this school
           }
-        }
-        
-        // Check role-based permissions (super admins bypass this check)
-        if (isSuperAdmin()) {
-          console.log(`✅ Super Admin - Has permission for: ${item.title}`);
-          return true;
         }
         
         // Check role-based permissions for non-super-admin users
