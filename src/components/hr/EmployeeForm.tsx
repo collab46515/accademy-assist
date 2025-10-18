@@ -71,13 +71,13 @@ export function EmployeeForm({
       last_name: '',
       email: '',
       phone: '',
-      department_id: '',
+      department_id: departments.length > 0 ? departments[0].id : '',
       position: '',
       manager_id: 'none',
       start_date: '',
       salary: 0,
-      status: 'active',
-      work_type: 'full_time',
+      status: 'active' as const,
+      work_type: 'full_time' as const,
       location: '',
       emergency_contact_name: '',
       emergency_contact_phone: '',
@@ -204,7 +204,7 @@ export function EmployeeForm({
                   </FormControl>
                   <SelectContent className="bg-background border border-border z-50">
                     {departments.length === 0 ? (
-                      <SelectItem value="" disabled>No departments available</SelectItem>
+                      <SelectItem value="no-dept">No departments available</SelectItem>
                     ) : (
                       departments.map((dept) => (
                         <SelectItem key={dept.id} value={dept.id}>
@@ -247,7 +247,7 @@ export function EmployeeForm({
                   </FormControl>
                   <SelectContent className="bg-background border border-border z-50">
                     <SelectItem value="none">No Manager</SelectItem>
-                    {employees.filter(emp => emp.id !== employee?.id).map((emp) => (
+                    {employees.length > 0 && employees.filter(emp => emp.id !== employee?.id).map((emp) => (
                       <SelectItem key={emp.id} value={emp.id}>
                         {emp.first_name} {emp.last_name}
                       </SelectItem>
