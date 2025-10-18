@@ -98,7 +98,7 @@ function AIAutoGeneratorCard() {
 }
 
 function TimetablePageContent() {
-  const { currentSchool, hasRole, userRoles, loading } = useRBAC();
+  const { currentSchool, hasRole, userRoles, loading, isSuperAdmin } = useRBAC();
 
   // Debug logging
   console.log('Timetable Debug:', { currentSchool, userRoles, loading });
@@ -135,10 +135,10 @@ function TimetablePageContent() {
     );
   }
 
-  // Check user permissions
-  const isSuperAdmin = hasRole('super_admin', currentSchool?.id);
-  const canManageTimetables = isSuperAdmin || hasRole('school_admin', currentSchool?.id) || hasRole('hod', currentSchool?.id);
-  const canViewTimetables = isSuperAdmin || hasRole('teacher', currentSchool?.id) || hasRole('student', currentSchool?.id) || hasRole('parent', currentSchool?.id) || canManageTimetables;
+  // Check user permissions - Super Admins have full access
+  const isSuperAdminUser = isSuperAdmin();
+  const canManageTimetables = isSuperAdminUser || hasRole('school_admin', currentSchool?.id) || hasRole('hod', currentSchool?.id);
+  const canViewTimetables = isSuperAdminUser || hasRole('teacher', currentSchool?.id) || hasRole('student', currentSchool?.id) || hasRole('parent', currentSchool?.id) || canManageTimetables;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
