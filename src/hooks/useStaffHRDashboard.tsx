@@ -84,7 +84,7 @@ export function useStaffHRDashboard() {
       const { data: performanceData } = await supabase
         .from('performance_reviews')
         .select('overall_rating')
-        .gte('review_date', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString());
+        .gte('review_period_end', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
 
       const avgPerformance = performanceData?.length 
         ? performanceData.reduce((sum, p) => sum + (p.overall_rating || 0), 0) / performanceData.length
