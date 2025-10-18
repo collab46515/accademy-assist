@@ -72,8 +72,10 @@ export function HRManagementPage() {
     return searchParams.get('tab') || 'dashboard';
   });
   
-  // Get module features configuration
-  const { isFeatureEnabled, loading: featuresLoading } = useModuleFeatures('hr-management');
+  // Module features disabled until HR module is added to modules table
+  // const { isFeatureEnabled, loading: featuresLoading } = useModuleFeatures('hr-management');
+  const isFeatureEnabled = (featureKey: string) => true; // Enable all features by default
+  const featuresLoading = false;
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDepartment, setFilterDepartment] = useState('all');
   const [showEmployeeForm, setShowEmployeeForm] = useState(false);

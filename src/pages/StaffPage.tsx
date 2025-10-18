@@ -37,6 +37,7 @@ import {
 import { useHRData } from "@/hooks/useHRData";
 import { useComprehensiveHR } from "@/hooks/useComprehensiveHR";
 import { EmployeeForm } from "@/components/hr/EmployeeForm";
+import { EmptyStateHelper } from "@/components/hr/EmptyStateHelper";
 import { useToast } from "@/hooks/use-toast";
 
 interface StaffMember {
@@ -269,6 +270,19 @@ const StaffPage = () => {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-lg text-muted-foreground">Loading staff data...</p>
         </div>
+      </div>
+    );
+  }
+
+  // Show empty state helper if no departments exist
+  if (dbDepartments.length === 0 && !loading) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Teacher & Staff Management</h1>
+          <p className="text-muted-foreground">HR for academic and non-academic staff with contracts, CPD tracking, and performance reviews</p>
+        </div>
+        <EmptyStateHelper onDepartmentCreated={refreshData} />
       </div>
     );
   }
