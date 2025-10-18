@@ -412,7 +412,7 @@ export function AppSidebar() {
     console.log('🔍 Filtering modules - Super Admin:', isSuperAdmin(), '| School Modules Count:', schoolModules.length);
     
     // Filter existing ERP modules based on user permissions AND school configuration
-    return erpModules.map(category => ({
+    const filtered = erpModules.map(category => ({
       ...category,
       subItems: category.subItems.filter(item => {
         // Get the database module name for this sidebar item
@@ -455,6 +455,14 @@ export function AppSidebar() {
         return hasModulePermission(item.title, 'view');
       })
     })).filter(category => category.subItems.length > 0); // Remove empty categories
+    
+    console.log('📋 Accessible Modules:', filtered.map(m => ({ 
+      title: m.title, 
+      subItemsCount: m.subItems.length,
+      subItems: m.subItems.map(si => si.title)
+    })));
+    
+    return filtered;
   }, [hasModulePermission, isSuperAdmin, isModuleEnabled, currentSchool, schoolModules]);
 
   const currentModuleData = useMemo(() => 
