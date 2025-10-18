@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Lock } from 'lucide-react';
 
 const TransportPage = () => {
-  const { currentSchool } = useRBAC();
+  const { currentSchool, isSuperAdmin } = useRBAC();
   const { isModuleEnabled, loading } = useSchoolModules(currentSchool?.id);
 
   if (loading) {
@@ -17,7 +17,8 @@ const TransportPage = () => {
     );
   }
 
-  if (!isModuleEnabled('Transport Management')) {
+  // Super admins bypass module enablement checks
+  if (!isSuperAdmin() && !isModuleEnabled('Transport Management')) {
     return (
       <div className="flex items-center justify-center min-h-[400px] p-6">
         <Card className="max-w-md">
