@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { useHRData } from "@/hooks/useHRData";
 import { useComprehensiveHR } from "@/hooks/useComprehensiveHR";
+import { useSchoolFilter } from "@/hooks/useSchoolFilter";
 import { EmployeeForm } from "@/components/hr/EmployeeForm";
 import { EmptyStateHelper } from "@/components/hr/EmptyStateHelper";
 import { useToast } from "@/hooks/use-toast";
@@ -60,6 +61,7 @@ interface StaffMember {
 const StaffPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { currentSchoolId } = useSchoolFilter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -213,21 +215,8 @@ const StaffPage = () => {
   const handleCreateEmployee = async (employeeData: any) => {
     try {
       await createEmployee({
-        employee_id: `EMP${Date.now()}`,
-        first_name: employeeData.firstName,
-        last_name: employeeData.lastName,
-        email: employeeData.email,
-        phone: employeeData.phone,
-        department_id: employeeData.departmentId,
-        position: employeeData.position,
-        manager_id: employeeData.managerId,
-        start_date: employeeData.startDate,
-        salary: employeeData.salary,
-        status: employeeData.status || 'active',
-        work_type: employeeData.workType || 'full_time',
-        location: employeeData.location,
-        emergency_contact_name: employeeData.emergencyContactName,
-        emergency_contact_phone: employeeData.emergencyContactPhone
+        ...employeeData,
+        school_id: currentSchoolId
       });
       setShowEmployeeForm(false);
       setEditingEmployee(null);
@@ -240,21 +229,7 @@ const StaffPage = () => {
   const handleUpdateEmployee = async (employeeData: any) => {
     if (!editingEmployee) return;
     try {
-      await updateEmployee(editingEmployee.id, {
-        first_name: employeeData.firstName,
-        last_name: employeeData.lastName,
-        email: employeeData.email,
-        phone: employeeData.phone,
-        department_id: employeeData.departmentId,
-        position: employeeData.position,
-        manager_id: employeeData.managerId,
-        salary: employeeData.salary,
-        status: employeeData.status,
-        work_type: employeeData.workType,
-        location: employeeData.location,
-        emergency_contact_name: employeeData.emergencyContactName,
-        emergency_contact_phone: employeeData.emergencyContactPhone
-      });
+      await updateEmployee(editingEmployee.id, employeeData);
       setShowEmployeeForm(false);
       setEditingEmployee(null);
       await refreshData();
