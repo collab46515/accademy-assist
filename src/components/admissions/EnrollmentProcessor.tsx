@@ -125,13 +125,12 @@ export function EnrollmentProcessor() {
 
       // Create complete student enrollment with student and parent accounts
       const { data, error } = await supabase
-        .functions.invoke('create-student-accounts', {
-          body: {
-            student_data: studentDataWithAuth,
-            parent_data: parentData,
-            school_id: application.school_id,
-            application_id: application.id
-          }
+        .rpc('create_complete_student_enrollment', {
+          student_data: studentDataWithAuth,
+          parent_data: parentData,
+          school_id: application.school_id,
+          application_id: application.id,
+          created_by: application.submitted_by || null
         });
 
       if (error) {

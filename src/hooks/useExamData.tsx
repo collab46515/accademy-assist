@@ -84,6 +84,7 @@ export function useExamData() {
   const [examResults, setExamResults] = useState<ExamResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [currentSchoolId, setCurrentSchoolId] = useState<string | null>(null);
 
   // Get user's school_id from user_roles
   const getUserSchoolId = async () => {
@@ -97,7 +98,9 @@ export function useExamData() {
       .eq('is_active', true)
       .single();
 
-    return userRoles?.school_id || null;
+    const schoolId = userRoles?.school_id || null;
+    setCurrentSchoolId(schoolId);
+    return schoolId;
   };
 
   // Fetch exams from Supabase
@@ -242,6 +245,11 @@ export function useExamData() {
   };
 
   const recordExamResult = async (resultData: Omit<ExamResult, 'id' | 'marked_at' | 'marked_by'>) => {
+    if (!currentSchoolId) {
+      toast.error('School context required');
+      throw new Error('School context required');
+    }
+    
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
@@ -277,6 +285,7 @@ export function useExamData() {
           .from('exam_results')
           .insert({
             ...resultData,
+            school_id: currentSchoolId,
             marked_by: user.id,
             marked_at: new Date().toISOString(),
           })

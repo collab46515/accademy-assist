@@ -127,7 +127,7 @@ export const useAssignmentData = (schoolId?: string) => {
     if (!activeSchoolId || !user) return null;
 
     try {
-      // TODO: Replace with actual Supabase query when types are ready
+      // Create assignment in local state for now (assignments table may not exist in types yet)
       const newAssignment: Assignment = {
         ...assignmentData,
         id: `assignment-${Date.now()}`,
@@ -136,6 +136,19 @@ export const useAssignmentData = (schoolId?: string) => {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
+
+      // TODO: Uncomment when assignments table is available in Supabase types
+      // const { data, error } = await supabase
+      //   .from('assignments')
+      //   .insert({
+      //     ...assignmentData,
+      //     created_by: user.id,
+      //     school_id: activeSchoolId,
+      //   })
+      //   .select()
+      //   .single();
+      // if (error) throw error;
+      // const newAssignment = data as Assignment;
 
       setAssignments(prev => [newAssignment, ...prev]);
       

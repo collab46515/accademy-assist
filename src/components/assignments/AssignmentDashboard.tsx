@@ -208,8 +208,8 @@ export const AssignmentDashboard = () => {
                 variant="outline" 
                 className="w-full justify-start"
                 onClick={() => {
-                  // Navigate to submissions view
-                  window.location.href = '/assignments?tab=submissions';
+                  // Navigate to submissions view on assignments page
+                  window.location.href = '/academics/assignments';
                 }}
               >
                 <Users className="h-4 w-4 mr-2" />
@@ -219,8 +219,8 @@ export const AssignmentDashboard = () => {
                 variant="outline" 
                 className="w-full justify-start"
                 onClick={() => {
-                  // Navigate to grading view
-                  window.location.href = '/assignments?tab=grading';
+                  // Navigate to grading view on assignments page
+                  window.location.href = '/academics/assignments';
                 }}
               >
                 <CheckCircle className="h-4 w-4 mr-2" />

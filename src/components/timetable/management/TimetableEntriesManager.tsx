@@ -391,6 +391,9 @@ export function TimetableEntriesManager() {
         description: `Timetable entry has been ${editingId ? 'updated' : 'added'} successfully.`,
       });
 
+      // Reload entries from database to ensure consistency
+      await loadEntries();
+
       return true;
     } catch (error: any) {
       console.error('Error saving entry:', error);
@@ -425,6 +428,9 @@ export function TimetableEntriesManager() {
         title: "Entry Deleted",
         description: "Timetable entry has been deleted successfully.",
       });
+      
+      // Reload entries from database to ensure consistency
+      await loadEntries();
     } catch (error: any) {
       console.error('Error deleting entry:', error);
       toast({
