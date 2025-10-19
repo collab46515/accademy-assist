@@ -326,6 +326,137 @@ export type Database = {
         }
         Relationships: []
       }
+      assignment_submissions: {
+        Row: {
+          assignment_id: string
+          attachment_urls: string[] | null
+          created_at: string | null
+          feedback: string | null
+          graded_at: string | null
+          graded_by: string | null
+          id: string
+          is_late: boolean | null
+          marks_awarded: number | null
+          status: string
+          student_id: string
+          submission_text: string | null
+          submitted_at: string | null
+          updated_at: string | null
+          voice_feedback_url: string | null
+        }
+        Insert: {
+          assignment_id: string
+          attachment_urls?: string[] | null
+          created_at?: string | null
+          feedback?: string | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          is_late?: boolean | null
+          marks_awarded?: number | null
+          status?: string
+          student_id: string
+          submission_text?: string | null
+          submitted_at?: string | null
+          updated_at?: string | null
+          voice_feedback_url?: string | null
+        }
+        Update: {
+          assignment_id?: string
+          attachment_urls?: string[] | null
+          created_at?: string | null
+          feedback?: string | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          is_late?: boolean | null
+          marks_awarded?: number | null
+          status?: string
+          student_id?: string
+          submission_text?: string | null
+          submitted_at?: string | null
+          updated_at?: string | null
+          voice_feedback_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_submissions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assignments: {
+        Row: {
+          allow_late_submissions: boolean | null
+          assignment_type: string
+          attachment_urls: string[] | null
+          created_at: string | null
+          created_by: string
+          curriculum_topic_id: string | null
+          description: string
+          due_date: string
+          id: string
+          instructions: string | null
+          late_penalty_percentage: number | null
+          lesson_plan_id: string | null
+          school_id: string
+          status: string
+          subject: string
+          submission_type: string
+          title: string
+          total_marks: number
+          updated_at: string | null
+          year_group: string
+        }
+        Insert: {
+          allow_late_submissions?: boolean | null
+          assignment_type: string
+          attachment_urls?: string[] | null
+          created_at?: string | null
+          created_by: string
+          curriculum_topic_id?: string | null
+          description: string
+          due_date: string
+          id?: string
+          instructions?: string | null
+          late_penalty_percentage?: number | null
+          lesson_plan_id?: string | null
+          school_id: string
+          status?: string
+          subject: string
+          submission_type?: string
+          title: string
+          total_marks?: number
+          updated_at?: string | null
+          year_group: string
+        }
+        Update: {
+          allow_late_submissions?: boolean | null
+          assignment_type?: string
+          attachment_urls?: string[] | null
+          created_at?: string | null
+          created_by?: string
+          curriculum_topic_id?: string | null
+          description?: string
+          due_date?: string
+          id?: string
+          instructions?: string | null
+          late_penalty_percentage?: number | null
+          lesson_plan_id?: string | null
+          school_id?: string
+          status?: string
+          subject?: string
+          submission_type?: string
+          title?: string
+          total_marks?: number
+          updated_at?: string | null
+          year_group?: string
+        }
+        Relationships: []
+      }
       attendance_alerts: {
         Row: {
           alert_type: string
@@ -4059,6 +4190,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      gradebook_records: {
+        Row: {
+          assessment_id: string | null
+          assessment_type: string
+          created_at: string | null
+          grade_points: number | null
+          grade_text: string
+          id: string
+          notes: string | null
+          percentage: number | null
+          recorded_at: string | null
+          recorded_by: string
+          student_id: string
+          subject: string
+          term: string
+          topic_id: string | null
+          updated_at: string | null
+          year_group: string
+        }
+        Insert: {
+          assessment_id?: string | null
+          assessment_type: string
+          created_at?: string | null
+          grade_points?: number | null
+          grade_text: string
+          id?: string
+          notes?: string | null
+          percentage?: number | null
+          recorded_at?: string | null
+          recorded_by: string
+          student_id: string
+          subject: string
+          term: string
+          topic_id?: string | null
+          updated_at?: string | null
+          year_group: string
+        }
+        Update: {
+          assessment_id?: string | null
+          assessment_type?: string
+          created_at?: string | null
+          grade_points?: number | null
+          grade_text?: string
+          id?: string
+          notes?: string | null
+          percentage?: number | null
+          recorded_at?: string | null
+          recorded_by?: string
+          student_id?: string
+          subject?: string
+          term?: string
+          topic_id?: string | null
+          updated_at?: string | null
+          year_group?: string
+        }
+        Relationships: []
       }
       grading_results: {
         Row: {

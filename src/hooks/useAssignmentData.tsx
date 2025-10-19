@@ -54,64 +54,22 @@ export const useAssignmentData = (schoolId?: string) => {
 
   const activeSchoolId = schoolId || currentSchool?.id;
 
-  // Mock data for now until database is synced
-  const mockAssignments: Assignment[] = [
-    {
-      id: '1',
-      title: 'Mathematics Homework - Fractions',
-      description: 'Complete exercises 1-10 on equivalent fractions',
-      instructions: 'Show all working and use diagrams where helpful',
-      due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      total_marks: 20,
-      attachment_urls: [],
-      assignment_type: 'homework',
-      curriculum_topic_id: 'fractions-equiv',
-      lesson_plan_id: 'lesson-123',
-      subject: 'Mathematics',
-      year_group: 'Year 4',
-      created_by: user?.id || 'teacher-1',
-      school_id: activeSchoolId || 'school-1',
-      status: 'published',
-      submission_type: 'both',
-      allow_late_submissions: true,
-      late_penalty_percentage: 10,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    },
-    {
-      id: '2',
-      title: 'Science Project - Plant Growth',
-      description: 'Design and conduct an experiment to test factors affecting plant growth',
-      instructions: 'Include hypothesis, method, results, and conclusion',
-      due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-      total_marks: 50,
-      attachment_urls: [],
-      assignment_type: 'project',
-      curriculum_topic_id: 'plant-growth',
-      subject: 'Science',
-      year_group: 'Year 6',
-      created_by: user?.id || 'teacher-2',
-      school_id: activeSchoolId || 'school-1',
-      status: 'published',
-      submission_type: 'file_upload',
-      allow_late_submissions: false,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
-  ];
-
-  // Fetch assignments from database (gracefully handle missing table)
+  // Fetch assignments from database
   const fetchAssignments = async () => {
     if (!activeSchoolId) return;
     
     setLoading(true);
     try {
-      // Use mock data since assignments table doesn't exist yet
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setAssignments(mockAssignments);
+      const { data, error } = await supabase
+        .from('assignments')
+        .select('*')
+        .eq('school_id', activeSchoolId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setAssignments(data as Assignment[]);
     } catch (error) {
       console.error('Error fetching assignments:', error);
-      setAssignments(mockAssignments);
       toast({
         title: "Error",
         description: "Failed to fetch assignments",
@@ -122,34 +80,44 @@ export const useAssignmentData = (schoolId?: string) => {
     }
   };
 
+  // Fetch submissions for assignments
+  const fetchSubmissions = async () => {
+    if (!activeSchoolId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('assignment_submissions')
+        .select(`
+          *,
+          assignments!inner(school_id)
+        `)
+        .eq('assignments.school_id', activeSchoolId);
+
+      if (error) throw error;
+      setSubmissions(data as AssignmentSubmission[]);
+    } catch (error) {
+      console.error('Error fetching submissions:', error);
+    }
+  };
+
   // Create assignment
   const createAssignment = async (assignmentData: Omit<Assignment, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'school_id'>) => {
     if (!activeSchoolId || !user) return null;
 
     try {
-      // Create assignment in local state for now (assignments table may not exist in types yet)
-      const newAssignment: Assignment = {
-        ...assignmentData,
-        id: `assignment-${Date.now()}`,
-        created_by: user.id,
-        school_id: activeSchoolId,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+      const { data, error } = await supabase
+        .from('assignments')
+        .insert({
+          ...assignmentData,
+          created_by: user.id,
+          school_id: activeSchoolId,
+        })
+        .select()
+        .single();
 
-      // TODO: Uncomment when assignments table is available in Supabase types
-      // const { data, error } = await supabase
-      //   .from('assignments')
-      //   .insert({
-      //     ...assignmentData,
-      //     created_by: user.id,
-      //     school_id: activeSchoolId,
-      //   })
-      //   .select()
-      //   .single();
-      // if (error) throw error;
-      // const newAssignment = data as Assignment;
-
+      if (error) throw error;
+      
+      const newAssignment = data as Assignment;
       setAssignments(prev => [newAssignment, ...prev]);
       
       toast({
@@ -172,6 +140,13 @@ export const useAssignmentData = (schoolId?: string) => {
   // Update assignment
   const updateAssignment = async (id: string, updates: Partial<Assignment>) => {
     try {
+      const { error } = await supabase
+        .from('assignments')
+        .update(updates)
+        .eq('id', id);
+
+      if (error) throw error;
+
       setAssignments(prev => prev.map(assignment => 
         assignment.id === id 
           ? { ...assignment, ...updates, updated_at: new Date().toISOString() }
@@ -214,6 +189,7 @@ export const useAssignmentData = (schoolId?: string) => {
   useEffect(() => {
     if (activeSchoolId) {
       fetchAssignments();
+      fetchSubmissions();
     }
   }, [activeSchoolId]);
 
@@ -222,24 +198,35 @@ export const useAssignmentData = (schoolId?: string) => {
       const existingSubmission = submissions.find(s => s.assignment_id === assignmentId);
       
       if (existingSubmission) {
-        // Update existing submission
+        // Update existing submission in database
+        const { error } = await supabase
+          .from('assignment_submissions')
+          .update(updates)
+          .eq('id', existingSubmission.id);
+
+        if (error) throw error;
+
         const updatedSubmissions = submissions.map(s => 
           s.assignment_id === assignmentId ? { ...s, ...updates, updated_at: new Date().toISOString() } : s
         );
         setSubmissions(updatedSubmissions);
       } else {
-        // Create new submission
-        const newSubmission: AssignmentSubmission = {
-          id: `sub_${Date.now()}`,
-          assignment_id: assignmentId,
-          student_id: user?.id || 'student_1',
-          status: 'not_submitted',
-          is_late: false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          ...updates
-        };
-        setSubmissions(prev => [...prev, newSubmission]);
+        // Create new submission in database
+        const { data, error } = await supabase
+          .from('assignment_submissions')
+          .insert({
+            assignment_id: assignmentId,
+            student_id: user?.id,
+            status: 'not_submitted',
+            is_late: false,
+            ...updates
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        setSubmissions(prev => [...prev, data as AssignmentSubmission]);
       }
     } catch (error) {
       console.error('Failed to update submission:', error);

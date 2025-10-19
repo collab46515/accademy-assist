@@ -116,6 +116,8 @@ export const GradingInterface: React.FC<GradingInterfaceProps> = ({
 
   const handleSaveGrade = async (submissionId: string, returnToStudent = false) => {
     const grade = grades[submissionId];
+    const submission = submissions.find(s => s.id === submissionId);
+    
     if (!grade?.grade) {
       toast({
         title: "Error",
@@ -125,21 +127,57 @@ export const GradingInterface: React.FC<GradingInterfaceProps> = ({
       return;
     }
 
-    // TODO: Save to database and update gradebook
-    const action = returnToStudent ? 'returned' : 'saved as draft';
-    toast({
-      title: `Grade ${returnToStudent ? 'Returned' : 'Saved'}`,
-      description: `Student grade has been ${action}`
-    });
+    if (!submission) return;
 
-    if (returnToStudent) {
-      // Update gradebook_records
-      console.log('Updating gradebook with:', {
-        student_id: submissionId,
-        topic_id: assignment.curriculum_topic_id,
-        grade_text: grade.grade,
-        assessment_type: 'assignment',
-        assessment_id: assignment.id
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      
+      // Update submission with grade and feedback
+      const { error: submissionError } = await supabase
+        .from('assignment_submissions')
+        .update({
+          marks_awarded: parseInt(grade.grade) || 0,
+          feedback: grade.feedback,
+          graded_at: new Date().toISOString(),
+          graded_by: (await supabase.auth.getUser()).data.user?.id,
+          status: returnToStudent ? 'returned' : 'graded'
+        })
+        .eq('id', submissionId);
+
+      if (submissionError) throw submissionError;
+
+      // If returning to student, update gradebook_records
+      if (returnToStudent && assignment.curriculum_topic_id) {
+        const { error: gradebookError } = await supabase
+          .from('gradebook_records')
+          .upsert({
+            student_id: submission.student_id,
+            topic_id: assignment.curriculum_topic_id,
+            grade_text: grade.grade,
+            assessment_type: 'assignment',
+            assessment_id: assignment.id,
+            subject: assignment.subject,
+            year_group: assignment.year_group,
+            term: 'Current', // You may want to determine this dynamically
+            recorded_by: (await supabase.auth.getUser()).data.user?.id
+          }, {
+            onConflict: 'student_id,topic_id'
+          });
+
+        if (gradebookError) throw gradebookError;
+      }
+
+      const action = returnToStudent ? 'returned' : 'saved as draft';
+      toast({
+        title: `Grade ${returnToStudent ? 'Returned' : 'Saved'}`,
+        description: `Student grade has been ${action}`
+      });
+    } catch (error) {
+      console.error('Error saving grade:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save grade",
+        variant: "destructive"
       });
     }
   };
@@ -156,11 +194,60 @@ export const GradingInterface: React.FC<GradingInterfaceProps> = ({
       return;
     }
 
-    // TODO: Bulk save to database
-    toast({
-      title: `${gradesToSave.length} Grades ${returnSelected ? 'Returned' : 'Saved'}`,
-      description: `Successfully ${returnSelected ? 'returned' : 'saved'} grades for ${gradesToSave.length} students`
-    });
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+
+      // Update all submissions with grades
+      for (const submissionId of gradesToSave) {
+        const grade = grades[submissionId];
+        const submission = submissions.find(s => s.id === submissionId);
+        
+        if (!submission) continue;
+
+        await supabase
+          .from('assignment_submissions')
+          .update({
+            marks_awarded: parseInt(grade.grade) || 0,
+            feedback: grade.feedback,
+            graded_at: new Date().toISOString(),
+            graded_by: userId,
+            status: returnSelected ? 'returned' : 'graded'
+          })
+          .eq('id', submissionId);
+
+        // If returning, update gradebook
+        if (returnSelected && assignment.curriculum_topic_id) {
+          await supabase
+            .from('gradebook_records')
+            .upsert({
+              student_id: submission.student_id,
+              topic_id: assignment.curriculum_topic_id,
+              grade_text: grade.grade,
+              assessment_type: 'assignment',
+              assessment_id: assignment.id,
+              subject: assignment.subject,
+              year_group: assignment.year_group,
+              term: 'Current',
+              recorded_by: userId
+            }, {
+              onConflict: 'student_id,topic_id'
+            });
+        }
+      }
+
+      toast({
+        title: `${gradesToSave.length} Grades ${returnSelected ? 'Returned' : 'Saved'}`,
+        description: `Successfully ${returnSelected ? 'returned' : 'saved'} grades for ${gradesToSave.length} students`
+      });
+    } catch (error) {
+      console.error('Error bulk saving grades:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save grades",
+        variant: "destructive"
+      });
+    }
   };
 
   const quickFeedbackOptions = [
