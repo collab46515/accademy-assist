@@ -58,6 +58,7 @@ import HODDashboardPage from "./pages/HODDashboardPage";
 import AdminManagementPage from "./pages/AdminManagementPage";
 import AssignmentsPage from "./pages/AssignmentsPage";
 import ReportCardsPage from "./pages/ReportCardsPage";
+import GradingPage from "./pages/GradingPage";
 import NewApplicationsPage from "./pages/NewApplicationsPage";
 import EnrollmentPage from "./pages/EnrollmentPage";
 import LibraryPage from "./pages/LibraryPage";
@@ -133,6 +134,7 @@ const App = () => (
                           <Route path="/academics/curriculum" element={<CurriculumPage />} />
                           <Route path="/academics/lesson-planning" element={<LessonPlanningPage />} />
                           <Route path="/academics/assignments" element={<AssignmentsPage />} />
+                          <Route path="/academics/assignments/grading" element={<GradingPage />} />
                           <Route path="/academics/assignments/:id" element={<AssignmentsPage />} />
                           <Route path="/academics/assignments/:id/submit" element={<StudentSubmissionInterface />} />
                           <Route path="/academics/gradebook" element={<GradebookPage />} />

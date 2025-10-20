@@ -219,8 +219,7 @@ export const AssignmentDashboard = () => {
                 variant="outline" 
                 className="w-full justify-start"
                 onClick={() => {
-                  // Navigate to grading view on assignments page
-                  window.location.href = '/academics/assignments';
+                  window.location.href = '/academics/assignments/grading';
                 }}
               >
                 <CheckCircle className="h-4 w-4 mr-2" />
