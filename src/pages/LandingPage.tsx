@@ -34,6 +34,7 @@ import { EnhancedFooter } from "@/components/landing/EnhancedFooter";
 import { CallToActionSection } from "@/components/landing/CallToActionSection";
 import { SignInModal } from "@/components/auth/SignInModal";
 import { ContactModal } from "@/components/landing/ContactModal";
+import { PricingCalculator } from "@/components/landing/PricingCalculator";
 
 export default function LandingPage() {
   const location = useLocation();
@@ -221,6 +222,14 @@ export default function LandingPage() {
                 Home
               </button>
               <button 
+                onClick={() => setActiveSection("pricing")}
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  activeSection === "pricing" ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                Pricing
+              </button>
+              <button 
                 onClick={() => setActiveSection("modules")}
                 className={`text-sm font-medium transition-colors hover:text-primary ${
                   activeSection === "modules" ? "text-primary" : "text-muted-foreground"
@@ -341,6 +350,10 @@ export default function LandingPage() {
               onScheduleDemo={() => setIsContactModalOpen(true)}
             />
           </>
+        )}
+
+        {activeSection === "pricing" && (
+          <PricingCalculator />
         )}
 
         {activeSection === "modules" && (
