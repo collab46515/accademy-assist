@@ -81,6 +81,7 @@ import EnrollmentTestPage from "./pages/EnrollmentTestPage";
 import PermissionManagementPage from "./pages/PermissionManagementPage";
 import DataIntegrityTestPage from "./pages/DataIntegrityTestPage";
 import SchoolSwitcherPage from "./pages/SchoolSwitcherPage";
+import DeveloperDocsPage from "./pages/DeveloperDocsPage";
 
 const queryClient = new QueryClient();
 
@@ -199,8 +200,13 @@ const App = () => (
                                <PermissionManagementPage />
                              </ProtectedRoute>
                            } />
-                            <Route path="/integrations" element={<IntegrationsPage />} />
+                           <Route path="/integrations" element={<IntegrationsPage />} />
                            <Route path="/technical-docs" element={<TechnicalDocsPage />} />
+                           <Route path="/developer-docs" element={
+                             <ProtectedRoute>
+                               <DeveloperDocsPage />
+                             </ProtectedRoute>
+                           } />
                            <Route path="/portals/*" element={<PortalsPage />} />
                            <Route path="*" element={<NotFound />} />
                         </Routes>

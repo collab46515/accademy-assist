@@ -1,0 +1,272 @@
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
+import { Activity, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
+
+export function UserFlows() {
+  const flows = [
+    {
+      category: 'Student Admission Flow',
+      steps: [
+        {
+          step: 1,
+          title: 'Application Submission',
+          actor: 'Parent/Guardian',
+          actions: ['Navigate to public admissions portal', 'Fill application form with student details', 'Upload required documents', 'Submit application'],
+          technicalDetails: 'Form data saved to enrollment_applications table, documents uploaded to application-documents storage bucket',
+          files: ['src/pages/UnifiedAdmissionsPage.tsx']
+        },
+        {
+          step: 2,
+          title: 'Application Review',
+          actor: 'Admissions Officer',
+          actions: ['View new applications', 'Review submitted documents', 'Verify information', 'Update application status (pending/approved/rejected)'],
+          technicalDetails: 'Queries enrollment_applications, updates status field, can add notes to additional_data JSONB column',
+          files: ['src/pages/NewApplicationsPage.tsx']
+        },
+        {
+          step: 3,
+          title: 'Enrollment Processing',
+          actor: 'Admissions Officer',
+          actions: ['Select approved application', 'Enter student enrollment details', 'Generate student credentials', 'Create parent account if needed', 'Assign student number'],
+          technicalDetails: 'Calls create_complete_student_enrollment() function which creates records in students, profiles, user_roles, student_parents tables',
+          files: ['src/pages/EnrollmentPage.tsx', 'supabase/functions/create_complete_student_enrollment']
+        },
+        {
+          step: 4,
+          title: 'Credential Distribution',
+          actor: 'System',
+          actions: ['Generate temporary passwords', 'Display credentials to officer', 'Mark application as enrolled', 'Set must_change_password flag'],
+          technicalDetails: 'Credentials shown in UI, emails can be sent, must_change_password enforces password change on first login',
+          files: ['src/pages/EnrollmentPage.tsx']
+        },
+        {
+          step: 5,
+          title: 'First Login',
+          actor: 'Student/Parent',
+          actions: ['Login with provided credentials', 'Forced password change screen', 'Set new secure password', 'Access student/parent portal'],
+          technicalDetails: 'useAuth checks must_change_password flag, redirects to password change, calls clear_password_change_requirement()',
+          files: ['src/hooks/useAuth.tsx', 'src/pages/Index.tsx']
+        }
+      ]
+    },
+    {
+      category: 'Assignment Workflow',
+      steps: [
+        {
+          step: 1,
+          title: 'Assignment Creation',
+          actor: 'Teacher',
+          actions: ['Navigate to Assignments', 'Click Create Assignment', 'Fill assignment details (title, description, due date)', 'Select target class/students', 'Attach resources if needed', 'Publish assignment'],
+          technicalDetails: 'Creates record in assignments table with teacher_id, school_id, status=published',
+          files: ['src/pages/AssignmentsPage.tsx', 'src/hooks/useAssignmentData.tsx']
+        },
+        {
+          step: 2,
+          title: 'Student Views Assignment',
+          actor: 'Student',
+          actions: ['Login to portal', 'Navigate to My Assignments', 'View assignment details', 'Download attached resources', 'Click Submit'],
+          technicalDetails: 'Queries assignments filtered by class enrollment, shows pending assignments first',
+          files: ['src/pages/AssignmentsPage.tsx']
+        },
+        {
+          step: 3,
+          title: 'Student Submission',
+          actor: 'Student',
+          actions: ['Upload assignment file', 'Add submission notes', 'Submit assignment', 'See confirmation'],
+          technicalDetails: 'Inserts into assignment_submissions table, uploads file to submissions bucket with RLS policies',
+          files: ['src/components/assignments/StudentSubmissionInterface.tsx']
+        },
+        {
+          step: 4,
+          title: 'Teacher Grading',
+          actor: 'Teacher',
+          actions: ['Navigate to Grading', 'View pending submissions', 'Select assignment', 'Review student work', 'Enter grade and feedback', 'Mark as returned'],
+          technicalDetails: 'Updates assignment_submissions with grade, feedback, creates gradebook_records entry',
+          files: ['src/pages/GradingPage.tsx', 'src/components/assignments/GradingInterface.tsx']
+        },
+        {
+          step: 5,
+          title: 'Grade Publication',
+          actor: 'System',
+          actions: ['Save grade to gradebook', 'Update submission status', 'Notify student', 'Make grade visible to parents'],
+          technicalDetails: 'Inserts/updates gradebook_records, parents can view via RLS policies',
+          files: ['src/components/assignments/GradingInterface.tsx']
+        }
+      ]
+    },
+    {
+      category: 'Attendance Recording Flow',
+      steps: [
+        {
+          step: 1,
+          title: 'Register Opening',
+          actor: 'Teacher',
+          actions: ['Navigate to Attendance', 'Select class and date', 'View student list', 'Begin attendance marking'],
+          technicalDetails: 'Queries students by class, creates attendance session record',
+          files: ['src/pages/AttendancePage.tsx']
+        },
+        {
+          step: 2,
+          title: 'Mark Attendance',
+          actor: 'Teacher',
+          actions: ['Mark each student as Present/Absent/Late', 'Add notes for absences', 'Save attendance record'],
+          technicalDetails: 'Bulk inserts into attendance_records table with student_id, status, date, notes',
+          files: ['src/pages/AttendancePage.tsx']
+        },
+        {
+          step: 3,
+          title: 'Absence Notification',
+          actor: 'System',
+          actions: ['Identify absent students', 'Send notifications to parents', 'Log notification delivery'],
+          technicalDetails: 'Automated notifications via communication module, logged in notification_logs',
+          files: ['src/pages/AttendancePage.tsx']
+        },
+        {
+          step: 4,
+          title: 'Attendance Reports',
+          actor: 'Admin/HOD',
+          actions: ['Generate attendance reports', 'View attendance trends', 'Identify chronic absentees', 'Export data'],
+          technicalDetails: 'Aggregates attendance_records with GROUP BY, calculates percentages',
+          files: ['src/pages/AttendancePage.tsx', 'src/pages/AnalyticsPage.tsx']
+        }
+      ]
+    },
+    {
+      category: 'User & Role Management Flow',
+      steps: [
+        {
+          step: 1,
+          title: 'User Creation',
+          actor: 'Super Admin',
+          actions: ['Navigate to User Management', 'Click Add User', 'Enter user details (name, email)', 'Assign initial role', 'Set school association', 'Generate temporary password'],
+          technicalDetails: 'Creates profile in profiles table, assigns role in user_roles table with school_id',
+          files: ['src/pages/UserManagementPage.tsx']
+        },
+        {
+          step: 2,
+          title: 'Role Assignment',
+          actor: 'Super Admin',
+          actions: ['Select user', 'Choose role (teacher, school_admin, etc.)', 'Assign to school', 'Set department/year group if applicable', 'Activate role'],
+          technicalDetails: 'Inserts into user_roles with role enum, school_id, is_active=true',
+          files: ['src/pages/UserManagementPage.tsx']
+        },
+        {
+          step: 3,
+          title: 'Permission Configuration',
+          actor: 'Super Admin',
+          actions: ['Navigate to Permission Management', 'Select role', 'Choose module', 'Set permissions (view/create/edit/delete)', 'Configure field-level access'],
+          technicalDetails: 'Updates role_module_permissions and field_permissions tables',
+          files: ['src/pages/PermissionManagementPage.tsx', 'src/components/admin/PermissionManager.tsx']
+        },
+        {
+          step: 4,
+          title: 'Access Validation',
+          actor: 'System',
+          actions: ['User attempts to access module', 'Check RLS policies', 'Verify role permissions', 'Validate school association', 'Grant or deny access'],
+          technicalDetails: 'RLS policies query user_roles, usePermissions hook checks role_module_permissions',
+          files: ['src/hooks/useRBAC.tsx', 'src/hooks/usePermissions.tsx']
+        }
+      ]
+    }
+  ];
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="w-5 h-5" />
+            User Flows & Processes
+          </CardTitle>
+          <CardDescription>
+            Step-by-step workflow documentation for major system processes
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Accordion type="multiple" className="w-full">
+            {flows.map((flow, flowIndex) => (
+              <AccordionItem key={flowIndex} value={`flow-${flowIndex}`}>
+                <AccordionTrigger className="text-lg font-semibold">
+                  <div className="flex items-center gap-3">
+                    <Activity className="w-5 h-5 text-primary" />
+                    {flow.category}
+                    <Badge variant="secondary">{flow.steps.length} steps</Badge>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-6">
+                    {flow.steps.map((step, stepIndex) => (
+                      <div key={stepIndex} className="relative">
+                        {stepIndex < flow.steps.length - 1 && (
+                          <div className="absolute left-5 top-12 bottom-0 w-0.5 bg-border" />
+                        )}
+                        
+                        <div className="flex gap-4">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold relative z-10">
+                            {step.step}
+                          </div>
+                          
+                          <Card className="flex-1">
+                            <CardHeader>
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <CardTitle className="text-base flex items-center gap-2">
+                                    {step.title}
+                                  </CardTitle>
+                                  <CardDescription className="mt-1">
+                                    <Badge variant="outline" className="text-xs">
+                                      {step.actor}
+                                    </Badge>
+                                  </CardDescription>
+                                </div>
+                                <CheckCircle className="w-5 h-5 text-green-600" />
+                              </div>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              <div>
+                                <h4 className="text-sm font-semibold mb-2">Actions</h4>
+                                <ul className="space-y-1">
+                                  {step.actions.map((action, aIndex) => (
+                                    <li key={aIndex} className="text-sm text-muted-foreground flex items-start gap-2">
+                                      <ArrowRight className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                                      <span>{action}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+
+                              <div className="border-t pt-3">
+                                <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                                  <AlertCircle className="w-4 h-4" />
+                                  Technical Implementation
+                                </h4>
+                                <p className="text-sm text-muted-foreground">{step.technicalDetails}</p>
+                              </div>
+
+                              <div>
+                                <h4 className="text-sm font-semibold mb-2">Related Files</h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {step.files.map((file, fIndex) => (
+                                    <Badge key={fIndex} variant="secondary" className="text-xs font-mono">
+                                      {file}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

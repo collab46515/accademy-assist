@@ -1,0 +1,8 @@
+export { SystemArchitecture } from './SystemArchitecture';
+export { ModuleDocumentation } from './ModuleDocumentation';
+export { UserFlows } from './UserFlows';
+export { AccessControlMatrix } from './AccessControlMatrix';
+export { DatabaseSchema } from './DatabaseSchema';
+export { TestCases } from './TestCases';
+export { APIDocumentation } from './APIDocumentation';
+export { SetupGuide } from './SetupGuide';

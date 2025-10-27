@@ -180,6 +180,7 @@ const erpModules = [
       { title: "Master Data", url: "/master-data", icon: Database },
       { title: "Data Integrity Test", url: "/data-integrity-test", icon: CheckCircle },
       { title: "Technical Docs", url: "/technical-docs", icon: FileText },
+      { title: "Developer Documentation", url: "/developer-docs", icon: BookOpen },
       { title: "Integrations", url: "/integrations", icon: Globe },
       { title: "Portals", url: "/portals", icon: ExternalLink },
       { title: "Footer CMS", url: "/footer-cms", icon: FileText },
