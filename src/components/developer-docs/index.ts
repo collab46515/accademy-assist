@@ -6,3 +6,6 @@ export { DatabaseSchema } from './DatabaseSchema';
 export { TestCases } from './TestCases';
 export { APIDocumentation } from './APIDocumentation';
 export { SetupGuide } from './SetupGuide';
+export { CodeExamples } from './CodeExamples';
+export { CommonPatterns } from './CommonPatterns';
+export { ExtensionGuide } from './ExtensionGuide';

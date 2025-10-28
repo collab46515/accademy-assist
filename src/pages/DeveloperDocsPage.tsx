@@ -26,6 +26,9 @@ import { DatabaseSchema } from '@/components/developer-docs/DatabaseSchema';
 import { TestCases } from '@/components/developer-docs/TestCases';
 import { APIDocumentation } from '@/components/developer-docs/APIDocumentation';
 import { SetupGuide } from '@/components/developer-docs/SetupGuide';
+import { CodeExamples } from '@/components/developer-docs/CodeExamples';
+import { CommonPatterns } from '@/components/developer-docs/CommonPatterns';
+import { ExtensionGuide } from '@/components/developer-docs/ExtensionGuide';
 
 export default function DeveloperDocsPage() {
   const [activeTab, setActiveTab] = useState('architecture');
@@ -78,6 +81,24 @@ export default function DeveloperDocsPage() {
       label: 'Setup Guide',
       icon: BookOpen,
       component: SetupGuide
+    },
+    {
+      id: 'code-examples',
+      label: 'Code Examples',
+      icon: Code,
+      component: CodeExamples
+    },
+    {
+      id: 'patterns',
+      label: 'Best Practices',
+      icon: CheckCircle,
+      component: CommonPatterns
+    },
+    {
+      id: 'extension',
+      label: 'Extension Guide',
+      icon: Settings,
+      component: ExtensionGuide
     }
   ];
 
