@@ -1,10 +1,27 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { GitBranch } from 'lucide-react';
+import mermaid from 'mermaid';
 
 export function TechnicalFlowcharts() {
+  useEffect(() => {
+    mermaid.initialize({ 
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: {
+        useMaxWidth: true,
+        htmlLabels: true,
+        curve: 'basis'
+      }
+    });
+    
+    // Re-render mermaid diagrams when component mounts or updates
+    mermaid.contentLoaded();
+  }, []);
+
   const flowcharts = [
     {
       category: 'Authentication & Authorization',
