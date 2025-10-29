@@ -9,3 +9,4 @@ export { SetupGuide } from './SetupGuide';
 export { CodeExamples } from './CodeExamples';
 export { CommonPatterns } from './CommonPatterns';
 export { ExtensionGuide } from './ExtensionGuide';
+export { TechnicalFlowcharts } from './TechnicalFlowcharts';

@@ -29,6 +29,7 @@ import { SetupGuide } from '@/components/developer-docs/SetupGuide';
 import { CodeExamples } from '@/components/developer-docs/CodeExamples';
 import { CommonPatterns } from '@/components/developer-docs/CommonPatterns';
 import { ExtensionGuide } from '@/components/developer-docs/ExtensionGuide';
+import { TechnicalFlowcharts } from '@/components/developer-docs/TechnicalFlowcharts';
 
 export default function DeveloperDocsPage() {
   const [activeTab, setActiveTab] = useState('architecture');
@@ -39,6 +40,12 @@ export default function DeveloperDocsPage() {
       label: 'System Architecture',
       icon: GitBranch,
       component: SystemArchitecture
+    },
+    {
+      id: 'flowcharts',
+      label: 'Technical Flowcharts',
+      icon: GitBranch,
+      component: TechnicalFlowcharts
     },
     {
       id: 'modules',
