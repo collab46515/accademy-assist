@@ -1,26 +1,46 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { GitBranch } from 'lucide-react';
-import mermaid from 'mermaid';
+import { GitBranch, Copy } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 export function TechnicalFlowcharts() {
+  const { toast } = useToast();
+  
   useEffect(() => {
-    mermaid.initialize({ 
-      startOnLoad: true,
-      theme: 'default',
-      securityLevel: 'loose',
-      flowchart: {
-        useMaxWidth: true,
-        htmlLabels: true,
-        curve: 'basis'
+    // Load mermaid from CDN
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+    script.async = true;
+    script.onload = () => {
+      // @ts-ignore
+      if (window.mermaid) {
+        // @ts-ignore
+        window.mermaid.initialize({ 
+          startOnLoad: true,
+          theme: 'default',
+          securityLevel: 'loose',
+        });
+        // @ts-ignore
+        window.mermaid.contentLoaded();
       }
-    });
+    };
+    document.head.appendChild(script);
     
-    // Re-render mermaid diagrams when component mounts or updates
-    mermaid.contentLoaded();
+    return () => {
+      document.head.removeChild(script);
+    };
   }, []);
+
+  const copyToClipboard = (text: string, title: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied to clipboard",
+      description: `${title} flowchart code copied`,
+    });
+  };
 
   const flowcharts = [
     {
@@ -472,9 +492,20 @@ export function TechnicalFlowcharts() {
                         <CardDescription>{flow.description}</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="bg-muted/50 rounded-lg p-4 overflow-x-auto">
-                          <div className="mermaid">
-                            {flow.diagram}
+                        <div className="relative">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="absolute top-2 right-2 z-10"
+                            onClick={() => copyToClipboard(flow.diagram, flow.title)}
+                          >
+                            <Copy className="w-4 h-4 mr-2" />
+                            Copy
+                          </Button>
+                          <div className="bg-muted/50 rounded-lg p-4 overflow-x-auto">
+                            <pre className="mermaid">
+{flow.diagram}
+                            </pre>
                           </div>
                         </div>
                       </CardContent>
