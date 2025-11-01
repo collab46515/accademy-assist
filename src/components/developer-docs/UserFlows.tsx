@@ -1,10 +1,221 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { Activity, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Activity, ArrowRight, CheckCircle, AlertCircle, Copy, Check } from 'lucide-react';
 
 export function UserFlows() {
+  const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
+
+  const handleCopyMermaid = (code: string, index: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
+  const flowcharts = [
+    {
+      id: 'admission',
+      title: 'Student Admission Flow',
+      mermaid: `graph TD
+    A[Parent/Guardian Visits Portal] --> B[Fill Application Form]
+    B --> C[Upload Required Documents]
+    C --> D[Submit Application]
+    D --> E[Application Saved to DB]
+    E --> F[Admissions Officer Notified]
+    
+    F --> G[Officer Reviews Application]
+    G --> H{Documents Complete?}
+    H -->|No| I[Request Additional Documents]
+    I --> C
+    H -->|Yes| J{Information Valid?}
+    J -->|No| K[Reject Application]
+    J -->|Yes| L[Approve Application]
+    
+    L --> M[Officer Processes Enrollment]
+    M --> N[Enter Student Details]
+    N --> O[Generate Student Credentials]
+    O --> P[Create Parent Account]
+    P --> Q[Assign Student Number]
+    Q --> R[Call create_complete_student_enrollment]
+    
+    R --> S[Records Created in DB]
+    S --> T[Generate Temporary Passwords]
+    T --> U[Display Credentials to Officer]
+    U --> V[Mark Application as Enrolled]
+    
+    V --> W[Student/Parent Receives Credentials]
+    W --> X[First Login Attempt]
+    X --> Y{Must Change Password?}
+    Y -->|Yes| Z[Force Password Change Screen]
+    Z --> AA[Set New Secure Password]
+    AA --> AB[Clear Password Change Flag]
+    AB --> AC[Access Portal]
+    Y -->|No| AC
+    
+    K --> AD[Notify Parent of Rejection]
+    AC --> AE[Complete]`
+    },
+    {
+      id: 'assignment',
+      title: 'Assignment Workflow',
+      mermaid: `graph TD
+    A[Teacher Logs In] --> B[Navigate to Assignments]
+    B --> C[Click Create Assignment]
+    C --> D[Fill Assignment Details]
+    D --> E{Add Resources?}
+    E -->|Yes| F[Attach Files/Links]
+    E -->|No| G[Select Target Class]
+    F --> G
+    G --> H[Set Due Date]
+    H --> I[Publish Assignment]
+    I --> J[Save to assignments Table]
+    
+    J --> K[Students See Assignment]
+    K --> L[Student Logs In]
+    L --> M[Navigate to My Assignments]
+    M --> N{Assignments Available?}
+    N -->|No| O[Show Empty State]
+    N -->|Yes| P[View Assignment List]
+    
+    P --> Q[Click Assignment]
+    Q --> R[View Details & Resources]
+    R --> S{Download Resources?}
+    S -->|Yes| T[Download Files]
+    T --> U[Click Submit Button]
+    S -->|No| U
+    
+    U --> V[Upload Assignment File]
+    V --> W[Add Submission Notes]
+    W --> X[Submit Assignment]
+    X --> Y[Save to assignment_submissions]
+    Y --> Z[Upload File to Storage Bucket]
+    Z --> AA[Show Confirmation]
+    
+    AA --> AB[Teacher Views Pending Submissions]
+    AB --> AC[Navigate to Grading]
+    AC --> AD[Select Assignment]
+    AD --> AE[Review Student Work]
+    AE --> AF[Download Submission]
+    AF --> AG[Enter Grade]
+    AG --> AH[Add Feedback Comments]
+    AH --> AI[Mark as Returned]
+    
+    AI --> AJ[Update assignment_submissions]
+    AJ --> AK[Create gradebook_records Entry]
+    AK --> AL[Student Notified]
+    AL --> AM[Grade Visible to Parents]
+    AM --> AN[Complete]`
+    },
+    {
+      id: 'attendance',
+      title: 'Attendance Recording Flow',
+      mermaid: `graph TD
+    A[Teacher Logs In] --> B[Navigate to Attendance]
+    B --> C[Select Class from Dropdown]
+    C --> D[Select Date]
+    D --> E[System Loads Student List]
+    E --> F[Query students by class_id]
+    F --> G[Create Attendance Session]
+    
+    G --> H[Display Student List]
+    H --> I[Teacher Reviews List]
+    I --> J{Mark Next Student}
+    J --> K[Select Status: Present/Absent/Late]
+    K --> L{Status is Absent/Late?}
+    L -->|Yes| M[Add Notes/Reason]
+    L -->|No| N{More Students?}
+    M --> N
+    
+    N -->|Yes| J
+    N -->|No| O[Review All Entries]
+    O --> P[Click Save Attendance]
+    P --> Q[Bulk Insert to attendance_records]
+    
+    Q --> R{Any Absences?}
+    R -->|Yes| S[Identify Absent Students]
+    S --> T[Send Parent Notifications]
+    T --> U[Log Notification Delivery]
+    U --> V[Mark Attendance Complete]
+    R -->|No| V
+    
+    V --> W[Admin Views Reports]
+    W --> X[Navigate to Analytics]
+    X --> Y[Select Attendance Report]
+    Y --> Z[Aggregate attendance_records]
+    Z --> AA[Calculate Attendance %]
+    AA --> AB[Identify Chronic Absentees]
+    AB --> AC{Export Needed?}
+    AC -->|Yes| AD[Export to Excel/PDF]
+    AC -->|No| AE[View Dashboard]
+    AD --> AE
+    AE --> AF[Complete]`
+    },
+    {
+      id: 'user-role',
+      title: 'User & Role Management Flow',
+      mermaid: `graph TD
+    A[Super Admin Logs In] --> B[Navigate to User Management]
+    B --> C[Click Add User]
+    C --> D[Enter User Details]
+    D --> E[Enter Name & Email]
+    E --> F[Select School Association]
+    F --> G[Assign Initial Role]
+    G --> H[Generate Temporary Password]
+    H --> I[Save to profiles Table]
+    I --> J[Create user_roles Entry]
+    
+    J --> K{Assign Additional Roles?}
+    K -->|Yes| L[Select Additional Role]
+    L --> M[Choose School for Role]
+    M --> N{Department/Year Group?}
+    N -->|Yes| O[Set Department/Year]
+    N -->|No| P[Activate Role]
+    O --> P
+    P --> Q[Insert into user_roles]
+    Q --> K
+    
+    K -->|No| R[Navigate to Permission Management]
+    R --> S[Select Role Type]
+    S --> T[Choose Module]
+    T --> U{Set Module Permissions}
+    U --> V[Configure View Permission]
+    V --> W[Configure Create Permission]
+    W --> X[Configure Edit Permission]
+    X --> Y[Configure Delete Permission]
+    Y --> Z[Update role_module_permissions]
+    
+    Z --> AA{Field-Level Access?}
+    AA -->|Yes| AB[Select Sensitive Fields]
+    AB --> AC[Set Access Level]
+    AC --> AD[Update field_permissions]
+    AD --> AE{More Modules?}
+    AA -->|No| AE
+    
+    AE -->|Yes| T
+    AE -->|No| AF[Send Credentials to User]
+    AF --> AG[User Attempts Login]
+    AG --> AH[System Validates Credentials]
+    AH --> AI[Load User Roles]
+    AI --> AJ[Query user_roles Table]
+    AJ --> AK[Check RLS Policies]
+    
+    AK --> AL{Access Module?}
+    AL --> AM[User Clicks Module]
+    AM --> AN[System Checks Permissions]
+    AN --> AO[Query role_module_permissions]
+    AO --> AP{Permission Granted?}
+    AP -->|Yes| AQ[Load Module]
+    AP -->|No| AR[Show Access Denied]
+    AQ --> AS[Apply Field-Level Restrictions]
+    AS --> AT[Render UI]
+    AR --> AU[Log Access Attempt]
+    AT --> AV[Complete]
+    AU --> AV`
+    }
+  ];
+
   const flows = [
     {
       category: 'Student Admission Flow',
@@ -197,6 +408,45 @@ export function UserFlows() {
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-6">
+                    {/* Visual Flowchart */}
+                    {flowcharts[flowIndex] && (
+                      <Card className="border-2 border-primary/20">
+                        <CardHeader>
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-base">Visual Flowchart</CardTitle>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleCopyMermaid(flowcharts[flowIndex].mermaid, `flow-${flowIndex}`)}
+                            >
+                              {copiedIndex === `flow-${flowIndex}` ? (
+                                <>
+                                  <Check className="w-4 h-4 mr-2" />
+                                  Copied!
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-4 h-4 mr-2" />
+                                  Copy Mermaid Code
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                          <CardDescription>
+                            Complete visual representation of {flow.category}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="mermaid-container p-4 bg-muted/50 rounded-lg overflow-x-auto">
+                            <pre className="mermaid text-sm">
+                              {flowcharts[flowIndex].mermaid}
+                            </pre>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                    
+                    {/* Detailed Steps */}
                     {flow.steps.map((step, stepIndex) => (
                       <div key={stepIndex} className="relative">
                         {stepIndex < flow.steps.length - 1 && (
@@ -267,6 +517,29 @@ export function UserFlows() {
           </Accordion>
         </CardContent>
       </Card>
+
+      {/* Initialize Mermaid */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            if (typeof mermaid !== 'undefined') {
+              mermaid.initialize({ 
+                startOnLoad: true,
+                theme: 'default',
+                flowchart: {
+                  useMaxWidth: true,
+                  htmlLabels: true,
+                  curve: 'basis'
+                }
+              });
+              // Re-render mermaid diagrams
+              setTimeout(() => {
+                mermaid.contentLoaded();
+              }, 100);
+            }
+          `
+        }}
+      />
     </div>
   );
 }
