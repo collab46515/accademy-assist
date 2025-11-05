@@ -19,6 +19,7 @@ import { FeeCalendar } from "@/components/fee-management/FeeCalendar";
 import { RemindersAlerts } from "@/components/fee-management/RemindersAlerts";
 import { FeeDashboard } from "@/components/fee-management/FeeDashboard";
 import FeeCollections from "@/components/fee-management/FeeCollections";
+import { PaymentGatewaySettings } from "@/components/fee-management/PaymentGatewaySettings";
 import { useFeeData } from "@/hooks/useFeeData";
 import { ModuleGuard } from "@/components/modules/ModuleGuard";
 
@@ -191,6 +192,7 @@ const FeeManagementPage = () => {
         <Route path="structure" element={<FeeStructureTabs />} />
         <Route path="invoices" element={<InvoiceGeneration />} />
         <Route path="payments" element={<PaymentCollection />} />
+        <Route path="payment-gateways" element={<PaymentGatewaySettings />} />
         <Route path="installments" element={<InstallmentPlans />} />
         <Route path="discounts" element={<DiscountsWaivers />} />
         <Route path="outstanding" element={<OutstandingFees />} />

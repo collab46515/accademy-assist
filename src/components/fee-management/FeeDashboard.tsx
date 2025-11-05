@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -26,7 +27,8 @@ import {
   Download,
   Filter,
   Search,
-  ChevronRight
+  ChevronRight,
+  Settings
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -88,6 +90,7 @@ const chartConfig = {
 };
 
 export function FeeDashboard() {
+  const navigate = useNavigate();
   const [metrics, setMetrics] = useState<DashboardMetrics>({
     totalCollected: 0,
     outstandingFees: 0,
@@ -267,6 +270,9 @@ export function FeeDashboard() {
         break;
       case "View Today's Collection List":
         setTodayCollectionModalOpen(true);
+        break;
+      case 'Payment Gateway Settings':
+        navigate('/school-management/fee-management/payment-gateways');
         break;
       case 'Collect Fees':
         setPaymentModalOpen(true);
@@ -799,7 +805,8 @@ export function FeeDashboard() {
                   { label: 'Record Payment', icon: CreditCard, action: 'Record Payment', color: 'text-green-600', bg: 'hover:bg-green-50' },
                   { label: 'Send Reminders', icon: Send, action: 'Send Reminder to All Overdue', color: 'text-blue-600', bg: 'hover:bg-blue-50' },
                   { label: 'Generate Invoices', icon: FileText, action: 'Generate Invoices (Bulk)', color: 'text-purple-600', bg: 'hover:bg-purple-50' },
-                  { label: "Today's Collection", icon: Calendar, action: "View Today's Collection List", color: 'text-orange-600', bg: 'hover:bg-orange-50' }
+                  { label: "Today's Collection", icon: Calendar, action: "View Today's Collection List", color: 'text-orange-600', bg: 'hover:bg-orange-50' },
+                  { label: 'Payment Gateways', icon: Settings, action: 'Payment Gateway Settings', color: 'text-indigo-600', bg: 'hover:bg-indigo-50' }
                 ].map((item, index) => (
                   <Button 
                     key={item.action}
