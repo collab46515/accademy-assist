@@ -26,15 +26,14 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
   const [searchTerm, setSearchTerm] = useState('');
 
   const stages = [
-    { title: 'Application Submission', status: 'draft' },
-    { title: 'Application Fee', status: 'submitted' },
-    { title: 'Enrollment Processing', status: 'documents_pending' },
-    { title: 'Detailed Review', status: 'under_review' },
+    { title: 'Application Submitted', status: 'submitted' },
+    { title: 'Document Verification', status: 'documents_pending' },
+    { title: 'Application Review', status: 'under_review' },
     { title: 'Assessment/Interview', status: 'assessment_scheduled' },
     { title: 'Admission Decision', status: 'approved' },
-    { title: 'Deposit Payment', status: 'offer_sent' },
-    { title: 'Admission Confirmed', status: 'offer_accepted' },
-    { title: 'Class Allocation', status: 'enrolled' }
+    { title: 'Fee Payment', status: 'offer_sent' },
+    { title: 'Enrollment Confirmation', status: 'offer_accepted' },
+    { title: 'Welcome & Onboarding', status: 'enrolled' }
   ];
 
   const stageComponents = [
@@ -103,10 +102,38 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
     setSelectedApplication(null);
   };
 
-  const handleNextStage = () => {
-    // Move application to next stage and go back to list
-    setSelectedApplication(null);
-    fetchApplicationsForStage();
+  const handleNextStage = async () => {
+    if (!selectedApplication) return;
+    
+    try {
+      // Get next stage status
+      const nextStageIndex = currentStage + 1;
+      if (nextStageIndex >= stages.length) {
+        console.log('Application is already at final stage');
+        return;
+      }
+      
+      const nextStatus = stages[nextStageIndex].status;
+      
+      // Update application status in database
+      const { error } = await supabase
+        .from('enrollment_applications')
+        .update({ status: nextStatus as any })
+        .eq('id', selectedApplication.id);
+      
+      if (error) {
+        console.error('Error updating application:', error);
+        return;
+      }
+      
+      console.log(`✅ Moved application ${selectedApplication.application_number} to stage: ${stages[nextStageIndex].title}`);
+      
+      // Go back to list and refresh
+      setSelectedApplication(null);
+      fetchApplicationsForStage();
+    } catch (error) {
+      console.error('Error moving to next stage:', error);
+    }
   };
 
   const getStatusBadge = (status: string) => {
