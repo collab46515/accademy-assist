@@ -4,9 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Calendar, Clock, Users, BookOpen, Mic, Video, CheckCircle, PlusCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface AssessmentInterviewStageProps {
   applicationId: string;
@@ -15,6 +18,16 @@ interface AssessmentInterviewStageProps {
 
 export function AssessmentInterviewStage({ applicationId, onMoveToNext }: AssessmentInterviewStageProps) {
   const [selectedAssessment, setSelectedAssessment] = useState<string | null>(null);
+  const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
+  const [newAssessment, setNewAssessment] = useState({
+    type: '',
+    subject: '',
+    date: '',
+    time: '',
+    duration: '',
+    assessor: ''
+  });
+  const { toast } = useToast();
 
   const scheduledAssessments = [
     {
@@ -97,6 +110,35 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
     return 'text-red-600';
   };
 
+  const handleScheduleAssessment = () => {
+    // Validate form
+    if (!newAssessment.type || !newAssessment.subject || !newAssessment.date || !newAssessment.time || !newAssessment.assessor) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // In a real app, this would save to database
+    toast({
+      title: "Assessment Scheduled",
+      description: `${newAssessment.subject} assessment has been scheduled for ${newAssessment.date} at ${newAssessment.time}`,
+    });
+
+    // Reset form and close dialog
+    setNewAssessment({
+      type: '',
+      subject: '',
+      date: '',
+      time: '',
+      duration: '',
+      assessor: ''
+    });
+    setIsScheduleDialogOpen(false);
+  };
+
   return (
     <div className="space-y-6">
       {/* Assessment Overview */}
@@ -137,10 +179,100 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
         <TabsContent value="schedule" className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Scheduled Assessments</h3>
-            <Button className="flex items-center gap-2">
-              <PlusCircle className="h-4 w-4" />
-              Schedule New Assessment
-            </Button>
+            <Dialog open={isScheduleDialogOpen} onOpenChange={setIsScheduleDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="flex items-center gap-2">
+                  <PlusCircle className="h-4 w-4" />
+                  Schedule New Assessment
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Schedule New Assessment</DialogTitle>
+                  <DialogDescription>
+                    Add a new assessment or interview for this application
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="type">Assessment Type *</Label>
+                      <Select 
+                        value={newAssessment.type} 
+                        onValueChange={(value) => setNewAssessment({...newAssessment, type: value})}
+                      >
+                        <SelectTrigger id="type">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="academic">Academic Assessment</SelectItem>
+                          <SelectItem value="behavioral">Behavioral Assessment</SelectItem>
+                          <SelectItem value="interview">Interview</SelectItem>
+                          <SelectItem value="practical">Practical Test</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="subject">Subject/Title *</Label>
+                      <Input 
+                        id="subject" 
+                        placeholder="e.g., Mathematics"
+                        value={newAssessment.subject}
+                        onChange={(e) => setNewAssessment({...newAssessment, subject: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="date">Date *</Label>
+                      <Input 
+                        id="date" 
+                        type="date"
+                        value={newAssessment.date}
+                        onChange={(e) => setNewAssessment({...newAssessment, date: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="time">Time *</Label>
+                      <Input 
+                        id="time" 
+                        type="time"
+                        value={newAssessment.time}
+                        onChange={(e) => setNewAssessment({...newAssessment, time: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="duration">Duration</Label>
+                      <Input 
+                        id="duration" 
+                        placeholder="e.g., 60 minutes"
+                        value={newAssessment.duration}
+                        onChange={(e) => setNewAssessment({...newAssessment, duration: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="assessor">Assessor/Interviewer *</Label>
+                      <Input 
+                        id="assessor" 
+                        placeholder="e.g., Dr. Smith"
+                        value={newAssessment.assessor}
+                        onChange={(e) => setNewAssessment({...newAssessment, assessor: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsScheduleDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleScheduleAssessment}>
+                    Schedule Assessment
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
           
           <div className="space-y-3">
