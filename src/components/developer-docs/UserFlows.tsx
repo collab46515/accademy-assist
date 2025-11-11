@@ -1048,40 +1048,6 @@ export function UserFlows() {
       steps: [
         {
           step: 1,
-          title: 'Register Opening',
-          actor: 'Teacher',
-          actions: ['Navigate to Attendance', 'Select class and date', 'View student list', 'Begin attendance marking'],
-          technicalDetails: 'Queries students by class, creates attendance session record',
-          files: ['src/pages/AttendancePage.tsx']
-        },
-        {
-          step: 2,
-          title: 'Mark Attendance',
-          actor: 'Teacher',
-          actions: ['Mark each student as Present/Absent/Late', 'Add notes for absences', 'Save attendance record'],
-          technicalDetails: 'Bulk inserts into attendance_records table with student_id, status, date, notes',
-          files: ['src/pages/AttendancePage.tsx']
-        },
-        {
-          step: 3,
-          title: 'Absence Notification',
-          actor: 'System',
-          actions: ['Identify absent students', 'Send notifications to parents', 'Log notification delivery'],
-          technicalDetails: 'Automated notifications via communication module, logged in notification_logs',
-          files: ['src/pages/AttendancePage.tsx']
-        },
-        {
-          step: 4,
-          title: 'Attendance Reports',
-          actor: 'Admin/HOD',
-          actions: ['Generate attendance reports', 'View attendance trends', 'Identify chronic absentees', 'Export data'],
-          technicalDetails: 'Aggregates attendance_records with GROUP BY, calculates percentages',
-          files: ['src/pages/AttendancePage.tsx', 'src/pages/AnalyticsPage.tsx']
-        }
-      ]
-    },
-        {
-          step: 1,
           title: 'Create User Account',
           actor: 'Super Admin/School Admin',
           actions: ['Enter user details', 'Assign roles', 'Set school association', 'Generate credentials', 'Send welcome email'],
