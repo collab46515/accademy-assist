@@ -16,6 +16,82 @@ export function UserFlows() {
 
   const flowcharts = [
     {
+      id: 'admission-detailed',
+      title: 'Detailed Admissions Process (8 Stages)',
+      mermaid: `graph TD
+    Start([Student Applies]) --> Stage1[Stage 1: Application Submitted]
+    
+    Stage1 --> V1{Initial Validation}
+    V1 -->|Complete Forms| Stage2[Stage 2: Document Verification]
+    V1 -->|Incomplete| Reject1[Request Additional Info]
+    Reject1 --> Stage1
+    
+    Stage2 --> D1{Required Documents}
+    D1 -->|All Verified| Stage3[Stage 3: Assessment & Interview]
+    D1 -->|Missing/Invalid| Reject2[Request Documents]
+    Reject2 --> Stage2
+    
+    Stage3 --> A1[Academic Assessment]
+    Stage3 --> A2[Behavioral Assessment]
+    Stage3 --> A3[Interview]
+    
+    A1 --> Score1[Academic Score]
+    A2 --> Score2[Behavior Score]
+    A3 --> Score3[Interview Score]
+    
+    Score1 --> Stage4[Stage 4: Application Review]
+    Score2 --> Stage4
+    Score3 --> Stage4
+    
+    Stage4 --> R1{Committee Review}
+    R1 -->|Scores Compiled| Stage5[Stage 5: Admission Decision]
+    R1 -->|Need More Info| Stage3
+    
+    Stage5 --> Decision{Final Decision}
+    Decision -->|Accept| Stage6[Stage 6: Fee Payment]
+    Decision -->|Conditional Accept| Conditions[Set Conditions]
+    Decision -->|Waitlist| Waitlist[Add to Waitlist]
+    Decision -->|Reject| End1([Application Rejected])
+    
+    Conditions --> Stage6
+    Waitlist --> MonitorWaitlist{Space Available?}
+    MonitorWaitlist -->|Yes| Stage6
+    MonitorWaitlist -->|No| End1
+    
+    Stage6 --> Payment{Payment Status}
+    Payment -->|Payment Received| Stage7[Stage 7: Enrollment Confirmation]
+    Payment -->|Payment Pending| Reminder[Send Payment Reminder]
+    Reminder --> Payment
+    Payment -->|Payment Failed/Expired| End2([Offer Withdrawn])
+    
+    Stage7 --> Assign[Assign Student ID, Class, House]
+    Assign --> Stage8[Stage 8: Welcome & Onboarding]
+    
+    Stage8 --> Onboard1[Send Welcome Pack]
+    Stage8 --> Onboard2[Schedule Orientation]
+    Stage8 --> Onboard3[Order Uniform]
+    
+    Onboard1 --> Complete{All Complete?}
+    Onboard2 --> Complete
+    Onboard3 --> Complete
+    
+    Complete -->|Yes| End3([Fully Enrolled Student])
+    Complete -->|No| Pending[Pending Items]
+    Pending --> Stage8
+    
+    style Stage1 fill:#3b82f6,color:#fff
+    style Stage2 fill:#8b5cf6,color:#fff
+    style Stage3 fill:#f59e0b,color:#fff
+    style Stage4 fill:#ef4444,color:#fff
+    style Stage5 fill:#06b6d4,color:#fff
+    style Stage6 fill:#10b981,color:#fff
+    style Stage7 fill:#84cc16,color:#fff
+    style Stage8 fill:#f97316,color:#fff
+    style End3 fill:#22c55e,color:#fff
+    style End1 fill:#dc2626,color:#fff
+    style End2 fill:#dc2626,color:#fff`
+    },
+    {
       id: 'admission',
       title: 'Student Admission Flow',
       mermaid: `graph TD
