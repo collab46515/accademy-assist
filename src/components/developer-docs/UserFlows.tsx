@@ -294,166 +294,757 @@ export function UserFlows() {
 
   const flows = [
     {
-      category: 'Detailed Admissions Process (8 Stages)',
+      category: '1. Student Admissions Management',
+      description: 'Complete 8-stage admission process from application to enrollment',
       steps: [
         {
           step: 1,
-          title: 'Application Submitted',
-          actor: 'Parent/Guardian & System',
-          actions: ['Parent submits application form', 'System performs initial validation', 'Required documents checked', 'Application saved to database'],
-          technicalDetails: 'Creates record in enrollment_applications table, validates required fields, uploads documents to storage',
-          files: ['src/components/admissions/stages/ApplicationSubmittedStage.tsx']
+          title: 'Application Submission (Stage 1)',
+          actor: 'Parent/Guardian',
+          actions: [
+            'Access public admissions portal',
+            'Fill student information form (personal details, academic history)',
+            'Upload required documents (birth certificate, passport photo, school reports)',
+            'Provide emergency contact information',
+            'Submit application'
+          ],
+          technicalDetails: 'Creates record in enrollment_applications table with status="submitted". Documents uploaded to application-documents storage bucket. Initial validation checks performed.',
+          dataFlow: 'enrollment_applications → application_documents storage → notification system',
+          files: ['src/pages/UnifiedAdmissionsPage.tsx', 'src/components/admissions/stages/ApplicationSubmittedStage.tsx']
         },
         {
           step: 2,
-          title: 'Document Verification',
+          title: 'Document Verification (Stage 2)',
           actor: 'Admissions Officer',
-          actions: ['Review all required documents', 'Verify authenticity', 'Request missing documents if needed', 'Mark documents as verified/rejected'],
-          technicalDetails: 'Updates document status in enrollment_applications, manages document storage bucket with RLS policies',
+          actions: [
+            'Review submitted application',
+            'Verify each required document (birth certificate, passport photo, reports)',
+            'Check document authenticity and validity',
+            'Request missing/invalid documents',
+            'Mark documents as verified/rejected',
+            'Add verification notes'
+          ],
+          technicalDetails: 'Updates document_status field in enrollment_applications. Uses RLS policies to restrict document access. Stores verification metadata in JSONB field.',
+          dataFlow: 'enrollment_applications.document_status → storage RLS check → verification_log',
           files: ['src/components/admissions/stages/DocumentVerificationStage.tsx']
         },
         {
           step: 3,
-          title: 'Assessment & Interview',
+          title: 'Assessment & Interview (Stage 3)',
           actor: 'Academic Staff & Admissions Team',
-          actions: ['Schedule academic assessments', 'Conduct behavioral assessments', 'Perform student interview', 'Score all assessment components'],
-          technicalDetails: 'Stores assessment results, interview notes, and scores in application metadata JSONB field',
+          actions: [
+            'Schedule academic assessment (Math, English, Science)',
+            'Conduct behavioral assessment',
+            'Arrange and conduct student interview',
+            'Score each assessment component',
+            'Record interview notes',
+            'Calculate composite score'
+          ],
+          technicalDetails: 'Assessment results stored in application_metadata JSONB. Each assessment type has separate scoring. Composite score calculated automatically.',
+          dataFlow: 'assessment_scores → application_metadata.assessments → composite_score calculation',
           files: ['src/components/admissions/stages/AssessmentInterviewStage.tsx']
         },
         {
           step: 4,
-          title: 'Application Review',
+          title: 'Application Review (Stage 4)',
           actor: 'Admissions Committee',
-          actions: ['Review all assessment scores', 'Examine academic history', 'Review references', 'Compile comprehensive evaluation', 'Add review notes'],
-          technicalDetails: 'Aggregates data from multiple sources, committee members add reviews to application record',
+          actions: [
+            'Review all assessment scores',
+            'Examine academic performance history',
+            'Review behavioral indicators',
+            'Check references and recommendations',
+            'Evaluate student potential',
+            'Add committee review notes',
+            'Assign overall rating'
+          ],
+          technicalDetails: 'Committee members can add individual reviews. All reviews aggregated in application_metadata. Overall rating calculated from multiple factors.',
+          dataFlow: 'assessment_scores + academic_history + references → committee_reviews → overall_rating',
           files: ['src/components/admissions/stages/ApplicationReviewStage.tsx']
         },
         {
           step: 5,
-          title: 'Admission Decision',
+          title: 'Admission Decision (Stage 5)',
           actor: 'Head of Admissions',
-          actions: ['Review committee recommendations', 'Make final decision (Accept/Conditional/Waitlist/Reject)', 'Set conditions if conditional acceptance', 'Prepare decision letter'],
-          technicalDetails: 'Updates application status, stores decision details and conditions, triggers notification workflows',
+          actions: [
+            'Review committee recommendations',
+            'Make final admission decision (Accept/Conditional Accept/Waitlist/Reject)',
+            'Set conditions for conditional acceptance',
+            'Prepare decision letter',
+            'Set deadlines for acceptance',
+            'Notify parent/guardian'
+          ],
+          technicalDetails: 'Updates application.status to accepted/conditional/waitlist/rejected. Conditions stored in JSONB. Triggers email notification workflow.',
+          dataFlow: 'decision_data → application.status → notification_queue → email/SMS',
           files: ['src/components/admissions/stages/AdmissionDecisionStage.tsx']
         },
         {
           step: 6,
-          title: 'Fee Payment',
-          actor: 'Parent/Guardian & Finance',
-          actions: ['Receive payment link', 'Complete payment via gateway', 'System verifies payment', 'Generate receipt', 'Send payment reminders if pending'],
-          technicalDetails: 'Integrates with payment gateways, creates fee records, webhook handlers verify payment status',
+          title: 'Fee Payment (Stage 6)',
+          actor: 'Parent/Guardian & Finance Team',
+          actions: [
+            'Receive payment notification and link',
+            'Review fee structure (application, registration, tuition)',
+            'Select payment plan (full/installment)',
+            'Complete payment via gateway',
+            'System verifies payment',
+            'Generate and send receipt',
+            'Send payment reminders for pending'
+          ],
+          technicalDetails: 'Payment gateway integration (Stripe/PayPal). Payment records in fee_payments table. Webhook handlers verify payment status. Automated reminders for pending payments.',
+          dataFlow: 'payment_request → payment_gateway → webhook → fee_payments → receipt_generation',
           files: ['src/components/admissions/stages/FeePaymentStage.tsx']
         },
         {
           step: 7,
-          title: 'Enrollment Confirmation',
+          title: 'Enrollment Confirmation (Stage 7)',
           actor: 'Admissions Officer & System',
-          actions: ['Assign Student ID', 'Assign Form Class', 'Assign House', 'Set start date', 'Generate enrollment credentials'],
-          technicalDetails: 'Creates student record in students table, assigns to classes, sets up user accounts',
-          files: ['src/components/admissions/stages/EnrollmentConfirmationStage.tsx']
+          actions: [
+            'System generates unique Student ID',
+            'Assign to form class based on year group',
+            'Assign to house (Churchill, Kennedy, etc.)',
+            'Set academic start date',
+            'Create student profile',
+            'Generate login credentials',
+            'Set temporary password with must_change flag'
+          ],
+          technicalDetails: 'Calls create_complete_student_enrollment() edge function. Creates records in students, profiles, user_roles, student_class_assignments tables atomically.',
+          dataFlow: 'application_data → create_complete_student_enrollment() → students + profiles + user_roles + credentials',
+          files: ['src/components/admissions/stages/EnrollmentConfirmationStage.tsx', 'src/pages/EnrollmentPage.tsx']
         },
         {
           step: 8,
-          title: 'Welcome & Onboarding',
-          actor: 'Admissions & Administrative Staff',
-          actions: ['Send welcome pack', 'Schedule orientation', 'Order uniform', 'Complete onboarding checklist', 'Mark student as fully enrolled'],
-          technicalDetails: 'Updates onboarding status, sends automated communications, finalizes student enrollment',
+          title: 'Welcome & Onboarding (Stage 8)',
+          actor: 'Administrative Staff',
+          actions: [
+            'Send welcome pack with school information',
+            'Schedule orientation date and time',
+            'Order school uniform',
+            'Provide access to parent/student portals',
+            'Share important dates calendar',
+            'Complete onboarding checklist',
+            'Mark student as fully enrolled'
+          ],
+          technicalDetails: 'Onboarding checklist tracked in student_metadata. Automated emails for welcome pack. Integration with uniform supplier system.',
+          dataFlow: 'onboarding_tasks → student_metadata.onboarding → email_templates → enrollment_complete',
           files: ['src/components/admissions/stages/WelcomeOnboardingStage.tsx']
         }
       ]
     },
     {
-      category: 'Student Admission Flow',
+      category: '2. Student Information Management',
+      description: 'Comprehensive student data management and profile tracking',
       steps: [
         {
           step: 1,
-          title: 'Application Submission',
-          actor: 'Parent/Guardian',
-          actions: ['Navigate to public admissions portal', 'Fill application form with student details', 'Upload required documents', 'Submit application'],
-          technicalDetails: 'Form data saved to enrollment_applications table, documents uploaded to application-documents storage bucket',
-          files: ['src/pages/UnifiedAdmissionsPage.tsx']
+          title: 'View Student List',
+          actor: 'Teacher/Admin',
+          actions: [
+            'Access Students page',
+            'View complete list of enrolled students',
+            'Filter by class, year group, or house',
+            'Search by student name or ID',
+            'Sort by various criteria'
+          ],
+          technicalDetails: 'Queries students table with JOINs to profiles, classes. Uses RLS policies to filter by school_id and user permissions.',
+          dataFlow: 'students → profiles → classes → student_class_assignments',
+          files: ['src/pages/StudentsPage.tsx', 'src/hooks/useStudentData.tsx']
         },
         {
           step: 2,
-          title: 'Application Review',
-          actor: 'Admissions Officer',
-          actions: ['View new applications', 'Review submitted documents', 'Verify information', 'Update application status (pending/approved/rejected)'],
-          technicalDetails: 'Queries enrollment_applications, updates status field, can add notes to additional_data JSONB column',
-          files: ['src/pages/NewApplicationsPage.tsx']
+          title: 'View Student Profile',
+          actor: 'Teacher/Admin/Parent',
+          actions: [
+            'Click on student name',
+            'View comprehensive student information',
+            'See academic performance summary',
+            'Check attendance records',
+            'View behavioral notes',
+            'Access contact information'
+          ],
+          technicalDetails: 'Loads student data with related records: grades, attendance, behavior incidents. Parent access restricted via RLS to their own children.',
+          dataFlow: 'student_id → students + profiles + gradebook_records + attendance_records + behavior_incidents',
+          files: ['src/pages/StudentProfilePage.tsx', 'src/components/students/StudentProfileView.tsx']
         },
         {
           step: 3,
-          title: 'Enrollment Processing',
-          actor: 'Admissions Officer',
-          actions: ['Select approved application', 'Enter student enrollment details', 'Generate student credentials', 'Create parent account if needed', 'Assign student number'],
-          technicalDetails: 'Calls create_complete_student_enrollment() function which creates records in students, profiles, user_roles, student_parents tables',
-          files: ['src/pages/EnrollmentPage.tsx', 'supabase/functions/create_complete_student_enrollment']
+          title: 'Edit Student Information',
+          actor: 'School Admin',
+          actions: [
+            'Click Edit on student profile',
+            'Update personal information',
+            'Modify emergency contacts',
+            'Update medical information',
+            'Change class/house assignments',
+            'Save changes'
+          ],
+          technicalDetails: 'Updates students and profiles tables. Validates required fields. Logs changes in audit trail.',
+          dataFlow: 'updated_data → students/profiles validation → UPDATE query → audit_log',
+          files: ['src/components/students/StudentEditForm.tsx']
         },
         {
           step: 4,
-          title: 'Credential Distribution',
-          actor: 'System',
-          actions: ['Generate temporary passwords', 'Display credentials to officer', 'Mark application as enrolled', 'Set must_change_password flag'],
-          technicalDetails: 'Credentials shown in UI, emails can be sent, must_change_password enforces password change on first login',
-          files: ['src/pages/EnrollmentPage.tsx']
-        },
-        {
-          step: 5,
-          title: 'First Login',
-          actor: 'Student/Parent',
-          actions: ['Login with provided credentials', 'Forced password change screen', 'Set new secure password', 'Access student/parent portal'],
-          technicalDetails: 'useAuth checks must_change_password flag, redirects to password change, calls clear_password_change_requirement()',
-          files: ['src/hooks/useAuth.tsx', 'src/pages/Index.tsx']
+          title: 'Manage Parent Links',
+          actor: 'School Admin',
+          actions: [
+            'View student\'s linked parents',
+            'Add new parent/guardian',
+            'Remove parent link',
+            'Set primary contact',
+            'Update parent permissions'
+          ],
+          technicalDetails: 'Manages student_parents junction table. Creates parent profile if needed. Sets relationship_type (mother/father/guardian).',
+          dataFlow: 'parent_data → profiles (parent) → student_parents → relationship validation',
+          files: ['src/components/students/ParentLinksManager.tsx']
         }
       ]
     },
     {
-      category: 'Assignment Workflow',
+      category: '3. Assignment & Homework Management',
+      description: 'Complete lifecycle from creation to grading and feedback',
       steps: [
         {
           step: 1,
-          title: 'Assignment Creation',
+          title: 'Create Assignment',
           actor: 'Teacher',
-          actions: ['Navigate to Assignments', 'Click Create Assignment', 'Fill assignment details (title, description, due date)', 'Select target class/students', 'Attach resources if needed', 'Publish assignment'],
-          technicalDetails: 'Creates record in assignments table with teacher_id, school_id, status=published',
-          files: ['src/pages/AssignmentsPage.tsx', 'src/hooks/useAssignmentData.tsx']
+          actions: [
+            'Navigate to Assignments page',
+            'Click "Create New Assignment"',
+            'Enter assignment title and description',
+            'Set due date and time',
+            'Select target class/students',
+            'Attach resource files (PDFs, documents)',
+            'Set maximum marks',
+            'Set assignment type (homework/classwork/project)',
+            'Publish assignment'
+          ],
+          technicalDetails: 'Creates record in assignments table with status="published", teacher_id, school_id. Files uploaded to assignments-resources storage bucket with RLS policies.',
+          dataFlow: 'assignment_data → assignments table → storage bucket → student_notifications',
+          files: ['src/pages/AssignmentsPage.tsx', 'src/hooks/useAssignmentData.tsx', 'src/components/assignments/AssignmentCreator.tsx']
         },
         {
           step: 2,
           title: 'Student Views Assignment',
           actor: 'Student',
-          actions: ['Login to portal', 'Navigate to My Assignments', 'View assignment details', 'Download attached resources', 'Click Submit'],
-          technicalDetails: 'Queries assignments filtered by class enrollment, shows pending assignments first',
-          files: ['src/pages/AssignmentsPage.tsx']
+          actions: [
+            'Login to student portal',
+            'Navigate to "My Assignments"',
+            'View list of pending assignments',
+            'Filter by subject or due date',
+            'Click on assignment to view details',
+            'Read instructions and requirements',
+            'Download attached resources',
+            'Note the due date'
+          ],
+          technicalDetails: 'Queries assignments filtered by student\'s class enrollment (student_class_assignments JOIN). Shows status (pending/submitted/graded).',
+          dataFlow: 'student_id → student_class_assignments → assignments WHERE class_id → assignment_submissions (status)',
+          files: ['src/pages/AssignmentsPage.tsx', 'src/components/assignments/StudentAssignmentList.tsx']
         },
         {
           step: 3,
-          title: 'Student Submission',
+          title: 'Submit Assignment',
           actor: 'Student',
-          actions: ['Upload assignment file', 'Add submission notes', 'Submit assignment', 'See confirmation'],
-          technicalDetails: 'Inserts into assignment_submissions table, uploads file to submissions bucket with RLS policies',
+          actions: [
+            'Click "Submit Assignment" button',
+            'Upload assignment file (PDF, DOC, images)',
+            'Add submission notes or comments',
+            'Review submission details',
+            'Confirm and submit',
+            'Receive confirmation message'
+          ],
+          technicalDetails: 'Inserts into assignment_submissions table with student_id, assignment_id, submission_date. File uploaded to submissions storage bucket. RLS ensures student can only submit for themselves.',
+          dataFlow: 'file + notes → assignment_submissions INSERT → storage upload → submission confirmation',
           files: ['src/components/assignments/StudentSubmissionInterface.tsx']
         },
         {
           step: 4,
-          title: 'Teacher Grading',
+          title: 'Teacher Reviews Submissions',
           actor: 'Teacher',
-          actions: ['Navigate to Grading', 'View pending submissions', 'Select assignment', 'Review student work', 'Enter grade and feedback', 'Mark as returned'],
-          technicalDetails: 'Updates assignment_submissions with grade, feedback, creates gradebook_records entry',
+          actions: [
+            'Navigate to Grading page',
+            'View list of pending submissions',
+            'Filter by assignment or class',
+            'Click on submission to review',
+            'Download student\'s submitted file',
+            'Review student work',
+            'Prepare feedback'
+          ],
+          technicalDetails: 'Queries assignment_submissions WHERE status="submitted" and teacher owns assignment. Provides download links with presigned URLs.',
+          dataFlow: 'teacher_id → assignments → assignment_submissions WHERE status="submitted" → storage download URLs',
           files: ['src/pages/GradingPage.tsx', 'src/components/assignments/GradingInterface.tsx']
         },
         {
           step: 5,
-          title: 'Grade Publication',
-          actor: 'System',
-          actions: ['Save grade to gradebook', 'Update submission status', 'Notify student', 'Make grade visible to parents'],
-          technicalDetails: 'Inserts/updates gradebook_records, parents can view via RLS policies',
+          title: 'Grade & Provide Feedback',
+          actor: 'Teacher',
+          actions: [
+            'Enter numerical grade (out of maximum marks)',
+            'Write detailed feedback comments',
+            'Optionally attach feedback file',
+            'Mark as "Returned"',
+            'Save grading'
+          ],
+          technicalDetails: 'Updates assignment_submissions with grade, feedback. Creates gradebook_records entry. Status changed to "returned". Student and parent notified.',
+          dataFlow: 'grade + feedback → assignment_submissions UPDATE → gradebook_records INSERT → notification_queue',
           files: ['src/components/assignments/GradingInterface.tsx']
+        },
+        {
+          step: 6,
+          title: 'Student Views Grade',
+          actor: 'Student/Parent',
+          actions: [
+            'Receive notification of graded assignment',
+            'Navigate to Assignments page',
+            'View graded assignments section',
+            'Click to see grade and feedback',
+            'Download feedback file if attached',
+            'Review teacher comments'
+          ],
+          technicalDetails: 'assignment_submissions with status="returned" visible to student. Parents can view via student_parents link and RLS policies.',
+          dataFlow: 'student_id → assignment_submissions WHERE status="returned" → grade display',
+          files: ['src/pages/AssignmentsPage.tsx', 'src/components/assignments/StudentGradedView.tsx']
         }
       ]
     },
     {
-      category: 'Attendance Recording Flow',
+      category: '4. Attendance Tracking & Reporting',
+      description: 'Daily attendance marking, absence tracking, and analytics',
+      steps: [
+        {
+          step: 1,
+          title: 'Open Attendance Register',
+          actor: 'Teacher/Form Tutor',
+          actions: [
+            'Navigate to Attendance page',
+            'Select class from dropdown',
+            'Select date (defaults to today)',
+            'View student list for class',
+            'System loads existing attendance if already marked'
+          ],
+          technicalDetails: 'Queries students via student_class_assignments. Checks attendance_records for existing entries for selected date.',
+          dataFlow: 'class_id + date → student_class_assignments JOIN students → attendance_records (existing check)',
+          files: ['src/pages/AttendancePage.tsx', 'src/components/attendance/AttendanceRegister.tsx']
+        },
+        {
+          step: 2,
+          title: 'Mark Student Attendance',
+          actor: 'Teacher',
+          actions: [
+            'Review list of students',
+            'For each student, mark status: Present / Absent / Late / Excused',
+            'For absences/late: add reason notes',
+            'Mark special circumstances',
+            'Review all entries before saving'
+          ],
+          technicalDetails: 'UI maintains state for each student. Validates all students have status before allowing save.',
+          dataFlow: 'UI state management → validation → bulk insert preparation',
+          files: ['src/components/attendance/AttendanceRegister.tsx']
+        },
+        {
+          step: 3,
+          title: 'Save Attendance Records',
+          actor: 'System',
+          actions: [
+            'Validate all students marked',
+            'Bulk insert attendance records',
+            'Identify absent students',
+            'Queue parent notifications',
+            'Update attendance session status',
+            'Show confirmation'
+          ],
+          technicalDetails: 'Bulk INSERT into attendance_records. Triggers notification workflow for absences. Creates attendance_session record.',
+          dataFlow: 'attendance_data[] → attendance_records (bulk INSERT) → notification_queue (for absences) → confirmation',
+          files: ['src/pages/AttendancePage.tsx']
+        },
+        {
+          step: 4,
+          title: 'Parent Receives Absence Notification',
+          actor: 'Parent/Guardian',
+          actions: [
+            'Receive SMS/email notification of absence',
+            'View absence details',
+            'Optional: Provide explanation via portal',
+            'View student attendance history'
+          ],
+          technicalDetails: 'Automated notifications sent via communication module. Parents can respond via parent portal.',
+          dataFlow: 'absence detected → notification_queue → SMS/email gateway → parent device',
+          files: ['src/components/communication/NotificationSender.tsx']
+        },
+        {
+          step: 5,
+          title: 'View Attendance Reports',
+          actor: 'Admin/HOD/Teacher',
+          actions: [
+            'Navigate to Analytics/Reports',
+            'Select Attendance Report',
+            'Choose date range',
+            'Filter by class/year/student',
+            'View attendance percentage',
+            'Identify chronic absentees',
+            'Export to Excel/PDF'
+          ],
+          technicalDetails: 'Aggregates attendance_records with GROUP BY. Calculates attendance_percentage = (present_days / total_days) * 100. Identifies students < 80%.',
+          dataFlow: 'date_range + filters → attendance_records aggregate → percentage calculation → report generation',
+          files: ['src/pages/AnalyticsPage.tsx', 'src/components/reports/AttendanceReport.tsx']
+        }
+      ]
+    },
+    {
+      category: '5. Timetable Management',
+      description: 'Schedule creation, class allocation, and timetable distribution',
+      steps: [
+        {
+          step: 1,
+          title: 'Create Timetable Structure',
+          actor: 'Academic Admin',
+          actions: [
+            'Navigate to Timetable page',
+            'Define periods (Period 1-8)',
+            'Set period timings',
+            'Define days of week',
+            'Create timetable template',
+            'Save structure'
+          ],
+          technicalDetails: 'Creates timetable_structure with period definitions, timings. Linked to academic_year and term.',
+          dataFlow: 'timetable_config → timetable_structure → periods table',
+          files: ['src/pages/TimetablePage.tsx', 'src/components/timetable/TimetableBuilder.tsx']
+        },
+        {
+          step: 2,
+          title: 'Assign Classes to Periods',
+          actor: 'Academic Admin',
+          actions: [
+            'Select class/form',
+            'Select day and period',
+            'Assign subject',
+            'Assign teacher',
+            'Assign room/location',
+            'Save slot assignment',
+            'Repeat for all periods',
+            'Check for conflicts'
+          ],
+          technicalDetails: 'Inserts into timetable_slots with class_id, subject_id, teacher_id, room_id. Validates no conflicts (teacher/room double booking).',
+          dataFlow: 'slot_data → conflict_check → timetable_slots INSERT → validation',
+          files: ['src/components/timetable/TimetableEditor.tsx']
+        },
+        {
+          step: 3,
+          title: 'Publish Timetable',
+          actor: 'Academic Admin',
+          actions: [
+            'Review complete timetable',
+            'Check for gaps or conflicts',
+            'Validate all slots filled',
+            'Publish timetable',
+            'Notify teachers and students',
+            'Make visible in portals'
+          ],
+          technicalDetails: 'Updates timetable_structure status to "published". Triggers notifications. Students/teachers can now view.',
+          dataFlow: 'timetable_structure.status → "published" → notification_queue → portal visibility',
+          files: ['src/pages/TimetablePage.tsx']
+        },
+        {
+          step: 4,
+          title: 'View Timetable (Student/Teacher)',
+          actor: 'Student/Teacher',
+          actions: [
+            'Login to portal',
+            'Navigate to Timetable',
+            'View weekly schedule',
+            'See subjects, teachers, rooms',
+            'Filter by day',
+            'Export/download timetable'
+          ],
+          technicalDetails: 'Queries timetable_slots filtered by user: students see their class timetable, teachers see where they teach.',
+          dataFlow: 'user_id → class_assignment/teacher_id → timetable_slots → formatted display',
+          files: ['src/pages/TimetablePage.tsx', 'src/components/timetable/TimetableView.tsx']
+        }
+      ]
+    },
+    {
+      category: '6. Examination & Grading System',
+      description: 'Exam scheduling, grade entry, report card generation',
+      steps: [
+        {
+          step: 1,
+          title: 'Schedule Examination',
+          actor: 'Academic Admin/HOD',
+          actions: [
+            'Navigate to Exams page',
+            'Click Create Exam',
+            'Select exam type (Midterm/Final/Mock)',
+            'Set exam dates',
+            'Select classes/year groups',
+            'Add subject papers',
+            'Set duration for each paper',
+            'Assign invigilators',
+            'Publish exam schedule'
+          ],
+          technicalDetails: 'Creates exam_schedule with exam_type, start_date, end_date. exam_papers table holds subject-specific details. Links to academic_term.',
+          dataFlow: 'exam_data → exam_schedule → exam_papers[] → invigilator_assignments → publication',
+          files: ['src/pages/ExamsPage.tsx', 'src/components/exams/ExamScheduler.tsx']
+        },
+        {
+          step: 2,
+          title: 'Enter Student Marks',
+          actor: 'Teacher/Subject Head',
+          actions: [
+            'Navigate to Grading page',
+            'Select exam and subject',
+            'View student list for class',
+            'Enter marks for each student',
+            'Add grade comments if needed',
+            'Validate marks (within max marks)',
+            'Submit marks',
+            'Mark as completed'
+          ],
+          technicalDetails: 'Inserts/updates gradebook_records with student_id, exam_id, subject_id, marks_obtained, max_marks. Validates marks <= max_marks.',
+          dataFlow: 'marks_data[] → validation → gradebook_records (bulk upsert) → submission confirmation',
+          files: ['src/pages/GradingPage.tsx', 'src/components/grading/MarksEntryForm.tsx']
+        },
+        {
+          step: 3,
+          title: 'Calculate Grades & Rankings',
+          actor: 'System',
+          actions: [
+            'Aggregate all subject marks',
+            'Calculate total marks',
+            'Calculate percentage',
+            'Apply grading scale (A-F)',
+            'Calculate class average',
+            'Determine class rank',
+            'Calculate GPA if applicable'
+          ],
+          technicalDetails: 'Database function calculates aggregates. Grade scale applied based on percentage. Rankings computed with RANK() window function.',
+          dataFlow: 'gradebook_records → SUM(marks) → percentage calculation → grade scale application → ranking',
+          files: ['Database functions', 'src/hooks/useGradebook.tsx']
+        },
+        {
+          step: 4,
+          title: 'Generate Report Cards',
+          actor: 'System/Admin',
+          actions: [
+            'Navigate to Report Cards page',
+            'Select exam term',
+            'Select class/students',
+            'Generate reports (bulk or individual)',
+            'Review generated PDFs',
+            'Add principal/HOD comments',
+            'Approve and publish',
+            'Make available to parents'
+          ],
+          technicalDetails: 'Uses jsPDF library. Queries gradebook_records, calculates aggregates, applies school template. Stores PDFs in report_cards storage bucket.',
+          dataFlow: 'exam_id + student_ids → gradebook_records aggregation → PDF generation → storage upload → parent access',
+          files: ['src/pages/ReportCardsPage.tsx', 'src/utils/reportCardGenerator.ts']
+        },
+        {
+          step: 5,
+          title: 'View & Download Report Card',
+          actor: 'Student/Parent',
+          actions: [
+            'Receive notification of available report',
+            'Login to portal',
+            'Navigate to Report Cards',
+            'Select term/exam',
+            'View report card online',
+            'Download PDF',
+            'View detailed subject breakdowns',
+            'See teacher comments'
+          ],
+          technicalDetails: 'RLS policies ensure students/parents only see their own reports. Presigned URLs for PDF downloads.',
+          dataFlow: 'student_id → report_cards filtered by RLS → PDF download URL → user device',
+          files: ['src/components/reports/ReportCardViewer.tsx']
+        }
+      ]
+    },
+    {
+      category: '7. Behavior Tracking & Discipline',
+      description: 'Incident logging, merit/demerit system, behavior analytics',
+      steps: [
+        {
+          step: 1,
+          title: 'Log Behavior Incident',
+          actor: 'Teacher/Staff',
+          actions: [
+            'Navigate to Behavior Tracking',
+            'Click "Log Incident"',
+            'Select student',
+            'Choose incident type (positive/negative)',
+            'Select category (discipline, achievement, conduct)',
+            'Enter detailed description',
+            'Set severity level',
+            'Add any witnesses',
+            'Attach evidence (photos) if applicable',
+            'Submit incident report'
+          ],
+          technicalDetails: 'Inserts into behavior_incidents table with student_id, reported_by, incident_type, severity, description. Can attach files to storage.',
+          dataFlow: 'incident_data + files → behavior_incidents INSERT → storage upload → notifications (parent, admin)',
+          files: ['src/pages/BehaviorTrackingPage.tsx', 'src/components/behavior/IncidentLogger.tsx']
+        },
+        {
+          step: 2,
+          title: 'Review & Action Incident',
+          actor: 'Discipline Coordinator/Head',
+          actions: [
+            'View pending incidents',
+            'Review incident details',
+            'Investigate if needed',
+            'Determine appropriate action',
+            'Assign consequences (detention, suspension)',
+            'Schedule parent meeting if serious',
+            'Update incident status',
+            'Add resolution notes'
+          ],
+          technicalDetails: 'Updates behavior_incidents with action_taken, resolution_notes, status. Creates disciplinary_actions record if needed.',
+          dataFlow: 'incident_id → behavior_incidents UPDATE → disciplinary_actions INSERT → parent_notifications',
+          files: ['src/components/behavior/IncidentReview.tsx']
+        },
+        {
+          step: 3,
+          title: 'Merit/Demerit Points System',
+          actor: 'System',
+          actions: [
+            'Automatically assign points based on incident',
+            'Positive incidents: award merit points',
+            'Negative incidents: assign demerit points',
+            'Update student behavior score',
+            'Track cumulative points',
+            'Trigger rewards/consequences at thresholds'
+          ],
+          technicalDetails: 'behavior_points table tracks running total. Triggers fire on INSERT to behavior_incidents to auto-calculate points.',
+          dataFlow: 'behavior_incident → points_calculation → behavior_points UPDATE → threshold_checks → actions',
+          files: ['Database triggers', 'src/hooks/useBehaviorPoints.tsx']
+        },
+        {
+          step: 4,
+          title: 'View Behavior Reports',
+          actor: 'Teacher/Admin/Parent',
+          actions: [
+            'Navigate to behavior reports',
+            'View student behavior history',
+            'See trends over time',
+            'Filter by incident type',
+            'View behavior score',
+            'Export behavior report',
+            'Identify repeat offenders'
+          ],
+          technicalDetails: 'Aggregates behavior_incidents with time-series analysis. Charts show trends. RLS ensures parents only see their children.',
+          dataFlow: 'student_id + date_range → behavior_incidents aggregate → trend analysis → visualization',
+          files: ['src/pages/BehaviorTrackingPage.tsx', 'src/components/behavior/BehaviorAnalytics.tsx']
+        }
+      ]
+    },
+    {
+      category: '8. Library Management System',
+      description: 'Book cataloging, borrowing, returns, and fine management',
+      steps: [
+        {
+          step: 1,
+          title: 'Add Book to Catalog',
+          actor: 'Librarian',
+          actions: [
+            'Navigate to Library page',
+            'Click Add New Book',
+            'Enter book details (title, author, ISBN)',
+            'Set category/genre',
+            'Add copies count',
+            'Set borrowing rules',
+            'Upload book cover image',
+            'Save to catalog'
+          ],
+          technicalDetails: 'Inserts into library_books with title, author, isbn, category, total_copies, available_copies. Cover image uploaded to storage.',
+          dataFlow: 'book_data + image → library_books INSERT → storage upload → catalog update',
+          files: ['src/pages/LibraryPage.tsx', 'src/components/library/BookCatalog.tsx']
+        },
+        {
+          step: 2,
+          title: 'Student Borrows Book',
+          actor: 'Librarian + Student',
+          actions: [
+            'Student requests book',
+            'Librarian searches catalog',
+            'Check book availability',
+            'Scan student ID card',
+            'Record borrowing transaction',
+            'Set due date (typically 2 weeks)',
+            'Provide book to student',
+            'Print receipt'
+          ],
+          technicalDetails: 'Inserts into library_transactions with book_id, student_id, borrowed_date, due_date, status="borrowed". Decrements available_copies.',
+          dataFlow: 'book_id + student_id → library_transactions INSERT → library_books.available_copies - 1',
+          files: ['src/components/library/BookCheckout.tsx']
+        },
+        {
+          step: 3,
+          title: 'Return Book',
+          actor: 'Librarian',
+          actions: [
+            'Student returns book',
+            'Librarian scans book',
+            'Check for damages',
+            'Update transaction status',
+            'Check if overdue',
+            'Calculate fine if applicable',
+            'Accept payment if fine',
+            'Mark as returned'
+          ],
+          technicalDetails: 'Updates library_transactions status="returned", return_date=now(). If overdue, calculates fine: days_overdue * fine_per_day. Increments available_copies.',
+          dataFlow: 'transaction_id → library_transactions UPDATE → fine_calculation → library_books.available_copies + 1',
+          files: ['src/components/library/BookReturn.tsx']
+        },
+        {
+          step: 4,
+          title: 'Send Overdue Reminders',
+          actor: 'System (Automated)',
+          actions: [
+            'Daily cron job runs',
+            'Identify overdue books',
+            'Send reminder to students',
+            'CC parents if multiple days overdue',
+            'Generate overdue report',
+            'Flag chronic late returners'
+          ],
+          technicalDetails: 'Scheduled edge function queries library_transactions WHERE due_date < now() AND status="borrowed". Sends notifications via communication module.',
+          dataFlow: 'cron trigger → overdue_query → notification_queue → email/SMS → report generation',
+          files: ['supabase/functions/send-library-reminders', 'src/components/library/OverdueManager.tsx']
+        }
+      ]
+    },
+    {
+      category: '9. Finance & Fee Management',
+      description: 'Fee structure, payment tracking, receipts, financial reports',
+      steps: [
+        {
+          step: 1,
+          title: 'Set Fee Structure',
+          actor: 'Finance Manager',
+          actions: ['Define fee types (tuition, transport, meals)', 'Set amounts per year group', 'Configure payment terms', 'Set due dates', 'Publish fee structure'],
+          technicalDetails: 'Creates fee_structure records linked to academic_year. Supports multiple fee types and installment plans.',
+          dataFlow: 'fee_config → fee_structure → student_fee_assignments',
+          files: ['src/pages/FinanceOperationsPage.tsx', 'src/components/finance/FeeStructureManager.tsx']
+        },
+        {
+          step: 2,
+          title: 'Process Payment',
+          actor: 'Parent/Bursar',
+          actions: ['View outstanding fees', 'Select payment method', 'Complete transaction', 'Generate receipt', 'Update payment status'],
+          technicalDetails: 'Records payment in fee_payments table. Integrates with payment gateways. Generates PDF receipts.',
+          dataFlow: 'payment_data → payment_gateway → fee_payments INSERT → receipt_generation',
+          files: ['src/components/finance/PaymentProcessor.tsx']
+        },
+        {
+          step: 3,
+          title: 'Generate Financial Reports',
+          actor: 'Finance Manager',
+          actions: ['Select report type', 'Set date range', 'Filter parameters', 'Generate report', 'Export to Excel/PDF'],
+          technicalDetails: 'Aggregates fee_payments with various GROUP BY clauses. Calculates totals, outstanding amounts, collection rates.',
+          dataFlow: 'date_range + filters → fee_payments aggregate → report_generation → export',
+          files: ['src/components/finance/FinancialReports.tsx']
+        }
+      ]
+    },
+    {
+      category: '10. User & Permission Management',
+      description: 'Role-based access control, multi-school support, granular permissions',
       steps: [
         {
           step: 1,
@@ -489,39 +1080,31 @@ export function UserFlows() {
         }
       ]
     },
-    {
-      category: 'User & Role Management Flow',
-      steps: [
         {
           step: 1,
-          title: 'User Creation',
-          actor: 'Super Admin',
-          actions: ['Navigate to User Management', 'Click Add User', 'Enter user details (name, email)', 'Assign initial role', 'Set school association', 'Generate temporary password'],
-          technicalDetails: 'Creates profile in profiles table, assigns role in user_roles table with school_id',
-          files: ['src/pages/UserManagementPage.tsx']
+          title: 'Create User Account',
+          actor: 'Super Admin/School Admin',
+          actions: ['Enter user details', 'Assign roles', 'Set school association', 'Generate credentials', 'Send welcome email'],
+          technicalDetails: 'Creates records in profiles and user_roles tables. RLS policies ensure school isolation.',
+          dataFlow: 'user_data → profiles INSERT → user_roles INSERT → credential_generation',
+          files: ['src/pages/AdminManagementPage.tsx']
         },
         {
           step: 2,
-          title: 'Role Assignment',
+          title: 'Configure Role Permissions',
           actor: 'Super Admin',
-          actions: ['Select user', 'Choose role (teacher, school_admin, etc.)', 'Assign to school', 'Set department/year group if applicable', 'Activate role'],
-          technicalDetails: 'Inserts into user_roles with role enum, school_id, is_active=true',
-          files: ['src/pages/UserManagementPage.tsx']
-        },
-        {
-          step: 3,
-          title: 'Permission Configuration',
-          actor: 'Super Admin',
-          actions: ['Navigate to Permission Management', 'Select role', 'Choose module', 'Set permissions (view/create/edit/delete)', 'Configure field-level access'],
-          technicalDetails: 'Updates role_module_permissions and field_permissions tables',
+          actions: ['Select role type', 'Choose module', 'Set CRUD permissions', 'Configure field-level access', 'Save permissions'],
+          technicalDetails: 'Updates role_module_permissions table. Field restrictions stored in field_permissions.',
+          dataFlow: 'role + module → permission_settings → role_module_permissions UPSERT',
           files: ['src/pages/PermissionManagementPage.tsx', 'src/components/admin/PermissionManager.tsx']
         },
         {
-          step: 4,
-          title: 'Access Validation',
+          step: 3,
+          title: 'Access Control Enforcement',
           actor: 'System',
-          actions: ['User attempts to access module', 'Check RLS policies', 'Verify role permissions', 'Validate school association', 'Grant or deny access'],
-          technicalDetails: 'RLS policies query user_roles, usePermissions hook checks role_module_permissions',
+          actions: ['User login', 'Load user roles', 'Check module permissions', 'Apply RLS policies', 'Render UI based on permissions'],
+          technicalDetails: 'useRBAC hook loads user_roles. RLS policies filter all queries by school_id. usePermissions validates actions.',
+          dataFlow: 'auth.uid() → user_roles → RLS enforcement → UI rendering',
           files: ['src/hooks/useRBAC.tsx', 'src/hooks/usePermissions.tsx']
         }
       ]
