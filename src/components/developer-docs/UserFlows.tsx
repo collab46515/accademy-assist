@@ -294,6 +294,75 @@ export function UserFlows() {
 
   const flows = [
     {
+      category: 'Detailed Admissions Process (8 Stages)',
+      steps: [
+        {
+          step: 1,
+          title: 'Application Submitted',
+          actor: 'Parent/Guardian & System',
+          actions: ['Parent submits application form', 'System performs initial validation', 'Required documents checked', 'Application saved to database'],
+          technicalDetails: 'Creates record in enrollment_applications table, validates required fields, uploads documents to storage',
+          files: ['src/components/admissions/stages/ApplicationSubmittedStage.tsx']
+        },
+        {
+          step: 2,
+          title: 'Document Verification',
+          actor: 'Admissions Officer',
+          actions: ['Review all required documents', 'Verify authenticity', 'Request missing documents if needed', 'Mark documents as verified/rejected'],
+          technicalDetails: 'Updates document status in enrollment_applications, manages document storage bucket with RLS policies',
+          files: ['src/components/admissions/stages/DocumentVerificationStage.tsx']
+        },
+        {
+          step: 3,
+          title: 'Assessment & Interview',
+          actor: 'Academic Staff & Admissions Team',
+          actions: ['Schedule academic assessments', 'Conduct behavioral assessments', 'Perform student interview', 'Score all assessment components'],
+          technicalDetails: 'Stores assessment results, interview notes, and scores in application metadata JSONB field',
+          files: ['src/components/admissions/stages/AssessmentInterviewStage.tsx']
+        },
+        {
+          step: 4,
+          title: 'Application Review',
+          actor: 'Admissions Committee',
+          actions: ['Review all assessment scores', 'Examine academic history', 'Review references', 'Compile comprehensive evaluation', 'Add review notes'],
+          technicalDetails: 'Aggregates data from multiple sources, committee members add reviews to application record',
+          files: ['src/components/admissions/stages/ApplicationReviewStage.tsx']
+        },
+        {
+          step: 5,
+          title: 'Admission Decision',
+          actor: 'Head of Admissions',
+          actions: ['Review committee recommendations', 'Make final decision (Accept/Conditional/Waitlist/Reject)', 'Set conditions if conditional acceptance', 'Prepare decision letter'],
+          technicalDetails: 'Updates application status, stores decision details and conditions, triggers notification workflows',
+          files: ['src/components/admissions/stages/AdmissionDecisionStage.tsx']
+        },
+        {
+          step: 6,
+          title: 'Fee Payment',
+          actor: 'Parent/Guardian & Finance',
+          actions: ['Receive payment link', 'Complete payment via gateway', 'System verifies payment', 'Generate receipt', 'Send payment reminders if pending'],
+          technicalDetails: 'Integrates with payment gateways, creates fee records, webhook handlers verify payment status',
+          files: ['src/components/admissions/stages/FeePaymentStage.tsx']
+        },
+        {
+          step: 7,
+          title: 'Enrollment Confirmation',
+          actor: 'Admissions Officer & System',
+          actions: ['Assign Student ID', 'Assign Form Class', 'Assign House', 'Set start date', 'Generate enrollment credentials'],
+          technicalDetails: 'Creates student record in students table, assigns to classes, sets up user accounts',
+          files: ['src/components/admissions/stages/EnrollmentConfirmationStage.tsx']
+        },
+        {
+          step: 8,
+          title: 'Welcome & Onboarding',
+          actor: 'Admissions & Administrative Staff',
+          actions: ['Send welcome pack', 'Schedule orientation', 'Order uniform', 'Complete onboarding checklist', 'Mark student as fully enrolled'],
+          technicalDetails: 'Updates onboarding status, sends automated communications, finalizes student enrollment',
+          files: ['src/components/admissions/stages/WelcomeOnboardingStage.tsx']
+        }
+      ]
+    },
+    {
       category: 'Student Admission Flow',
       steps: [
         {
