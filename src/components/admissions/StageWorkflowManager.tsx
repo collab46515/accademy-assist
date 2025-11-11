@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Filter, Eye, User, Calendar, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { ApplicationSubmittedStage } from './stages/ApplicationSubmittedStage';
 import { DocumentVerificationStage } from './stages/DocumentVerificationStage';
 import { ApplicationReviewStage } from './stages/ApplicationReviewStage';
@@ -24,6 +25,8 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isMoving, setIsMoving] = useState(false);
+  const { toast } = useToast();
 
   const stages = [
     { title: 'Application Submitted', status: 'submitted' },
@@ -103,17 +106,25 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
   };
 
   const handleNextStage = async () => {
-    if (!selectedApplication) return;
+    if (!selectedApplication || isMoving) return;
     
     try {
-      // Get next stage status
+      setIsMoving(true);
+      
+      // Check if this is the final stage
       const nextStageIndex = currentStage + 1;
       if (nextStageIndex >= stages.length) {
-        console.log('Application is already at final stage');
+        toast({
+          title: "Final Stage Reached",
+          description: "This application has completed all admission stages.",
+          variant: "default",
+        });
+        setIsMoving(false);
         return;
       }
       
       const nextStatus = stages[nextStageIndex].status;
+      const nextStageTitle = stages[nextStageIndex].title;
       
       // Update application status in database
       const { error } = await supabase
@@ -123,16 +134,35 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
       
       if (error) {
         console.error('Error updating application:', error);
+        toast({
+          title: "Error Moving Application",
+          description: "Failed to update application stage. Please try again.",
+          variant: "destructive",
+        });
+        setIsMoving(false);
         return;
       }
       
-      console.log(`✅ Moved application ${selectedApplication.application_number} to stage: ${stages[nextStageIndex].title}`);
+      console.log(`✅ Moved application ${selectedApplication.application_number} to stage: ${nextStageTitle}`);
+      
+      toast({
+        title: "Application Moved Successfully",
+        description: `${selectedApplication.student_name} has been moved to ${nextStageTitle}`,
+        variant: "default",
+      });
       
       // Go back to list and refresh
       setSelectedApplication(null);
       fetchApplicationsForStage();
     } catch (error) {
       console.error('Error moving to next stage:', error);
+      toast({
+        title: "Unexpected Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsMoving(false);
     }
   };
 
@@ -181,6 +211,19 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
           applicationData={selectedApplication}
           onMoveToNext={handleNextStage}
         />
+        
+        {isMoving && (
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+            <Card className="w-[300px]">
+              <CardContent className="pt-6">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                  <p className="text-sm text-muted-foreground">Moving application to next stage...</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     );
   }
