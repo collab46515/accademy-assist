@@ -294,138 +294,134 @@ export function UserFlows() {
 
   const flows = [
     {
-      category: '1. Student Admissions Management',
-      description: 'Complete 8-stage admission process from application to enrollment',
+      category: '1. ACTUAL ADMISSION STAGES - AS IMPLEMENTED',
+      description: '8-stage admission process (Stage 0-7) with real navigation via /admissions?stage=0-7',
       steps: [
         {
-          step: 1,
-          title: 'Application Submission (Stage 1)',
-          actor: 'Parent/Guardian',
+          step: 0,
+          title: 'Stage 0: Application Submitted',
+          actor: 'Parent/Guardian & Admissions Officer',
           actions: [
-            'Access public admissions portal',
-            'Fill student information form (personal details, academic history)',
-            'Upload required documents (birth certificate, passport photo, school reports)',
-            'Provide emergency contact information',
-            'Submit application'
+            'Shows validation checks: Personal details, Parent details, Academic history, Emergency contact, Medical info',
+            'Each item shows status: completed/pending',
+            'Button: "Move to Document Verification"',
+            'Status in DB: "submitted"'
           ],
-          technicalDetails: 'Creates record in enrollment_applications table with status="submitted". Documents uploaded to application-documents storage bucket. Initial validation checks performed.',
-          dataFlow: 'enrollment_applications → application_documents storage → notification system',
-          files: ['src/pages/UnifiedAdmissionsPage.tsx', 'src/components/admissions/stages/ApplicationSubmittedStage.tsx']
+          technicalDetails: 'Component: ApplicationSubmittedStage.tsx. Shows hardcoded validation checklist. Updates status when moving to next stage.',
+          dataFlow: 'enrollment_applications.status = "submitted" → button click → updates to "document_verification"',
+          files: ['src/components/admissions/stages/ApplicationSubmittedStage.tsx', 'src/components/admissions/StageWorkflowManager.tsx']
         },
         {
-          step: 2,
-          title: 'Document Verification (Stage 2)',
+          step: 1,
+          title: 'Stage 1: Document Verification',
           actor: 'Admissions Officer',
           actions: [
-            'Review submitted application',
-            'Verify each required document (birth certificate, passport photo, reports)',
-            'Check document authenticity and validity',
-            'Request missing/invalid documents',
-            'Mark documents as verified/rejected',
-            'Add verification notes'
+            'Lists required documents: Birth Certificate, Passport Photo, School Reports, Immunization Records, Transfer Certificate',
+            'Each document shows: status (verified/pending), upload date, verified by name',
+            'Document preview functionality',
+            'Button: "Move to Assessment & Interview"',
+            'Status in DB: "document_verification"'
           ],
-          technicalDetails: 'Updates document_status field in enrollment_applications. Uses RLS policies to restrict document access. Stores verification metadata in JSONB field.',
-          dataFlow: 'enrollment_applications.document_status → storage RLS check → verification_log',
+          technicalDetails: 'Component: DocumentVerificationStage.tsx. Lists documents with hardcoded sample data. Has document selection and preview UI.',
+          dataFlow: 'Document list display → selection → verification → button updates status to "assessment_scheduled"',
           files: ['src/components/admissions/stages/DocumentVerificationStage.tsx']
         },
         {
-          step: 3,
-          title: 'Assessment & Interview (Stage 3)',
+          step: 2,
+          title: 'Stage 2: Assessment & Interview',
           actor: 'Academic Staff & Admissions Team',
           actions: [
-            'Schedule academic assessment (Math, English, Science)',
-            'Conduct behavioral assessment',
-            'Arrange and conduct student interview',
-            'Score each assessment component',
-            'Record interview notes',
-            'Calculate composite score'
+            'Shows assessment list: Math, English, Science, Behavioral Assessment',
+            'Each shows: type, subject, scheduled date, time, status (pending/scheduled/completed)',
+            'Dialog to schedule new assessments with date/time picker',
+            'Interview scheduling functionality',
+            'Button: "Move to Application Review"',
+            'Status in DB: "assessment_scheduled"'
           ],
-          technicalDetails: 'Assessment results stored in application_metadata JSONB. Each assessment type has separate scoring. Composite score calculated automatically.',
-          dataFlow: 'assessment_scores → application_metadata.assessments → composite_score calculation',
+          technicalDetails: 'Component: AssessmentInterviewStage.tsx. Has scheduling dialog with form. Displays assessment cards with status badges.',
+          dataFlow: 'Assessment scheduling → status tracking → button updates to "under_review"',
           files: ['src/components/admissions/stages/AssessmentInterviewStage.tsx']
         },
         {
-          step: 4,
-          title: 'Application Review (Stage 4)',
+          step: 3,
+          title: 'Stage 3: Application Review',
           actor: 'Admissions Committee',
           actions: [
-            'Review all assessment scores',
-            'Examine academic performance history',
-            'Review behavioral indicators',
-            'Check references and recommendations',
-            'Evaluate student potential',
-            'Add committee review notes',
-            'Assign overall rating'
+            'Review criteria with sliders: Academic Performance (0-100), Behavioral Assessment (0-100), Potential Score (0-100)',
+            'Shows reviewer name, completion status for each criterion',
+            'Composite score calculation display',
+            'Committee review notes section',
+            'Button: "Move to Admission Decision"',
+            'Status in DB: "under_review"'
           ],
-          technicalDetails: 'Committee members can add individual reviews. All reviews aggregated in application_metadata. Overall rating calculated from multiple factors.',
-          dataFlow: 'assessment_scores + academic_history + references → committee_reviews → overall_rating',
+          technicalDetails: 'Component: ApplicationReviewStage.tsx. Uses Slider components for scoring. Shows hardcoded review criteria with sample reviewers.',
+          dataFlow: 'Score sliders → composite calculation → review notes → button updates to "pending_decision"',
           files: ['src/components/admissions/stages/ApplicationReviewStage.tsx']
         },
         {
-          step: 5,
-          title: 'Admission Decision (Stage 5)',
+          step: 4,
+          title: 'Stage 4: Admission Decision',
           actor: 'Head of Admissions',
           actions: [
-            'Review committee recommendations',
-            'Make final admission decision (Accept/Conditional Accept/Waitlist/Reject)',
-            'Set conditions for conditional acceptance',
-            'Prepare decision letter',
-            'Set deadlines for acceptance',
-            'Notify parent/guardian'
+            'Decision selector: Accept, Conditional Accept, Waitlist, Reject',
+            'Conditions input field (for conditional acceptance)',
+            'Application summary display with student details',
+            'Assessment scores summary display',
+            'Button: "Move to Fee Payment"',
+            'Status in DB: "approved" or "rejected" or "on_hold"'
           ],
-          technicalDetails: 'Updates application.status to accepted/conditional/waitlist/rejected. Conditions stored in JSONB. Triggers email notification workflow.',
-          dataFlow: 'decision_data → application.status → notification_queue → email/SMS',
+          technicalDetails: 'Component: AdmissionDecisionStage.tsx. Radio buttons for decision selection. Text input for conditions. Shows hardcoded application summary.',
+          dataFlow: 'Decision selection → conditions input → button updates status to "approved"/"rejected"/"on_hold"',
           files: ['src/components/admissions/stages/AdmissionDecisionStage.tsx']
         },
         {
-          step: 6,
-          title: 'Fee Payment (Stage 6)',
+          step: 5,
+          title: 'Stage 5: Fee Payment',
           actor: 'Parent/Guardian & Finance Team',
           actions: [
-            'Receive payment notification and link',
-            'Review fee structure (application, registration, tuition)',
-            'Select payment plan (full/installment)',
-            'Complete payment via gateway',
-            'System verifies payment',
-            'Generate and send receipt',
-            'Send payment reminders for pending'
+            'Fee structure display: Application Fee $100, Registration Fee $500, Tuition Fee $12,000, Total $12,600',
+            'Payment plan selector: Full Payment or Installment',
+            'Payment gateway integration (PLACEHOLDER - not fully connected)',
+            'Payment status tracking',
+            'Button: "Move to Enrollment Confirmation"',
+            'Status in DB: "fee_pending" or "fee_paid"'
           ],
-          technicalDetails: 'Payment gateway integration (Stripe/PayPal). Payment records in fee_payments table. Webhook handlers verify payment status. Automated reminders for pending payments.',
-          dataFlow: 'payment_request → payment_gateway → webhook → fee_payments → receipt_generation',
+          technicalDetails: 'Component: FeePaymentStage.tsx. Shows hardcoded fee amounts. Payment plan radio buttons. Gateway integration is placeholder only.',
+          dataFlow: 'Fee display → plan selection → payment (placeholder) → button updates to "enrollment_confirmed"',
           files: ['src/components/admissions/stages/FeePaymentStage.tsx']
         },
         {
-          step: 7,
-          title: 'Enrollment Confirmation (Stage 7)',
+          step: 6,
+          title: 'Stage 6: Enrollment Confirmation',
           actor: 'Admissions Officer & System',
           actions: [
-            'System generates unique Student ID',
-            'Assign to form class based on year group',
-            'Assign to house (Churchill, Kennedy, etc.)',
-            'Set academic start date',
-            'Create student profile',
-            'Generate login credentials',
-            'Set temporary password with must_change flag'
+            'Student ID generation confirmation',
+            'Class assignment display',
+            'House assignment display (Churchill, Kennedy, etc.)',
+            'Academic start date display',
+            'Login credentials generation confirmation',
+            'Profile creation status',
+            'Button: "Move to Welcome & Onboarding"',
+            'Status in DB: "enrollment_confirmed"'
           ],
-          technicalDetails: 'Calls create_complete_student_enrollment() edge function. Creates records in students, profiles, user_roles, student_class_assignments tables atomically.',
-          dataFlow: 'application_data → create_complete_student_enrollment() → students + profiles + user_roles + credentials',
+          technicalDetails: 'Component: EnrollmentConfirmationStage.tsx. Shows enrollment summary with generated details. Creates student, profile, and user_role records.',
+          dataFlow: 'Enrollment data → student record creation → profile creation → credentials → button updates to "enrolled"',
           files: ['src/components/admissions/stages/EnrollmentConfirmationStage.tsx', 'src/pages/EnrollmentPage.tsx']
         },
         {
-          step: 8,
-          title: 'Welcome & Onboarding (Stage 8)',
+          step: 7,
+          title: 'Stage 7: Welcome & Onboarding',
           actor: 'Administrative Staff',
           actions: [
-            'Send welcome pack with school information',
-            'Schedule orientation date and time',
-            'Order school uniform',
-            'Provide access to parent/student portals',
-            'Share important dates calendar',
-            'Complete onboarding checklist',
-            'Mark student as fully enrolled'
+            'Onboarding checklist display: Welcome pack sent, Orientation scheduled, Uniform ordered, Portal access granted, Calendar shared',
+            'Each item shows completion status checkbox',
+            'Mark items as complete',
+            'Button: "Complete Enrollment"',
+            'Status in DB: "enrolled" (final status)',
+            'THIS IS THE LAST STAGE - No next stage button after this'
           ],
-          technicalDetails: 'Onboarding checklist tracked in student_metadata. Automated emails for welcome pack. Integration with uniform supplier system.',
-          dataFlow: 'onboarding_tasks → student_metadata.onboarding → email_templates → enrollment_complete',
+          technicalDetails: 'Component: WelcomeOnboardingStage.tsx. Shows checklist with checkboxes. Final stage - button marks as fully enrolled.',
+          dataFlow: 'Checklist tracking → completion status → button marks application as "enrolled" (final)',
           files: ['src/components/admissions/stages/WelcomeOnboardingStage.tsx']
         }
       ]
