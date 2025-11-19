@@ -6,69 +6,117 @@ const emailSchema = z.string().email("Please enter a valid email address");
 const phoneSchema = z.string().regex(phoneRegex, "Please enter a valid Indian phone number");
 const postcodeSchema = z.string().regex(/^\d{6}$/, "Please enter a valid 6-digit PIN code");
 
-// Base student schema
+// Base student schema - Anand Niketan fields
 const baseStudentSchema = z.object({
   student_name: z.string().min(2, "Student name is required"),
-  student_email: z.string().email().optional().or(z.literal("")),
-  student_phone: z.string().optional().or(z.literal("")),
-  nationality: z.string().optional().or(z.literal("")),
-  gender: z.enum(["Male", "Female", "Other", "Prefer not to say"]).optional(),
+  date_of_birth: z.date({ required_error: "Date of birth is required" }),
+  mother_tongue: z.string().min(1, "Mother tongue is required"),
+  state: z.string().min(1, "State is required"),
+  gender: z.enum(["Male", "Female"], { required_error: "Gender is required" }),
+  blood_group: z.string().min(1, "Blood group is required"),
+  nationality: z.string().min(1, "Nationality is required"),
+  religion: z.string().optional().or(z.literal("")),
+  apar_id: z.string().min(1, "APAR ID is required"),
+  caste: z.string().optional().or(z.literal("")),
+  caste_classification: z.string().optional().or(z.literal("")),
+  aadhaar_number: z.string().optional().or(z.literal("")),
+  ration_card_number: z.string().optional().or(z.literal("")),
+  udise_number: z.string().optional().or(z.literal("")),
+  food_choice: z.string().min(1, "Food choice is required"),
+  chronic_diseases: z.string().min(1, "Please specify chronic diseases or enter 'None'"),
+  medicine_treatment: z.string().min(1, "Please specify if taking any medicine"),
   year_group: z.string().min(1, "Year group is required"),
-  date_of_birth: z.date().optional(),
 });
 
-// Base parent schema
-const baseParentSchema = z.object({
-  parent_name: z.string().min(2, "Parent/guardian name is required"),
-  parent_email: emailSchema,
-  parent_phone: phoneSchema,
-  parent_aadhaar: z.string().optional().refine((val) => !val || /^\d{4}\s?\d{4}\s?\d{4}$/.test(val), "Please enter a valid 12-digit Aadhaar number"),
-  parent_pan: z.string().optional().refine((val) => !val || /^[A-Z]{5}\d{4}[A-Z]$/.test(val), "Please enter a valid 10-character PAN number"),
-  parent_relationship: z.string().default("Parent"),
-  home_address: z.string().min(10, "Please enter a full address"),
-  postal_code: postcodeSchema,
-  country: z.string().default("India"),
+// Family Details Schema - Anand Niketan
+const familyDetailsSchema = z.object({
+  // Father Details
+  father_name: z.string().min(2, "Father's name is required"),
+  father_profession: z.string().min(1, "Father's profession is required"),
+  father_mobile: phoneSchema,
+  father_email: emailSchema,
+  father_monthly_income: z.string().min(1, "Father's monthly income is required"),
+  father_organization: z.string().min(1, "Organization employed is required"),
+  
+  // Mother Details
+  mother_name: z.string().min(2, "Mother's name is required"),
+  mother_profession: z.string().min(1, "Mother's profession is required"),
+  mother_mobile: phoneSchema,
+  mother_email: emailSchema,
+  mother_monthly_income: z.string().min(1, "Mother's monthly income is required"),
+  mother_organization: z.string().min(1, "Organization employed is required"),
+  
+  // Guardian Details (Optional)
+  guardian_name: z.string().optional().or(z.literal("")),
+  guardian_profession: z.string().optional().or(z.literal("")),
+  guardian_mobile: z.string().optional().or(z.literal("")),
+  guardian_email: z.string().optional().or(z.literal("")),
+  guardian_monthly_income: z.string().optional().or(z.literal("")),
+  guardian_organization: z.string().optional().or(z.literal("")),
+  
+  // Sibling Information
+  has_sibling_in_school: z.string().min(1, "Please select if child has siblings in school"),
+  sibling_information: z.string().optional().or(z.literal("")),
 });
 
-// Emergency contact schema
-const emergencyContactSchema = z.object({
-  emergency_contact_name: z.string().min(2, "Emergency contact name is required"),
-  emergency_contact_phone: z.string().regex(/^(\+91\s?[6-9]\d{9}|\+91\d{10})$/, "Please enter a valid Indian phone number"),
-  emergency_contact_relationship: z.string().min(1, "Relationship is required"),
+// Address Schema - Permanent & Communication
+const addressSchema = z.object({
+  // Permanent Address
+  permanent_house_no: z.string().min(1, "House no is required"),
+  permanent_street: z.string().min(1, "Street is required"),
+  permanent_city: z.string().min(1, "Town/City is required"),
+  permanent_district: z.string().min(1, "District is required"),
+  permanent_state: z.string().min(1, "State is required"),
+  permanent_postal_code: postcodeSchema,
+  
+  // Communication Address
+  communication_house_no: z.string().min(1, "House no is required"),
+  communication_street: z.string().min(1, "Street is required"),
+  communication_city: z.string().min(1, "Town/City is required"),
+  communication_district: z.string().min(1, "District is required"),
+  communication_state: z.string().min(1, "State is required"),
+  communication_postal_code: postcodeSchema,
 });
 
-// Standard Admission Schema
+// Academic & Language Choice Schema
+const academicChoiceSchema = z.object({
+  class_last_studied: z.string().min(1, "Class last studied is required"),
+  school_last_studied: z.string().optional().or(z.literal("")),
+  class_seeking_admission: z.string().min(1, "Class for admission is required"),
+  last_school_location: z.string().optional().or(z.literal("")),
+  language_studied: z.string().min(1, "Language studied is required"),
+  last_syllabus: z.string().optional().or(z.literal("")),
+  group_first_choice: z.string().optional().or(z.literal("")),
+  group_second_choice: z.string().optional().or(z.literal("")),
+});
+
+// References Schema
+const referencesSchema = z.object({
+  reference1_name: z.string().optional().or(z.literal("")),
+  reference1_mobile: z.string().optional().or(z.literal("")),
+  reference2_name: z.string().optional().or(z.literal("")),
+  reference2_mobile: z.string().optional().or(z.literal("")),
+});
+
+// Standard Admission Schema - Anand Niketan Complete
 const standardAdmissionSchema = z.object({
   // Student details
   ...baseStudentSchema.shape,
-  previous_school: z.string().optional(),
-  current_year_group: z.string().optional(),
   
-  // Parent details
-  ...baseParentSchema.shape,
-  ...emergencyContactSchema.shape,
+  // Family details
+  ...familyDetailsSchema.shape,
   
-  // Additional fields
-  house_preference: z.string().optional(),
-  form_class_preference: z.string().optional(),
-  academic_notes: z.string().optional(),
-  special_requirements: z.string().optional(),
-  medical_information: z.string().optional(),
+  // Address details
+  ...addressSchema.shape,
   
-  // Sibling information
-  sibling_student_id: z.string().optional(),
+  // Academic & Language
+  ...academicChoiceSchema.shape,
   
-  // Assessment
-  assessment_required: z.boolean().default(true),
+  // References
+  ...referencesSchema.shape,
   
-  // Fees
-  fee_status: z.enum(["full_fees", "bursary", "scholarship"]).default("full_fees"),
-  bursary_application: z.boolean().default(false),
-  scholarship_application: z.boolean().default(false),
-  
-  // Consent
-  data_protection_consent: z.boolean().refine(val => val === true, "Data protection consent is required"),
-  marketing_consent: z.boolean().default(false),
+  // Consent & Declaration
+  declaration_accepted: z.boolean().refine(val => val === true, "Declaration must be accepted"),
 });
 
 // SEN Admission Schema
