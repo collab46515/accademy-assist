@@ -17,13 +17,13 @@ import {
 } from 'lucide-react';
 
 const WORKFLOW_STAGES = [
-  { key: 'submission', label: 'Application Submitted', icon: UserPlus, color: 'bg-blue-100 text-blue-800', stageId: 0 },
-  { key: 'review_verify', label: 'Review & Verify', icon: FileCheck, color: 'bg-purple-100 text-purple-800', stageId: 1 },
-  { key: 'assessment', label: 'Assessment/Interview', icon: Calendar, color: 'bg-indigo-100 text-indigo-800', stageId: 2 },
-  { key: 'decision', label: 'Admission Decision', icon: CheckCircle, color: 'bg-green-100 text-green-800', stageId: 3 },
-  { key: 'payment', label: 'Fee Payment', icon: CreditCard, color: 'bg-emerald-100 text-emerald-800', stageId: 4 },
-  { key: 'confirmation', label: 'Enrollment Confirmation', icon: Award, color: 'bg-green-200 text-green-900', stageId: 5 },
-  { key: 'onboarding', label: 'Welcome & Onboarding', icon: GraduationCap, color: 'bg-blue-200 text-blue-900', stageId: 6 }
+  { key: 'submitted', label: 'Application Submitted', icon: UserPlus, color: 'bg-blue-100 text-blue-800', stageId: 0 },
+  { key: 'under_review', label: 'Review & Verify', icon: FileCheck, color: 'bg-purple-100 text-purple-800', stageId: 1 },
+  { key: 'assessment_scheduled', label: 'Assessment/Interview', icon: Calendar, color: 'bg-indigo-100 text-indigo-800', stageId: 2 },
+  { key: 'approved', label: 'Admission Decision', icon: CheckCircle, color: 'bg-green-100 text-green-800', stageId: 3 },
+  { key: 'fee_pending', label: 'Fee Payment', icon: CreditCard, color: 'bg-emerald-100 text-emerald-800', stageId: 4 },
+  { key: 'enrollment_confirmed', label: 'Enrollment Confirmation', icon: Award, color: 'bg-green-200 text-green-900', stageId: 5 },
+  { key: 'enrolled', label: 'Welcome & Onboarding', icon: GraduationCap, color: 'bg-blue-200 text-blue-900', stageId: 6 }
 ];
 
 export function AdmissionsFlowVisualization() {
