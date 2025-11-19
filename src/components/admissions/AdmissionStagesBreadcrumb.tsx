@@ -23,39 +23,39 @@ const admissionStages = [
   },
   { 
     id: 1, 
-    title: "Under Review", 
-    icon: Eye,
-    shortTitle: "Review"
+    title: "Application Review & Verify", 
+    icon: FileText,
+    shortTitle: "Review & Verify"
   },
   { 
     id: 2, 
-    title: "Assessment Scheduled", 
+    title: "Assessment/Interview", 
     icon: ClipboardCheck,
     shortTitle: "Assessment"
   },
   { 
     id: 3, 
-    title: "Approved", 
+    title: "Admission Decision", 
     icon: CheckCircle,
-    shortTitle: "Approved"
+    shortTitle: "Decision"
   },
   { 
     id: 4, 
-    title: "Fee Pending", 
+    title: "Fee Payment", 
     icon: CreditCard,
     shortTitle: "Payment"
   },
   { 
     id: 5, 
-    title: "Enrollment Confirmed", 
+    title: "Enrollment Confirmation", 
     icon: UserCheck,
-    shortTitle: "Confirmed"
+    shortTitle: "Enrollment"
   },
   { 
     id: 6, 
-    title: "Enrolled", 
+    title: "Welcome & Onboarding", 
     icon: Users,
-    shortTitle: "Enrolled"
+    shortTitle: "Onboarding"
   },
 ];
 
