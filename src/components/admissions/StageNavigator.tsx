@@ -8,73 +8,57 @@ import { useNavigate } from 'react-router-dom';
 const STAGES = [
   { 
     id: 0,
-    title: 'Application Submission', 
-    status: 'draft',
-    description: 'Initial applications received',
+    title: 'Application Submitted', 
+    status: 'submitted',
+    description: 'Initial review',
     icon: '📝',
     color: 'bg-blue-100 text-blue-800'
   },
   { 
     id: 1,
-    title: 'Application Fee', 
-    status: 'submitted',
-    description: 'Fee payment processing',
-    icon: '💰',
-    color: 'bg-yellow-100 text-yellow-800'
-  },
-  { 
-    id: 2,
-    title: 'Enrollment Processing', 
-    status: 'documents_pending',
-    description: 'Document verification',
+    title: 'Application Review & Verify', 
+    status: 'under_review',
+    description: 'Document verification + scoring',
     icon: '📋',
     color: 'bg-purple-100 text-purple-800'
   },
   { 
-    id: 3,
-    title: 'Detailed Review', 
-    status: 'under_review',
-    description: 'Comprehensive review',
-    icon: '👁️',
-    color: 'bg-amber-100 text-amber-800'
-  },
-  { 
-    id: 4,
+    id: 2,
     title: 'Assessment/Interview', 
     status: 'assessment_scheduled',
-    description: 'Testing or interviews',
+    description: 'Schedule & conduct',
     icon: '📅',
     color: 'bg-indigo-100 text-indigo-800'
   },
   { 
-    id: 5,
+    id: 3,
     title: 'Admission Decision', 
     status: 'approved',
-    description: 'Final decision made',
+    description: 'Accept/reject/waitlist',
     icon: '✅',
     color: 'bg-green-100 text-green-800'
   },
   { 
-    id: 6,
-    title: 'Deposit Payment', 
-    status: 'offer_sent',
-    description: 'Deposit processing',
+    id: 4,
+    title: 'Fee Payment', 
+    status: 'fee_pending',
+    description: 'Process fees',
     icon: '💳',
     color: 'bg-emerald-100 text-emerald-800'
   },
   { 
-    id: 7,
-    title: 'Admission Confirmed', 
-    status: 'offer_accepted',
-    description: 'Final confirmation',
+    id: 5,
+    title: 'Enrollment Confirmation', 
+    status: 'enrollment_confirmed',
+    description: 'Finalize enrollment',
     icon: '🎯',
     color: 'bg-green-200 text-green-900'
   },
   { 
-    id: 8,
-    title: 'Class Allocation', 
+    id: 6,
+    title: 'Welcome & Onboarding', 
     status: 'enrolled',
-    description: 'Class assignment & student creation',
+    description: 'Student orientation',
     icon: '🏫',
     color: 'bg-blue-200 text-blue-900'
   }
