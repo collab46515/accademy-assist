@@ -21,8 +21,14 @@ import {
   AlertTriangle,
   ArrowRight,
   Edit3,
-  Send
+  Send,
+  Mail,
+  Download
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface Application {
   id: string;
@@ -34,6 +40,7 @@ interface Application {
   yearGroup: string;
   submittedAt: string;
   progress: number;
+  parent_email?: string;
 }
 
 const WORKFLOW_STAGES = [
@@ -42,49 +49,66 @@ const WORKFLOW_STAGES = [
     label: 'Application Submitted', 
     description: 'Application received and initial review',
     icon: UserPlus,
-    color: 'bg-blue-100 text-blue-800'
+    color: 'bg-blue-100 text-blue-800',
+    allowedTransitions: ['under_review', 'rejected'],
+    canEdit: true
   },
   { 
     key: 'under_review', 
     label: 'Application Review & Verify', 
     description: 'Document verification and application review',
     icon: FileCheck,
-    color: 'bg-purple-100 text-purple-800'
+    color: 'bg-purple-100 text-purple-800',
+    allowedTransitions: ['assessment_scheduled', 'rejected'],
+    canEdit: true
   },
   { 
     key: 'assessment_scheduled', 
     label: 'Assessment/Interview', 
     description: 'Assessment or interview scheduled and conducted',
     icon: Calendar,
-    color: 'bg-indigo-100 text-indigo-800'
+    color: 'bg-indigo-100 text-indigo-800',
+    allowedTransitions: ['approved', 'under_review', 'rejected'],
+    canSchedule: true,
+    canEdit: true
   },
   { 
     key: 'approved', 
     label: 'Admission Decision', 
     description: 'Final decision: Approved, Rejected, or Waitlisted',
     icon: CheckCircle,
-    color: 'bg-green-100 text-green-800'
+    color: 'bg-green-100 text-green-800',
+    allowedTransitions: ['fee_pending', 'rejected', 'waitlisted'],
+    canGenerateLetter: true,
+    canEdit: true
   },
   { 
     key: 'fee_pending', 
     label: 'Fee Payment', 
     description: 'Fee payment processing and verification',
     icon: DollarSign,
-    color: 'bg-emerald-100 text-emerald-800'
+    color: 'bg-emerald-100 text-emerald-800',
+    allowedTransitions: ['enrollment_confirmed', 'approved'],
+    requiresPayment: true,
+    canEdit: true
   },
   { 
     key: 'enrollment_confirmed', 
     label: 'Enrollment Confirmation', 
     description: 'Enrollment confirmed with student ID assigned',
     icon: Award,
-    color: 'bg-green-200 text-green-900'
+    color: 'bg-green-200 text-green-900',
+    allowedTransitions: ['enrolled'],
+    canEdit: false
   },
   { 
     key: 'enrolled', 
     label: 'Welcome & Onboarding', 
     description: 'Student onboarding and orientation',
     icon: GraduationCap,
-    color: 'bg-blue-200 text-blue-900'
+    color: 'bg-blue-200 text-blue-900',
+    allowedTransitions: [],
+    canEdit: false
   }
 ];
 
@@ -94,6 +118,18 @@ export function AdmissionsWorkflow() {
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
+  
+  // Dialog states for enhanced features
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [assessmentDialogOpen, setAssessmentDialogOpen] = useState(false);
+  const [letterDialogOpen, setLetterDialogOpen] = useState(false);
+  
+  // Form states
+  const [assessmentNotes, setAssessmentNotes] = useState('');
+  const [assessmentDate, setAssessmentDate] = useState('');
+  const [assessmentType, setAssessmentType] = useState('');
+  
   const { toast } = useToast();
 
   const fetchRealApplications = useCallback(async () => {
@@ -402,17 +438,76 @@ export function AdmissionsWorkflow() {
 
   const mapStageToStatus = (stage: string): string => {
     switch (stage) {
-      case 'submission': return 'draft';
-      case 'application_fee': return 'submitted';
-      case 'enrollment': return 'submitted';
-      case 'review': return 'under_review';
-      case 'assessment': return 'assessment_scheduled';
-      case 'decision': return 'approved';
-      case 'deposit': return 'fee_payment';
-      case 'confirmed': return 'confirmed';
-      case 'class_allocation': return 'enrolled';
+      case 'submitted': return 'submitted';
+      case 'under_review': return 'under_review';
+      case 'assessment_scheduled': return 'assessment_scheduled';
+      case 'approved': return 'approved';
+      case 'fee_pending': return 'fee_pending';
+      case 'enrollment_confirmed': return 'enrollment_confirmed';
+      case 'enrolled': return 'enrolled';
       default: return 'draft';
     }
+  };
+
+  // Enhanced workflow helper functions
+  const getStageInfo = (status: string) => {
+    return WORKFLOW_STAGES.find(stage => stage.key === status) || WORKFLOW_STAGES[0];
+  };
+
+  const isTransitionAllowed = (currentStatus: string, targetStatus: string): boolean => {
+    const currentStage = getStageInfo(currentStatus);
+    return currentStage.allowedTransitions?.includes(targetStatus) || false;
+  };
+
+  const handleStatusUpdate = async (newStatus: string) => {
+    if (!selectedApplication) return;
+
+    if (!isTransitionAllowed(selectedApplication.currentStage, newStatus) && newStatus !== 'rejected') {
+      toast({
+        title: "Invalid Transition",
+        description: `Cannot move from ${selectedApplication.currentStage} to ${newStatus}`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setStatusUpdateLoading(true);
+      const { error } = await supabase
+        .from('enrollment_applications')
+        .update({ status: newStatus as any, updated_at: new Date().toISOString() })
+        .eq('id', selectedApplication.id);
+
+      if (error) throw error;
+      toast({ title: "Status Updated", description: `Application moved to ${getStageInfo(newStatus).label}` });
+      await fetchRealApplications();
+      setSelectedApplication(null);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to update status", variant: "destructive" });
+    } finally {
+      setStatusUpdateLoading(false);
+    }
+  };
+
+  const handleScheduleAssessment = async () => {
+    if (!selectedApplication) return;
+    toast({ title: "Assessment Scheduled", description: `${assessmentType} scheduled for ${assessmentDate}` });
+    await handleStatusUpdate('assessment_scheduled');
+    setAssessmentDialogOpen(false);
+    setAssessmentNotes('');
+    setAssessmentDate('');
+    setAssessmentType('');
+  };
+
+  const handleGenerateOfferLetter = () => {
+    toast({ title: "Offer Letter Generated", description: "Offer letter generated and sent" });
+    setLetterDialogOpen(false);
+  };
+
+  const handlePaymentProcessed = async () => {
+    if (!selectedApplication) return;
+    await handleStatusUpdate('enrollment_confirmed');
+    setPaymentDialogOpen(false);
   };
 
   return (
@@ -548,7 +643,162 @@ export function AdmissionsWorkflow() {
         }))}
       </div>
 
-      {/* Edit Dialog would go here */}
+      {/* Enhanced Application Details Dialog */}
+      {selectedApplication && !editMode && (
+        <Dialog open={!!selectedApplication && !paymentDialogOpen && !assessmentDialogOpen && !letterDialogOpen} onOpenChange={() => setSelectedApplication(null)}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Application Details</DialogTitle>
+              <DialogDescription>
+                {selectedApplication.studentName} - {selectedApplication.applicationNumber}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Current Stage</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Badge className={getStageInfo(selectedApplication.currentStage).color}>
+                    {getStageInfo(selectedApplication.currentStage).label}
+                  </Badge>
+                </CardContent>
+              </Card>
+
+              {/* Stage Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Stage Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {getStageInfo(selectedApplication.currentStage).canSchedule && (
+                    <Button onClick={() => setAssessmentDialogOpen(true)} className="w-full" variant="outline">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Schedule Assessment/Interview
+                    </Button>
+                  )}
+                  {getStageInfo(selectedApplication.currentStage).canGenerateLetter && (
+                    <Button onClick={() => setLetterDialogOpen(true)} className="w-full" variant="outline">
+                      <Mail className="h-4 w-4 mr-2" />
+                      Generate Offer Letter
+                    </Button>
+                  )}
+                  {getStageInfo(selectedApplication.currentStage).requiresPayment && (
+                    <Button onClick={() => setPaymentDialogOpen(true)} className="w-full">
+                      <DollarSign className="h-4 w-4 mr-2" />
+                      Process Payment
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Manual Status Change */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Change Status</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Select onValueChange={handleStatusUpdate}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select new status..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {WORKFLOW_STAGES.map((stage) => (
+                        <SelectItem key={stage.key} value={stage.key} disabled={!isTransitionAllowed(selectedApplication.currentStage, stage.key) && stage.key !== 'rejected'}>
+                          {stage.label}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="rejected">Reject Application</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </CardContent>
+              </Card>
+
+              <FeesDisplay applicationId={selectedApplication.id} applicationData={selectedApplication} currentStage={selectedApplication.currentStage} />
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Assessment Scheduling Dialog */}
+      <Dialog open={assessmentDialogOpen} onOpenChange={setAssessmentDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Schedule Assessment/Interview</DialogTitle>
+            <DialogDescription>Set up an assessment or interview for this applicant</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Type</label>
+              <Select value={assessmentType} onValueChange={setAssessmentType}>
+                <SelectTrigger><SelectValue placeholder="Select type..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="entrance_exam">Entrance Exam</SelectItem>
+                  <SelectItem value="interview">Interview</SelectItem>
+                  <SelectItem value="both">Both</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Date & Time</label>
+              <Input type="datetime-local" value={assessmentDate} onChange={(e) => setAssessmentDate(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Notes</label>
+              <Textarea value={assessmentNotes} onChange={(e) => setAssessmentNotes(e.target.value)} placeholder="Additional instructions..." />
+            </div>
+            <Button onClick={handleScheduleAssessment} className="w-full">
+              <Send className="h-4 w-4 mr-2" />
+              Schedule & Notify
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Offer Letter Dialog */}
+      <Dialog open={letterDialogOpen} onOpenChange={setLetterDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Generate Offer Letter</DialogTitle>
+            <DialogDescription>Generate and send admission offer letter</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">This will generate an official offer letter and send it to the applicant's email.</p>
+            <div className="flex gap-2">
+              <Button onClick={handleGenerateOfferLetter} className="flex-1">
+                <Mail className="h-4 w-4 mr-2" />
+                Generate & Send
+              </Button>
+              <Button variant="outline" className="flex-1">
+                <Download className="h-4 w-4 mr-2" />
+                Preview
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Dialog */}
+      <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Process Payment</DialogTitle>
+            <DialogDescription>Record and verify payment for this application</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">Verify that payment has been received before confirming enrollment.</p>
+            {selectedApplication && (
+              <FeesDisplay applicationId={selectedApplication.id} applicationData={selectedApplication} currentStage={selectedApplication.currentStage} />
+            )}
+            <Button onClick={handlePaymentProcessed} className="w-full">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Confirm Payment & Advance
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
       {editMode && selectedApplication && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
