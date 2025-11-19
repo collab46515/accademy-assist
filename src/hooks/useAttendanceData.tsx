@@ -233,19 +233,26 @@ export function useAttendanceData() {
         (existing || []).forEach((r: any) => existingMap.set(r.student_id, r.id));
       }
 
-      const records = attendanceList.map(att => ({
-        id: existingMap.get(att.student_id) || undefined,
-        student_id: att.student_id,
-        school_id: currentSchool.id,
-        teacher_id: user.id,
-        date: att.date,
-        period: att.period,
-        status: att.status,
-        subject: att.subject,
-        reason: att.reason,
-        notes: att.notes,
-        marked_at: new Date().toISOString(),
-      }));
+      const records = attendanceList.map(att => {
+        const existingId = existingMap.get(att.student_id);
+        const record: any = {
+          student_id: att.student_id,
+          school_id: currentSchool.id,
+          teacher_id: user.id,
+          date: att.date,
+          period: att.period,
+          status: att.status,
+          subject: att.subject,
+          reason: att.reason,
+          notes: att.notes,
+          marked_at: new Date().toISOString(),
+        };
+        // Only include id if we're updating an existing record
+        if (existingId) {
+          record.id = existingId;
+        }
+        return record;
+      });
 
       const { error } = await supabase
         .from('attendance_records')
