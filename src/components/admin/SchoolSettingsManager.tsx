@@ -207,7 +207,7 @@ export function SchoolSettingsManager() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const { toast } = useToast();
-  const { currentSchool, isSchoolAdmin, isSuperAdmin, schools } = useRBAC();
+  const { currentSchool, isSchoolAdmin, isSuperAdmin, schools, fetchUserData } = useRBAC();
 
   // All hooks must be called before any conditional returns
   useEffect(() => {
@@ -425,6 +425,9 @@ export function SchoolSettingsManager() {
         setLogoPreview(null);
       }
 
+      // Refresh the RBAC context to update sidebar
+      await fetchUserData();
+      
       // Refresh the data
       await fetchSchoolData();
       
