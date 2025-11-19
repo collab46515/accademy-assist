@@ -283,8 +283,8 @@ export const pathwayConfig = {
   standard: {
     name: "Standard Admission",
     description: "Regular admission process with assessment",
-    steps: ["Student Details", "Parent Details", "Medical & SEN", "Documents", "Assessment", "Review"],
-    totalSteps: 6,
+    steps: ["Student Details", "Family Details", "Address Details", "Academic & Language", "References", "Documents", "Review"],
+    totalSteps: 7,
   },
   sen: {
     name: "SEN Admission", 

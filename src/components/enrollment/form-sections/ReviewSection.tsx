@@ -190,29 +190,6 @@ export function ReviewSection() {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="marketing_consent"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>
-                    Marketing Communications (Optional)
-                  </FormLabel>
-                  <p className="text-sm text-muted-foreground">
-                    I would like to receive updates about school events, news, and other relevant information 
-                    via email and other communication channels.
-                  </p>
-                </div>
-              </FormItem>
-            )}
-          />
         </CardContent>
       </Card>
     </div>
