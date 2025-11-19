@@ -398,7 +398,7 @@ export function SchoolSettingsManager() {
           contact_phone: schoolInfo.phone,
           contact_email: schoolInfo.email,
           website: schoolInfo.website,
-          custom_domain: schoolInfo.custom_domain,
+          custom_domain: schoolInfo.custom_domain?.trim() || null,
           logo_url: logoUrl,
           principal_name: schoolInfo.principal_name,
           establishment_type: schoolInfo.establishment_type,
