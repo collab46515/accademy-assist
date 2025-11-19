@@ -8,8 +8,7 @@ import { Search, Filter, Eye, User, Calendar, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ApplicationSubmittedStage } from './stages/ApplicationSubmittedStage';
-import { DocumentVerificationStage } from './stages/DocumentVerificationStage';
-import { ApplicationReviewStage } from './stages/ApplicationReviewStage';
+import { ApplicationReviewVerifyStage } from './stages/ApplicationReviewVerifyStage';
 import { AssessmentInterviewStage } from './stages/AssessmentInterviewStage';
 import { AdmissionDecisionStage } from './stages/AdmissionDecisionStage';
 import { FeePaymentStage } from './stages/FeePaymentStage';
@@ -30,19 +29,17 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
 
   const stages = [
     { title: 'Application Submitted', status: 'submitted' },
-    { title: 'Document Verification', status: 'documents_pending' },
-    { title: 'Application Review', status: 'under_review' },
+    { title: 'Application Review & Verify', status: 'under_review' },
     { title: 'Assessment/Interview', status: 'assessment_scheduled' },
     { title: 'Admission Decision', status: 'approved' },
-    { title: 'Fee Payment', status: 'offer_sent' },
-    { title: 'Enrollment Confirmation', status: 'offer_accepted' },
+    { title: 'Fee Payment', status: 'fee_pending' },
+    { title: 'Enrollment Confirmation', status: 'enrollment_confirmed' },
     { title: 'Welcome & Onboarding', status: 'enrolled' }
   ];
 
   const stageComponents = [
     ApplicationSubmittedStage,
-    DocumentVerificationStage,
-    ApplicationReviewStage,
+    ApplicationReviewVerifyStage,
     AssessmentInterviewStage,
     AdmissionDecisionStage,
     FeePaymentStage,

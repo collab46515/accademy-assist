@@ -33,7 +33,7 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
     {
       id: 'math_assessment',
       type: 'Academic Assessment',
-      subject: 'Mathematics',
+      subject: 'Math',
       date: '2024-01-25',
       time: '10:00 AM',
       duration: '60 minutes',
@@ -53,10 +53,32 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
       score: 78
     },
     {
+      id: 'science_assessment',
+      type: 'Academic Assessment',
+      subject: 'Science',
+      date: '2024-01-26',
+      time: '9:00 AM',
+      duration: '60 minutes',
+      assessor: 'Dr. Wilson',
+      status: 'scheduled',
+      score: null
+    },
+    {
+      id: 'hindi_assessment',
+      type: 'Academic Assessment',
+      subject: 'Hindi',
+      date: '2024-01-26',
+      time: '11:00 AM',
+      duration: '45 minutes',
+      assessor: 'Mrs. Sharma',
+      status: 'pending',
+      score: null
+    },
+    {
       id: 'interview',
       type: 'Interview',
       subject: 'General Interview',
-      date: '2024-01-26',
+      date: '2024-01-27',
       time: '2:00 PM',
       duration: '30 minutes',
       assessor: 'Head of Admissions',

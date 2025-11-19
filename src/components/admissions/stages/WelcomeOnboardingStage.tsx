@@ -34,9 +34,17 @@ export function WelcomeOnboardingStage({ applicationId, onMoveToNext }: WelcomeO
               <span>Uniform ordered</span>
               <Badge variant="secondary">Pending</Badge>
             </div>
+            <div className="flex items-center justify-between p-3 border rounded-lg">
+              <span>Portal access granted</span>
+              <Badge variant="secondary">Pending</Badge>
+            </div>
+            <div className="flex items-center justify-between p-3 border rounded-lg">
+              <span>Calendar shared</span>
+              <Badge variant="secondary">Pending</Badge>
+            </div>
           </div>
           <Button onClick={onMoveToNext} className="mt-4 w-full">
-            Complete Admission Process
+            Complete Enrollment
           </Button>
         </CardContent>
       </Card>

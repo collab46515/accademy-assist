@@ -18,13 +18,12 @@ import {
 
 const WORKFLOW_STAGES = [
   { key: 'submission', label: 'Application Submitted', icon: UserPlus, color: 'bg-blue-100 text-blue-800', stageId: 0 },
-  { key: 'documents', label: 'Document Verification', icon: FileCheck, color: 'bg-purple-100 text-purple-800', stageId: 1 },
-  { key: 'review', label: 'Application Review', icon: Eye, color: 'bg-amber-100 text-amber-800', stageId: 2 },
-  { key: 'assessment', label: 'Assessment/Interview', icon: Calendar, color: 'bg-indigo-100 text-indigo-800', stageId: 3 },
-  { key: 'decision', label: 'Admission Decision', icon: CheckCircle, color: 'bg-green-100 text-green-800', stageId: 4 },
-  { key: 'payment', label: 'Fee Payment', icon: CreditCard, color: 'bg-emerald-100 text-emerald-800', stageId: 5 },
-  { key: 'confirmation', label: 'Enrollment Confirmation', icon: Award, color: 'bg-green-200 text-green-900', stageId: 6 },
-  { key: 'onboarding', label: 'Welcome & Onboarding', icon: GraduationCap, color: 'bg-blue-200 text-blue-900', stageId: 7 }
+  { key: 'review_verify', label: 'Review & Verify', icon: FileCheck, color: 'bg-purple-100 text-purple-800', stageId: 1 },
+  { key: 'assessment', label: 'Assessment/Interview', icon: Calendar, color: 'bg-indigo-100 text-indigo-800', stageId: 2 },
+  { key: 'decision', label: 'Admission Decision', icon: CheckCircle, color: 'bg-green-100 text-green-800', stageId: 3 },
+  { key: 'payment', label: 'Fee Payment', icon: CreditCard, color: 'bg-emerald-100 text-emerald-800', stageId: 4 },
+  { key: 'confirmation', label: 'Enrollment Confirmation', icon: Award, color: 'bg-green-200 text-green-900', stageId: 5 },
+  { key: 'onboarding', label: 'Welcome & Onboarding', icon: GraduationCap, color: 'bg-blue-200 text-blue-900', stageId: 6 }
 ];
 
 export function AdmissionsFlowVisualization() {
@@ -47,7 +46,46 @@ export function AdmissionsFlowVisualization() {
         <div className="space-y-8">
           {/* Top Row */}
           <div className="flex justify-center items-center gap-4 overflow-x-auto pb-4">
-            {WORKFLOW_STAGES.slice(0, 4).map((stage, index) => (
+            {WORKFLOW_STAGES.slice(0, 3).map((stage, index) => (
+              <React.Fragment key={stage.key}>
+                <div className="flex flex-col items-center min-w-[140px]">
+                  <Button
+                    onClick={() => handleStageClick(stage.stageId, stage.label)}
+                    variant="ghost"
+                    className="p-0 h-auto hover:bg-transparent"
+                  >
+                    <div className={`p-4 rounded-xl ${stage.color} mb-2 hover:shadow-md transition-shadow cursor-pointer`}>
+                      <stage.icon className="h-8 w-8" />
+                    </div>
+                  </Button>
+                  <Badge 
+                    variant="outline" 
+                    className="text-xs text-center whitespace-nowrap cursor-pointer hover:bg-muted"
+                    onClick={() => handleStageClick(stage.stageId, stage.label)}
+                  >
+                    {stage.label}
+                  </Badge>
+                </div>
+                 {index < 2 && (
+                  <ArrowRight className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+
+          {/* Flow Direction */}
+          <div className="flex justify-center">
+            <div className="flex flex-col items-center">
+              <ArrowRight className="h-6 w-6 text-muted-foreground rotate-90 mb-2" />
+              <Badge variant="secondary" className="text-xs">
+                Decision Point
+              </Badge>
+            </div>
+          </div>
+
+          {/* Bottom Row */}
+          <div className="flex justify-center items-center gap-4 overflow-x-auto">
+            {WORKFLOW_STAGES.slice(3).map((stage, index) => (
               <React.Fragment key={stage.key}>
                 <div className="flex flex-col items-center min-w-[140px]">
                   <Button
@@ -68,45 +106,6 @@ export function AdmissionsFlowVisualization() {
                   </Badge>
                 </div>
                  {index < 3 && (
-                  <ArrowRight className="h-6 w-6 text-muted-foreground flex-shrink-0" />
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-
-          {/* Flow Direction */}
-          <div className="flex justify-center">
-            <div className="flex flex-col items-center">
-              <ArrowRight className="h-6 w-6 text-muted-foreground rotate-90 mb-2" />
-              <Badge variant="secondary" className="text-xs">
-                Decision Point
-              </Badge>
-            </div>
-          </div>
-
-          {/* Bottom Row */}
-          <div className="flex justify-center items-center gap-4 overflow-x-auto">
-            {WORKFLOW_STAGES.slice(4).map((stage, index) => (
-              <React.Fragment key={stage.key}>
-                <div className="flex flex-col items-center min-w-[140px]">
-                  <Button
-                    onClick={() => handleStageClick(stage.stageId, stage.label)}
-                    variant="ghost"
-                    className="p-0 h-auto hover:bg-transparent"
-                  >
-                    <div className={`p-4 rounded-xl ${stage.color} mb-2 hover:shadow-md transition-shadow cursor-pointer`}>
-                      <stage.icon className="h-8 w-8" />
-                    </div>
-                  </Button>
-                  <Badge 
-                    variant="outline" 
-                    className="text-xs text-center whitespace-nowrap cursor-pointer hover:bg-muted"
-                    onClick={() => handleStageClick(stage.stageId, stage.label)}
-                  >
-                    {stage.label}
-                  </Badge>
-                </div>
-                {index < 3 && (
                   <ArrowRight className="h-6 w-6 text-muted-foreground flex-shrink-0" />
                 )}
               </React.Fragment>
