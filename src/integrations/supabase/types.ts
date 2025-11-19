@@ -702,7 +702,7 @@ export type Database = {
           created_at: string
           elevated_privilege: boolean | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           new_values: Json | null
           old_values: Json | null
           resource_id: string | null
@@ -716,7 +716,7 @@ export type Database = {
           created_at?: string
           elevated_privilege?: boolean | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           resource_id?: string | null
@@ -730,7 +730,7 @@ export type Database = {
           created_at?: string
           elevated_privilege?: boolean | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           resource_id?: string | null
@@ -8864,10 +8864,7 @@ export type Database = {
         Args: { lesson_plan_id: string; user_id?: string }
         Returns: boolean
       }
-      can_access_student: {
-        Args: { student_uuid: string }
-        Returns: boolean
-      }
+      can_access_student: { Args: { student_uuid: string }; Returns: boolean }
       can_access_student_in_school: {
         Args: { student_school_id: string }
         Returns: boolean
@@ -8880,14 +8877,8 @@ export type Database = {
         Args: { lesson_plan_id: string; user_id?: string }
         Returns: boolean
       }
-      check_must_change_password: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      clear_password_change_requirement: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      check_must_change_password: { Args: never; Returns: boolean }
+      clear_password_change_requirement: { Args: never; Returns: undefined }
       create_complete_student_enrollment: {
         Args: {
           application_id: string
@@ -8910,10 +8901,7 @@ export type Database = {
         Args: { activity_id: string }
         Returns: undefined
       }
-      generate_receipt_number: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      generate_receipt_number: { Args: never; Returns: string }
       generate_report_card_data: {
         Args: {
           p_academic_term: string
@@ -8944,26 +8932,14 @@ export type Database = {
         Args: { activity_id: string }
         Returns: undefined
       }
-      is_super_admin: {
-        Args: { user_uuid: string }
-        Returns: boolean
-      }
-      remove_demo_profiles_and_roles: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      is_super_admin: { Args: { user_uuid: string }; Returns: boolean }
+      remove_demo_profiles_and_roles: { Args: never; Returns: Json }
       request_password_reset: {
         Args: { target_user_id: string }
         Returns: boolean
       }
-      reset_public_data_preserve_auth: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
-      self_serve_create_school: {
-        Args: { school_data: Json }
-        Returns: string
-      }
+      reset_public_data_preserve_auth: { Args: never; Returns: Json }
+      self_serve_create_school: { Args: { school_data: Json }; Returns: string }
     }
     Enums: {
       academic_period_type: "term" | "semester" | "quarter" | "year" | "custom"

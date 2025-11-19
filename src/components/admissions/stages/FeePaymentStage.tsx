@@ -17,34 +17,34 @@ export function FeePaymentStage({ applicationId, onMoveToNext }: FeePaymentStage
   const [paymentPlan, setPaymentPlan] = useState<string>('');
 
   const feeStructure = {
-    applicationFee: 100,
-    registrationFee: 500,
-    tuitionFee: 12000,
-    uniformDeposit: 300,
-    equipmentFee: 200,
-    total: 13100
+    applicationFee: 2000,
+    registrationFee: 10000,
+    tuitionFee: 250000,
+    uniformDeposit: 5000,
+    equipmentFee: 3000,
+    total: 270000
   };
 
   const paymentSchedule = [
-    { id: 1, description: 'Application Fee', amount: 100, dueDate: '2024-01-15', status: 'paid', paidDate: '2024-01-10' },
-    { id: 2, description: 'Registration Fee', amount: 500, dueDate: '2024-02-01', status: 'pending', paidDate: null },
-    { id: 3, description: 'First Tuition Payment', amount: 4000, dueDate: '2024-03-01', status: 'pending', paidDate: null },
-    { id: 4, description: 'Second Tuition Payment', amount: 4000, dueDate: '2024-06-01', status: 'scheduled', paidDate: null },
-    { id: 5, description: 'Final Tuition Payment', amount: 4000, dueDate: '2024-09-01', status: 'scheduled', paidDate: null },
-    { id: 6, description: 'Uniform Deposit', amount: 300, dueDate: '2024-08-15', status: 'scheduled', paidDate: null },
-    { id: 7, description: 'Equipment Fee', amount: 200, dueDate: '2024-08-15', status: 'scheduled', paidDate: null }
+    { id: 1, description: 'Application Fee', amount: 2000, dueDate: '2024-01-15', status: 'paid', paidDate: '2024-01-10' },
+    { id: 2, description: 'Registration Fee', amount: 10000, dueDate: '2024-02-01', status: 'pending', paidDate: null },
+    { id: 3, description: 'First Tuition Payment', amount: 83333, dueDate: '2024-03-01', status: 'pending', paidDate: null },
+    { id: 4, description: 'Second Tuition Payment', amount: 83333, dueDate: '2024-06-01', status: 'scheduled', paidDate: null },
+    { id: 5, description: 'Final Tuition Payment', amount: 83334, dueDate: '2024-09-01', status: 'scheduled', paidDate: null },
+    { id: 6, description: 'Uniform Deposit', amount: 5000, dueDate: '2024-08-15', status: 'scheduled', paidDate: null },
+    { id: 7, description: 'Equipment Fee', amount: 3000, dueDate: '2024-08-15', status: 'scheduled', paidDate: null }
   ];
 
   const paymentMethods = [
-    { id: 'bank_transfer', name: 'Bank Transfer', icon: '🏦' },
-    { id: 'credit_card', name: 'Credit/Debit Card', icon: '💳' },
-    { id: 'cheque', name: 'Cheque', icon: '📝' },
-    { id: 'payment_plan', name: 'Payment Plan', icon: '📅' }
+    { id: 'credit_debit_card', name: 'Credit/Debit Card', icon: '💳', description: 'Visa, Mastercard, Rupay' },
+    { id: 'upi', name: 'UPI Payment', icon: '📱', description: 'Google Pay, PhonePe, Paytm' },
+    { id: 'cash', name: 'Cash Payment', icon: '💵', description: 'Pay at school office' },
+    { id: 'bank_transfer', name: 'Bank Transfer', icon: '🏦', description: 'NEFT, RTGS, IMPS' }
   ];
 
   const scholarships = [
-    { name: 'Academic Excellence Scholarship', amount: 2000, status: 'approved' },
-    { name: 'Sports Scholarship', amount: 1000, status: 'pending' }
+    { name: 'Academic Excellence Scholarship', amount: 25000, status: 'approved' },
+    { name: 'Sports Scholarship', amount: 15000, status: 'pending' }
   ];
 
   const getStatusBadge = (status: string) => {
@@ -118,28 +118,28 @@ export function FeePaymentStage({ applicationId, onMoveToNext }: FeePaymentStage
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span>Application Fee</span>
-                  <span className="font-medium">£{feeStructure.applicationFee}</span>
+                  <span className="font-medium">₹{feeStructure.applicationFee}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Registration Fee</span>
-                  <span className="font-medium">£{feeStructure.registrationFee}</span>
+                  <span className="font-medium">₹{feeStructure.registrationFee}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Annual Tuition Fee</span>
-                  <span className="font-medium">£{feeStructure.tuitionFee.toLocaleString()}</span>
+                  <span className="font-medium">₹{feeStructure.tuitionFee.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Uniform Deposit</span>
-                  <span className="font-medium">£{feeStructure.uniformDeposit}</span>
+                  <span className="font-medium">₹{feeStructure.uniformDeposit}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Equipment Fee</span>
-                  <span className="font-medium">£{feeStructure.equipmentFee}</span>
+                  <span className="font-medium">₹{feeStructure.equipmentFee}</span>
                 </div>
                 <hr />
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total</span>
-                  <span>£{feeStructure.total.toLocaleString()}</span>
+                  <span>₹{feeStructure.total.toLocaleString()}</span>
                 </div>
               </div>
             </CardContent>
@@ -164,7 +164,7 @@ export function FeePaymentStage({ applicationId, onMoveToNext }: FeePaymentStage
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">£{payment.amount}</p>
+                      <p className="font-medium">₹{payment.amount}</p>
                       {getStatusBadge(payment.status)}
                     </div>
                   </div>
@@ -187,12 +187,7 @@ export function FeePaymentStage({ applicationId, onMoveToNext }: FeePaymentStage
                       <span className="text-2xl">{method.icon}</span>
                       <div>
                         <p className="font-medium">{method.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {method.id === 'bank_transfer' && 'Direct transfer to school account'}
-                          {method.id === 'credit_card' && 'Secure online payment'}
-                          {method.id === 'cheque' && 'Traditional payment method'}
-                          {method.id === 'payment_plan' && 'Flexible payment options'}
-                        </p>
+                        <p className="text-sm text-muted-foreground">{method.description}</p>
                       </div>
                     </div>
                   </div>
@@ -253,7 +248,7 @@ export function FeePaymentStage({ applicationId, onMoveToNext }: FeePaymentStage
                   <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
                       <p className="font-medium">{scholarship.name}</p>
-                      <p className="text-sm text-muted-foreground">Award Amount: £{scholarship.amount}</p>
+                      <p className="text-sm text-muted-foreground">Award Amount: ₹{scholarship.amount}</p>
                     </div>
                     {getStatusBadge(scholarship.status)}
                   </div>
@@ -261,8 +256,8 @@ export function FeePaymentStage({ applicationId, onMoveToNext }: FeePaymentStage
               </div>
               
               <div className="mt-4 p-4 bg-green-50 rounded-lg">
-                <p className="font-medium text-green-800">Total Scholarship Awards: {formatCurrency(3000, getUserCurrency())}</p>
-                <p className="text-sm text-green-700">Adjusted fee total: £{(feeStructure.total - 3000).toLocaleString()}</p>
+                <p className="font-medium text-green-800">Total Scholarship Awards: ₹40,000</p>
+                <p className="text-sm text-green-700">Adjusted fee total: ₹{(feeStructure.total - 40000).toLocaleString()}</p>
               </div>
             </CardContent>
           </Card>

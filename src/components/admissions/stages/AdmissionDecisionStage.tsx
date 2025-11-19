@@ -31,12 +31,13 @@ export function AdmissionDecisionStage({ applicationId, onMoveToNext }: Admissio
     reviewStatus: 'complete'
   };
 
-  const committeeMember = [
-    { name: 'Dr. Sarah Wilson', role: 'Head of Admissions', decision: 'approve', notes: 'Strong academic performance' },
-    { name: 'Mr. James Brown', role: 'Academic Director', decision: 'approve', notes: 'Good potential for growth' },
-    { name: 'Ms. Emily Davis', role: 'Year Head', decision: 'conditional', notes: 'Needs support in English' },
-    { name: 'Dr. Michael Thompson', role: 'Deputy Head', decision: null, notes: null }
-  ];
+  // Simplified to single committee member approval (Head of Admissions)
+  const headOfAdmissions = {
+    name: 'Dr. Sarah Wilson',
+    role: 'Head of Admissions',
+    decision: 'approve',
+    notes: 'Strong academic performance and excellent assessment scores'
+  };
 
   const decisionOptions = [
     { value: 'accept', label: 'Accept (Unconditional)', color: 'text-green-600', icon: CheckCircle },
@@ -55,22 +56,11 @@ export function AdmissionDecisionStage({ applicationId, onMoveToNext }: Admissio
 
   const getDecisionBadge = (decision: string | null) => {
     switch (decision) {
-      case 'approve': return <Badge variant="default" className="bg-green-100 text-green-800">Approve</Badge>;
+      case 'approve': return <Badge variant="default" className="bg-green-100 text-green-800">Approved</Badge>;
       case 'conditional': return <Badge variant="secondary">Conditional</Badge>;
-      case 'reject': return <Badge variant="destructive">Reject</Badge>;
+      case 'reject': return <Badge variant="destructive">Rejected</Badge>;
       default: return <Badge variant="outline">Pending</Badge>;
     }
-  };
-
-  const getOverallRecommendation = () => {
-    const decisions = committeeMember.filter(m => m.decision).map(m => m.decision);
-    const approvals = decisions.filter(d => d === 'approve').length;
-    const conditionals = decisions.filter(d => d === 'conditional').length;
-    const rejections = decisions.filter(d => d === 'reject').length;
-
-    if (approvals >= conditionals + rejections) return 'approve';
-    if (conditionals > rejections) return 'conditional';
-    return 'reject';
   };
 
   return (
@@ -128,29 +118,30 @@ export function AdmissionDecisionStage({ applicationId, onMoveToNext }: Admissio
         <TabsContent value="committee" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Committee Members Review</CardTitle>
+              <CardTitle>Head of Admissions Review</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {committeeMember.map((member, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <p className="font-medium">{member.name}</p>
-                      <p className="text-sm text-muted-foreground">{member.role}</p>
-                      {member.notes && (
-                        <p className="text-sm mt-1">{member.notes}</p>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      {getDecisionBadge(member.decision)}
-                    </div>
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{headOfAdmissions.name}</p>
+                    <p className="text-sm text-muted-foreground">{headOfAdmissions.role}</p>
+                    {headOfAdmissions.notes && (
+                      <p className="text-sm mt-1">{headOfAdmissions.notes}</p>
+                    )}
                   </div>
-                ))}
+                  <div className="text-right">
+                    {getDecisionBadge(headOfAdmissions.decision)}
+                  </div>
+                </div>
               </div>
               
               <div className="mt-6 p-4 bg-primary/5 rounded-lg">
-                <p className="font-medium">Committee Recommendation: 
-                  <span className="ml-2 text-primary">{getOverallRecommendation().toUpperCase()}</span>
+                <p className="font-medium">Head of Admissions Decision: 
+                  <span className="ml-2 text-primary">{headOfAdmissions.decision?.toUpperCase() || 'PENDING'}</span>
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Only Head of Admissions approval is required for admission decisions.
                 </p>
               </div>
             </CardContent>
