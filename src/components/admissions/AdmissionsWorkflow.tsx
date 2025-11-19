@@ -29,7 +29,7 @@ interface Application {
   applicationNumber: string;
   studentName: string;
   source: 'online' | 'referral' | 'call_centre' | 'walk_in';
-  currentStage: 'submission' | 'application_fee' | 'enrollment' | 'review' | 'assessment' | 'decision' | 'deposit' | 'confirmed' | 'class_allocation';
+  currentStage: 'submitted' | 'under_review' | 'assessment_scheduled' | 'approved' | 'fee_pending' | 'enrollment_confirmed' | 'enrolled';
   status: 'pending' | 'in_progress' | 'completed' | 'rejected' | 'on_hold';
   yearGroup: string;
   submittedAt: string;
@@ -173,23 +173,25 @@ export function AdmissionsWorkflow() {
     }
   };
 
-  const mapStatusToStage = (status: string): 'submission' | 'application_fee' | 'enrollment' | 'review' | 'assessment' | 'decision' | 'deposit' | 'confirmed' | 'class_allocation' => {
+  const mapStatusToStage = (status: string): 'submitted' | 'under_review' | 'assessment_scheduled' | 'approved' | 'fee_pending' | 'enrollment_confirmed' | 'enrolled' => {
     switch (status) {
-      case 'draft': return 'submission';
-      case 'submitted': return 'application_fee';
-      case 'under_review': return 'review';
-      case 'documents_pending': return 'enrollment';
+      case 'draft': 
+      case 'submitted': return 'submitted';
+      case 'under_review': 
+      case 'documents_pending': return 'under_review';
       case 'assessment_scheduled': 
       case 'assessment_complete':
       case 'interview_scheduled':
-      case 'interview_complete': return 'assessment';
+      case 'interview_complete': return 'assessment_scheduled';
       case 'pending_approval':
-      case 'approved': return 'decision';
-      case 'offer_sent':
-      case 'offer_accepted': return 'deposit';
-      case 'confirmed': return 'confirmed';
-      case 'enrolled': return 'class_allocation'; // Enrolled students are in final stage
-      default: return 'submission';
+      case 'approved': 
+      case 'offer_sent': return 'approved';
+      case 'offer_accepted':
+      case 'fee_pending': return 'fee_pending';
+      case 'confirmed': 
+      case 'enrollment_confirmed': return 'enrollment_confirmed';
+      case 'enrolled': return 'enrolled';
+      default: return 'submitted';
     }
   };
 
@@ -461,7 +463,7 @@ export function AdmissionsWorkflow() {
         ) : (
           applications.map((application) => {
           const currentStageIndex = WORKFLOW_STAGES.findIndex(stage => stage.key === application.currentStage);
-          const currentStageInfo = WORKFLOW_STAGES[currentStageIndex];
+          const currentStageInfo = WORKFLOW_STAGES[currentStageIndex] || WORKFLOW_STAGES[0]; // Fallback to first stage if not found
           
           return (
             <Card key={application.id} className="hover:shadow-md transition-shadow">
