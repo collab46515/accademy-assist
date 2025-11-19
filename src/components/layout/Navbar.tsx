@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useRBAC } from "@/hooks/useRBAC";
 import { Button } from "@/components/ui/button";
-import { SchoolSelector } from "./SchoolSelector";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
@@ -56,20 +55,12 @@ export const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
-  const { hasRole, isSuperAdmin, currentSchool, schools, switchSchool } = useRBAC();
+  const { hasRole, isSuperAdmin, currentSchool } = useRBAC();
 
-  console.log('🔍 Navbar rendering - User:', !!user, 'isSuperAdmin:', isSuperAdmin(), 'Schools:', schools.length, 'Current:', currentSchool?.name);
+  console.log('🔍 Navbar rendering - User:', !!user, 'isSuperAdmin:', isSuperAdmin(), 'Current:', currentSchool?.name);
 
   const handleSignOut = async () => {
     await signOut();
-  };
-  
-  const handleSchoolChange = (schoolId: string) => {
-    const school = schools.find(s => s.id === schoolId);
-    if (school) {
-      console.log('🔄 SWITCHING SCHOOL TO:', school);
-      switchSchool(school);
-    }
   };
 
   // Filter navigation items based on user roles
@@ -139,24 +130,6 @@ export const Navbar = () => {
               );
             })}
             
-            {/* Simple School Switcher - VISIBLE TEST */}
-            {isSuperAdmin() && schools.length > 0 && (
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 border-primary bg-primary/10">
-                <Building2 className="h-4 w-4 text-primary" />
-                <select 
-                  value={currentSchool?.id || ''} 
-                  onChange={(e) => handleSchoolChange(e.target.value)}
-                  className="bg-transparent border-none text-sm font-medium cursor-pointer focus:outline-none"
-                >
-                  {schools.map(school => (
-                    <option key={school.id} value={school.id}>
-                      {school.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-            
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -177,12 +150,6 @@ export const Navbar = () => {
                     </p>
                   </div>
                 </DropdownMenuItem>
-                
-                {/* School Selector in Dropdown - ALWAYS SHOW */}
-                <div className="border-t border-border my-1" />
-                <div className="px-2 py-2">
-                  <SchoolSelector />
-                </div>
                 
                 <div className="border-t border-border my-1" />
                 <DropdownMenuItem onClick={handleSignOut}>
