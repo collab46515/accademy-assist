@@ -173,7 +173,6 @@ const erpModules = [
       { title: "Dashboard", url: "/administration", icon: LayoutDashboard },
       { title: "School Settings", url: "/school-settings", icon: Building },
       { title: "Module Features", url: "/admin/module-features", icon: Settings2 },
-      { title: "School Switcher", url: "/school-switcher", icon: Building },
       { title: "User Management", url: "/user-management", icon: UserCog },
       { title: "Permission Management", url: "/permission-management", icon: Shield },
       { title: "System Settings", url: "/admin-management", icon: Settings },
