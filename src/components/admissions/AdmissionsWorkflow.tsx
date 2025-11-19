@@ -351,7 +351,7 @@ export function AdmissionsWorkflow() {
         }
 
         // Special handling for final stage - create actual student record
-        if (nextStage.key === 'class_allocation') {
+        if (nextStage.key === 'enrolled') {
           await handleFinalEnrollment(applicationId);
         }
 
