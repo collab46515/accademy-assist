@@ -32,15 +32,13 @@ export function EnhancedWorkflowManager() {
   });
 
   const stages = [
-    { key: 'submitted', title: 'Application Submitted', nextKey: 'application_fee', autoProgress: false },
-    { key: 'application_fee', title: 'Application Fee', nextKey: 'documents_pending', autoProgress: true },
-    { key: 'documents_pending', title: 'Enrollment Processing', nextKey: 'under_review', autoProgress: false },
-    { key: 'under_review', title: 'Detailed Review', nextKey: 'assessment_scheduled', autoProgress: false },
+    { key: 'submitted', title: 'Application Submitted', nextKey: 'under_review', autoProgress: false },
+    { key: 'under_review', title: 'Application Review & Verify', nextKey: 'assessment_scheduled', autoProgress: false },
     { key: 'assessment_scheduled', title: 'Assessment/Interview', nextKey: 'approved', autoProgress: false },
-    { key: 'approved', title: 'Admission Decision', nextKey: 'deposit', autoProgress: false },
-    { key: 'deposit', title: 'Deposit Payment', nextKey: 'offer_accepted', autoProgress: true },
-    { key: 'offer_accepted', title: 'Admission Confirmed', nextKey: 'enrolled', autoProgress: true },
-    { key: 'enrolled', title: 'Class Allocation', nextKey: null, autoProgress: false }
+    { key: 'approved', title: 'Admission Decision', nextKey: 'fee_pending', autoProgress: false },
+    { key: 'fee_pending', title: 'Fee Payment', nextKey: 'enrollment_confirmed', autoProgress: true },
+    { key: 'enrollment_confirmed', title: 'Enrollment Confirmation', nextKey: 'enrolled', autoProgress: false },
+    { key: 'enrolled', title: 'Welcome & Onboarding', nextKey: null, autoProgress: false }
   ];
 
   useEffect(() => {
