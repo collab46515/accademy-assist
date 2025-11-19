@@ -40,68 +40,59 @@ const ENHANCED_WORKFLOW_STAGES = [
   { 
     key: 'submitted', 
     label: 'Application Submitted', 
-    description: 'Application has been submitted and is awaiting initial review',
+    description: 'Application submitted and awaiting initial review',
     color: 'bg-blue-100 text-blue-800',
     allowedTransitions: ['under_review', 'rejected'],
     canEdit: true
   },
   { 
     key: 'under_review', 
-    label: 'Application Fee Required', 
-    description: 'Application fee payment required to proceed',
-    color: 'bg-yellow-100 text-yellow-800',
-    allowedTransitions: ['assessment_scheduled', 'rejected', 'documents_pending'],
-    requiresPayment: true,
+    label: 'Application Review & Verify', 
+    description: 'Document verification and detailed review',
+    color: 'bg-purple-100 text-purple-800',
+    allowedTransitions: ['assessment_scheduled', 'rejected'],
     canEdit: true
   },
   { 
     key: 'assessment_scheduled', 
     label: 'Assessment/Interview', 
-    description: 'Assessment or interview has been scheduled',
-    color: 'bg-purple-100 text-purple-800',
-    allowedTransitions: ['assessment_complete', 'under_review', 'rejected'],
-    canSchedule: true,
-    canEdit: true
-  },
-  { 
-    key: 'assessment_complete', 
-    label: 'Review', 
-    description: 'Assessment completed, application under detailed review',
+    description: 'Assessment or interview scheduled',
     color: 'bg-indigo-100 text-indigo-800',
-    allowedTransitions: ['approved', 'rejected', 'on_hold'],
+    allowedTransitions: ['approved', 'under_review', 'rejected'],
+    canSchedule: true,
     canEdit: true
   },
   { 
     key: 'approved', 
     label: 'Admission Decision', 
-    description: 'Application approved, awaiting enrollment confirmation',
+    description: 'Application approved, awaiting fee payment',
     color: 'bg-green-100 text-green-800',
-    allowedTransitions: ['fee_payment', 'rejected'],
+    allowedTransitions: ['fee_pending', 'rejected', 'waitlisted'],
     canGenerateLetter: true,
     canEdit: true
   },
   { 
-    key: 'fee_payment', 
-    label: 'Deposit Payment', 
-    description: 'Enrollment deposit payment required',
+    key: 'fee_pending', 
+    label: 'Fee Payment', 
+    description: 'Fee payment processing',
     color: 'bg-emerald-100 text-emerald-800',
-    allowedTransitions: ['confirmed', 'approved'],
+    allowedTransitions: ['enrollment_confirmed', 'approved'],
     requiresPayment: true,
     canEdit: true
   },
   { 
-    key: 'confirmed', 
-    label: 'Confirmed', 
-    description: 'Enrollment confirmed, student ready for class allocation',
+    key: 'enrollment_confirmed', 
+    label: 'Enrollment Confirmation', 
+    description: 'Enrollment confirmed with student ID assigned',
     color: 'bg-green-200 text-green-900',
     allowedTransitions: ['enrolled'],
     canEdit: false
   },
   { 
     key: 'enrolled', 
-    label: 'Enrolled', 
-    description: 'Student successfully enrolled and allocated to class',
-    color: 'bg-green-300 text-green-900',
+    label: 'Welcome & Onboarding', 
+    description: 'Student onboarding and orientation complete',
+    color: 'bg-blue-200 text-blue-900',
     allowedTransitions: [],
     canEdit: false
   }
