@@ -17,13 +17,24 @@ export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: Ap
   const [behaviorScore, setBehaviorScore] = useState([80]);
   const [communicationScore, setCommunicationScore] = useState([70]);
 
-  // Required documents as per new requirements
+  // Required documents as per Anand Niketan requirements
   const requiredDocuments = [
-    { id: 'aadhaar', name: 'Aadhaar Copy / UID', status: 'verified', uploadedAt: '2024-01-15', verifiedBy: 'John Admin' },
-    { id: 'community_cert', name: 'Community Certificate', status: 'verified', uploadedAt: '2024-01-15', verifiedBy: 'John Admin' },
-    { id: 'birth_certificate', name: 'Birth Certificate', status: 'verified', uploadedAt: '2024-01-15', verifiedBy: 'John Admin' },
-    { id: 'salary_cert', name: 'Salary Certificate / Slip or Self Declaration of Income', status: 'pending', uploadedAt: '2024-01-16', verifiedBy: null },
-    { id: 'passport_photo', name: 'Passport Photo', status: 'verified', uploadedAt: '2024-01-14', verifiedBy: 'John Admin' }
+    // Mandatory Documents
+    { id: 'passport_photo', name: 'Child Passport Size Photo', status: 'pending', required: true, uploadedAt: null, verifiedBy: null },
+    { id: 'birth_certificate', name: 'Birth Certificate', status: 'pending', required: true, uploadedAt: null, verifiedBy: null },
+    { id: 'aadhaar', name: 'Aadhaar Copy / UID', status: 'pending', required: true, uploadedAt: null, verifiedBy: null },
+    { id: 'community_cert', name: 'Community Certificate', status: 'pending', required: true, uploadedAt: null, verifiedBy: null },
+    { id: 'salary_cert', name: 'Salary Certificate / Slip or Self Declaration of Income', status: 'pending', required: true, uploadedAt: null, verifiedBy: null },
+    { id: 'org_endorsement', name: 'Organization Endorsement or Reference Letter', status: 'pending', required: true, uploadedAt: null, verifiedBy: null },
+    
+    // Optional Documents
+    { id: 'ration_card', name: 'Ration Card', status: 'pending', required: false, uploadedAt: null, verifiedBy: null },
+    { id: 'medical_cert', name: 'Medical Certificate', status: 'pending', required: false, uploadedAt: null, verifiedBy: null },
+    { id: 'church_endorsement', name: 'Church Endorsement (Church Certificate or Letter from Pastor)', status: 'pending', required: false, uploadedAt: null, verifiedBy: null },
+    
+    // Original School Documents
+    { id: 'transfer_cert', name: 'Transfer Certificate', status: 'pending', required: false, uploadedAt: null, verifiedBy: null },
+    { id: 'migration_cert', name: 'Migration Certificate', status: 'pending', required: false, uploadedAt: null, verifiedBy: null }
   ];
 
   const getStatusBadge = (status: string) => {
@@ -94,7 +105,12 @@ export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: Ap
                     <div className="flex items-center gap-3">
                       {getStatusIcon(doc.status)}
                       <div>
-                        <p className="font-medium">{doc.name}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{doc.name}</p>
+                          {doc.required && (
+                            <Badge variant="destructive" className="text-xs">Required</Badge>
+                          )}
+                        </div>
                         {doc.uploadedAt && (
                           <p className="text-sm text-muted-foreground">
                             Uploaded: {new Date(doc.uploadedAt).toLocaleDateString()}
