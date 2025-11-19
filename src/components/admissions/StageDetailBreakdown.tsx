@@ -55,18 +55,18 @@ interface StageDetail {
 
 const DETAILED_WORKFLOW_STAGES: StageDetail[] = [
   {
-    key: 'submission',
-    label: 'Application Submission',
-    description: 'Initial application received from various sources',
+    key: 'submitted',
+    label: 'Application Submitted',
+    description: 'Application received and initial review',
     icon: UserPlus,
     color: 'bg-blue-100 text-blue-800',
     duration: '1-2 hours',
     activities: [
-      'Receive application from online portal, phone, or walk-in',
+      'Receive application via online form (7 steps)',
       'Generate unique application number',
-      'Create initial student record',
+      'Verify all Anand Niketan form fields submitted',
       'Send confirmation email to parents',
-      'Assign to initial review queue'
+      'Assign to review queue'
     ],
     tasks: [
       { task: 'Generate application number', responsible: 'System', timeframe: 'Immediate', critical: true },
@@ -119,18 +119,18 @@ const DETAILED_WORKFLOW_STAGES: StageDetail[] = [
     ]
   },
   {
-    key: 'application_fee',
-    label: 'Application Fee Processing',
-    description: 'Application fee payment processing and verification',
-    icon: DollarSign,
-    color: 'bg-yellow-100 text-yellow-800',
-    duration: '24-48 hours',
+    key: 'under_review',
+    label: 'Application Review & Verify',
+    description: 'Document verification and comprehensive review',
+    icon: FileCheck,
+    color: 'bg-purple-100 text-purple-800',
+    duration: '2-5 days',
     activities: [
-      'Generate payment link and invoice',
-      'Process online payment or bank transfer',
-      'Verify payment completion',
-      'Update financial records',
-      'Release application for next stage'
+      'Verify all 11 required documents from Anand Niketan form',
+      'Check mandatory documents: Passport photo, Birth cert, Aadhaar, Community cert, Salary cert, Org endorsement',
+      'Review optional documents: Ration card, Medical cert, Church endorsement, Transfer cert, Migration cert',
+      'Score application (Academic, Behavior, Communication)',
+      'Conduct detailed data validation'
     ],
     tasks: [
       { task: 'Issue payment invoice', responsible: 'Finance System', timeframe: '1 hour', critical: true },

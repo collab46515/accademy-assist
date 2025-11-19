@@ -17,6 +17,7 @@ import {
   Clock, 
   DollarSign,
   GraduationCap,
+  Award,
   AlertTriangle,
   ArrowRight,
   Edit3,
@@ -37,65 +38,51 @@ interface Application {
 
 const WORKFLOW_STAGES = [
   { 
-    key: 'submission', 
-    label: 'Application Submission', 
-    description: 'Initial application received from various sources',
+    key: 'submitted', 
+    label: 'Application Submitted', 
+    description: 'Application received and initial review',
     icon: UserPlus,
     color: 'bg-blue-100 text-blue-800'
   },
   { 
-    key: 'application_fee', 
-    label: 'Application Fee', 
-    description: 'Application fee payment processing',
-    icon: DollarSign,
-    color: 'bg-yellow-100 text-yellow-800'
-  },
-  { 
-    key: 'enrollment', 
-    label: 'Enrollment Processing', 
-    description: 'Basic enrollment requirements processing',
+    key: 'under_review', 
+    label: 'Application Review & Verify', 
+    description: 'Document verification and application review',
     icon: FileCheck,
     color: 'bg-purple-100 text-purple-800'
   },
   { 
-    key: 'review', 
-    label: 'Detailed Review', 
-    description: 'Comprehensive review of all application details',
-    icon: Eye,
-    color: 'bg-amber-100 text-amber-800'
-  },
-  { 
-    key: 'assessment', 
+    key: 'assessment_scheduled', 
     label: 'Assessment/Interview', 
-    description: 'Online assessment or personal interview conducted',
+    description: 'Assessment or interview scheduled and conducted',
     icon: Calendar,
     color: 'bg-indigo-100 text-indigo-800'
   },
   { 
-    key: 'decision', 
+    key: 'approved', 
     label: 'Admission Decision', 
-    description: 'Final decision: Approved, Rejected, or On Hold',
+    description: 'Final decision: Approved, Rejected, or Waitlisted',
     icon: CheckCircle,
     color: 'bg-green-100 text-green-800'
   },
   { 
-    key: 'deposit', 
-    label: 'Deposit Payment', 
-    description: 'Deposit payment processing (if approved)',
+    key: 'fee_pending', 
+    label: 'Fee Payment', 
+    description: 'Fee payment processing and verification',
     icon: DollarSign,
     color: 'bg-emerald-100 text-emerald-800'
   },
   { 
-    key: 'confirmed', 
-    label: 'Admission Confirmed', 
-    description: 'Final admission confirmation',
-    icon: CheckCircle,
+    key: 'enrollment_confirmed', 
+    label: 'Enrollment Confirmation', 
+    description: 'Enrollment confirmed with student ID assigned',
+    icon: Award,
     color: 'bg-green-200 text-green-900'
   },
   { 
-    key: 'class_allocation', 
-    label: 'Class Allocation', 
-    description: 'Class assignment and final setup',
+    key: 'enrolled', 
+    label: 'Welcome & Onboarding', 
+    description: 'Student onboarding and orientation',
     icon: GraduationCap,
     color: 'bg-blue-200 text-blue-900'
   }
