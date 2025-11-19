@@ -1,7 +1,7 @@
 import React from 'react';
 import { useEnrollmentContext } from '../EnrollmentFormWrapper';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
+
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText } from 'lucide-react';
@@ -19,25 +19,9 @@ export function DocumentsSection() {
         </p>
       </div>
 
-      <div className="grid gap-6">
-        <FormField
-          control={form.control}
-          name="academic_notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Academic Records & Previous School Information</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Please provide details about the student's previous academic performance, any awards, achievements, or relevant academic information..."
-                  className="min-h-[100px]"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      <p className="text-sm text-muted-foreground">
+        Please ensure you have the following documents ready for submission
+      </p>
 
       <Card className="bg-muted/50">
         <CardHeader>
