@@ -21,8 +21,8 @@ const WORKFLOW_STAGES = [
   { key: 'under_review', label: 'Review & Verify', icon: FileCheck, color: 'bg-purple-100 text-purple-800', stageId: 1 },
   { key: 'assessment_scheduled', label: 'Assessment/Interview', icon: Calendar, color: 'bg-indigo-100 text-indigo-800', stageId: 2 },
   { key: 'approved', label: 'Admission Decision', icon: CheckCircle, color: 'bg-green-100 text-green-800', stageId: 3 },
-  { key: 'fee_pending', label: 'Fee Payment', icon: CreditCard, color: 'bg-emerald-100 text-emerald-800', stageId: 4 },
-  { key: 'enrollment_confirmed', label: 'Enrollment Confirmation', icon: Award, color: 'bg-green-200 text-green-900', stageId: 5 },
+  { key: 'offer_sent', label: 'Fee Payment', icon: CreditCard, color: 'bg-emerald-100 text-emerald-800', stageId: 4 },
+  { key: 'offer_accepted', label: 'Enrollment Confirmation', icon: Award, color: 'bg-green-200 text-green-900', stageId: 5 },
   { key: 'enrolled', label: 'Welcome & Onboarding', icon: GraduationCap, color: 'bg-blue-200 text-blue-900', stageId: 6 }
 ];
 

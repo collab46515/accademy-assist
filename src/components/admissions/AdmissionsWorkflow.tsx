@@ -35,7 +35,7 @@ interface Application {
   applicationNumber: string;
   studentName: string;
   source: 'online' | 'referral' | 'call_centre' | 'walk_in';
-  currentStage: 'submitted' | 'under_review' | 'assessment_scheduled' | 'approved' | 'fee_pending' | 'enrollment_confirmed' | 'enrolled';
+  currentStage: 'submitted' | 'under_review' | 'assessment_scheduled' | 'approved' | 'offer_sent' | 'offer_accepted' | 'enrolled';
   status: 'pending' | 'in_progress' | 'completed' | 'rejected' | 'on_hold';
   yearGroup: string;
   submittedAt: string;
@@ -78,22 +78,22 @@ const WORKFLOW_STAGES = [
     description: 'Final decision: Approved, Rejected, or Waitlisted',
     icon: CheckCircle,
     color: 'bg-green-100 text-green-800',
-    allowedTransitions: ['fee_pending', 'rejected', 'waitlisted'],
+    allowedTransitions: ['offer_sent', 'rejected', 'waitlisted'],
     canGenerateLetter: true,
     canEdit: true
   },
   { 
-    key: 'fee_pending', 
+    key: 'offer_sent', 
     label: 'Fee Payment', 
     description: 'Fee payment processing and verification',
     icon: DollarSign,
     color: 'bg-emerald-100 text-emerald-800',
-    allowedTransitions: ['enrollment_confirmed', 'approved'],
+    allowedTransitions: ['offer_accepted', 'approved'],
     requiresPayment: true,
     canEdit: true
   },
   { 
-    key: 'enrollment_confirmed', 
+    key: 'offer_accepted', 
     label: 'Enrollment Confirmation', 
     description: 'Enrollment confirmed with student ID assigned',
     icon: Award,
@@ -209,7 +209,7 @@ export function AdmissionsWorkflow() {
     }
   };
 
-  const mapStatusToStage = (status: string): 'submitted' | 'under_review' | 'assessment_scheduled' | 'approved' | 'fee_pending' | 'enrollment_confirmed' | 'enrolled' => {
+  const mapStatusToStage = (status: string): 'submitted' | 'under_review' | 'assessment_scheduled' | 'approved' | 'offer_sent' | 'offer_accepted' | 'enrolled' => {
     switch (status) {
       case 'draft': 
       case 'submitted': return 'submitted';
@@ -220,12 +220,9 @@ export function AdmissionsWorkflow() {
       case 'interview_scheduled':
       case 'interview_complete': return 'assessment_scheduled';
       case 'pending_approval':
-      case 'approved': 
-      case 'offer_sent': return 'approved';
-      case 'offer_accepted':
-      case 'fee_pending': return 'fee_pending';
-      case 'confirmed': 
-      case 'enrollment_confirmed': return 'enrollment_confirmed';
+      case 'approved': return 'approved';
+      case 'offer_sent': return 'offer_sent';
+      case 'offer_accepted': return 'offer_accepted';
       case 'enrolled': return 'enrolled';
       default: return 'submitted';
     }
@@ -442,8 +439,8 @@ export function AdmissionsWorkflow() {
       case 'under_review': return 'under_review';
       case 'assessment_scheduled': return 'assessment_scheduled';
       case 'approved': return 'approved';
-      case 'fee_pending': return 'fee_pending';
-      case 'enrollment_confirmed': return 'enrollment_confirmed';
+      case 'offer_sent': return 'offer_sent';
+      case 'offer_accepted': return 'offer_accepted';
       case 'enrolled': return 'enrolled';
       default: return 'draft';
     }
@@ -506,7 +503,7 @@ export function AdmissionsWorkflow() {
 
   const handlePaymentProcessed = async () => {
     if (!selectedApplication) return;
-    await handleStatusUpdate('enrollment_confirmed');
+    await handleStatusUpdate('offer_accepted');
     setPaymentDialogOpen(false);
   };
 

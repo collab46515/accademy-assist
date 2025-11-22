@@ -41,7 +41,7 @@ const STAGES = [
   { 
     id: 4,
     title: 'Fee Payment', 
-    status: 'fee_pending',
+    status: 'offer_sent',
     description: 'Process fees',
     icon: '💳',
     color: 'bg-emerald-100 text-emerald-800'
@@ -49,7 +49,7 @@ const STAGES = [
   { 
     id: 5,
     title: 'Enrollment Confirmation', 
-    status: 'enrollment_confirmed',
+    status: 'offer_accepted',
     description: 'Finalize enrollment',
     icon: '🎯',
     color: 'bg-green-200 text-green-900'

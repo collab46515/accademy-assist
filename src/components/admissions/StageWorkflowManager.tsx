@@ -32,8 +32,8 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
     { title: 'Application Review & Verify', status: 'under_review' },
     { title: 'Assessment/Interview', status: 'assessment_scheduled' },
     { title: 'Admission Decision', status: 'approved' },
-    { title: 'Fee Payment', status: 'fee_pending' },
-    { title: 'Enrollment Confirmation', status: 'enrollment_confirmed' },
+    { title: 'Fee Payment', status: 'offer_sent' },
+    { title: 'Enrollment Confirmation', status: 'offer_accepted' },
     { title: 'Welcome & Onboarding', status: 'enrolled' }
   ];
 

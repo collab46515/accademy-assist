@@ -384,10 +384,10 @@ export function UserFlows() {
             'Payment gateway integration (PLACEHOLDER - not fully connected)',
             'Payment status tracking',
             'Button: "Move to Enrollment Confirmation"',
-            'Status in DB: "fee_pending" or "fee_paid"'
+            'Status in DB: "offer_sent"'
           ],
           technicalDetails: 'Component: FeePaymentStage.tsx. Shows hardcoded fee amounts. Payment plan radio buttons. Gateway integration is placeholder only.',
-          dataFlow: 'Fee display → plan selection → payment (placeholder) → button updates to "enrollment_confirmed"',
+          dataFlow: 'Fee display → plan selection → payment (placeholder) → button updates to "offer_accepted"',
           files: ['src/components/admissions/stages/FeePaymentStage.tsx']
         },
         {
@@ -402,7 +402,7 @@ export function UserFlows() {
             'Login credentials generation confirmation',
             'Profile creation status',
             'Button: "Move to Welcome & Onboarding"',
-            'Status in DB: "enrollment_confirmed"'
+            'Status in DB: "offer_accepted"'
           ],
           technicalDetails: 'Component: EnrollmentConfirmationStage.tsx. Shows enrollment summary with generated details. Creates student, profile, and user_role records.',
           dataFlow: 'Enrollment data → student record creation → profile creation → credentials → button updates to "enrolled"',
