@@ -165,14 +165,22 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
+      draft: { variant: 'outline', label: 'Draft' },
       submitted: { variant: 'secondary', label: 'Submitted' },
-      document_verification: { variant: 'outline', label: 'Docs Pending' },
       under_review: { variant: 'default', label: 'Under Review' },
+      documents_pending: { variant: 'outline', label: 'Docs Pending' },
       assessment_scheduled: { variant: 'secondary', label: 'Assessment' },
+      assessment_complete: { variant: 'secondary', label: 'Assessment Done' },
+      interview_scheduled: { variant: 'secondary', label: 'Interview' },
+      interview_complete: { variant: 'secondary', label: 'Interview Done' },
       pending_approval: { variant: 'outline', label: 'Decision Pending' },
-      fee_payment: { variant: 'destructive', label: 'Payment Due' },
-      enrollment_confirmation: { variant: 'default', label: 'Confirming' },
-      onboarding: { variant: 'default', label: 'Onboarding' }
+      approved: { variant: 'default', label: 'Approved' },
+      offer_sent: { variant: 'destructive', label: 'Payment Due' },
+      offer_accepted: { variant: 'default', label: 'Confirming' },
+      enrolled: { variant: 'default', label: 'Enrolled' },
+      rejected: { variant: 'destructive', label: 'Rejected' },
+      withdrawn: { variant: 'outline', label: 'Withdrawn' },
+      on_hold: { variant: 'outline', label: 'On Hold' }
     };
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.submitted;

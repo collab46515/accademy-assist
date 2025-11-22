@@ -17,6 +17,7 @@ import { EnrollmentProcessor } from "@/components/admissions/EnrollmentProcessor
 import { StageNavigator } from "@/components/admissions/StageNavigator";
 import { StudentIntegrationVerifier } from "@/components/admissions/StudentIntegrationVerifier";
 import { ResendEnrollmentEmails } from "@/components/admin/ResendEnrollmentEmails";
+import { WorkflowValidation } from "@/components/admissions/WorkflowValidation";
 import { ArrowLeft, UserPlus, FileText, Phone, Globe, Calendar, Upload } from "lucide-react";
 
 const UnifiedAdmissionsPage = () => {
@@ -264,12 +265,14 @@ const UnifiedAdmissionsPage = () => {
 
         {/* Reports Tab */}
         <TabsContent value="reports" className="space-y-6">
+          <WorkflowValidation />
+          
           <Card>
             <CardHeader>
               <CardTitle>Reports & Analytics</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>Reports and analytics functionality will be implemented here.</p>
+              <p>Additional reports and analytics functionality will be implemented here.</p>
             </CardContent>
           </Card>
         </TabsContent>
