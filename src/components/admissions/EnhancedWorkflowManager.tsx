@@ -35,9 +35,9 @@ export function EnhancedWorkflowManager() {
     { key: 'submitted', title: 'Application Submitted', nextKey: 'under_review', autoProgress: false },
     { key: 'under_review', title: 'Application Review & Verify', nextKey: 'assessment_scheduled', autoProgress: false },
     { key: 'assessment_scheduled', title: 'Assessment/Interview', nextKey: 'approved', autoProgress: false },
-    { key: 'approved', title: 'Admission Decision', nextKey: 'fee_pending', autoProgress: false },
-    { key: 'fee_pending', title: 'Fee Payment', nextKey: 'enrollment_confirmed', autoProgress: true },
-    { key: 'enrollment_confirmed', title: 'Enrollment Confirmation', nextKey: 'enrolled', autoProgress: false },
+    { key: 'approved', title: 'Admission Decision', nextKey: 'offer_sent', autoProgress: false },
+    { key: 'offer_sent', title: 'Fee Payment', nextKey: 'offer_accepted', autoProgress: true },
+    { key: 'offer_accepted', title: 'Enrollment Confirmation', nextKey: 'enrolled', autoProgress: false },
     { key: 'enrolled', title: 'Welcome & Onboarding', nextKey: null, autoProgress: false }
   ];
 
