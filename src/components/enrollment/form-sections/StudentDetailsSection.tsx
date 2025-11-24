@@ -45,6 +45,9 @@ export function StudentDetailsSection() {
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>Date of Birth *</FormLabel>
+              <FormDescription>
+                Applicant must be between 2 and 25 years old
+              </FormDescription>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -69,7 +72,15 @@ export function StudentDetailsSection() {
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
-                    disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                    disabled={(date) => {
+                      const today = new Date();
+                      const minAge = new Date();
+                      minAge.setFullYear(today.getFullYear() - 25); // Max 25 years old
+                      const maxAge = new Date();
+                      maxAge.setFullYear(today.getFullYear() - 2); // Min 2 years old
+                      
+                      return date > maxAge || date < minAge;
+                    }}
                     initialFocus
                     className="pointer-events-auto"
                   />

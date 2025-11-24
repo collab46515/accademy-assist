@@ -9,7 +9,20 @@ const postcodeSchema = z.string().regex(/^\d{6}$/, "Please enter a valid 6-digit
 // Base student schema - Anand Niketan fields
 const baseStudentSchema = z.object({
   student_name: z.string().min(2, "Student name is required"),
-  date_of_birth: z.date({ required_error: "Date of birth is required" }),
+  date_of_birth: z.date({ required_error: "Date of birth is required" })
+    .refine((date) => {
+      const today = new Date();
+      const age = today.getFullYear() - date.getFullYear();
+      const monthDiff = today.getMonth() - date.getMonth();
+      const dayDiff = today.getDate() - date.getDate();
+      
+      // Calculate precise age
+      const preciseAge = age - (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? 1 : 0);
+      
+      return preciseAge >= 2 && preciseAge <= 25;
+    }, {
+      message: "Student must be between 2 and 25 years old"
+    }),
   mother_tongue: z.string().min(1, "Mother tongue is required"),
   state: z.string().min(1, "State is required"),
   gender: z.enum(["Male", "Female"], { required_error: "Gender is required" }),
@@ -175,7 +188,20 @@ const emergencyEnrollmentSchema = z.object({
   // Student details
   student_first_name: z.string().min(1, "First name is required"),
   student_last_name: z.string().min(1, "Last name is required"),
-  student_dob: z.date(),
+  student_dob: z.date()
+    .refine((date) => {
+      const today = new Date();
+      const age = today.getFullYear() - date.getFullYear();
+      const monthDiff = today.getMonth() - date.getMonth();
+      const dayDiff = today.getDate() - date.getDate();
+      
+      // Calculate precise age
+      const preciseAge = age - (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? 1 : 0);
+      
+      return preciseAge >= 2 && preciseAge <= 25;
+    }, {
+      message: "Student must be between 2 and 25 years old"
+    }),
   student_gender: z.enum(["Male", "Female", "Other", "Prefer not to say"]).optional(),
   student_known_risks: z.string().optional(),
   student_immigration_status: z.string().optional(),
