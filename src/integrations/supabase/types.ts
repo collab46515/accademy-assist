@@ -2781,6 +2781,7 @@ export type Database = {
           review_completed: boolean | null
           review_data: Json | null
           review_notes: string | null
+          review_stage_status: string | null
           scholarship_application: boolean | null
           school_id: string
           sibling_student_id: string | null
@@ -2834,6 +2835,7 @@ export type Database = {
           review_completed?: boolean | null
           review_data?: Json | null
           review_notes?: string | null
+          review_stage_status?: string | null
           scholarship_application?: boolean | null
           school_id: string
           sibling_student_id?: string | null
@@ -2887,6 +2889,7 @@ export type Database = {
           review_completed?: boolean | null
           review_data?: Json | null
           review_notes?: string | null
+          review_stage_status?: string | null
           scholarship_application?: boolean | null
           school_id?: string
           sibling_student_id?: string | null
