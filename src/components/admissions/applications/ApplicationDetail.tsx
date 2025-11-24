@@ -77,6 +77,82 @@ export function ApplicationDetail({ applicationId, onBack, getStatusColor }: App
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const handleDownloadApplication = () => {
+    if (!application) return;
+
+    const content = `
+ENROLLMENT APPLICATION SUMMARY
+================================
+
+Application Number: ${application.application_number || 'N/A'}
+Submission Date: ${application.submitted_at ? new Date(application.submitted_at).toLocaleString() : 'N/A'}
+Status: ${application.status || 'N/A'}
+
+STUDENT INFORMATION
+-------------------
+Name: ${application.student_name || 'N/A'}
+Date of Birth: ${application.date_of_birth || 'N/A'}
+Gender: ${(application as any).gender || 'N/A'}
+Mother Tongue: ${(application as any).mother_tongue || 'N/A'}
+Religion: ${(application as any).religion || 'N/A'}
+Nationality: ${application.nationality || 'N/A'}
+
+PARENT/GUARDIAN INFORMATION
+---------------------------
+Father's Name: ${(application as any).father_name || 'N/A'}
+Father's Email: ${(application as any).father_email || 'N/A'}
+Father's Mobile: ${(application as any).father_mobile || 'N/A'}
+
+Mother's Name: ${(application as any).mother_name || 'N/A'}
+Mother's Profession: ${(application as any).mother_profession || 'N/A'}
+Mother's Mobile: ${(application as any).mother_mobile || 'N/A'}
+Mother's Email: ${(application as any).mother_email || 'N/A'}
+
+ADDRESS
+-------
+House No: ${(application as any).communication_house_no || 'N/A'}
+Street: ${(application as any).communication_street || 'N/A'}
+City: ${(application as any).communication_city || 'N/A'}
+District: ${(application as any).communication_district || 'N/A'}
+State: ${(application as any).communication_state || (application as any).state || 'N/A'}
+Postal Code: ${(application as any).communication_postal_code || 'N/A'}
+Country: ${application.country || 'N/A'}
+
+ACADEMIC INFORMATION
+--------------------
+Year Group: ${application.year_group || 'N/A'}
+APAR ID: ${(application as any).apar_id || 'N/A'}
+Sibling in School: ${(application as any).has_sibling_in_school || 'N/A'}
+
+MEDICAL INFORMATION
+-------------------
+Chronic Diseases: ${(application as any).chronic_diseases || 'None'}
+Medicine/Treatment: ${(application as any).medicine_treatment || 'None'}
+
+ADDITIONAL INFORMATION
+----------------------
+Pathway: ${application.pathway || 'N/A'}
+
+================================
+Generated on: ${new Date().toLocaleString()}
+    `.trim();
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `application-${application.application_number}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Downloaded",
+      description: "Application summary downloaded successfully",
+    });
+  };
+
   useEffect(() => {
     fetchApplication();
   }, [applicationId]);
@@ -470,25 +546,26 @@ export function ApplicationDetail({ applicationId, onBack, getStatusColor }: App
           </CardContent>
         </Card>
 
-        {/* Full Application Details Dialog */}
+        {/* Application Actions */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5" />
-              View Full Application Details
+              <FileText className="h-5 w-5" />
+              Application Actions
             </CardTitle>
             <CardDescription>
-              View comprehensive application information including all submitted data
+              View complete application details or download a summary
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="w-full" variant="outline">
-                  <Eye className="h-4 w-4 mr-2" />
-                  Open Full Application Details
-                </Button>
-              </DialogTrigger>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="w-full" variant="outline">
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Full Details
+                  </Button>
+                </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Complete Application Details: {application.student_name}</DialogTitle>
@@ -737,6 +814,15 @@ export function ApplicationDetail({ applicationId, onBack, getStatusColor }: App
                 )}
               </DialogContent>
             </Dialog>
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handleDownloadApplication}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Download Summary
+            </Button>
+            </div>
           </CardContent>
         </Card>
 
