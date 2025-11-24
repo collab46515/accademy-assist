@@ -16,6 +16,29 @@ export function ApplicationReviewStage({ applicationId, onMoveToNext }: Applicat
   const [academicScore, setAcademicScore] = useState([75]);
   const [behaviorScore, setBehaviorScore] = useState([80]);
   const [potentialScore, setPotentialScore] = useState([70]);
+  const [reviewNotes, setReviewNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmitReview = async () => {
+    setIsSubmitting(true);
+    try {
+      // Add your review submission logic here
+      console.log('Submitting review:', {
+        applicationId,
+        academicScore: academicScore[0],
+        behaviorScore: behaviorScore[0],
+        potentialScore: potentialScore[0],
+        reviewNotes
+      });
+      // For now, just show success
+      alert('Review submitted successfully!');
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      alert('Failed to submit review');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const reviewCriteria = [
     { id: 'academic_performance', label: 'Academic Performance', score: 75, reviewer: 'Dr. Smith', completed: true },
@@ -232,10 +255,18 @@ export function ApplicationReviewStage({ applicationId, onMoveToNext }: Applicat
                 <Textarea 
                   placeholder="Add your review notes and recommendations..."
                   rows={6}
+                  value={reviewNotes}
+                  onChange={(e) => setReviewNotes(e.target.value)}
                 />
                 <div className="flex gap-2">
                   <Button variant="outline" className="flex-1">Save Draft</Button>
-                  <Button className="flex-1">Submit Review</Button>
+                  <Button 
+                    className="flex-1" 
+                    onClick={handleSubmitReview}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Submitting...' : 'Submit Review'}
+                  </Button>
                 </div>
               </div>
             </CardContent>
