@@ -1,49 +1,326 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Upload, Download, CheckCircle, XCircle, Eye, FileText, AlertTriangle } from 'lucide-react';
+import { Upload, Download, CheckCircle, XCircle, Eye, FileText, AlertTriangle, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface ApplicationReviewVerifyStageProps {
   applicationId: string;
   onMoveToNext: () => void;
 }
 
+interface Document {
+  id?: string;
+  document_type: string;
+  document_name: string;
+  status: string;
+  required: boolean;
+  file_path?: string;
+  uploaded_at?: string;
+  verified_by?: string;
+  file_size?: number;
+  mime_type?: string;
+}
+
 export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: ApplicationReviewVerifyStageProps) {
   const [academicScore, setAcademicScore] = useState([75]);
   const [behaviorScore, setBehaviorScore] = useState([80]);
   const [communicationScore, setCommunicationScore] = useState([70]);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState<string | null>(null);
+  const [verifying, setVerifying] = useState(false);
+  const [notes, setNotes] = useState('');
+  const { toast } = useToast();
 
-  // Required documents as per Anand Niketan requirements
-  const requiredDocuments = [
-    // Mandatory Documents
-    { id: 'passport_photo', name: 'Child Passport Size Photo', status: 'pending', required: true, uploadedAt: null, verifiedBy: null },
-    { id: 'birth_certificate', name: 'Birth Certificate', status: 'pending', required: true, uploadedAt: null, verifiedBy: null },
-    { id: 'aadhaar', name: 'Aadhaar Copy / UID', status: 'pending', required: true, uploadedAt: null, verifiedBy: null },
-    { id: 'community_cert', name: 'Community Certificate', status: 'pending', required: true, uploadedAt: null, verifiedBy: null },
-    { id: 'salary_cert', name: 'Salary Certificate / Slip or Self Declaration of Income', status: 'pending', required: true, uploadedAt: null, verifiedBy: null },
-    { id: 'org_endorsement', name: 'Organization Endorsement or Reference Letter', status: 'pending', required: true, uploadedAt: null, verifiedBy: null },
-    
-    // Optional Documents
-    { id: 'ration_card', name: 'Ration Card', status: 'pending', required: false, uploadedAt: null, verifiedBy: null },
-    { id: 'medical_cert', name: 'Medical Certificate', status: 'pending', required: false, uploadedAt: null, verifiedBy: null },
-    { id: 'church_endorsement', name: 'Church Endorsement (Church Certificate or Letter from Pastor)', status: 'pending', required: false, uploadedAt: null, verifiedBy: null },
-    
-    // Original School Documents
-    { id: 'transfer_cert', name: 'Transfer Certificate', status: 'pending', required: false, uploadedAt: null, verifiedBy: null },
-    { id: 'migration_cert', name: 'Migration Certificate', status: 'pending', required: false, uploadedAt: null, verifiedBy: null }
+  // Required documents template
+  const requiredDocumentsTemplate = [
+    { document_type: 'passport_photo', document_name: 'Child Passport Size Photo', required: true },
+    { document_type: 'birth_certificate', document_name: 'Birth Certificate', required: true },
+    { document_type: 'aadhaar', document_name: 'Aadhaar Copy / UID', required: true },
+    { document_type: 'community_cert', document_name: 'Community Certificate', required: true },
+    { document_type: 'salary_cert', document_name: 'Salary Certificate / Slip or Self Declaration of Income', required: true },
+    { document_type: 'org_endorsement', document_name: 'Organization Endorsement or Reference Letter', required: true },
+    { document_type: 'ration_card', document_name: 'Ration Card', required: false },
+    { document_type: 'medical_cert', document_name: 'Medical Certificate', required: false },
+    { document_type: 'church_endorsement', document_name: 'Church Endorsement (Church Certificate or Letter from Pastor)', required: false },
+    { document_type: 'transfer_cert', document_name: 'Transfer Certificate', required: false },
+    { document_type: 'migration_cert', document_name: 'Migration Certificate', required: false }
   ];
+
+  useEffect(() => {
+    fetchDocuments();
+  }, [applicationId]);
+
+  const fetchDocuments = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('application_documents')
+        .select('*')
+        .eq('application_id', applicationId);
+
+      if (error) throw error;
+
+      // Merge fetched documents with template
+      const mergedDocs = requiredDocumentsTemplate.map(template => {
+        const existingDoc = data?.find(d => d.document_type === template.document_type);
+        if (existingDoc) {
+          return {
+            ...template,
+            id: existingDoc.id,
+            status: existingDoc.status,
+            file_path: existingDoc.file_path,
+            uploaded_at: existingDoc.uploaded_at,
+            verified_by: existingDoc.verified_by,
+            file_size: existingDoc.file_size,
+            mime_type: existingDoc.mime_type
+          };
+        }
+        return { ...template, status: 'pending' };
+      });
+
+      setDocuments(mergedDocs);
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load documents",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFileUpload = async (documentType: string, file: File) => {
+    try {
+      setUploading(documentType);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Upload file to storage
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${applicationId}/${documentType}_${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('application-documents')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // Check if document record exists
+      const existingDoc = documents.find(d => d.document_type === documentType);
+      
+      if (existingDoc?.id) {
+        // Update existing document
+        const { error: updateError } = await supabase
+          .from('application_documents')
+          .update({
+            file_path: filePath,
+            file_size: file.size,
+            mime_type: file.type,
+            uploaded_at: new Date().toISOString(),
+            uploaded_by: user.id,
+            status: 'pending'
+          })
+          .eq('id', existingDoc.id);
+
+        if (updateError) throw updateError;
+      } else {
+        // Create new document record
+        const doc = documents.find(d => d.document_type === documentType);
+        const { error: insertError } = await supabase
+          .from('application_documents')
+          .insert({
+            application_id: applicationId,
+            document_type: documentType,
+            document_name: doc?.document_name || documentType,
+            file_path: filePath,
+            file_size: file.size,
+            mime_type: file.type,
+            uploaded_at: new Date().toISOString(),
+            uploaded_by: user.id,
+            status: 'pending'
+          });
+
+        if (insertError) throw insertError;
+      }
+
+      toast({
+        title: "Success",
+        description: "Document uploaded successfully",
+      });
+
+      fetchDocuments();
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload document",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const handleVerifyDocument = async (documentId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { error } = await supabase
+        .from('application_documents')
+        .update({
+          status: 'verified',
+          verified_at: new Date().toISOString(),
+          verified_by: user.id
+        })
+        .eq('id', documentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Document verified successfully",
+      });
+
+      fetchDocuments();
+    } catch (error) {
+      console.error('Error verifying document:', error);
+      toast({
+        title: "Error",
+        description: "Failed to verify document",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleVerifyAll = async () => {
+    try {
+      setVerifying(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Get all document IDs that have been uploaded
+      const uploadedDocIds = documents
+        .filter(d => d.id && d.file_path)
+        .map(d => d.id);
+
+      if (uploadedDocIds.length === 0) {
+        toast({
+          title: "No documents",
+          description: "No documents to verify",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Update all uploaded documents to verified
+      const { error } = await supabase
+        .from('application_documents')
+        .update({
+          status: 'verified',
+          verified_at: new Date().toISOString(),
+          verified_by: user.id,
+          verification_notes: notes
+        })
+        .in('id', uploadedDocIds);
+
+      if (error) throw error;
+
+      // Check if all required documents are verified
+      await fetchDocuments();
+      const allRequiredVerified = requiredDocumentsTemplate
+        .filter(d => d.required)
+        .every(req => {
+          const doc = documents.find(d => d.document_type === req.document_type);
+          return doc?.status === 'verified' || doc?.file_path;
+        });
+
+      if (allRequiredVerified) {
+        // Update application status to move to next stage
+        await supabase
+          .from('enrollment_applications')
+          .update({ status: 'assessment_scheduled' })
+          .eq('id', applicationId);
+      }
+
+      toast({
+        title: "Success",
+        description: "All documents verified successfully",
+      });
+
+      fetchDocuments();
+    } catch (error) {
+      console.error('Error verifying documents:', error);
+      toast({
+        title: "Error",
+        description: "Failed to verify documents",
+        variant: "destructive",
+      });
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const handleDownloadDocument = async (filePath: string, documentName: string) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('application-documents')
+        .download(filePath);
+
+      if (error) throw error;
+
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = documentName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      toast({
+        title: "Error",
+        description: "Failed to download document",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleViewDocument = async (filePath: string) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('application-documents')
+        .createSignedUrl(filePath, 60);
+
+      if (error) throw error;
+
+      window.open(data.signedUrl, '_blank');
+    } catch (error) {
+      console.error('Error viewing document:', error);
+      toast({
+        title: "Error",
+        description: "Failed to view document",
+        variant: "destructive",
+      });
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'verified': return <Badge variant="default" className="bg-green-100 text-green-800">Verified</Badge>;
+      case 'verified': return <Badge className="bg-green-100 text-green-800 border-green-200">Verified</Badge>;
       case 'pending': return <Badge variant="secondary">Pending Review</Badge>;
       case 'rejected': return <Badge variant="destructive">Rejected</Badge>;
-      case 'missing': return <Badge variant="outline">Missing</Badge>;
-      default: return <Badge variant="outline">Unknown</Badge>;
+      default: return <Badge variant="outline">Pending</Badge>;
     }
   };
 
@@ -52,7 +329,6 @@ export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: Ap
       case 'verified': return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'pending': return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
       case 'rejected': return <XCircle className="h-4 w-4 text-red-600" />;
-      case 'missing': return <FileText className="h-4 w-4 text-gray-400" />;
       default: return <FileText className="h-4 w-4 text-gray-400" />;
     }
   };
@@ -84,6 +360,14 @@ export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: Ap
     </Card>
   );
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Tabs defaultValue="documents" className="w-full">
@@ -100,40 +384,76 @@ export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: Ap
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {requiredDocuments.map((doc) => (
-                  <div key={doc.id} className="flex items-center justify-between p-4 border rounded-lg">
+                {documents.map((doc) => (
+                  <div key={doc.document_type} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center gap-3">
                       {getStatusIcon(doc.status)}
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="font-medium">{doc.name}</p>
+                          <p className="font-medium">{doc.document_name}</p>
                           {doc.required && (
                             <Badge variant="destructive" className="text-xs">Required</Badge>
                           )}
                         </div>
-                        {doc.uploadedAt && (
+                        {doc.uploaded_at && (
                           <p className="text-sm text-muted-foreground">
-                            Uploaded: {new Date(doc.uploadedAt).toLocaleDateString()}
-                            {doc.verifiedBy && ` • Verified by: ${doc.verifiedBy}`}
+                            Uploaded: {new Date(doc.uploaded_at).toLocaleDateString()}
+                            {doc.verified_by && ` • Verified`}
                           </p>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       {getStatusBadge(doc.status)}
-                      {doc.uploadedAt && (
+                      {doc.file_path && (
                         <div className="flex gap-1">
-                          <Button size="sm" variant="outline">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleViewDocument(doc.file_path!)}
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleDownloadDocument(doc.file_path!, doc.document_name)}
+                          >
                             <Download className="h-4 w-4" />
                           </Button>
+                          {doc.status !== 'verified' && doc.id && (
+                            <Button 
+                              size="sm" 
+                              variant="default"
+                              onClick={() => handleVerifyDocument(doc.id!)}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Verify
+                            </Button>
+                          )}
                         </div>
                       )}
-                      {!doc.uploadedAt && (
-                        <Button size="sm" variant="outline">
-                          <Upload className="h-4 w-4 mr-2" />
+                      {!doc.file_path && (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          disabled={uploading === doc.document_type}
+                          onClick={() => {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = 'application/pdf,image/*';
+                            input.onchange = (e) => {
+                              const file = (e.target as HTMLInputElement).files?.[0];
+                              if (file) handleFileUpload(doc.document_type, file);
+                            };
+                            input.click();
+                          }}
+                        >
+                          {uploading === doc.document_type ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <Upload className="h-4 w-4 mr-2" />
+                          )}
                           Upload
                         </Button>
                       )}
@@ -152,10 +472,26 @@ export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: Ap
               <Textarea 
                 placeholder="Add notes about document verification..." 
                 rows={4}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
               />
               <div className="flex gap-2 mt-4">
-                <Button variant="outline">Save Notes</Button>
-                <Button>Verify All Documents</Button>
+                <Button 
+                  onClick={handleVerifyAll}
+                  disabled={verifying || documents.filter(d => d.file_path).length === 0}
+                >
+                  {verifying ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Verifying...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Verify All Documents
+                    </>
+                  )}
+                </Button>
               </div>
             </CardContent>
           </Card>
