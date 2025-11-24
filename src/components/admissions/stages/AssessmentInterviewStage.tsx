@@ -186,11 +186,10 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
       return null;
     }
 
-    const totalMarks = assessments.reduce((sum, a) => sum + parseFloat(a.marks || '0'), 0);
-    const totalMaxMarks = assessments.reduce((sum, a) => sum + parseFloat(a.maxMarks || '0'), 0);
-    const percentage = (totalMarks / totalMaxMarks) * 100;
+    // Check if any subject failed - if so, overall result is fail
+    const anySubjectFailed = assessments.some(a => a.status === 'fail');
     
-    return percentage >= 40 ? 'pass' : 'fail';
+    return anySubjectFailed ? 'fail' : 'pass';
   };
 
   const handleCompleteAssessment = async () => {
