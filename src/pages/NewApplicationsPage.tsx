@@ -1,11 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { Plus, UserPlus, FileText, Calendar, Clock, Users } from 'lucide-react';
+import { Plus, UserPlus, FileText, Calendar, Clock, Users, FolderOpen, ArrowRight } from 'lucide-react';
 
 export default function NewApplicationsPage() {
   const navigate = useNavigate();
@@ -29,29 +29,76 @@ export default function NewApplicationsPage() {
     { label: "Total Applicants", value: "156", icon: Users, color: "bg-purple-500" },
   ];
 
-  const recentApplications = [
-    { id: "APP001", name: "John Smith", yearGroup: "Year 7", submittedDate: "2024-01-15", status: "Draft" },
-    { id: "APP002", name: "Emma Johnson", yearGroup: "Year 9", submittedDate: "2024-01-15", status: "Submitted" },
-    { id: "APP003", name: "Michael Brown", yearGroup: "Year 8", submittedDate: "2024-01-14", status: "Under Review" },
-    { id: "APP004", name: "Sarah Wilson", yearGroup: "Year 10", submittedDate: "2024-01-14", status: "Draft" },
-    { id: "APP005", name: "David Taylor", yearGroup: "Year 7", submittedDate: "2024-01-13", status: "Submitted" },
-  ];
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Draft': return 'bg-gray-100 text-gray-800';
-      case 'Submitted': return 'bg-blue-100 text-blue-800';
-      case 'Under Review': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   return (
     <div className="container mx-auto p-6 space-y-6">
       <PageHeader 
-        title="New Applications" 
-        description="Manage new student applications and admissions intake"
+        title="Applications" 
+        description="Manage student applications and enrollment"
       />
+
+      {/* Main Action Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Start New Application Card */}
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow border-2 hover:border-primary"
+          onClick={() => navigate('/admissions/enroll')}
+        >
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-lg bg-primary/10">
+                  <Plus className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <CardTitle>Start New Application</CardTitle>
+                  <CardDescription>Begin a new student enrollment</CardDescription>
+                </div>
+              </div>
+              <ArrowRight className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Choose from multiple enrollment pathways including standard admission, SEN, staff children, and emergency placements.
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              <Badge variant="outline">Standard</Badge>
+              <Badge variant="outline">SEN</Badge>
+              <Badge variant="outline">Staff Child</Badge>
+              <Badge variant="outline">Emergency</Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* My Applications Card */}
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow border-2 hover:border-primary"
+          onClick={() => navigate('/admissions/my-applications')}
+        >
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-lg bg-blue-500/10">
+                  <FolderOpen className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <CardTitle>My Applications</CardTitle>
+                  <CardDescription>View and manage your applications</CardDescription>
+                </div>
+              </div>
+              <ArrowRight className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Resume draft applications, track submission status, and view application history for all your enrollment applications.
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              <Badge variant="outline">Drafts</Badge>
+              <Badge variant="outline">Submitted</Badge>
+              <Badge variant="outline">Under Review</Badge>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -76,7 +123,7 @@ export default function NewApplicationsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
+            <Clock className="h-5 w-5" />
             Quick Actions
           </CardTitle>
         </CardHeader>
@@ -89,65 +136,16 @@ export default function NewApplicationsPage() {
               <UserPlus className="h-5 w-5" />
               <span>Start New Application</span>
             </Button>
-            <Button variant="outline" className="h-16 flex flex-col gap-2">
-              <FileText className="h-5 w-5" />
-              <span>Import Applications</span>
+            <Button variant="outline" className="h-16 flex flex-col gap-2"
+              onClick={() => navigate('/admissions/my-applications')}
+            >
+              <FolderOpen className="h-5 w-5" />
+              <span>My Applications</span>
             </Button>
             <Button variant="outline" className="h-16 flex flex-col gap-2">
               <Calendar className="h-5 w-5" />
               <span>Schedule Open Day</span>
             </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Recent Applications */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Recent Applications
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-4 font-medium">Application ID</th>
-                  <th className="text-left py-3 px-4 font-medium">Student Name</th>
-                  <th className="text-left py-3 px-4 font-medium">Year Group</th>
-                  <th className="text-left py-3 px-4 font-medium">Submitted Date</th>
-                  <th className="text-left py-3 px-4 font-medium">Status</th>
-                  <th className="text-left py-3 px-4 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentApplications.map((application) => (
-                  <tr key={application.id} className="border-b hover:bg-muted/50">
-                    <td className="py-3 px-4 font-mono text-sm">{application.id}</td>
-                    <td className="py-3 px-4 font-medium">{application.name}</td>
-                    <td className="py-3 px-4">{application.yearGroup}</td>
-                    <td className="py-3 px-4">{application.submittedDate}</td>
-                    <td className="py-3 px-4">
-                      <Badge variant="secondary" className={getStatusColor(application.status)}>
-                        {application.status}
-                      </Badge>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          View
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          Edit
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </CardContent>
       </Card>
