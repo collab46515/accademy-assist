@@ -29,14 +29,7 @@ export function AdmissionDecisionStage({ applicationId, onMoveToNext }: Admissio
     try {
       const { data, error } = await supabase
         .from('enrollment_applications')
-        .select(`
-          *,
-          students:student_id (
-            student_number,
-            year_group,
-            form_class
-          )
-        `)
+        .select('*')
         .eq('id', applicationId)
         .maybeSingle();
 
