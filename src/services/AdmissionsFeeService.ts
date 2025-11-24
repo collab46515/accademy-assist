@@ -116,19 +116,30 @@ export class AdmissionsFeeService {
       return { success: false, error: 'No fee structure found for this year group' };
     }
 
-    // Create invoice for full term fees
+    // Check if there's a class-specific amount for this year group
+    const yearGroup = applicationData.year_group;
+    let feeAmount = feeStructure.total_amount;
+    
+    if (feeStructure.year_group_amounts && feeStructure.year_group_amounts[yearGroup]) {
+      feeAmount = feeStructure.year_group_amounts[yearGroup];
+      console.log(`💰 Using class-specific amount for ${yearGroup}: £${feeAmount}`);
+    } else {
+      console.log(`💰 Using default amount: £${feeAmount}`);
+    }
+
+    // Create invoice for term fees
     const result = await this.createInvoice({
       applicationId,
       applicationData,
-      amount: feeStructure.total_amount,
-      description: `${feeStructure.name} - Full Term Fees`,
+      amount: feeAmount,
+      description: `${feeStructure.name} - ${yearGroup}`,
       category: 'Tuition',
       dueInDays: 30,
       feeStructureId: feeStructure.id
     });
 
     if (result.success) {
-      console.log(`✅ Main tuition fees assigned: £${feeStructure.total_amount}`);
+      console.log(`✅ Main tuition fees assigned: £${feeAmount}`);
     }
     
     return result;

@@ -38,6 +38,7 @@ import {
 import { FeeManagementMasterData } from '@/components/master-data/FeeManagementMasterData';
 import { HRMasterData } from '@/components/master-data/HRMasterData';
 import { AccountingMasterData } from '@/components/master-data/AccountingMasterData';
+import { MasterDataHierarchy } from '@/components/master-data/MasterDataHierarchy';
 
 export function MasterDataPage() {
   return (
@@ -1056,6 +1057,9 @@ function MasterDataPageContent() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Master Data Hierarchy Guide */}
+            <MasterDataHierarchy />
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
