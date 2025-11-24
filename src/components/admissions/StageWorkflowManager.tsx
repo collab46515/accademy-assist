@@ -86,7 +86,7 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
       // Fetch real applications from the database
       const { data, error } = await supabase
         .from('enrollment_applications')
-        .select('*')
+        .select('*, review_stage_status')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -123,6 +123,7 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
         student_name: app.student_name || 'Unknown Student',
         year_group: app.year_group || 'Not specified',
         status: app.status,
+        review_stage_status: app.review_stage_status,
         submitted_at: app.submitted_at || app.created_at,
         parent_email: app.parent_email || 'No email',
         pathway: app.pathway || 'standard_digital',
@@ -210,12 +211,14 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, reviewStageStatus?: string) => {
     const statusConfig = {
       draft: { variant: 'outline', label: 'Draft' },
       submitted: { variant: 'secondary', label: 'Submitted' },
       under_review: { variant: 'default', label: 'Under Review' },
-      documents_pending: { variant: 'outline', label: 'Docs Pending' },
+      documents_pending: { variant: 'outline', label: 'Pending Docs' },
+      documents_verified: { variant: 'secondary', label: 'Docs Verified' },
+      review_submitted: { variant: 'default', label: 'Review Done' },
       assessment_scheduled: { variant: 'secondary', label: 'Assessment' },
       assessment_complete: { variant: 'secondary', label: 'Assessment Done' },
       interview_scheduled: { variant: 'secondary', label: 'Interview' },
@@ -230,7 +233,9 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
       on_hold: { variant: 'outline', label: 'On Hold' }
     };
 
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.submitted;
+    // For "under_review" status, check if we have a more specific review_stage_status
+    const displayStatus = (status === 'under_review' && reviewStageStatus) ? reviewStageStatus : status;
+    const config = statusConfig[displayStatus as keyof typeof statusConfig] || statusConfig.submitted;
     return <Badge variant={config.variant as any}>{config.label}</Badge>;
   };
 
@@ -362,7 +367,7 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
                       <div className="text-sm font-medium">Score: {application.priority_score}</div>
                       <div className="text-xs text-muted-foreground">{application.pathway}</div>
                     </div>
-                    {getStatusBadge(application.status)}
+                    {getStatusBadge(application.status, application.review_stage_status)}
                     <Button size="sm" variant="outline">
                       <Eye className="h-4 w-4" />
                     </Button>
