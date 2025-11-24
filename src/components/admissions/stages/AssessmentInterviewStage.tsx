@@ -80,6 +80,7 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
             application.status === 'interview_complete') {
           
           // Load assessment data
+          let loadedResult: 'pass' | 'fail' = 'pass';
           if (application.assessment_data && application.assessment_data !== null) {
             const data = application.assessment_data as any;
             console.log('Loading saved assessment data:', data);
@@ -87,19 +88,36 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
               setAssessments(data.assessments);
             }
             if (data.overallComments) setOverallComments(data.overallComments);
-            if (data.result) setAssessmentResult(data.result);
+            if (data.result) {
+              loadedResult = data.result;
+              setAssessmentResult(data.result);
+            }
           } else {
             console.log('No assessment data saved, but status indicates assessment passed');
             setOverallComments('Assessment completed (detailed marks not recorded)');
           }
           
           setAssessmentStatus('completed');
-          setAssessmentResult('pass');
+          setAssessmentResult(loadedResult);
           
-          // Show scheduling form if assessment just completed
-          if (application.status === 'assessment_complete') {
+          // Only show scheduling form if assessment passed
+          if (application.status === 'assessment_complete' && loadedResult === 'pass') {
             setShowInterviewScheduling(true);
           }
+        }
+        
+        // Handle rejected applications (failed assessment)
+        if (application.status === 'rejected') {
+          if (application.assessment_data && application.assessment_data !== null) {
+            const data = application.assessment_data as any;
+            if (data.assessments && Array.isArray(data.assessments)) {
+              setAssessments(data.assessments);
+            }
+            if (data.overallComments) setOverallComments(data.overallComments);
+            if (data.result) setAssessmentResult(data.result);
+          }
+          setAssessmentStatus('completed');
+          setShowInterviewScheduling(false);
         }
 
         // Handle interview scheduling
@@ -220,7 +238,22 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
         toast.success('Assessment completed successfully! Student passed. You can now schedule an interview.');
         setShowInterviewScheduling(true);
       } else {
-        toast.error('Assessment completed. Student failed. Application will be rejected.');
+        // Update status to rejected when assessment fails
+        const { error: rejectError } = await supabase
+          .from('enrollment_applications')
+          .update({ 
+            status: 'rejected',
+            rejection_reason: 'Failed Assessment - Did not meet minimum passing criteria',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', applicationId);
+
+        if (rejectError) {
+          console.error('Error rejecting application:', rejectError);
+        }
+
+        toast.error('Assessment completed. Student failed. Application has been rejected.');
+        setShowInterviewScheduling(false);
       }
     } catch (error) {
       console.error('Error completing assessment:', error);
@@ -510,14 +543,19 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
                     )}
                     
                     {assessmentResult === 'fail' && (
-                      <Button 
-                        variant="destructive" 
-                        onClick={handleRejectApplication}
-                        disabled={isSubmitting}
-                        className="w-full mt-3"
-                      >
-                        {isSubmitting ? 'Rejecting...' : 'Reject Application'}
-                      </Button>
+                      <div className="mt-3 space-y-2">
+                        <div className="p-3 bg-red-100 border border-red-300 rounded text-sm text-red-800">
+                          <p className="font-medium mb-1">Student did not meet minimum passing criteria.</p>
+                          <p>This application has been automatically rejected and cannot proceed to interview scheduling.</p>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          disabled
+                          className="w-full"
+                        >
+                          Cannot Proceed - Assessment Failed
+                        </Button>
+                      </div>
                     )}
                   </CardContent>
                 </Card>
@@ -703,14 +741,19 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
                         Move to Admission Decision
                       </Button>
                     ) : (
-                      <Button 
-                        variant="destructive" 
-                        onClick={handleRejectApplication}
-                        disabled={isSubmitting}
-                        className="w-full mt-3"
-                      >
-                        {isSubmitting ? 'Rejecting...' : 'Reject Application'}
-                      </Button>
+                      <div className="space-y-2 mt-3">
+                        <div className="p-3 bg-red-100 border border-red-300 rounded text-sm text-red-800">
+                          Student did not pass the interview. Application will be rejected.
+                        </div>
+                        <Button 
+                          variant="destructive" 
+                          onClick={handleRejectApplication}
+                          disabled={isSubmitting}
+                          className="w-full"
+                        >
+                          {isSubmitting ? 'Rejecting...' : 'Confirm Rejection'}
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </CardContent>
