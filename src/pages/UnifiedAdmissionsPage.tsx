@@ -24,7 +24,7 @@ const UnifiedAdmissionsPage = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("management");
+  const [activeTab, setActiveTab] = useState("workflow");
   const [loading, setLoading] = useState(false);
 
   // Handle application type selection
@@ -86,30 +86,13 @@ const UnifiedAdmissionsPage = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="management">Application Management</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="workflow">Unified Workflow</TabsTrigger>
           <TabsTrigger value="pathways">New Applications</TabsTrigger>
           <TabsTrigger value="processor">Enrollment Processor</TabsTrigger>
           <TabsTrigger value="integration">Student Integration</TabsTrigger>
           <TabsTrigger value="reports">Reports & Analytics</TabsTrigger>
         </TabsList>
-
-        {/* Application Management Tab */}
-        <TabsContent value="management" className="space-y-6">
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="overview">Application Overview</TabsTrigger>
-              <TabsTrigger value="tasks">Task Management</TabsTrigger>
-            </TabsList>
-            <TabsContent value="overview">
-              <ApplicationManagement />
-            </TabsContent>
-            <TabsContent value="tasks">
-              <ApplicationTaskManager />
-            </TabsContent>
-          </Tabs>
-        </TabsContent>
 
         {/* Unified Workflow Tab - Merged from basic + enhanced workflows */}
         <TabsContent value="workflow" className="space-y-6">
