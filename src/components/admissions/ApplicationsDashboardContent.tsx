@@ -262,7 +262,7 @@ export function ApplicationsDashboardContent() {
   };
 
   const handleActivityClick = (id: string) => {
-    navigate(`/admissions?stage=1&applicationId=${id}`);
+    navigate(`/admissions/application?id=${id}`);
   };
 
   const statusColors = [

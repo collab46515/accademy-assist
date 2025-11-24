@@ -208,7 +208,7 @@ export default function ApplicationsListPage() {
             <Card 
               key={application.id} 
               className="hover:shadow-lg transition-all cursor-pointer"
-              onClick={() => navigate(`/admissions?stage=1&applicationId=${application.id}`)}
+              onClick={() => navigate(`/admissions/application?id=${application.id}`)}
             >
               <CardHeader>
                 <div className="flex items-start justify-between">
