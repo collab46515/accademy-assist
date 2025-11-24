@@ -158,28 +158,22 @@ export default function ApplicationDetailPage() {
   return (
     <div className="p-8 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate('/admissions/applications')}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold">{application.student_name}</h1>
-              {getStatusBadge(application.status)}
-            </div>
-            <p className="text-muted-foreground mt-1">
-              Application #{application.application_number} • Created {format(new Date(application.created_at), 'dd MMM yyyy')}
-            </p>
+      <div className="flex items-center gap-4">
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={() => navigate('/admissions/applications')}
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold">{application.student_name}</h1>
+            {getStatusBadge(application.status)}
           </div>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline">Print</Button>
-          <Button>Update Status</Button>
+          <p className="text-muted-foreground mt-1">
+            Application #{application.application_number} • Created {format(new Date(application.created_at), 'dd MMM yyyy')}
+          </p>
         </div>
       </div>
 
