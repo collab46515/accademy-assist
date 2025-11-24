@@ -36,6 +36,8 @@ export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: Ap
   const [uploading, setUploading] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(false);
   const [notes, setNotes] = useState('');
+  const [reviewStageStatus, setReviewStageStatus] = useState<'documents_pending' | 'documents_verified' | 'review_submitted'>('documents_pending');
+  const [activeTab, setActiveTab] = useState('documents');
   const { toast } = useToast();
 
   // Required documents template
@@ -55,7 +57,39 @@ export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: Ap
 
   useEffect(() => {
     fetchDocuments();
+    fetchReviewStageStatus();
   }, [applicationId]);
+
+  const fetchReviewStageStatus = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('enrollment_applications')
+        .select('review_stage_status, review_data, review_notes')
+        .eq('id', applicationId)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        const status = data.review_stage_status as 'documents_pending' | 'documents_verified' | 'review_submitted';
+        setReviewStageStatus(status || 'documents_pending');
+        
+        // Load existing review scores if available
+        if (data.review_data) {
+          const reviewData = data.review_data as any;
+          if (reviewData.academicScore) setAcademicScore([reviewData.academicScore]);
+          if (reviewData.behaviorScore) setBehaviorScore([reviewData.behaviorScore]);
+          if (reviewData.communicationScore) setCommunicationScore([reviewData.communicationScore]);
+        }
+        
+        if (data.review_notes) {
+          setNotes(data.review_notes);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching review stage status:', error);
+    }
+  };
 
   const fetchDocuments = async () => {
     try {
@@ -250,17 +284,25 @@ export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: Ap
         });
 
       if (allRequiredVerified) {
-        // Update application status to move to next stage
+        // Update review stage status to documents_verified
         await supabase
           .from('enrollment_applications')
-          .update({ status: 'assessment_scheduled' })
+          .update({ review_stage_status: 'documents_verified' })
           .eq('id', applicationId);
+        
+        setReviewStageStatus('documents_verified');
+        setActiveTab('review'); // Automatically switch to review tab
+        
+        toast({
+          title: "Success",
+          description: "All documents verified! You can now proceed to review the application.",
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Documents verified successfully",
+        });
       }
-
-      toast({
-        title: "Success",
-        description: "All documents verified successfully",
-      });
 
       fetchDocuments();
     } catch (error) {
@@ -272,6 +314,87 @@ export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: Ap
       });
     } finally {
       setVerifying(false);
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const reviewData = {
+        academicScore: academicScore[0],
+        behaviorScore: behaviorScore[0],
+        communicationScore: communicationScore[0],
+        overallScore: compositeScore,
+        reviewedBy: user.id,
+        reviewedAt: new Date().toISOString(),
+        status: 'completed'
+      };
+
+      const { error } = await supabase
+        .from('enrollment_applications')
+        .update({
+          review_data: reviewData,
+          review_notes: notes,
+          review_stage_status: 'review_submitted',
+          review_completed: true
+        })
+        .eq('id', applicationId);
+
+      if (error) throw error;
+
+      setReviewStageStatus('review_submitted');
+
+      toast({
+        title: "Success",
+        description: "Review submitted successfully! You can now move to the next stage.",
+      });
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit review",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const reviewData = {
+        academicScore: academicScore[0],
+        behaviorScore: behaviorScore[0],
+        communicationScore: communicationScore[0],
+        overallScore: compositeScore,
+        reviewedBy: user.id,
+        status: 'draft'
+      };
+
+      const { error } = await supabase
+        .from('enrollment_applications')
+        .update({
+          review_data: reviewData,
+          review_notes: notes
+        })
+        .eq('id', applicationId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Review draft saved successfully",
+      });
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save draft",
+        variant: "destructive",
+      });
     }
   };
 
@@ -365,6 +488,13 @@ export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: Ap
     </Card>
   );
 
+  const allRequiredDocsVerified = documents
+    .filter(d => d.required)
+    .every(d => d.status === 'verified');
+
+  const canAccessReview = reviewStageStatus === 'documents_verified' || reviewStageStatus === 'review_submitted';
+  const canMoveToNextStage = reviewStageStatus === 'review_submitted';
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -375,10 +505,42 @@ export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: Ap
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="documents" className="w-full">
+      {/* Status Banner */}
+      <Card className="border-l-4" style={{ borderLeftColor: reviewStageStatus === 'review_submitted' ? 'rgb(34, 197, 94)' : reviewStageStatus === 'documents_verified' ? 'rgb(59, 130, 246)' : 'rgb(234, 179, 8)' }}>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-semibold text-lg">
+                {reviewStageStatus === 'documents_pending' && 'Step 1: Document Verification Required'}
+                {reviewStageStatus === 'documents_verified' && 'Step 2: Application Review Required'}
+                {reviewStageStatus === 'review_submitted' && 'All Steps Complete'}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {reviewStageStatus === 'documents_pending' && 'Please verify all required documents before proceeding to review'}
+                {reviewStageStatus === 'documents_verified' && 'Documents verified. Please complete the application review'}
+                {reviewStageStatus === 'review_submitted' && 'Review submitted. You can now move to the next stage'}
+              </p>
+            </div>
+            <Badge variant={reviewStageStatus === 'review_submitted' ? 'default' : 'secondary'} className="text-sm">
+              {reviewStageStatus === 'documents_pending' && '1/2 Complete'}
+              {reviewStageStatus === 'documents_verified' && '1/2 Complete'}
+              {reviewStageStatus === 'review_submitted' && '2/2 Complete'}
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="documents">Document Verification</TabsTrigger>
-          <TabsTrigger value="review">Application Review</TabsTrigger>
+          <TabsTrigger value="documents">
+            Document Verification
+            {allRequiredDocsVerified && <CheckCircle className="ml-2 h-4 w-4 text-green-600" />}
+          </TabsTrigger>
+          <TabsTrigger value="review" disabled={!canAccessReview}>
+            Application Review
+            {reviewStageStatus === 'review_submitted' && <CheckCircle className="ml-2 h-4 w-4 text-green-600" />}
+            {!canAccessReview && <span className="ml-2 text-xs">(Locked)</span>}
+          </TabsTrigger>
         </TabsList>
 
         {/* Document Verification Tab */}
@@ -557,10 +719,14 @@ export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: Ap
               <Textarea 
                 placeholder="Add your review notes and recommendations..." 
                 rows={6}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
               />
               <div className="flex gap-2 mt-4">
-                <Button variant="outline">Save Draft</Button>
-                <Button>Submit Review</Button>
+                <Button variant="outline" onClick={handleSaveDraft}>Save Draft</Button>
+                <Button onClick={handleSubmitReview} disabled={reviewStageStatus === 'review_submitted'}>
+                  {reviewStageStatus === 'review_submitted' ? 'Review Submitted' : 'Submit Review'}
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -577,10 +743,16 @@ export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: Ap
             <div>
               <p className="font-medium">Ready to proceed to Assessment & Interview?</p>
               <p className="text-sm text-muted-foreground">
-                Ensure all documents are verified and review is complete.
+                {!canMoveToNextStage 
+                  ? 'Complete document verification and submit the review to proceed.' 
+                  : 'All requirements complete. You can now move to the next stage.'}
               </p>
             </div>
-            <Button onClick={onMoveToNext} className="ml-4">
+            <Button 
+              onClick={onMoveToNext} 
+              className="ml-4"
+              disabled={!canMoveToNextStage}
+            >
               Move to Assessment & Interview
             </Button>
           </div>
