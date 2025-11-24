@@ -39,9 +39,14 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Interview state - simplified, no scheduling step
+  // Interview state - with scheduling step
   const [showInterviewScheduling, setShowInterviewScheduling] = useState(false);
-  const [interviewStatus, setInterviewStatus] = useState<'not_started' | 'completed'>('not_started');
+  const [interviewScheduled, setInterviewScheduled] = useState(false);
+  const [interviewDate, setInterviewDate] = useState('');
+  const [interviewTime, setInterviewTime] = useState('');
+  const [interviewer, setInterviewer] = useState('');
+  const [notificationMethod, setNotificationMethod] = useState('email');
+  const [interviewStatus, setInterviewStatus] = useState<'not_started' | 'scheduled' | 'completed'>('not_started');
   const [interviewResult, setInterviewResult] = useState<'pass' | 'fail' | null>(null);
   const [interviewComments, setInterviewComments] = useState('');
 
@@ -69,11 +74,12 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
 
         console.log('Application data loaded:', application);
 
-        // If status is interview_scheduled or interview_complete, assessment must be passed
-        if (application.status === 'interview_scheduled' || 
+        // Handle assessment completion
+        if (application.status === 'assessment_complete' || 
+            application.status === 'interview_scheduled' || 
             application.status === 'interview_complete') {
           
-          // Load assessment data if available, otherwise use defaults with pass status
+          // Load assessment data
           if (application.assessment_data && application.assessment_data !== null) {
             const data = application.assessment_data as any;
             console.log('Loading saved assessment data:', data);
@@ -83,28 +89,41 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
             if (data.overallComments) setOverallComments(data.overallComments);
             if (data.result) setAssessmentResult(data.result);
           } else {
-            // No saved data but assessment was passed (status proves it)
             console.log('No assessment data saved, but status indicates assessment passed');
             setOverallComments('Assessment completed (detailed marks not recorded)');
           }
           
           setAssessmentStatus('completed');
           setAssessmentResult('pass');
-          setShowInterviewScheduling(true);
-        }
-
-        if (application.status === 'interview_scheduled' || 
-            application.status === 'interview_complete') {
           
-          // Load interview results if available
-          if (application.interview_data && application.interview_data !== null) {
-            const data = application.interview_data as any;
-            console.log('Loading saved interview data:', data);
-            if (data.result) setInterviewResult(data.result);
-            if (data.comments) setInterviewComments(data.comments);
+          // Show scheduling form if assessment just completed
+          if (application.status === 'assessment_complete') {
+            setShowInterviewScheduling(true);
           }
         }
 
+        // Handle interview scheduling
+        if (application.status === 'interview_scheduled' || 
+            application.status === 'interview_complete') {
+          
+          // Load interview schedule if available
+          if (application.interview_data && application.interview_data !== null) {
+            const data = application.interview_data as any;
+            console.log('Loading saved interview data:', data);
+            if (data.scheduledDate) setInterviewDate(data.scheduledDate);
+            if (data.scheduledTime) setInterviewTime(data.scheduledTime);
+            if (data.interviewer) setInterviewer(data.interviewer);
+            if (data.notificationMethod) setNotificationMethod(data.notificationMethod);
+            if (data.result) setInterviewResult(data.result);
+            if (data.comments) setInterviewComments(data.comments);
+          }
+          
+          setInterviewScheduled(true);
+          setShowInterviewScheduling(true);
+          setInterviewStatus('scheduled');
+        }
+
+        // Handle interview completion
         if (application.status === 'interview_complete') {
           setInterviewStatus('completed');
         }
@@ -229,7 +248,51 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
     }
   };
 
-  // Removed handleScheduleInterview - no longer needed
+  const handleScheduleInterview = async () => {
+    if (!interviewDate || !interviewTime || !interviewer) {
+      toast.error('Please fill in all interview scheduling details');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const interviewData = {
+        scheduledDate: interviewDate,
+        scheduledTime: interviewTime,
+        interviewer: interviewer,
+        notificationMethod: notificationMethod,
+        scheduledAt: new Date().toISOString()
+      };
+
+      // Update application status to interview_scheduled
+      const { error: statusError } = await supabase
+        .from('enrollment_applications')
+        .update({ 
+          status: 'interview_scheduled',
+          interview_data: interviewData as any,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', applicationId);
+
+      if (statusError) {
+        console.error('Error scheduling interview:', statusError);
+        toast.error('Failed to schedule interview');
+        setIsSubmitting(false);
+        return;
+      }
+
+      console.log('Interview scheduled successfully');
+      
+      setInterviewScheduled(true);
+      setInterviewStatus('scheduled');
+      toast.success('Interview scheduled successfully!');
+    } catch (error) {
+      console.error('Error scheduling interview:', error);
+      toast.error('Failed to schedule interview');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleCompleteInterview = async () => {
     if (!interviewResult) {
@@ -244,7 +307,17 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
 
     setIsSubmitting(true);
     try {
+      // Load existing interview data to preserve schedule info
+      const { data: existingApp } = await supabase
+        .from('enrollment_applications')
+        .select('interview_data')
+        .eq('id', applicationId)
+        .maybeSingle();
+
+      const existingData = (existingApp?.interview_data as any) || {};
+
       const interviewData = {
+        ...existingData, // Preserve scheduling information
         result: interviewResult,
         comments: interviewComments,
         completedAt: new Date().toISOString()
@@ -454,17 +527,147 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
         </CardContent>
       </Card>
 
-      {/* Interview Section - Simplified, no separate scheduling */}
+      {/* Interview Section - With Scheduling Step */}
       {showInterviewScheduling && assessmentResult === 'pass' && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              Interview Completion
+              Admission Interview
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {interviewStatus === 'completed' && interviewResult ? (
+            {/* Step 1: Schedule Interview */}
+            {!interviewScheduled && interviewStatus === 'not_started' && (
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    Assessment completed successfully! Please schedule an interview for the candidate.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Interview Date *</Label>
+                    <Input
+                      type="date"
+                      value={interviewDate}
+                      onChange={(e) => setInterviewDate(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                  <div>
+                    <Label>Interview Time *</Label>
+                    <Input
+                      type="time"
+                      value={interviewTime}
+                      onChange={(e) => setInterviewTime(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Interviewer Name *</Label>
+                  <Input
+                    placeholder="Enter interviewer name"
+                    value={interviewer}
+                    onChange={(e) => setInterviewer(e.target.value)}
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label>Notification Method</Label>
+                  <Select value={notificationMethod} onValueChange={setNotificationMethod}>
+                    <SelectTrigger className="mt-2">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="email">Email</SelectItem>
+                      <SelectItem value="sms">SMS</SelectItem>
+                      <SelectItem value="phone">Phone Call</SelectItem>
+                      <SelectItem value="portal">Parent Portal</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Button 
+                  onClick={handleScheduleInterview} 
+                  disabled={isSubmitting}
+                  className="w-full"
+                >
+                  {isSubmitting ? 'Scheduling...' : 'Schedule Interview'}
+                </Button>
+              </div>
+            )}
+
+            {/* Step 2: Interview Scheduled - Show Details & Complete Interview Form */}
+            {interviewScheduled && interviewStatus === 'scheduled' && (
+              <div className="space-y-4">
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <h4 className="font-semibold text-green-800 mb-2">Interview Scheduled</h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm text-green-700">
+                    <div><strong>Date:</strong> {interviewDate}</div>
+                    <div><strong>Time:</strong> {interviewTime}</div>
+                    <div><strong>Interviewer:</strong> {interviewer}</div>
+                    <div><strong>Notification:</strong> {notificationMethod}</div>
+                  </div>
+                </div>
+
+                <div className="border-t pt-4">
+                  <h4 className="font-semibold mb-3">Complete Interview</h4>
+                  
+                  <div>
+                    <Label>Interview Result *</Label>
+                    <RadioGroup value={interviewResult || ''} onValueChange={(v: any) => setInterviewResult(v)} className="mt-2">
+                      <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-green-50">
+                        <RadioGroupItem value="pass" id="interview-pass" />
+                        <Label htmlFor="interview-pass" className="font-normal cursor-pointer flex items-center gap-2 flex-1">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <div>
+                            <div className="font-medium">Pass</div>
+                            <div className="text-xs text-muted-foreground">Student performed well in interview</div>
+                          </div>
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-red-50">
+                        <RadioGroupItem value="fail" id="interview-fail" />
+                        <Label htmlFor="interview-fail" className="font-normal cursor-pointer flex items-center gap-2 flex-1">
+                          <XCircle className="h-4 w-4 text-red-600" />
+                          <div>
+                            <div className="font-medium">Fail</div>
+                            <div className="text-xs text-muted-foreground">Student did not meet interview criteria</div>
+                          </div>
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  <div className="mt-4">
+                    <Label>Interview Comments *</Label>
+                    <Textarea
+                      placeholder="Record interview observations, strengths, concerns, and recommendations..."
+                      value={interviewComments}
+                      onChange={(e) => setInterviewComments(e.target.value)}
+                      rows={6}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <Button 
+                    onClick={handleCompleteInterview} 
+                    disabled={isSubmitting || !interviewResult}
+                    className="w-full mt-4"
+                  >
+                    {isSubmitting ? 'Completing...' : 'Complete Interview'}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Interview Completed - Show Results */}
+            {interviewStatus === 'completed' && interviewResult && (
               <Card className={interviewResult === 'pass' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
                 <CardContent className="p-4">
                   <div className="space-y-3">
@@ -481,6 +684,14 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
                         </>
                       )}
                     </h4>
+                    
+                    {interviewDate && interviewTime && (
+                      <div className="text-sm text-muted-foreground">
+                        <strong>Conducted on:</strong> {interviewDate} at {interviewTime}
+                        {interviewer && <> by {interviewer}</>}
+                      </div>
+                    )}
+                    
                     <p className="text-sm text-muted-foreground">{interviewComments}</p>
                     
                     {interviewResult === 'pass' ? (
@@ -489,7 +700,7 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
                         className="w-full mt-3"
                         size="lg"
                       >
-                        Complete Interview & Move to Admission Decision
+                        Move to Admission Decision
                       </Button>
                     ) : (
                       <Button 
@@ -504,47 +715,6 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
                   </div>
                 </CardContent>
               </Card>
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  <Label>Interview Result *</Label>
-                  <RadioGroup value={interviewResult || ''} onValueChange={(v: any) => setInterviewResult(v)}>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="pass" id="pass" />
-                      <Label htmlFor="pass" className="font-normal cursor-pointer flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        Pass
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="fail" id="fail" />
-                      <Label htmlFor="fail" className="font-normal cursor-pointer flex items-center gap-2">
-                        <XCircle className="h-4 w-4 text-red-600" />
-                        Fail
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-                
-                <div>
-                  <Label>Interview Comments *</Label>
-                  <Textarea
-                    placeholder="Provide detailed interview feedback and observations..."
-                    value={interviewComments}
-                    onChange={(e) => setInterviewComments(e.target.value)}
-                    rows={6}
-                  />
-                </div>
-                
-                <Button 
-                  onClick={handleCompleteInterview} 
-                  disabled={isSubmitting}
-                  className="w-full"
-                  size="lg"
-                >
-                  {isSubmitting ? 'Completing...' : 'Complete Interview'}
-                </Button>
-              </div>
             )}
           </CardContent>
         </Card>
