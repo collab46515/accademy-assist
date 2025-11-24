@@ -5,10 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Upload, Download, FileSpreadsheet, CheckCircle, AlertTriangle, Database, Users, BookOpen, Home } from 'lucide-react';
+import { Upload, Download, FileSpreadsheet, CheckCircle, AlertTriangle, Database, Users, BookOpen, Home, UserPlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRBAC } from '@/hooks/useRBAC';
 import { ModuleGuard } from '@/components/modules/ModuleGuard';
+import { generateBulkImportTemplate, parseBulkImportCSV, processBulkImport } from '@/utils/bulkImportHelpers';
 
 export default function MasterDataImportPage() {
   return (
@@ -29,39 +30,19 @@ function MasterDataImportContent() {
   const { currentSchool } = useRBAC();
 
   const downloadTemplate = () => {
-    // Create Excel-compatible CSV template matching the customer's structure
-    const template = `Name,Code,Address,Contact Email,Contact Phone
-Example Primary School,EPS001,123 Main Street,admin@example.edu,+44 20 1234 5678
-Example Secondary School,ESS002,456 Oak Avenue,contact@secondary.edu,+44 20 9876 5432
-
-Student Number,Year Group,Form Class,Date of Birth,Emergency Contact Name,Emergency Contact Phone
-STU001,1,A,2010-05-15,John Smith,+44 7700 900123
-STU002,2,B,2011-03-20,Jane Doe,+44 7700 900456
-
-Period Number,Start Time,End Time,Day of Week
-1,09:20,10:00,All Day
-2,10:00,10:40,All Day
-3,11:00,11:40,All Day
-
-Employee ID,First Name,Last Name,Email,Position,Department,Start Date
-EMP001,John,Smith,j.smith@school.edu,Head Teacher,Administration,2020-09-01
-EMP002,Jane,Doe,j.doe@school.edu,Mathematics Teacher,Teaching,2021-01-15
-
-Fee Name,Description,Category,Default Amount,Currency,Is Mandatory,Is Recurring,Recurrence Frequency,Applicable Classes,Applicable Genders
-Tuition Fee,Main academic tuition fees,Tuition,1500,GBP,TRUE,TRUE,termly,,
-Registration Fee,One-time registration fee,Registration,250,GBP,TRUE,FALSE,,,,`;
-
+    const template = generateBulkImportTemplate(currentSchool?.code || 'SCHOOL');
+    
     const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${currentSchool?.code || 'SCHOOL'}_master_data_template.csv`;
+    link.download = `${currentSchool?.code || 'SCHOOL'}_bulk_student_import_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
 
     toast({
       title: 'Template Downloaded',
-      description: 'Fill in your school data and upload the file.',
+      description: 'Comprehensive template with 5 example students downloaded. Fill in your data and upload.',
     });
   };
 
@@ -89,29 +70,46 @@ Registration Fee,One-time registration fee,Registration,250,GBP,TRUE,FALSE,,,,`;
     setProgress(10);
 
     try {
-      // Simulate validation (in real implementation, parse and validate the file)
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setProgress(50);
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const csvContent = e.target?.result as string;
+        const rows = parseBulkImportCSV(csvContent);
+        
+        setProgress(50);
+        
+        // Validate data
+        const validation = {
+          students: { 
+            valid: rows.filter(r => r.student_number && r.first_name && r.last_name && r.date_of_birth).length,
+            errors: rows.filter(r => !r.student_number || !r.first_name || !r.last_name || !r.date_of_birth).length,
+            issues: [] as string[]
+          },
+          parents: { 
+            valid: rows.filter(r => r.parent1_email).length,
+            errors: rows.filter(r => !r.parent1_email).length,
+            issues: rows.filter(r => !r.parent1_email).length > 0 ? [`${rows.filter(r => !r.parent1_email).length} students missing parent email`] : []
+          },
+          fees: { 
+            valid: rows.filter(r => r.fee_structure_name).length,
+            errors: rows.filter(r => !r.fee_structure_name).length,
+            issues: rows.filter(r => !r.fee_structure_name).length > 0 ? [`${rows.filter(r => !r.fee_structure_name).length} students without fee assignment`] : []
+          },
+        };
 
-      const mockValidation = {
-        schools: { valid: 2, errors: 0 },
-        students: { valid: 145, errors: 5, issues: ['5 students missing emergency contact'] },
-        employees: { valid: 62, errors: 3, issues: ['3 employees missing email addresses'] },
-        periods: { valid: 8, errors: 0 },
-        feeStructures: { valid: 12, errors: 2, issues: ['2 fee structures have invalid amounts'] },
+        setValidationResults(validation);
+        setProgress(100);
+
+        toast({
+          title: 'Validation Complete',
+          description: `Found ${rows.length} students to import. Review validation results.`,
+        });
       };
-
-      setValidationResults(mockValidation);
-      setProgress(100);
-
-      toast({
-        title: 'Validation Complete',
-        description: 'Review the validation results before importing.',
-      });
-    } catch (error) {
+      
+      reader.readAsText(file);
+    } catch (error: any) {
       toast({
         title: 'Validation Failed',
-        description: 'An error occurred during validation.',
+        description: error.message,
         variant: 'destructive',
       });
     } finally {
@@ -120,7 +118,7 @@ Registration Fee,One-time registration fee,Registration,250,GBP,TRUE,FALSE,,,,`;
   };
 
   const handleImport = async () => {
-    if (!file || !currentSchool) {
+    if (!file || !currentSchool?.id) {
       toast({
         title: 'Cannot Import',
         description: 'Please select a school and upload a file first.',
@@ -133,40 +131,48 @@ Registration Fee,One-time registration fee,Registration,250,GBP,TRUE,FALSE,,,,`;
     setProgress(0);
 
     try {
-      // Simulate import process
-      const steps = [
-        { name: 'Parsing file...', progress: 20 },
-        { name: 'Importing schools...', progress: 30 },
-        { name: 'Importing students...', progress: 50 },
-        { name: 'Importing employees...', progress: 70 },
-        { name: 'Importing periods...', progress: 85 },
-        { name: 'Importing fee structures...', progress: 95 },
-        { name: 'Finalizing...', progress: 100 },
-      ];
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const csvContent = e.target?.result as string;
+        const rows = parseBulkImportCSV(csvContent);
+        
+        const results = await processBulkImport(
+          rows, 
+          currentSchool.id,
+          (progress, message) => {
+            setProgress(progress);
+            console.log(message);
+          }
+        );
 
-      for (const step of steps) {
-        setProgress(step.progress);
-        await new Promise(resolve => setTimeout(resolve, 800));
-      }
+        setImportResults({
+          students: { imported: results.successful, skipped: results.failed },
+          parents: { imported: results.createdParents.length, skipped: 0 },
+          fees: { imported: results.assignedFees.length, skipped: 0 },
+          errors: results.errors
+        });
 
-      const mockResults = {
-        schools: { imported: 1, skipped: 0 },
-        students: { imported: 140, skipped: 5 },
-        employees: { imported: 59, skipped: 3 },
-        periods: { imported: 8, skipped: 0 },
-        feeStructures: { imported: 10, skipped: 2 },
+        if (results.successful > 0) {
+          toast({
+            title: 'Import Successful',
+            description: `Successfully imported ${results.successful} students with parents and fees for ${currentSchool.name}`,
+          });
+        }
+        
+        if (results.failed > 0) {
+          toast({
+            title: 'Import Completed with Errors',
+            description: `${results.successful} succeeded, ${results.failed} failed. Check results below.`,
+            variant: 'destructive',
+          });
+        }
       };
-
-      setImportResults(mockResults);
-
-      toast({
-        title: 'Import Successful',
-        description: `Successfully imported data for ${currentSchool.name}`,
-      });
-    } catch (error) {
+      
+      reader.readAsText(file);
+    } catch (error: any) {
       toast({
         title: 'Import Failed',
-        description: 'An error occurred during the import process.',
+        description: error.message,
         variant: 'destructive',
       });
     } finally {
@@ -206,16 +212,23 @@ Registration Fee,One-time registration fee,Registration,250,GBP,TRUE,FALSE,,,,`;
               Step 1: Download Template
             </CardTitle>
             <CardDescription>
-              Download the Excel template with the correct format for your school data
+              Download the comprehensive CSV template with example data for students, parents, and fee assignments
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-medium">Master Data Template</p>
+                <p className="text-sm font-medium">Bulk Student Import Template</p>
                 <p className="text-xs text-muted-foreground">
-                  Includes: Schools, Students, Employees, Periods, Fee Structures
+                  Includes: Student Details, Parent Information (both parents), Emergency Contacts, Medical Info, Fee Assignments
                 </p>
+                <div className="flex gap-2 mt-2">
+                  <Badge variant="outline" className="text-xs">
+                    <UserPlus className="h-3 w-3 mr-1" />
+                    50+ Fields
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">5 Examples</Badge>
+                </div>
               </div>
               <Button onClick={downloadTemplate}>
                 <Download className="h-4 w-4 mr-2" />
@@ -233,7 +246,7 @@ Registration Fee,One-time registration fee,Registration,250,GBP,TRUE,FALSE,,,,`;
               Step 2: Upload Your Data
             </CardTitle>
             <CardDescription>
-              Upload the completed Excel or CSV file with your school's data
+              Upload the completed CSV file with student, parent, and fee data
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -290,25 +303,23 @@ Registration Fee,One-time registration fee,Registration,250,GBP,TRUE,FALSE,,,,`;
                 {Object.entries(validationResults).map(([key, value]: [string, any]) => (
                   <div key={key} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center gap-3">
-                      {key === 'schools' && <Database className="h-5 w-5" />}
-                      {key === 'students' && <Users className="h-5 w-5" />}
-                      {key === 'employees' && <Users className="h-5 w-5" />}
-                      {key === 'periods' && <BookOpen className="h-5 w-5" />}
-                      {key === 'feeStructures' && <Home className="h-5 w-5" />}
+                      {key === 'students' && <Users className="h-5 w-5 text-blue-500" />}
+                      {key === 'parents' && <UserPlus className="h-5 w-5 text-green-500" />}
+                      {key === 'fees' && <Home className="h-5 w-5 text-purple-500" />}
                       <div>
-                        <p className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')}</p>
+                        <p className="font-medium capitalize">{key}</p>
                         {value.issues && value.issues.length > 0 && (
                           <p className="text-xs text-amber-600">{value.issues.join(', ')}</p>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <Badge variant="outline">
+                      <Badge variant="outline" className="bg-green-50">
                         {value.valid} Valid
                       </Badge>
                       {value.errors > 0 && (
                         <Badge variant="destructive">
-                          {value.errors} Errors
+                          {value.errors} Issues
                         </Badge>
                       )}
                     </div>
@@ -348,18 +359,40 @@ Registration Fee,One-time registration fee,Registration,250,GBP,TRUE,FALSE,,,,`;
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {Object.entries(importResults).map(([key, value]: [string, any]) => (
-                  <div key={key} className="text-center p-4 bg-white rounded-lg border">
-                    <p className="text-2xl font-bold text-green-600">{value.imported}</p>
-                    <p className="text-sm text-muted-foreground capitalize">
-                      {key.replace(/([A-Z])/g, ' $1')}
-                    </p>
-                    {value.skipped > 0 && (
-                      <p className="text-xs text-amber-600 mt-1">{value.skipped} skipped</p>
-                    )}
-                  </div>
-                ))}
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {Object.entries(importResults).map(([key, value]: [string, any]) => {
+                    if (key === 'errors') return null;
+                    return (
+                      <div key={key} className="text-center p-4 bg-white rounded-lg border">
+                        <p className="text-2xl font-bold text-green-600">{value.imported}</p>
+                        <p className="text-sm text-muted-foreground capitalize">
+                          {key}
+                        </p>
+                        {value.skipped > 0 && (
+                          <p className="text-xs text-amber-600 mt-1">{value.skipped} failed</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                {importResults.errors && importResults.errors.length > 0 && (
+                  <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription>
+                      <p className="font-semibold mb-2">Import Errors:</p>
+                      <ul className="list-disc list-inside space-y-1 text-xs">
+                        {importResults.errors.slice(0, 5).map((error: string, i: number) => (
+                          <li key={i}>{error}</li>
+                        ))}
+                        {importResults.errors.length > 5 && (
+                          <li>... and {importResults.errors.length - 5} more errors</li>
+                        )}
+                      </ul>
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
             </CardContent>
           </Card>
