@@ -38,6 +38,7 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
   const [assessmentResult, setAssessmentResult] = useState<'pass' | 'fail' | null>(null);
   const [overallComments, setOverallComments] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Interview state
   const [showInterviewScheduling, setShowInterviewScheduling] = useState(false);
@@ -50,13 +51,86 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
   const [interviewResult, setInterviewResult] = useState<'pass' | 'fail' | null>(null);
   const [interviewComments, setInterviewComments] = useState('');
 
+  // Load application status on mount
+  useEffect(() => {
+    const loadApplicationData = async () => {
+      try {
+        const { data: application, error } = await supabase
+          .from('enrollment_applications')
+          .select('status, assessment_data, interview_data')
+          .eq('id', applicationId)
+          .single();
+
+        if (error) {
+          console.error('Error loading application:', error);
+          setIsLoading(false);
+          return;
+        }
+
+        console.log('Application status:', application.status);
+
+        // Check status and set appropriate state
+        if (application.status === 'assessment_complete' || 
+            application.status === 'interview_scheduled' || 
+            application.status === 'interview_complete') {
+          
+          // Load assessment data if available
+          if (application.assessment_data) {
+            const data = application.assessment_data as any;
+            if (data.assessments) setAssessments(data.assessments);
+            if (data.overallComments) setOverallComments(data.overallComments);
+            if (data.result) setAssessmentResult(data.result);
+          }
+          
+          setAssessmentStatus('completed');
+          setAssessmentResult('pass'); // Only pass moves to interview
+          setShowInterviewScheduling(true);
+        }
+
+        if (application.status === 'interview_scheduled' || 
+            application.status === 'interview_complete') {
+          
+          // Load interview data if available
+          if (application.interview_data) {
+            const data = application.interview_data as any;
+            if (data.date) setInterviewDate(data.date);
+            if (data.time) setInterviewTime(data.time);
+            if (data.interviewer) setInterviewer(data.interviewer);
+            if (data.notificationMethod) setNotificationMethod(data.notificationMethod);
+          }
+          
+          setInterviewScheduled(true);
+          setInterviewStatus('scheduled');
+        }
+
+        if (application.status === 'interview_complete') {
+          // Load interview results
+          if (application.interview_data) {
+            const data = application.interview_data as any;
+            if (data.result) setInterviewResult(data.result);
+            if (data.comments) setInterviewComments(data.comments);
+          }
+          
+          setInterviewStatus('completed');
+        }
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error loading application data:', error);
+        setIsLoading(false);
+      }
+    };
+
+    loadApplicationData();
+  }, [applicationId]);
+
   useEffect(() => {
     // Check if any marks are entered
     const hasMarks = assessments.some(a => a.marks !== '');
-    if (hasMarks) {
+    if (hasMarks && assessmentStatus === 'not_started') {
       setAssessmentStatus('in_progress');
     }
-  }, [assessments]);
+  }, [assessments, assessmentStatus]);
 
   const updateAssessment = (index: number, field: keyof SubjectAssessment, value: string) => {
     const updated = [...assessments];
@@ -98,11 +172,20 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
 
     setIsSubmitting(true);
     try {
-      // Update application status to assessment_complete
+      // Prepare assessment data
+      const assessmentData = {
+        assessments,
+        overallComments,
+        result,
+        completedAt: new Date().toISOString()
+      };
+
+      // Update application with status and assessment data
       const { error: statusError } = await supabase
         .from('enrollment_applications')
         .update({ 
           status: 'assessment_complete',
+          assessment_data: assessmentData as any,
           updated_at: new Date().toISOString()
         })
         .eq('id', applicationId);
@@ -114,13 +197,7 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
         return;
       }
 
-      // Save assessment data to database
-      console.log('Saving assessment:', {
-        applicationId,
-        assessments,
-        result,
-        comments: overallComments
-      });
+      console.log('Assessment saved successfully');
 
       setAssessmentStatus('completed');
       setAssessmentResult(result);
@@ -165,11 +242,21 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
 
     setIsSubmitting(true);
     try {
-      // Update application status to interview_scheduled
+      // Prepare interview scheduling data
+      const interviewData = {
+        date: interviewDate,
+        time: interviewTime,
+        interviewer,
+        notificationMethod,
+        scheduledAt: new Date().toISOString()
+      };
+
+      // Update application with status and interview data
       const { error: statusError } = await supabase
         .from('enrollment_applications')
         .update({ 
           status: 'interview_scheduled',
+          interview_data: interviewData as any,
           updated_at: new Date().toISOString()
         })
         .eq('id', applicationId);
@@ -181,14 +268,7 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
         return;
       }
 
-      // Save interview schedule
-      console.log('Scheduling interview:', {
-        applicationId,
-        date: interviewDate,
-        time: interviewTime,
-        interviewer,
-        notificationMethod
-      });
+      console.log('Interview scheduled successfully');
 
       // Send notification based on method
       if (notificationMethod === 'email') {
@@ -222,11 +302,26 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
 
     setIsSubmitting(true);
     try {
-      // Update application status to interview_complete
+      // Get existing interview data and add completion info
+      const { data: currentApp } = await supabase
+        .from('enrollment_applications')
+        .select('interview_data')
+        .eq('id', applicationId)
+        .single();
+
+      const updatedInterviewData = {
+        ...(currentApp?.interview_data as any || {}),
+        result: interviewResult,
+        comments: interviewComments,
+        completedAt: new Date().toISOString()
+      };
+
+      // Update application with completion status and interview results
       const { error: statusError } = await supabase
         .from('enrollment_applications')
         .update({ 
           status: 'interview_complete',
+          interview_data: updatedInterviewData as any,
           updated_at: new Date().toISOString()
         })
         .eq('id', applicationId);
@@ -238,11 +333,7 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
         return;
       }
 
-      console.log('Completing interview:', {
-        applicationId,
-        result: interviewResult,
-        comments: interviewComments
-      });
+      console.log('Interview completed successfully');
 
       setInterviewStatus('completed');
       
@@ -269,6 +360,14 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
         return <Badge variant="outline"><AlertCircle className="h-3 w-3 mr-1" />Pending</Badge>;
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-muted-foreground">Loading application data...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
