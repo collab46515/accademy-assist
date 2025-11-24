@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Calendar, Clock, Users, BookOpen, Mic, Video, CheckCircle, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AssessmentInterviewStageProps {
   applicationId: string;
@@ -19,6 +20,9 @@ interface AssessmentInterviewStageProps {
 export function AssessmentInterviewStage({ applicationId, onMoveToNext }: AssessmentInterviewStageProps) {
   const [selectedAssessment, setSelectedAssessment] = useState<string | null>(null);
   const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
+  const [scheduledAssessments, setScheduledAssessments] = useState<any[]>([]);
+  const [assessmentResults, setAssessmentResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [newAssessment, setNewAssessment] = useState({
     type: '',
     subject: '',
@@ -29,84 +33,33 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
   });
   const { toast } = useToast();
 
-  const scheduledAssessments = [
-    {
-      id: 'math_assessment',
-      type: 'Academic Assessment',
-      subject: 'Math',
-      date: '2024-01-25',
-      time: '10:00 AM',
-      duration: '60 minutes',
-      assessor: 'Dr. Smith',
-      status: 'completed',
-      score: 85
-    },
-    {
-      id: 'english_assessment',
-      type: 'Academic Assessment',
-      subject: 'English',
-      date: '2024-01-25',
-      time: '11:30 AM',
-      duration: '45 minutes',
-      assessor: 'Ms. Johnson',
-      status: 'completed',
-      score: 78
-    },
-    {
-      id: 'science_assessment',
-      type: 'Academic Assessment',
-      subject: 'Science',
-      date: '2024-01-26',
-      time: '9:00 AM',
-      duration: '60 minutes',
-      assessor: 'Dr. Wilson',
-      status: 'scheduled',
-      score: null
-    },
-    {
-      id: 'hindi_assessment',
-      type: 'Academic Assessment',
-      subject: 'Hindi',
-      date: '2024-01-26',
-      time: '11:00 AM',
-      duration: '45 minutes',
-      assessor: 'Mrs. Sharma',
-      status: 'pending',
-      score: null
-    },
-    {
-      id: 'interview',
-      type: 'Interview',
-      subject: 'General Interview',
-      date: '2024-01-27',
-      time: '2:00 PM',
-      duration: '30 minutes',
-      assessor: 'Head of Admissions',
-      status: 'scheduled',
-      score: null
-    }
-  ];
+  useEffect(() => {
+    fetchAssessments();
+  }, [applicationId]);
 
-  const assessmentResults = [
-    {
-      subject: 'Mathematics',
-      score: 85,
-      maxScore: 100,
-      assessor: 'Dr. Smith',
-      date: '2024-01-25',
-      notes: 'Strong problem-solving skills, excellent understanding of algebraic concepts.',
-      recommendations: 'Suitable for advanced mathematics program.'
-    },
-    {
-      subject: 'English',
-      score: 78,
-      maxScore: 100,
-      assessor: 'Ms. Johnson',
-      date: '2024-01-25',
-      notes: 'Good reading comprehension, needs improvement in creative writing.',
-      recommendations: 'Additional support in creative writing would be beneficial.'
+  const fetchAssessments = async () => {
+    try {
+      setLoading(true);
+      // Fetch assessments from the database - adjust table name based on your schema
+      // For now, this will return empty array until you have actual data
+      const { data, error } = await supabase
+        .from('enrollment_applications')
+        .select('*')
+        .eq('id', applicationId)
+        .single();
+
+      if (error) throw error;
+
+      // Extract assessments from application data if stored there
+      // Or fetch from a separate assessments table if you have one
+      setScheduledAssessments([]);
+      setAssessmentResults([]);
+    } catch (error) {
+      console.error('Error fetching assessments:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const interviewQuestions = [
     'Why do you want to join our school?',
@@ -132,7 +85,7 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
     return 'text-red-600';
   };
 
-  const handleScheduleAssessment = () => {
+  const handleScheduleAssessment = async () => {
     // Validate form
     if (!newAssessment.type || !newAssessment.subject || !newAssessment.date || !newAssessment.time || !newAssessment.assessor) {
       toast({
@@ -143,22 +96,45 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
       return;
     }
 
-    // In a real app, this would save to database
-    toast({
-      title: "Assessment Scheduled",
-      description: `${newAssessment.subject} assessment has been scheduled for ${newAssessment.date} at ${newAssessment.time}`,
-    });
+    try {
+      // Save to database - you'll need to create an assessments table or store in application data
+      const newAssessmentData = {
+        application_id: applicationId,
+        assessment_type: newAssessment.type,
+        subject: newAssessment.subject,
+        scheduled_date: newAssessment.date,
+        scheduled_time: newAssessment.time,
+        duration: newAssessment.duration,
+        assessor: newAssessment.assessor,
+        status: 'scheduled'
+      };
 
-    // Reset form and close dialog
-    setNewAssessment({
-      type: '',
-      subject: '',
-      date: '',
-      time: '',
-      duration: '',
-      assessor: ''
-    });
-    setIsScheduleDialogOpen(false);
+      // For now, add to local state until you create the assessments table
+      setScheduledAssessments([...scheduledAssessments, { ...newAssessmentData, id: Date.now().toString() }]);
+
+      toast({
+        title: "Assessment Scheduled",
+        description: `${newAssessment.subject} assessment has been scheduled for ${newAssessment.date} at ${newAssessment.time}`,
+      });
+
+      // Reset form and close dialog
+      setNewAssessment({
+        type: '',
+        subject: '',
+        date: '',
+        time: '',
+        duration: '',
+        assessor: ''
+      });
+      setIsScheduleDialogOpen(false);
+    } catch (error) {
+      console.error('Error scheduling assessment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to schedule assessment",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -171,19 +147,33 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">2</div>
+              <div className="text-2xl font-bold text-green-600">
+                {scheduledAssessments.filter(a => a.status === 'completed').length}
+              </div>
               <div className="text-sm text-muted-foreground">Completed</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">1</div>
+              <div className="text-2xl font-bold text-yellow-600">
+                {scheduledAssessments.filter(a => a.status === 'scheduled').length}
+              </div>
               <div className="text-sm text-muted-foreground">Scheduled</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-primary">81.5</div>
+              <div className="text-2xl font-bold text-primary">
+                {assessmentResults.length > 0 
+                  ? (assessmentResults.reduce((sum, r) => sum + r.score, 0) / assessmentResults.length).toFixed(1)
+                  : '0'
+                }
+              </div>
               <div className="text-sm text-muted-foreground">Avg Score</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-primary">85%</div>
+              <div className="text-2xl font-bold text-primary">
+                {scheduledAssessments.length > 0
+                  ? Math.round((scheduledAssessments.filter(a => a.status === 'completed').length / scheduledAssessments.length) * 100)
+                  : 0
+                }%
+              </div>
               <div className="text-sm text-muted-foreground">Success Rate</div>
             </div>
           </div>
@@ -298,7 +288,12 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
           </div>
           
           <div className="space-y-3">
-            {scheduledAssessments.map((assessment) => (
+            {loading ? (
+              <p className="text-center text-muted-foreground py-8">Loading assessments...</p>
+            ) : scheduledAssessments.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No assessments scheduled yet. Click "Schedule New Assessment" to add one.</p>
+            ) : (
+              scheduledAssessments.map((assessment) => (
               <Card key={assessment.id}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
@@ -338,12 +333,18 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
                   </div>
                 </CardContent>
               </Card>
-            ))}
+              ))
+            )}
           </div>
         </TabsContent>
         
         <TabsContent value="results" className="space-y-4">
-          {assessmentResults.map((result, index) => (
+          {loading ? (
+            <p className="text-center text-muted-foreground py-8">Loading results...</p>
+          ) : assessmentResults.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">No assessment results available yet.</p>
+          ) : (
+            assessmentResults.map((result, index) => (
             <Card key={index}>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
@@ -370,7 +371,8 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
                 </div>
               </CardContent>
             </Card>
-          ))}
+            ))
+          )}
         </TabsContent>
         
         <TabsContent value="interview" className="space-y-4">
