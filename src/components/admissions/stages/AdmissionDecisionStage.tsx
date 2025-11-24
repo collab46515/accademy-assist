@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CheckCircle, XCircle, Clock, FileText, Mail, Award, AlertTriangle } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { CheckCircle, XCircle, Clock, User, AlertTriangle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface AdmissionDecisionStageProps {
   applicationId: string;
@@ -14,58 +15,154 @@ interface AdmissionDecisionStageProps {
 }
 
 export function AdmissionDecisionStage({ applicationId, onMoveToNext }: AdmissionDecisionStageProps) {
-  const [decision, setDecision] = useState<string>('');
-  const [conditions, setConditions] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [applicationData, setApplicationData] = useState<any>(null);
+  const [decision, setDecision] = useState<'approved' | 'rejected' | null>(null);
+  const [decisionNotes, setDecisionNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const applicationSummary = {
-    studentName: 'John Smith',
-    applicationNumber: 'APP-2024-001',
-    yearGroup: 'Year 7',
-    overallScore: 82,
-    assessmentScores: {
-      mathematics: 85,
-      english: 78,
-      interview: 84
-    },
-    documentStatus: 'complete',
-    reviewStatus: 'complete'
-  };
+  useEffect(() => {
+    loadApplicationData();
+  }, [applicationId]);
 
-  // Simplified to single committee member approval (Head of Admissions)
-  const headOfAdmissions = {
-    name: 'Dr. Sarah Wilson',
-    role: 'Head of Admissions',
-    decision: 'approve',
-    notes: 'Strong academic performance and excellent assessment scores'
-  };
+  const loadApplicationData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('enrollment_applications')
+        .select(`
+          *,
+          students:student_id (
+            student_number,
+            year_group,
+            form_class
+          )
+        `)
+        .eq('id', applicationId)
+        .maybeSingle();
 
-  const decisionOptions = [
-    { value: 'accept', label: 'Accept (Unconditional)', color: 'text-green-600', icon: CheckCircle },
-    { value: 'conditional', label: 'Accept (Conditional)', color: 'text-yellow-600', icon: AlertTriangle },
-    { value: 'waitlist', label: 'Waitlist', color: 'text-blue-600', icon: Clock },
-    { value: 'reject', label: 'Reject', color: 'text-red-600', icon: XCircle }
-  ];
+      if (error) {
+        console.error('Error loading application:', error);
+        toast.error('Failed to load application data');
+        return;
+      }
 
-  const possibleConditions = [
-    'Achieve minimum grade B in English',
-    'Complete summer mathematics program',
-    'Provide additional character reference',
-    'Attend orientation session',
-    'Submit health clearance'
-  ];
+      if (!data) {
+        toast.error('Application not found');
+        return;
+      }
 
-  const getDecisionBadge = (decision: string | null) => {
-    switch (decision) {
-      case 'approve': return <Badge variant="default" className="bg-green-100 text-green-800">Approved</Badge>;
-      case 'conditional': return <Badge variant="secondary">Conditional</Badge>;
-      case 'reject': return <Badge variant="destructive">Rejected</Badge>;
-      default: return <Badge variant="outline">Pending</Badge>;
+      console.log('Loaded application data:', data);
+      setApplicationData(data);
+
+      // Load existing decision if any
+      if (data.status === 'approved') {
+        setDecision('approved');
+      } else if (data.status === 'rejected') {
+        setDecision('rejected');
+      }
+
+      // Load decision notes from additional_data if exists
+      if (data.additional_data) {
+        const additionalData = data.additional_data as any;
+        if (additionalData?.decision_notes) {
+          setDecisionNotes(additionalData.decision_notes);
+        }
+      }
+
+      setLoading(false);
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Failed to load application');
+      setLoading(false);
     }
   };
 
+  const handleSubmitDecision = async () => {
+    if (!decision) {
+      toast.error('Please select a decision (Approve or Reject)');
+      return;
+    }
+
+    if (!decisionNotes.trim()) {
+      toast.error('Please provide decision notes');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Update application with decision
+      const additionalData = applicationData.additional_data as any || {};
+      const { error } = await supabase
+        .from('enrollment_applications')
+        .update({
+          status: decision,
+          additional_data: {
+            ...additionalData,
+            decision_notes: decisionNotes,
+            decision_made_at: new Date().toISOString(),
+            decision_made_by: (await supabase.auth.getUser()).data.user?.id
+          } as any,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', applicationId);
+
+      if (error) {
+        console.error('Error updating decision:', error);
+        toast.error('Failed to save decision');
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (decision === 'approved') {
+        toast.success('Application approved successfully!');
+      } else {
+        toast.error('Application rejected');
+      }
+
+      // Reload data
+      await loadApplicationData();
+    } catch (error) {
+      console.error('Error submitting decision:', error);
+      toast.error('Failed to submit decision');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-muted-foreground">Loading application data...</p>
+      </div>
+    );
+  }
+
+  if (!applicationData) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-muted-foreground">Application not found</p>
+      </div>
+    );
+  }
+
+  // Parse assessment and interview data
+  const assessmentData = applicationData.assessment_data as any;
+  const interviewData = applicationData.interview_data as any;
+  
+  // Calculate overall assessment score
+  const calculateOverallScore = () => {
+    if (!assessmentData?.assessments) return 0;
+    const assessments = assessmentData.assessments;
+    const totalMarks = assessments.reduce((sum: number, a: any) => sum + parseFloat(a.marks || '0'), 0);
+    const totalMaxMarks = assessments.reduce((sum: number, a: any) => sum + parseFloat(a.maxMarks || '0'), 0);
+    return totalMaxMarks > 0 ? Math.round((totalMarks / totalMaxMarks) * 100) : 0;
+  };
+
+  const overallScore = calculateOverallScore();
+
   return (
     <div className="space-y-6">
-      {/* Application Summary */}
+      {/* Application Summary - Real Data */}
       <Card>
         <CardHeader>
           <CardTitle>Application Summary</CardTitle>
@@ -73,257 +170,173 @@ export function AdmissionDecisionStage({ applicationId, onMoveToNext }: Admissio
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <p className="text-sm text-muted-foreground">Student</p>
-              <p className="font-medium">{applicationSummary.studentName}</p>
+              <p className="text-sm text-muted-foreground">Student Name</p>
+              <p className="font-medium">{applicationData.student_first_name} {applicationData.student_last_name}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Application Number</p>
-              <p className="font-medium">{applicationSummary.applicationNumber}</p>
+              <p className="font-medium">{applicationData.application_number}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Year Group</p>
-              <p className="font-medium">{applicationSummary.yearGroup}</p>
+              <p className="font-medium">{applicationData.year_group_applying}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Overall Score</p>
-              <p className="font-medium text-primary">{applicationSummary.overallScore}/100</p>
+              <p className="font-medium text-primary">{overallScore}/100</p>
             </div>
           </div>
           
-          <div className="mt-4 grid grid-cols-3 gap-4">
-            <div className="text-center p-3 bg-green-50 rounded-lg">
-              <div className="text-lg font-bold text-green-600">{applicationSummary.assessmentScores.mathematics}</div>
-              <div className="text-sm text-muted-foreground">Mathematics</div>
+          {/* Assessment Scores */}
+          {assessmentData?.assessments && (
+            <div className="mt-4">
+              <p className="text-sm font-medium mb-2">Assessment Scores:</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {assessmentData.assessments.map((assessment: any, index: number) => (
+                  <div key={index} className="text-center p-3 bg-muted/30 rounded-lg">
+                    <div className="text-lg font-bold text-primary">
+                      {assessment.marks}/{assessment.maxMarks}
+                    </div>
+                    <div className="text-sm text-muted-foreground">{assessment.subject}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {assessment.marks && assessment.maxMarks ? 
+                        `${((parseFloat(assessment.marks) / parseFloat(assessment.maxMarks)) * 100).toFixed(0)}%` : '0%'}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="text-center p-3 bg-blue-50 rounded-lg">
-              <div className="text-lg font-bold text-blue-600">{applicationSummary.assessmentScores.english}</div>
-              <div className="text-sm text-muted-foreground">English</div>
+          )}
+
+          {/* Interview Result */}
+          {interviewData?.result && (
+            <div className="mt-4 p-3 bg-muted/30 rounded-lg">
+              <p className="text-sm font-medium mb-1">Interview Result:</p>
+              <div className="flex items-center gap-2">
+                {interviewData.result === 'pass' ? (
+                  <>
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-green-600 font-medium">PASSED</span>
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="h-4 w-4 text-red-600" />
+                    <span className="text-red-600 font-medium">FAILED</span>
+                  </>
+                )}
+              </div>
+              {interviewData.comments && (
+                <p className="text-sm text-muted-foreground mt-2">{interviewData.comments}</p>
+              )}
             </div>
-            <div className="text-center p-3 bg-purple-50 rounded-lg">
-              <div className="text-lg font-bold text-purple-600">{applicationSummary.assessmentScores.interview}</div>
-              <div className="text-sm text-muted-foreground">Interview</div>
-            </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="committee">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="committee">Committee Review</TabsTrigger>
-          <TabsTrigger value="decision">Final Decision</TabsTrigger>
-          <TabsTrigger value="conditions">Conditions</TabsTrigger>
-          <TabsTrigger value="communication">Communication</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="committee" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Head of Admissions Review</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <p className="font-medium">{headOfAdmissions.name}</p>
-                    <p className="text-sm text-muted-foreground">{headOfAdmissions.role}</p>
-                    {headOfAdmissions.notes && (
-                      <p className="text-sm mt-1">{headOfAdmissions.notes}</p>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    {getDecisionBadge(headOfAdmissions.decision)}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-6 p-4 bg-primary/5 rounded-lg">
-                <p className="font-medium">Head of Admissions Decision: 
-                  <span className="ml-2 text-primary">{headOfAdmissions.decision?.toUpperCase() || 'PENDING'}</span>
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Only Head of Admissions approval is required for admission decisions.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="decision" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Final Admission Decision</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium">Decision</label>
-                  <Select value={decision} onValueChange={setDecision}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select final decision" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {decisionOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          <div className="flex items-center gap-2">
-                            <option.icon className={`h-4 w-4 ${option.color}`} />
-                            {option.label}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                {decision === 'accept' && (
-                  <div className="p-4 bg-green-50 rounded-lg">
-                    <div className="flex items-center gap-2 text-green-800">
-                      <CheckCircle className="h-5 w-5" />
-                      <span className="font-medium">Unconditional Acceptance</span>
-                    </div>
-                    <p className="text-sm text-green-700 mt-1">
-                      Student meets all requirements for admission without conditions.
-                    </p>
-                  </div>
-                )}
-                
-                {decision === 'conditional' && (
-                  <div className="p-4 bg-yellow-50 rounded-lg">
-                    <div className="flex items-center gap-2 text-yellow-800">
-                      <AlertTriangle className="h-5 w-5" />
-                      <span className="font-medium">Conditional Acceptance</span>
-                    </div>
-                    <p className="text-sm text-yellow-700 mt-1">
-                      Acceptance subject to meeting specified conditions.
-                    </p>
-                  </div>
-                )}
-                
-                <div>
-                  <label className="text-sm font-medium">Decision Notes</label>
-                  <Textarea 
-                    placeholder="Provide reasoning for the admission decision..."
-                    rows={4}
-                  />
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium">Decision Date</label>
-                  <Input type="date" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="conditions" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Admission Conditions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Add conditions that must be met for conditional acceptance.
-                </p>
-                
-                <div>
-                  <label className="text-sm font-medium">Select Conditions</label>
-                  <div className="space-y-2 mt-2">
-                    {possibleConditions.map((condition, index) => (
-                      <label key={index} className="flex items-center space-x-2">
-                        <input 
-                          type="checkbox" 
-                          className="rounded border-gray-300"
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setConditions([...conditions, condition]);
-                            } else {
-                              setConditions(conditions.filter(c => c !== condition));
-                            }
-                          }}
-                        />
-                        <span className="text-sm">{condition}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium">Custom Condition</label>
-                  <Input placeholder="Add custom condition..." />
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium">Condition Due Date</label>
-                  <Input type="date" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="communication" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Mail className="h-5 w-5" />
-                Decision Communication
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    Generate Acceptance Letter
-                  </Button>
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    Generate Rejection Letter
-                  </Button>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium">Communication Notes</label>
-                  <Textarea 
-                    placeholder="Additional notes for the decision letter..."
-                    rows={4}
-                  />
-                </div>
-                
-                <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1">
-                    <Mail className="h-4 w-4 mr-2" />
-                    Send Email
-                  </Button>
-                  <Button variant="outline" className="flex-1">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Print Letter
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      {/* Next Stage */}
+      {/* Committee Review / Decision */}
       <Card>
         <CardHeader>
-          <CardTitle>Stage Completion</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <User className="h-5 w-5" />
+            Head of Admissions Decision
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Ready to proceed to Fee Payment?</p>
-              <p className="text-sm text-muted-foreground">
-                Finalize and communicate the admission decision before proceeding.
-              </p>
+          {applicationData.status === 'approved' || applicationData.status === 'rejected' ? (
+            // Show readonly decision
+            <div className="space-y-4">
+              <div className={`p-4 rounded-lg ${
+                applicationData.status === 'approved' 
+                  ? 'bg-green-50 border border-green-200' 
+                  : 'bg-red-50 border border-red-200'
+              }`}>
+                <div className="flex items-center gap-2 mb-2">
+                  {applicationData.status === 'approved' ? (
+                    <>
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <span className="font-semibold text-green-800">Application APPROVED</span>
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="h-5 w-5 text-red-600" />
+                      <span className="font-semibold text-red-800">Application REJECTED</span>
+                    </>
+                  )}
+                </div>
+                {decisionNotes && (
+                  <>
+                    <p className="text-sm font-medium mb-1">Decision Notes:</p>
+                    <p className="text-sm text-muted-foreground">{decisionNotes}</p>
+                  </>
+                )}
+              </div>
+              
+              {applicationData.status === 'approved' && (
+                <Button onClick={onMoveToNext} size="lg" className="w-full">
+                  Move to Fee Payment Stage
+                </Button>
+              )}
             </div>
-            <Button onClick={onMoveToNext}>
-              Move to Fee Payment
-            </Button>
-          </div>
+          ) : (
+            // Show decision form
+            <div className="space-y-4">
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-amber-600" />
+                  <span className="font-medium text-amber-800">Decision Pending</span>
+                </div>
+                <p className="text-sm text-amber-700 mt-1">
+                  Head of Admissions needs to review and approve/reject this application
+                </p>
+              </div>
+
+              <div>
+                <Label>Decision *</Label>
+                <RadioGroup value={decision || ''} onValueChange={(v: any) => setDecision(v)} className="mt-2">
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-green-50">
+                    <RadioGroupItem value="approved" id="approved" />
+                    <Label htmlFor="approved" className="font-normal cursor-pointer flex items-center gap-2 flex-1">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <div>
+                        <div className="font-medium">Approve</div>
+                        <div className="text-xs text-muted-foreground">Accept this student for admission</div>
+                      </div>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-red-50">
+                    <RadioGroupItem value="rejected" id="rejected" />
+                    <Label htmlFor="rejected" className="font-normal cursor-pointer flex items-center gap-2 flex-1">
+                      <XCircle className="h-4 w-4 text-red-600" />
+                      <div>
+                        <div className="font-medium">Reject</div>
+                        <div className="text-xs text-muted-foreground">Decline this application</div>
+                      </div>
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              <div>
+                <Label>Decision Notes *</Label>
+                <Textarea
+                  placeholder="Provide detailed reasoning for your decision..."
+                  value={decisionNotes}
+                  onChange={(e) => setDecisionNotes(e.target.value)}
+                  rows={6}
+                  className="mt-2"
+                />
+              </div>
+
+              <Button 
+                onClick={handleSubmitDecision} 
+                disabled={isSubmitting || !decision}
+                size="lg"
+                className="w-full"
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Decision'}
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
