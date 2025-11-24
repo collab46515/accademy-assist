@@ -4063,6 +4063,7 @@ export type Database = {
           term: string
           total_amount: number
           updated_at: string
+          year_group_amounts: Json | null
         }
         Insert: {
           academic_year: string
@@ -4078,6 +4079,7 @@ export type Database = {
           term: string
           total_amount?: number
           updated_at?: string
+          year_group_amounts?: Json | null
         }
         Update: {
           academic_year?: string
@@ -4093,6 +4095,7 @@ export type Database = {
           term?: string
           total_amount?: number
           updated_at?: string
+          year_group_amounts?: Json | null
         }
         Relationships: []
       }

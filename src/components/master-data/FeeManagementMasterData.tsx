@@ -13,178 +13,6 @@ import { useFeeData } from '@/hooks/useFeeData';
 import { usePaymentData } from '@/hooks/usePaymentData';
 import { CreditCard, Plus, Search, Download, Upload, Edit, Trash } from 'lucide-react';
 
-// Mock fee heads data with INR amounts
-const mockFeeHeads = [
-  {
-    name: 'Tuition Fee',
-    description: 'Main academic tuition fees',
-    category: 'Tuition',
-    default_amount: 120000, // ₹1,20,000 (equivalent to £1500)
-    currency: 'INR',
-    is_mandatory: true,
-    is_recurring: true,
-    recurrence_frequency: 'termly',
-    applicable_classes: [],
-    applicable_genders: []
-  },
-  {
-    name: 'Registration Fee',
-    description: 'One-time registration and admission processing',
-    category: 'Registration',
-    default_amount: 20000, // ₹20,000
-    currency: 'INR',
-    is_mandatory: true,
-    is_recurring: false,
-    recurrence_frequency: '',
-    applicable_classes: [],
-    applicable_genders: []
-  },
-  {
-    name: 'Transport Fee',
-    description: 'School bus and transport services',
-    category: 'Transport',
-    default_amount: 12000, // ₹12,000 (equivalent to £150)
-    currency: 'INR',
-    is_mandatory: false,
-    is_recurring: true,
-    recurrence_frequency: 'termly',
-    applicable_classes: [],
-    applicable_genders: []
-  },
-  {
-    name: 'Meal Fee',
-    description: 'Lunch and snack services',
-    category: 'Meals',
-    default_amount: 16000, // ₹16,000 (equivalent to £200)
-    currency: 'INR',
-    is_mandatory: false,
-    is_recurring: true,
-    recurrence_frequency: 'termly',
-    applicable_classes: [],
-    applicable_genders: []
-  },
-  {
-    name: 'Examination Fee',
-    description: 'External and internal examination fees',
-    category: 'Examination',
-    default_amount: 8000, // ₹8,000 (equivalent to £100)
-    currency: 'INR',
-    is_mandatory: true,
-    is_recurring: false,
-    recurrence_frequency: '',
-    applicable_classes: ['Year 10', 'Year 11', 'Year 12', 'Year 13'],
-    applicable_genders: []
-  },
-  {
-    name: 'ICT Fee',
-    description: 'Information and Communication Technology resources',
-    category: 'ICT',
-    default_amount: 6000, // ₹6,000 (equivalent to £75)
-    currency: 'INR',
-    is_mandatory: false,
-    is_recurring: true,
-    recurrence_frequency: 'annually',
-    applicable_classes: [],
-    applicable_genders: []
-  },
-  {
-    name: 'Laboratory Fee',
-    description: 'Science laboratory usage and materials',
-    category: 'Laboratory',
-    default_amount: 9600, // ₹9,600 (equivalent to £120)
-    currency: 'INR',
-    is_mandatory: false,
-    is_recurring: true,
-    recurrence_frequency: 'termly',
-    applicable_classes: ['Year 7', 'Year 8', 'Year 9', 'Year 10', 'Year 11', 'Year 12', 'Year 13'],
-    applicable_genders: []
-  },
-  {
-    name: 'Library Fee',
-    description: 'Library resources and book replacement',
-    category: 'Library',
-    default_amount: 2400, // ₹2,400 (equivalent to £30)
-    currency: 'INR',
-    is_mandatory: false,
-    is_recurring: true,
-    recurrence_frequency: 'annually',
-    applicable_classes: [],
-    applicable_genders: []
-  },
-  {
-    name: 'Sports Fee',
-    description: 'Sports equipment and activities',
-    category: 'Sports',
-    default_amount: 6400, // ₹6,400 (equivalent to £80)
-    currency: 'INR',
-    is_mandatory: false,
-    is_recurring: true,
-    recurrence_frequency: 'termly',
-    applicable_classes: [],
-    applicable_genders: []
-  },
-  {
-    name: 'Music Lessons',
-    description: 'Individual music lessons and instrument hire',
-    category: 'Music Lessons',
-    default_amount: 16000, // ₹16,000 (equivalent to £200)
-    currency: 'INR',
-    is_mandatory: false,
-    is_recurring: true,
-    recurrence_frequency: 'termly',
-    applicable_classes: [],
-    applicable_genders: []
-  },
-  {
-    name: 'Boarding Fee',
-    description: 'Accommodation and boarding services',
-    category: 'Boarding',
-    default_amount: 200000, // ₹2,00,000 (equivalent to £2500)
-    currency: 'INR',
-    is_mandatory: false,
-    is_recurring: true,
-    recurrence_frequency: 'termly',
-    applicable_classes: [],
-    applicable_genders: []
-  },
-  {
-    name: 'Uniform Fee',
-    description: 'School uniform and PE kit',
-    category: 'Uniform',
-    default_amount: 12000, // ₹12,000 (equivalent to £150)
-    currency: 'INR',
-    is_mandatory: true,
-    is_recurring: false,
-    recurrence_frequency: '',
-    applicable_classes: [],
-    applicable_genders: []
-  },
-  {
-    name: 'Activity Fee',
-    description: 'Extracurricular activities and clubs',
-    category: 'Activity Fees',
-    default_amount: 4800, // ₹4,800 (equivalent to £60)
-    currency: 'INR',
-    is_mandatory: false,
-    is_recurring: true,
-    recurrence_frequency: 'termly',
-    applicable_classes: [],
-    applicable_genders: []
-  },
-  {
-    name: 'Excursion Fee',
-    description: 'Educational trips and excursions',
-    category: 'Excursions',
-    default_amount: 8000, // ₹8,000 (equivalent to £100)
-    currency: 'INR',
-    is_mandatory: false,
-    is_recurring: false,
-    recurrence_frequency: '',
-    applicable_classes: [],
-    applicable_genders: []
-  }
-];
-
 export function FeeManagementMasterData() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('fee-heads');
@@ -193,18 +21,47 @@ export function FeeManagementMasterData() {
   const form = useForm();
 
   // Use real fee data and payment data
-  const { feeStructures, createFeeStructure, updateFeeStructure, deleteFeeStructure, loading } = useFeeData();
+  const { feeHeads, feeStructures, createFeeHead, updateFeeHead, deleteFeeHead, createFeeStructure, updateFeeStructure, deleteFeeStructure, loading } = useFeeData('2f21656b-0848-40ee-bbec-12e5e8137545');
   const { paymentPlans, discounts, createPaymentPlan, updatePaymentPlan, deletePaymentPlan, createDiscount, updateDiscount, deleteDiscount, loading: paymentLoading } = usePaymentData('2f21656b-0848-40ee-bbec-12e5e8137545');
 
   const handleCreate = async (data: any) => {
     console.log('Form data received:', data);
     console.log('Active tab:', activeTab);
     try {
-      if (activeTab === 'structures') {
+      if (activeTab === 'fee-heads') {
+        // Create or update fee head
+        const feeHeadData = {
+          school_id: '2f21656b-0848-40ee-bbec-12e5e8137545',
+          name: data.name,
+          description: data.description || '',
+          category: data.category || 'General',
+          amount: parseFloat(data.default_amount) || 0,
+          recurrence: data.recurrence_frequency || 'once',
+          applicable_classes: data.applicable_classes ? data.applicable_classes.split(',').map((c: string) => c.trim()) : [],
+          applicable_genders: data.applicable_genders ? data.applicable_genders.split(',').map((g: string) => g.trim()) : [],
+          is_active: true
+        };
+        
+        if (editingItem) {
+          await updateFeeHead(editingItem.id, feeHeadData);
+        } else {
+          await createFeeHead(feeHeadData);
+        }
+      } else if (activeTab === 'structures') {
         // Convert comma-separated string to array for applicable_year_groups
         const yearGroups = data.applicable_year_groups 
           ? data.applicable_year_groups.split(',').map((s: string) => s.trim()).filter(Boolean)
           : [];
+          
+        // Parse year group amounts if provided
+        let yearGroupAmounts: Record<string, number> = {};
+        if (data.year_group_amounts) {
+          try {
+            yearGroupAmounts = JSON.parse(data.year_group_amounts);
+          } catch (e) {
+            console.error('Error parsing year group amounts:', e);
+          }
+        }
           
         console.log('Processed year groups:', yearGroups);
           
@@ -213,24 +70,28 @@ export function FeeManagementMasterData() {
           await updateFeeStructure(editingItem.id, {
             name: data.name,
             description: data.description || '',
-            academic_year: data.academic_year || '2024-25', // Add fallback
+            academic_year: data.academic_year || '2024-25',
             term: data.term || 'Full Year',
             fee_heads: data.fee_heads || [],
             total_amount: parseFloat(data.total_amount || '0'),
             applicable_year_groups: yearGroups,
+            year_group_amounts: yearGroupAmounts,
+            student_type: data.student_type || 'all',
             status: 'active'
           });
         } else {
           console.log('Creating new structure');
           await createFeeStructure({
-            school_id: data.school_id || '2f21656b-0848-40ee-bbec-12e5e8137545', // Default school
+            school_id: data.school_id || '2f21656b-0848-40ee-bbec-12e5e8137545',
             name: data.name,
             description: data.description || '',
-            academic_year: data.academic_year || '2024-25', // Add fallback
+            academic_year: data.academic_year || '2024-25',
             term: data.term || 'Full Year',
             fee_heads: data.fee_heads || [],
             total_amount: parseFloat(data.total_amount || '0'),
             applicable_year_groups: yearGroups,
+            year_group_amounts: yearGroupAmounts,
+            student_type: data.student_type || 'all',
             status: 'active'
           });
         }
@@ -292,8 +153,9 @@ export function FeeManagementMasterData() {
     }
   };
 
-  const handleEdit = (item: any) => {
+  const handleEdit = (item: any, tab: string) => {
     setEditingItem(item);
+    setActiveTab(tab);
     setDialogOpen(true);
     form.reset(item);
   };
@@ -302,7 +164,10 @@ export function FeeManagementMasterData() {
     console.log('Delete called with ID:', id, 'for tab:', activeTab);
     if (confirm('Are you sure you want to delete this item?')) {
       try {
-        if (activeTab === 'structures') {
+        if (activeTab === 'fee-heads') {
+          console.log('Deleting fee head:', id);
+          await deleteFeeHead(id);
+        } else if (activeTab === 'structures') {
           console.log('Deleting fee structure:', id);
           await deleteFeeStructure(id);
         } else if (activeTab === 'payment-plans') {
@@ -364,7 +229,7 @@ export function FeeManagementMasterData() {
       <div className="border-b">
         <div className="flex space-x-8">
           {[
-            { id: 'fee-heads', label: 'Fee Heads', count: mockFeeHeads.length },
+            { id: 'fee-heads', label: 'Fee Heads', count: feeHeads.length },
             { id: 'structures', label: 'Fee Structures', count: feeStructures.length },
             { id: 'payment-plans', label: 'Payment Plans', count: paymentPlans.length },
             { id: 'discounts', label: 'Discounts & Waivers', count: discounts.length }
@@ -407,13 +272,25 @@ export function FeeManagementMasterData() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockFeeHeads
+                  {loading && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center">Loading...</TableCell>
+                    </TableRow>
+                  )}
+                  {!loading && feeHeads.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center text-muted-foreground">
+                        No fee heads found. Click "Add New" to create one.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {!loading && feeHeads
                     .filter(item =>
                       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                       item.category.toLowerCase().includes(searchTerm.toLowerCase())
                     )
-                    .map((feeHead, index) => (
-                    <TableRow key={index}>
+                    .map((feeHead) => (
+                    <TableRow key={feeHead.id}>
                       <TableCell>
                         <div>
                           <div className="font-medium">{feeHead.name}</div>
@@ -423,23 +300,23 @@ export function FeeManagementMasterData() {
                       <TableCell>
                         <Badge variant="outline">{feeHead.category}</Badge>
                       </TableCell>
-                      <TableCell>{formatCurrency(feeHead.default_amount)}</TableCell>
+                      <TableCell>{formatCurrency(feeHead.amount || 0)}</TableCell>
                       <TableCell>
-                        <Badge variant={feeHead.is_mandatory ? 'default' : 'secondary'}>
-                          {feeHead.is_mandatory ? 'Yes' : 'No'}
+                        <Badge variant={feeHead.is_active ? 'default' : 'secondary'}>
+                          {feeHead.is_active ? 'Active' : 'Inactive'}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={feeHead.is_recurring ? 'default' : 'secondary'}>
-                          {feeHead.is_recurring ? feeHead.recurrence_frequency : 'One-time'}
+                        <Badge variant={feeHead.recurrence === 'termly' || feeHead.recurrence === 'monthly' ? 'default' : 'secondary'}>
+                          {feeHead.recurrence || 'Once'}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => handleEdit(feeHead)}>
+                          <Button variant="ghost" size="sm" onClick={() => handleEdit(feeHead, 'fee-heads')}>
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(feeHead.name)}>
+                          <Button variant="ghost" size="sm" onClick={() => handleDelete(feeHead.id)}>
                             <Trash className="h-4 w-4" />
                           </Button>
                         </div>
@@ -503,7 +380,7 @@ export function FeeManagementMasterData() {
                         <TableCell>{formatCurrency(structure.total_amount)}</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
-                            <Button variant="ghost" size="sm" onClick={() => handleEdit(structure)}>
+                            <Button variant="ghost" size="sm" onClick={() => handleEdit(structure, 'structures')}>
                               <Edit className="h-4 w-4" />
                             </Button>
                             <Button variant="ghost" size="sm" onClick={() => handleDelete(structure.id)}>
@@ -557,15 +434,15 @@ export function FeeManagementMasterData() {
                        <TableCell>{plan.number_of_installments} ({plan.frequency})</TableCell>
                        <TableCell>{plan.interest_rate || 0}%</TableCell>
                        <TableCell>
-                         <div className="flex gap-2">
-                           <Button variant="ghost" size="sm" onClick={() => handleEdit(plan)}>
-                             <Edit className="h-4 w-4" />
-                           </Button>
-                           <Button variant="ghost" size="sm" onClick={() => handleDelete(plan.id)}>
-                             <Trash className="h-4 w-4" />
-                           </Button>
-                         </div>
-                       </TableCell>
+                          <div className="flex gap-2">
+                            <Button variant="ghost" size="sm" onClick={() => handleEdit(plan, 'payment-plans')}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleDelete(plan.id)}>
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
                      </TableRow>
                    ))}
                  </TableBody>
@@ -612,15 +489,15 @@ export function FeeManagementMasterData() {
                        <TableCell>{discount.value}{discount.discount_type === 'percentage' ? '%' : ' ₹'}</TableCell>
                        <TableCell>-</TableCell>
                        <TableCell>
-                         <div className="flex gap-2">
-                           <Button variant="ghost" size="sm" onClick={() => handleEdit(discount)}>
-                             <Edit className="h-4 w-4" />
-                           </Button>
-                           <Button variant="ghost" size="sm" onClick={() => handleDelete(discount.id)}>
-                             <Trash className="h-4 w-4" />
-                           </Button>
-                         </div>
-                       </TableCell>
+                          <div className="flex gap-2">
+                            <Button variant="ghost" size="sm" onClick={() => handleEdit(discount, 'discounts')}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleDelete(discount.id)}>
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
                      </TableRow>
                    ))}
                  </TableBody>
@@ -702,6 +579,17 @@ export function FeeManagementMasterData() {
                   </Select>
                   <p className="text-xs text-muted-foreground mt-1">
                     Specify if this fee structure applies to new admissions, existing students being promoted, or all students
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Class-Specific Amounts (Optional)</label>
+                  <Textarea 
+                    {...form.register('year_group_amounts')} 
+                    placeholder='{"Year 7": 100000, "Year 8": 110000, "Year 9": 120000}'
+                    rows={3}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Enter JSON format to set different amounts per year group. Leave empty to use the total amount above for all classes.
                   </p>
                 </div>
               </>
