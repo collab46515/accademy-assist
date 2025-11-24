@@ -254,15 +254,15 @@ export function ApplicationsDashboardContent() {
   };
 
   const handleCardClick = (type: 'pending' | 'approved' | 'rejected' | 'all') => {
-    navigate(`/admissions/applications?filter=${type}`);
+    navigate(`/admissions/new?filter=${type}`);
   };
 
   const handleStageClick = (status: string) => {
-    navigate(`/admissions/applications?filter=${status}`);
+    navigate(`/admissions/new?filter=${status}`);
   };
 
   const handleActivityClick = (id: string) => {
-    navigate(`/admissions/application/${id}`);
+    navigate(`/admissions/new?application=${id}`);
   };
 
   const statusColors = [
@@ -597,7 +597,7 @@ export function ApplicationsDashboardContent() {
             <Button 
               variant="outline" 
               className="w-full h-20 text-base"
-              onClick={() => navigate('/admissions/applications')}
+              onClick={() => navigate('/admissions/new')}
             >
               View All Applications
             </Button>
