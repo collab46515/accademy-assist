@@ -18,13 +18,14 @@ import { StageNavigator } from "@/components/admissions/StageNavigator";
 import { StudentIntegrationVerifier } from "@/components/admissions/StudentIntegrationVerifier";
 import { ResendEnrollmentEmails } from "@/components/admin/ResendEnrollmentEmails";
 import { WorkflowValidation } from "@/components/admissions/WorkflowValidation";
+import { ApplicationsDashboardContent } from "@/components/admissions/ApplicationsDashboardContent";
 import { ArrowLeft, UserPlus, FileText, Phone, Globe, Calendar, Upload } from "lucide-react";
 
 const UnifiedAdmissionsPage = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("pathways");
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [loading, setLoading] = useState(false);
 
   // Handle application type selection
@@ -85,19 +86,18 @@ const UnifiedAdmissionsPage = () => {
           {/* Admission Stages Breadcrumb */}
           <AdmissionStagesBreadcrumb />
         </div>
-        <Button 
-          onClick={() => navigate('/admissions/dashboard')}
-          variant="default"
-          className="gap-2"
-        >
-          📊 Dashboard
-        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-1">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="pathways">Applications</TabsTrigger>
         </TabsList>
+
+        {/* Dashboard Tab */}
+        <TabsContent value="dashboard" className="space-y-6">
+          <ApplicationsDashboardContent />
+        </TabsContent>
 
         {/* Applications Tab */}
         <TabsContent value="pathways" className="space-y-6">
