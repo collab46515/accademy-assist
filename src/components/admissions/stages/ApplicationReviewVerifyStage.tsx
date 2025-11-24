@@ -235,13 +235,18 @@ export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: Ap
 
       if (error) throw error;
 
+      // Refetch documents to get updated status
+      const { data: updatedDocs } = await supabase
+        .from('application_documents')
+        .select('*')
+        .eq('application_id', applicationId);
+
       // Check if all required documents are verified
-      await fetchDocuments();
       const allRequiredVerified = requiredDocumentsTemplate
         .filter(d => d.required)
         .every(req => {
-          const doc = documents.find(d => d.document_type === req.document_type);
-          return doc?.status === 'verified' || doc?.file_path;
+          const doc = updatedDocs?.find(d => d.document_type === req.document_type);
+          return doc?.status === 'verified';
         });
 
       if (allRequiredVerified) {
