@@ -33,12 +33,17 @@ export function DocumentsSection() {
         <CardContent className="space-y-4">
           <div className="space-y-3">
             {[
-              { name: "Birth Certificate", required: true, description: "Official copy required" },
-              { name: "Passport Photos", required: true, description: "2 recent photos (within 6 months)" },
-              { name: "Previous School Records", required: false, description: "Academic transcripts and reports" },
-              { name: "Medical Records", required: false, description: "Including vaccination records" },
-              { name: "Proof of Address", required: true, description: "Utility bill or bank statement" },
-              { name: "Parent/Guardian ID", required: true, description: "Copy of valid identification" }
+              { name: "Child Passport Size Photo", required: true, description: "Recent passport size photograph of the child" },
+              { name: "Birth Certificate", required: true, description: "Official birth certificate" },
+              { name: "Aadhaar Copy / UID", required: true, description: "Copy of Aadhaar card or UID" },
+              { name: "Community Certificate", required: true, description: "Valid community certificate" },
+              { name: "Salary Certificate / Slip or Self Declaration of Income", required: true, description: "Latest salary slip or income declaration" },
+              { name: "Organization Endorsement or Reference Letter", required: true, description: "Letter from current employer or reference" },
+              { name: "Ration Card", required: false, description: "Copy of ration card (if applicable)" },
+              { name: "Medical Certificate", required: false, description: "Medical fitness certificate (if applicable)" },
+              { name: "Church Endorsement", required: false, description: "Church certificate or letter from pastor (if applicable)" },
+              { name: "Transfer Certificate", required: false, description: "TC from previous school (if applicable)" },
+              { name: "Migration Certificate", required: false, description: "Migration certificate (if applicable)" }
             ].map((doc, index) => (
               <div key={index} className="flex items-start gap-3 p-3 bg-background rounded-lg">
                 <div className={`w-2 h-2 rounded-full mt-2 ${doc.required ? 'bg-destructive' : 'bg-muted-foreground'}`} />
