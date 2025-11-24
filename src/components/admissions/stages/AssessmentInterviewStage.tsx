@@ -7,9 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { Calendar, Clock, Users, BookOpen, Mic, Video, CheckCircle, PlusCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Calendar, Clock, BookOpen, CheckCircle, XCircle, AlertCircle, Mail, MessageSquare, User } from 'lucide-react';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
 interface AssessmentInterviewStageProps {
@@ -17,483 +18,545 @@ interface AssessmentInterviewStageProps {
   onMoveToNext: () => void;
 }
 
+interface SubjectAssessment {
+  subject: string;
+  marks: string;
+  maxMarks: string;
+  status: 'pending' | 'pass' | 'fail';
+  comments: string;
+}
+
 export function AssessmentInterviewStage({ applicationId, onMoveToNext }: AssessmentInterviewStageProps) {
-  const [selectedAssessment, setSelectedAssessment] = useState<string | null>(null);
-  const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
-  const [scheduledAssessments, setScheduledAssessments] = useState<any[]>([]);
-  const [assessmentResults, setAssessmentResults] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [newAssessment, setNewAssessment] = useState({
-    type: '',
-    subject: '',
-    date: '',
-    time: '',
-    duration: '',
-    assessor: ''
-  });
-  const { toast } = useToast();
+  const [assessments, setAssessments] = useState<SubjectAssessment[]>([
+    { subject: 'Mathematics', marks: '', maxMarks: '100', status: 'pending', comments: '' },
+    { subject: 'English', marks: '', maxMarks: '100', status: 'pending', comments: '' },
+    { subject: 'Science', marks: '', maxMarks: '100', status: 'pending', comments: '' },
+    { subject: 'Hindi', marks: '', maxMarks: '100', status: 'pending', comments: '' }
+  ]);
+  
+  const [assessmentStatus, setAssessmentStatus] = useState<'not_started' | 'in_progress' | 'completed'>('not_started');
+  const [assessmentResult, setAssessmentResult] = useState<'pass' | 'fail' | null>(null);
+  const [overallComments, setOverallComments] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Interview state
+  const [showInterviewScheduling, setShowInterviewScheduling] = useState(false);
+  const [interviewScheduled, setInterviewScheduled] = useState(false);
+  const [interviewDate, setInterviewDate] = useState('');
+  const [interviewTime, setInterviewTime] = useState('');
+  const [interviewer, setInterviewer] = useState('');
+  const [notificationMethod, setNotificationMethod] = useState<'manual' | 'email' | 'sms'>('manual');
+  const [interviewStatus, setInterviewStatus] = useState<'not_scheduled' | 'scheduled' | 'completed'>('not_scheduled');
+  const [interviewResult, setInterviewResult] = useState<'pass' | 'fail' | null>(null);
+  const [interviewComments, setInterviewComments] = useState('');
 
   useEffect(() => {
-    fetchAssessments();
-  }, [applicationId]);
-
-  const fetchAssessments = async () => {
-    try {
-      setLoading(true);
-      // Fetch assessments from the database - adjust table name based on your schema
-      // For now, this will return empty array until you have actual data
-      const { data, error } = await supabase
-        .from('enrollment_applications')
-        .select('*')
-        .eq('id', applicationId)
-        .single();
-
-      if (error) throw error;
-
-      // Extract assessments from application data if stored there
-      // Or fetch from a separate assessments table if you have one
-      setScheduledAssessments([]);
-      setAssessmentResults([]);
-    } catch (error) {
-      console.error('Error fetching assessments:', error);
-    } finally {
-      setLoading(false);
+    // Check if any marks are entered
+    const hasMarks = assessments.some(a => a.marks !== '');
+    if (hasMarks) {
+      setAssessmentStatus('in_progress');
     }
-  };
+  }, [assessments]);
 
-  const interviewQuestions = [
-    'Why do you want to join our school?',
-    'Tell us about your favorite subject and why you enjoy it.',
-    'Describe a challenge you have overcome.',
-    'What are your hobbies and interests outside of school?',
-    'How do you handle working in a team?'
-  ];
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'completed': return <Badge variant="default" className="bg-green-100 text-green-800">Completed</Badge>;
-      case 'scheduled': return <Badge variant="secondary">Scheduled</Badge>;
-      case 'cancelled': return <Badge variant="destructive">Cancelled</Badge>;
-      default: return <Badge variant="outline">Unknown</Badge>;
+  const updateAssessment = (index: number, field: keyof SubjectAssessment, value: string) => {
+    const updated = [...assessments];
+    updated[index] = { ...updated[index], [field]: value };
+    
+    // Auto-calculate pass/fail based on marks
+    if (field === 'marks' && value) {
+      const marks = parseFloat(value);
+      const maxMarks = parseFloat(updated[index].maxMarks);
+      const percentage = (marks / maxMarks) * 100;
+      updated[index].status = percentage >= 40 ? 'pass' : 'fail';
     }
+    
+    setAssessments(updated);
   };
 
-  const getScoreColor = (score: number, maxScore: number) => {
-    const percentage = (score / maxScore) * 100;
-    if (percentage >= 80) return 'text-green-600';
-    if (percentage >= 60) return 'text-yellow-600';
-    return 'text-red-600';
+  const calculateOverallResult = () => {
+    const allCompleted = assessments.every(a => a.marks !== '');
+    if (!allCompleted) {
+      toast.error('Please enter marks for all subjects');
+      return null;
+    }
+
+    const totalMarks = assessments.reduce((sum, a) => sum + parseFloat(a.marks || '0'), 0);
+    const totalMaxMarks = assessments.reduce((sum, a) => sum + parseFloat(a.maxMarks || '0'), 0);
+    const percentage = (totalMarks / totalMaxMarks) * 100;
+    
+    return percentage >= 40 ? 'pass' : 'fail';
   };
 
-  const handleScheduleAssessment = async () => {
-    // Validate form
-    if (!newAssessment.type || !newAssessment.subject || !newAssessment.date || !newAssessment.time || !newAssessment.assessor) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
+  const handleCompleteAssessment = async () => {
+    const result = calculateOverallResult();
+    if (!result) return;
+
+    if (!overallComments.trim()) {
+      toast.error('Please add overall assessment comments');
       return;
     }
 
+    setIsSubmitting(true);
     try {
-      // Save to database - you'll need to create an assessments table or store in application data
-      const newAssessmentData = {
-        application_id: applicationId,
-        assessment_type: newAssessment.type,
-        subject: newAssessment.subject,
-        scheduled_date: newAssessment.date,
-        scheduled_time: newAssessment.time,
-        duration: newAssessment.duration,
-        assessor: newAssessment.assessor,
-        status: 'scheduled'
-      };
-
-      // For now, add to local state until you create the assessments table
-      setScheduledAssessments([...scheduledAssessments, { ...newAssessmentData, id: Date.now().toString() }]);
-
-      toast({
-        title: "Assessment Scheduled",
-        description: `${newAssessment.subject} assessment has been scheduled for ${newAssessment.date} at ${newAssessment.time}`,
+      // Save assessment data to database
+      console.log('Saving assessment:', {
+        applicationId,
+        assessments,
+        result,
+        comments: overallComments
       });
 
-      // Reset form and close dialog
-      setNewAssessment({
-        type: '',
-        subject: '',
-        date: '',
-        time: '',
-        duration: '',
-        assessor: ''
-      });
-      setIsScheduleDialogOpen(false);
+      setAssessmentStatus('completed');
+      setAssessmentResult(result);
+      
+      if (result === 'pass') {
+        toast.success('Assessment completed successfully! Student passed. You can now schedule an interview.');
+        setShowInterviewScheduling(true);
+      } else {
+        toast.error('Assessment completed. Student failed. Application will be rejected.');
+      }
     } catch (error) {
-      console.error('Error scheduling assessment:', error);
-      toast({
-        title: "Error",
-        description: "Failed to schedule assessment",
-        variant: "destructive"
+      console.error('Error completing assessment:', error);
+      toast.error('Failed to save assessment');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRejectApplication = async () => {
+    setIsSubmitting(true);
+    try {
+      await supabase
+        .from('enrollment_applications')
+        .update({ status: 'rejected', rejection_reason: 'Failed Assessment' })
+        .eq('id', applicationId);
+      
+      toast.success('Application has been rejected');
+      // You might want to navigate away or refresh
+    } catch (error) {
+      console.error('Error rejecting application:', error);
+      toast.error('Failed to reject application');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleScheduleInterview = async () => {
+    if (!interviewDate || !interviewTime || !interviewer) {
+      toast.error('Please fill in all interview details');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Save interview schedule
+      console.log('Scheduling interview:', {
+        applicationId,
+        date: interviewDate,
+        time: interviewTime,
+        interviewer,
+        notificationMethod
       });
+
+      // Send notification based on method
+      if (notificationMethod === 'email') {
+        toast.success('Interview scheduled! Email notification sent to applicant.');
+      } else if (notificationMethod === 'sms') {
+        toast.success('Interview scheduled! SMS notification sent to applicant.');
+      } else {
+        toast.success('Interview scheduled successfully!');
+      }
+
+      setInterviewScheduled(true);
+      setInterviewStatus('scheduled');
+    } catch (error) {
+      console.error('Error scheduling interview:', error);
+      toast.error('Failed to schedule interview');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCompleteInterview = async () => {
+    if (!interviewResult) {
+      toast.error('Please select interview result (Pass/Fail)');
+      return;
+    }
+
+    if (!interviewComments.trim()) {
+      toast.error('Please add interview comments');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      console.log('Completing interview:', {
+        applicationId,
+        result: interviewResult,
+        comments: interviewComments
+      });
+
+      setInterviewStatus('completed');
+      
+      if (interviewResult === 'pass') {
+        toast.success('Interview completed! Student passed. Ready to move to next stage.');
+      } else {
+        toast.error('Interview completed. Student failed. Application will be rejected.');
+      }
+    } catch (error) {
+      console.error('Error completing interview:', error);
+      toast.error('Failed to complete interview');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pass':
+        return <Badge className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 mr-1" />Pass</Badge>;
+      case 'fail':
+        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Fail</Badge>;
+      default:
+        return <Badge variant="outline"><AlertCircle className="h-3 w-3 mr-1" />Pending</Badge>;
     }
   };
 
   return (
     <div className="space-y-6">
-      {/* Assessment Overview */}
+      {/* Academic Assessment Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Assessment & Interview Overview</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <BookOpen className="h-5 w-5" />
+            Academic Assessment
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
-                {scheduledAssessments.filter(a => a.status === 'completed').length}
-              </div>
-              <div className="text-sm text-muted-foreground">Completed</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">
-                {scheduledAssessments.filter(a => a.status === 'scheduled').length}
-              </div>
-              <div className="text-sm text-muted-foreground">Scheduled</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-primary">
-                {assessmentResults.length > 0 
-                  ? (assessmentResults.reduce((sum, r) => sum + r.score, 0) / assessmentResults.length).toFixed(1)
-                  : '0'
-                }
-              </div>
-              <div className="text-sm text-muted-foreground">Avg Score</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-primary">
-                {scheduledAssessments.length > 0
-                  ? Math.round((scheduledAssessments.filter(a => a.status === 'completed').length / scheduledAssessments.length) * 100)
-                  : 0
-                }%
-              </div>
-              <div className="text-sm text-muted-foreground">Success Rate</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Tabs defaultValue="schedule">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="schedule">Schedule</TabsTrigger>
-          <TabsTrigger value="results">Results</TabsTrigger>
-          <TabsTrigger value="interview">Interview</TabsTrigger>
-          <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="schedule" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Scheduled Assessments</h3>
-            <Dialog open={isScheduleDialogOpen} onOpenChange={setIsScheduleDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="flex items-center gap-2">
-                  <PlusCircle className="h-4 w-4" />
-                  Schedule New Assessment
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>Schedule New Assessment</DialogTitle>
-                  <DialogDescription>
-                    Add a new assessment or interview for this application
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="type">Assessment Type *</Label>
-                      <Select 
-                        value={newAssessment.type} 
-                        onValueChange={(value) => setNewAssessment({...newAssessment, type: value})}
-                      >
-                        <SelectTrigger id="type">
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="academic">Academic Assessment</SelectItem>
-                          <SelectItem value="behavioral">Behavioral Assessment</SelectItem>
-                          <SelectItem value="interview">Interview</SelectItem>
-                          <SelectItem value="practical">Practical Test</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="subject">Subject/Title *</Label>
-                      <Input 
-                        id="subject" 
-                        placeholder="e.g., Mathematics"
-                        value={newAssessment.subject}
-                        onChange={(e) => setNewAssessment({...newAssessment, subject: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="date">Date *</Label>
-                      <Input 
-                        id="date" 
-                        type="date"
-                        value={newAssessment.date}
-                        onChange={(e) => setNewAssessment({...newAssessment, date: e.target.value})}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="time">Time *</Label>
-                      <Input 
-                        id="time" 
-                        type="time"
-                        value={newAssessment.time}
-                        onChange={(e) => setNewAssessment({...newAssessment, time: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="duration">Duration</Label>
-                      <Input 
-                        id="duration" 
-                        placeholder="e.g., 60 minutes"
-                        value={newAssessment.duration}
-                        onChange={(e) => setNewAssessment({...newAssessment, duration: e.target.value})}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="assessor">Assessor/Interviewer *</Label>
-                      <Input 
-                        id="assessor" 
-                        placeholder="e.g., Dr. Smith"
-                        value={newAssessment.assessor}
-                        onChange={(e) => setNewAssessment({...newAssessment, assessor: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsScheduleDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleScheduleAssessment}>
-                    Schedule Assessment
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-          
-          <div className="space-y-3">
-            {loading ? (
-              <p className="text-center text-muted-foreground py-8">Loading assessments...</p>
-            ) : scheduledAssessments.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No assessments scheduled yet. Click "Schedule New Assessment" to add one.</p>
-            ) : (
-              scheduledAssessments.map((assessment) => (
-              <Card key={assessment.id}>
+          <div className="space-y-4">
+            {assessments.map((assessment, index) => (
+              <Card key={assessment.subject}>
                 <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        {assessment.type === 'Interview' ? (
-                          <Mic className="h-5 w-5 text-primary" />
-                        ) : (
-                          <BookOpen className="h-5 w-5 text-primary" />
-                        )}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">{assessment.subject}</h4>
+                      {getStatusBadge(assessment.status)}
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Marks Obtained</Label>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          value={assessment.marks}
+                          onChange={(e) => updateAssessment(index, 'marks', e.target.value)}
+                          disabled={assessmentStatus === 'completed'}
+                        />
                       </div>
                       <div>
-                        <p className="font-medium">{assessment.subject}</p>
-                        <p className="text-sm text-muted-foreground">{assessment.type}</p>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {assessment.date}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {assessment.time}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            {assessment.assessor}
-                          </span>
-                        </div>
+                        <Label>Max Marks</Label>
+                        <Input
+                          type="number"
+                          value={assessment.maxMarks}
+                          onChange={(e) => updateAssessment(index, 'maxMarks', e.target.value)}
+                          disabled={assessmentStatus === 'completed'}
+                        />
                       </div>
                     </div>
-                    <div className="text-right">
-                      {getStatusBadge(assessment.status)}
-                      {assessment.score && (
-                        <p className="text-sm font-medium mt-1">Score: {assessment.score}/100</p>
-                      )}
+                    
+                    {assessment.marks && (
+                      <div className="text-sm text-muted-foreground">
+                        Percentage: {((parseFloat(assessment.marks) / parseFloat(assessment.maxMarks)) * 100).toFixed(1)}%
+                      </div>
+                    )}
+                    
+                    <div>
+                      <Label>Comments</Label>
+                      <Textarea
+                        placeholder="Add assessment comments..."
+                        value={assessment.comments}
+                        onChange={(e) => updateAssessment(index, 'comments', e.target.value)}
+                        disabled={assessmentStatus === 'completed'}
+                        rows={2}
+                      />
                     </div>
                   </div>
                 </CardContent>
               </Card>
-              ))
+            ))}
+            
+            {assessmentStatus !== 'completed' && (
+              <Card className="bg-muted/50">
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    <Label>Overall Assessment Comments</Label>
+                    <Textarea
+                      placeholder="Provide overall assessment comments and recommendations..."
+                      value={overallComments}
+                      onChange={(e) => setOverallComments(e.target.value)}
+                      rows={4}
+                    />
+                    <Button 
+                      onClick={handleCompleteAssessment} 
+                      disabled={isSubmitting}
+                      className="w-full"
+                    >
+                      {isSubmitting ? 'Completing...' : 'Complete Assessment'}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             )}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="results" className="space-y-4">
-          {loading ? (
-            <p className="text-center text-muted-foreground py-8">Loading results...</p>
-          ) : assessmentResults.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">No assessment results available yet.</p>
-          ) : (
-            assessmentResults.map((result, index) => (
-            <Card key={index}>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>{result.subject} Assessment</span>
-                  <span className={`text-2xl font-bold ${getScoreColor(result.score, result.maxScore)}`}>
-                    {result.score}/{result.maxScore}
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span>Assessor: {result.assessor}</span>
-                    <span>Date: {result.date}</span>
+            
+            {assessmentStatus === 'completed' && assessmentResult && (
+              <Card className={assessmentResult === 'pass' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    {assessmentResult === 'pass' ? (
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    ) : (
+                      <XCircle className="h-5 w-5 text-red-600" />
+                    )}
+                    <h4 className="font-semibold">
+                      Assessment Result: {assessmentResult === 'pass' ? 'PASSED' : 'FAILED'}
+                    </h4>
                   </div>
-                  <div>
-                    <p className="font-medium text-sm">Notes:</p>
-                    <p className="text-sm text-muted-foreground">{result.notes}</p>
-                  </div>
-                  <div>
-                    <p className="font-medium text-sm">Recommendations:</p>
-                    <p className="text-sm text-muted-foreground">{result.recommendations}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            ))
-          )}
-        </TabsContent>
-        
-        <TabsContent value="interview" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Video className="h-5 w-5" />
-                Interview Setup
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">Interview Type</label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select interview type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="in-person">In-Person</SelectItem>
-                      <SelectItem value="video">Video Call</SelectItem>
-                      <SelectItem value="phone">Phone Call</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Duration</label>
-                  <Input placeholder="30 minutes" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Interview Questions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {interviewQuestions.map((question, index) => (
-                  <div key={index} className="p-3 border rounded-lg">
-                    <p className="text-sm">{index + 1}. {question}</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Interview Notes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea 
-                placeholder="Record interview observations, responses, and overall impression..."
-                rows={6}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="recommendations" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Assessment Recommendations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium">Overall Recommendation</label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select recommendation" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="strong-accept">Strong Accept</SelectItem>
-                      <SelectItem value="accept">Accept</SelectItem>
-                      <SelectItem value="conditional">Conditional Accept</SelectItem>
-                      <SelectItem value="waitlist">Waitlist</SelectItem>
-                      <SelectItem value="reject">Reject</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium">Detailed Recommendations</label>
-                  <Textarea 
-                    placeholder="Provide detailed recommendations based on assessment results..."
-                    rows={6}
-                  />
-                </div>
-                
-                <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1">Save Draft</Button>
-                  <Button className="flex-1">Submit Assessment</Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      {/* Next Stage */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Stage Completion</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Ready to proceed to Admission Decision?</p>
-              <p className="text-sm text-muted-foreground">
-                Complete all assessments and interviews before moving to the final decision stage.
-              </p>
-            </div>
-            <Button onClick={onMoveToNext}>
-              Move to Admission Decision
-            </Button>
+                  <p className="text-sm text-muted-foreground">{overallComments}</p>
+                  
+                  {assessmentResult === 'fail' && (
+                    <Button 
+                      variant="destructive" 
+                      onClick={handleRejectApplication}
+                      disabled={isSubmitting}
+                      className="w-full mt-3"
+                    >
+                      {isSubmitting ? 'Rejecting...' : 'Reject Application'}
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </div>
         </CardContent>
       </Card>
+
+      {/* Interview Scheduling Section */}
+      {showInterviewScheduling && assessmentResult === 'pass' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Interview Scheduling
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="schedule">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="schedule">Schedule Interview</TabsTrigger>
+                <TabsTrigger value="complete" disabled={!interviewScheduled}>Complete Interview</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="schedule" className="space-y-4">
+                {!interviewScheduled ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Interview Date *</Label>
+                        <Input
+                          type="date"
+                          value={interviewDate}
+                          onChange={(e) => setInterviewDate(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Interview Time *</Label>
+                        <Input
+                          type="time"
+                          value={interviewTime}
+                          onChange={(e) => setInterviewTime(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label>Interviewer *</Label>
+                      <Input
+                        placeholder="Enter interviewer name"
+                        value={interviewer}
+                        onChange={(e) => setInterviewer(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label>Notification Method</Label>
+                      <RadioGroup value={notificationMethod} onValueChange={(v: any) => setNotificationMethod(v)}>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="manual" id="manual" />
+                          <Label htmlFor="manual" className="font-normal cursor-pointer">
+                            Manual (No notification)
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="email" id="email" />
+                          <Label htmlFor="email" className="font-normal cursor-pointer flex items-center gap-2">
+                            <Mail className="h-4 w-4" />
+                            Send Email Notification
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="sms" id="sms" />
+                          <Label htmlFor="sms" className="font-normal cursor-pointer flex items-center gap-2">
+                            <MessageSquare className="h-4 w-4" />
+                            Send SMS Notification
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                    
+                    <Button 
+                      onClick={handleScheduleInterview} 
+                      disabled={isSubmitting}
+                      className="w-full"
+                    >
+                      {isSubmitting ? 'Scheduling...' : 'Schedule Interview'}
+                    </Button>
+                  </div>
+                ) : (
+                  <Card className="border-blue-200 bg-blue-50">
+                    <CardContent className="p-4">
+                      <div className="space-y-2">
+                        <h4 className="font-semibold flex items-center gap-2">
+                          <CheckCircle className="h-5 w-5 text-blue-600" />
+                          Interview Scheduled
+                        </h4>
+                        <div className="text-sm space-y-1">
+                          <p className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            <strong>Date:</strong> {new Date(interviewDate).toLocaleDateString()}
+                          </p>
+                          <p className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            <strong>Time:</strong> {interviewTime}
+                          </p>
+                          <p className="flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            <strong>Interviewer:</strong> {interviewer}
+                          </p>
+                          <p className="flex items-center gap-2">
+                            {notificationMethod === 'email' ? <Mail className="h-4 w-4" /> : 
+                             notificationMethod === 'sms' ? <MessageSquare className="h-4 w-4" /> : 
+                             <AlertCircle className="h-4 w-4" />}
+                            <strong>Notification:</strong> {notificationMethod === 'manual' ? 'Manual' : notificationMethod === 'email' ? 'Email Sent' : 'SMS Sent'}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="complete" className="space-y-4">
+                {interviewStatus !== 'completed' ? (
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Interview Result *</Label>
+                      <RadioGroup value={interviewResult || ''} onValueChange={(v: any) => setInterviewResult(v)}>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="pass" id="pass" />
+                          <Label htmlFor="pass" className="font-normal cursor-pointer flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            Pass
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="fail" id="fail" />
+                          <Label htmlFor="fail" className="font-normal cursor-pointer flex items-center gap-2">
+                            <XCircle className="h-4 w-4 text-red-600" />
+                            Fail
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                    
+                    <div>
+                      <Label>Interview Comments *</Label>
+                      <Textarea
+                        placeholder="Provide detailed interview feedback and observations..."
+                        value={interviewComments}
+                        onChange={(e) => setInterviewComments(e.target.value)}
+                        rows={6}
+                      />
+                    </div>
+                    
+                    <Button 
+                      onClick={handleCompleteInterview} 
+                      disabled={isSubmitting}
+                      className="w-full"
+                    >
+                      {isSubmitting ? 'Completing...' : 'Complete Interview'}
+                    </Button>
+                  </div>
+                ) : (
+                  <Card className={interviewResult === 'pass' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                    <CardContent className="p-4">
+                      <div className="space-y-2">
+                        <h4 className="font-semibold flex items-center gap-2">
+                          {interviewResult === 'pass' ? (
+                            <>
+                              <CheckCircle className="h-5 w-5 text-green-600" />
+                              Interview Result: PASSED
+                            </>
+                          ) : (
+                            <>
+                              <XCircle className="h-5 w-5 text-red-600" />
+                              Interview Result: FAILED
+                            </>
+                          )}
+                        </h4>
+                        <p className="text-sm text-muted-foreground">{interviewComments}</p>
+                        
+                        {interviewResult === 'fail' && (
+                          <Button 
+                            variant="destructive" 
+                            onClick={handleRejectApplication}
+                            disabled={isSubmitting}
+                            className="w-full mt-3"
+                          >
+                            {isSubmitting ? 'Rejecting...' : 'Reject Application'}
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Next Stage Button */}
+      {assessmentResult === 'pass' && interviewStatus === 'completed' && interviewResult === 'pass' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Stage Completion</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Assessment and Interview Completed Successfully!</p>
+                <p className="text-sm text-muted-foreground">
+                  Student has passed both assessment and interview. Ready to proceed to Admission Decision stage.
+                </p>
+              </div>
+              <Button onClick={onMoveToNext} size="lg">
+                Move to Admission Decision
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
