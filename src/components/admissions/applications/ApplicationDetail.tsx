@@ -26,9 +26,11 @@ import {
   AlertTriangle,
   Edit,
   Send,
-  Download
+  Download,
+  Eye
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 interface ApplicationDetailProps {
   applicationId: string;
@@ -71,6 +73,7 @@ export function ApplicationDetail({ applicationId, onBack, getStatusColor }: App
   const [application, setApplication] = useState<ApplicationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -88,7 +91,16 @@ export function ApplicationDetail({ applicationId, onBack, getStatusColor }: App
         .single();
 
       if (error) throw error;
-      setApplication(data);
+      
+      // Merge additional_data into main application object
+      const additionalData = data.additional_data as any;
+      const mergedData = {
+        ...data,
+        ...(additionalData?.pathway_data || {}),
+        ...(additionalData?.submitted_data || {}),
+      };
+      
+      setApplication(mergedData);
     } catch (error) {
       console.error('Error fetching application:', error);
       toast({
@@ -455,6 +467,192 @@ export function ApplicationDetail({ applicationId, onBack, getStatusColor }: App
                 </Button>
               ))}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Full Application Details Dialog */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5" />
+              View Full Application Details
+            </CardTitle>
+            <CardDescription>
+              View comprehensive application information including all submitted data
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="w-full" variant="outline">
+                  <Eye className="h-4 w-4 mr-2" />
+                  Open Full Application Details
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Complete Application Details: {application.student_name}</DialogTitle>
+                </DialogHeader>
+                
+                <Tabs defaultValue="student" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="student">Student</TabsTrigger>
+                    <TabsTrigger value="parents">Parents/Guardian</TabsTrigger>
+                    <TabsTrigger value="address">Address</TabsTrigger>
+                    <TabsTrigger value="academic">Academic</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="student" className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Full Name</p>
+                        <p className="text-sm">{application.student_name || 'Not provided'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Date of Birth</p>
+                        <p className="text-sm">{application.date_of_birth ? format(new Date(application.date_of_birth), 'dd MMM yyyy') : 'Not provided'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Gender</p>
+                        <p className="text-sm">{(application as any).gender || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Nationality</p>
+                        <p className="text-sm">{application.nationality || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Mother Tongue</p>
+                        <p className="text-sm">{(application as any).mother_tongue || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Blood Group</p>
+                        <p className="text-sm">{(application as any).blood_group || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Religion</p>
+                        <p className="text-sm">{(application as any).religion || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Caste</p>
+                        <p className="text-sm">{(application as any).caste || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Aadhaar Number</p>
+                        <p className="text-sm">{(application as any).aadhaar_number || 'Not provided'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Food Choice</p>
+                        <p className="text-sm">{(application as any).food_choice || 'Not specified'}</p>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="parents" className="space-y-4">
+                    <div className="space-y-6">
+                      <div>
+                        <h4 className="font-semibold mb-3">Primary Contact</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Name</p>
+                            <p className="text-sm">{application.parent_name || 'Not provided'}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Relationship</p>
+                            <p className="text-sm">{application.parent_relationship || 'Not specified'}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Email</p>
+                            <p className="text-sm">{application.parent_email || 'Not provided'}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Phone</p>
+                            <p className="text-sm">{application.parent_phone || 'Not provided'}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Occupation</p>
+                            <p className="text-sm">{(application as any).father_occupation || (application as any).mother_occupation || 'Not specified'}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {application.emergency_contact_name && (
+                        <div>
+                          <h4 className="font-semibold mb-3">Emergency Contact</h4>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">Name</p>
+                              <p className="text-sm">{application.emergency_contact_name}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">Relationship</p>
+                              <p className="text-sm">{application.emergency_contact_relationship || 'Not specified'}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">Phone</p>
+                              <p className="text-sm">{application.emergency_contact_phone || 'Not provided'}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="address" className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="col-span-2">
+                        <p className="text-sm font-medium text-muted-foreground">Home Address</p>
+                        <p className="text-sm">{application.home_address || 'Not provided'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">City</p>
+                        <p className="text-sm">{(application as any).city || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">State</p>
+                        <p className="text-sm">{(application as any).state || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Postal Code</p>
+                        <p className="text-sm">{application.postal_code || 'Not provided'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Country</p>
+                        <p className="text-sm">{application.country || 'Not specified'}</p>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="academic" className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Year Group Applying For</p>
+                        <p className="text-sm">{application.year_group || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Current Year Group</p>
+                        <p className="text-sm">{application.current_year_group || 'Not specified'}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-sm font-medium text-muted-foreground">Previous School</p>
+                        <p className="text-sm">{application.previous_school || 'Not provided'}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-sm font-medium text-muted-foreground">Special Requirements</p>
+                        <p className="text-sm">{application.special_requirements || 'None specified'}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-sm font-medium text-muted-foreground">Medical Information</p>
+                        <p className="text-sm">{application.medical_information || 'None provided'}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-sm font-medium text-muted-foreground">Chronic Diseases</p>
+                        <p className="text-sm">{(application as any).chronic_diseases || 'None reported'}</p>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </DialogContent>
+            </Dialog>
           </CardContent>
         </Card>
 
