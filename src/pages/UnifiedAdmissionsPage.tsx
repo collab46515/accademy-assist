@@ -11,7 +11,6 @@ import { AdmissionsWorkflow } from "@/components/admissions/AdmissionsWorkflow";
 import { AdmissionsFlowVisualization } from "@/components/admissions/AdmissionsFlowVisualization";
 import { StageDetailBreakdown } from "@/components/admissions/StageDetailBreakdown";
 import { ApplicationTaskManager } from "@/components/admissions/ApplicationTaskManager";
-import { StageWorkflowManager } from "@/components/admissions/StageWorkflowManager";
 import { AdmissionStagesBreadcrumb } from "@/components/admissions/AdmissionStagesBreadcrumb";
 import { EnrollmentProcessor } from "@/components/admissions/EnrollmentProcessor";
 import { StageNavigator } from "@/components/admissions/StageNavigator";
@@ -40,34 +39,67 @@ const UnifiedAdmissionsPage = () => {
     navigate(`/admissions/enroll?type=${applicationType.toLowerCase().replace(' ', '_')}`);
   };
 
-  // Simple stage detection - Convert 1-based URL param to 0-based array index
+  // Stage to status mapping for filtering
+  const stageToStatusMap = [
+    { stage: 1, statuses: ['submitted'], filter: 'submitted' },
+    { stage: 2, statuses: ['under_review', 'documents_pending'], filter: 'under_review' },
+    { stage: 3, statuses: ['assessment_scheduled', 'assessment_complete', 'interview_scheduled', 'interview_complete'], filter: 'assessment_scheduled' },
+    { stage: 4, statuses: ['pending_approval', 'approved', 'on_hold'], filter: 'pending_approval' },
+    { stage: 5, statuses: ['offer_sent'], filter: 'offer_sent' },
+    { stage: 6, statuses: ['offer_accepted', 'offer_declined'], filter: 'offer_accepted' },
+    { stage: 7, statuses: ['enrolled'], filter: 'enrolled' }
+  ];
+
+  // Simple stage detection - Convert 1-based URL param to stage info
   const stageParam = searchParams.get('stage');
   const isStageView = stageParam !== null;
-  const currentStage = isStageView ? parseInt(stageParam) - 1 : null;
+  const stageNumber = isStageView ? parseInt(stageParam) : null;
+  const stageInfo = stageNumber ? stageToStatusMap.find(s => s.stage === stageNumber) : null;
 
-  // If viewing a specific stage, show stage view
-  if (isStageView && currentStage !== null) {
-    // Display as 1-based for users (currentStage is 0-based internally)
-    const displayStageNumber = currentStage + 1;
+  // If viewing a specific stage, show filtered application management
+  if (isStageView && stageInfo) {
+    const stageTitles = [
+      'Application Submitted',
+      'Application Review & Verify',
+      'Assessment/Interview',
+      'Admission Decision',
+      'Fee Payment',
+      'Enrollment Confirmation',
+      'Welcome & Onboarding'
+    ];
+    
+    const stageTitle = stageTitles[stageNumber! - 1] || 'Unknown Stage';
     
     return (
-      <div className="min-h-screen bg-blue-50">
-        <div className="bg-blue-600 text-white p-6">
-          <h1 className="text-3xl font-bold">🎯 Stage View Working!</h1>
-          <p className="text-xl">You are viewing Stage {displayStageNumber}</p>
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="mb-6">
           <Button 
-            variant="secondary" 
+            variant="outline" 
             onClick={() => navigate('/admissions')}
-            className="mt-4"
+            className="mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Main Admissions
           </Button>
+          
+          <div className="bg-primary/10 border border-primary/20 rounded-lg p-6 mb-6">
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Stage {stageNumber}: {stageTitle}
+            </h1>
+            <p className="text-muted-foreground">
+              Viewing all applications in this stage • Filter shows: {stageInfo.statuses.join(', ')}
+            </p>
+          </div>
+          
+          {/* Stage breadcrumb for navigation */}
+          <AdmissionStagesBreadcrumb />
         </div>
-        <div className="container mx-auto px-4 py-8">
-          <h2 className="text-2xl font-bold mb-4">Applications for Stage {displayStageNumber}</h2>
-          <StageWorkflowManager currentStage={currentStage} />
-        </div>
+        
+        {/* Show Application Management filtered by stage */}
+        <ApplicationManagement 
+          initialFilter={stageInfo.filter}
+          stageStatuses={stageInfo.statuses}
+        />
       </div>
     );
   }

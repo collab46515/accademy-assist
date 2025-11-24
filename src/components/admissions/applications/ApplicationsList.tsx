@@ -38,13 +38,15 @@ interface Application {
 interface ApplicationsListProps {
   searchTerm: string;
   statusFilter: string;
+  stageStatuses?: string[]; // Optional array of statuses for stage filtering
   onSelectApplication: (id: string) => void;
   getStatusColor: (status: string) => string;
 }
 
 export function ApplicationsList({ 
   searchTerm, 
-  statusFilter, 
+  statusFilter,
+  stageStatuses,
   onSelectApplication, 
   getStatusColor 
 }: ApplicationsListProps) {
@@ -106,12 +108,20 @@ export function ApplicationsList({
         app.application_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.parent_email.toLowerCase().includes(searchTerm.toLowerCase());
       
-      // Filter by status - include rejected and on_hold (waitlisted)
-      const validFilters = ['all', 'submitted', 'under_review', 'assessment_scheduled', 'interview_scheduled', 'pending_approval', 'approved', 'on_hold', 'rejected'];
-      const effectiveFilter = validFilters.includes(statusFilter) ? statusFilter : 'all';
+      // Filter by status - support both single status filter and stage statuses array
+      let matchesStatus = false;
       
-      console.log('Filtering app:', app.student_name, 'status:', app.status, 'filter:', statusFilter, 'effective:', effectiveFilter);
-      const matchesStatus = effectiveFilter === 'all' || app.status === effectiveFilter;
+      if (stageStatuses && stageStatuses.length > 0) {
+        // Stage filtering: check if app status is in the allowed statuses for this stage
+        matchesStatus = stageStatuses.includes(app.status);
+        console.log('Stage filtering - app:', app.student_name, 'status:', app.status, 'allowed:', stageStatuses, 'matches:', matchesStatus);
+      } else {
+        // Regular filtering: check against statusFilter
+        const validFilters = ['all', 'submitted', 'under_review', 'assessment_scheduled', 'interview_scheduled', 'pending_approval', 'approved', 'on_hold', 'rejected'];
+        const effectiveFilter = validFilters.includes(statusFilter) ? statusFilter : 'all';
+        matchesStatus = effectiveFilter === 'all' || app.status === effectiveFilter;
+        console.log('Regular filtering - app:', app.student_name, 'status:', app.status, 'filter:', effectiveFilter, 'matches:', matchesStatus);
+      }
       
       return matchesSearch && matchesStatus;
     })
