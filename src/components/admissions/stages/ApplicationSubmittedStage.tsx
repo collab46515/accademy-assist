@@ -32,7 +32,16 @@ export function ApplicationSubmittedStage({ applicationId, applicationData, onMo
         .single();
 
       if (error) throw error;
-      setApplication(data);
+      
+      // Merge data from additional_data into the main object
+      const additionalData = data.additional_data as any;
+      const mergedData = {
+        ...data,
+        ...(additionalData?.pathway_data || {}),
+        ...(additionalData?.submitted_data || {})
+      };
+      
+      setApplication(mergedData);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -66,44 +75,40 @@ Nationality: ${application.nationality || 'N/A'}
 
 PARENT/GUARDIAN INFORMATION
 ---------------------------
-Father's Name: ${application.father_name || 'N/A'}
-Father's Occupation: ${application.father_occupation || 'N/A'}
-Father's Phone: ${application.father_phone || 'N/A'}
 Father's Email: ${application.father_email || 'N/A'}
+Father's Mobile: ${application.father_mobile || 'N/A'}
 
 Mother's Name: ${application.mother_name || 'N/A'}
-Mother's Occupation: ${application.mother_occupation || 'N/A'}
-Mother's Phone: ${application.mother_phone || 'N/A'}
+Mother's Profession: ${application.mother_profession || 'N/A'}
+Mother's Mobile: ${application.mother_mobile || 'N/A'}
 Mother's Email: ${application.mother_email || 'N/A'}
-
-Guardian's Name: ${application.guardian_name || 'N/A'}
-Guardian Relation: ${application.guardian_relation || 'N/A'}
-Guardian's Phone: ${application.guardian_phone || 'N/A'}
 
 ADDRESS
 -------
-${application.street_address || 'N/A'}
-${application.city || 'N/A'}, ${application.state || 'N/A'}
-PIN: ${application.pincode || 'N/A'}
+House No: ${application.communication_house_no || 'N/A'}
+Street: ${application.communication_street || 'N/A'}
+City: ${application.communication_city || 'N/A'}
+District: ${application.communication_district || 'N/A'}
+State: ${application.communication_state || application.state || 'N/A'}
+Postal Code: ${application.communication_postal_code || 'N/A'}
 Country: ${application.country || 'N/A'}
 
 ACADEMIC INFORMATION
 --------------------
 Year Group: ${application.year_group || 'N/A'}
-Previous School: ${application.previous_school_name || 'N/A'}
-Previous School Address: ${application.previous_school_address || 'N/A'}
+APAR ID: ${application.apar_id || 'N/A'}
+Sibling in School: ${application.has_sibling_in_school || 'N/A'}
 
-EMERGENCY CONTACT
------------------
-Name: ${application.emergency_contact_name || 'N/A'}
-Phone: ${application.emergency_contact_phone || 'N/A'}
-Relationship: ${application.emergency_contact_relation || 'N/A'}
+MEDICAL INFORMATION
+-------------------
+Chronic Diseases: ${application.chronic_diseases || 'None'}
+Medicine/Treatment: ${application.medicine_treatment || 'None'}
 
 ADDITIONAL INFORMATION
 ----------------------
-Sibling at School: ${application.sibling_at_school ? 'Yes' : 'No'}
-${application.sibling_name ? `Sibling Name: ${application.sibling_name}` : ''}
+Pathway: ${application.pathway || 'N/A'}
 Bursary Application: ${application.bursary_application ? 'Yes' : 'No'}
+Scholarship Application: ${application.scholarship_application ? 'Yes' : 'No'}
 
 Notes: ${application.academic_notes || 'None'}
 
@@ -154,17 +159,17 @@ Generated on: ${new Date().toLocaleString()}
     { 
       id: 'parent_details', 
       label: 'Parent/Guardian Details', 
-      status: (application.father_name || application.mother_name || application.guardian_name) ? 'completed' : 'pending'
+      status: (application.mother_name && (application.father_email || application.mother_email)) ? 'completed' : 'pending'
     },
     { 
       id: 'address', 
       label: 'Address Information', 
-      status: application.street_address && application.city && application.state ? 'completed' : 'pending'
+      status: (application.communication_street && application.communication_city && application.communication_state) ? 'completed' : 'pending'
     },
     { 
-      id: 'emergency_contact', 
-      label: 'Emergency Contact', 
-      status: application.emergency_contact_name && application.emergency_contact_phone ? 'completed' : 'pending'
+      id: 'medical_info', 
+      label: 'Medical Information', 
+      status: (application.chronic_diseases || application.medicine_treatment) ? 'completed' : 'pending'
     },
     { 
       id: 'academic_info', 
@@ -280,7 +285,9 @@ Generated on: ${new Date().toLocaleString()}
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Date of Birth</p>
-                  <p className="font-medium">{application.date_of_birth || 'N/A'}</p>
+                  <p className="font-medium">
+                    {application.date_of_birth ? new Date(application.date_of_birth).toLocaleDateString() : 'N/A'}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Gender</p>
@@ -306,6 +313,14 @@ Generated on: ${new Date().toLocaleString()}
                   <p className="text-sm text-muted-foreground">Blood Group</p>
                   <p className="font-medium">{application.blood_group || 'N/A'}</p>
                 </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Food Choice</p>
+                  <p className="font-medium">{application.food_choice || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">APAR ID</p>
+                  <p className="font-medium">{application.apar_id || 'N/A'}</p>
+                </div>
               </div>
             </TabsContent>
             
@@ -317,24 +332,16 @@ Generated on: ${new Date().toLocaleString()}
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">Name</p>
-                    <p className="font-medium">{application.father_name || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Occupation</p>
-                    <p className="font-medium">{application.father_occupation || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <Phone className="h-3 w-3" /> Phone
-                    </p>
-                    <p className="font-medium">{application.father_phone || 'N/A'}</p>
-                  </div>
-                  <div>
                     <p className="text-sm text-muted-foreground flex items-center gap-1">
                       <Mail className="h-3 w-3" /> Email
                     </p>
                     <p className="font-medium">{application.father_email || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Phone className="h-3 w-3" /> Mobile
+                    </p>
+                    <p className="font-medium">{application.father_mobile || 'N/A'}</p>
                   </div>
                 </div>
               </div>
@@ -350,14 +357,14 @@ Generated on: ${new Date().toLocaleString()}
                     <p className="font-medium">{application.mother_name || 'N/A'}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Occupation</p>
-                    <p className="font-medium">{application.mother_occupation || 'N/A'}</p>
+                    <p className="text-sm text-muted-foreground">Profession</p>
+                    <p className="font-medium">{application.mother_profession || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <Phone className="h-3 w-3" /> Phone
+                      <Phone className="h-3 w-3" /> Mobile
                     </p>
-                    <p className="font-medium">{application.mother_phone || 'N/A'}</p>
+                    <p className="font-medium">{application.mother_mobile || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground flex items-center gap-1">
@@ -368,75 +375,49 @@ Generated on: ${new Date().toLocaleString()}
                 </div>
               </div>
 
-              {application.guardian_name && (
-                <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    Guardian's Information
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Name</p>
-                      <p className="font-medium">{application.guardian_name}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Relation</p>
-                      <p className="font-medium">{application.guardian_relation || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <Phone className="h-3 w-3" /> Phone
-                      </p>
-                      <p className="font-medium">{application.guardian_phone || 'N/A'}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               <div>
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
                   <AlertCircle className="h-4 w-4" />
-                  Emergency Contact
+                  Medical Information
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">Name</p>
-                    <p className="font-medium">{application.emergency_contact_name || 'N/A'}</p>
+                    <p className="text-sm text-muted-foreground">Chronic Diseases</p>
+                    <p className="font-medium">{application.chronic_diseases || 'None'}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Relation</p>
-                    <p className="font-medium">{application.emergency_contact_relation || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <Phone className="h-3 w-3" /> Phone
-                    </p>
-                    <p className="font-medium">{application.emergency_contact_phone || 'N/A'}</p>
+                    <p className="text-sm text-muted-foreground">Medicine/Treatment</p>
+                    <p className="font-medium">{application.medicine_treatment || 'None'}</p>
                   </div>
                 </div>
               </div>
             </TabsContent>
             
             <TabsContent value="address" className="space-y-4">
-              <div className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 mt-1 text-muted-foreground" />
-                <div className="flex-1">
-                  <p className="text-sm text-muted-foreground">Street Address</p>
-                  <p className="font-medium">{application.street_address || 'N/A'}</p>
-                </div>
-              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
+                  <p className="text-sm text-muted-foreground">House No</p>
+                  <p className="font-medium">{application.communication_house_no || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Street</p>
+                  <p className="font-medium">{application.communication_street || 'N/A'}</p>
+                </div>
+                <div>
                   <p className="text-sm text-muted-foreground">City</p>
-                  <p className="font-medium">{application.city || 'N/A'}</p>
+                  <p className="font-medium">{application.communication_city || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">District</p>
+                  <p className="font-medium">{application.communication_district || 'N/A'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">State</p>
-                  <p className="font-medium">{application.state || 'N/A'}</p>
+                  <p className="font-medium">{application.communication_state || application.state || 'N/A'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">PIN Code</p>
-                  <p className="font-medium">{application.pincode || 'N/A'}</p>
+                  <p className="text-sm text-muted-foreground">Postal Code</p>
+                  <p className="font-medium">{application.communication_postal_code || 'N/A'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Country</p>
@@ -452,45 +433,22 @@ Generated on: ${new Date().toLocaleString()}
                   <p className="font-medium">{application.year_group || 'N/A'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Academic Year</p>
-                  <p className="font-medium">{application.academic_year || 'N/A'}</p>
+                  <p className="text-sm text-muted-foreground">Pathway</p>
+                  <p className="font-medium">{application.pathway || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">APAR ID</p>
+                  <p className="font-medium">{application.apar_id || 'N/A'}</p>
                 </div>
               </div>
 
-              {application.previous_school_name && (
+              <div>
+                <h3 className="font-semibold mb-3">Sibling Information</h3>
                 <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    <School className="h-4 w-4" />
-                    Previous School
-                  </h3>
-                  <div className="space-y-2">
-                    <div>
-                      <p className="text-sm text-muted-foreground">School Name</p>
-                      <p className="font-medium">{application.previous_school_name}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Address</p>
-                      <p className="font-medium">{application.previous_school_address || 'N/A'}</p>
-                    </div>
-                  </div>
+                  <p className="text-sm text-muted-foreground">Has Sibling in School</p>
+                  <p className="font-medium">{application.has_sibling_in_school || 'N/A'}</p>
                 </div>
-              )}
-
-              {application.sibling_at_school && (
-                <div>
-                  <h3 className="font-semibold mb-3">Sibling Information</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Sibling Name</p>
-                      <p className="font-medium">{application.sibling_name || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Sibling Class</p>
-                      <p className="font-medium">{application.sibling_class || 'N/A'}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
+              </div>
 
               {application.bursary_application && (
                 <div className="p-4 bg-blue-50 rounded-lg">
