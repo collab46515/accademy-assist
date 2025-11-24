@@ -28,13 +28,41 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
   const { toast } = useToast();
 
   const stages = [
-    { title: 'Application Submitted', status: 'submitted' },
-    { title: 'Application Review & Verify', status: 'under_review' },
-    { title: 'Assessment/Interview', status: 'assessment_scheduled' },
-    { title: 'Admission Decision', status: 'approved' },
-    { title: 'Fee Payment', status: 'offer_sent' },
-    { title: 'Enrollment Confirmation', status: 'offer_accepted' },
-    { title: 'Welcome & Onboarding', status: 'enrolled' }
+    { 
+      title: 'Application Submitted', 
+      status: 'submitted',
+      allowedStatuses: ['draft', 'submitted']
+    },
+    { 
+      title: 'Application Review & Verify', 
+      status: 'under_review',
+      allowedStatuses: ['under_review', 'documents_pending']
+    },
+    { 
+      title: 'Assessment/Interview', 
+      status: 'assessment_scheduled',
+      allowedStatuses: ['assessment_scheduled', 'assessment_complete', 'interview_scheduled', 'interview_complete']
+    },
+    { 
+      title: 'Admission Decision', 
+      status: 'approved',
+      allowedStatuses: ['pending_approval', 'approved', 'on_hold']
+    },
+    { 
+      title: 'Fee Payment', 
+      status: 'offer_sent',
+      allowedStatuses: ['offer_sent']
+    },
+    { 
+      title: 'Enrollment Confirmation', 
+      status: 'offer_accepted',
+      allowedStatuses: ['offer_accepted', 'offer_declined']
+    },
+    { 
+      title: 'Welcome & Onboarding', 
+      status: 'enrolled',
+      allowedStatuses: ['enrolled']
+    }
   ];
 
   const stageComponents = [
@@ -61,16 +89,21 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
         .select('*')
         .order('created_at', { ascending: false });
 
-      // Filter by status after fetching to avoid TypeScript issues
-      const filteredData = (data || []).filter(app => 
-        app.status === (stages[currentStage]?.status || 'submitted')
-      );
-
       if (error) {
         console.error('Error fetching applications:', error);
         setApplications([]);
+        setLoading(false);
         return;
       }
+
+      // Get allowed statuses for current stage
+      const currentStageConfig = stages[currentStage];
+      const allowedStatuses = currentStageConfig?.allowedStatuses || [currentStageConfig?.status];
+
+      // Filter by status - include all statuses allowed for this stage
+      const filteredData = (data || []).filter(app => 
+        allowedStatuses.includes(app.status)
+      );
 
       // Transform the data to match our UI expectations
       const transformedApplications = filteredData.map(app => ({
@@ -123,10 +156,13 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
       const nextStatus = stages[nextStageIndex].status;
       const nextStageTitle = stages[nextStageIndex].title;
       
-      // Update application status in database
+      // Update application status in database with timestamp
       const { error } = await supabase
         .from('enrollment_applications')
-        .update({ status: nextStatus as any })
+        .update({ 
+          status: nextStatus as any,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', selectedApplication.id);
       
       if (error) {
@@ -140,7 +176,7 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
         return;
       }
       
-      console.log(`✅ Moved application ${selectedApplication.application_number} to stage: ${nextStageTitle}`);
+      console.log(`✅ Moved application ${selectedApplication.application_number} from ${selectedApplication.status} to ${nextStatus} (${nextStageTitle})`);
       
       toast({
         title: "Application Moved Successfully",
