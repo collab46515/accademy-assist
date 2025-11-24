@@ -98,6 +98,22 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
 
     setIsSubmitting(true);
     try {
+      // Update application status to assessment_complete
+      const { error: statusError } = await supabase
+        .from('enrollment_applications')
+        .update({ 
+          status: 'assessment_complete',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', applicationId);
+
+      if (statusError) {
+        console.error('Error updating status:', statusError);
+        toast.error('Failed to update application status');
+        setIsSubmitting(false);
+        return;
+      }
+
       // Save assessment data to database
       console.log('Saving assessment:', {
         applicationId,
@@ -149,6 +165,22 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
 
     setIsSubmitting(true);
     try {
+      // Update application status to interview_scheduled
+      const { error: statusError } = await supabase
+        .from('enrollment_applications')
+        .update({ 
+          status: 'interview_scheduled',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', applicationId);
+
+      if (statusError) {
+        console.error('Error updating status:', statusError);
+        toast.error('Failed to update application status');
+        setIsSubmitting(false);
+        return;
+      }
+
       // Save interview schedule
       console.log('Scheduling interview:', {
         applicationId,
@@ -190,6 +222,22 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
 
     setIsSubmitting(true);
     try {
+      // Update application status to interview_complete
+      const { error: statusError } = await supabase
+        .from('enrollment_applications')
+        .update({ 
+          status: 'interview_complete',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', applicationId);
+
+      if (statusError) {
+        console.error('Error updating status:', statusError);
+        toast.error('Failed to update application status');
+        setIsSubmitting(false);
+        return;
+      }
+
       console.log('Completing interview:', {
         applicationId,
         result: interviewResult,
