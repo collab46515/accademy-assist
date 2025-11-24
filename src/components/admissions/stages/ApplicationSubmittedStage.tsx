@@ -17,6 +17,9 @@ interface ApplicationSubmittedStageProps {
 export function ApplicationSubmittedStage({ applicationId, applicationData, onMoveToNext }: ApplicationSubmittedStageProps) {
   const [application, setApplication] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [editingCheckItem, setEditingCheckItem] = useState<string | null>(null);
+  const [editFormData, setEditFormData] = useState<any>({});
+  const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -196,6 +199,80 @@ Generated on: ${new Date().toLocaleString()}
     }
   };
 
+  const handleEditCheckItem = (checkId: string) => {
+    setEditingCheckItem(checkId);
+    // Initialize form data based on check item
+    switch (checkId) {
+      case 'personal_details':
+        setEditFormData({
+          student_name: application.student_name || '',
+          date_of_birth: application.date_of_birth || '',
+          gender: application.gender || ''
+        });
+        break;
+      case 'parent_details':
+        setEditFormData({
+          mother_name: application.mother_name || '',
+          father_email: application.father_email || '',
+          mother_email: application.mother_email || '',
+          father_mobile: application.father_mobile || '',
+          mother_mobile: application.mother_mobile || ''
+        });
+        break;
+      case 'address':
+        setEditFormData({
+          communication_street: application.communication_street || '',
+          communication_city: application.communication_city || '',
+          communication_state: application.communication_state || '',
+          communication_postal_code: application.communication_postal_code || ''
+        });
+        break;
+      case 'medical_info':
+        setEditFormData({
+          chronic_diseases: application.chronic_diseases || '',
+          medicine_treatment: application.medicine_treatment || ''
+        });
+        break;
+      case 'academic_info':
+        setEditFormData({
+          year_group: application.year_group || ''
+        });
+        break;
+    }
+  };
+
+  const handleSaveCheckItem = async () => {
+    setSaving(true);
+    try {
+      // Update the application in database
+      const { error } = await supabase
+        .from('enrollment_applications')
+        .update(editFormData)
+        .eq('id', applicationId);
+
+      if (error) throw error;
+
+      // Refresh the application data
+      await fetchApplicationDetails();
+
+      toast({
+        title: "Success",
+        description: "Information updated successfully",
+      });
+
+      setEditingCheckItem(null);
+      setEditFormData({});
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to update information: " + error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Application Summary */}
@@ -236,12 +313,235 @@ Generated on: ${new Date().toLocaleString()}
         <CardContent>
           <div className="space-y-3">
             {validationChecks.map((check) => (
-              <div key={check.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  {getStatusIcon(check.status)}
-                  <span className="font-medium">{check.label}</span>
-                </div>
-                {getStatusBadge(check.status)}
+              <div key={check.id}>
+                {editingCheckItem === check.id ? (
+                  <div className="p-4 border rounded-lg bg-accent/50">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">{check.label}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditingCheckItem(null)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                      
+                      {/* Edit form based on check type */}
+                      {check.id === 'personal_details' && (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-sm font-medium">Student Name</label>
+                            <input
+                              type="text"
+                              className="w-full px-3 py-2 border rounded-md"
+                              value={editFormData.student_name || ''}
+                              onChange={(e) => setEditFormData({...editFormData, student_name: e.target.value})}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Date of Birth</label>
+                            <input
+                              type="date"
+                              className="w-full px-3 py-2 border rounded-md"
+                              value={editFormData.date_of_birth || ''}
+                              onChange={(e) => setEditFormData({...editFormData, date_of_birth: e.target.value})}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Gender</label>
+                            <select
+                              className="w-full px-3 py-2 border rounded-md"
+                              value={editFormData.gender || ''}
+                              onChange={(e) => setEditFormData({...editFormData, gender: e.target.value})}
+                            >
+                              <option value="">Select Gender</option>
+                              <option value="Male">Male</option>
+                              <option value="Female">Female</option>
+                              <option value="Other">Other</option>
+                            </select>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {check.id === 'parent_details' && (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-sm font-medium">Mother's Name</label>
+                            <input
+                              type="text"
+                              className="w-full px-3 py-2 border rounded-md"
+                              value={editFormData.mother_name || ''}
+                              onChange={(e) => setEditFormData({...editFormData, mother_name: e.target.value})}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Father's Email</label>
+                            <input
+                              type="email"
+                              className="w-full px-3 py-2 border rounded-md"
+                              value={editFormData.father_email || ''}
+                              onChange={(e) => setEditFormData({...editFormData, father_email: e.target.value})}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Mother's Email</label>
+                            <input
+                              type="email"
+                              className="w-full px-3 py-2 border rounded-md"
+                              value={editFormData.mother_email || ''}
+                              onChange={(e) => setEditFormData({...editFormData, mother_email: e.target.value})}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Father's Mobile</label>
+                            <input
+                              type="tel"
+                              className="w-full px-3 py-2 border rounded-md"
+                              value={editFormData.father_mobile || ''}
+                              onChange={(e) => setEditFormData({...editFormData, father_mobile: e.target.value})}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Mother's Mobile</label>
+                            <input
+                              type="tel"
+                              className="w-full px-3 py-2 border rounded-md"
+                              value={editFormData.mother_mobile || ''}
+                              onChange={(e) => setEditFormData({...editFormData, mother_mobile: e.target.value})}
+                            />
+                          </div>
+                        </div>
+                      )}
+                      
+                      {check.id === 'address' && (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-sm font-medium">Street</label>
+                            <input
+                              type="text"
+                              className="w-full px-3 py-2 border rounded-md"
+                              value={editFormData.communication_street || ''}
+                              onChange={(e) => setEditFormData({...editFormData, communication_street: e.target.value})}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">City</label>
+                            <input
+                              type="text"
+                              className="w-full px-3 py-2 border rounded-md"
+                              value={editFormData.communication_city || ''}
+                              onChange={(e) => setEditFormData({...editFormData, communication_city: e.target.value})}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">State</label>
+                            <input
+                              type="text"
+                              className="w-full px-3 py-2 border rounded-md"
+                              value={editFormData.communication_state || ''}
+                              onChange={(e) => setEditFormData({...editFormData, communication_state: e.target.value})}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Postal Code</label>
+                            <input
+                              type="text"
+                              className="w-full px-3 py-2 border rounded-md"
+                              value={editFormData.communication_postal_code || ''}
+                              onChange={(e) => setEditFormData({...editFormData, communication_postal_code: e.target.value})}
+                            />
+                          </div>
+                        </div>
+                      )}
+                      
+                      {check.id === 'medical_info' && (
+                        <div className="space-y-3">
+                          <div>
+                            <label className="text-sm font-medium">Chronic Diseases</label>
+                            <textarea
+                              className="w-full px-3 py-2 border rounded-md"
+                              rows={2}
+                              value={editFormData.chronic_diseases || ''}
+                              onChange={(e) => setEditFormData({...editFormData, chronic_diseases: e.target.value})}
+                              placeholder="Enter any chronic diseases or 'None'"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Medicine/Treatment</label>
+                            <textarea
+                              className="w-full px-3 py-2 border rounded-md"
+                              rows={2}
+                              value={editFormData.medicine_treatment || ''}
+                              onChange={(e) => setEditFormData({...editFormData, medicine_treatment: e.target.value})}
+                              placeholder="Enter ongoing medications or treatments or 'None'"
+                            />
+                          </div>
+                        </div>
+                      )}
+                      
+                      {check.id === 'academic_info' && (
+                        <div>
+                          <label className="text-sm font-medium">Year Group</label>
+                          <select
+                            className="w-full px-3 py-2 border rounded-md"
+                            value={editFormData.year_group || ''}
+                            onChange={(e) => setEditFormData({...editFormData, year_group: e.target.value})}
+                          >
+                            <option value="">Select Year Group</option>
+                            <option value="Year 1">Year 1</option>
+                            <option value="Year 2">Year 2</option>
+                            <option value="Year 3">Year 3</option>
+                            <option value="Year 4">Year 4</option>
+                            <option value="Year 5">Year 5</option>
+                            <option value="Year 6">Year 6</option>
+                            <option value="Year 7">Year 7</option>
+                            <option value="Year 8">Year 8</option>
+                            <option value="Year 9">Year 9</option>
+                            <option value="Year 10">Year 10</option>
+                            <option value="Year 11">Year 11</option>
+                            <option value="Year 12">Year 12</option>
+                            <option value="Year 13">Year 13</option>
+                          </select>
+                        </div>
+                      )}
+                      
+                      <Button 
+                        onClick={handleSaveCheckItem} 
+                        disabled={saving}
+                        className="w-full"
+                      >
+                        {saving ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          'Save Changes'
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div 
+                    className={`flex items-center justify-between p-3 border rounded-lg ${
+                      check.status === 'pending' ? 'cursor-pointer hover:bg-accent/50 transition-colors' : ''
+                    }`}
+                    onClick={() => check.status === 'pending' && handleEditCheckItem(check.id)}
+                  >
+                    <div className="flex items-center gap-3">
+                      {getStatusIcon(check.status)}
+                      <span className="font-medium">{check.label}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {getStatusBadge(check.status)}
+                      {check.status === 'pending' && (
+                        <span className="text-xs text-muted-foreground">Click to complete</span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
