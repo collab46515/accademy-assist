@@ -7,9 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Calendar, Clock, BookOpen, CheckCircle, XCircle, AlertCircle, Mail, MessageSquare, User } from 'lucide-react';
+import { BookOpen, CheckCircle, XCircle, AlertCircle, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -40,14 +39,9 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Interview state
+  // Interview state - simplified, no scheduling step
   const [showInterviewScheduling, setShowInterviewScheduling] = useState(false);
-  const [interviewScheduled, setInterviewScheduled] = useState(false);
-  const [interviewDate, setInterviewDate] = useState('');
-  const [interviewTime, setInterviewTime] = useState('');
-  const [interviewer, setInterviewer] = useState('');
-  const [notificationMethod, setNotificationMethod] = useState<'manual' | 'email' | 'sms'>('manual');
-  const [interviewStatus, setInterviewStatus] = useState<'not_scheduled' | 'scheduled' | 'completed'>('not_scheduled');
+  const [interviewStatus, setInterviewStatus] = useState<'not_started' | 'completed'>('not_started');
   const [interviewResult, setInterviewResult] = useState<'pass' | 'fail' | null>(null);
   const [interviewComments, setInterviewComments] = useState('');
 
@@ -102,34 +96,17 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
         if (application.status === 'interview_scheduled' || 
             application.status === 'interview_complete') {
           
-          // Load interview data if available
+          // Load interview results if available
           if (application.interview_data && application.interview_data !== null) {
             const data = application.interview_data as any;
             console.log('Loading saved interview data:', data);
-            if (data.date) setInterviewDate(data.date);
-            if (data.time) setInterviewTime(data.time);
-            if (data.interviewer) setInterviewer(data.interviewer);
-            if (data.notificationMethod) setNotificationMethod(data.notificationMethod);
-            
-            setInterviewScheduled(true);
-            setInterviewStatus('scheduled');
-          } else {
-            // Status says interview_scheduled but no data saved yet - keep form open
-            console.log('Interview status is scheduled but no data saved - keeping form available');
-            setInterviewScheduled(false); // Keep scheduling form available
+            if (data.result) setInterviewResult(data.result);
+            if (data.comments) setInterviewComments(data.comments);
           }
         }
 
         if (application.status === 'interview_complete') {
-          // Load interview results
-          if (application.interview_data && application.interview_data !== null) {
-            const data = application.interview_data as any;
-            console.log('Loading interview results:', data);
-            if (data.result) setInterviewResult(data.result);
-            if (data.comments) setInterviewComments(data.comments);
-            
-            setInterviewStatus('completed');
-          }
+          setInterviewStatus('completed');
         }
 
         setIsLoading(false);
@@ -252,60 +229,7 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
     }
   };
 
-  const handleScheduleInterview = async () => {
-    if (!interviewDate || !interviewTime || !interviewer) {
-      toast.error('Please fill in all interview details');
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      // Prepare interview scheduling data
-      const interviewData = {
-        date: interviewDate,
-        time: interviewTime,
-        interviewer,
-        notificationMethod,
-        scheduledAt: new Date().toISOString()
-      };
-
-      // Update application with status and interview data
-      const { error: statusError } = await supabase
-        .from('enrollment_applications')
-        .update({ 
-          status: 'interview_scheduled',
-          interview_data: interviewData as any,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', applicationId);
-
-      if (statusError) {
-        console.error('Error updating status:', statusError);
-        toast.error('Failed to update application status');
-        setIsSubmitting(false);
-        return;
-      }
-
-      console.log('Interview scheduled successfully');
-
-      // Send notification based on method
-      if (notificationMethod === 'email') {
-        toast.success('Interview scheduled! Email notification sent to applicant.');
-      } else if (notificationMethod === 'sms') {
-        toast.success('Interview scheduled! SMS notification sent to applicant.');
-      } else {
-        toast.success('Interview scheduled successfully!');
-      }
-
-      setInterviewScheduled(true);
-      setInterviewStatus('scheduled');
-    } catch (error) {
-      console.error('Error scheduling interview:', error);
-      toast.error('Failed to schedule interview');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  // Removed handleScheduleInterview - no longer needed
 
   const handleCompleteInterview = async () => {
     if (!interviewResult) {
@@ -320,15 +244,7 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
 
     setIsSubmitting(true);
     try {
-      // Get existing interview data and add completion info
-      const { data: currentApp } = await supabase
-        .from('enrollment_applications')
-        .select('interview_data')
-        .eq('id', applicationId)
-        .single();
-
-      const updatedInterviewData = {
-        ...(currentApp?.interview_data as any || {}),
+      const interviewData = {
         result: interviewResult,
         comments: interviewComments,
         completedAt: new Date().toISOString()
@@ -339,7 +255,7 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
         .from('enrollment_applications')
         .update({ 
           status: 'interview_complete',
-          interview_data: updatedInterviewData as any,
+          interview_data: interviewData as any,
           updated_at: new Date().toISOString()
         })
         .eq('id', applicationId);
@@ -538,205 +454,98 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
         </CardContent>
       </Card>
 
-      {/* Interview Scheduling Section */}
+      {/* Interview Section - Simplified, no separate scheduling */}
       {showInterviewScheduling && assessmentResult === 'pass' && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              Interview Scheduling
+              Interview Completion
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="schedule">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="schedule">Schedule Interview</TabsTrigger>
-                <TabsTrigger value="complete" disabled={!interviewScheduled}>Complete Interview</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="schedule" className="space-y-4">
-                {!interviewScheduled ? (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label>Interview Date *</Label>
-                        <Input
-                          type="date"
-                          value={interviewDate}
-                          onChange={(e) => setInterviewDate(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Label>Interview Time *</Label>
-                        <Input
-                          type="time"
-                          value={interviewTime}
-                          onChange={(e) => setInterviewTime(e.target.value)}
-                        />
-                      </div>
-                    </div>
+            {interviewStatus === 'completed' && interviewResult ? (
+              <Card className={interviewResult === 'pass' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    <h4 className="font-semibold flex items-center gap-2">
+                      {interviewResult === 'pass' ? (
+                        <>
+                          <CheckCircle className="h-5 w-5 text-green-600" />
+                          Interview Result: PASSED
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="h-5 w-5 text-red-600" />
+                          Interview Result: FAILED
+                        </>
+                      )}
+                    </h4>
+                    <p className="text-sm text-muted-foreground">{interviewComments}</p>
                     
-                    <div>
-                      <Label>Interviewer *</Label>
-                      <Input
-                        placeholder="Enter interviewer name"
-                        value={interviewer}
-                        onChange={(e) => setInterviewer(e.target.value)}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label>Notification Method</Label>
-                      <RadioGroup value={notificationMethod} onValueChange={(v: any) => setNotificationMethod(v)}>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="manual" id="manual" />
-                          <Label htmlFor="manual" className="font-normal cursor-pointer">
-                            Manual (No notification)
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="email" id="email" />
-                          <Label htmlFor="email" className="font-normal cursor-pointer flex items-center gap-2">
-                            <Mail className="h-4 w-4" />
-                            Send Email Notification
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="sms" id="sms" />
-                          <Label htmlFor="sms" className="font-normal cursor-pointer flex items-center gap-2">
-                            <MessageSquare className="h-4 w-4" />
-                            Send SMS Notification
-                          </Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-                    
-                    <Button 
-                      onClick={handleScheduleInterview} 
-                      disabled={isSubmitting}
-                      className="w-full"
-                    >
-                      {isSubmitting ? 'Scheduling...' : 'Schedule Interview'}
-                    </Button>
+                    {interviewResult === 'pass' ? (
+                      <Button 
+                        onClick={onMoveToNext}
+                        className="w-full mt-3"
+                        size="lg"
+                      >
+                        Complete Interview & Move to Admission Decision
+                      </Button>
+                    ) : (
+                      <Button 
+                        variant="destructive" 
+                        onClick={handleRejectApplication}
+                        disabled={isSubmitting}
+                        className="w-full mt-3"
+                      >
+                        {isSubmitting ? 'Rejecting...' : 'Reject Application'}
+                      </Button>
+                    )}
                   </div>
-                ) : (
-                  <Card className="border-blue-200 bg-blue-50">
-                    <CardContent className="p-4">
-                      <div className="space-y-2">
-                        <h4 className="font-semibold flex items-center gap-2">
-                          <CheckCircle className="h-5 w-5 text-blue-600" />
-                          Interview Scheduled
-                        </h4>
-                        <div className="text-sm space-y-1">
-                          <p className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            <strong>Date:</strong> {new Date(interviewDate).toLocaleDateString()}
-                          </p>
-                          <p className="flex items-center gap-2">
-                            <Clock className="h-4 w-4" />
-                            <strong>Time:</strong> {interviewTime}
-                          </p>
-                          <p className="flex items-center gap-2">
-                            <User className="h-4 w-4" />
-                            <strong>Interviewer:</strong> {interviewer}
-                          </p>
-                          <p className="flex items-center gap-2">
-                            {notificationMethod === 'email' ? <Mail className="h-4 w-4" /> : 
-                             notificationMethod === 'sms' ? <MessageSquare className="h-4 w-4" /> : 
-                             <AlertCircle className="h-4 w-4" />}
-                            <strong>Notification:</strong> {notificationMethod === 'manual' ? 'Manual' : notificationMethod === 'email' ? 'Email Sent' : 'SMS Sent'}
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="complete" className="space-y-4">
-                {interviewStatus === 'completed' && interviewResult ? (
-                  <Card className={interviewResult === 'pass' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
-                    <CardContent className="p-4">
-                      <div className="space-y-3">
-                        <h4 className="font-semibold flex items-center gap-2">
-                          {interviewResult === 'pass' ? (
-                            <>
-                              <CheckCircle className="h-5 w-5 text-green-600" />
-                              Interview Result: PASSED
-                            </>
-                          ) : (
-                            <>
-                              <XCircle className="h-5 w-5 text-red-600" />
-                              Interview Result: FAILED
-                            </>
-                          )}
-                        </h4>
-                        <p className="text-sm text-muted-foreground">{interviewComments}</p>
-                        
-                        {interviewResult === 'pass' ? (
-                          <Button 
-                            onClick={onMoveToNext}
-                            className="w-full mt-3"
-                            size="lg"
-                          >
-                            Complete Interview & Move to Admission Decision
-                          </Button>
-                        ) : (
-                          <Button 
-                            variant="destructive" 
-                            onClick={handleRejectApplication}
-                            disabled={isSubmitting}
-                            className="w-full mt-3"
-                          >
-                            {isSubmitting ? 'Rejecting...' : 'Reject Application'}
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="space-y-4">
-                    <div>
-                      <Label>Interview Result *</Label>
-                      <RadioGroup value={interviewResult || ''} onValueChange={(v: any) => setInterviewResult(v)}>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="pass" id="pass" />
-                          <Label htmlFor="pass" className="font-normal cursor-pointer flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                            Pass
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="fail" id="fail" />
-                          <Label htmlFor="fail" className="font-normal cursor-pointer flex items-center gap-2">
-                            <XCircle className="h-4 w-4 text-red-600" />
-                            Fail
-                          </Label>
-                        </div>
-                      </RadioGroup>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <Label>Interview Result *</Label>
+                  <RadioGroup value={interviewResult || ''} onValueChange={(v: any) => setInterviewResult(v)}>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="pass" id="pass" />
+                      <Label htmlFor="pass" className="font-normal cursor-pointer flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        Pass
+                      </Label>
                     </div>
-                    
-                    <div>
-                      <Label>Interview Comments *</Label>
-                      <Textarea
-                        placeholder="Provide detailed interview feedback and observations..."
-                        value={interviewComments}
-                        onChange={(e) => setInterviewComments(e.target.value)}
-                        rows={6}
-                      />
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="fail" id="fail" />
+                      <Label htmlFor="fail" className="font-normal cursor-pointer flex items-center gap-2">
+                        <XCircle className="h-4 w-4 text-red-600" />
+                        Fail
+                      </Label>
                     </div>
-                    
-                    <Button 
-                      onClick={handleCompleteInterview} 
-                      disabled={isSubmitting}
-                      className="w-full"
-                    >
-                      {isSubmitting ? 'Completing...' : 'Complete Interview'}
-                    </Button>
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
+                  </RadioGroup>
+                </div>
+                
+                <div>
+                  <Label>Interview Comments *</Label>
+                  <Textarea
+                    placeholder="Provide detailed interview feedback and observations..."
+                    value={interviewComments}
+                    onChange={(e) => setInterviewComments(e.target.value)}
+                    rows={6}
+                  />
+                </div>
+                
+                <Button 
+                  onClick={handleCompleteInterview} 
+                  disabled={isSubmitting}
+                  className="w-full"
+                  size="lg"
+                >
+                  {isSubmitting ? 'Completing...' : 'Complete Interview'}
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
