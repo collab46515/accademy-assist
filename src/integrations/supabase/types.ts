@@ -2778,6 +2778,9 @@ export type Database = {
           previous_school: string | null
           priority_score: number | null
           referring_staff_id: string | null
+          review_completed: boolean | null
+          review_data: Json | null
+          review_notes: string | null
           scholarship_application: boolean | null
           school_id: string
           sibling_student_id: string | null
@@ -2828,6 +2831,9 @@ export type Database = {
           previous_school?: string | null
           priority_score?: number | null
           referring_staff_id?: string | null
+          review_completed?: boolean | null
+          review_data?: Json | null
+          review_notes?: string | null
           scholarship_application?: boolean | null
           school_id: string
           sibling_student_id?: string | null
@@ -2878,6 +2884,9 @@ export type Database = {
           previous_school?: string | null
           priority_score?: number | null
           referring_staff_id?: string | null
+          review_completed?: boolean | null
+          review_data?: Json | null
+          review_notes?: string | null
           scholarship_application?: boolean | null
           school_id?: string
           sibling_student_id?: string | null

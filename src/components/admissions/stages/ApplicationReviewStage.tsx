@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -6,7 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Star, User, GraduationCap, Award, MessageSquare, CheckCircle } from 'lucide-react';
-import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface ApplicationReviewStageProps {
   applicationId: string;
@@ -19,22 +20,72 @@ export function ApplicationReviewStage({ applicationId, onMoveToNext }: Applicat
   const [potentialScore, setPotentialScore] = useState([70]);
   const [reviewNotes, setReviewNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  // Load existing review data on mount
+  useEffect(() => {
+    loadReviewData();
+  }, [applicationId]);
+
+  const loadReviewData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('enrollment_applications')
+        .select('review_data, review_notes')
+        .eq('id', applicationId)
+        .single();
+
+      if (error) throw error;
+
+      if (data?.review_data) {
+        const reviewData = data.review_data as any;
+        if (reviewData.academicScore) setAcademicScore([reviewData.academicScore]);
+        if (reviewData.behaviorScore) setBehaviorScore([reviewData.behaviorScore]);
+        if (reviewData.potentialScore) setPotentialScore([reviewData.potentialScore]);
+      }
+
+      if (data?.review_notes) {
+        setReviewNotes(data.review_notes);
+      }
+    } catch (error: any) {
+      console.error('Error loading review data:', error);
+    }
+  };
 
   const handleSaveDraft = async () => {
     setIsSubmitting(true);
     try {
-      console.log('Saving draft review:', {
-        applicationId,
+      const reviewData = {
         academicScore: academicScore[0],
         behaviorScore: behaviorScore[0],
         potentialScore: potentialScore[0],
-        reviewNotes,
-        status: 'draft'
+        overallScore: Math.round((academicScore[0] + behaviorScore[0] + potentialScore[0]) / 3),
+        status: 'draft',
+        lastSaved: new Date().toISOString()
+      };
+
+      const { error } = await supabase
+        .from('enrollment_applications')
+        .update({
+          review_data: reviewData,
+          review_notes: reviewNotes,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', applicationId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Draft Saved",
+        description: "Review draft saved successfully!",
       });
-      toast.success('Review draft saved successfully!');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving draft:', error);
-      toast.error('Failed to save draft');
+      toast({
+        title: "Error",
+        description: "Failed to save draft: " + error.message,
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -43,18 +94,43 @@ export function ApplicationReviewStage({ applicationId, onMoveToNext }: Applicat
   const handleSubmitReview = async () => {
     setIsSubmitting(true);
     try {
-      console.log('Submitting review:', {
-        applicationId,
+      const reviewData = {
         academicScore: academicScore[0],
         behaviorScore: behaviorScore[0],
         potentialScore: potentialScore[0],
-        reviewNotes,
-        status: 'submitted'
+        overallScore: Math.round((academicScore[0] + behaviorScore[0] + potentialScore[0]) / 3),
+        status: 'completed',
+        submittedAt: new Date().toISOString()
+      };
+
+      const { error } = await supabase
+        .from('enrollment_applications')
+        .update({
+          review_data: reviewData,
+          review_notes: reviewNotes,
+          review_completed: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', applicationId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Review Submitted",
+        description: "Review submitted successfully! You can now move to the next stage.",
       });
-      toast.success('Review submitted successfully!');
-    } catch (error) {
+
+      // Auto-refresh after 1 second
+      setTimeout(() => {
+        loadReviewData();
+      }, 1000);
+    } catch (error: any) {
       console.error('Error submitting review:', error);
-      toast.error('Failed to submit review');
+      toast({
+        title: "Error",
+        description: "Failed to submit review: " + error.message,
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
