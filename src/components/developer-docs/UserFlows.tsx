@@ -17,7 +17,7 @@ export function UserFlows() {
   const flowcharts = [
     {
       id: 'admission-detailed',
-      title: 'Detailed Admissions Process (8 Stages)',
+      title: 'Detailed Admissions Process (7 Stages)',
       mermaid: `graph TD
     Start([Student Applies]) --> Stage1[Stage 1: Application Submitted]
     
@@ -59,17 +59,15 @@ export function UserFlows() {
     MonitorWaitlist -->|No| End1
     
     Stage6 --> Payment{Payment Status}
-    Payment -->|Payment Received| Stage7[Stage 7: Enrollment Confirmation]
+    Payment -->|Payment Received| Stage7[Stage 7: Welcome & Onboarding]
     Payment -->|Payment Pending| Reminder[Send Payment Reminder]
     Reminder --> Payment
     Payment -->|Payment Failed/Expired| End2([Offer Withdrawn])
     
     Stage7 --> Assign[Assign Student ID, Class, House]
-    Assign --> Stage8[Stage 8: Welcome & Onboarding]
-    
-    Stage8 --> Onboard1[Send Welcome Pack]
-    Stage8 --> Onboard2[Schedule Orientation]
-    Stage8 --> Onboard3[Order Uniform]
+    Assign --> Onboard1[Send Welcome Pack]
+    Assign --> Onboard2[Schedule Orientation]
+    Assign --> Onboard3[Order Uniform]
     
     Onboard1 --> Complete{All Complete?}
     Onboard2 --> Complete
@@ -77,7 +75,7 @@ export function UserFlows() {
     
     Complete -->|Yes| End3([Fully Enrolled Student])
     Complete -->|No| Pending[Pending Items]
-    Pending --> Stage8
+    Pending --> Stage7
     
     style Stage1 fill:#3b82f6,color:#fff
     style Stage2 fill:#8b5cf6,color:#fff
@@ -86,7 +84,6 @@ export function UserFlows() {
     style Stage5 fill:#06b6d4,color:#fff
     style Stage6 fill:#10b981,color:#fff
     style Stage7 fill:#84cc16,color:#fff
-    style Stage8 fill:#f97316,color:#fff
     style End3 fill:#22c55e,color:#fff
     style End1 fill:#dc2626,color:#fff
     style End2 fill:#dc2626,color:#fff`
@@ -295,11 +292,11 @@ export function UserFlows() {
   const flows = [
     {
       category: '1. ACTUAL ADMISSION STAGES - AS IMPLEMENTED',
-      description: '8-stage admission process (Stage 0-7) with real navigation via /admissions?stage=0-7',
+      description: '7-stage admission process (Stage 1-7) with real navigation via /admissions?stage=1-7',
       steps: [
         {
-          step: 0,
-          title: 'Stage 0: Application Submitted',
+          step: 1,
+          title: 'Stage 1: Application Submitted',
           actor: 'Parent/Guardian & Admissions Officer',
           actions: [
             'Shows validation checks: Personal details, Parent details, Academic history, Emergency contact, Medical info',
@@ -312,8 +309,8 @@ export function UserFlows() {
           files: ['src/components/admissions/stages/ApplicationSubmittedStage.tsx', 'src/components/admissions/StageWorkflowManager.tsx']
         },
         {
-          step: 1,
-          title: 'Stage 1: Document Verification',
+          step: 2,
+          title: 'Stage 2: Document Verification',
           actor: 'Admissions Officer',
           actions: [
             'Lists required documents: Birth Certificate, Passport Photo, School Reports, Immunization Records, Transfer Certificate',
@@ -327,8 +324,8 @@ export function UserFlows() {
           files: ['src/components/admissions/stages/DocumentVerificationStage.tsx']
         },
         {
-          step: 2,
-          title: 'Stage 2: Assessment & Interview',
+          step: 3,
+          title: 'Stage 3: Assessment & Interview',
           actor: 'Academic Staff & Admissions Team',
           actions: [
             'Shows assessment list: Math, English, Science, Behavioral Assessment',
@@ -343,8 +340,8 @@ export function UserFlows() {
           files: ['src/components/admissions/stages/AssessmentInterviewStage.tsx']
         },
         {
-          step: 3,
-          title: 'Stage 3: Application Review',
+          step: 4,
+          title: 'Stage 4: Application Review',
           actor: 'Admissions Committee',
           actions: [
             'Review criteria with sliders: Academic Performance (0-100), Behavioral Assessment (0-100), Potential Score (0-100)',
@@ -359,8 +356,8 @@ export function UserFlows() {
           files: ['src/components/admissions/stages/ApplicationReviewStage.tsx']
         },
         {
-          step: 4,
-          title: 'Stage 4: Admission Decision',
+          step: 5,
+          title: 'Stage 5: Admission Decision',
           actor: 'Head of Admissions',
           actions: [
             'Decision selector: Accept, Conditional Accept, Waitlist, Reject',
@@ -375,8 +372,8 @@ export function UserFlows() {
           files: ['src/components/admissions/stages/AdmissionDecisionStage.tsx']
         },
         {
-          step: 5,
-          title: 'Stage 5: Fee Payment',
+          step: 6,
+          title: 'Stage 6: Fee Payment',
           actor: 'Parent/Guardian & Finance Team',
           actions: [
             'Fee structure display: Application Fee $100, Registration Fee $500, Tuition Fee $12,000, Total $12,600',
@@ -391,8 +388,8 @@ export function UserFlows() {
           files: ['src/components/admissions/stages/FeePaymentStage.tsx']
         },
         {
-          step: 6,
-          title: 'Stage 6: Enrollment Confirmation',
+          step: 7,
+          title: 'Stage 7: Enrollment Confirmation',
           actor: 'Admissions Officer & System',
           actions: [
             'Student ID generation confirmation',
