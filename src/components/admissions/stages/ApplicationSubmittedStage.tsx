@@ -244,10 +244,35 @@ Generated on: ${new Date().toLocaleString()}
   const handleSaveCheckItem = async () => {
     setSaving(true);
     try {
+      // First, get the current application data
+      const { data: currentApp, error: fetchError } = await supabase
+        .from('enrollment_applications')
+        .select('additional_data')
+        .eq('id', applicationId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Merge the updates into additional_data structure
+      const currentAdditionalData = (currentApp.additional_data as any) || {};
+      const updatedAdditionalData = {
+        ...currentAdditionalData,
+        pathway_data: {
+          ...(currentAdditionalData.pathway_data || {}),
+          ...editFormData
+        },
+        submitted_data: {
+          ...(currentAdditionalData.submitted_data || {}),
+          ...editFormData
+        }
+      };
+
       // Update the application in database
       const { error } = await supabase
         .from('enrollment_applications')
-        .update(editFormData)
+        .update({ 
+          additional_data: updatedAdditionalData
+        })
         .eq('id', applicationId);
 
       if (error) throw error;
