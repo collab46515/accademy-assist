@@ -24,7 +24,7 @@ const UnifiedAdmissionsPage = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("workflow");
+  const [activeTab, setActiveTab] = useState("pathways");
   const [loading, setLoading] = useState(false);
 
   // Handle application type selection
@@ -86,21 +86,9 @@ const UnifiedAdmissionsPage = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="workflow">Unified Workflow</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-1">
           <TabsTrigger value="pathways">New Applications</TabsTrigger>
-          <TabsTrigger value="processor">Enrollment Processor</TabsTrigger>
-          <TabsTrigger value="integration">Student Integration</TabsTrigger>
-          <TabsTrigger value="reports">Reports & Analytics</TabsTrigger>
         </TabsList>
-
-        {/* Unified Workflow Tab - Merged from basic + enhanced workflows */}
-        <TabsContent value="workflow" className="space-y-6">
-          <StageNavigator />
-          <AdmissionsFlowVisualization />
-          <StageDetailBreakdown />
-          <AdmissionsWorkflow />
-        </TabsContent>
 
         {/* New Applications Tab */}
         <TabsContent value="pathways" className="space-y-6">
@@ -230,37 +218,6 @@ const UnifiedAdmissionsPage = () => {
               </CardContent>
             </Card>
           </div>
-        </TabsContent>
-
-        {/* Enrollment Processor Tab */}
-        <TabsContent value="processor" className="space-y-6">
-          <EnrollmentProcessor />
-          
-          {/* Resend Enrollment Emails */}
-          <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <h2 className="text-lg font-semibold text-green-800 mb-2">📧 Resend Enrollment Emails</h2>
-            <p className="text-green-700 text-sm mb-4">Resend welcome emails with login credentials to all enrolled students and parents</p>
-            <ResendEnrollmentEmails />
-          </div>
-        </TabsContent>
-
-        {/* Student Integration Tab */}
-        <TabsContent value="integration" className="space-y-6">
-          <StudentIntegrationVerifier />
-        </TabsContent>
-
-        {/* Reports Tab */}
-        <TabsContent value="reports" className="space-y-6">
-          <WorkflowValidation />
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Reports & Analytics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>Additional reports and analytics functionality will be implemented here.</p>
-            </CardContent>
-          </Card>
         </TabsContent>
       </Tabs>
     </div>
