@@ -75,14 +75,23 @@ const UnifiedAdmissionsPage = () => {
   // Main admissions page
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">✅ Unified Admissions System</h1>
-        <p className="text-muted-foreground">
-          Complete admissions management with 6 enrollment pathways, workflow automation, and approval processes
-        </p>
-        
-        {/* Admission Stages Breadcrumb */}
-        <AdmissionStagesBreadcrumb />
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">✅ Unified Admissions System</h1>
+          <p className="text-muted-foreground">
+            Complete admissions management with 6 enrollment pathways, workflow automation, and approval processes
+          </p>
+          
+          {/* Admission Stages Breadcrumb */}
+          <AdmissionStagesBreadcrumb />
+        </div>
+        <Button 
+          onClick={() => navigate('/admissions/dashboard')}
+          variant="default"
+          className="gap-2"
+        >
+          📊 Dashboard
+        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

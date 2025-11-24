@@ -62,6 +62,7 @@ import GradingPage from "./pages/GradingPage";
 import NewApplicationsPage from "./pages/NewApplicationsPage";
 import EnrollmentPage from "./pages/EnrollmentPage";
 import MyApplicationsPage from "./pages/MyApplicationsPage";
+import ApplicationsDashboard from "./pages/ApplicationsDashboard";
 import LibraryPage from "./pages/LibraryPage";
 
 import { StudentSubmissionInterface } from "@/components/assignments/StudentSubmissionInterface";
@@ -124,6 +125,7 @@ const App = () => (
                           <Route path="/academic-management" element={<AcademicManagementPage />} />
                           <Route path="/students" element={<StudentsPage />} />
              <Route path="/admissions" element={<UnifiedAdmissionsPage />} />
+             <Route path="/admissions/dashboard" element={<ApplicationsDashboard />} />
              <Route path="/admissions/new" element={<NewApplicationsPage />} />
              <Route path="/admissions/enroll" element={<EnrollmentPage />} />
              <Route path="/admissions/my-applications" element={<MyApplicationsPage />} />

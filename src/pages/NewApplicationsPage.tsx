@@ -31,10 +31,20 @@ export default function NewApplicationsPage() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <PageHeader 
-        title="Applications" 
-        description="Manage student applications and enrollment"
-      />
+      <div className="flex items-center justify-between">
+        <PageHeader 
+          title="Applications" 
+          description="Manage student applications and enrollment"
+        />
+        <Button 
+          onClick={() => navigate('/admissions/dashboard')}
+          variant="outline"
+          className="gap-2"
+        >
+          <ArrowRight className="h-4 w-4" />
+          View Dashboard
+        </Button>
+      </div>
 
       {/* Main Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
