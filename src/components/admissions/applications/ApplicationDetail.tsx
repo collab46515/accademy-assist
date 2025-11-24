@@ -494,163 +494,247 @@ export function ApplicationDetail({ applicationId, onBack, getStatusColor }: App
                   <DialogTitle>Complete Application Details: {application.student_name}</DialogTitle>
                 </DialogHeader>
                 
-                <Tabs defaultValue="student" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="student">Student</TabsTrigger>
-                    <TabsTrigger value="parents">Parents/Guardian</TabsTrigger>
-                    <TabsTrigger value="address">Address</TabsTrigger>
-                    <TabsTrigger value="academic">Academic</TabsTrigger>
-                  </TabsList>
+                {/* Standard/SEN Pathway */}
+                {(application.pathway === 'standard' || application.pathway === 'sen') && (
+                  <Tabs defaultValue="student" className="w-full">
+                    <TabsList className="grid w-full grid-cols-5">
+                      <TabsTrigger value="student">Student</TabsTrigger>
+                      <TabsTrigger value="family">Family</TabsTrigger>
+                      <TabsTrigger value="address">Address</TabsTrigger>
+                      <TabsTrigger value="academic">Academic</TabsTrigger>
+                      {application.pathway === 'sen' && <TabsTrigger value="sen">SEN Info</TabsTrigger>}
+                      {application.pathway === 'standard' && <TabsTrigger value="references">References</TabsTrigger>}
+                    </TabsList>
 
-                  <TabsContent value="student" className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Full Name</p>
-                        <p className="text-sm">{application.student_name || 'Not provided'}</p>
+                    <TabsContent value="student" className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><p className="text-sm font-medium text-muted-foreground">Student Name</p><p className="text-sm">{(application as any).student_name || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Date of Birth</p><p className="text-sm">{(application as any).date_of_birth ? format(new Date((application as any).date_of_birth), 'dd MMM yyyy') : 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Gender</p><p className="text-sm">{(application as any).gender || 'Not specified'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Mother Tongue</p><p className="text-sm">{(application as any).mother_tongue || 'Not specified'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">State</p><p className="text-sm">{(application as any).state || 'Not specified'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Blood Group</p><p className="text-sm">{(application as any).blood_group || 'Not specified'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Nationality</p><p className="text-sm">{(application as any).nationality || 'Not specified'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Religion</p><p className="text-sm">{(application as any).religion || 'Not specified'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">APAR ID</p><p className="text-sm">{(application as any).apar_id || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Caste</p><p className="text-sm">{(application as any).caste || 'Not specified'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Caste Classification</p><p className="text-sm">{(application as any).caste_classification || 'Not specified'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Aadhaar Number</p><p className="text-sm">{(application as any).aadhaar_number || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Ration Card Number</p><p className="text-sm">{(application as any).ration_card_number || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">UDISE Number</p><p className="text-sm">{(application as any).udise_number || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Food Choice</p><p className="text-sm">{(application as any).food_choice || 'Not specified'}</p></div>
+                        <div className="col-span-2"><p className="text-sm font-medium text-muted-foreground">Chronic Diseases</p><p className="text-sm">{(application as any).chronic_diseases || 'Not provided'}</p></div>
+                        <div className="col-span-2"><p className="text-sm font-medium text-muted-foreground">Medicine Treatment</p><p className="text-sm">{(application as any).medicine_treatment || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Year Group</p><p className="text-sm">{(application as any).year_group || 'Not specified'}</p></div>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Date of Birth</p>
-                        <p className="text-sm">{application.date_of_birth ? format(new Date(application.date_of_birth), 'dd MMM yyyy') : 'Not provided'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Gender</p>
-                        <p className="text-sm">{(application as any).gender || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Nationality</p>
-                        <p className="text-sm">{application.nationality || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Mother Tongue</p>
-                        <p className="text-sm">{(application as any).mother_tongue || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Blood Group</p>
-                        <p className="text-sm">{(application as any).blood_group || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Religion</p>
-                        <p className="text-sm">{(application as any).religion || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Caste</p>
-                        <p className="text-sm">{(application as any).caste || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Aadhaar Number</p>
-                        <p className="text-sm">{(application as any).aadhaar_number || 'Not provided'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Food Choice</p>
-                        <p className="text-sm">{(application as any).food_choice || 'Not specified'}</p>
-                      </div>
-                    </div>
-                  </TabsContent>
+                    </TabsContent>
 
-                  <TabsContent value="parents" className="space-y-4">
-                    <div className="space-y-6">
+                    <TabsContent value="family" className="space-y-6">
                       <div>
-                        <h4 className="font-semibold mb-3">Primary Contact</h4>
+                        <h4 className="font-semibold mb-3">Father Details</h4>
                         <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Name</p>
-                            <p className="text-sm">{application.parent_name || 'Not provided'}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Relationship</p>
-                            <p className="text-sm">{application.parent_relationship || 'Not specified'}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Email</p>
-                            <p className="text-sm">{application.parent_email || 'Not provided'}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Phone</p>
-                            <p className="text-sm">{application.parent_phone || 'Not provided'}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Occupation</p>
-                            <p className="text-sm">{(application as any).father_occupation || (application as any).mother_occupation || 'Not specified'}</p>
-                          </div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Name</p><p className="text-sm">{(application as any).father_name || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Profession</p><p className="text-sm">{(application as any).father_profession || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Mobile</p><p className="text-sm">{(application as any).father_mobile || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Email</p><p className="text-sm">{(application as any).father_email || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Monthly Income</p><p className="text-sm">{(application as any).father_monthly_income || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Organization</p><p className="text-sm">{(application as any).father_organization || 'Not provided'}</p></div>
                         </div>
                       </div>
-                      
-                      {application.emergency_contact_name && (
+                      <div>
+                        <h4 className="font-semibold mb-3">Mother Details</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div><p className="text-sm font-medium text-muted-foreground">Name</p><p className="text-sm">{(application as any).mother_name || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Profession</p><p className="text-sm">{(application as any).mother_profession || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Mobile</p><p className="text-sm">{(application as any).mother_mobile || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Email</p><p className="text-sm">{(application as any).mother_email || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Monthly Income</p><p className="text-sm">{(application as any).mother_monthly_income || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Organization</p><p className="text-sm">{(application as any).mother_organization || 'Not provided'}</p></div>
+                        </div>
+                      </div>
+                      {((application as any).guardian_name) && (
                         <div>
-                          <h4 className="font-semibold mb-3">Emergency Contact</h4>
+                          <h4 className="font-semibold mb-3">Guardian Details</h4>
                           <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <p className="text-sm font-medium text-muted-foreground">Name</p>
-                              <p className="text-sm">{application.emergency_contact_name}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-muted-foreground">Relationship</p>
-                              <p className="text-sm">{application.emergency_contact_relationship || 'Not specified'}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-muted-foreground">Phone</p>
-                              <p className="text-sm">{application.emergency_contact_phone || 'Not provided'}</p>
-                            </div>
+                            <div><p className="text-sm font-medium text-muted-foreground">Name</p><p className="text-sm">{(application as any).guardian_name}</p></div>
+                            <div><p className="text-sm font-medium text-muted-foreground">Profession</p><p className="text-sm">{(application as any).guardian_profession || 'Not provided'}</p></div>
+                            <div><p className="text-sm font-medium text-muted-foreground">Mobile</p><p className="text-sm">{(application as any).guardian_mobile || 'Not provided'}</p></div>
+                            <div><p className="text-sm font-medium text-muted-foreground">Email</p><p className="text-sm">{(application as any).guardian_email || 'Not provided'}</p></div>
+                            <div><p className="text-sm font-medium text-muted-foreground">Monthly Income</p><p className="text-sm">{(application as any).guardian_monthly_income || 'Not provided'}</p></div>
+                            <div><p className="text-sm font-medium text-muted-foreground">Organization</p><p className="text-sm">{(application as any).guardian_organization || 'Not provided'}</p></div>
                           </div>
                         </div>
                       )}
-                    </div>
-                  </TabsContent>
+                      <div>
+                        <h4 className="font-semibold mb-3">Sibling Information</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div><p className="text-sm font-medium text-muted-foreground">Has Sibling in School</p><p className="text-sm">{(application as any).has_sibling_in_school || 'Not specified'}</p></div>
+                          {((application as any).sibling_information) && (
+                            <div className="col-span-2"><p className="text-sm font-medium text-muted-foreground">Sibling Details</p><p className="text-sm">{(application as any).sibling_information}</p></div>
+                          )}
+                        </div>
+                      </div>
+                    </TabsContent>
 
-                  <TabsContent value="address" className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="col-span-2">
-                        <p className="text-sm font-medium text-muted-foreground">Home Address</p>
-                        <p className="text-sm">{application.home_address || 'Not provided'}</p>
+                    <TabsContent value="address" className="space-y-6">
+                      <div>
+                        <h4 className="font-semibold mb-3">Permanent Address</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div><p className="text-sm font-medium text-muted-foreground">House No</p><p className="text-sm">{(application as any).permanent_house_no || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Street</p><p className="text-sm">{(application as any).permanent_street || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">City</p><p className="text-sm">{(application as any).permanent_city || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">District</p><p className="text-sm">{(application as any).permanent_district || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">State</p><p className="text-sm">{(application as any).permanent_state || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Postal Code</p><p className="text-sm">{(application as any).permanent_postal_code || 'Not provided'}</p></div>
+                        </div>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-muted-foreground">City</p>
-                        <p className="text-sm">{(application as any).city || 'Not specified'}</p>
+                        <h4 className="font-semibold mb-3">Communication Address</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div><p className="text-sm font-medium text-muted-foreground">House No</p><p className="text-sm">{(application as any).communication_house_no || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Street</p><p className="text-sm">{(application as any).communication_street || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">City</p><p className="text-sm">{(application as any).communication_city || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">District</p><p className="text-sm">{(application as any).communication_district || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">State</p><p className="text-sm">{(application as any).communication_state || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Postal Code</p><p className="text-sm">{(application as any).communication_postal_code || 'Not provided'}</p></div>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">State</p>
-                        <p className="text-sm">{(application as any).state || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Postal Code</p>
-                        <p className="text-sm">{application.postal_code || 'Not provided'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Country</p>
-                        <p className="text-sm">{application.country || 'Not specified'}</p>
-                      </div>
-                    </div>
-                  </TabsContent>
+                    </TabsContent>
 
-                  <TabsContent value="academic" className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Year Group Applying For</p>
-                        <p className="text-sm">{application.year_group || 'Not specified'}</p>
+                    <TabsContent value="academic" className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><p className="text-sm font-medium text-muted-foreground">Class Last Studied</p><p className="text-sm">{(application as any).class_last_studied || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">School Last Studied</p><p className="text-sm">{(application as any).school_last_studied || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Class Seeking Admission</p><p className="text-sm">{(application as any).class_seeking_admission || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Last School Location</p><p className="text-sm">{(application as any).last_school_location || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Language Studied</p><p className="text-sm">{(application as any).language_studied || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Last Syllabus</p><p className="text-sm">{(application as any).last_syllabus || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Group First Choice</p><p className="text-sm">{(application as any).group_first_choice || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Group Second Choice</p><p className="text-sm">{(application as any).group_second_choice || 'Not provided'}</p></div>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Current Year Group</p>
-                        <p className="text-sm">{application.current_year_group || 'Not specified'}</p>
-                      </div>
-                      <div className="col-span-2">
-                        <p className="text-sm font-medium text-muted-foreground">Previous School</p>
-                        <p className="text-sm">{application.previous_school || 'Not provided'}</p>
-                      </div>
-                      <div className="col-span-2">
-                        <p className="text-sm font-medium text-muted-foreground">Special Requirements</p>
-                        <p className="text-sm">{application.special_requirements || 'None specified'}</p>
-                      </div>
-                      <div className="col-span-2">
-                        <p className="text-sm font-medium text-muted-foreground">Medical Information</p>
-                        <p className="text-sm">{application.medical_information || 'None provided'}</p>
-                      </div>
-                      <div className="col-span-2">
-                        <p className="text-sm font-medium text-muted-foreground">Chronic Diseases</p>
-                        <p className="text-sm">{(application as any).chronic_diseases || 'None reported'}</p>
+                    </TabsContent>
+
+                    {application.pathway === 'sen' && (
+                      <TabsContent value="sen" className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div><p className="text-sm font-medium text-muted-foreground">SEN Status</p><p className="text-sm">{(application as any).sen_status || 'Not specified'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">EHCP Number</p><p className="text-sm">{(application as any).ehcp_number || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">EHCP Expiry Date</p><p className="text-sm">{(application as any).ehcp_expiry_date ? format(new Date((application as any).ehcp_expiry_date), 'dd MMM yyyy') : 'Not provided'}</p></div>
+                          <div className="col-span-2"><p className="text-sm font-medium text-muted-foreground">Current SEN Provision</p><p className="text-sm">{(application as any).current_sen_provision || 'Not provided'}</p></div>
+                          <div className="col-span-2"><p className="text-sm font-medium text-muted-foreground">Mobility Requirements</p><p className="text-sm">{(application as any).mobility_requirements || 'None specified'}</p></div>
+                          <div className="col-span-2"><p className="text-sm font-medium text-muted-foreground">Communication Needs</p><p className="text-sm">{(application as any).communication_needs || 'None specified'}</p></div>
+                          <div className="col-span-2"><p className="text-sm font-medium text-muted-foreground">Learning Support Needs</p><p className="text-sm">{(application as any).learning_support_needs || 'None specified'}</p></div>
+                          <div className="col-span-2"><p className="text-sm font-medium text-muted-foreground">Behaviour Support Needs</p><p className="text-sm">{(application as any).behaviour_support_needs || 'None specified'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">SENCO Contact Name</p><p className="text-sm">{(application as any).senco_contact_name || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">SENCO Email</p><p className="text-sm">{(application as any).senco_contact_email || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">SENCO Phone</p><p className="text-sm">{(application as any).senco_contact_phone || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Educational Psychologist</p><p className="text-sm">{(application as any).educational_psychologist || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Previous SEN School</p><p className="text-sm">{(application as any).previous_sen_school || 'Not provided'}</p></div>
+                          <div className="col-span-2"><p className="text-sm font-medium text-muted-foreground">SEN Transition Notes</p><p className="text-sm">{(application as any).sen_transition_notes || 'Not provided'}</p></div>
+                        </div>
+                      </TabsContent>
+                    )}
+
+                    {application.pathway === 'standard' && (
+                      <TabsContent value="references" className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div><p className="text-sm font-medium text-muted-foreground">Reference 1 Name</p><p className="text-sm">{(application as any).reference1_name || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Reference 1 Mobile</p><p className="text-sm">{(application as any).reference1_mobile || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Reference 2 Name</p><p className="text-sm">{(application as any).reference2_name || 'Not provided'}</p></div>
+                          <div><p className="text-sm font-medium text-muted-foreground">Reference 2 Mobile</p><p className="text-sm">{(application as any).reference2_mobile || 'Not provided'}</p></div>
+                        </div>
+                      </TabsContent>
+                    )}
+                  </Tabs>
+                )}
+
+                {/* Staff Child Pathway */}
+                {application.pathway === 'staff_child' && (
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="font-semibold mb-3">Student Details</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><p className="text-sm font-medium text-muted-foreground">Student Name</p><p className="text-sm">{(application as any).student_name || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Date of Birth</p><p className="text-sm">{(application as any).date_of_birth ? format(new Date((application as any).date_of_birth), 'dd MMM yyyy') : 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Gender</p><p className="text-sm">{(application as any).gender || 'Not specified'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Year Group</p><p className="text-sm">{(application as any).year_group || 'Not specified'}</p></div>
                       </div>
                     </div>
-                  </TabsContent>
-                </Tabs>
+                    <div>
+                      <h4 className="font-semibold mb-3">Staff Member Details</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><p className="text-sm font-medium text-muted-foreground">Staff Member Name</p><p className="text-sm">{(application as any).staff_member_name || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Staff Member ID</p><p className="text-sm">{(application as any).staff_member_id || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Email</p><p className="text-sm">{(application as any).staff_member_email || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Department</p><p className="text-sm">{(application as any).staff_member_department || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Role</p><p className="text-sm">{(application as any).staff_member_role || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Relationship to Staff</p><p className="text-sm">{(application as any).relationship_to_staff || 'Not provided'}</p></div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-3">Emergency Contact</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><p className="text-sm font-medium text-muted-foreground">Name</p><p className="text-sm">{(application as any).emergency_contact_name || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Phone</p><p className="text-sm">{(application as any).emergency_contact_phone || 'Not provided'}</p></div>
+                        <div className="col-span-2"><p className="text-sm font-medium text-muted-foreground">Medical Information</p><p className="text-sm">{(application as any).medical_information || 'None provided'}</p></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Emergency Enrollment Pathway */}
+                {application.pathway === 'emergency' && (
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="font-semibold mb-3">Student Details</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><p className="text-sm font-medium text-muted-foreground">First Name</p><p className="text-sm">{(application as any).student_first_name || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Last Name</p><p className="text-sm">{(application as any).student_last_name || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Date of Birth</p><p className="text-sm">{(application as any).student_dob ? format(new Date((application as any).student_dob), 'dd MMM yyyy') : 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Gender</p><p className="text-sm">{(application as any).student_gender || 'Not specified'}</p></div>
+                        <div className="col-span-2"><p className="text-sm font-medium text-muted-foreground">Known Risks</p><p className="text-sm">{(application as any).student_known_risks || 'None specified'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Immigration Status</p><p className="text-sm">{(application as any).student_immigration_status || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Visa Status</p><p className="text-sm">{(application as any).student_visa_status || 'Not provided'}</p></div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-3">Referral Information</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><p className="text-sm font-medium text-muted-foreground">Referral Source Type</p><p className="text-sm">{(application as any).referral_source_type || 'Not specified'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Referral Source Name</p><p className="text-sm">{(application as any).referral_source_name || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Referral Email</p><p className="text-sm">{(application as any).referral_source_email || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Referral Phone</p><p className="text-sm">{(application as any).referral_source_phone || 'Not provided'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Referral Date</p><p className="text-sm">{(application as any).referral_date ? format(new Date((application as any).referral_date), 'dd MMM yyyy') : 'Not provided'}</p></div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-3">Urgent Needs</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><p className="text-sm font-medium text-muted-foreground">Uniform</p><p className="text-sm">{(application as any).urgent_needs_uniform ? 'Yes' : 'No'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Meals</p><p className="text-sm">{(application as any).urgent_needs_meals ? 'Yes' : 'No'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Device</p><p className="text-sm">{(application as any).urgent_needs_device ? 'Yes' : 'No'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Transport</p><p className="text-sm">{(application as any).urgent_needs_transport ? 'Yes' : 'No'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Counselling</p><p className="text-sm">{(application as any).urgent_needs_counselling ? 'Yes' : 'No'}</p></div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-3">Safeguarding</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><p className="text-sm font-medium text-muted-foreground">Has Been in Care</p><p className="text-sm">{(application as any).safeguarding_has_been_in_care ? 'Yes' : 'No'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Subject to Protection Plan</p><p className="text-sm">{(application as any).safeguarding_subject_to_child_protection_plan ? 'Yes' : 'No'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Referral Document Provided</p><p className="text-sm">{(application as any).safeguarding_referral_document ? 'Yes' : 'No'}</p></div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-3">Assignments</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><p className="text-sm font-medium text-muted-foreground">Assigned DSL</p><p className="text-sm">{(application as any).assigned_dsl_id || 'Not assigned'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Assigned Form Tutor</p><p className="text-sm">{(application as any).assigned_form_tutor_id || 'Not assigned'}</p></div>
+                        <div><p className="text-sm font-medium text-muted-foreground">Assigned House</p><p className="text-sm">{(application as any).assigned_house || 'Not assigned'}</p></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </DialogContent>
             </Dialog>
           </CardContent>
