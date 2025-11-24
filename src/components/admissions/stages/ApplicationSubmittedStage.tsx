@@ -793,16 +793,50 @@ Generated on: ${new Date().toLocaleString()}
           <CardTitle>Stage Completion</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Ready to proceed to Document Verification?</p>
-              <p className="text-sm text-muted-foreground">
-                Ensure all validation checks are complete before moving to the next stage.
-              </p>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="font-medium">Ready to proceed to Document Verification?</p>
+                <p className="text-sm text-muted-foreground">
+                  {validationChecks.every(check => check.status === 'completed') 
+                    ? 'All validation checks are complete. You can now move to the next stage.'
+                    : 'Complete all mandatory validation checks before proceeding to the next stage.'
+                  }
+                </p>
+              </div>
+              <Button 
+                onClick={onMoveToNext} 
+                className="ml-4"
+                disabled={!validationChecks.every(check => check.status === 'completed')}
+              >
+                Move to Document Verification
+              </Button>
             </div>
-            <Button onClick={onMoveToNext} className="ml-4">
-              Move to Document Verification
-            </Button>
+            
+            {!validationChecks.every(check => check.status === 'completed') && (
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-amber-900">Incomplete Validation Items</p>
+                    <p className="text-sm text-amber-700 mt-1">
+                      Please complete the following items before proceeding:
+                    </p>
+                    <ul className="list-disc list-inside text-sm text-amber-700 mt-2 space-y-1">
+                      {validationChecks
+                        .filter(check => check.status === 'pending')
+                        .map(check => (
+                          <li key={check.id}>{check.label}</li>
+                        ))
+                      }
+                    </ul>
+                    <p className="text-xs text-amber-600 mt-2">
+                      Click on any incomplete item above to fill in the missing information.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
