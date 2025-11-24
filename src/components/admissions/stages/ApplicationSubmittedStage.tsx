@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CheckCircle, Clock, AlertCircle, FileText, User, Calendar, Download, Loader2, Mail, Phone, MapPin, School } from 'lucide-react';
+import { CheckCircle, Clock, AlertCircle, FileText, User, Download, Loader2, Mail, Phone, MapPin, School } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -482,19 +482,6 @@ Generated on: ${new Date().toLocaleString()}
             >
               <Download className="h-4 w-4" />
               Download Application Summary
-            </Button>
-            <Button 
-              variant="outline" 
-              className="flex items-center gap-2"
-              onClick={() => {
-                toast({
-                  title: "Feature coming soon",
-                  description: "Review scheduling will be available in the next update",
-                });
-              }}
-            >
-              <Calendar className="h-4 w-4" />
-              Schedule Review
             </Button>
           </div>
         </CardContent>
