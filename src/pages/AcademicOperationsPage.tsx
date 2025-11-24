@@ -209,7 +209,7 @@ export default function AcademicOperationsPage() {
                 onClick={() => navigate('/admissions/new')}
               >
                 <UserPlus className="h-6 w-6 text-primary" />
-                <span className="text-sm">New Admission</span>
+                <span className="text-sm">Applications</span>
               </Button>
               <Button 
                 variant="outline" 

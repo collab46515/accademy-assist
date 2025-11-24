@@ -87,10 +87,10 @@ const UnifiedAdmissionsPage = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-1">
-          <TabsTrigger value="pathways">New Applications</TabsTrigger>
+          <TabsTrigger value="pathways">Applications</TabsTrigger>
         </TabsList>
 
-        {/* New Applications Tab */}
+        {/* Applications Tab */}
         <TabsContent value="pathways" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card className="hover:shadow-md transition-shadow cursor-pointer">

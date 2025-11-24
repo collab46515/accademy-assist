@@ -1002,7 +1002,7 @@ export default function Dashboard() {
                   onClick={() => navigate('/admissions/new')}
                 >
                   <Users className="h-4 w-4" />
-                  New Student
+                  Applications
                 </Button>
                 <Button 
                   variant="outline" 
