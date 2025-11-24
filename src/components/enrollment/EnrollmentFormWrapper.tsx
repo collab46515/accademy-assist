@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useEnrollmentForm } from '@/hooks/useEnrollmentForm';
 import { PathwayType } from '@/lib/enrollment-schemas';
-import { ChevronLeft, ChevronRight, Save, Send, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Save, Send, Clock, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 // Context for pathway data sharing between components
 interface EnrollmentContextType {
@@ -31,6 +32,7 @@ interface EnrollmentFormWrapperProps {
 }
 
 export function EnrollmentFormWrapper({ pathway, applicationId, children }: EnrollmentFormWrapperProps) {
+  const navigate = useNavigate();
   const formHook = useEnrollmentForm({ pathway, applicationId });
   const { config, currentStep, totalSteps, progress, isLoading, isSaving, isSubmitted, isFirstStep, isLastStep, nextStep, previousStep } = formHook;
 
@@ -43,22 +45,36 @@ export function EnrollmentFormWrapper({ pathway, applicationId, children }: Enro
     <EnrollmentContext.Provider value={contextValue}>
       <div className="max-w-4xl mx-auto p-6 space-y-6">
         {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-2">
-            <Badge variant="outline" className="px-3 py-1">
-              {config.name}
-            </Badge>
-            {isSaving && (
-              <Badge variant="secondary" className="px-3 py-1 gap-1">
-                <Clock className="h-3 w-3" />
-                Auto-saving...
-              </Badge>
-            )}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/admissions/my-applications')}
+              className="gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              My Applications
+            </Button>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">{config.name}</h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            {config.description}
-          </p>
+          
+          <div className="text-center space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <Badge variant="outline" className="px-3 py-1">
+                {config.name}
+              </Badge>
+              {isSaving && (
+                <Badge variant="secondary" className="px-3 py-1 gap-1">
+                  <Clock className="h-3 w-3" />
+                  Auto-saving...
+                </Badge>
+              )}
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight">{config.name}</h1>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              {config.description}
+            </p>
+          </div>
         </div>
 
         {/* Progress Bar */}

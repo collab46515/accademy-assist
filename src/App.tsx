@@ -61,6 +61,7 @@ import ReportCardsPage from "./pages/ReportCardsPage";
 import GradingPage from "./pages/GradingPage";
 import NewApplicationsPage from "./pages/NewApplicationsPage";
 import EnrollmentPage from "./pages/EnrollmentPage";
+import MyApplicationsPage from "./pages/MyApplicationsPage";
 import LibraryPage from "./pages/LibraryPage";
 
 import { StudentSubmissionInterface } from "@/components/assignments/StudentSubmissionInterface";
@@ -125,6 +126,7 @@ const App = () => (
              <Route path="/admissions" element={<UnifiedAdmissionsPage />} />
              <Route path="/admissions/new" element={<NewApplicationsPage />} />
              <Route path="/admissions/enroll" element={<EnrollmentPage />} />
+             <Route path="/admissions/my-applications" element={<MyApplicationsPage />} />
              <Route path="/admissions/test" element={<EnrollmentTestPage />} />
              <Route path="/admissions/exit/*" element={<StudentExitPage />} />
              <Route path="/legacy-admissions" element={<AdmissionsPage />} />
