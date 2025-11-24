@@ -6,13 +6,15 @@ import { EnrollmentForm } from '@/components/enrollment/EnrollmentForm';
 import { PathwayType, pathwayConfig } from '@/lib/enrollment-schemas';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, FileText, Users, UserCheck, AlertTriangle, Upload, RefreshCw } from 'lucide-react';
+import { ArrowLeft, FileText, Users, UserCheck, AlertTriangle, Upload, RefreshCw, List } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface ApplicationFormsProps {
   onBackToDashboard: () => void;
 }
 
 export function ApplicationForms({ onBackToDashboard }: ApplicationFormsProps) {
+  const navigate = useNavigate();
   const [selectedPathway, setSelectedPathway] = useState<PathwayType | null>(null);
   const [applicationId, setApplicationId] = useState<string | undefined>(undefined);
   const { toast } = useToast();
@@ -123,14 +125,24 @@ export function ApplicationForms({ onBackToDashboard }: ApplicationFormsProps) {
                 Choose an enrollment pathway to begin the application process
               </p>
             </div>
-            <Button
-              variant="outline"
-              onClick={onBackToDashboard}
-              className="flex items-center space-x-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Dashboard</span>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => navigate('/admissions/my-applications')}
+                className="flex items-center space-x-2"
+              >
+                <List className="h-4 w-4" />
+                <span>My Applications</span>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={onBackToDashboard}
+                className="flex items-center space-x-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span>Back to Dashboard</span>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
