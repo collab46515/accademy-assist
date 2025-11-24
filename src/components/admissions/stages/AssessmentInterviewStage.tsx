@@ -59,10 +59,16 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
           .from('enrollment_applications')
           .select('status, assessment_data, interview_data')
           .eq('id', applicationId)
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error('Error loading application:', error);
+          setIsLoading(false);
+          return;
+        }
+
+        if (!application) {
+          console.warn('No application found');
           setIsLoading(false);
           return;
         }
@@ -77,7 +83,10 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
           // Load assessment data if available
           if (application.assessment_data) {
             const data = application.assessment_data as any;
-            if (data.assessments) setAssessments(data.assessments);
+            console.log('Loading assessment data:', data);
+            if (data.assessments && Array.isArray(data.assessments)) {
+              setAssessments(data.assessments);
+            }
             if (data.overallComments) setOverallComments(data.overallComments);
             if (data.result) setAssessmentResult(data.result);
           }
@@ -93,6 +102,7 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
           // Load interview data if available
           if (application.interview_data) {
             const data = application.interview_data as any;
+            console.log('Loading interview data:', data);
             if (data.date) setInterviewDate(data.date);
             if (data.time) setInterviewTime(data.time);
             if (data.interviewer) setInterviewer(data.interviewer);
@@ -107,6 +117,7 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
           // Load interview results
           if (application.interview_data) {
             const data = application.interview_data as any;
+            console.log('Loading interview results:', data);
             if (data.result) setInterviewResult(data.result);
             if (data.comments) setInterviewComments(data.comments);
           }
@@ -633,7 +644,7 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
                 {interviewStatus === 'completed' && interviewResult ? (
                   <Card className={interviewResult === 'pass' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
                     <CardContent className="p-4">
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <h4 className="font-semibold flex items-center gap-2">
                           {interviewResult === 'pass' ? (
                             <>
@@ -649,7 +660,15 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
                         </h4>
                         <p className="text-sm text-muted-foreground">{interviewComments}</p>
                         
-                        {interviewResult === 'fail' && (
+                        {interviewResult === 'pass' ? (
+                          <Button 
+                            onClick={onMoveToNext}
+                            className="w-full mt-3"
+                            size="lg"
+                          >
+                            Complete Interview & Move to Admission Decision
+                          </Button>
+                        ) : (
                           <Button 
                             variant="destructive" 
                             onClick={handleRejectApplication}
@@ -705,28 +724,6 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
                 )}
               </TabsContent>
             </Tabs>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Next Stage Button */}
-      {assessmentResult === 'pass' && interviewStatus === 'completed' && interviewResult === 'pass' && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Stage Completion</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Assessment and Interview Completed Successfully!</p>
-                <p className="text-sm text-muted-foreground">
-                  Student has passed both assessment and interview. Ready to proceed to Admission Decision stage.
-                </p>
-              </div>
-              <Button onClick={onMoveToNext} size="lg">
-                Move to Admission Decision
-              </Button>
-            </div>
           </CardContent>
         </Card>
       )}
