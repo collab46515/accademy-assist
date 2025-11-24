@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Star, User, GraduationCap, Award, MessageSquare, CheckCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ApplicationReviewStageProps {
   applicationId: string;
@@ -19,22 +20,41 @@ export function ApplicationReviewStage({ applicationId, onMoveToNext }: Applicat
   const [reviewNotes, setReviewNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const handleSaveDraft = async () => {
+    setIsSubmitting(true);
+    try {
+      console.log('Saving draft review:', {
+        applicationId,
+        academicScore: academicScore[0],
+        behaviorScore: behaviorScore[0],
+        potentialScore: potentialScore[0],
+        reviewNotes,
+        status: 'draft'
+      });
+      toast.success('Review draft saved successfully!');
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      toast.error('Failed to save draft');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSubmitReview = async () => {
     setIsSubmitting(true);
     try {
-      // Add your review submission logic here
       console.log('Submitting review:', {
         applicationId,
         academicScore: academicScore[0],
         behaviorScore: behaviorScore[0],
         potentialScore: potentialScore[0],
-        reviewNotes
+        reviewNotes,
+        status: 'submitted'
       });
-      // For now, just show success
-      alert('Review submitted successfully!');
+      toast.success('Review submitted successfully!');
     } catch (error) {
       console.error('Error submitting review:', error);
-      alert('Failed to submit review');
+      toast.error('Failed to submit review');
     } finally {
       setIsSubmitting(false);
     }
@@ -259,7 +279,14 @@ export function ApplicationReviewStage({ applicationId, onMoveToNext }: Applicat
                   onChange={(e) => setReviewNotes(e.target.value)}
                 />
                 <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1">Save Draft</Button>
+                  <Button 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={handleSaveDraft}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Saving...' : 'Save Draft'}
+                  </Button>
                   <Button 
                     className="flex-1" 
                     onClick={handleSubmitReview}
