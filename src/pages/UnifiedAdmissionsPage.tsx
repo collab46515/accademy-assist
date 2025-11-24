@@ -40,18 +40,21 @@ const UnifiedAdmissionsPage = () => {
     navigate(`/admissions/enroll?type=${applicationType.toLowerCase().replace(' ', '_')}`);
   };
 
-  // Simple stage detection
+  // Simple stage detection - Convert 1-based URL param to 0-based array index
   const stageParam = searchParams.get('stage');
   const isStageView = stageParam !== null;
-  const currentStage = isStageView ? parseInt(stageParam) : null;
+  const currentStage = isStageView ? parseInt(stageParam) - 1 : null;
 
   // If viewing a specific stage, show stage view
   if (isStageView && currentStage !== null) {
+    // Display as 1-based for users (currentStage is 0-based internally)
+    const displayStageNumber = currentStage + 1;
+    
     return (
       <div className="min-h-screen bg-blue-50">
         <div className="bg-blue-600 text-white p-6">
           <h1 className="text-3xl font-bold">🎯 Stage View Working!</h1>
-          <p className="text-xl">You are viewing Stage {currentStage}</p>
+          <p className="text-xl">You are viewing Stage {displayStageNumber}</p>
           <Button 
             variant="secondary" 
             onClick={() => navigate('/admissions')}
@@ -62,7 +65,7 @@ const UnifiedAdmissionsPage = () => {
           </Button>
         </div>
         <div className="container mx-auto px-4 py-8">
-          <h2 className="text-2xl font-bold mb-4">Applications for Stage {currentStage}</h2>
+          <h2 className="text-2xl font-bold mb-4">Applications for Stage {displayStageNumber}</h2>
           <StageWorkflowManager currentStage={currentStage} />
         </div>
       </div>
