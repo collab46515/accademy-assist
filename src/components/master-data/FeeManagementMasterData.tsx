@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,21 +8,43 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useForm } from 'react-hook-form';
+import { Label } from '@/components/ui/label';
+import { useForm, Controller } from 'react-hook-form';
 import { useFeeData } from '@/hooks/useFeeData';
 import { usePaymentData } from '@/hooks/usePaymentData';
-import { CreditCard, Plus, Search, Download, Upload, Edit, Trash } from 'lucide-react';
+import { useMasterData } from '@/hooks/useMasterData';
+import { CreditCard, Plus, Search, Download, Upload, Edit, Trash, Info } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export function FeeManagementMasterData() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('fee-heads');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
+  const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
   const form = useForm();
+  const { control } = form;
 
   // Use real fee data and payment data
   const { feeHeads, feeStructures, createFeeHead, updateFeeHead, deleteFeeHead, createFeeStructure, updateFeeStructure, deleteFeeStructure, loading } = useFeeData('2f21656b-0848-40ee-bbec-12e5e8137545');
   const { paymentPlans, discounts, createPaymentPlan, updatePaymentPlan, deletePaymentPlan, createDiscount, updateDiscount, deleteDiscount, loading: paymentLoading } = usePaymentData('2f21656b-0848-40ee-bbec-12e5e8137545');
+  
+  // Get classes/year groups from master data
+  const { classes, yearGroups } = useMasterData();
+  
+  // Combine classes and year groups for selection
+  const availableClasses = [
+    ...yearGroups.map(yg => yg.year_name),
+    ...classes.map(c => `${c.year_group} - ${c.class_name}`)
+  ];
+
+  useEffect(() => {
+    if (editingItem && editingItem.applicable_classes) {
+      setSelectedClasses(editingItem.applicable_classes);
+    } else {
+      setSelectedClasses([]);
+    }
+  }, [editingItem]);
 
   const handleCreate = async (data: any) => {
     console.log('Form data received:', data);
@@ -37,7 +59,7 @@ export function FeeManagementMasterData() {
           category: data.category || 'General',
           amount: parseFloat(data.default_amount) || 0,
           recurrence: data.recurrence_frequency || 'once',
-          applicable_classes: data.applicable_classes ? data.applicable_classes.split(',').map((c: string) => c.trim()) : [],
+          applicable_classes: selectedClasses,
           applicable_genders: data.applicable_genders ? data.applicable_genders.split(',').map((g: string) => g.trim()) : [],
           is_active: true
         };
@@ -47,6 +69,8 @@ export function FeeManagementMasterData() {
         } else {
           await createFeeHead(feeHeadData);
         }
+        
+        setSelectedClasses([]);
       } else if (activeTab === 'structures') {
         // Convert comma-separated string to array for applicable_year_groups
         const yearGroups = data.applicable_year_groups 
@@ -148,6 +172,7 @@ export function FeeManagementMasterData() {
       }
       setDialogOpen(false);
       form.reset();
+      setSelectedClasses([]);
     } catch (error) {
       console.error('Error creating/updating:', error);
     }
@@ -157,6 +182,9 @@ export function FeeManagementMasterData() {
     setEditingItem(item);
     setActiveTab(tab);
     setDialogOpen(true);
+    if (item.applicable_classes) {
+      setSelectedClasses(Array.isArray(item.applicable_classes) ? item.applicable_classes : []);
+    }
     form.reset(item);
   };
 
@@ -192,13 +220,28 @@ export function FeeManagementMasterData() {
 
   return (
     <div className="space-y-6">
+      {/* Hierarchy Info Alert */}
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertDescription>
+          <strong>Data Flow:</strong> Classes/Year Groups defined in <strong>Master Data → Academic Structure</strong> are used here for fee configuration and cascade throughout the system (admissions, fee structures, timetabling, etc.)
+          {availableClasses.length === 0 && (
+            <span className="block mt-2 text-destructive">
+              <strong>Warning:</strong> No classes found in Master Data. Please add Year Groups and Classes first in the Academic Structure tab.
+            </span>
+          )}
+        </AlertDescription>
+      </Alert>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Fee Management Master Data</h2>
-          <p className="text-muted-foreground">Configure fee structures, payment plans, and financial settings</p>
+          <p className="text-muted-foreground">
+            Configure fee structures, payment plans, and financial settings
+          </p>
         </div>
-        <Button onClick={() => { setEditingItem(null); setDialogOpen(true); }}>
+        <Button onClick={() => { setEditingItem(null); setSelectedClasses([]); setDialogOpen(true); }}>
           <Plus className="h-4 w-4 mr-2" />
           Add New
         </Button>
@@ -559,11 +602,43 @@ export function FeeManagementMasterData() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Applicable Year Groups</label>
-                  <Input 
-                    {...form.register('applicable_year_groups')} 
-                    placeholder="Year 7, Year 8 (comma-separated)" 
-                  />
+                  <label className="text-sm font-medium">Applicable Year Groups/Classes</label>
+                  {availableClasses.length > 0 ? (
+                    <>
+                      <Input 
+                        {...form.register('applicable_year_groups')} 
+                        placeholder="Leave empty or select from: " 
+                      />
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {availableClasses.map((className) => (
+                          <Badge 
+                            key={className}
+                            variant="outline"
+                            className="cursor-pointer hover:bg-primary hover:text-primary-foreground"
+                            onClick={() => {
+                              const current = form.getValues('applicable_year_groups') || '';
+                              const classes = current ? current.split(',').map((c: string) => c.trim()).filter(Boolean) : [];
+                              if (!classes.includes(className)) {
+                                form.setValue('applicable_year_groups', [...classes, className].join(', '));
+                              }
+                            }}
+                          >
+                            {className}
+                          </Badge>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <Alert>
+                      <Info className="h-4 w-4" />
+                      <AlertDescription>
+                        No classes defined. Add Year Groups and Classes in Master Data first.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Click badges above to add quickly, or type comma-separated values
+                  </p>
                 </div>
                 <div>
                   <label className="text-sm font-medium">Student Type *</label>
@@ -699,8 +774,55 @@ export function FeeManagementMasterData() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Applicable Classes</label>
-                  <Input {...form.register('applicable_classes')} placeholder="All, 1-5, 6-10, etc." />
+                  <label className="text-sm font-medium">Applicable Classes/Year Groups *</label>
+                  {availableClasses.length > 0 ? (
+                    <div className="border rounded-md p-3 space-y-2 max-h-48 overflow-y-auto">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Checkbox
+                          id="select-all-classes"
+                          checked={selectedClasses.length === availableClasses.length}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedClasses(availableClasses);
+                            } else {
+                              setSelectedClasses([]);
+                            }
+                          }}
+                        />
+                        <Label htmlFor="select-all-classes" className="font-medium">
+                          Select All
+                        </Label>
+                      </div>
+                      {availableClasses.map((className) => (
+                        <div key={className} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`class-${className}`}
+                            checked={selectedClasses.includes(className)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedClasses([...selectedClasses, className]);
+                              } else {
+                                setSelectedClasses(selectedClasses.filter(c => c !== className));
+                              }
+                            }}
+                          />
+                          <Label htmlFor={`class-${className}`}>
+                            {className}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <Alert>
+                      <Info className="h-4 w-4" />
+                      <AlertDescription>
+                        No classes defined yet. Please add Year Groups and Classes in Master Data first.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Leave empty to apply to all classes. Selected: {selectedClasses.length > 0 ? selectedClasses.join(', ') : 'All Classes'}
+                  </p>
                 </div>
                 <div>
                   <label className="text-sm font-medium">Applicable Genders</label>
