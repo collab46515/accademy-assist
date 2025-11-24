@@ -2747,6 +2747,7 @@ export type Database = {
           academic_notes: string | null
           additional_data: Json | null
           application_number: string
+          assessment_data: Json | null
           assigned_to: string | null
           bulk_operation_id: string | null
           bursary_application: boolean | null
@@ -2764,6 +2765,7 @@ export type Database = {
           home_address: string | null
           house_preference: string | null
           id: string
+          interview_data: Json | null
           last_activity_at: string | null
           medical_information: string | null
           nationality: string | null
@@ -2795,6 +2797,7 @@ export type Database = {
           academic_notes?: string | null
           additional_data?: Json | null
           application_number: string
+          assessment_data?: Json | null
           assigned_to?: string | null
           bulk_operation_id?: string | null
           bursary_application?: boolean | null
@@ -2812,6 +2815,7 @@ export type Database = {
           home_address?: string | null
           house_preference?: string | null
           id?: string
+          interview_data?: Json | null
           last_activity_at?: string | null
           medical_information?: string | null
           nationality?: string | null
@@ -2843,6 +2847,7 @@ export type Database = {
           academic_notes?: string | null
           additional_data?: Json | null
           application_number?: string
+          assessment_data?: Json | null
           assigned_to?: string | null
           bulk_operation_id?: string | null
           bursary_application?: boolean | null
@@ -2860,6 +2865,7 @@ export type Database = {
           home_address?: string | null
           house_preference?: string | null
           id?: string
+          interview_data?: Json | null
           last_activity_at?: string | null
           medical_information?: string | null
           nationality?: string | null
