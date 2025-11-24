@@ -72,6 +72,7 @@ export function StudentDetailsSection() {
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
+                    defaultMonth={new Date(new Date().getFullYear() - 10, 0)}
                     disabled={(date) => {
                       const today = new Date();
                       const minAge = new Date();
