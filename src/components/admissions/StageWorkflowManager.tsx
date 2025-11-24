@@ -31,7 +31,7 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
     { 
       title: 'Application Submitted', 
       status: 'submitted',
-      allowedStatuses: ['draft', 'submitted']
+      allowedStatuses: ['submitted']
     },
     { 
       title: 'Application Review & Verify', 
@@ -45,7 +45,7 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
     },
     { 
       title: 'Admission Decision', 
-      status: 'approved',
+      status: 'pending_approval',
       allowedStatuses: ['pending_approval', 'approved', 'on_hold']
     },
     { 
@@ -100,10 +100,21 @@ export function StageWorkflowManager({ currentStage }: StageWorkflowManagerProps
       const currentStageConfig = stages[currentStage];
       const allowedStatuses = currentStageConfig?.allowedStatuses || [currentStageConfig?.status];
 
+      console.log(`📋 Stage ${currentStage + 1}: "${currentStageConfig?.title}"`);
+      console.log(`✅ Allowed statuses:`, allowedStatuses);
+      console.log(`📊 Total applications in DB:`, data?.length || 0);
+
       // Filter by status - include all statuses allowed for this stage
       const filteredData = (data || []).filter(app => 
         allowedStatuses.includes(app.status)
       );
+
+      console.log(`🎯 Filtered applications for this stage:`, filteredData.length);
+      console.log(`Applications:`, filteredData.map(a => ({
+        id: a.application_number,
+        name: a.student_name,
+        status: a.status
+      })));
 
       // Transform the data to match our UI expectations
       const transformedApplications = filteredData.map(app => ({
