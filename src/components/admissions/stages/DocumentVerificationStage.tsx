@@ -1,39 +1,87 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Upload, Download, CheckCircle, XCircle, Eye, FileText, AlertTriangle } from 'lucide-react';
+import { Download, CheckCircle, XCircle, FileText, AlertTriangle, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { DocumentUploader } from '../documents/DocumentUploader';
 
 interface DocumentVerificationStageProps {
   applicationId: string;
   onMoveToNext: () => void;
 }
 
+interface Document {
+  id: string;
+  document_name: string;
+  document_type: string;
+  status: string;
+  uploaded_at: string | null;
+  verified_by: string | null;
+  file_path: string;
+  mime_type: string | null;
+}
+
 export function DocumentVerificationStage({ applicationId, onMoveToNext }: DocumentVerificationStageProps) {
-  const [selectedDocument, setSelectedDocument] = useState<string | null>(null);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [notes, setNotes] = useState('');
+  const { toast } = useToast();
 
-  const requiredDocuments = [
-    { id: 'birth_certificate', name: 'Birth Certificate', status: 'verified', uploadedAt: '2024-01-15', verifiedBy: 'John Admin' },
-    { id: 'passport_photo', name: 'Passport Photo', status: 'verified', uploadedAt: '2024-01-15', verifiedBy: 'John Admin' },
-    { id: 'school_reports', name: 'Previous School Reports', status: 'pending', uploadedAt: '2024-01-16', verifiedBy: null },
-    { id: 'medical_records', name: 'Medical Records', status: 'rejected', uploadedAt: '2024-01-14', verifiedBy: 'Sarah Nurse', notes: 'Document unclear, please resubmit' },
-    { id: 'proof_address', name: 'Proof of Address', status: 'missing', uploadedAt: null, verifiedBy: null }
+  const requiredDocTypes = [
+    { id: 'passport_photo', name: 'Child Passport Size Photo', required: true },
+    { id: 'birth_certificate', name: 'Birth Certificate', required: true },
+    { id: 'aadhaar', name: 'Aadhaar Copy / UID', required: true },
+    { id: 'community_cert', name: 'Community Certificate', required: true },
+    { id: 'salary_cert', name: 'Salary Certificate / Income Declaration', required: true },
+    { id: 'org_endorsement', name: 'Organization Endorsement', required: true },
   ];
 
-  const optionalDocuments = [
-    { id: 'awards_certificates', name: 'Awards & Certificates', status: 'verified', uploadedAt: '2024-01-16', verifiedBy: 'John Admin' },
-    { id: 'recommendation_letter', name: 'Recommendation Letter', status: 'missing', uploadedAt: null, verifiedBy: null }
+  const optionalDocTypes = [
+    { id: 'ration_card', name: 'Ration Card', required: false },
+    { id: 'medical_cert', name: 'Medical Certificate', required: false },
+    { id: 'church_endorsement', name: 'Church Endorsement', required: false },
+    { id: 'transfer_cert', name: 'Transfer Certificate', required: false },
+    { id: 'migration_cert', name: 'Migration Certificate', required: false },
   ];
+
+  useEffect(() => {
+    fetchDocuments();
+  }, [applicationId]);
+
+  const fetchDocuments = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('application_documents')
+        .select('*')
+        .eq('application_id', applicationId);
+
+      if (error) throw error;
+      setDocuments(data || []);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch documents",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getDocStatus = (docType: string) => {
+    return documents.find(d => d.document_type === docType);
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'verified': return <Badge variant="default" className="bg-green-100 text-green-800">Verified</Badge>;
       case 'pending': return <Badge variant="secondary">Pending Review</Badge>;
       case 'rejected': return <Badge variant="destructive">Rejected</Badge>;
-      case 'missing': return <Badge variant="outline">Missing</Badge>;
-      default: return <Badge variant="outline">Unknown</Badge>;
+      default: return <Badge variant="outline">Missing</Badge>;
     }
   };
 
@@ -42,67 +90,155 @@ export function DocumentVerificationStage({ applicationId, onMoveToNext }: Docum
       case 'verified': return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'pending': return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
       case 'rejected': return <XCircle className="h-4 w-4 text-red-600" />;
-      case 'missing': return <FileText className="h-4 w-4 text-gray-400" />;
       default: return <FileText className="h-4 w-4 text-gray-400" />;
     }
   };
 
-  const handleVerifyDocument = (documentId: string, action: 'approve' | 'reject') => {
-    console.log(`${action} document: ${documentId}`);
+  const handleVerifyDocument = async (documentId: string, newStatus: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { error } = await supabase
+        .from('application_documents')
+        .update({
+          status: newStatus,
+          verified_by: user?.id,
+          verified_at: new Date().toISOString()
+        })
+        .eq('id', documentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Document updated",
+        description: `Document status changed to ${newStatus}`,
+      });
+
+      fetchDocuments();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
-  const DocumentList = ({ documents, title }: { documents: any[], title: string }) => (
+  const handleDownload = async (filePath: string, fileName: string) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('application-documents')
+        .download(filePath);
+
+      if (error) throw error;
+
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error: any) {
+      toast({
+        title: "Download failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const DocumentList = ({ docTypes, title }: { docTypes: typeof requiredDocTypes, title: string }) => (
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {documents.map((doc) => (
-            <div key={doc.id} className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center gap-3">
-                {getStatusIcon(doc.status)}
-                <div>
-                  <p className="font-medium">{doc.name}</p>
-                  {doc.uploadedAt && (
-                    <p className="text-sm text-muted-foreground">
-                      Uploaded: {new Date(doc.uploadedAt).toLocaleDateString()}
-                      {doc.verifiedBy && ` • Verified by: ${doc.verifiedBy}`}
-                    </p>
-                  )}
-                  {doc.notes && (
-                    <p className="text-sm text-red-600 mt-1">{doc.notes}</p>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {getStatusBadge(doc.status)}
-                {doc.uploadedAt && (
-                  <div className="flex gap-1">
-                    <Button size="sm" variant="outline">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="outline">
-                      <Download className="h-4 w-4" />
-                    </Button>
+        {loading ? (
+          <div className="flex justify-center p-4">
+            <Loader2 className="h-6 w-6 animate-spin" />
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {docTypes.map((docType) => {
+              const doc = getDocStatus(docType.id);
+              const status = doc?.status || 'missing';
+              
+              return (
+                <div key={docType.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    {getStatusIcon(status)}
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium">{docType.name}</p>
+                        {docType.required && (
+                          <Badge variant="destructive" className="text-xs">Required</Badge>
+                        )}
+                      </div>
+                      {doc?.uploaded_at && (
+                        <p className="text-sm text-muted-foreground">
+                          Uploaded: {new Date(doc.uploaded_at).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                )}
-                {doc.status === 'missing' && (
-                  <Button size="sm" variant="outline">
-                    <Upload className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+                  <div className="flex items-center gap-2">
+                    {getStatusBadge(status)}
+                    {doc && (
+                      <div className="flex gap-1">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleDownload(doc.file_path, doc.document_name)}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        {status === 'pending' && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleVerifyDocument(doc.id, 'verified')}
+                            >
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleVerifyDocument(doc.id, 'rejected')}
+                            >
+                              <XCircle className="h-4 w-4 text-red-600" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    )}
+                    {!doc && (
+                      <DocumentUploader
+                        applicationId={applicationId}
+                        documentType={docType.id}
+                        documentName={docType.name}
+                        onUploadComplete={fetchDocuments}
+                      />
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
 
+  const verifiedCount = documents.filter(d => d.status === 'verified').length;
+  const pendingCount = documents.filter(d => d.status === 'pending').length;
+  const rejectedCount = documents.filter(d => d.status === 'rejected').length;
+  const missingCount = requiredDocTypes.length + optionalDocTypes.length - documents.length;
+
   return (
     <div className="space-y-6">
-      {/* Document Status Overview */}
       <Card>
         <CardHeader>
           <CardTitle>Document Verification Overview</CardTitle>
@@ -110,26 +246,25 @@ export function DocumentVerificationStage({ applicationId, onMoveToNext }: Docum
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">3</div>
+              <div className="text-2xl font-bold text-green-600">{verifiedCount}</div>
               <div className="text-sm text-muted-foreground">Verified</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">1</div>
+              <div className="text-2xl font-bold text-yellow-600">{pendingCount}</div>
               <div className="text-sm text-muted-foreground">Pending</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">1</div>
+              <div className="text-2xl font-bold text-red-600">{rejectedCount}</div>
               <div className="text-sm text-muted-foreground">Rejected</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-400">2</div>
+              <div className="text-2xl font-bold text-gray-400">{missingCount}</div>
               <div className="text-sm text-muted-foreground">Missing</div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Document Lists */}
       <Tabs defaultValue="required">
         <TabsList>
           <TabsTrigger value="required">Required Documents</TabsTrigger>
@@ -137,44 +272,28 @@ export function DocumentVerificationStage({ applicationId, onMoveToNext }: Docum
         </TabsList>
         
         <TabsContent value="required" className="space-y-4">
-          <DocumentList documents={requiredDocuments} title="Required Documents" />
+          <DocumentList docTypes={requiredDocTypes} title="Required Documents" />
         </TabsContent>
         
         <TabsContent value="optional" className="space-y-4">
-          <DocumentList documents={optionalDocuments} title="Optional Documents" />
+          <DocumentList docTypes={optionalDocTypes} title="Optional Documents" />
         </TabsContent>
       </Tabs>
 
-      {/* Document Verification Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Verification Actions</CardTitle>
+          <CardTitle>Verification Notes</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="flex gap-4">
-              <Button variant="outline" className="flex-1">
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Bulk Approve Verified
-              </Button>
-              <Button variant="outline" className="flex-1">
-                <FileText className="h-4 w-4 mr-2" />
-                Request Missing Documents
-              </Button>
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium">Verification Notes</label>
-              <Textarea 
-                placeholder="Add any notes about the document verification process..."
-                className="mt-1"
-              />
-            </div>
-          </div>
+          <Textarea 
+            placeholder="Add any notes about the document verification process..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={4}
+          />
         </CardContent>
       </Card>
 
-      {/* Next Stage */}
       <Card>
         <CardHeader>
           <CardTitle>Stage Completion</CardTitle>
