@@ -205,36 +205,80 @@ function MasterDataImportContent() {
 
       <div className="grid gap-6">
         {/* Step 1: Download Template */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Download className="h-5 w-5" />
-              Step 1: Download Template
-            </CardTitle>
-            <CardDescription>
-              Download the comprehensive CSV template with example data for students, parents, and fee assignments
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Bulk Student Import Template</p>
-                <p className="text-xs text-muted-foreground">
-                  Includes: Student Details, Parent Information (both parents), Emergency Contacts, Medical Info, Fee Assignments
-                </p>
-                <div className="flex gap-2 mt-2">
-                  <Badge variant="outline" className="text-xs">
-                    <UserPlus className="h-3 w-3 mr-1" />
-                    50+ Fields
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">5 Examples</Badge>
-                </div>
+        <Card className="border-2 border-primary/20">
+          <CardHeader className="pb-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Download className="h-6 w-6 text-primary" />
+                  Step 1: Download the Template
+                </CardTitle>
+                <CardDescription className="mt-2">
+                  One comprehensive template for importing students, parents, and fees all at once
+                </CardDescription>
               </div>
-              <Button onClick={downloadTemplate}>
-                <Download className="h-4 w-4 mr-2" />
-                Download Template
-              </Button>
             </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-lg border bg-muted/50 p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-3 flex-1">
+                  <div>
+                    <p className="font-semibold text-base mb-1">Bulk Student Import Template</p>
+                    <p className="text-sm text-muted-foreground">
+                      Everything you need in one CSV file - no need for multiple templates
+                    </p>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary" className="text-xs">
+                      <Users className="h-3 w-3 mr-1" />
+                      Student Details
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      <UserPlus className="h-3 w-3 mr-1" />
+                      Both Parents
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      <AlertTriangle className="h-3 w-3 mr-1" />
+                      Emergency Contacts
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      <FileSpreadsheet className="h-3 w-3 mr-1" />
+                      Medical Info
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      <Home className="h-3 w-3 mr-1" />
+                      Fee Assignments
+                    </Badge>
+                  </div>
+                  
+                  <div className="pt-2">
+                    <p className="text-xs text-muted-foreground">
+                      ✓ 50+ fields covering all student data
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      ✓ 5 pre-filled examples showing different scenarios
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      ✓ Import everything in one upload
+                    </p>
+                  </div>
+                </div>
+                
+                <Button onClick={downloadTemplate} size="lg" className="shrink-0">
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Template
+                </Button>
+              </div>
+            </div>
+            
+            <Alert>
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>This is the only template you need.</strong> Fill it in with your data and upload it in Step 2 below.
+              </AlertDescription>
+            </Alert>
           </CardContent>
         </Card>
 
