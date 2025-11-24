@@ -73,26 +73,29 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
           return;
         }
 
-        console.log('Application status:', application.status);
+        console.log('Application data loaded:', application);
 
-        // Check status and set appropriate state
-        if (application.status === 'assessment_complete' || 
-            application.status === 'interview_scheduled' || 
+        // If status is interview_scheduled or interview_complete, assessment must be passed
+        if (application.status === 'interview_scheduled' || 
             application.status === 'interview_complete') {
           
-          // Load assessment data if available
-          if (application.assessment_data) {
+          // Load assessment data if available, otherwise use defaults with pass status
+          if (application.assessment_data && application.assessment_data !== null) {
             const data = application.assessment_data as any;
-            console.log('Loading assessment data:', data);
+            console.log('Loading saved assessment data:', data);
             if (data.assessments && Array.isArray(data.assessments)) {
               setAssessments(data.assessments);
             }
             if (data.overallComments) setOverallComments(data.overallComments);
             if (data.result) setAssessmentResult(data.result);
+          } else {
+            // No saved data but assessment was passed (status proves it)
+            console.log('No assessment data saved, but status indicates assessment passed');
+            setOverallComments('Assessment completed (detailed marks not recorded)');
           }
           
           setAssessmentStatus('completed');
-          setAssessmentResult('pass'); // Only pass moves to interview
+          setAssessmentResult('pass');
           setShowInterviewScheduling(true);
         }
 
@@ -100,29 +103,33 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
             application.status === 'interview_complete') {
           
           // Load interview data if available
-          if (application.interview_data) {
+          if (application.interview_data && application.interview_data !== null) {
             const data = application.interview_data as any;
-            console.log('Loading interview data:', data);
+            console.log('Loading saved interview data:', data);
             if (data.date) setInterviewDate(data.date);
             if (data.time) setInterviewTime(data.time);
             if (data.interviewer) setInterviewer(data.interviewer);
             if (data.notificationMethod) setNotificationMethod(data.notificationMethod);
+            
+            setInterviewScheduled(true);
+            setInterviewStatus('scheduled');
+          } else {
+            // Status says interview_scheduled but no data saved yet - keep form open
+            console.log('Interview status is scheduled but no data saved - keeping form available');
+            setInterviewScheduled(false); // Keep scheduling form available
           }
-          
-          setInterviewScheduled(true);
-          setInterviewStatus('scheduled');
         }
 
         if (application.status === 'interview_complete') {
           // Load interview results
-          if (application.interview_data) {
+          if (application.interview_data && application.interview_data !== null) {
             const data = application.interview_data as any;
             console.log('Loading interview results:', data);
             if (data.result) setInterviewResult(data.result);
             if (data.comments) setInterviewComments(data.comments);
+            
+            setInterviewStatus('completed');
           }
-          
-          setInterviewStatus('completed');
         }
 
         setIsLoading(false);
@@ -469,27 +476,29 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
             
             {assessmentStatus === 'completed' && assessmentResult && (
               <>
-                {/* Show assessment marks breakdown */}
-                <Card className="bg-muted/30">
-                  <CardContent className="p-4">
-                    <h4 className="font-semibold mb-3">Assessment Results Summary</h4>
-                    <div className="space-y-2">
-                      {assessments.map((assessment) => (
-                        <div key={assessment.subject} className="flex items-center justify-between text-sm">
-                          <span className="font-medium">{assessment.subject}:</span>
-                          <div className="flex items-center gap-2">
-                            <span>{assessment.marks}/{assessment.maxMarks}</span>
-                            <span className="text-muted-foreground">
-                              ({assessment.marks && assessment.maxMarks ? 
-                                ((parseFloat(assessment.marks) / parseFloat(assessment.maxMarks)) * 100).toFixed(1) : 0}%)
-                            </span>
-                            {getStatusBadge(assessment.status)}
+                {/* Show assessment marks breakdown only if we have data */}
+                {assessments.some(a => a.marks !== '') ? (
+                  <Card className="bg-muted/30">
+                    <CardContent className="p-4">
+                      <h4 className="font-semibold mb-3">Assessment Results Summary</h4>
+                      <div className="space-y-2">
+                        {assessments.map((assessment) => (
+                          <div key={assessment.subject} className="flex items-center justify-between text-sm">
+                            <span className="font-medium">{assessment.subject}:</span>
+                            <div className="flex items-center gap-2">
+                              <span>{assessment.marks}/{assessment.maxMarks}</span>
+                              <span className="text-muted-foreground">
+                                ({assessment.marks && assessment.maxMarks ? 
+                                  ((parseFloat(assessment.marks) / parseFloat(assessment.maxMarks)) * 100).toFixed(1) : 0}%)
+                              </span>
+                              {getStatusBadge(assessment.status)}
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : null}
 
                 {/* Overall result card */}
                 <Card className={assessmentResult === 'pass' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
@@ -504,8 +513,12 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
                         Assessment Result: {assessmentResult === 'pass' ? 'PASSED' : 'FAILED'}
                       </h4>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-2"><strong>Overall Comments:</strong></p>
-                    <p className="text-sm text-muted-foreground">{overallComments}</p>
+                    {overallComments && (
+                      <>
+                        <p className="text-sm text-muted-foreground mb-2"><strong>Comments:</strong></p>
+                        <p className="text-sm text-muted-foreground">{overallComments}</p>
+                      </>
+                    )}
                     
                     {assessmentResult === 'fail' && (
                       <Button 
