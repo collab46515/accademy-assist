@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { ApplicationsList } from './applications/ApplicationsList';
 import { ApplicationDetail } from './applications/ApplicationDetail';
+import { WorkflowDashboard } from './workflow/WorkflowDashboard';
 import { AssessmentScheduler } from './assessment/AssessmentScheduler';
 import { DocumentManager } from './documents/DocumentManager';
 import { ReportsAndAnalytics } from './reports/ReportsAndAnalytics';
@@ -16,10 +17,9 @@ import { Search, Filter, Users, Clock, CheckCircle, AlertTriangle, Calendar, Fil
 
 interface ApplicationManagementProps {
   initialFilter?: string;
-  stageStatuses?: string[]; // Array of statuses for stage filtering
 }
 
-export function ApplicationManagement({ initialFilter = 'all', stageStatuses }: ApplicationManagementProps) {
+export function ApplicationManagement({ initialFilter = 'all' }: ApplicationManagementProps) {
   const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState(initialFilter);
@@ -297,13 +297,20 @@ export function ApplicationManagement({ initialFilter = 'all', stageStatuses }: 
           console.log('Tab changed to:', value);
           setActiveTab(value);
         }} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-white border shadow-sm h-12 p-1">
+          <TabsList className="grid w-full grid-cols-5 bg-white border shadow-sm h-12 p-1">
             <TabsTrigger 
               value="applications" 
               className="flex items-center gap-2 h-10 rounded-md transition-all data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-blue-50 data-[state=active]:hover:bg-blue-600"
             >
               <Users className="h-4 w-4" />
               Applications
+            </TabsTrigger>
+            <TabsTrigger 
+              value="workflow" 
+              className="flex items-center gap-2 h-10 rounded-md transition-all data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-blue-50 data-[state=active]:hover:bg-blue-600"
+            >
+              <Clock className="h-4 w-4" />
+              Progress Tracking
             </TabsTrigger>
             <TabsTrigger 
               value="assessments" 
@@ -332,9 +339,18 @@ export function ApplicationManagement({ initialFilter = 'all', stageStatuses }: 
             <ApplicationsList
               searchTerm={searchTerm}
               statusFilter={statusFilter}
-              stageStatuses={stageStatuses}
               onSelectApplication={setSelectedApplication}
               getStatusColor={getStatusColor}
+            />
+          </TabsContent>
+
+          <TabsContent value="workflow">
+            <WorkflowDashboard 
+              getStatusColor={getStatusColor} 
+              onViewApplications={(status) => {
+                setStatusFilter(status);
+                setActiveTab('applications');
+              }}
             />
           </TabsContent>
 

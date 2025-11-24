@@ -49,79 +49,14 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
   const [interviewStatus, setInterviewStatus] = useState<'not_scheduled' | 'scheduled' | 'completed'>('not_scheduled');
   const [interviewResult, setInterviewResult] = useState<'pass' | 'fail' | null>(null);
   const [interviewComments, setInterviewComments] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Load existing application data on mount
-  useEffect(() => {
-    const loadApplicationData = async () => {
-      setIsLoading(true);
-      try {
-        const { data: application, error } = await supabase
-          .from('enrollment_applications')
-          .select('status')
-          .eq('id', applicationId)
-          .single();
-
-        if (error) {
-          console.error('Error loading application:', error);
-          toast.error('Failed to load application data');
-          return;
-        }
-
-        // Set state based on current status
-        if (application.status === 'assessment_complete' || 
-            application.status === 'interview_scheduled' || 
-            application.status === 'interview_complete') {
-          // Assessment is completed
-          setAssessmentStatus('completed');
-          setAssessmentResult('pass');
-          setOverallComments('Assessment completed successfully');
-          
-          // Mock load assessment data (in production, fetch from assessment_results table)
-          setAssessments([
-            { subject: 'Mathematics', marks: '85', maxMarks: '100', status: 'pass', comments: 'Good performance' },
-            { subject: 'English', marks: '78', maxMarks: '100', status: 'pass', comments: 'Satisfactory' },
-            { subject: 'Science', marks: '92', maxMarks: '100', status: 'pass', comments: 'Excellent' },
-            { subject: 'Hindi', marks: '70', maxMarks: '100', status: 'pass', comments: 'Good effort' }
-          ]);
-          
-          setShowInterviewScheduling(true);
-        }
-
-        if (application.status === 'interview_scheduled' || 
-            application.status === 'interview_complete') {
-          // Interview is scheduled
-          setInterviewScheduled(true);
-          setInterviewStatus('scheduled');
-          setInterviewDate('2024-12-01');
-          setInterviewTime('10:00');
-          setInterviewer('Principal');
-          setNotificationMethod('email');
-        }
-
-        if (application.status === 'interview_complete') {
-          // Interview is completed
-          setInterviewStatus('completed');
-          setInterviewResult('pass');
-          setInterviewComments('Interview completed successfully. Candidate shows strong potential.');
-        }
-      } catch (error) {
-        console.error('Error in loadApplicationData:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadApplicationData();
-  }, [applicationId]);
 
   useEffect(() => {
     // Check if any marks are entered
     const hasMarks = assessments.some(a => a.marks !== '');
-    if (hasMarks && assessmentStatus === 'not_started') {
+    if (hasMarks) {
       setAssessmentStatus('in_progress');
     }
-  }, [assessments, assessmentStatus]);
+  }, [assessments]);
 
   const updateAssessment = (index: number, field: keyof SubjectAssessment, value: string) => {
     const updated = [...assessments];
@@ -337,32 +272,14 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
 
   return (
     <div className="space-y-6">
-      {isLoading ? (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <div className="animate-pulse space-y-4">
-              <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
-              <div className="h-4 bg-muted rounded w-1/2 mx-auto"></div>
-            </div>
-            <p className="text-muted-foreground mt-4">Loading application data...</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          {/* Academic Assessment Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5" />
-                Academic Assessment
-                {assessmentStatus === 'completed' && (
-                  <Badge className="ml-2 bg-green-100 text-green-800">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Completed
-                  </Badge>
-                )}
-              </CardTitle>
-            </CardHeader>
+      {/* Academic Assessment Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BookOpen className="h-5 w-5" />
+            Academic Assessment
+          </CardTitle>
+        </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {assessments.map((assessment, index) => (
@@ -687,8 +604,6 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
             </div>
           </CardContent>
         </Card>
-      )}
-        </>
       )}
     </div>
   );

@@ -8,6 +8,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { ApplicationWorkflow } from './ApplicationWorkflow';
+import { ApplicationTimeline } from './ApplicationTimeline';
 import { ApplicationDocuments } from './ApplicationDocuments';
 import { ApplicationNotes } from './ApplicationNotes';
 import { 
@@ -526,6 +528,21 @@ Generated on: ${new Date().toLocaleString()}
                 </div>
               </div>
             </div>
+            
+            {/* Quick Actions */}
+            <div className="mt-6 pt-6 border-t flex items-center gap-3">
+              <span className="text-sm font-medium text-muted-foreground">Quick Actions:</span>
+              {getStatusActions(application.status).map((action, index) => (
+                <Button
+                  key={index}
+                  variant={action.variant}
+                  size="sm"
+                  onClick={action.action}
+                >
+                  {action.label}
+                </Button>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
@@ -811,8 +828,10 @@ Generated on: ${new Date().toLocaleString()}
 
         {/* Detailed Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 bg-white border shadow-sm">
+          <TabsList className="grid w-full grid-cols-5 bg-white border shadow-sm">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="workflow">Workflow</TabsTrigger>
+            <TabsTrigger value="timeline">Timeline</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="notes">Notes</TabsTrigger>
           </TabsList>
@@ -898,6 +917,18 @@ Generated on: ${new Date().toLocaleString()}
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="workflow">
+            <ApplicationWorkflow 
+              applicationId={applicationId} 
+              currentStatus={application.status}
+              onStatusChange={handleStatusUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="timeline">
+            <ApplicationTimeline applicationId={applicationId} />
           </TabsContent>
 
           <TabsContent value="documents">
