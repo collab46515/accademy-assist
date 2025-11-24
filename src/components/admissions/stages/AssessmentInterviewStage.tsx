@@ -46,6 +46,7 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
   const [interviewTime, setInterviewTime] = useState('');
   const [interviewer, setInterviewer] = useState('');
   const [notificationMethod, setNotificationMethod] = useState('email');
+  const [notificationTemplate, setNotificationTemplate] = useState('');
   const [interviewStatus, setInterviewStatus] = useState<'not_started' | 'scheduled' | 'completed'>('not_started');
   const [interviewResult, setInterviewResult] = useState<'pass' | 'fail' | null>(null);
   const [interviewComments, setInterviewComments] = useState('');
@@ -639,11 +640,37 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
                     <SelectContent>
                       <SelectItem value="email">Email</SelectItem>
                       <SelectItem value="sms">SMS</SelectItem>
+                      <SelectItem value="whatsapp">WhatsApp</SelectItem>
                       <SelectItem value="phone">Phone Call</SelectItem>
-                      <SelectItem value="portal">Parent Portal</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
+
+                {(notificationMethod === 'email' || notificationMethod === 'sms' || notificationMethod === 'whatsapp') && (
+                  <div>
+                    <Label>Message Template</Label>
+                    <Textarea
+                      value={notificationTemplate}
+                      onChange={(e) => setNotificationTemplate(e.target.value)}
+                      placeholder={`Enter ${notificationMethod} template message...
+
+Example: 
+Dear Parent,
+
+Your child's interview has been scheduled for {date} at {time} with {interviewer}.
+
+Please ensure your child arrives 10 minutes early.
+
+Best regards,
+School Administration`}
+                      rows={6}
+                      className="mt-2"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Use placeholders: {'{date}'}, {'{time}'}, {'{interviewer}'}
+                    </p>
+                  </div>
+                )}
 
                 <Button 
                   onClick={handleScheduleInterview} 
