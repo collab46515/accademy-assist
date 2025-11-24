@@ -17,9 +17,10 @@ import { Search, Filter, Users, Clock, CheckCircle, AlertTriangle, Calendar, Fil
 
 interface ApplicationManagementProps {
   initialFilter?: string;
+  stageStatuses?: string[]; // Array of statuses for stage filtering
 }
 
-export function ApplicationManagement({ initialFilter = 'all' }: ApplicationManagementProps) {
+export function ApplicationManagement({ initialFilter = 'all', stageStatuses }: ApplicationManagementProps) {
   const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState(initialFilter);
@@ -339,6 +340,7 @@ export function ApplicationManagement({ initialFilter = 'all' }: ApplicationMana
             <ApplicationsList
               searchTerm={searchTerm}
               statusFilter={statusFilter}
+              stageStatuses={stageStatuses}
               onSelectApplication={setSelectedApplication}
               getStatusColor={getStatusColor}
             />
