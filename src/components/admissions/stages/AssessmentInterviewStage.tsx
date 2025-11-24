@@ -192,6 +192,12 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
     return anySubjectFailed ? 'fail' : 'pass';
   };
 
+  const handleEditAssessment = () => {
+    setAssessmentStatus('in_progress');
+    setAssessmentResult(null);
+    toast.info('Assessment unlocked for editing');
+  };
+
   const handleCompleteAssessment = async () => {
     const result = calculateOverallResult();
     if (!result) return;
@@ -556,6 +562,16 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
                         </Button>
                       </div>
                     )}
+
+                    <div className="mt-3">
+                      <Button 
+                        onClick={handleEditAssessment}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        Edit Assessment
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               </>
