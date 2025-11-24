@@ -457,32 +457,58 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
             )}
             
             {assessmentStatus === 'completed' && assessmentResult && (
-              <Card className={assessmentResult === 'pass' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    {assessmentResult === 'pass' ? (
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                    ) : (
-                      <XCircle className="h-5 w-5 text-red-600" />
+              <>
+                {/* Show assessment marks breakdown */}
+                <Card className="bg-muted/30">
+                  <CardContent className="p-4">
+                    <h4 className="font-semibold mb-3">Assessment Results Summary</h4>
+                    <div className="space-y-2">
+                      {assessments.map((assessment) => (
+                        <div key={assessment.subject} className="flex items-center justify-between text-sm">
+                          <span className="font-medium">{assessment.subject}:</span>
+                          <div className="flex items-center gap-2">
+                            <span>{assessment.marks}/{assessment.maxMarks}</span>
+                            <span className="text-muted-foreground">
+                              ({assessment.marks && assessment.maxMarks ? 
+                                ((parseFloat(assessment.marks) / parseFloat(assessment.maxMarks)) * 100).toFixed(1) : 0}%)
+                            </span>
+                            {getStatusBadge(assessment.status)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Overall result card */}
+                <Card className={assessmentResult === 'pass' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      {assessmentResult === 'pass' ? (
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-red-600" />
+                      )}
+                      <h4 className="font-semibold">
+                        Assessment Result: {assessmentResult === 'pass' ? 'PASSED' : 'FAILED'}
+                      </h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-2"><strong>Overall Comments:</strong></p>
+                    <p className="text-sm text-muted-foreground">{overallComments}</p>
+                    
+                    {assessmentResult === 'fail' && (
+                      <Button 
+                        variant="destructive" 
+                        onClick={handleRejectApplication}
+                        disabled={isSubmitting}
+                        className="w-full mt-3"
+                      >
+                        {isSubmitting ? 'Rejecting...' : 'Reject Application'}
+                      </Button>
                     )}
-                    <h4 className="font-semibold">
-                      Assessment Result: {assessmentResult === 'pass' ? 'PASSED' : 'FAILED'}
-                    </h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{overallComments}</p>
-                  
-                  {assessmentResult === 'fail' && (
-                    <Button 
-                      variant="destructive" 
-                      onClick={handleRejectApplication}
-                      disabled={isSubmitting}
-                      className="w-full mt-3"
-                    >
-                      {isSubmitting ? 'Rejecting...' : 'Reject Application'}
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </>
             )}
           </div>
         </CardContent>
@@ -604,7 +630,39 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
               </TabsContent>
               
               <TabsContent value="complete" className="space-y-4">
-                {interviewStatus !== 'completed' ? (
+                {interviewStatus === 'completed' && interviewResult ? (
+                  <Card className={interviewResult === 'pass' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                    <CardContent className="p-4">
+                      <div className="space-y-2">
+                        <h4 className="font-semibold flex items-center gap-2">
+                          {interviewResult === 'pass' ? (
+                            <>
+                              <CheckCircle className="h-5 w-5 text-green-600" />
+                              Interview Result: PASSED
+                            </>
+                          ) : (
+                            <>
+                              <XCircle className="h-5 w-5 text-red-600" />
+                              Interview Result: FAILED
+                            </>
+                          )}
+                        </h4>
+                        <p className="text-sm text-muted-foreground">{interviewComments}</p>
+                        
+                        {interviewResult === 'fail' && (
+                          <Button 
+                            variant="destructive" 
+                            onClick={handleRejectApplication}
+                            disabled={isSubmitting}
+                            className="w-full mt-3"
+                          >
+                            {isSubmitting ? 'Rejecting...' : 'Reject Application'}
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
                   <div className="space-y-4">
                     <div>
                       <Label>Interview Result *</Label>
@@ -644,38 +702,6 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
                       {isSubmitting ? 'Completing...' : 'Complete Interview'}
                     </Button>
                   </div>
-                ) : (
-                  <Card className={interviewResult === 'pass' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
-                    <CardContent className="p-4">
-                      <div className="space-y-2">
-                        <h4 className="font-semibold flex items-center gap-2">
-                          {interviewResult === 'pass' ? (
-                            <>
-                              <CheckCircle className="h-5 w-5 text-green-600" />
-                              Interview Result: PASSED
-                            </>
-                          ) : (
-                            <>
-                              <XCircle className="h-5 w-5 text-red-600" />
-                              Interview Result: FAILED
-                            </>
-                          )}
-                        </h4>
-                        <p className="text-sm text-muted-foreground">{interviewComments}</p>
-                        
-                        {interviewResult === 'fail' && (
-                          <Button 
-                            variant="destructive" 
-                            onClick={handleRejectApplication}
-                            disabled={isSubmitting}
-                            className="w-full mt-3"
-                          >
-                            {isSubmitting ? 'Rejecting...' : 'Reject Application'}
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
                 )}
               </TabsContent>
             </Tabs>
