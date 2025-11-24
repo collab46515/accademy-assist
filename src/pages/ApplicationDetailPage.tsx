@@ -19,44 +19,58 @@ import {
   MapPin,
   Calendar,
   GraduationCap,
-  Users
+  Users,
+  Download,
+  Eye
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-
 import { Database } from '@/integrations/supabase/types';
 
 type Application = Database['public']['Tables']['enrollment_applications']['Row'];
+type ApplicationDocument = Database['public']['Tables']['application_documents']['Row'];
 
 export default function ApplicationDetailPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { currentSchool } = useRBAC();
   const [application, setApplication] = useState<Application | null>(null);
+  const [documents, setDocuments] = useState<ApplicationDocument[]>([]);
   const [loading, setLoading] = useState(true);
   
   const applicationId = searchParams.get('id');
 
   useEffect(() => {
     if (applicationId && currentSchool?.id) {
-      fetchApplication();
+      fetchApplicationData();
     }
   }, [applicationId, currentSchool?.id]);
 
-  const fetchApplication = async () => {
+  const fetchApplicationData = async () => {
     try {
       setLoading(true);
 
-      const { data, error } = await supabase
+      // Fetch application
+      const { data: appData, error: appError } = await supabase
         .from('enrollment_applications')
         .select('*')
         .eq('id', applicationId)
         .eq('school_id', currentSchool.id)
         .single();
 
-      if (error) throw error;
+      if (appError) throw appError;
+      setApplication(appData);
 
-      setApplication(data);
+      // Fetch documents
+      const { data: docsData, error: docsError } = await supabase
+        .from('application_documents')
+        .select('*')
+        .eq('application_id', applicationId)
+        .order('created_at', { ascending: false });
+
+      if (docsError) throw docsError;
+      setDocuments(docsData || []);
+
     } catch (error) {
       console.error('Error fetching application:', error);
       toast.error('Failed to load application details');
@@ -75,6 +89,7 @@ export default function ApplicationDetailPage() {
       assessment_complete: { variant: 'secondary', label: 'Assessment Complete', icon: <CheckCircle className="h-4 w-4" />, color: 'text-purple-600' },
       interview_scheduled: { variant: 'secondary', label: 'Interview Scheduled', icon: <Clock className="h-4 w-4" />, color: 'text-indigo-600' },
       interview_complete: { variant: 'secondary', label: 'Interview Complete', icon: <CheckCircle className="h-4 w-4" />, color: 'text-indigo-600' },
+      offer_sent: { variant: 'default', label: 'Offer Sent', icon: <CheckCircle className="h-4 w-4" />, color: 'text-green-600' },
       approved: { variant: 'default', label: 'Approved', icon: <CheckCircle className="h-4 w-4" />, color: 'text-green-600' },
       enrolled: { variant: 'default', label: 'Enrolled', icon: <CheckCircle className="h-4 w-4" />, color: 'text-green-600' },
       rejected: { variant: 'destructive', label: 'Rejected', icon: <XCircle className="h-4 w-4" />, color: 'text-red-600' },
@@ -88,6 +103,16 @@ export default function ApplicationDetailPage() {
         {config.label}
       </Badge>
     );
+  };
+
+  const getDocumentStatusBadge = (status: string) => {
+    const config: Record<string, { variant: any; label: string }> = {
+      pending: { variant: 'outline', label: 'Pending' },
+      verified: { variant: 'default', label: 'Verified' },
+      rejected: { variant: 'destructive', label: 'Rejected' }
+    };
+    const statusConfig = config[status] || config.pending;
+    return <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>;
   };
 
   if (loading) {
@@ -124,6 +149,12 @@ export default function ApplicationDetailPage() {
     );
   }
 
+  const additionalData = application.additional_data as any;
+  const pathwayData = additionalData?.pathway_data || {};
+  const assessmentData = application.assessment_data as any;
+  const interviewData = application.interview_data as any;
+  const reviewData = application.review_data as any;
+
   return (
     <div className="p-8 space-y-6">
       {/* Header */}
@@ -157,7 +188,8 @@ export default function ApplicationDetailPage() {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="student">Student Details</TabsTrigger>
           <TabsTrigger value="parent">Parent/Guardian</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="documents">Documents ({documents.length})</TabsTrigger>
+          <TabsTrigger value="assessment">Assessment & Interview</TabsTrigger>
           <TabsTrigger value="timeline">Timeline</TabsTrigger>
         </TabsList>
 
@@ -198,7 +230,7 @@ export default function ApplicationDetailPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold mb-2">
-                  Year {application.year_group || 'Not specified'}
+                  {application.year_group || pathwayData.year_group || 'Not specified'}
                 </div>
                 <p className="text-sm text-muted-foreground">
                   Requested grade level
@@ -218,50 +250,58 @@ export default function ApplicationDetailPage() {
                   <User className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
                     <div className="font-medium">Student Name</div>
-                    <div className="text-sm text-muted-foreground">{application.student_name}</div>
+                    <div className="text-sm text-muted-foreground">{application.student_name || pathwayData.student_name}</div>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <div className="font-medium">Date of Birth</div>
-                    <div className="text-sm text-muted-foreground">
-                      {application.date_of_birth 
-                        ? format(new Date(application.date_of_birth), 'dd MMM yyyy')
-                        : 'Not provided'}
+                {(application.date_of_birth || pathwayData.date_of_birth) && (
+                  <div className="flex items-start gap-3">
+                    <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <div className="font-medium">Date of Birth</div>
+                      <div className="text-sm text-muted-foreground">
+                        {format(new Date(application.date_of_birth || pathwayData.date_of_birth), 'dd MMM yyyy')}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <GraduationCap className="h-5 w-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <div className="font-medium">Previous School</div>
-                    <div className="text-sm text-muted-foreground">{application.previous_school || 'Not provided'}</div>
+                )}
+                {(application.previous_school || pathwayData.school_last_studied) && (
+                  <div className="flex items-start gap-3">
+                    <GraduationCap className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <div className="font-medium">Previous School</div>
+                      <div className="text-sm text-muted-foreground">{application.previous_school || pathwayData.school_last_studied}</div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <Users className="h-5 w-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <div className="font-medium">Parent/Guardian</div>
-                    <div className="text-sm text-muted-foreground">{application.parent_name || 'Not provided'}</div>
+                {(application.parent_name || pathwayData.father_name) && (
+                  <div className="flex items-start gap-3">
+                    <Users className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <div className="font-medium">Parent/Guardian</div>
+                      <div className="text-sm text-muted-foreground">{application.parent_name || pathwayData.father_name}</div>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <div className="font-medium">Email</div>
-                    <div className="text-sm text-muted-foreground">{application.parent_email}</div>
+                )}
+                {(application.parent_email || pathwayData.father_email) && (
+                  <div className="flex items-start gap-3">
+                    <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <div className="font-medium">Email</div>
+                      <div className="text-sm text-muted-foreground">{application.parent_email || pathwayData.father_email}</div>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <div className="font-medium">Phone</div>
-                    <div className="text-sm text-muted-foreground">{application.parent_phone || 'Not provided'}</div>
+                )}
+                {(application.parent_phone || pathwayData.father_mobile) && (
+                  <div className="flex items-start gap-3">
+                    <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <div className="font-medium">Phone</div>
+                      <div className="text-sm text-muted-foreground">{application.parent_phone || pathwayData.father_mobile}</div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -277,24 +317,50 @@ export default function ApplicationDetailPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">Full Name</div>
-                  <div className="text-base">{application.student_name}</div>
+                  <div className="text-base">{application.student_name || pathwayData.student_name}</div>
                 </div>
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">Date of Birth</div>
-                  <div className="text-base">
-                    {application.date_of_birth 
-                      ? format(new Date(application.date_of_birth), 'dd MMM yyyy')
-                      : 'Not provided'}
+                {(application.date_of_birth || pathwayData.date_of_birth) && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">Date of Birth</div>
+                    <div className="text-base">
+                      {format(new Date(application.date_of_birth || pathwayData.date_of_birth), 'dd MMM yyyy')}
+                    </div>
                   </div>
-                </div>
+                )}
+                {pathwayData.gender && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">Gender</div>
+                    <div className="text-base">{pathwayData.gender}</div>
+                  </div>
+                )}
+                {pathwayData.nationality && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">Nationality</div>
+                    <div className="text-base">{pathwayData.nationality}</div>
+                  </div>
+                )}
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">Year Group</div>
-                  <div className="text-base">Year {application.year_group || 'Not specified'}</div>
+                  <div className="text-base">{application.year_group || pathwayData.year_group || pathwayData.class_seeking_admission}</div>
                 </div>
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">Previous School</div>
-                  <div className="text-base">{application.previous_school || 'Not provided'}</div>
-                </div>
+                {(application.previous_school || pathwayData.school_last_studied) && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">Previous School</div>
+                    <div className="text-base">{application.previous_school || pathwayData.school_last_studied}</div>
+                  </div>
+                )}
+                {pathwayData.mother_tongue && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">Mother Tongue</div>
+                    <div className="text-base">{pathwayData.mother_tongue}</div>
+                  </div>
+                )}
+                {pathwayData.apar_id && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">APAR ID</div>
+                    <div className="text-base">{pathwayData.apar_id}</div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -304,61 +370,281 @@ export default function ApplicationDetailPage() {
         <TabsContent value="parent" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Parent/Guardian Information</CardTitle>
+              <CardTitle>Father's Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">Full Name</div>
-                  <div className="text-base">{application.parent_name || 'Not provided'}</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">Email</div>
-                  <div className="text-base">{application.parent_email}</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">Phone Number</div>
-                  <div className="text-base">{application.parent_phone || 'Not provided'}</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">Address</div>
-                  <div className="text-base">{(application.additional_data as any)?.address || 'Not provided'}</div>
-                </div>
+                {pathwayData.father_name && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">Full Name</div>
+                    <div className="text-base">{pathwayData.father_name}</div>
+                  </div>
+                )}
+                {pathwayData.father_email && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">Email</div>
+                    <div className="text-base">{pathwayData.father_email}</div>
+                  </div>
+                )}
+                {pathwayData.father_mobile && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">Phone</div>
+                    <div className="text-base">{pathwayData.father_mobile}</div>
+                  </div>
+                )}
+                {pathwayData.father_profession && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">Profession</div>
+                    <div className="text-base">{pathwayData.father_profession}</div>
+                  </div>
+                )}
+                {pathwayData.father_monthly_income && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">Monthly Income</div>
+                    <div className="text-base">₹{pathwayData.father_monthly_income}</div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Emergency Contact</CardTitle>
+              <CardTitle>Mother's Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">Contact Name</div>
-                  <div className="text-base">{application.emergency_contact_name || 'Not provided'}</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">Contact Phone</div>
-                  <div className="text-base">{application.emergency_contact_phone || 'Not provided'}</div>
-                </div>
+                {pathwayData.mother_name && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">Full Name</div>
+                    <div className="text-base">{pathwayData.mother_name}</div>
+                  </div>
+                )}
+                {pathwayData.mother_email && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">Email</div>
+                    <div className="text-base">{pathwayData.mother_email}</div>
+                  </div>
+                )}
+                {pathwayData.mother_mobile && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">Phone</div>
+                    <div className="text-base">{pathwayData.mother_mobile}</div>
+                  </div>
+                )}
+                {pathwayData.mother_profession && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">Profession</div>
+                    <div className="text-base">{pathwayData.mother_profession}</div>
+                  </div>
+                )}
+                {pathwayData.mother_monthly_income && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">Monthly Income</div>
+                    <div className="text-base">₹{pathwayData.mother_monthly_income}</div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
+
+          {(application.emergency_contact_name || pathwayData.guardian_mobile) && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Emergency Contact</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {application.emergency_contact_name && (
+                    <div>
+                      <div className="text-sm font-medium text-muted-foreground">Contact Name</div>
+                      <div className="text-base">{application.emergency_contact_name}</div>
+                    </div>
+                  )}
+                  {(application.emergency_contact_phone || pathwayData.guardian_mobile) && (
+                    <div>
+                      <div className="text-sm font-medium text-muted-foreground">Contact Phone</div>
+                      <div className="text-base">{application.emergency_contact_phone || pathwayData.guardian_mobile}</div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* Documents Tab */}
-        <TabsContent value="documents">
+        <TabsContent value="documents" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Application Documents</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12 text-muted-foreground">
-                Document management coming soon
-              </div>
+              {documents.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  No documents uploaded yet
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {documents.map((doc) => (
+                    <div key={doc.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors">
+                      <div className="flex items-center gap-3 flex-1">
+                        <FileText className="h-5 w-5 text-primary" />
+                        <div className="flex-1">
+                          <div className="font-medium">{doc.document_name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {doc.file_size ? `${(doc.file_size / 1024).toFixed(2)} KB` : 'Unknown size'} • 
+                            Uploaded {doc.uploaded_at ? format(new Date(doc.uploaded_at), 'dd MMM yyyy') : 'Unknown date'}
+                          </div>
+                          {doc.verification_notes && (
+                            <div className="text-sm text-muted-foreground mt-1">
+                              Note: {doc.verification_notes}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {getDocumentStatusBadge(doc.status)}
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4 mr-2" />
+                          View
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Assessment & Interview Tab */}
+        <TabsContent value="assessment" className="space-y-6">
+          {assessmentData && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Assessment Results</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {assessmentData.assessments && assessmentData.assessments.length > 0 ? (
+                  <div className="space-y-4">
+                    {assessmentData.assessments.map((assessment: any, index: number) => (
+                      <div key={index} className="p-4 border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="font-medium">{assessment.subject}</div>
+                          <Badge variant={assessment.status === 'pass' ? 'default' : 'destructive'}>
+                            {assessment.status}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">Marks:</span> {assessment.marks}/{assessment.maxMarks}
+                          </div>
+                          {assessment.comments && (
+                            <div className="col-span-2">
+                              <span className="text-muted-foreground">Comments:</span> {assessment.comments}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    {assessmentData.overallComments && (
+                      <div className="p-4 bg-muted rounded-lg">
+                        <div className="font-medium mb-2">Overall Comments</div>
+                        <div className="text-sm">{assessmentData.overallComments}</div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No assessment data available
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {interviewData && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Interview Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {interviewData.scheduledDate && (
+                      <div>
+                        <div className="text-sm font-medium text-muted-foreground">Scheduled Date</div>
+                        <div className="text-base">{format(new Date(interviewData.scheduledDate), 'dd MMM yyyy')}</div>
+                      </div>
+                    )}
+                    {interviewData.scheduledTime && (
+                      <div>
+                        <div className="text-sm font-medium text-muted-foreground">Time</div>
+                        <div className="text-base">{interviewData.scheduledTime}</div>
+                      </div>
+                    )}
+                    {interviewData.interviewer && (
+                      <div>
+                        <div className="text-sm font-medium text-muted-foreground">Interviewer</div>
+                        <div className="text-base">{interviewData.interviewer}</div>
+                      </div>
+                    )}
+                    {interviewData.result && (
+                      <div>
+                        <div className="text-sm font-medium text-muted-foreground">Result</div>
+                        <Badge variant={interviewData.result === 'pass' ? 'default' : 'destructive'}>
+                          {interviewData.result}
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                  {interviewData.comments && (
+                    <div className="p-4 bg-muted rounded-lg">
+                      <div className="font-medium mb-2">Interview Comments</div>
+                      <div className="text-sm">{interviewData.comments}</div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {reviewData && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Review Scores</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {reviewData.academicScore && (
+                    <div className="text-center p-4 border rounded-lg">
+                      <div className="text-2xl font-bold text-primary">{reviewData.academicScore}</div>
+                      <div className="text-sm text-muted-foreground">Academic</div>
+                    </div>
+                  )}
+                  {reviewData.behaviorScore && (
+                    <div className="text-center p-4 border rounded-lg">
+                      <div className="text-2xl font-bold text-primary">{reviewData.behaviorScore}</div>
+                      <div className="text-sm text-muted-foreground">Behavior</div>
+                    </div>
+                  )}
+                  {reviewData.communicationScore && (
+                    <div className="text-center p-4 border rounded-lg">
+                      <div className="text-2xl font-bold text-primary">{reviewData.communicationScore}</div>
+                      <div className="text-sm text-muted-foreground">Communication</div>
+                    </div>
+                  )}
+                  {reviewData.overallScore && (
+                    <div className="text-center p-4 border rounded-lg">
+                      <div className="text-2xl font-bold text-primary">{reviewData.overallScore}</div>
+                      <div className="text-sm text-muted-foreground">Overall</div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* Timeline Tab */}
@@ -369,6 +655,65 @@ export default function ApplicationDetailPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+                {additionalData?.decision_made_at && (
+                  <div className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className="w-3 h-3 rounded-full bg-primary"></div>
+                      <div className="w-0.5 h-full bg-border"></div>
+                    </div>
+                    <div className="pb-8">
+                      <div className="font-medium">Decision Made</div>
+                      <div className="text-sm text-muted-foreground">
+                        {format(new Date(additionalData.decision_made_at), 'dd MMM yyyy, HH:mm')}
+                      </div>
+                      {additionalData.decision_notes && (
+                        <div className="text-sm mt-1">Note: {additionalData.decision_notes}</div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {interviewData?.completedAt && (
+                  <div className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className="w-3 h-3 rounded-full bg-primary"></div>
+                      <div className="w-0.5 h-full bg-border"></div>
+                    </div>
+                    <div className="pb-8">
+                      <div className="font-medium">Interview Completed</div>
+                      <div className="text-sm text-muted-foreground">
+                        {format(new Date(interviewData.completedAt), 'dd MMM yyyy, HH:mm')}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {assessmentData?.completedAt && (
+                  <div className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className="w-3 h-3 rounded-full bg-primary"></div>
+                      <div className="w-0.5 h-full bg-border"></div>
+                    </div>
+                    <div className="pb-8">
+                      <div className="font-medium">Assessment Completed</div>
+                      <div className="text-sm text-muted-foreground">
+                        {format(new Date(assessmentData.completedAt), 'dd MMM yyyy, HH:mm')}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {reviewData?.reviewedAt && (
+                  <div className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className="w-3 h-3 rounded-full bg-primary"></div>
+                      <div className="w-0.5 h-full bg-border"></div>
+                    </div>
+                    <div className="pb-8">
+                      <div className="font-medium">Application Reviewed</div>
+                      <div className="text-sm text-muted-foreground">
+                        {format(new Date(reviewData.reviewedAt), 'dd MMM yyyy, HH:mm')}
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {application.submitted_at && (
                   <div className="flex gap-4">
                     <div className="flex flex-col items-center">
