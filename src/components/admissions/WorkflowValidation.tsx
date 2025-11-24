@@ -19,13 +19,13 @@ const DB_STATUSES = [
 
 // 7 Main workflow stages
 const WORKFLOW_STAGES = [
-  { id: 0, title: 'Application Submitted', status: 'submitted', dbStatuses: ['draft', 'submitted'] },
-  { id: 1, title: 'Application Review & Verify', status: 'under_review', dbStatuses: ['under_review', 'documents_pending'] },
-  { id: 2, title: 'Assessment/Interview', status: 'assessment_scheduled', dbStatuses: ['assessment_scheduled', 'assessment_complete', 'interview_scheduled', 'interview_complete'] },
-  { id: 3, title: 'Admission Decision', status: 'approved', dbStatuses: ['pending_approval', 'approved'] },
-  { id: 4, title: 'Fee Payment', status: 'offer_sent', dbStatuses: ['offer_sent'] },
-  { id: 5, title: 'Enrollment Confirmation', status: 'offer_accepted', dbStatuses: ['offer_accepted'] },
-  { id: 6, title: 'Welcome & Onboarding', status: 'enrolled', dbStatuses: ['enrolled'] }
+  { id: 1, title: 'Application Submitted', status: 'submitted', dbStatuses: ['draft', 'submitted'] },
+  { id: 2, title: 'Application Review & Verify', status: 'under_review', dbStatuses: ['under_review', 'documents_pending'] },
+  { id: 3, title: 'Assessment/Interview', status: 'assessment_scheduled', dbStatuses: ['assessment_scheduled', 'assessment_complete', 'interview_scheduled', 'interview_complete'] },
+  { id: 4, title: 'Admission Decision', status: 'approved', dbStatuses: ['pending_approval', 'approved'] },
+  { id: 5, title: 'Fee Payment', status: 'offer_sent', dbStatuses: ['offer_sent'] },
+  { id: 6, title: 'Enrollment Confirmation', status: 'offer_accepted', dbStatuses: ['offer_accepted'] },
+  { id: 7, title: 'Welcome & Onboarding', status: 'enrolled', dbStatuses: ['enrolled'] }
 ];
 
 // Expected workflow path
@@ -78,12 +78,12 @@ export function WorkflowValidation() {
       details: WORKFLOW_STAGES.map(s => ({ id: s.id, title: s.title }))
     },
     {
-      name: 'Stage IDs are sequential (0-6)',
-      passed: WORKFLOW_STAGES.every((stage, idx) => stage.id === idx),
+      name: 'Stage IDs are sequential (1-7)',
+      passed: WORKFLOW_STAGES.every((stage, idx) => stage.id === idx + 1),
       details: WORKFLOW_STAGES.map((s, idx) => ({ 
-        expected: idx, 
+        expected: idx + 1, 
         actual: s.id, 
-        match: s.id === idx 
+        match: s.id === idx + 1 
       }))
     },
     {

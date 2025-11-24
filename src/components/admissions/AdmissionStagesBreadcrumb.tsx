@@ -16,43 +16,43 @@ import {
 
 const admissionStages = [
   { 
-    id: 0, 
+    id: 1, 
     title: "Application Submitted", 
     icon: Send,
     shortTitle: "Submitted"
   },
   { 
-    id: 1, 
+    id: 2, 
     title: "Application Review & Verify", 
     icon: FileText,
     shortTitle: "Review & Verify"
   },
   { 
-    id: 2, 
+    id: 3, 
     title: "Assessment/Interview", 
     icon: ClipboardCheck,
     shortTitle: "Assessment"
   },
   { 
-    id: 3, 
+    id: 4, 
     title: "Admission Decision", 
     icon: CheckCircle,
     shortTitle: "Decision"
   },
   { 
-    id: 4, 
+    id: 5, 
     title: "Fee Payment", 
     icon: CreditCard,
     shortTitle: "Payment"
   },
   { 
-    id: 5, 
+    id: 6, 
     title: "Enrollment Confirmation", 
     icon: UserCheck,
     shortTitle: "Enrollment"
   },
   { 
-    id: 6, 
+    id: 7, 
     title: "Welcome & Onboarding", 
     icon: Users,
     shortTitle: "Onboarding"
