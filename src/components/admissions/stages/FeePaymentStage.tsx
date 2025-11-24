@@ -1,39 +1,113 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CreditCard, DollarSign, Receipt, Mail, CheckCircle, Clock, AlertTriangle, Download } from 'lucide-react';
+import { CreditCard, DollarSign, Receipt, Mail, CheckCircle, Clock, AlertTriangle, Download, Loader2 } from 'lucide-react';
 import { formatCurrency, getUserCurrency } from '@/lib/currency';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
+import { AdmissionsFeeService } from '@/services/AdmissionsFeeService';
 
 interface FeePaymentStageProps {
   applicationId: string;
   onMoveToNext: () => void;
 }
 
+interface FeeHead {
+  name: string;
+  amount: number;
+  description?: string;
+}
+
+interface AssignedFee {
+  id: string;
+  invoice_number: string;
+  category: string;
+  description: string;
+  amount: number;
+  due_date: string;
+  status: string;
+  assigned_at: string;
+  fee_structure_id?: string;
+}
+
 export function FeePaymentStage({ applicationId, onMoveToNext }: FeePaymentStageProps) {
   const [paymentPlan, setPaymentPlan] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [feeStructure, setFeeStructure] = useState<any>(null);
+  const [assignedFees, setAssignedFees] = useState<AssignedFee[]>([]);
+  const [applicationData, setApplicationData] = useState<any>(null);
+  const { toast } = useToast();
 
-  const feeStructure = {
-    applicationFee: 2000,
-    registrationFee: 10000,
-    tuitionFee: 250000,
-    uniformDeposit: 5000,
-    equipmentFee: 3000,
-    total: 270000
+  useEffect(() => {
+    loadFeeData();
+  }, [applicationId]);
+
+  const loadFeeData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch application data
+      const { data: app, error: appError } = await supabase
+        .from('enrollment_applications')
+        .select('*')
+        .eq('id', applicationId)
+        .single();
+
+      if (appError) throw appError;
+      setApplicationData(app);
+
+      // Fetch fee structure for this student's year group
+      const { data: feeStructures, error: feeError } = await supabase
+        .from('fee_structures')
+        .select('*')
+        .eq('status', 'active')
+        .eq('school_id', app.school_id)
+        .in('student_type', ['new', 'all'])
+        .contains('applicable_year_groups', [app.year_group])
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (feeError) throw feeError;
+
+      if (feeStructures && feeStructures.length > 0) {
+        setFeeStructure(feeStructures[0]);
+      } else {
+        toast({
+          title: 'No Fee Structure Found',
+          description: `No active fee structure found for ${app.year_group}. Please create one in Master Data.`,
+          variant: 'destructive',
+        });
+      }
+
+      // Fetch assigned fees
+      const fees = await AdmissionsFeeService.getAssignedFees(applicationId);
+      setAssignedFees(fees);
+
+    } catch (error) {
+      console.error('Error loading fee data:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load fee information',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const paymentSchedule = [
-    { id: 1, description: 'Application Fee', amount: 2000, dueDate: '2024-01-15', status: 'paid', paidDate: '2024-01-10' },
-    { id: 2, description: 'Registration Fee', amount: 10000, dueDate: '2024-02-01', status: 'pending', paidDate: null },
-    { id: 3, description: 'First Tuition Payment', amount: 83333, dueDate: '2024-03-01', status: 'pending', paidDate: null },
-    { id: 4, description: 'Second Tuition Payment', amount: 83333, dueDate: '2024-06-01', status: 'scheduled', paidDate: null },
-    { id: 5, description: 'Final Tuition Payment', amount: 83334, dueDate: '2024-09-01', status: 'scheduled', paidDate: null },
-    { id: 6, description: 'Uniform Deposit', amount: 5000, dueDate: '2024-08-15', status: 'scheduled', paidDate: null },
-    { id: 7, description: 'Equipment Fee', amount: 3000, dueDate: '2024-08-15', status: 'scheduled', paidDate: null }
-  ];
+  // Convert assigned fees to payment schedule format
+  const paymentSchedule = assignedFees.map((fee, index) => ({
+    id: index + 1,
+    description: fee.description,
+    amount: fee.amount,
+    dueDate: fee.due_date,
+    status: fee.status,
+    paidDate: null
+  }));
 
   const paymentMethods = [
     { id: 'credit_debit_card', name: 'Credit/Debit Card', icon: '💳', description: 'Visa, Mastercard, Rupay' },
@@ -70,6 +144,34 @@ export function FeePaymentStage({ applicationId, onMoveToNext }: FeePaymentStage
   const totalPaid = paymentSchedule.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.amount, 0);
   const totalPending = paymentSchedule.filter(p => p.status === 'pending').reduce((sum, p) => sum + p.amount, 0);
   const totalScheduled = paymentSchedule.filter(p => p.status === 'scheduled').reduce((sum, p) => sum + p.amount, 0);
+  const totalAmount = feeStructure?.total_amount || 0;
+
+  // Parse fee heads from JSONB
+  const feeHeads: FeeHead[] = feeStructure?.fee_heads || [];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!feeStructure) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>No Fee Structure Available</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">
+            No fee structure has been configured for {applicationData?.year_group}. 
+            Please contact the admissions office or configure fee structures in Master Data Management.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -93,7 +195,7 @@ export function FeePaymentStage({ applicationId, onMoveToNext }: FeePaymentStage
               <div className="text-sm text-muted-foreground">Scheduled</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-primary">{formatCurrency(feeStructure.total, getUserCurrency())}</div>
+              <div className="text-2xl font-bold text-primary">{formatCurrency(totalAmount, getUserCurrency())}</div>
               <div className="text-sm text-muted-foreground">Total</div>
             </div>
           </div>
@@ -112,34 +214,37 @@ export function FeePaymentStage({ applicationId, onMoveToNext }: FeePaymentStage
         <TabsContent value="schedule" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Fee Breakdown</CardTitle>
+              <CardTitle>Fee Breakdown - {feeStructure.name}</CardTitle>
+              {feeStructure.description && (
+                <p className="text-sm text-muted-foreground">{feeStructure.description}</p>
+              )}
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span>Application Fee</span>
-                  <span className="font-medium">₹{feeStructure.applicationFee}</span>
+                <div className="text-sm text-muted-foreground mb-4">
+                  <p>Academic Year: {feeStructure.academic_year}</p>
+                  <p>Term: {feeStructure.term}</p>
+                  <p>Applicable to: {feeStructure.applicable_year_groups?.join(', ') || 'All'}</p>
                 </div>
-                <div className="flex justify-between">
-                  <span>Registration Fee</span>
-                  <span className="font-medium">₹{feeStructure.registrationFee}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Annual Tuition Fee</span>
-                  <span className="font-medium">₹{feeStructure.tuitionFee.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Uniform Deposit</span>
-                  <span className="font-medium">₹{feeStructure.uniformDeposit}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Equipment Fee</span>
-                  <span className="font-medium">₹{feeStructure.equipmentFee}</span>
-                </div>
+                
+                {feeHeads.length > 0 ? (
+                  feeHeads.map((head: FeeHead, index: number) => (
+                    <div key={index} className="flex justify-between">
+                      <span>{head.name}</span>
+                      <span className="font-medium">{formatCurrency(head.amount, getUserCurrency())}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex justify-between">
+                    <span>Total Fees</span>
+                    <span className="font-medium">{formatCurrency(totalAmount, getUserCurrency())}</span>
+                  </div>
+                )}
+                
                 <hr />
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total</span>
-                  <span>₹{feeStructure.total.toLocaleString()}</span>
+                  <span>{formatCurrency(totalAmount, getUserCurrency())}</span>
                 </div>
               </div>
             </CardContent>

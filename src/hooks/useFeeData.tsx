@@ -27,6 +27,7 @@ export interface FeeStructure {
   fee_heads: any[];
   total_amount: number;
   applicable_year_groups?: string[];
+  student_type?: 'new' | 'existing' | 'all';
   status: string;
   created_at: string;
   updated_at: string;

@@ -4059,6 +4059,7 @@ export type Database = {
           name: string
           school_id: string
           status: string
+          student_type: string | null
           term: string
           total_amount: number
           updated_at: string
@@ -4073,6 +4074,7 @@ export type Database = {
           name: string
           school_id: string
           status?: string
+          student_type?: string | null
           term: string
           total_amount?: number
           updated_at?: string
@@ -4087,6 +4089,7 @@ export type Database = {
           name?: string
           school_id?: string
           status?: string
+          student_type?: string | null
           term?: string
           total_amount?: number
           updated_at?: string

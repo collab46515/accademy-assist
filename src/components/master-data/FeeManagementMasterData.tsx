@@ -688,6 +688,22 @@ export function FeeManagementMasterData() {
                     placeholder="Year 7, Year 8 (comma-separated)" 
                   />
                 </div>
+                <div>
+                  <label className="text-sm font-medium">Student Type *</label>
+                  <Select onValueChange={(value) => form.setValue('student_type', value)} defaultValue="all">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select student type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Students</SelectItem>
+                      <SelectItem value="new">New Students (Admissions)</SelectItem>
+                      <SelectItem value="existing">Existing Students (Promotions)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Specify if this fee structure applies to new admissions, existing students being promoted, or all students
+                  </p>
+                </div>
               </>
             ) : activeTab === 'payment-plans' ? (
               <>

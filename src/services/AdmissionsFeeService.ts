@@ -147,11 +147,13 @@ export class AdmissionsFeeService {
         return null;
       }
 
+      // For admissions, fetch fee structures for new students
       const { data: feeStructures, error } = await supabase
         .from('fee_structures')
         .select('*')
         .eq('status', 'active')
         .eq('school_id', schoolId)
+        .in('student_type', ['new', 'all'])
         .contains('applicable_year_groups', [yearGroup])
         .order('created_at', { ascending: false })
         .limit(1);
