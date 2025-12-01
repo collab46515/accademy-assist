@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { AdmissionsFeeService } from '@/services/AdmissionsFeeService';
-import { CreditCard, DollarSign, Calendar, FileText, CheckCircle } from 'lucide-react';
+import { AdmissionsFeeService, type FeeHead } from '@/services/AdmissionsFeeService';
+import { CreditCard, DollarSign, Calendar, FileText, CheckCircle, List } from 'lucide-react';
 
 interface FeesDisplayProps {
   applicationId: string;
@@ -14,19 +14,27 @@ interface FeesDisplayProps {
 
 export function FeesDisplay({ applicationId, applicationData, currentStage }: FeesDisplayProps) {
   const [assignedFees, setAssignedFees] = useState<any[]>([]);
+  const [feeHeadsBreakdown, setFeeHeadsBreakdown] = useState<FeeHead[]>([]);
+  const [installmentPlan, setInstallmentPlan] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchAssignedFees();
+    fetchFeeData();
   }, [applicationId, currentStage]);
 
-  const fetchAssignedFees = async () => {
+  const fetchFeeData = async () => {
     try {
       setLoading(true);
-      const fees = await AdmissionsFeeService.getAssignedFees(applicationId);
+      const [fees, feeHeads, plan] = await Promise.all([
+        AdmissionsFeeService.getAssignedFees(applicationId),
+        AdmissionsFeeService.getFeeHeadsBreakdown(applicationId),
+        AdmissionsFeeService.getInstallmentPlan(applicationId)
+      ]);
       setAssignedFees(fees);
+      setFeeHeadsBreakdown(feeHeads);
+      setInstallmentPlan(plan);
     } catch (error) {
-      console.error('Error fetching fees:', error);
+      console.error('Error fetching fee data:', error);
     } finally {
       setLoading(false);
     }
@@ -69,20 +77,77 @@ export function FeesDisplay({ applicationId, applicationData, currentStage }: Fe
           </div>
         )}
 
-        {/* Current Stage Payment Requirements */}
-        {isPaymentStage && (
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <DollarSign className="h-4 w-4 text-yellow-600" />
-              <span className="font-medium text-yellow-800">Payment Required for Current Stage</span>
-            </div>
-            <div className="text-sm text-yellow-700">
-              {currentStage === 'application_fee' && 'Application processing fee will be auto-assigned when advancing to this stage.'}
-              {currentStage === 'deposit' && 'Admission deposit (15% of annual fees) will be auto-assigned based on year group.'}
-              {currentStage === 'confirmed' && 'Full term tuition fees will be auto-assigned based on selected fee structure.'}
+      {/* Fee Heads Breakdown from Master Data */}
+      {feeHeadsBreakdown.length > 0 && (
+        <>
+          <Separator />
+          <div className="space-y-3">
+            <h4 className="font-medium flex items-center gap-2">
+              <List className="h-4 w-4" />
+              Annual Fee Breakdown
+            </h4>
+            <div className="space-y-2">
+              {feeHeadsBreakdown.map((head, index) => (
+                <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  <div>
+                    <div className="font-medium text-sm">{head.name}</div>
+                    {head.description && (
+                      <div className="text-xs text-muted-foreground">{head.description}</div>
+                    )}
+                  </div>
+                  <div className="font-bold text-sm">₹{head.amount.toLocaleString()}</div>
+                </div>
+              ))}
+              <div className="flex items-center justify-between p-2 bg-blue-50 rounded font-bold">
+                <span>Total Annual Fees</span>
+                <span className="text-blue-700">
+                  ₹{feeHeadsBreakdown.reduce((sum, head) => sum + head.amount, 0).toLocaleString()}
+                </span>
+              </div>
             </div>
           </div>
-        )}
+        </>
+      )}
+
+      {/* Installment Plan */}
+      {installmentPlan && (
+        <>
+          <Separator />
+          <div className="space-y-3">
+            <h4 className="font-medium">Payment Plan: {installmentPlan.type === 'full' ? 'Full Payment' : '40-30-30 Installments'}</h4>
+            <div className="space-y-2">
+              {installmentPlan.installments.map((inst: any, index: number) => (
+                <div key={index} className="flex items-center justify-between p-2 border rounded">
+                  <div>
+                    <div className="font-medium text-sm">{inst.description}</div>
+                    <div className="text-xs text-muted-foreground">Due: {new Date(inst.due_date).toLocaleDateString()}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-bold text-sm">₹{inst.amount.toLocaleString()}</div>
+                    <div className="text-xs text-muted-foreground">{inst.percentage}%</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Current Stage Payment Requirements */}
+      {isPaymentStage && (
+        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="flex items-center gap-2 mb-2">
+            <DollarSign className="h-4 w-4 text-yellow-600" />
+            <span className="font-medium text-yellow-800">Payment Required for Current Stage</span>
+          </div>
+          <div className="text-sm text-yellow-700">
+            {currentStage === 'application_fee' && 'Application processing fee will be auto-assigned from fee structure.'}
+            {currentStage === 'deposit' && 'Admission deposit (15% of annual fees) will be auto-assigned based on fee structure.'}
+            {currentStage === 'admission_decision' && 'Annual fees with installment option (Full or 40-30-30) will be assigned.'}
+            {currentStage === 'confirmed' && 'Full annual fees will be assigned based on selected payment plan.'}
+          </div>
+        </div>
+      )}
 
         {/* Assigned Fees List */}
         {assignedFees.length > 0 && (
