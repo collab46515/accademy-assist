@@ -627,7 +627,7 @@ export function ApplicationsDashboardContent() {
             <Button 
               variant="outline" 
               className="w-full h-20 text-base"
-              onClick={() => navigate('/settings/admissions')}
+              onClick={() => navigate('/school-settings')}
             >
               <Settings className="h-5 w-5 mr-2" />
               Settings
