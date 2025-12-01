@@ -20,7 +20,9 @@ import {
   Download
 } from "lucide-react";
 import { FeeStructureBuilder } from './FeeStructureBuilder';
+import { FeeStructureForm } from './FeeStructureForm';
 import { useFeeData } from '@/hooks/useFeeData';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 // No mock data - using real database data only
 
@@ -29,6 +31,7 @@ export const FeeStructureTabs = () => {
   const [selectedTerm, setSelectedTerm] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   
   const { feeStructures, loading } = useFeeData();
 
@@ -95,10 +98,23 @@ export const FeeStructureTabs = () => {
           <h2 className="text-2xl font-bold text-foreground">Fee Structures</h2>
           <p className="text-muted-foreground">Manage and monitor fee structures across your school</p>
         </div>
-        <Button className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Create Fee Structure
-        </Button>
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogTrigger asChild>
+            <Button className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Create Fee Structure
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden">
+            <DialogHeader>
+              <DialogTitle>Create New Fee Structure</DialogTitle>
+            </DialogHeader>
+            <FeeStructureForm
+              onSave={() => setShowCreateDialog(false)}
+              onCancel={() => setShowCreateDialog(false)}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
