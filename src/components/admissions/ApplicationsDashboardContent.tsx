@@ -136,6 +136,14 @@ export function ApplicationsDashboardContent() {
           status: 'interview_complete'
         },
         { 
+          stage: 'Admission Decision', 
+          count: applications?.filter(a => 
+            a.status === 'admission_decision'
+          ).length || 0,
+          conversion: 0,
+          status: 'admission_decision'
+        },
+        { 
           stage: 'Approved', 
           count: approved,
           conversion: 0,

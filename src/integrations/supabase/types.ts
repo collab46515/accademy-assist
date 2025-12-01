@@ -9045,6 +9045,7 @@ export type Database = {
         | "assessment_complete"
         | "interview_scheduled"
         | "interview_complete"
+        | "admission_decision"
         | "pending_approval"
         | "approved"
         | "offer_sent"
@@ -9332,6 +9333,7 @@ export const Constants = {
         "assessment_complete",
         "interview_scheduled",
         "interview_complete",
+        "admission_decision",
         "pending_approval",
         "approved",
         "offer_sent",
