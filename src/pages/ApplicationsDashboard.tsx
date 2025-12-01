@@ -131,6 +131,7 @@ export default function ApplicationsDashboard() {
             a.status === 'assessment_complete' || 
             a.status === 'interview_scheduled' ||
             a.status === 'interview_complete' ||
+            a.status === 'admission_decision' ||
             a.status === 'approved' ||
             a.status === 'enrolled'
           ).length || 0,
@@ -140,6 +141,16 @@ export default function ApplicationsDashboard() {
           stage: 'Interviewed', 
           count: applications?.filter(a => 
             a.status === 'interview_complete' ||
+            a.status === 'admission_decision' ||
+            a.status === 'approved' ||
+            a.status === 'enrolled'
+          ).length || 0,
+          conversion: 0
+        },
+        { 
+          stage: 'Admission Decision', 
+          count: applications?.filter(a => 
+            a.status === 'admission_decision' ||
             a.status === 'approved' ||
             a.status === 'enrolled'
           ).length || 0,
