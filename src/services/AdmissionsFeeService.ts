@@ -7,6 +7,25 @@ export interface FeeAssignmentResult {
   error?: string;
 }
 
+export interface FeeHead {
+  name: string;
+  amount: number;
+  description?: string;
+  is_mandatory?: boolean;
+  category?: string;
+}
+
+export interface InstallmentPlan {
+  type: 'full' | '40-30-30';
+  installments: Array<{
+    sequence: number;
+    percentage: number;
+    amount: number;
+    due_date: string;
+    description: string;
+  }>;
+}
+
 export class AdmissionsFeeService {
   
   /**
@@ -15,10 +34,11 @@ export class AdmissionsFeeService {
   static async assignFeesForStage(
     applicationId: string, 
     stage: string, 
-    applicationData: any
+    applicationData: any,
+    installmentType: 'full' | '40-30-30' = 'full'
   ): Promise<FeeAssignmentResult> {
     
-    console.log(`🎯 Auto-assigning fees for stage: ${stage}`);
+    console.log(`🎯 Auto-assigning fees for stage: ${stage}, installment: ${installmentType}`);
     
     try {
       switch (stage) {
@@ -29,7 +49,11 @@ export class AdmissionsFeeService {
           return await this.assignDepositFee(applicationId, applicationData);
         
         case 'confirmed':
-          return await this.assignMainTuitionFees(applicationId, applicationData);
+          return await this.assignMainTuitionFees(applicationId, applicationData, installmentType);
+        
+        case 'admission_decision':
+          // For admission decision stage, assign all annual fees with installment plan
+          return await this.assignAnnualFees(applicationId, applicationData, installmentType);
         
         default:
           return { success: true }; // No fees for this stage
@@ -41,48 +65,70 @@ export class AdmissionsFeeService {
   }
 
   /**
-   * Assign application fee (typically £50-100)
+   * Assign application fee from fee structure
    */
   private static async assignApplicationFee(
     applicationId: string, 
     applicationData: any
   ): Promise<FeeAssignmentResult> {
     
-    const applicationFeeAmount = 75; // £75 application fee
-    
-    const result = await this.createInvoice({
-      applicationId,
-      applicationData,
-      amount: applicationFeeAmount,
-      description: 'Application Processing Fee',
-      category: 'Application Fee',
-      dueInDays: 7
-    });
-
-    if (result.success) {
-      console.log(`✅ Application fee assigned: £${applicationFeeAmount}`);
-    }
-    
-    return result;
-  }
-
-  /**
-   * Assign deposit fee (typically 10-20% of annual fees)
-   */
-  private static async assignDepositFee(
-    applicationId: string, 
-    applicationData: any
-  ): Promise<FeeAssignmentResult> {
-    
-    // Get appropriate fee structure for the student's year group
     const feeStructure = await this.getFeeStructureForStudent(applicationData);
     
     if (!feeStructure) {
       return { success: false, error: 'No fee structure found for this year group' };
     }
 
-    // Calculate 15% deposit of annual fees
-    const depositAmount = Math.round(feeStructure.total_amount * 0.15);
+    // Find application fee from fee heads
+    const feeHeads: FeeHead[] = (feeStructure.fee_heads as unknown as FeeHead[]) || [];
+    const applicationFeeHead = feeHeads.find(head =>
+      head.category?.toLowerCase() === 'admission' || 
+      head.name.toLowerCase().includes('admission')
+    );
+
+    if (!applicationFeeHead) {
+      return { success: false, error: 'Application fee not defined in fee structure' };
+    }
+    
+    const result = await this.createInvoice({
+      applicationId,
+      applicationData,
+      amount: applicationFeeHead.amount,
+      description: applicationFeeHead.name,
+      category: 'Application Fee',
+      dueInDays: 7,
+      feeStructureId: feeStructure.id,
+      feeHeadName: applicationFeeHead.name
+    });
+
+    if (result.success) {
+      console.log(`✅ Application fee assigned: ₹${applicationFeeHead.amount}`);
+    }
+    
+    return result;
+  }
+
+  /**
+   * Assign deposit fee (15% of annual fees calculated from fee heads)
+   */
+  private static async assignDepositFee(
+    applicationId: string, 
+    applicationData: any
+  ): Promise<FeeAssignmentResult> {
+    
+    const feeStructure = await this.getFeeStructureForStudent(applicationData);
+    
+    if (!feeStructure) {
+      return { success: false, error: 'No fee structure found for this year group' };
+    }
+
+    // Calculate total from fee heads (excluding mess fees which are monthly)
+    const feeHeads: FeeHead[] = (feeStructure.fee_heads as unknown as FeeHead[]) || [];
+    const annualTotal = feeHeads
+      .filter(head => !head.name.toLowerCase().includes('mess'))
+      .reduce((sum, head) => sum + head.amount, 0);
+
+    // Calculate 15% deposit
+    const depositAmount = Math.round(annualTotal * 0.15);
     
     const result = await this.createInvoice({
       applicationId,
@@ -91,58 +137,155 @@ export class AdmissionsFeeService {
       description: `Admission Deposit (15% of annual fees)`,
       category: 'Deposit',
       dueInDays: 14,
-      feeStructureId: feeStructure.id
+      feeStructureId: feeStructure.id,
+      notes: `Calculated as 15% of ₹${annualTotal} annual fees`
     });
 
     if (result.success) {
-      console.log(`✅ Deposit fee assigned: £${depositAmount}`);
+      console.log(`✅ Deposit fee assigned: ₹${depositAmount}`);
     }
     
     return result;
   }
 
   /**
-   * Assign main tuition fees based on year group and fee structure
+   * Assign all annual fees with installment plan
    */
-  private static async assignMainTuitionFees(
+  private static async assignAnnualFees(
     applicationId: string, 
-    applicationData: any
+    applicationData: any,
+    installmentType: 'full' | '40-30-30' = 'full'
   ): Promise<FeeAssignmentResult> {
     
-    // Get appropriate fee structure for the student's year group
     const feeStructure = await this.getFeeStructureForStudent(applicationData);
     
     if (!feeStructure) {
       return { success: false, error: 'No fee structure found for this year group' };
     }
 
-    // Check if there's a class-specific amount for this year group
-    const yearGroup = applicationData.year_group;
-    let feeAmount = feeStructure.total_amount;
+    const feeHeads: FeeHead[] = (feeStructure.fee_heads as unknown as FeeHead[]) || [];
     
-    if (feeStructure.year_group_amounts && feeStructure.year_group_amounts[yearGroup]) {
-      feeAmount = feeStructure.year_group_amounts[yearGroup];
-      console.log(`💰 Using class-specific amount for ${yearGroup}: £${feeAmount}`);
-    } else {
-      console.log(`💰 Using default amount: £${feeAmount}`);
+    // Separate fees by type
+    const annualFees = feeHeads.filter(head => !head.name.toLowerCase().includes('mess'));
+    const messFees = feeHeads.find(head => head.name.toLowerCase().includes('mess'));
+    
+    const annualTotal = annualFees.reduce((sum, head) => sum + head.amount, 0);
+
+    // Create installment plan
+    const installmentPlan = this.createInstallmentPlan(annualTotal, installmentType);
+
+    // Create invoices for each installment
+    const invoices = [];
+    for (const installment of installmentPlan.installments) {
+      const result = await this.createInvoice({
+        applicationId,
+        applicationData,
+        amount: installment.amount,
+        description: installment.description,
+        category: 'Tuition',
+        dueDate: installment.due_date,
+        feeStructureId: feeStructure.id,
+        notes: `${installmentPlan.type} payment plan - Installment ${installment.sequence} of ${installmentPlan.installments.length}`
+      });
+      
+      if (result.success) {
+        invoices.push(result);
+      }
     }
 
-    // Create invoice for term fees
-    const result = await this.createInvoice({
-      applicationId,
-      applicationData,
-      amount: feeAmount,
-      description: `${feeStructure.name} - ${yearGroup}`,
-      category: 'Tuition',
-      dueInDays: 30,
-      feeStructureId: feeStructure.id
-    });
+    // Store installment plan in application data
+    await this.saveInstallmentPlan(applicationId, applicationData, installmentPlan, feeHeads);
 
-    if (result.success) {
-      console.log(`✅ Main tuition fees assigned: £${feeAmount}`);
+    return {
+      success: true,
+      amount: annualTotal
+    };
+  }
+
+  /**
+   * Assign main tuition fees (legacy method, kept for compatibility)
+   */
+  private static async assignMainTuitionFees(
+    applicationId: string, 
+    applicationData: any,
+    installmentType: 'full' | '40-30-30' = 'full'
+  ): Promise<FeeAssignmentResult> {
+    return await this.assignAnnualFees(applicationId, applicationData, installmentType);
+  }
+
+  /**
+   * Create installment plan based on type
+   */
+  private static createInstallmentPlan(totalAmount: number, type: 'full' | '40-30-30'): InstallmentPlan {
+    const today = new Date();
+    
+    if (type === 'full') {
+      return {
+        type: 'full',
+        installments: [{
+          sequence: 1,
+          percentage: 100,
+          amount: totalAmount,
+          due_date: new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          description: 'Full Annual Fee Payment'
+        }]
+      };
     }
     
-    return result;
+    // 40-30-30 installment plan
+    const firstInstallment = Math.round(totalAmount * 0.40);
+    const secondInstallment = Math.round(totalAmount * 0.30);
+    const thirdInstallment = totalAmount - firstInstallment - secondInstallment; // Remainder to handle rounding
+    
+    return {
+      type: '40-30-30',
+      installments: [
+        {
+          sequence: 1,
+          percentage: 40,
+          amount: firstInstallment,
+          due_date: new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          description: '1st Installment (40%) - At Admission'
+        },
+        {
+          sequence: 2,
+          percentage: 30,
+          amount: secondInstallment,
+          due_date: new Date(today.getTime() + 120 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          description: '2nd Installment (30%) - Term I'
+        },
+        {
+          sequence: 3,
+          percentage: 30,
+          amount: thirdInstallment,
+          due_date: new Date(today.getTime() + 240 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          description: '3rd Installment (30%) - Term II'
+        }
+      ]
+    };
+  }
+
+  /**
+   * Save installment plan to application
+   */
+  private static async saveInstallmentPlan(
+    applicationId: string,
+    applicationData: any,
+    installmentPlan: InstallmentPlan,
+    feeHeads: FeeHead[]
+  ) {
+    const existingData = applicationData.additional_data || {};
+    
+    await supabase
+      .from('enrollment_applications')
+      .update({
+        additional_data: {
+          ...existingData,
+          installment_plan: installmentPlan,
+          fee_heads_breakdown: feeHeads
+        }
+      })
+      .eq('id', applicationId);
   }
 
   /**
@@ -158,7 +301,6 @@ export class AdmissionsFeeService {
         return null;
       }
 
-      // For admissions, fetch fee structures for new students
       const { data: feeStructures, error } = await supabase
         .from('fee_structures')
         .select('*')
@@ -198,15 +340,21 @@ export class AdmissionsFeeService {
     description,
     category,
     dueInDays,
-    feeStructureId
+    dueDate,
+    feeStructureId,
+    feeHeadName,
+    notes
   }: {
     applicationId: string;
     applicationData: any;
     amount: number;
     description: string;
     category: string;
-    dueInDays: number;
+    dueInDays?: number;
+    dueDate?: string;
     feeStructureId?: string;
+    feeHeadName?: string;
+    notes?: string;
   }): Promise<FeeAssignmentResult> {
     
     try {
@@ -214,22 +362,27 @@ export class AdmissionsFeeService {
       const invoiceNumber = `INV-${applicationData.application_number || applicationId.slice(-6)}-${Date.now().toString().slice(-6)}`;
       
       // Calculate due date
-      const dueDate = new Date();
-      dueDate.setDate(dueDate.getDate() + dueInDays);
+      let calculatedDueDate: string;
+      if (dueDate) {
+        calculatedDueDate = dueDate;
+      } else {
+        const dueDateObj = new Date();
+        dueDateObj.setDate(dueDateObj.getDate() + (dueInDays || 30));
+        calculatedDueDate = dueDateObj.toISOString().split('T')[0];
+      }
 
-      // For now, just store fee information in application data until student record is created
-      // When the student record is created, we can transfer this to proper invoice records
-      
       const feeAssignment = {
-        id: `fee_${Date.now()}`,
+        id: `fee_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         invoice_number: invoiceNumber,
         category,
         description,
         amount: amount,
-        due_date: dueDate.toISOString().split('T')[0],
+        due_date: calculatedDueDate,
         status: 'pending',
         assigned_at: new Date().toISOString(),
-        fee_structure_id: feeStructureId
+        fee_structure_id: feeStructureId,
+        fee_head_name: feeHeadName,
+        notes: notes || `${description} - Auto-assigned`
       };
 
       // Update application with fee assignment
@@ -288,9 +441,57 @@ export class AdmissionsFeeService {
   }
 
   /**
+   * Get fee heads breakdown for an application
+   */
+  static async getFeeHeadsBreakdown(applicationId: string): Promise<FeeHead[]> {
+    try {
+      const { data: application, error } = await supabase
+        .from('enrollment_applications')
+        .select('additional_data')
+        .eq('id', applicationId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching fee heads:', error);
+        return [];
+      }
+
+      const additionalData = application?.additional_data as any;
+      return additionalData?.fee_heads_breakdown || [];
+    } catch (error) {
+      console.error('Error in getFeeHeadsBreakdown:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get installment plan for an application
+   */
+  static async getInstallmentPlan(applicationId: string): Promise<InstallmentPlan | null> {
+    try {
+      const { data: application, error } = await supabase
+        .from('enrollment_applications')
+        .select('additional_data')
+        .eq('id', applicationId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching installment plan:', error);
+        return null;
+      }
+
+      const additionalData = application?.additional_data as any;
+      return additionalData?.installment_plan || null;
+    } catch (error) {
+      console.error('Error in getInstallmentPlan:', error);
+      return null;
+    }
+  }
+
+  /**
    * Check if payment is required for current stage
    */
   static isPaymentStage(stage: string): boolean {
-    return ['application_fee', 'deposit', 'confirmed'].includes(stage);
+    return ['application_fee', 'deposit', 'confirmed', 'admission_decision'].includes(stage);
   }
 }
