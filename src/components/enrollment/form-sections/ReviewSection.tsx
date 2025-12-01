@@ -63,49 +63,108 @@ export function ReviewSection() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            Parent/Guardian Information
+            Family Details
             <Badge variant="outline">Step 2</Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="font-medium">Name:</span> {formData.parent_name || 'Not provided'}
-            </div>
-            <div>
-              <span className="font-medium">Email:</span> {formData.parent_email || 'Not provided'}
-            </div>
-            <div>
-              <span className="font-medium">Phone:</span> {formData.parent_phone || 'Not provided'}
-            </div>
-            <div>
-              <span className="font-medium">Relationship:</span> {formData.parent_relationship || 'Parent'}
-            </div>
-            <div className="md:col-span-2">
-              <span className="font-medium">Address:</span> {formData.home_address || 'Not provided'}
-            </div>
-            <div>
-              <span className="font-medium">PIN Code:</span> {formData.postal_code || 'Not provided'}
-            </div>
-            <div>
-              <span className="font-medium">Country:</span> {formData.country || 'Not provided'}
-            </div>
-          </div>
-          
-          <Separator />
-          
+        <CardContent className="space-y-4">
+          {/* Father's Details */}
           <div className="space-y-2">
-            <h4 className="font-medium">Emergency Contact</h4>
+            <h4 className="font-semibold text-sm">Father's Details</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="font-medium">Name:</span> {formData.emergency_contact_name || 'Not provided'}
+                <span className="font-medium">Name:</span> {formData.father_name || 'Not provided'}
               </div>
               <div>
-                <span className="font-medium">Phone:</span> {formData.emergency_contact_phone || 'Not provided'}
+                <span className="font-medium">Profession:</span> {formData.father_profession || 'Not provided'}
               </div>
               <div>
-                <span className="font-medium">Relationship:</span> {formData.emergency_contact_relationship || 'Not provided'}
+                <span className="font-medium">Mobile:</span> {formData.father_mobile || 'Not provided'}
               </div>
+              <div>
+                <span className="font-medium">Email:</span> {formData.father_email || 'Not provided'}
+              </div>
+              <div>
+                <span className="font-medium">Monthly Income:</span> {formData.father_monthly_income || 'Not provided'}
+              </div>
+              <div>
+                <span className="font-medium">Organization:</span> {formData.father_organization || 'Not provided'}
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Mother's Details */}
+          <div className="space-y-2">
+            <h4 className="font-semibold text-sm">Mother's Details</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="font-medium">Name:</span> {formData.mother_name || 'Not provided'}
+              </div>
+              <div>
+                <span className="font-medium">Profession:</span> {formData.mother_profession || 'Not provided'}
+              </div>
+              <div>
+                <span className="font-medium">Mobile:</span> {formData.mother_mobile || 'Not provided'}
+              </div>
+              <div>
+                <span className="font-medium">Email:</span> {formData.mother_email || 'Not provided'}
+              </div>
+              <div>
+                <span className="font-medium">Monthly Income:</span> {formData.mother_monthly_income || 'Not provided'}
+              </div>
+              <div>
+                <span className="font-medium">Organization:</span> {formData.mother_organization || 'Not provided'}
+              </div>
+            </div>
+          </div>
+
+          {(formData.guardian_name || formData.guardian_mobile || formData.guardian_email) && (
+            <>
+              <Separator />
+              
+              {/* Guardian's Details */}
+              <div className="space-y-2">
+                <h4 className="font-semibold text-sm">Guardian's Details</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium">Name:</span> {formData.guardian_name || 'Not provided'}
+                  </div>
+                  <div>
+                    <span className="font-medium">Profession:</span> {formData.guardian_profession || 'Not provided'}
+                  </div>
+                  <div>
+                    <span className="font-medium">Mobile:</span> {formData.guardian_mobile || 'Not provided'}
+                  </div>
+                  <div>
+                    <span className="font-medium">Email:</span> {formData.guardian_email || 'Not provided'}
+                  </div>
+                  <div>
+                    <span className="font-medium">Monthly Income:</span> {formData.guardian_monthly_income || 'Not provided'}
+                  </div>
+                  <div>
+                    <span className="font-medium">Organization:</span> {formData.guardian_organization || 'Not provided'}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          <Separator />
+
+          {/* Sibling Information */}
+          <div className="space-y-2">
+            <h4 className="font-semibold text-sm">Sibling Information</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="font-medium">Has Sibling in School:</span> {formData.has_sibling_in_school || 'Not provided'}
+              </div>
+              {formData.sibling_information && (
+                <div className="md:col-span-2">
+                  <span className="font-medium">Sibling Details:</span> {formData.sibling_information}
+                </div>
+              )}
             </div>
           </div>
         </CardContent>
