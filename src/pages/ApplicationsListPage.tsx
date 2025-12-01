@@ -68,12 +68,14 @@ export default function ApplicationsListPage() {
       } else if (filterParam === 'rejected') {
         query = query.eq('status', 'rejected');
       } else if (filterParam === 'verified') {
-        query = query.not('status', 'in', '(under_review,documents_pending,submitted)');
+        query = query.not('status', 'in', '(under_review,documents_pending,submitted,draft)');
       } else if (filterParam === 'assessment_complete') {
-        query = query.in('status', ['assessment_complete', 'interview_scheduled', 'interview_complete', 'approved', 'enrolled']);
+        query = query.eq('status', 'assessment_complete');
       } else if (filterParam === 'interview_complete') {
-        query = query.in('status', ['interview_complete', 'approved', 'enrolled']);
+        query = query.eq('status', 'interview_complete');
       }
+      
+      console.log(`📊 Filtering applications with filter: ${filterParam}`);
 
       const { data, error } = await query;
 
@@ -183,10 +185,19 @@ export default function ApplicationsListPage() {
             className="pl-10"
           />
         </div>
-        <Button variant="outline" className="gap-2">
-          <Filter className="h-4 w-4" />
-          Filters
-        </Button>
+        <select 
+          className="px-4 py-2 border rounded-md bg-background text-foreground cursor-pointer hover:bg-accent transition-colors"
+          value={filterParam}
+          onChange={(e) => navigate(`/admissions/applications?filter=${e.target.value}`)}
+        >
+          <option value="all">All Applications</option>
+          <option value="pending">Pending Reviews</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+          <option value="verified">Verified</option>
+          <option value="assessment_complete">Assessment Complete</option>
+          <option value="interview_complete">Interview Complete</option>
+        </select>
       </div>
 
       {/* Applications List */}
