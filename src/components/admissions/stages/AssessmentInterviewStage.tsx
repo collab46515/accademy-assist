@@ -29,7 +29,7 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
   const [assessments, setAssessments] = useState<SubjectAssessment[]>([
     { subject: 'Mathematics', marks: '', maxMarks: '100', status: 'pending', comments: '' },
     { subject: 'English', marks: '', maxMarks: '100', status: 'pending', comments: '' },
-    { subject: 'Science', marks: '', maxMarks: '100', status: 'pending', comments: '' },
+    { subject: 'General Knowledge', marks: '', maxMarks: '100', status: 'pending', comments: '' },
     { subject: 'Hindi', marks: '', maxMarks: '100', status: 'pending', comments: '' }
   ]);
   
@@ -240,27 +240,9 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
       setAssessmentStatus('completed');
       setAssessmentResult(result);
       
-      if (result === 'pass') {
-        toast.success('Assessment completed successfully! Student passed. You can now schedule an interview.');
-        setShowInterviewScheduling(true);
-      } else {
-        // Update status to rejected when assessment fails
-        const { error: rejectError } = await supabase
-          .from('enrollment_applications')
-          .update({ 
-            status: 'rejected',
-            rejection_reason: 'Failed Assessment - Did not meet minimum passing criteria',
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', applicationId);
-
-        if (rejectError) {
-          console.error('Error rejecting application:', rejectError);
-        }
-
-        toast.error('Assessment completed. Student failed. Application has been rejected.');
-        setShowInterviewScheduling(false);
-      }
+      // ALWAYS allow scheduling interview regardless of assessment result
+      toast.success('Assessment completed successfully! You can now schedule an interview.');
+      setShowInterviewScheduling(true);
     } catch (error) {
       console.error('Error completing assessment:', error);
       toast.error('Failed to save assessment');

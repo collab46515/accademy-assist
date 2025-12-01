@@ -122,11 +122,7 @@ export function ApplicationsDashboardContent() {
         { 
           stage: 'Assessed', 
           count: applications?.filter(a => 
-            a.status === 'assessment_complete' || 
-            a.status === 'interview_scheduled' ||
-            a.status === 'interview_complete' ||
-            a.status === 'approved' ||
-            a.status === 'enrolled'
+            a.status === 'assessment_complete'
           ).length || 0,
           conversion: 0,
           status: 'assessment_complete'
@@ -134,9 +130,7 @@ export function ApplicationsDashboardContent() {
         { 
           stage: 'Interviewed', 
           count: applications?.filter(a => 
-            a.status === 'interview_complete' ||
-            a.status === 'approved' ||
-            a.status === 'enrolled'
+            a.status === 'interview_complete'
           ).length || 0,
           conversion: 0,
           status: 'interview_complete'
@@ -604,6 +598,28 @@ export function ApplicationsDashboardContent() {
             <Button 
               variant="outline" 
               className="w-full h-20 text-base"
+              onClick={async () => {
+                try {
+                  const { data, error } = await supabase
+                    .from('enrollment_applications')
+                    .select('*')
+                    .eq('school_id', currentSchool.id)
+                    .csv();
+                  
+                  if (error) throw error;
+                  
+                  const blob = new Blob([data], { type: 'text/csv' });
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `applications-${new Date().toISOString().split('T')[0]}.csv`;
+                  a.click();
+                  toast.success('Report exported successfully');
+                } catch (error) {
+                  console.error('Export error:', error);
+                  toast.error('Failed to export report');
+                }
+              }}
             >
               <Download className="h-5 w-5 mr-2" />
               Export Reports
@@ -611,6 +627,7 @@ export function ApplicationsDashboardContent() {
             <Button 
               variant="outline" 
               className="w-full h-20 text-base"
+              onClick={() => navigate('/settings/admissions')}
             >
               <Settings className="h-5 w-5 mr-2" />
               Settings

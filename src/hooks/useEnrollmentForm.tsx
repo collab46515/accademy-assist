@@ -292,7 +292,7 @@ export function useEnrollmentForm({ pathway, applicationId, schoolId }: UseEnrol
       
       const applicationData = {
         // Required fields for database
-        application_number: `APP-${Date.now()}`,
+        application_number: applicationId ? `APP-${Date.now()}` : `APP-${Date.now()}`, // Always use APP- prefix on submission
         pathway: mapPathwayToDatabase(pathway) as any,
         school_id: effectiveSchoolId,
         

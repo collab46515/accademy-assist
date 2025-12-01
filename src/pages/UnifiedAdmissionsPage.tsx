@@ -75,7 +75,7 @@ const UnifiedAdmissionsPage = () => {
 
   // Main admissions page
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="container mx-auto px-4 py-8 max-w-7xl overflow-x-auto">
       <div className="mb-8 flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">✅ Unified Admissions System</h1>
