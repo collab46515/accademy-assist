@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, Download, CheckCircle, XCircle, Eye, FileText, AlertTriangle, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { DocumentViewer } from '../documents/DocumentViewer';
 
 interface ApplicationReviewVerifyStageProps {
   applicationId: string;
@@ -38,6 +39,11 @@ export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: Ap
   const [notes, setNotes] = useState('');
   const [reviewStageStatus, setReviewStageStatus] = useState<'documents_pending' | 'documents_verified' | 'review_submitted'>('documents_pending');
   const [activeTab, setActiveTab] = useState('documents');
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+  const [viewerDocName, setViewerDocName] = useState('');
+  const [viewerMimeType, setViewerMimeType] = useState('');
+  const [currentViewFilePath, setCurrentViewFilePath] = useState('');
   const { toast } = useToast();
 
   // Required documents template
@@ -424,20 +430,24 @@ export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: Ap
     }
   };
 
-  const handleViewDocument = async (filePath: string) => {
+  const handleViewDocument = async (filePath: string, docName: string, mimeType?: string) => {
     try {
       const { data, error } = await supabase.storage
         .from('application-documents')
-        .createSignedUrl(filePath, 60);
+        .createSignedUrl(filePath, 3600); // 1 hour expiry
 
       if (error) throw error;
 
-      window.open(data.signedUrl, '_blank');
+      setViewerUrl(data.signedUrl);
+      setViewerDocName(docName);
+      setViewerMimeType(mimeType || '');
+      setCurrentViewFilePath(filePath);
+      setViewerOpen(true);
     } catch (error) {
       console.error('Error viewing document:', error);
       toast({
         title: "Error",
-        description: "Failed to view document",
+        description: "Failed to load document for viewing",
         variant: "destructive",
       });
     }
@@ -577,7 +587,7 @@ export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: Ap
                           <Button 
                             size="sm" 
                             variant="outline"
-                            onClick={() => handleViewDocument(doc.file_path!)}
+                            onClick={() => handleViewDocument(doc.file_path!, doc.document_name, doc.mime_type)}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -758,6 +768,18 @@ export function ApplicationReviewVerifyStage({ applicationId, onMoveToNext }: Ap
           </div>
         </CardContent>
       </Card>
+
+      <DocumentViewer
+        isOpen={viewerOpen}
+        onClose={() => {
+          setViewerOpen(false);
+          setViewerUrl(null);
+        }}
+        documentUrl={viewerUrl}
+        documentName={viewerDocName}
+        mimeType={viewerMimeType}
+        onDownload={() => handleDownloadDocument(currentViewFilePath, viewerDocName)}
+      />
     </div>
   );
 }

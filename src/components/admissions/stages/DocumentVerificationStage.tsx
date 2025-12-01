@@ -4,10 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Download, CheckCircle, XCircle, FileText, AlertTriangle, Loader2 } from 'lucide-react';
+import { Download, CheckCircle, XCircle, FileText, AlertTriangle, Loader2, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { DocumentUploader } from '../documents/DocumentUploader';
+import { DocumentViewer } from '../documents/DocumentViewer';
 
 interface DocumentVerificationStageProps {
   applicationId: string;
@@ -29,6 +30,11 @@ export function DocumentVerificationStage({ applicationId, onMoveToNext }: Docum
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState('');
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+  const [viewerDocName, setViewerDocName] = useState('');
+  const [viewerMimeType, setViewerMimeType] = useState('');
+  const [currentViewFilePath, setCurrentViewFilePath] = useState('');
   const { toast } = useToast();
 
   const requiredDocTypes = [
@@ -149,6 +155,28 @@ export function DocumentVerificationStage({ applicationId, onMoveToNext }: Docum
     }
   };
 
+  const handleViewDocument = async (filePath: string, fileName: string, mimeType?: string) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('application-documents')
+        .createSignedUrl(filePath, 3600); // 1 hour expiry
+
+      if (error) throw error;
+
+      setViewerUrl(data.signedUrl);
+      setViewerDocName(fileName);
+      setViewerMimeType(mimeType || '');
+      setCurrentViewFilePath(filePath);
+      setViewerOpen(true);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to load document for viewing",
+        variant: "destructive",
+      });
+    }
+  };
+
   const DocumentList = ({ docTypes, title }: { docTypes: typeof requiredDocTypes, title: string }) => (
     <Card>
       <CardHeader>
@@ -187,6 +215,13 @@ export function DocumentVerificationStage({ applicationId, onMoveToNext }: Docum
                     {getStatusBadge(status)}
                     {doc && (
                       <div className="flex gap-1">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleViewDocument(doc.file_path, doc.document_name, doc.mime_type || undefined)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
                         <Button 
                           size="sm" 
                           variant="outline"
@@ -312,6 +347,18 @@ export function DocumentVerificationStage({ applicationId, onMoveToNext }: Docum
           </div>
         </CardContent>
       </Card>
+
+      <DocumentViewer
+        isOpen={viewerOpen}
+        onClose={() => {
+          setViewerOpen(false);
+          setViewerUrl(null);
+        }}
+        documentUrl={viewerUrl}
+        documentName={viewerDocName}
+        mimeType={viewerMimeType}
+        onDownload={() => handleDownload(currentViewFilePath, viewerDocName)}
+      />
     </div>
   );
 }
