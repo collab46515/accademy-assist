@@ -26,6 +26,7 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Database } from '@/integrations/supabase/types';
+import { DocumentViewer } from '@/components/admissions/documents/DocumentViewer';
 
 type Application = Database['public']['Tables']['enrollment_applications']['Row'];
 type ApplicationDocument = Database['public']['Tables']['application_documents']['Row'];
@@ -37,6 +38,11 @@ export default function ApplicationDetailPage() {
   const [application, setApplication] = useState<Application | null>(null);
   const [documents, setDocuments] = useState<ApplicationDocument[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+  const [viewerDocName, setViewerDocName] = useState('');
+  const [viewerMimeType, setViewerMimeType] = useState('');
+  const [currentViewFilePath, setCurrentViewFilePath] = useState('');
   
   const applicationId = searchParams.get('id');
 
@@ -76,6 +82,27 @@ export default function ApplicationDetailPage() {
       toast.error('Failed to load application details');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const viewDocumentInline = async (doc: ApplicationDocument) => {
+    try {
+      if (!doc.file_path) throw new Error('Missing file path');
+
+      const { data, error } = await supabase.storage
+        .from('application-documents')
+        .createSignedUrl(doc.file_path, 3600);
+
+      if (error) throw error;
+
+      setViewerUrl(data.signedUrl);
+      setViewerDocName(doc.document_name || 'Document');
+      setViewerMimeType(doc.mime_type || '');
+      setCurrentViewFilePath(doc.file_path);
+      setViewerOpen(true);
+    } catch (error) {
+      console.error('Error opening document:', error);
+      toast.error('Failed to open document');
     }
   };
 
@@ -479,37 +506,46 @@ export default function ApplicationDetailPage() {
                   No documents uploaded yet
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {documents.map((doc) => (
-                    <div key={doc.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors">
-                      <div className="flex items-center gap-3 flex-1">
-                        <FileText className="h-5 w-5 text-primary" />
-                        <div className="flex-1">
-                          <div className="font-medium">{doc.document_name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {doc.file_size ? `${(doc.file_size / 1024).toFixed(2)} KB` : 'Unknown size'} • 
-                            Uploaded {doc.uploaded_at ? format(new Date(doc.uploaded_at), 'dd MMM yyyy') : 'Unknown date'}
-                          </div>
-                          {doc.verification_notes && (
-                            <div className="text-sm text-muted-foreground mt-1">
-                              Note: {doc.verification_notes}
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Double-click a document row to preview it on screen.
+                  </p>
+                  <div className="space-y-4">
+                    {documents.map((doc) => (
+                      <div 
+                        key={doc.id} 
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                        onDoubleClick={() => viewDocumentInline(doc)}
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          <FileText className="h-5 w-5 text-primary" />
+                          <div className="flex-1">
+                            <div className="font-medium">{doc.document_name}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {doc.file_size ? `${(doc.file_size / 1024).toFixed(2)} KB` : 'Unknown size'} • 
+                              Uploaded {doc.uploaded_at ? format(new Date(doc.uploaded_at), 'dd MMM yyyy') : 'Unknown date'}
                             </div>
-                          )}
+                            {doc.verification_notes && (
+                              <div className="text-sm text-muted-foreground mt-1">
+                                Note: {doc.verification_notes}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {getDocumentStatusBadge(doc.status)}
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => viewDocumentInline(doc)}
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            View
+                          </Button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        {getDocumentStatusBadge(doc.status)}
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => window.open(doc.file_path, '_blank')}
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          View
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -741,7 +777,25 @@ export default function ApplicationDetailPage() {
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
+        </Tabs>
+
+        <DocumentViewer
+          isOpen={viewerOpen}
+          onClose={() => {
+            setViewerOpen(false);
+            setViewerUrl(null);
+          }}
+          documentUrl={viewerUrl}
+          documentName={viewerDocName}
+          mimeType={viewerMimeType}
+          onDownload={() => {
+            if (currentViewFilePath) {
+              // simple download by opening signed URL in new tab from viewer only
+              window.open(viewerUrl || '', '_blank');
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
