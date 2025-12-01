@@ -73,6 +73,8 @@ export default function ApplicationsListPage() {
         query = query.eq('status', 'assessment_complete');
       } else if (filterParam === 'interview_complete') {
         query = query.eq('status', 'interview_complete');
+      } else if (filterParam === 'admission_decision') {
+        query = query.eq('status', 'admission_decision');
       }
       
       console.log(`📊 Filtering applications with filter: ${filterParam}`);
@@ -100,6 +102,7 @@ export default function ApplicationsListPage() {
       assessment_complete: { variant: 'secondary', label: 'Assessment Complete', icon: <CheckCircle className="h-3 w-3" />, color: 'text-purple-600' },
       interview_scheduled: { variant: 'secondary', label: 'Interview Scheduled', icon: <Clock className="h-3 w-3" />, color: 'text-indigo-600' },
       interview_complete: { variant: 'secondary', label: 'Interview Complete', icon: <CheckCircle className="h-3 w-3" />, color: 'text-indigo-600' },
+      admission_decision: { variant: 'default', label: 'Admission Decision', icon: <CheckCircle className="h-3 w-3" />, color: 'text-blue-600' },
       approved: { variant: 'default', label: 'Approved', icon: <CheckCircle className="h-3 w-3" />, color: 'text-green-600' },
       enrolled: { variant: 'default', label: 'Enrolled', icon: <CheckCircle className="h-3 w-3" />, color: 'text-green-600' },
       rejected: { variant: 'destructive', label: 'Rejected', icon: <XCircle className="h-3 w-3" />, color: 'text-red-600' },

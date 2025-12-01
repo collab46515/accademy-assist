@@ -246,6 +246,7 @@ export function ApplicationsDashboardContent() {
       'assessment_complete': 'Assessment Completed',
       'interview_scheduled': 'Interview Scheduled',
       'interview_complete': 'Interview Completed',
+      'admission_decision': 'Admission Decision Pending',
       'pending_approval': 'Awaiting Approval',
       'approved': 'Application Approved',
       'rejected': 'Application Rejected',
