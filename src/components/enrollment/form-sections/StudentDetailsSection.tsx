@@ -24,6 +24,12 @@ export function StudentDetailsSection() {
         </p>
       </div>
 
+      {/* Date of Application - Display only */}
+      <div className="bg-muted/50 px-4 py-3 rounded-lg border">
+        <div className="text-sm font-medium text-muted-foreground">Date of Application</div>
+        <div className="text-base font-semibold">{new Date().toLocaleDateString('en-GB')}</div>
+      </div>
+
       <div className="grid gap-6 md:grid-cols-2">
         <FormField
           control={form.control}
