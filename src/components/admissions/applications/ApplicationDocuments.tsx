@@ -6,9 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, Download, CheckCircle, Clock, AlertTriangle, Upload, X } from 'lucide-react';
+import { FileText, Download, CheckCircle, Clock, AlertTriangle, Upload, X, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { DocumentViewer } from '../documents/DocumentViewer';
 
 interface ApplicationDocumentsProps {
   applicationId: string;
@@ -36,6 +37,11 @@ export function ApplicationDocuments({ applicationId }: ApplicationDocumentsProp
   const [documentType, setDocumentType] = useState('');
   const [verificationNotes, setVerificationNotes] = useState('');
   const [verifyingDocId, setVerifyingDocId] = useState<string | null>(null);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+  const [viewerDocName, setViewerDocName] = useState('');
+  const [viewerMimeType, setViewerMimeType] = useState('');
+  const [currentViewFilePath, setCurrentViewFilePath] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -177,6 +183,29 @@ export function ApplicationDocuments({ applicationId }: ApplicationDocumentsProp
       toast({
         title: 'Error',
         description: 'Failed to download document',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const viewDocument = async (filePath: string, fileName: string, mimeType?: string) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('application-documents')
+        .createSignedUrl(filePath, 3600); // 1 hour expiry
+
+      if (error) throw error;
+
+      setViewerUrl(data.signedUrl);
+      setViewerDocName(fileName);
+      setViewerMimeType(mimeType || '');
+      setCurrentViewFilePath(filePath);
+      setViewerOpen(true);
+    } catch (error) {
+      console.error('Error viewing document:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load document for viewing',
         variant: 'destructive'
       });
     }
@@ -402,6 +431,14 @@ export function ApplicationDocuments({ applicationId }: ApplicationDocumentsProp
                       <Button 
                         variant="outline" 
                         size="sm"
+                        onClick={() => viewDocument(document.file_path, document.document_name, document.mime_type)}
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        View
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
                         onClick={() => downloadDocument(document.file_path, document.document_name)}
                       >
                         <Download className="h-4 w-4 mr-1" />
@@ -451,6 +488,18 @@ export function ApplicationDocuments({ applicationId }: ApplicationDocumentsProp
           </CardContent>
         </Card>
       )}
+
+      <DocumentViewer
+        isOpen={viewerOpen}
+        onClose={() => {
+          setViewerOpen(false);
+          setViewerUrl(null);
+        }}
+        documentUrl={viewerUrl}
+        documentName={viewerDocName}
+        mimeType={viewerMimeType}
+        onDownload={() => downloadDocument(currentViewFilePath, viewerDocName)}
+      />
     </div>
   );
 }
