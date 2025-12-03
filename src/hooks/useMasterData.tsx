@@ -335,6 +335,7 @@ export function useMasterData() {
       const payload = {
         ...subjectData,
         school_id: subjectData.school_id || defaultSchoolId,
+        periods_per_week: subjectData.periods_per_week ? Number(subjectData.periods_per_week) : null,
       };
       const { data, error } = await supabase
         .from('subjects')
