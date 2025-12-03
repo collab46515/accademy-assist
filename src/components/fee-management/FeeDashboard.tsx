@@ -1029,7 +1029,7 @@ export function FeeDashboard() {
         open={metricDetailModalOpen}
         onOpenChange={setMetricDetailModalOpen}
         metricType={selectedMetric}
-        data={{}}
+        data={metrics}
       />
       
       <BulkActionsModal
