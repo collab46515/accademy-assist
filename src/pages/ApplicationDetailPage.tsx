@@ -117,7 +117,7 @@ export default function ApplicationDetailPage() {
       interview_scheduled: { variant: 'secondary', label: 'Interview Scheduled', icon: <Clock className="h-4 w-4" />, color: 'text-indigo-600' },
       interview_complete: { variant: 'secondary', label: 'Interview Complete', icon: <CheckCircle className="h-4 w-4" />, color: 'text-indigo-600' },
       offer_sent: { variant: 'default', label: 'Offer Sent', icon: <CheckCircle className="h-4 w-4" />, color: 'text-green-600' },
-      approved: { variant: 'default', label: 'Approved', icon: <CheckCircle className="h-4 w-4" />, color: 'text-green-600' },
+      approved: { variant: 'default', label: 'Approved', icon: <CheckCircle className="h-4 w-4" />, color: 'text-white' },
       enrolled: { variant: 'default', label: 'Enrolled', icon: <CheckCircle className="h-4 w-4" />, color: 'text-green-600' },
       rejected: { variant: 'destructive', label: 'Rejected', icon: <XCircle className="h-4 w-4" />, color: 'text-white' },
       withdrawn: { variant: 'outline', label: 'Withdrawn', icon: <AlertCircle className="h-4 w-4" />, color: 'text-gray-600' },
