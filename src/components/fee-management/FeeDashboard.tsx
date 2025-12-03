@@ -14,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer } from 'recharts';
 import { 
-  PoundSterling, 
+  Wallet, 
   AlertTriangle, 
   TrendingUp, 
   Users, 
@@ -30,6 +30,7 @@ import {
   ChevronRight,
   Settings
 } from 'lucide-react';
+import { formatCurrency } from '@/lib/currency';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { PaymentRecordModal } from './PaymentRecordModal';
@@ -550,14 +551,14 @@ export function FeeDashboard() {
                     <p className="text-primary-foreground/90 text-sm font-medium">Total Collected</p>
                     <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30">This Term</Badge>
                   </div>
-                  <p className="text-3xl sm:text-4xl font-bold tracking-tight">£{metrics.totalCollected.toLocaleString()}</p>
+                  <p className="text-3xl sm:text-4xl font-bold tracking-tight">{formatCurrency(metrics.totalCollected)}</p>
                   <div className="flex items-center gap-1 text-primary-foreground/80">
                     <Eye className="h-3 w-3" />
                     <span className="text-xs">Click for insights</span>
                   </div>
                 </div>
                 <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
-                  <PoundSterling className="h-8 w-8 text-primary-foreground" />
+                  <Wallet className="h-8 w-8 text-primary-foreground" />
                 </div>
               </div>
             </CardContent>
@@ -577,7 +578,7 @@ export function FeeDashboard() {
                     <p className="text-red-700 text-sm font-medium">Outstanding Fees</p>
                     <Badge variant="destructive" className="text-xs">Urgent</Badge>
                   </div>
-                  <p className="text-3xl sm:text-4xl font-bold text-red-600 tracking-tight">£{metrics.outstandingFees.toLocaleString()}</p>
+                  <p className="text-3xl sm:text-4xl font-bold text-red-600 tracking-tight">{formatCurrency(metrics.outstandingFees)}</p>
                   <div className="flex items-center gap-1 text-muted-foreground">
                     <Eye className="h-3 w-3" />
                     <span className="text-xs">View breakdown</span>
@@ -639,7 +640,7 @@ export function FeeDashboard() {
                     <p className="text-blue-700 text-sm font-medium">Today's Expected</p>
                     <Badge variant="default" className="text-xs bg-blue-100 text-blue-700 border-blue-300">8 pending</Badge>
                   </div>
-                  <p className="text-3xl sm:text-4xl font-bold text-blue-600 tracking-tight">£{metrics.todayExpected.toLocaleString()}</p>
+                  <p className="text-3xl sm:text-4xl font-bold text-blue-600 tracking-tight">{formatCurrency(metrics.todayExpected)}</p>
                   <div className="flex items-center gap-1 text-muted-foreground">
                     <Eye className="h-3 w-3" />
                     <span className="text-xs">View list</span>
@@ -776,7 +777,7 @@ export function FeeDashboard() {
                         </span>
                       </div>
                       <span className="text-xs text-muted-foreground mt-1">
-                        £{classItem.collected.toLocaleString()} / £{classItem.total.toLocaleString()}
+                        {formatCurrency(classItem.collected)} / {formatCurrency(classItem.total)}
                       </span>
                     </Button>
                   ))}
@@ -843,7 +844,7 @@ export function FeeDashboard() {
                         <YAxis 
                           tick={{ fontSize: 12 }}
                           axisLine={{ stroke: 'hsl(var(--border))' }}
-                          tickFormatter={(value) => `£${value}`}
+                          tickFormatter={(value) => `₹${value}`}
                         />
                         <ChartTooltip content={<ChartTooltipContent />} />
                         <Line 
@@ -921,7 +922,7 @@ export function FeeDashboard() {
                       <div className="text-xs text-muted-foreground">Classes</div>
                     </div>
                     <div className="text-center p-2 bg-background/50 rounded-lg">
-                      <div className="text-lg font-bold">£{(metrics.totalCollected / 100).toFixed(0)}k</div>
+                      <div className="text-lg font-bold">₹{(metrics.totalCollected / 100).toFixed(0)}k</div>
                       <div className="text-xs text-muted-foreground">Avg/Class</div>
                     </div>
                   </div>

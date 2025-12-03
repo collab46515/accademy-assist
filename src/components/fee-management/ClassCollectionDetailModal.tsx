@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Download, Eye } from 'lucide-react';
+import { formatCurrency } from '@/lib/currency';
 
 interface ClassCollectionDetailModalProps {
   open: boolean;
@@ -65,11 +66,11 @@ export function ClassCollectionDetailModal({ open, onOpenChange, className, data
             <div className="text-sm text-muted-foreground">Total Students</div>
           </div>
           <div className="bg-muted/50 p-4 rounded-lg">
-            <div className="text-2xl font-bold">£{data.summary.totalDue.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{formatCurrency(data.summary.totalDue)}</div>
             <div className="text-sm text-muted-foreground">Total Due</div>
           </div>
           <div className="bg-muted/50 p-4 rounded-lg">
-            <div className="text-2xl font-bold">£{data.summary.totalPaid.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{formatCurrency(data.summary.totalPaid)}</div>
             <div className="text-sm text-muted-foreground">Total Paid</div>
           </div>
           <div className="bg-muted/50 p-4 rounded-lg">
@@ -113,10 +114,10 @@ export function ClassCollectionDetailModal({ open, onOpenChange, className, data
                 return (
                   <TableRow key={student.id} className={overdue ? 'bg-destructive/5' : ''}>
                     <TableCell className="font-medium">{student.name}</TableCell>
-                    <TableCell>£{student.amountDue.toFixed(2)}</TableCell>
-                    <TableCell>£{student.amountPaid.toFixed(2)}</TableCell>
+                    <TableCell>{formatCurrency(student.amountDue)}</TableCell>
+                    <TableCell>{formatCurrency(student.amountPaid)}</TableCell>
                     <TableCell className={outstanding > 0 ? 'text-destructive font-medium' : 'text-green-600'}>
-                      £{outstanding.toFixed(2)}
+                      {formatCurrency(outstanding)}
                     </TableCell>
                     <TableCell>
                       <Badge variant={getStatusColor(overdue ? 'overdue' : student.status)}>
