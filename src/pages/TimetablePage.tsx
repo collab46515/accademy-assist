@@ -2,13 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { StudentTimetableView } from '@/components/timetable/StudentTimetableView';
 import { PeriodsManager } from '@/components/timetable/management/PeriodsManager';
 import { SubjectsManager } from '@/components/timetable/management/SubjectsManager';
 import { ClassroomsManager } from '@/components/timetable/management/ClassroomsManager';
 import { TimetableEntriesManager } from '@/components/timetable/management/TimetableEntriesManager';
-import { AITimetableGenerator } from '@/components/ai-timetable/AITimetableGenerator';
 import { TeacherTimetableView } from '@/components/timetable/TeacherTimetableView';
 import { TimetableDebugger } from '@/components/timetable/TimetableDebugger';
 import { useRBAC } from '@/hooks/useRBAC';
@@ -19,11 +17,8 @@ import {
   Settings, 
   Users, 
   AlertTriangle,
-  Zap,
   BookOpen,
-  GraduationCap,
-  Wand2,
-  Brain
+  GraduationCap
 } from 'lucide-react';
 
 export default function TimetablePage() {
@@ -34,74 +29,8 @@ export default function TimetablePage() {
   );
 }
 
-function AIAutoGeneratorCard() {
-  const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
-
-  return (
-    <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Wand2 className="h-5 w-5 text-primary" />
-          </div>
-          <span>AI Automatic Timetable Generator</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">
-          Revolutionary AI-powered timetable generation with conflict resolution and optimization.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className="flex items-center space-x-2 p-3 rounded-lg bg-background/50">
-            <Brain className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium">Intelligent Conflict Detection</span>
-          </div>
-          <div className="flex items-center space-x-2 p-3 rounded-lg bg-background/50">
-            <Users className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium">Teacher Workload Optimization</span>
-          </div>
-          <div className="flex items-center space-x-2 p-3 rounded-lg bg-background/50">
-            <Settings className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium">Room Allocation Automation</span>
-          </div>
-        </div>
-        
-        <Dialog open={isGeneratorOpen} onOpenChange={setIsGeneratorOpen}>
-          <DialogTrigger asChild>
-            <Button className="w-full shadow-[var(--shadow-elegant)]">
-              <Zap className="h-4 w-4 mr-2" />
-              Launch AI Timetable Generator
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-7xl max-h-[90vh] overflow-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Wand2 className="h-5 w-5" />
-                AI Timetable Generator
-              </DialogTitle>
-            </DialogHeader>
-            <AITimetableGenerator onClose={() => setIsGeneratorOpen(false)} />
-          </DialogContent>
-        </Dialog>
-        
-        <div className="bg-primary/5 p-3 rounded-lg border border-primary/10">
-          <p className="text-xs text-muted-foreground">
-            <strong className="text-primary">AI Features:</strong>
-            <br />• One-click timetable generation with 95%+ optimization
-            <br />• Automatic conflict resolution and constraint satisfaction
-            <br />• Real-time analytics and performance insights
-          </p>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
 function TimetablePageContent() {
   const { currentSchool, hasRole, userRoles, loading, isSuperAdmin } = useRBAC();
-
-  // Debug logging
-  console.log('Timetable Debug:', { currentSchool, userRoles, loading });
 
   // Debug logging
   console.log('Timetable Debug:', { currentSchool, userRoles, loading });
@@ -289,11 +218,6 @@ function TimetablePageContent() {
                     <TimetableEntriesManager />
                   </TabsContent>
                 </Tabs>
-              </div>
-
-              {/* AI Auto-Generator Section */}
-              <div className="grid grid-cols-1 gap-6">
-                <AIAutoGeneratorCard />
               </div>
             </div>
           </TabsContent>
