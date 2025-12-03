@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useRBAC } from './useRBAC';
 
@@ -25,7 +25,18 @@ export interface Student {
   };
 }
 
-// Mock data for now
+// Module-level cache to persist data across re-mounts
+const studentCache: {
+  schoolId: string | null;
+  students: Student[];
+  lastFetched: number | null;
+} = {
+  schoolId: null,
+  students: [],
+  lastFetched: null
+};
+
+// Mock data for fallback
 const mockStudents: Student[] = [
   {
     id: '1',
@@ -132,17 +143,38 @@ const mockStudents: Student[] = [
 ];
 
 export function useStudentData() {
-  const [students, setStudents] = useState<Student[]>([]);
-  const [loading, setLoading] = useState(true);
   const { currentSchool } = useRBAC();
+  const schoolId = currentSchool?.id;
+  
+  // Initialize from cache if available for the same school
+  const cacheValid = studentCache.schoolId === schoolId && studentCache.lastFetched;
+  
+  const [students, setStudents] = useState<Student[]>(
+    cacheValid ? studentCache.students : []
+  );
+  const [loading, setLoading] = useState(!cacheValid);
+  const isFetching = useRef(false);
 
-  const fetchStudents = async () => {
-    if (!currentSchool?.id) {
+  const fetchStudents = async (forceRefresh = false) => {
+    if (!schoolId) {
       setLoading(false);
       return;
     }
 
-    setLoading(true);
+    // Skip if already fetching or cache is valid (unless forced)
+    if (isFetching.current) return;
+    if (!forceRefresh && studentCache.schoolId === schoolId && studentCache.lastFetched) {
+      setStudents(studentCache.students);
+      setLoading(false);
+      return;
+    }
+
+    isFetching.current = true;
+    // Only show loading if we don't have cached data
+    if (studentCache.schoolId !== schoolId || !studentCache.students.length) {
+      setLoading(true);
+    }
+    
     try {
       const { data, error } = await supabase
         .from('students')
@@ -156,41 +188,45 @@ export function useStudentData() {
             avatar_url
           )
         `)
-        .eq('school_id', currentSchool.id);
+        .eq('school_id', schoolId);
 
       if (error) {
         console.error('Error fetching students:', error);
-        setStudents(mockStudents); // Fallback to mock data
+        setStudents(mockStudents);
       } else {
-        // Transform the data to match our Student interface
         const transformedStudents = (data || []).map((student: any) => ({
           ...student,
-          // Default to enrolled when field is missing in DB
           is_enrolled: student.is_enrolled ?? true,
           profiles: student.profiles || undefined
         })) as Student[];
+        
+        // Update cache
+        studentCache.schoolId = schoolId;
+        studentCache.students = transformedStudents;
+        studentCache.lastFetched = Date.now();
+        
         setStudents(transformedStudents);
       }
     } catch (error) {
       console.error('Error fetching students:', error);
-      setStudents(mockStudents); // Fallback to mock data
+      setStudents(mockStudents);
     } finally {
       setLoading(false);
+      isFetching.current = false;
     }
   };
 
-  // Create a new student
   const createStudent = async (studentData: any) => {
     try {
       const { data, error } = await supabase
         .rpc('create_student_with_user', {
           student_data: studentData,
-          school_id: currentSchool?.id || ''
+          school_id: schoolId || ''
         });
 
       if (error) throw error;
 
-      await fetchStudents(); // Refresh the list
+      await fetchStudents(true); // Force refresh after creation
       return data;
     } catch (error) {
       console.error('Error creating student:', error);
@@ -218,7 +254,6 @@ export function useStudentData() {
       if (error) throw error;
       if (!data) return null;
       
-      // Transform the data to match our Student interface
       const transformedStudent = {
         ...data,
         is_enrolled: (data as any).is_enrolled ?? true,
@@ -246,10 +281,9 @@ export function useStudentData() {
           )
         `)
         .eq('form_class', classId)
-        .eq('school_id', currentSchool?.id || '');
+        .eq('school_id', schoolId || '');
 
       if (error) throw error;
-      // Transform the data to match our Student interface
       const transformedStudents = (data || []).map((student: any) => ({
         ...student,
         is_enrolled: student.is_enrolled ?? true,
@@ -263,13 +297,17 @@ export function useStudentData() {
   };
 
   useEffect(() => {
-    fetchStudents();
-  }, [currentSchool]);
+    // Only fetch if school changed or cache is empty
+    const needsFetch = schoolId && (studentCache.schoolId !== schoolId || !studentCache.lastFetched);
+    if (needsFetch) {
+      fetchStudents();
+    }
+  }, [schoolId]);
 
   return {
     students,
     loading,
-    fetchStudents,
+    fetchStudents: () => fetchStudents(true), // Expose force refresh for explicit calls
     createStudent,
     getStudentById,
     getStudentsByClass,
