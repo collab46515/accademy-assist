@@ -99,9 +99,7 @@ function MasterDataPageContent() {
     updateClass,
     updateYearGroup,
     updateHouse,
-    deleteRecord,
-    getEntityCounts,
-    getActiveEntities
+    deleteRecord
   } = useMasterData();
 
   // Allow access for super admins or school admins only
@@ -474,8 +472,6 @@ function MasterDataPageContent() {
     );
   }
 
-  const entityCounts = getEntityCounts();
-  const activeEntities = getActiveEntities();
 
   const filteredData = {
     schools: schools.filter(item => 
@@ -1003,73 +999,6 @@ function MasterDataPageContent() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            {/* Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200 dark:from-blue-900/20 dark:to-blue-800/20 dark:border-blue-800">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Schools</CardTitle>
-                  <SchoolIcon className="h-4 w-4 text-blue-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{entityCounts.schools}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {activeEntities.schools} active
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-green-50 to-green-100/50 border-green-200 dark:from-green-900/20 dark:to-green-800/20 dark:border-green-800">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Subjects</CardTitle>
-                  <BookOpen className="h-4 w-4 text-green-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{entityCounts.subjects}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {activeEntities.subjects} active
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-200 dark:from-purple-900/20 dark:to-purple-800/20 dark:border-purple-800">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Students</CardTitle>
-                  <GraduationCap className="h-4 w-4 text-purple-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{entityCounts.students}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {activeEntities.students} enrolled
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-orange-50 to-orange-100/50 border-orange-200 dark:from-orange-900/20 dark:to-orange-800/20 dark:border-orange-800">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Classes</CardTitle>
-                  <Building2 className="h-4 w-4 text-orange-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{entityCounts.classes}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {activeEntities.classes} active
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-red-50 to-red-100/50 border-red-200 dark:from-red-900/20 dark:to-red-800/20 dark:border-red-800">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Parents</CardTitle>
-                  <Home className="h-4 w-4 text-red-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{entityCounts.parents}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Family contacts
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
 
             {/* Master Data Hierarchy Guide */}
             <MasterDataHierarchy />
@@ -1099,38 +1028,6 @@ function MasterDataPageContent() {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    Data Summary
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Schools</span>
-                      <Badge variant="secondary">{entityCounts.schools}</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Subjects</span>
-                      <Badge variant="secondary">{entityCounts.subjects}</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Students</span>
-                      <Badge variant="secondary">{entityCounts.students}</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Classes</span>
-                      <Badge variant="secondary">{entityCounts.classes}</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Parents</span>
-                      <Badge variant="secondary">{entityCounts.parents}</Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </TabsContent>
 
