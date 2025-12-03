@@ -21,7 +21,7 @@ import { StudentManagementWorkflow } from "@/components/workflows/StudentManagem
 import { FeeManagementWorkflow } from "@/components/workflows/FeeManagementWorkflow";
 import { AdmissionsWorkflow } from "@/components/workflows/AdmissionsWorkflow";
 import { HRManagementWorkflow } from "@/components/workflows/HRManagementWorkflow";
-import { AITimetableWorkflow } from "@/components/workflows/AITimetableWorkflow";
+
 import { CommunicationWorkflow } from "@/components/workflows/CommunicationWorkflow";
 import { AIClassroomWorkflow } from "@/components/workflows/AIClassroomWorkflow";
 import { CurriculumPlanningWorkflow } from "@/components/workflows/CurriculumPlanningWorkflow";
@@ -85,14 +85,6 @@ export function WorkflowDiagrams({ modules }: WorkflowDiagramsProps) {
       description: "Staff recruitment and management workflow",
       component: HRManagementWorkflow,
       color: "bg-indigo-500"
-    },
-    {
-      id: "ai-timetable",
-      name: "AI Timetable Generation",
-      icon: Brain,
-      description: "Intelligent timetable creation with AI optimization",
-      component: AITimetableWorkflow,
-      color: "bg-purple-500"
     },
     {
       id: "communication",

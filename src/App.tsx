@@ -29,7 +29,7 @@ import SafeguardingPage from "./pages/SafeguardingPage";
 import EventsPage from "./pages/EventsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import AISuitePage from "./pages/AISuitePage";
-import { AITimetablePage } from "./pages/AITimetablePage";
+
 import { AILessonPlannerPage } from "./pages/AILessonPlannerPage";
 import { AICommentGeneratorPage } from "./pages/AICommentGeneratorPage";
 import { AIPredictiveInsightsPage } from "./pages/AIPredictiveInsightsPage";
@@ -175,7 +175,7 @@ const App = () => (
                           <Route path="/events" element={<EventsPage />} />
                           <Route path="/analytics" element={<AnalyticsPage />} />
                           <Route path="/ai-suite" element={<AISuitePage />} />
-                          <Route path="/ai-suite/timetable" element={<AITimetablePage />} />
+                          
                           <Route path="/ai-suite/lesson-planner" element={<AILessonPlannerPage />} />
                           <Route path="/ai-suite/grading" element={<AIGradingPage />} />
                           <Route path="/ai-suite/comments" element={<AICommentGeneratorPage />} />
