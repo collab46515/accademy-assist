@@ -74,7 +74,7 @@ export default function ApplicationsListPage() {
       } else if (filterParam === 'interview_complete') {
         query = query.eq('status', 'interview_complete');
       } else if (filterParam === 'admission_decision') {
-        query = query.eq('status', 'admission_decision');
+        query = query.in('status', ['pending_approval', 'on_hold']);
       }
       
       console.log(`📊 Filtering applications with filter: ${filterParam}`);
