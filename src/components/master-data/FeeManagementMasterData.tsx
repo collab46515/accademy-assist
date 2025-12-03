@@ -970,11 +970,11 @@ export function FeeManagementMasterData() {
               </>
             )}
             </div>
-            <div className="flex gap-2 justify-end pt-4 border-t flex-shrink-0 mt-4">
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+            <div className="flex gap-2 justify-end pt-4 border-t flex-shrink-0 mt-4 bg-background relative z-10">
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="cursor-pointer">
                 Cancel
               </Button>
-              <Button type="submit">
+              <Button type="submit" className="cursor-pointer">
                 {editingItem ? 'Update' : 'Create'}
               </Button>
             </div>
