@@ -101,8 +101,7 @@ function MasterDataPageContent() {
     updateHouse,
     deleteRecord,
     getEntityCounts,
-    getActiveEntities,
-    refreshData
+    getActiveEntities
   } = useMasterData();
 
   // Allow access for super admins or school admins only
