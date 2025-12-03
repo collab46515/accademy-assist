@@ -15,8 +15,10 @@ import { useFeeData } from '@/hooks/useFeeData';
 import { usePaymentData } from '@/hooks/usePaymentData';
 import { useMasterData } from '@/hooks/useMasterData';
 import { useSchoolFilter } from '@/hooks/useSchoolFilter';
-import { CreditCard, Plus, Search, Download, Upload, Edit, Trash, Info, DollarSign } from 'lucide-react';
+import { CreditCard, Plus, Search, Download, Upload, Edit, Trash, Info, DollarSign, FileText } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { downloadCSV } from '@/utils/exportHelpers';
+import { toast } from 'sonner';
 
 export function FeeManagementMasterData() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -310,6 +312,242 @@ export function FeeManagementMasterData() {
     }).format(amount);
   };
 
+  // Export current tab data
+  const handleExport = () => {
+    try {
+      let data: any[] = [];
+      let filename = '';
+      
+      if (activeTab === 'fee-heads') {
+        data = feeHeads.map(fh => ({
+          name: fh.name,
+          description: fh.description || '',
+          category: fh.category,
+          amount: fh.amount || 0,
+          recurrence: fh.recurrence || 'once',
+          applicable_classes: Array.isArray(fh.applicable_classes) ? fh.applicable_classes.join('; ') : '',
+          is_active: fh.is_active ? 'Yes' : 'No'
+        }));
+        filename = 'fee_heads';
+      } else if (activeTab === 'structures') {
+        data = feeStructures.map(fs => ({
+          name: fs.name,
+          description: fs.description || '',
+          academic_year: fs.academic_year,
+          term: fs.term,
+          total_amount: fs.total_amount || 0,
+          applicable_year_groups: Array.isArray(fs.applicable_year_groups) ? fs.applicable_year_groups.join('; ') : '',
+          student_type: fs.student_type || 'all',
+          fee_heads: Array.isArray(fs.fee_heads) ? fs.fee_heads.map((fh: any) => fh.name).join('; ') : '',
+          status: fs.status
+        }));
+        filename = 'fee_structures';
+      } else if (activeTab === 'payment-plans') {
+        data = paymentPlans.map(pp => ({
+          name: pp.name,
+          description: pp.description || '',
+          total_amount: pp.total_amount || 0,
+          number_of_installments: pp.number_of_installments,
+          frequency: pp.frequency,
+          interest_rate: pp.interest_rate || 0,
+          status: pp.status
+        }));
+        filename = 'payment_plans';
+      } else if (activeTab === 'discounts') {
+        data = discounts.map(d => ({
+          name: d.name,
+          discount_type: d.discount_type,
+          value: d.value || 0,
+          valid_from: d.valid_from || '',
+          valid_to: d.valid_to || '',
+          status: d.status
+        }));
+        filename = 'discounts';
+      }
+      
+      if (data.length === 0) {
+        toast.error('No data to export');
+        return;
+      }
+      
+      downloadCSV(data, filename);
+      toast.success(`Exported ${data.length} records`);
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Failed to export data');
+    }
+  };
+
+  // Download template for import
+  const handleDownloadTemplate = () => {
+    let templateData: any[] = [];
+    let filename = '';
+    
+    if (activeTab === 'fee-heads') {
+      templateData = [{
+        name: 'Tuition Fee',
+        description: 'Monthly tuition fee',
+        category: 'Tuition',
+        amount: 5000,
+        recurrence: 'monthly',
+        applicable_classes: 'Year 1; Year 2; Year 3'
+      }, {
+        name: 'Lab Fee',
+        description: 'Science lab usage fee',
+        category: 'Academic',
+        amount: 1000,
+        recurrence: 'term',
+        applicable_classes: 'Year 6; Year 7; Year 8'
+      }];
+      filename = 'fee_heads_template';
+    } else if (activeTab === 'structures') {
+      templateData = [{
+        name: 'Year 1 Fee Structure 2024-25',
+        description: 'Complete fee structure for Year 1',
+        academic_year: '2024-25',
+        term: 'Full Year',
+        total_amount: 50000,
+        applicable_year_groups: 'Year 1',
+        student_type: 'all',
+        fee_heads: 'Tuition Fee; Lab Fee; Sports Fee'
+      }];
+      filename = 'fee_structures_template';
+    } else if (activeTab === 'payment-plans') {
+      templateData = [{
+        name: 'Monthly Payment Plan',
+        description: '12 monthly installments',
+        total_amount: 60000,
+        number_of_installments: 12,
+        frequency: 'monthly',
+        interest_rate: 0
+      }, {
+        name: 'Quarterly Payment Plan',
+        description: '4 quarterly installments',
+        total_amount: 60000,
+        number_of_installments: 4,
+        frequency: 'quarterly',
+        interest_rate: 2
+      }];
+      filename = 'payment_plans_template';
+    } else if (activeTab === 'discounts') {
+      templateData = [{
+        name: 'Sibling Discount',
+        discount_type: 'percentage',
+        value: 10,
+        valid_from: '2024-04-01',
+        valid_to: '2025-03-31'
+      }, {
+        name: 'Early Bird Discount',
+        discount_type: 'fixed',
+        value: 5000,
+        valid_from: '2024-04-01',
+        valid_to: '2024-06-30'
+      }];
+      filename = 'discounts_template';
+    }
+    
+    downloadCSV(templateData, filename);
+    toast.success('Template downloaded');
+  };
+
+  // Handle CSV import
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    if (!currentSchoolId) {
+      toast.error('No school context available');
+      return;
+    }
+    
+    try {
+      const text = await file.text();
+      const lines = text.split('\n').filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        toast.error('CSV file is empty or has no data rows');
+        return;
+      }
+      
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g, ''));
+      const rows = lines.slice(1).map(line => {
+        const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+        const obj: Record<string, string> = {};
+        headers.forEach((h, i) => {
+          obj[h] = values[i] || '';
+        });
+        return obj;
+      });
+      
+      let imported = 0;
+      
+      for (const row of rows) {
+        try {
+          if (activeTab === 'fee-heads') {
+            await createFeeHead({
+              school_id: currentSchoolId,
+              name: row.name,
+              description: row.description || '',
+              category: row.category || 'General',
+              amount: parseFloat(row.amount) || 0,
+              recurrence: row.recurrence || 'once',
+              applicable_classes: row.applicable_classes ? row.applicable_classes.split(';').map(s => s.trim()) : [],
+              is_active: true
+            });
+            imported++;
+          } else if (activeTab === 'structures') {
+            const studentType = (['all', 'existing', 'new'].includes(row.student_type) ? row.student_type : 'all') as 'all' | 'existing' | 'new';
+            await createFeeStructure({
+              school_id: currentSchoolId,
+              name: row.name,
+              description: row.description || '',
+              academic_year: row.academic_year || '2024-25',
+              term: row.term || 'Full Year',
+              total_amount: parseFloat(row.total_amount) || 0,
+              applicable_year_groups: row.applicable_year_groups ? row.applicable_year_groups.split(';').map(s => s.trim()) : [],
+              student_type: studentType,
+              fee_heads: [],
+              status: 'active'
+            });
+            imported++;
+          } else if (activeTab === 'payment-plans') {
+            await createPaymentPlan({
+              school_id: currentSchoolId,
+              name: row.name,
+              description: row.description || '',
+              total_amount: parseFloat(row.total_amount) || 0,
+              number_of_installments: parseInt(row.number_of_installments) || 1,
+              frequency: row.frequency || 'monthly',
+              interest_rate: parseFloat(row.interest_rate) || 0,
+              status: 'active'
+            });
+            imported++;
+          } else if (activeTab === 'discounts') {
+            const discountType = (row.discount_type === 'fixed' ? 'fixed' : 'percentage') as 'fixed' | 'percentage';
+            await createDiscount({
+              school_id: currentSchoolId,
+              name: row.name,
+              discount_type: discountType,
+              value: parseFloat(row.value) || 0,
+              valid_from: row.valid_from || new Date().toISOString().split('T')[0],
+              valid_to: row.valid_to || null,
+              status: 'active'
+            });
+            imported++;
+          }
+        } catch (rowError) {
+          console.error('Error importing row:', row, rowError);
+        }
+      }
+      
+      toast.success(`Successfully imported ${imported} of ${rows.length} records`);
+      event.target.value = ''; // Reset file input
+    } catch (error) {
+      console.error('Import error:', error);
+      toast.error('Failed to import data');
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Hierarchy Info Alert */}
@@ -350,14 +588,28 @@ export function FeeManagementMasterData() {
             className="pl-10"
           />
         </div>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={handleDownloadTemplate}>
+          <FileText className="h-4 w-4 mr-2" />
+          Template
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleExport}>
           <Download className="h-4 w-4 mr-2" />
           Export
         </Button>
-        <Button variant="outline" size="sm">
-          <Upload className="h-4 w-4 mr-2" />
-          Import
-        </Button>
+        <label>
+          <Button variant="outline" size="sm" asChild>
+            <span>
+              <Upload className="h-4 w-4 mr-2" />
+              Import
+            </span>
+          </Button>
+          <input
+            type="file"
+            accept=".csv"
+            onChange={handleImport}
+            className="hidden"
+          />
+        </label>
       </div>
 
       {/* Tabs */}
