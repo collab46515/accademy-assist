@@ -257,7 +257,27 @@ export function FeeManagementMasterData() {
     if (item.applicable_classes) {
       setSelectedClasses(Array.isArray(item.applicable_classes) ? item.applicable_classes : []);
     }
-    form.reset(item);
+    
+    // Map database fields to form fields for fee heads
+    if (tab === 'fee-heads') {
+      form.reset({
+        ...item,
+        default_amount: item.amount,
+        recurrence_frequency: item.recurrence,
+      });
+    } else if (tab === 'structures') {
+      // Pre-select fee heads if they exist
+      if (item.fee_heads && Array.isArray(item.fee_heads)) {
+        const headIds = new Set<string>(item.fee_heads.map((fh: any) => fh.id as string));
+        setSelectedFeeHeadIds(headIds);
+      }
+      form.reset({
+        ...item,
+        applicable_year_groups: item.applicable_year_groups?.join(', ') || '',
+      });
+    } else {
+      form.reset(item);
+    }
   };
 
   const handleDelete = async (id: string) => {
