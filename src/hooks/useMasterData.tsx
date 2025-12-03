@@ -1,8 +1,35 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRBAC } from '@/hooks/useRBAC';
 import { useSchoolFilter } from '@/hooks/useSchoolFilter';
+
+// Module-level cache to persist data across component mounts
+let masterDataCache: {
+  schoolId: string | null;
+  schools: any[];
+  subjects: any[];
+  students: any[];
+  staff: any[];
+  parents: any[];
+  yearGroups: any[];
+  houses: any[];
+  departments: any[];
+  classes: any[];
+  lastFetched: number | null;
+} = {
+  schoolId: null,
+  schools: [],
+  subjects: [],
+  students: [],
+  staff: [],
+  parents: [],
+  yearGroups: [],
+  houses: [],
+  departments: [],
+  classes: [],
+  lastFetched: null
+};
 
 // Core Master Data Types - matching actual database schema
 export interface School {
@@ -130,18 +157,38 @@ export interface Class {
 }
 
 export function useMasterData() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [schools, setSchools] = useState<School[]>([]);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [students, setStudents] = useState<Student[]>([]);
-  const [staff, setStaff] = useState<Staff[]>([]);
-  const [parents, setParents] = useState<Parent[]>([]);
-  const [yearGroups, setYearGroups] = useState<YearGroup[]>([]);
-  const [houses, setHouses] = useState<House[]>([]);
-  const [departments, setDepartments] = useState<DBDepartment[]>([]);
-  const [classes, setClasses] = useState<Class[]>([]);
-  const { toast } = useToast();
+  // Initialize from cache if available for the same school
   const { currentSchoolId, currentSchool, isSuperAdmin } = useSchoolFilter();
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [schools, setSchools] = useState<School[]>(
+    masterDataCache.schoolId === currentSchoolId ? masterDataCache.schools : []
+  );
+  const [subjects, setSubjects] = useState<Subject[]>(
+    masterDataCache.schoolId === currentSchoolId ? masterDataCache.subjects : []
+  );
+  const [students, setStudents] = useState<Student[]>(
+    masterDataCache.schoolId === currentSchoolId ? masterDataCache.students : []
+  );
+  const [staff, setStaff] = useState<Staff[]>(
+    masterDataCache.schoolId === currentSchoolId ? masterDataCache.staff : []
+  );
+  const [parents, setParents] = useState<Parent[]>(
+    masterDataCache.schoolId === currentSchoolId ? masterDataCache.parents : []
+  );
+  const [yearGroups, setYearGroups] = useState<YearGroup[]>(
+    masterDataCache.schoolId === currentSchoolId ? masterDataCache.yearGroups : []
+  );
+  const [houses, setHouses] = useState<House[]>(
+    masterDataCache.schoolId === currentSchoolId ? masterDataCache.houses : []
+  );
+  const [departments, setDepartments] = useState<DBDepartment[]>(
+    masterDataCache.schoolId === currentSchoolId ? masterDataCache.departments : []
+  );
+  const [classes, setClasses] = useState<Class[]>(
+    masterDataCache.schoolId === currentSchoolId ? masterDataCache.classes : []
+  );
+  const { toast } = useToast();
 
   // Fetch all master data - FILTERED BY CURRENT SCHOOL
   const fetchAllData = async () => {
@@ -218,10 +265,22 @@ export function useMasterData() {
       })) || [];
       setParents(parentRelationships);
 
-      toast({
-        title: "Success",
-        description: "Master data loaded successfully",
-      });
+      // Update cache
+      masterDataCache = {
+        schoolId: currentSchoolId,
+        schools: schoolsResponse.data as School[] || [],
+        subjects: subjectsResponse.data as Subject[] || [],
+        students: studentsResponse.data as Student[] || [],
+        staff: staffResponse.data as Staff[] || [],
+        parents: parentRelationships,
+        yearGroups: (yearGroupsResponse.data as unknown) as YearGroup[] || [],
+        houses: (housesResponse.data as unknown) as House[] || [],
+        departments: departmentsResponse.data as DBDepartment[] || [],
+        classes: classesResponse.data as Class[] || [],
+        lastFetched: Date.now()
+      };
+
+      // Don't show toast on every load - only on manual refresh
     } catch (error: any) {
       console.error('Error fetching master data:', error);
       toast({
@@ -671,12 +730,24 @@ export function useMasterData() {
   };
 
   const refreshData = () => {
-    fetchAllData();
+    // Force refresh by clearing cache
+    masterDataCache.lastFetched = null;
+    fetchAllData().then(() => {
+      toast({
+        title: "Success",
+        description: "Master data refreshed successfully",
+      });
+    });
   };
 
   useEffect(() => {
-    fetchAllData();
-  }, []);
+    // Only fetch if school changed or cache is empty/stale
+    const cacheValid = masterDataCache.schoolId === currentSchoolId && masterDataCache.lastFetched;
+    
+    if (currentSchoolId && !cacheValid) {
+      fetchAllData();
+    }
+  }, [currentSchoolId]);
 
   return {
     isLoading,
