@@ -108,19 +108,19 @@ export default function ApplicationDetailPage() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { variant: any; label: string; icon: React.ReactNode; color: string }> = {
-      draft: { variant: 'outline', label: 'Draft', icon: <Clock className="h-4 w-4" />, color: 'text-muted-foreground' },
-      submitted: { variant: 'secondary', label: 'Submitted', icon: <FileText className="h-4 w-4" />, color: 'text-blue-600' },
-      under_review: { variant: 'default', label: 'Under Review', icon: <AlertCircle className="h-4 w-4" />, color: 'text-amber-600' },
-      documents_pending: { variant: 'outline', label: 'Documents Pending', icon: <AlertCircle className="h-4 w-4" />, color: 'text-orange-600' },
-      assessment_scheduled: { variant: 'secondary', label: 'Assessment Scheduled', icon: <Clock className="h-4 w-4" />, color: 'text-purple-600' },
-      assessment_complete: { variant: 'secondary', label: 'Assessment Complete', icon: <CheckCircle className="h-4 w-4" />, color: 'text-purple-600' },
-      interview_scheduled: { variant: 'secondary', label: 'Interview Scheduled', icon: <Clock className="h-4 w-4" />, color: 'text-indigo-600' },
-      interview_complete: { variant: 'secondary', label: 'Interview Complete', icon: <CheckCircle className="h-4 w-4" />, color: 'text-indigo-600' },
-      offer_sent: { variant: 'default', label: 'Offer Sent', icon: <CheckCircle className="h-4 w-4" />, color: 'text-green-600' },
+      draft: { variant: 'outline', label: 'Draft', icon: <Clock className="h-4 w-4" />, color: 'text-white' },
+      submitted: { variant: 'secondary', label: 'Submitted', icon: <FileText className="h-4 w-4" />, color: 'text-white' },
+      under_review: { variant: 'default', label: 'Under Review', icon: <AlertCircle className="h-4 w-4" />, color: 'text-white' },
+      documents_pending: { variant: 'outline', label: 'Documents Pending', icon: <AlertCircle className="h-4 w-4" />, color: 'text-white' },
+      assessment_scheduled: { variant: 'secondary', label: 'Assessment Scheduled', icon: <Clock className="h-4 w-4" />, color: 'text-white' },
+      assessment_complete: { variant: 'secondary', label: 'Assessment Complete', icon: <CheckCircle className="h-4 w-4" />, color: 'text-white' },
+      interview_scheduled: { variant: 'secondary', label: 'Interview Scheduled', icon: <Clock className="h-4 w-4" />, color: 'text-white' },
+      interview_complete: { variant: 'secondary', label: 'Interview Complete', icon: <CheckCircle className="h-4 w-4" />, color: 'text-white' },
+      offer_sent: { variant: 'default', label: 'Offer Sent', icon: <CheckCircle className="h-4 w-4" />, color: 'text-white' },
       approved: { variant: 'default', label: 'Approved', icon: <CheckCircle className="h-4 w-4" />, color: 'text-white' },
-      enrolled: { variant: 'default', label: 'Enrolled', icon: <CheckCircle className="h-4 w-4" />, color: 'text-green-600' },
+      enrolled: { variant: 'default', label: 'Enrolled', icon: <CheckCircle className="h-4 w-4" />, color: 'text-white' },
       rejected: { variant: 'destructive', label: 'Rejected', icon: <XCircle className="h-4 w-4" />, color: 'text-white' },
-      withdrawn: { variant: 'outline', label: 'Withdrawn', icon: <AlertCircle className="h-4 w-4" />, color: 'text-gray-600' },
+      withdrawn: { variant: 'outline', label: 'Withdrawn', icon: <AlertCircle className="h-4 w-4" />, color: 'text-white' },
     };
 
     const config = statusConfig[status] || statusConfig.submitted;
