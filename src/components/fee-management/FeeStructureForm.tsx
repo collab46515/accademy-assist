@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, Trash2, Save, DollarSign } from 'lucide-react';
 import { useFeeData, FeeHead, FeeStructure } from '@/hooks/useFeeData';
 import { useToast } from '@/hooks/use-toast';
+import { useSchoolFilter } from '@/hooks/useSchoolFilter';
 
 const YEAR_GROUPS = [
   'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6',
@@ -33,7 +34,8 @@ interface FeeStructureFormProps {
 }
 
 export const FeeStructureForm = ({ feeStructure, onSave, onCancel }: FeeStructureFormProps) => {
-  const { feeHeads, createFeeStructure, updateFeeStructure } = useFeeData();
+  const { currentSchoolId } = useSchoolFilter();
+  const { feeHeads, createFeeStructure, updateFeeStructure } = useFeeData(currentSchoolId);
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({
@@ -45,7 +47,7 @@ export const FeeStructureForm = ({ feeStructure, onSave, onCancel }: FeeStructur
     student_type: feeStructure?.student_type || 'all',
     status: feeStructure?.status || 'draft',
     selected_fee_heads: [] as string[], // IDs of selected fee heads
-    school_id: feeStructure?.school_id || ''
+    school_id: feeStructure?.school_id || currentSchoolId || ''
   });
 
   const [selectedFeeHeadIds, setSelectedFeeHeadIds] = useState<Set<string>>(new Set());
@@ -58,6 +60,13 @@ export const FeeStructureForm = ({ feeStructure, onSave, onCancel }: FeeStructur
       setSelectedFeeHeadIds(new Set(ids));
     }
   }, [feeStructure]);
+
+  // Update school_id when currentSchoolId becomes available
+  useEffect(() => {
+    if (currentSchoolId && !formData.school_id) {
+      setFormData(prev => ({ ...prev, school_id: currentSchoolId }));
+    }
+  }, [currentSchoolId]);
 
   const toggleFeeHead = (feeHeadId: string) => {
     const newSet = new Set(selectedFeeHeadIds);
@@ -107,6 +116,15 @@ export const FeeStructureForm = ({ feeStructure, onSave, onCancel }: FeeStructur
       return;
     }
 
+    if (!currentSchoolId) {
+      toast({
+        title: 'Error',
+        description: 'No school context available',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     try {
       const selectedHeads = getSelectedFeeHeads();
       const totalAmount = calculateTotal();
@@ -115,7 +133,7 @@ export const FeeStructureForm = ({ feeStructure, onSave, onCancel }: FeeStructur
         ...formData,
         fee_heads: selectedHeads,
         total_amount: totalAmount,
-        school_id: formData.school_id || crypto.randomUUID() // Temp for demo
+        school_id: currentSchoolId
       };
 
       if (feeStructure) {
