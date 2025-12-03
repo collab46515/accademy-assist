@@ -624,8 +624,8 @@ export function FeeManagementMasterData() {
 
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle>
               {editingItem ? 'Edit' : 'Create'} {
                 activeTab === 'structures' ? 'Fee Structure' : 
@@ -634,7 +634,8 @@ export function FeeManagementMasterData() {
               }
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={form.handleSubmit(handleCreate)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(handleCreate)} className="flex flex-col flex-1 min-h-0">
+            <div className="flex-1 overflow-y-auto space-y-4 pr-2">
             {activeTab === 'structures' ? (
               <>
                 <div className="grid grid-cols-2 gap-4">
@@ -968,7 +969,8 @@ export function FeeManagementMasterData() {
                 </div>
               </>
             )}
-            <div className="flex gap-2 justify-end">
+            </div>
+            <div className="flex gap-2 justify-end pt-4 border-t flex-shrink-0 mt-4">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancel
               </Button>
