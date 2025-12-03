@@ -381,6 +381,7 @@ export function FeeManagementMasterData() {
                     <TableHead>Name</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Default Amount</TableHead>
+                    <TableHead>Applicable Classes</TableHead>
                     <TableHead>Mandatory</TableHead>
                     <TableHead>Recurring</TableHead>
                     <TableHead>Actions</TableHead>
@@ -389,12 +390,12 @@ export function FeeManagementMasterData() {
                 <TableBody>
                   {loading && (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center">Loading...</TableCell>
+                      <TableCell colSpan={7} className="text-center">Loading...</TableCell>
                     </TableRow>
                   )}
                   {!loading && feeHeads.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground">
+                      <TableCell colSpan={7} className="text-center text-muted-foreground">
                         No fee heads found. Click "Add New" to create one.
                       </TableCell>
                     </TableRow>
@@ -416,6 +417,24 @@ export function FeeManagementMasterData() {
                         <Badge variant="outline">{feeHead.category}</Badge>
                       </TableCell>
                       <TableCell>{formatCurrency(feeHead.amount || 0)}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1 max-w-[200px]">
+                          {feeHead.applicable_classes && feeHead.applicable_classes.length > 0 ? (
+                            feeHead.applicable_classes.slice(0, 3).map((cls: string, idx: number) => (
+                              <Badge key={idx} variant="outline" className="text-xs">
+                                {cls}
+                              </Badge>
+                            ))
+                          ) : (
+                            <span className="text-muted-foreground text-sm">All</span>
+                          )}
+                          {feeHead.applicable_classes && feeHead.applicable_classes.length > 3 && (
+                            <Badge variant="secondary" className="text-xs">
+                              +{feeHead.applicable_classes.length - 3} more
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <Badge variant={feeHead.is_active ? 'default' : 'secondary'}>
                           {feeHead.is_active ? 'Active' : 'Inactive'}
