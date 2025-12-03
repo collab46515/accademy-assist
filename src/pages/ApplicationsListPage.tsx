@@ -68,7 +68,7 @@ export default function ApplicationsListPage() {
       } else if (filterParam === 'rejected') {
         query = query.eq('status', 'rejected');
       } else if (filterParam === 'verified') {
-        query = query.not('status', 'in', '(under_review,documents_pending,submitted,draft)');
+        query = query.not('status', 'in', '(under_review,documents_pending,submitted,draft,rejected,enrolled)');
       } else if (filterParam === 'assessment_complete') {
         query = query.eq('status', 'assessment_complete');
       } else if (filterParam === 'interview_complete') {
