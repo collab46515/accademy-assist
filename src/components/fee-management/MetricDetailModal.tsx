@@ -107,7 +107,7 @@ export function MetricDetailModal({ open, onOpenChange, metricType, data }: Metr
                       <TableRow key={i}>
                         <TableCell>{payment.date}</TableCell>
                         <TableCell>{payment.student}</TableCell>
-                        <TableCell>£{payment.amount}</TableCell>
+                        <TableCell>{formatCurrency(payment.amount)}</TableCell>
                         <TableCell>{payment.method}</TableCell>
                         <TableCell>{payment.ref}</TableCell>
                       </TableRow>
@@ -171,7 +171,7 @@ export function MetricDetailModal({ open, onOpenChange, metricType, data }: Metr
                         <TableRow key={i}>
                           <TableCell className="font-medium">{item.class}</TableCell>
                           <TableCell>{item.students}</TableCell>
-                          <TableCell className="text-destructive font-semibold">£{item.amount}</TableCell>
+                          <TableCell className="text-destructive font-semibold">{formatCurrency(item.amount)}</TableCell>
                           <TableCell>
                             <Badge variant="destructive">{item.overdue}</Badge>
                           </TableCell>
@@ -338,7 +338,7 @@ export function MetricDetailModal({ open, onOpenChange, metricType, data }: Metr
                         <TableRow key={i}>
                           <TableCell className="font-medium">{item.student}</TableCell>
                           <TableCell>{item.class}</TableCell>
-                          <TableCell className="text-red-600 font-semibold">£{item.amount}</TableCell>
+                          <TableCell className="text-red-600 font-semibold">{formatCurrency(item.amount)}</TableCell>
                           <TableCell>
                             <Badge variant={item.days > 30 ? 'destructive' : item.days > 14 ? 'default' : 'secondary'}>
                               {item.days} days
@@ -423,7 +423,7 @@ export function MetricDetailModal({ open, onOpenChange, metricType, data }: Metr
                       <TableRow key={i}>
                         <TableCell className="font-medium">{item.student}</TableCell>
                         <TableCell>{item.class}</TableCell>
-                        <TableCell>£{item.amount}</TableCell>
+                        <TableCell>{formatCurrency(item.amount)}</TableCell>
                         <TableCell>{item.type}</TableCell>
                         <TableCell>{item.contact}</TableCell>
                         <TableCell>
