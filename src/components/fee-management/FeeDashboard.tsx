@@ -147,6 +147,23 @@ export function FeeDashboard() {
         .from('student_fee_assignments')
         .select('amount_due, amount_paid, status, class_name, due_date');
 
+      // Fetch fee structures for configured totals
+      const { data: feeStructures } = await supabase
+        .from('fee_structures')
+        .select('*')
+        .eq('status', 'active');
+
+      // Fetch fee heads for category breakdown
+      const { data: feeHeads } = await supabase
+        .from('fee_heads')
+        .select('*')
+        .eq('is_active', true);
+
+      // Fetch invoices
+      const { data: invoices } = await supabase
+        .from('invoices')
+        .select('total_amount, paid_amount, balance_due, status');
+
       // Fetch fee alerts
       const { data: alertsData } = await supabase
         .from('fee_alerts')
@@ -154,32 +171,52 @@ export function FeeDashboard() {
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
-      if (payments && assignments) {
-        // Calculate metrics
-        const totalCollected = payments.reduce((sum, p) => sum + Number(p.amount), 0);
+      // Calculate metrics from multiple sources
+      const paymentTotal = payments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+      const invoicesPaid = invoices?.reduce((sum, inv) => sum + Number(inv.paid_amount || 0), 0) || 0;
+      const totalCollected = Math.max(paymentTotal, invoicesPaid);
+      
+      // Outstanding from invoices or fee structures
+      const invoicesOutstanding = invoices?.reduce((sum, inv) => sum + Number(inv.balance_due || 0), 0) || 0;
+      const structuresTotal = feeStructures?.reduce((sum, fs) => sum + Number(fs.total_amount || 0), 0) || 0;
+      
+      // If we have assignments, use them, otherwise show structure totals
+      const hasAssignments = assignments && assignments.length > 0;
+      
+      let outstandingFees = 0;
+      let collectionPercentage = 0;
+      let overdueAccounts = 0;
+      
+      if (hasAssignments) {
         const totalDue = assignments.reduce((sum, a) => sum + Number(a.amount_due), 0);
         const totalPaid = assignments.reduce((sum, a) => sum + Number(a.amount_paid), 0);
-        const outstandingFees = totalDue - totalPaid;
-        const collectionPercentage = totalDue > 0 ? Math.round((totalPaid / totalDue) * 100) : 0;
+        outstandingFees = totalDue - totalPaid;
+        collectionPercentage = totalDue > 0 ? Math.round((totalPaid / totalDue) * 100) : 0;
         
-        // Calculate overdue accounts
         const today = new Date();
-        const overdueAccounts = assignments.filter(a => 
+        overdueAccounts = assignments.filter(a => 
           a.status !== 'paid' && new Date(a.due_date) < today
         ).length;
+      } else {
+        // Use invoice data or show structure totals as potential
+        outstandingFees = invoicesOutstanding > 0 ? invoicesOutstanding : structuresTotal;
+        collectionPercentage = structuresTotal > 0 ? Math.round((totalCollected / structuresTotal) * 100) : 0;
+        overdueAccounts = invoices?.filter(inv => inv.status === 'overdue').length || 0;
+      }
 
-        // Calculate today's expected (mock for now)
-        const todayExpected = 2100;
+      // Today's expected (based on invoices due today or average)
+      const todayExpected = Math.round(structuresTotal / 12) || 2100; // Monthly average or default
 
-        setMetrics({
-          totalCollected,
-          outstandingFees,
-          collectionPercentage,
-          todayExpected,
-          overdueAccounts
-        });
+      setMetrics({
+        totalCollected,
+        outstandingFees,
+        collectionPercentage: Math.min(collectionPercentage, 100),
+        todayExpected,
+        overdueAccounts
+      });
 
-        // Process class collections
+      // Process class collections from assignments or structures
+      if (hasAssignments) {
         const classGroups = assignments.reduce((acc, assignment) => {
           const className = assignment.class_name || 'Unknown';
           if (!acc[className]) {
@@ -198,24 +235,58 @@ export function FeeDashboard() {
         }));
 
         setClassCollections(classCollectionsData);
+      } else if (feeStructures && feeStructures.length > 0) {
+        // Show structures as class-like breakdown
+        const structureCollections = feeStructures.map(fs => ({
+          className: fs.name,
+          collected: 0,
+          total: Number(fs.total_amount || 0),
+          percentage: 0
+        }));
+        setClassCollections(structureCollections);
+      }
 
-        // Mock category breakdown (would come from fee heads)
+      // Category breakdown from fee heads
+      if (feeHeads && feeHeads.length > 0) {
+        const categoryGroups = feeHeads.reduce((acc, fh) => {
+          const category = fh.category || 'General';
+          if (!acc[category]) {
+            acc[category] = 0;
+          }
+          acc[category] += Number(fh.amount || 0);
+          return acc;
+        }, {} as Record<string, number>);
+
+        const totalFeeAmount = Object.values(categoryGroups).reduce((sum, amt) => sum + amt, 0);
+        
+        const breakdown = Object.entries(categoryGroups).map(([category, amount]) => ({
+          category,
+          amount,
+          percentage: totalFeeAmount > 0 ? Math.round((amount / totalFeeAmount) * 100) : 0
+        }));
+        
+        setCategoryBreakdown(breakdown);
+      } else {
         setCategoryBreakdown([
-          { category: 'Tuition', amount: outstandingFees * 0.6, percentage: 60 },
-          { category: 'Transport', amount: outstandingFees * 0.25, percentage: 25 },
-          { category: 'Exam', amount: outstandingFees * 0.15, percentage: 15 }
+          { category: 'No fee heads configured', amount: 0, percentage: 100 }
         ]);
+      }
 
-        // Mock daily collections (last 7 days)
-        const last7Days = Array.from({ length: 7 }, (_, i) => {
-          const date = new Date();
-          date.setDate(date.getDate() - (6 - i));
-          return {
-            date: date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' }),
-            amount: Math.floor(Math.random() * 2000) + 500
-          };
-        });
-        setDailyCollections(last7Days);
+      // Daily collections from payments
+      if (payments && payments.length > 0) {
+        const paymentsByDate = payments.reduce((acc, p) => {
+          const date = new Date(p.payment_date).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
+          acc[date] = (acc[date] || 0) + Number(p.amount);
+          return acc;
+        }, {} as Record<string, number>);
+
+        const dailyData = Object.entries(paymentsByDate).map(([date, amount]) => ({
+          date,
+          amount
+        }));
+        setDailyCollections(dailyData.length > 0 ? dailyData : generateMockDailyData());
+      } else {
+        setDailyCollections(generateMockDailyData());
       }
 
       setAlerts(alertsData?.map(alert => ({
@@ -235,6 +306,17 @@ export function FeeDashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const generateMockDailyData = () => {
+    return Array.from({ length: 7 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i));
+      return {
+        date: date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' }),
+        amount: 0
+      };
+    });
   };
 
   const handleApplyFilters = (filters: FilterOptions) => {
