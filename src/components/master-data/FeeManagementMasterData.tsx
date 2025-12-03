@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,9 +18,32 @@ import { CreditCard, Plus, Search, Download, Upload, Edit, Trash, Info } from 'l
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export function FeeManagementMasterData() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('fee-heads');
-  const [dialogOpen, setDialogOpen] = useState(false);
+  
+  // Persist dialog and tab state in URL
+  const activeTab = searchParams.get('feeTab') || 'fee-heads';
+  const dialogOpen = searchParams.get('dialog') === 'open';
+  
+  const setActiveTab = (tab: string) => {
+    setSearchParams(prev => {
+      prev.set('feeTab', tab);
+      return prev;
+    }, { replace: true });
+  };
+  
+  const setDialogOpen = (open: boolean) => {
+    setSearchParams(prev => {
+      if (open) {
+        prev.set('dialog', 'open');
+      } else {
+        prev.delete('dialog');
+        prev.delete('editId'); // Clear edit ID when closing dialog
+      }
+      return prev;
+    }, { replace: true });
+  };
+  
   const [editingItem, setEditingItem] = useState<any>(null);
   const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
   const form = useForm();
