@@ -990,10 +990,6 @@ function MasterDataPageContent() {
                 </div>
               </DialogContent>
             </Dialog>
-            <Button variant="outline" size="sm" onClick={refreshData}>
-              <Download className="h-4 w-4 mr-2" />
-              Refresh
-            </Button>
           </div>
         </div>
       </div>
