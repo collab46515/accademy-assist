@@ -33,6 +33,7 @@ import {
 import { formatCurrency } from '@/lib/currency';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useSchoolFilter } from '@/hooks/useSchoolFilter';
 import { PaymentRecordModal } from './PaymentRecordModal';
 import { ClassCollectionDetailModal } from './ClassCollectionDetailModal';
 import { TodayCollectionModal } from './TodayCollectionModal';
@@ -128,48 +129,58 @@ export function FeeDashboard() {
   });
   
   const { toast } = useToast();
+  const { currentSchoolId } = useSchoolFilter();
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    if (currentSchoolId) {
+      fetchDashboardData();
+    }
+  }, [currentSchoolId]);
 
   const fetchDashboardData = async () => {
+    if (!currentSchoolId) return;
+    
     try {
       setLoading(true);
       
-      // Fetch payment records for total collected
+      // Fetch payment records for total collected - filtered by school
       const { data: payments } = await supabase
         .from('payment_records')
         .select('amount, payment_date')
-        .eq('status', 'completed');
+        .eq('status', 'completed')
+        .eq('school_id', currentSchoolId);
 
-      // Fetch student fee assignments for outstanding fees
+      // Fetch student fee assignments for outstanding fees - filtered by school
       const { data: assignments } = await supabase
         .from('student_fee_assignments')
-        .select('amount_due, amount_paid, status, class_name, due_date');
+        .select('amount_due, amount_paid, status, class_name, due_date')
+        .eq('school_id', currentSchoolId);
 
-      // Fetch fee structures for configured totals
+      // Fetch fee structures for configured totals - filtered by school
       const { data: feeStructures } = await supabase
         .from('fee_structures')
         .select('*')
-        .eq('status', 'active');
+        .eq('status', 'active')
+        .eq('school_id', currentSchoolId);
 
-      // Fetch fee heads for category breakdown
+      // Fetch fee heads for category breakdown - filtered by school
       const { data: feeHeads } = await supabase
         .from('fee_heads')
         .select('*')
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .eq('school_id', currentSchoolId);
 
-      // Fetch invoices
+      // Fetch invoices - note: invoices table may not have school_id
       const { data: invoices } = await supabase
         .from('invoices')
         .select('total_amount, paid_amount, balance_due, status');
 
-      // Fetch fee alerts
+      // Fetch fee alerts - filtered by school
       const { data: alertsData } = await supabase
         .from('fee_alerts')
         .select('*')
         .eq('is_active', true)
+        .eq('school_id', currentSchoolId)
         .order('created_at', { ascending: false });
 
       // Calculate metrics from multiple sources
@@ -177,11 +188,11 @@ export function FeeDashboard() {
       const invoicesPaid = invoices?.reduce((sum, inv) => sum + Number(inv.paid_amount || 0), 0) || 0;
       const totalCollected = Math.max(paymentTotal, invoicesPaid);
       
-      // Outstanding from invoices or fee structures
+      // Outstanding from invoices only (actual billed amounts)
       const invoicesOutstanding = invoices?.reduce((sum, inv) => sum + Number(inv.balance_due || 0), 0) || 0;
       const structuresTotal = feeStructures?.reduce((sum, fs) => sum + Number(fs.total_amount || 0), 0) || 0;
       
-      // If we have assignments, use them, otherwise show structure totals
+      // If we have assignments, use them for actual outstanding
       const hasAssignments = assignments && assignments.length > 0;
       
       let outstandingFees = 0;
@@ -199,14 +210,18 @@ export function FeeDashboard() {
           a.status !== 'paid' && new Date(a.due_date) < today
         ).length;
       } else {
-        // Use invoice data or show structure totals as potential
-        outstandingFees = invoicesOutstanding > 0 ? invoicesOutstanding : structuresTotal;
-        collectionPercentage = structuresTotal > 0 ? Math.round((totalCollected / structuresTotal) * 100) : 0;
+        // Only show outstanding from actual invoices, not potential from structures
+        outstandingFees = invoicesOutstanding;
+        collectionPercentage = (invoicesOutstanding + totalCollected) > 0 
+          ? Math.round((totalCollected / (invoicesOutstanding + totalCollected)) * 100) 
+          : 0;
         overdueAccounts = invoices?.filter(inv => inv.status === 'overdue').length || 0;
       }
 
-      // Today's expected (based on invoices due today or average)
-      const todayExpected = Math.round(structuresTotal / 12) || 2100; // Monthly average or default
+      // Today's expected - only show if there are actual pending invoices/assignments
+      const todayExpected = hasAssignments || invoicesOutstanding > 0 
+        ? Math.round((outstandingFees + totalCollected) / 12) 
+        : 0;
 
       setMetrics({
         totalCollected,
