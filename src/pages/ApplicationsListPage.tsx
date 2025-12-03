@@ -67,8 +67,6 @@ export default function ApplicationsListPage() {
         query = query.in('status', ['approved', 'enrolled']);
       } else if (filterParam === 'rejected') {
         query = query.eq('status', 'rejected');
-      } else if (filterParam === 'verified') {
-        query = query.not('status', 'in', '(under_review,documents_pending,submitted,draft,rejected,enrolled)');
       } else if (filterParam === 'assessment_complete') {
         query = query.eq('status', 'assessment_complete');
       } else if (filterParam === 'interview_complete') {
@@ -124,7 +122,6 @@ export default function ApplicationsListPage() {
       pending: 'Pending Applications',
       approved: 'Approved Applications',
       rejected: 'Rejected Applications',
-      verified: 'Verified Applications',
       assessment_complete: 'Assessment Complete',
       interview_complete: 'Interview Complete'
     };
@@ -197,7 +194,6 @@ export default function ApplicationsListPage() {
           <option value="pending">Pending Reviews</option>
           <option value="approved">Approved</option>
           <option value="rejected">Rejected</option>
-          <option value="verified">Verified</option>
           <option value="assessment_complete">Assessment Complete</option>
           <option value="interview_complete">Interview Complete</option>
         </select>

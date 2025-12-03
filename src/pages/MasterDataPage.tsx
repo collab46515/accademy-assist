@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,9 +50,27 @@ export function MasterDataPage() {
 
 function MasterDataPageContent() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('overview');
-  const [activeEntityTab, setActiveEntityTab] = useState('schools');
+  
+  // Persist tab state in URL
+  const activeTab = searchParams.get('tab') || 'overview';
+  const activeEntityTab = searchParams.get('entity') || 'schools';
+  
+  const setActiveTab = (tab: string) => {
+    setSearchParams(prev => {
+      prev.set('tab', tab);
+      return prev;
+    }, { replace: true });
+  };
+  
+  const setActiveEntityTab = (entity: string) => {
+    setSearchParams(prev => {
+      prev.set('entity', entity);
+      return prev;
+    }, { replace: true });
+  };
+  
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
