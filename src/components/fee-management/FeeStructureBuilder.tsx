@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, Edit, Trash2, Save, Settings } from 'lucide-react';
 import { useFeeData, FeeHead } from '@/hooks/useFeeData';
+import { useSchoolFilter } from '@/hooks/useSchoolFilter';
 
 const FEE_CATEGORIES = [
   'Tuition',
@@ -221,15 +222,19 @@ const FeeHeadForm = ({ feeHead, onSave, onCancel }: FeeHeadFormProps) => {
 };
 
 export const FeeStructureBuilder = () => {
-  // Show all data for demo purposes - in production this would use proper school context
-  const { feeHeads, loading, createFeeHead, updateFeeHead, deleteFeeHead } = useFeeData();
+  const { currentSchoolId } = useSchoolFilter();
+  const { feeHeads, loading, createFeeHead, updateFeeHead, deleteFeeHead } = useFeeData(currentSchoolId);
   const [showForm, setShowForm] = useState(false);
   const [editingFeeHead, setEditingFeeHead] = useState<FeeHead | undefined>();
 
   const handleSave = async (feeHeadData: Omit<FeeHead, 'id' | 'created_at' | 'updated_at'>) => {
+    if (!currentSchoolId) {
+      console.error('No school context available');
+      return;
+    }
+    
     try {
-      // Add a random school_id for demo purposes
-      const dataWithSchool = { ...feeHeadData, school_id: crypto.randomUUID() };
+      const dataWithSchool = { ...feeHeadData, school_id: currentSchoolId };
       
       if (editingFeeHead) {
         await updateFeeHead(editingFeeHead.id, dataWithSchool);
