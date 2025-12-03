@@ -95,7 +95,7 @@ export function AdmissionStagesBreadcrumb() {
       </div>
       
       <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex items-center space-x-2 pb-2">
+        <div className="flex items-center space-x-2 pb-3">
           {admissionStages.map((stage, index) => {
             const isActive = activeStageId === stage.id;
             const isCompleted = activeStageId !== null && stage.id < activeStageId;
@@ -129,7 +129,7 @@ export function AdmissionStagesBreadcrumb() {
             );
           })}
         </div>
-        <ScrollBar orientation="horizontal" />
+        <ScrollBar orientation="horizontal" className="h-3 bg-muted/50" />
       </ScrollArea>
       
       {activeStageId !== null && (
