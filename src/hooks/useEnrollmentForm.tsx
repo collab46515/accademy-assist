@@ -319,12 +319,14 @@ export function useEnrollmentForm({ pathway, applicationId, schoolId }: UseEnrol
       };
 
       let result;
-      if (applicationId) {
-        // Update existing application
+      const existingId = applicationId || currentDraftId;
+      
+      if (existingId) {
+        // Update existing application/draft
         result = await supabase
           .from('enrollment_applications')
           .update(applicationData)
-          .eq('id', applicationId)
+          .eq('id', existingId)
           .select()
           .single();
       } else {
