@@ -14,12 +14,14 @@ import { useForm, Controller } from 'react-hook-form';
 import { useFeeData } from '@/hooks/useFeeData';
 import { usePaymentData } from '@/hooks/usePaymentData';
 import { useMasterData } from '@/hooks/useMasterData';
-import { CreditCard, Plus, Search, Download, Upload, Edit, Trash, Info } from 'lucide-react';
+import { useSchoolFilter } from '@/hooks/useSchoolFilter';
+import { CreditCard, Plus, Search, Download, Upload, Edit, Trash, Info, DollarSign } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export function FeeManagementMasterData() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
+  const { currentSchoolId } = useSchoolFilter();
   
   // Persist dialog and tab state in URL
   const activeTab = searchParams.get('feeTab') || 'fee-heads';
@@ -46,12 +48,13 @@ export function FeeManagementMasterData() {
   
   const [editingItem, setEditingItem] = useState<any>(null);
   const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
+  const [selectedFeeHeadIds, setSelectedFeeHeadIds] = useState<Set<string>>(new Set());
   const form = useForm();
   const { control } = form;
 
-  // Use real fee data and payment data
-  const { feeHeads, feeStructures, createFeeHead, updateFeeHead, deleteFeeHead, createFeeStructure, updateFeeStructure, deleteFeeStructure, loading } = useFeeData('2f21656b-0848-40ee-bbec-12e5e8137545');
-  const { paymentPlans, discounts, createPaymentPlan, updatePaymentPlan, deletePaymentPlan, createDiscount, updateDiscount, deleteDiscount, loading: paymentLoading } = usePaymentData('2f21656b-0848-40ee-bbec-12e5e8137545');
+  // Use real fee data and payment data with current school context
+  const { feeHeads, feeStructures, createFeeHead, updateFeeHead, deleteFeeHead, createFeeStructure, updateFeeStructure, deleteFeeStructure, loading } = useFeeData(currentSchoolId);
+  const { paymentPlans, discounts, createPaymentPlan, updatePaymentPlan, deletePaymentPlan, createDiscount, updateDiscount, deleteDiscount, loading: paymentLoading } = usePaymentData(currentSchoolId);
   
   // Get classes/year groups from master data
   const { classes, yearGroups } = useMasterData();
@@ -62,22 +65,60 @@ export function FeeManagementMasterData() {
     ...classes.map(c => `${c.year_group} - ${c.class_name}`)
   ];
 
+  // Toggle fee head selection for structures
+  const toggleFeeHead = (feeHeadId: string) => {
+    const newSet = new Set(selectedFeeHeadIds);
+    if (newSet.has(feeHeadId)) {
+      newSet.delete(feeHeadId);
+    } else {
+      newSet.add(feeHeadId);
+    }
+    setSelectedFeeHeadIds(newSet);
+  };
+
+  // Calculate total from selected fee heads
+  const calculateTotalFromFeeHeads = () => {
+    return feeHeads
+      .filter(fh => selectedFeeHeadIds.has(fh.id))
+      .reduce((sum, fh) => sum + (fh.amount || 0), 0);
+  };
+
+  // Group fee heads by category
+  const groupedFeeHeads = feeHeads.reduce((acc, feeHead) => {
+    const category = feeHead.category || 'Uncategorized';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(feeHead);
+    return acc;
+  }, {} as Record<string, typeof feeHeads>);
+
   useEffect(() => {
     if (editingItem && editingItem.applicable_classes) {
       setSelectedClasses(editingItem.applicable_classes);
     } else {
       setSelectedClasses([]);
     }
-  }, [editingItem]);
+    // Reset selected fee heads when dialog opens/closes
+    if (!dialogOpen) {
+      setSelectedFeeHeadIds(new Set());
+    }
+  }, [editingItem, dialogOpen]);
 
   const handleCreate = async (data: any) => {
     console.log('Form data received:', data);
     console.log('Active tab:', activeTab);
+    
+    if (!currentSchoolId) {
+      console.error('No school context available');
+      return;
+    }
+    
     try {
       if (activeTab === 'fee-heads') {
         // Create or update fee head
         const feeHeadData = {
-          school_id: '2f21656b-0848-40ee-bbec-12e5e8137545',
+          school_id: currentSchoolId,
           name: data.name,
           description: data.description || '',
           category: data.category || 'General',
@@ -97,7 +138,7 @@ export function FeeManagementMasterData() {
         setSelectedClasses([]);
       } else if (activeTab === 'structures') {
         // Convert comma-separated string to array for applicable_year_groups
-        const yearGroups = data.applicable_year_groups 
+        const yearGroupsData = data.applicable_year_groups 
           ? data.applicable_year_groups.split(',').map((s: string) => s.trim()).filter(Boolean)
           : [];
           
@@ -110,8 +151,14 @@ export function FeeManagementMasterData() {
             console.error('Error parsing year group amounts:', e);
           }
         }
+        
+        // Get selected fee heads
+        const selectedHeads = feeHeads.filter(fh => selectedFeeHeadIds.has(fh.id));
+        const calculatedTotal = selectedHeads.reduce((sum, fh) => sum + (fh.amount || 0), 0);
+        const totalAmount = selectedFeeHeadIds.size > 0 ? calculatedTotal : parseFloat(data.total_amount || '0');
           
-        console.log('Processed year groups:', yearGroups);
+        console.log('Processed year groups:', yearGroupsData);
+        console.log('Selected fee heads:', selectedHeads.length);
           
         if (editingItem) {
           console.log('Updating existing structure:', editingItem.id);
@@ -120,9 +167,9 @@ export function FeeManagementMasterData() {
             description: data.description || '',
             academic_year: data.academic_year || '2024-25',
             term: data.term || 'Full Year',
-            fee_heads: data.fee_heads || [],
-            total_amount: parseFloat(data.total_amount || '0'),
-            applicable_year_groups: yearGroups,
+            fee_heads: selectedHeads,
+            total_amount: totalAmount,
+            applicable_year_groups: yearGroupsData,
             year_group_amounts: yearGroupAmounts,
             student_type: data.student_type || 'all',
             status: 'active'
@@ -130,19 +177,20 @@ export function FeeManagementMasterData() {
         } else {
           console.log('Creating new structure');
           await createFeeStructure({
-            school_id: data.school_id || '2f21656b-0848-40ee-bbec-12e5e8137545',
+            school_id: currentSchoolId,
             name: data.name,
             description: data.description || '',
             academic_year: data.academic_year || '2024-25',
             term: data.term || 'Full Year',
-            fee_heads: data.fee_heads || [],
-            total_amount: parseFloat(data.total_amount || '0'),
-            applicable_year_groups: yearGroups,
+            fee_heads: selectedHeads,
+            total_amount: totalAmount,
+            applicable_year_groups: yearGroupsData,
             year_group_amounts: yearGroupAmounts,
             student_type: data.student_type || 'all',
             status: 'active'
           });
         }
+        setSelectedFeeHeadIds(new Set());
       } else if (activeTab === 'payment-plans') {
         console.log('Processing payment plan');
         if (editingItem) {
@@ -610,15 +658,71 @@ export function FeeManagementMasterData() {
                   <label className="text-sm font-medium">Description</label>
                   <Input {...form.register('description')} placeholder="Fee structure description" />
                 </div>
+                
+                {/* Fee Head Selection */}
+                <div className="border rounded-lg p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      Select Fee Heads *
+                    </label>
+                    <Badge variant="secondary">
+                      {selectedFeeHeadIds.size} selected
+                    </Badge>
+                  </div>
+                  
+                  {Object.keys(groupedFeeHeads).length === 0 ? (
+                    <Alert>
+                      <Info className="h-4 w-4" />
+                      <AlertDescription>
+                        No fee heads available. Please create fee heads first in the "Fee Heads" tab.
+                      </AlertDescription>
+                    </Alert>
+                  ) : (
+                    <div className="max-h-48 overflow-y-auto space-y-3">
+                      {Object.entries(groupedFeeHeads).map(([category, heads]) => (
+                        <div key={category} className="space-y-1">
+                          <p className="text-xs font-medium text-muted-foreground">{category}</p>
+                          <div className="space-y-1 pl-2 border-l-2">
+                            {heads.map(feeHead => (
+                              <div key={feeHead.id} className="flex items-center justify-between p-2 border rounded hover:bg-muted/50">
+                                <div className="flex items-center gap-2">
+                                  <Checkbox
+                                    checked={selectedFeeHeadIds.has(feeHead.id)}
+                                    onCheckedChange={() => toggleFeeHead(feeHead.id)}
+                                  />
+                                  <span className="text-sm">{feeHead.name}</span>
+                                </div>
+                                <span className="text-sm font-medium">₹{feeHead.amount?.toLocaleString()}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {selectedFeeHeadIds.size > 0 && (
+                    <div className="pt-2 border-t flex items-center justify-between text-sm font-medium">
+                      <span>Auto-calculated Total:</span>
+                      <span className="text-primary text-lg">₹{calculateTotalFromFeeHeads().toLocaleString()}</span>
+                    </div>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium">Total Amount (₹) *</label>
+                    <label className="text-sm font-medium">Manual Total Amount (₹)</label>
                     <Input 
-                      {...form.register('total_amount', { required: 'Total amount is required' })} 
+                      {...form.register('total_amount')} 
                       type="number" 
-                      placeholder="0.00" 
+                      placeholder="Auto-calculated if fee heads selected" 
                       step="0.01"
+                      disabled={selectedFeeHeadIds.size > 0}
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {selectedFeeHeadIds.size > 0 ? 'Total is auto-calculated from selected fee heads' : 'Enter manually if not selecting fee heads'}
+                    </p>
                   </div>
                   <div>
                     <label className="text-sm font-medium">Term</label>
