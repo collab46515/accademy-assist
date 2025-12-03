@@ -1,20 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, Download, Send, Calendar, TrendingUp, Users } from 'lucide-react';
-import { formatCurrency, getUserCurrency } from '@/lib/currency';
+import { Search, Download, Send, Calendar, TrendingUp, Users, AlertCircle } from 'lucide-react';
+import { formatCurrency } from '@/lib/currency';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { supabase } from '@/integrations/supabase/client';
+import { useSchoolFilter } from '@/hooks/useSchoolFilter';
 
 interface MetricDetailModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   metricType: 'collected' | 'outstanding' | 'percentage' | 'expected' | 'overdue';
-  data: any;
+  data: {
+    totalCollected: number;
+    outstandingFees: number;
+    collectionPercentage: number;
+    todayExpected: number;
+    overdueAccounts: number;
+  };
+}
+
+interface PaymentRecord {
+  id: string;
+  amount: number;
+  payment_date: string;
+  payment_method: string;
+  receipt_number: string;
+  student_name?: string;
+}
+
+interface FeeHead {
+  id: string;
+  name: string;
+  category: string;
+  amount: number;
+}
+
+interface FeeStructure {
+  id: string;
+  name: string;
+  total_amount: number;
+  applicable_year_groups: string[];
 }
 
 const chartConfig = {
@@ -22,8 +53,91 @@ const chartConfig = {
   count: { label: "Count", color: "hsl(var(--primary))" }
 };
 
+const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(142 76% 36%)', 'hsl(38 92% 50%)', 'hsl(0 84% 60%)'];
+
 export function MetricDetailModal({ open, onOpenChange, metricType, data }: MetricDetailModalProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [payments, setPayments] = useState<PaymentRecord[]>([]);
+  const [feeHeads, setFeeHeads] = useState<FeeHead[]>([]);
+  const [feeStructures, setFeeStructures] = useState<FeeStructure[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { currentSchoolId } = useSchoolFilter();
+
+  useEffect(() => {
+    if (open && currentSchoolId) {
+      fetchDetailData();
+    }
+  }, [open, currentSchoolId, metricType]);
+
+  const fetchDetailData = async () => {
+    if (!currentSchoolId) return;
+    setLoading(true);
+
+    try {
+      // Fetch payment records
+      const { data: paymentData } = await supabase
+        .from('payment_records')
+        .select('*')
+        .eq('school_id', currentSchoolId)
+        .eq('status', 'completed')
+        .order('payment_date', { ascending: false })
+        .limit(20);
+
+      // Fetch fee heads
+      const { data: feeHeadsData } = await supabase
+        .from('fee_heads')
+        .select('*')
+        .eq('school_id', currentSchoolId)
+        .eq('is_active', true);
+
+      // Fetch fee structures
+      const { data: structuresData } = await supabase
+        .from('fee_structures')
+        .select('*')
+        .eq('school_id', currentSchoolId)
+        .eq('status', 'active');
+
+      setPayments(paymentData || []);
+      setFeeHeads(feeHeadsData || []);
+      setFeeStructures(structuresData || []);
+    } catch (error) {
+      console.error('Error fetching detail data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const EmptyState = ({ message }: { message: string }) => (
+    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+      <AlertCircle className="h-12 w-12 mb-4 opacity-50" />
+      <p className="text-lg font-medium">{message}</p>
+      <p className="text-sm">Data will appear here once fee assignments are created</p>
+    </div>
+  );
+
+  // Group payments by method for chart
+  const paymentsByMethod = payments.reduce((acc, p) => {
+    const method = p.payment_method || 'Other';
+    acc[method] = (acc[method] || 0) + Number(p.amount);
+    return acc;
+  }, {} as Record<string, number>);
+
+  const paymentMethodChartData = Object.entries(paymentsByMethod).map(([method, amount]) => ({
+    method,
+    amount
+  }));
+
+  // Group fee heads by category for pie chart
+  const feesByCategory = feeHeads.reduce((acc, fh) => {
+    const category = fh.category || 'General';
+    acc[category] = (acc[category] || 0) + Number(fh.amount);
+    return acc;
+  }, {} as Record<string, number>);
+
+  const categoryChartData = Object.entries(feesByCategory).map(([name, value]) => ({
+    name,
+    value
+  }));
 
   const getModalContent = () => {
     switch (metricType) {
@@ -33,87 +147,81 @@ export function MetricDetailModal({ open, onOpenChange, metricType, data }: Metr
           description: 'Detailed breakdown of all payments received',
           content: (
             <div className="space-y-6">
-              {/* Summary Cards */}
               <div className="grid grid-cols-3 gap-4">
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold">{formatCurrency(42800, getUserCurrency())}</div>
+                    <div className="text-2xl font-bold">{formatCurrency(data.totalCollected)}</div>
                     <div className="text-sm text-muted-foreground">Total Collected</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold">324</div>
+                    <div className="text-2xl font-bold">{payments.length}</div>
                     <div className="text-sm text-muted-foreground">Transactions</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold">{formatCurrency(132, getUserCurrency())}</div>
+                    <div className="text-2xl font-bold">
+                      {formatCurrency(payments.length > 0 ? data.totalCollected / payments.length : 0)}
+                    </div>
                     <div className="text-sm text-muted-foreground">Avg Payment</div>
                   </CardContent>
                 </Card>
               </div>
 
-              {/* Payment Methods Chart */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Collection by Payment Method</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer config={chartConfig}>
-                    <ResponsiveContainer width="100%" height={200}>
-                      <BarChart data={[
-                        { method: 'Bank Transfer', amount: 18500 },
-                        { method: 'Card', amount: 15200 },
-                        { method: 'Cash', amount: 6800 },
-                        { method: 'Online', amount: 2300 }
-                      ]}>
-                        <XAxis dataKey="method" />
-                        <YAxis />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Bar dataKey="amount" fill="hsl(var(--primary))" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
+              {paymentMethodChartData.length > 0 ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Collection by Payment Method</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer config={chartConfig}>
+                      <ResponsiveContainer width="100%" height={200}>
+                        <BarChart data={paymentMethodChartData}>
+                          <XAxis dataKey="method" />
+                          <YAxis />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                          <Bar dataKey="amount" fill="hsl(var(--primary))" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+              ) : null}
 
-              {/* Recent Payments Table */}
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-semibold">Recent Payments</h3>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" disabled={payments.length === 0}>
                     <Download className="w-4 h-4 mr-2" />
                     Export All
                   </Button>
                 </div>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Student</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Method</TableHead>
-                      <TableHead>Reference</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {[
-                      { date: '2025-08-03', student: 'James Wilson', amount: 1600, method: 'Bank Transfer', ref: 'TXN001' },
-                      { date: '2025-08-02', student: 'Sarah Brown', amount: 1250, method: 'Card', ref: 'TXN002' },
-                      { date: '2025-08-01', student: 'Michael Davis', amount: 800, method: 'Cash', ref: 'TXN003' }
-                    ].map((payment, i) => (
-                      <TableRow key={i}>
-                        <TableCell>{payment.date}</TableCell>
-                        <TableCell>{payment.student}</TableCell>
-                        <TableCell>{formatCurrency(payment.amount)}</TableCell>
-                        <TableCell>{payment.method}</TableCell>
-                        <TableCell>{payment.ref}</TableCell>
+                {payments.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Receipt #</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Method</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {payments.map((payment) => (
+                        <TableRow key={payment.id}>
+                          <TableCell>{new Date(payment.payment_date).toLocaleDateString()}</TableCell>
+                          <TableCell>{payment.receipt_number || '-'}</TableCell>
+                          <TableCell>{formatCurrency(payment.amount)}</TableCell>
+                          <TableCell>{payment.payment_method || '-'}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <EmptyState message="No payments recorded yet" />
+                )}
               </div>
             </div>
           )
@@ -121,70 +229,132 @@ export function MetricDetailModal({ open, onOpenChange, metricType, data }: Metr
 
       case 'outstanding':
         return {
-          title: 'Outstanding Fees',
-          description: 'Breakdown of all unpaid fees by class and category',
+          title: 'Outstanding Fees Overview',
+          description: 'Breakdown of configured fee structures and heads',
           content: (
             <div className="space-y-6">
               <div className="grid grid-cols-3 gap-4">
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold text-destructive">{formatCurrency(8450, getUserCurrency())}</div>
+                    <div className="text-2xl font-bold text-destructive">{formatCurrency(data.outstandingFees)}</div>
                     <div className="text-sm text-muted-foreground">Total Outstanding</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold">47</div>
-                    <div className="text-sm text-muted-foreground">Students with Dues</div>
+                    <div className="text-2xl font-bold">{feeStructures.length}</div>
+                    <div className="text-sm text-muted-foreground">Active Fee Structures</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold">17</div>
-                    <div className="text-sm text-muted-foreground">Overdue Accounts</div>
+                    <div className="text-2xl font-bold">{feeHeads.length}</div>
+                    <div className="text-sm text-muted-foreground">Fee Heads Configured</div>
                   </CardContent>
                 </Card>
               </div>
 
+              {categoryChartData.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Fee Distribution by Category</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer config={chartConfig}>
+                      <ResponsiveContainer width="100%" height={250}>
+                        <PieChart>
+                          <Pie
+                            data={categoryChartData}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {categoryChartData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+              )}
+
               <Card>
                 <CardHeader>
-                  <CardTitle>Outstanding by Class</CardTitle>
+                  <CardTitle>Fee Heads from Master Data</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Class</TableHead>
-                        <TableHead>Students</TableHead>
-                        <TableHead>Amount Outstanding</TableHead>
-                        <TableHead>Overdue</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {[
-                        { class: '8B', students: 12, amount: 3200, overdue: 8 },
-                        { class: '7A', students: 8, amount: 2100, overdue: 4 },
-                        { class: '9C', students: 15, amount: 1900, overdue: 3 },
-                        { class: '12A', students: 12, amount: 1250, overdue: 2 }
-                      ].map((item, i) => (
-                        <TableRow key={i}>
-                          <TableCell className="font-medium">{item.class}</TableCell>
-                          <TableCell>{item.students}</TableCell>
-                          <TableCell className="text-destructive font-semibold">{formatCurrency(item.amount)}</TableCell>
-                          <TableCell>
-                            <Badge variant="destructive">{item.overdue}</Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Button variant="ghost" size="sm">
-                              <Send className="w-3 h-3 mr-1" />
-                              Send Reminders
-                            </Button>
-                          </TableCell>
+                  {feeHeads.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Fee Head</TableHead>
+                          <TableHead>Category</TableHead>
+                          <TableHead>Amount</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {feeHeads.map((fh) => (
+                          <TableRow key={fh.id}>
+                            <TableCell className="font-medium">{fh.name}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{fh.category}</Badge>
+                            </TableCell>
+                            <TableCell>{formatCurrency(fh.amount)}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <EmptyState message="No fee heads configured" />
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Active Fee Structures</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {feeStructures.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Structure Name</TableHead>
+                          <TableHead>Applicable Year Groups</TableHead>
+                          <TableHead>Total Amount</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {feeStructures.map((fs) => (
+                          <TableRow key={fs.id}>
+                            <TableCell className="font-medium">{fs.name}</TableCell>
+                            <TableCell>
+                              <div className="flex flex-wrap gap-1">
+                                {(fs.applicable_year_groups || []).slice(0, 3).map((yg, i) => (
+                                  <Badge key={i} variant="secondary" className="text-xs">{yg}</Badge>
+                                ))}
+                                {(fs.applicable_year_groups || []).length > 3 && (
+                                  <Badge variant="outline" className="text-xs">
+                                    +{(fs.applicable_year_groups || []).length - 3} more
+                                  </Badge>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell className="font-semibold">{formatCurrency(fs.total_amount)}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <EmptyState message="No fee structures configured" />
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -194,172 +364,118 @@ export function MetricDetailModal({ open, onOpenChange, metricType, data }: Metr
       case 'percentage':
         return {
           title: 'Collection Rate Analysis',
-          description: 'Detailed breakdown of collection rates across different segments',
+          description: 'Overview of fee collection performance',
           content: (
             <div className="space-y-6">
               <div className="grid grid-cols-4 gap-4">
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold text-green-600">83%</div>
-                    <div className="text-sm text-muted-foreground">Overall Rate</div>
+                    <div className="text-2xl font-bold text-green-600">{data.collectionPercentage}%</div>
+                    <div className="text-sm text-muted-foreground">Collection Rate</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold">{formatCurrency(42800, getUserCurrency())}</div>
+                    <div className="text-2xl font-bold">{formatCurrency(data.totalCollected)}</div>
                     <div className="text-sm text-muted-foreground">Collected</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold text-red-600">{formatCurrency(8450, getUserCurrency())}</div>
+                    <div className="text-2xl font-bold text-red-600">{formatCurrency(data.outstandingFees)}</div>
                     <div className="text-sm text-muted-foreground">Outstanding</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold">{formatCurrency(51250, getUserCurrency())}</div>
+                    <div className="text-2xl font-bold">{formatCurrency(data.totalCollected + data.outstandingFees)}</div>
                     <div className="text-sm text-muted-foreground">Total Expected</div>
                   </CardContent>
                 </Card>
               </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Collection Rate by Class</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer config={chartConfig}>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={[
-                        { class: '7A', rate: 95, collected: 4750, outstanding: 250 },
-                        { class: '8B', rate: 87, collected: 6960, outstanding: 1040 },
-                        { class: '9C', rate: 82, collected: 4920, outstanding: 1080 },
-                        { class: '10A', rate: 78, collected: 5460, remaining: 1540 },
-                        { class: '11B', rate: 75, collected: 4500, remaining: 1500 },
-                        { class: '12A', rate: 92, collected: 5520, remaining: 480 }
-                      ]}>
-                        <XAxis dataKey="class" />
-                        <YAxis />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Bar dataKey="rate" fill="hsl(var(--primary))" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Collection Rate Trends</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer config={chartConfig}>
-                    <ResponsiveContainer width="100%" height={250}>
-                      <LineChart data={[
-                        { month: 'Jan', rate: 78 },
-                        { month: 'Feb', rate: 82 },
-                        { month: 'Mar', rate: 85 },
-                        { month: 'Apr', rate: 83 },
-                        { month: 'May', rate: 87 },
-                        { month: 'Jun', rate: 89 },
-                        { month: 'Jul', rate: 83 }
-                      ]}>
-                        <XAxis dataKey="month" />
-                        <YAxis />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Line type="monotone" dataKey="rate" stroke="hsl(var(--primary))" strokeWidth={3} />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
+              {data.totalCollected === 0 && data.outstandingFees === 0 ? (
+                <EmptyState message="No fee collection data available yet" />
+              ) : (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Collection Summary</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer config={chartConfig}>
+                      <ResponsiveContainer width="100%" height={250}>
+                        <PieChart>
+                          <Pie
+                            data={[
+                              { name: 'Collected', value: data.totalCollected },
+                              { name: 'Outstanding', value: data.outstandingFees }
+                            ]}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            <Cell fill="hsl(142 76% 36%)" />
+                            <Cell fill="hsl(0 84% 60%)" />
+                          </Pie>
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           )
         };
 
       case 'overdue':
         return {
-          title: 'Overdue Accounts Analysis',
-          description: 'Detailed breakdown of overdue accounts requiring immediate attention',
+          title: 'Overdue Accounts',
+          description: 'Students with overdue fee payments',
           content: (
             <div className="space-y-6">
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold text-red-600">17</div>
+                    <div className="text-2xl font-bold text-red-600">{data.overdueAccounts}</div>
                     <div className="text-sm text-muted-foreground">Overdue Accounts</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold text-red-600">{formatCurrency(4250, getUserCurrency())}</div>
-                    <div className="text-sm text-muted-foreground">Total Overdue</div>
+                    <div className="text-2xl font-bold">{formatCurrency(data.outstandingFees)}</div>
+                    <div className="text-sm text-muted-foreground">Total Outstanding</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold">{formatCurrency(250, getUserCurrency())}</div>
-                    <div className="text-sm text-muted-foreground">Avg Overdue</div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="text-2xl font-bold">23</div>
-                    <div className="text-sm text-muted-foreground">Avg Days Late</div>
+                    <div className="text-2xl font-bold">
+                      {data.overdueAccounts > 0 ? formatCurrency(data.outstandingFees / data.overdueAccounts) : formatCurrency(0)}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Avg per Account</div>
                   </CardContent>
                 </Card>
               </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Overdue Accounts by Severity</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Student</TableHead>
-                        <TableHead>Class</TableHead>
-                        <TableHead>Amount Overdue</TableHead>
-                        <TableHead>Days Late</TableHead>
-                        <TableHead>Last Contact</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {[
-                        { student: 'James Wilson', class: '8B', amount: 1600, days: 45, lastContact: '2025-07-15', severity: 'high' },
-                        { student: 'Sarah Connor', class: '7A', amount: 800, days: 32, lastContact: '2025-07-20', severity: 'high' },
-                        { student: 'Michael Davis', class: '9C', amount: 450, days: 28, lastContact: '2025-07-25', severity: 'medium' },
-                        { student: 'Emma Johnson', class: '10A', amount: 300, days: 15, lastContact: '2025-08-01', severity: 'low' },
-                        { student: 'Tom Wilson', class: '11B', amount: 250, days: 12, lastContact: '2025-08-02', severity: 'low' }
-                      ].map((item, i) => (
-                        <TableRow key={i}>
-                          <TableCell className="font-medium">{item.student}</TableCell>
-                          <TableCell>{item.class}</TableCell>
-                          <TableCell className="text-red-600 font-semibold">{formatCurrency(item.amount)}</TableCell>
-                          <TableCell>
-                            <Badge variant={item.days > 30 ? 'destructive' : item.days > 14 ? 'default' : 'secondary'}>
-                              {item.days} days
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{item.lastContact}</TableCell>
-                          <TableCell>
-                            <div className="flex gap-1">
-                              <Button variant="outline" size="sm">
-                                <Send className="w-3 h-3 mr-1" />
-                                Remind
-                              </Button>
-                              <Button variant="ghost" size="sm">Call</Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
+              {data.overdueAccounts === 0 ? (
+                <EmptyState message="No overdue accounts" />
+              ) : (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Overdue Account Details</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">
+                      Student fee assignments need to be created to track individual overdue accounts.
+                      Configure fee structures and assign them to students to enable detailed tracking.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           )
         };
@@ -367,76 +483,44 @@ export function MetricDetailModal({ open, onOpenChange, metricType, data }: Metr
       case 'expected':
         return {
           title: "Today's Expected Collections",
-          description: 'Students scheduled to make payments today',
+          description: 'Payments expected based on due dates',
           content: (
             <div className="space-y-6">
               <div className="grid grid-cols-3 gap-4">
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold">{formatCurrency(2100, getUserCurrency())}</div>
+                    <div className="text-2xl font-bold">{formatCurrency(data.todayExpected)}</div>
                     <div className="text-sm text-muted-foreground">Expected Today</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold">8</div>
-                    <div className="text-sm text-muted-foreground">Students</div>
+                    <div className="text-2xl font-bold">{formatCurrency(data.totalCollected)}</div>
+                    <div className="text-sm text-muted-foreground">Total Collected</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold">{formatCurrency(262, getUserCurrency())}</div>
-                    <div className="text-sm text-muted-foreground">Avg Expected</div>
+                    <div className="text-2xl font-bold">{feeStructures.length}</div>
+                    <div className="text-sm text-muted-foreground">Active Structures</div>
                   </CardContent>
                 </Card>
               </div>
 
-              <div>
-                <div className="relative mb-4">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  <Input
-                    placeholder="Search expected collections..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Student</TableHead>
-                      <TableHead>Class</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Fee Type</TableHead>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {[
-                      { student: 'Emma Johnson', class: '8B', amount: 1600, type: 'Tuition', contact: '+44 7123 456789' },
-                      { student: 'Tom Wilson', class: '7A', amount: 250, type: 'Transport', contact: '+44 7234 567890' },
-                      { student: 'Lisa Brown', class: '9C', amount: 150, type: 'Exam Fee', contact: '+44 7345 678901' },
-                      { student: 'Alex Davis', class: '12A', amount: 100, type: 'Library', contact: '+44 7456 789012' }
-                    ].map((item, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="font-medium">{item.student}</TableCell>
-                        <TableCell>{item.class}</TableCell>
-                        <TableCell>{formatCurrency(item.amount)}</TableCell>
-                        <TableCell>{item.type}</TableCell>
-                        <TableCell>{item.contact}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            <Button variant="ghost" size="sm">Call</Button>
-                            <Button variant="ghost" size="sm">Remind</Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              {data.todayExpected === 0 ? (
+                <EmptyState message="No payments expected today" />
+              ) : (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Expected Payment Details</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">
+                      Create student fee assignments with due dates to track expected daily collections.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           )
         };
@@ -445,7 +529,7 @@ export function MetricDetailModal({ open, onOpenChange, metricType, data }: Metr
         return {
           title: 'Metric Details',
           description: 'Detailed information',
-          content: <div>Details coming soon...</div>
+          content: <EmptyState message="No data available" />
         };
     }
   };
@@ -454,12 +538,18 @@ export function MetricDetailModal({ open, onOpenChange, metricType, data }: Metr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{modalContent.title}</DialogTitle>
           <DialogDescription>{modalContent.description}</DialogDescription>
         </DialogHeader>
-        {modalContent.content}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : (
+          modalContent.content
+        )}
       </DialogContent>
     </Dialog>
   );
