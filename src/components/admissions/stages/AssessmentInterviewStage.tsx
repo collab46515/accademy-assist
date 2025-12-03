@@ -532,17 +532,10 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
                     
                     {assessmentResult === 'fail' && (
                       <div className="mt-3 space-y-2">
-                        <div className="p-3 bg-red-100 border border-red-300 rounded text-sm text-red-800">
+                        <div className="p-3 bg-amber-100 border border-amber-300 rounded text-sm text-amber-800">
                           <p className="font-medium mb-1">Student did not meet minimum passing criteria.</p>
-                          <p>This application has been automatically rejected and cannot proceed to interview scheduling.</p>
+                          <p>You may still proceed to schedule an interview if desired.</p>
                         </div>
-                        <Button 
-                          variant="outline" 
-                          disabled
-                          className="w-full"
-                        >
-                          Cannot Proceed - Assessment Failed
-                        </Button>
                       </div>
                     )}
 
@@ -564,7 +557,7 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
       </Card>
 
       {/* Interview Section - With Scheduling Step */}
-      {showInterviewScheduling && assessmentResult === 'pass' && (
+      {showInterviewScheduling && assessmentResult !== null && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -576,9 +569,11 @@ export function AssessmentInterviewStage({ applicationId, onMoveToNext }: Assess
             {/* Step 1: Schedule Interview */}
             {!interviewScheduled && interviewStatus === 'not_started' && (
               <div className="space-y-4">
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-blue-800">
-                    Assessment completed successfully! Please schedule an interview for the candidate.
+                <div className={`p-4 border rounded-lg ${assessmentResult === 'pass' ? 'bg-blue-50 border-blue-200' : 'bg-amber-50 border-amber-200'}`}>
+                  <p className={`text-sm ${assessmentResult === 'pass' ? 'text-blue-800' : 'text-amber-800'}`}>
+                    {assessmentResult === 'pass' 
+                      ? 'Assessment completed successfully! Please schedule an interview for the candidate.'
+                      : 'Assessment completed. You may proceed to schedule an interview for further evaluation.'}
                   </p>
                 </div>
 
