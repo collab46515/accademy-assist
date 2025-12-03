@@ -119,7 +119,7 @@ export default function ApplicationDetailPage() {
       offer_sent: { variant: 'default', label: 'Offer Sent', icon: <CheckCircle className="h-4 w-4" />, color: 'text-green-600' },
       approved: { variant: 'default', label: 'Approved', icon: <CheckCircle className="h-4 w-4" />, color: 'text-green-600' },
       enrolled: { variant: 'default', label: 'Enrolled', icon: <CheckCircle className="h-4 w-4" />, color: 'text-green-600' },
-      rejected: { variant: 'destructive', label: 'Rejected', icon: <XCircle className="h-4 w-4" />, color: 'text-red-600' },
+      rejected: { variant: 'destructive', label: 'Rejected', icon: <XCircle className="h-4 w-4" />, color: 'text-white' },
       withdrawn: { variant: 'outline', label: 'Withdrawn', icon: <AlertCircle className="h-4 w-4" />, color: 'text-gray-600' },
     };
 
