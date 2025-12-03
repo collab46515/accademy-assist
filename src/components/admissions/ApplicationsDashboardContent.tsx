@@ -138,7 +138,7 @@ export function ApplicationsDashboardContent() {
         { 
           stage: 'Admission Decision', 
           count: applications?.filter(a => 
-            a.status === 'admission_decision'
+            a.status === 'pending_approval' || a.status === 'on_hold'
           ).length || 0,
           conversion: 0,
           status: 'admission_decision'
