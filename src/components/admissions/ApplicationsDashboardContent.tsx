@@ -110,16 +110,6 @@ export function ApplicationsDashboardContent() {
       const stages: StageCount[] = [
         { stage: 'Applied', count: total, conversion: 100, status: 'all' },
         { 
-          stage: 'Verified', 
-          count: applications?.filter(a => 
-            a.status !== 'under_review' && 
-            a.status !== 'documents_pending' &&
-            a.status !== 'submitted'
-          ).length || 0,
-          conversion: 0,
-          status: 'verified'
-        },
-        { 
           stage: 'Assessed', 
           count: applications?.filter(a => 
             a.status === 'assessment_complete'
