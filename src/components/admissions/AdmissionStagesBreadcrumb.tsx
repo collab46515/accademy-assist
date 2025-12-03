@@ -1,7 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import {
   Send,
@@ -94,43 +93,40 @@ export function AdmissionStagesBreadcrumb() {
         )}
       </div>
       
-      <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex items-center space-x-2 pb-3">
-          {admissionStages.map((stage, index) => {
-            const isActive = activeStageId === stage.id;
-            const isCompleted = activeStageId !== null && stage.id < activeStageId;
-            const Icon = stage.icon;
-            
-            return (
-              <div key={stage.id} className="flex items-center">
-                <Button
-                  variant={isActive ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => handleStageClick(stage.id)}
-                  className={cn(
-                    "flex items-center gap-2 min-w-fit px-3 py-2 transition-all duration-200",
-                    isActive && "bg-primary text-primary-foreground shadow-md",
-                    isCompleted && "bg-green-100 text-green-800 hover:bg-green-200 border border-green-200",
-                    !isActive && !isCompleted && "hover:bg-primary/30 hover:text-primary-foreground hover:shadow-sm border border-transparent"
-                  )}
-                >
-                  <Icon className="h-4 w-4 flex-shrink-0" />
-                  <span className="hidden sm:inline">{stage.title}</span>
-                  <span className="sm:hidden">{stage.shortTitle}</span>
-                  {isActive && (
-                    <div className="ml-2 h-2 w-2 rounded-full bg-primary-foreground animate-pulse" />
-                  )}
-                </Button>
-                
-                {index < admissionStages.length - 1 && (
-                  <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0 mx-1" />
+      <div className="flex flex-wrap items-center gap-2">
+        {admissionStages.map((stage, index) => {
+          const isActive = activeStageId === stage.id;
+          const isCompleted = activeStageId !== null && stage.id < activeStageId;
+          const Icon = stage.icon;
+          
+          return (
+            <div key={stage.id} className="flex items-center">
+              <Button
+                variant={isActive ? "default" : "ghost"}
+                size="sm"
+                onClick={() => handleStageClick(stage.id)}
+                className={cn(
+                  "flex items-center gap-2 min-w-fit px-3 py-2 transition-all duration-200",
+                  isActive && "bg-primary text-primary-foreground shadow-md",
+                  isCompleted && "bg-green-100 text-green-800 hover:bg-green-200 border border-green-200",
+                  !isActive && !isCompleted && "hover:bg-primary/30 hover:text-primary-foreground hover:shadow-sm border border-transparent"
                 )}
-              </div>
-            );
-          })}
-        </div>
-        <ScrollBar orientation="horizontal" className="h-3 bg-muted/50" />
-      </ScrollArea>
+              >
+                <Icon className="h-4 w-4 flex-shrink-0" />
+                <span className="hidden sm:inline">{stage.title}</span>
+                <span className="sm:hidden">{stage.shortTitle}</span>
+                {isActive && (
+                  <div className="ml-2 h-2 w-2 rounded-full bg-primary-foreground animate-pulse" />
+                )}
+              </Button>
+              
+              {index < admissionStages.length - 1 && (
+                <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0 mx-1" />
+              )}
+            </div>
+          );
+        })}
+      </div>
       
       {activeStageId !== null && (
         <div className="mt-4 p-3 bg-muted rounded-md">
