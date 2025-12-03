@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useRBAC } from './useRBAC';
 
@@ -18,11 +18,34 @@ export interface SchoolModule {
   };
 }
 
+// Module-level cache to persist across re-mounts
+const modulesCache: {
+  schoolId: string | null;
+  modules: SchoolModule[];
+  lastFetched: number | null;
+  isSuperAdmin: boolean;
+} = {
+  schoolId: null,
+  modules: [],
+  lastFetched: null,
+  isSuperAdmin: false
+};
+
 export function useSchoolModules(schoolId: string | undefined) {
   const { isSuperAdmin } = useRBAC();
-  const [modules, setModules] = useState<SchoolModule[]>([]);
-  const [loading, setLoading] = useState(true);
+  const isSuperAdminUser = isSuperAdmin();
+  
+  // Check if cache is valid
+  const cacheValid = modulesCache.schoolId === schoolId && 
+                     modulesCache.lastFetched && 
+                     modulesCache.isSuperAdmin === isSuperAdminUser;
+  
+  const [modules, setModules] = useState<SchoolModule[]>(
+    cacheValid ? modulesCache.modules : []
+  );
+  const [loading, setLoading] = useState(!cacheValid && !!schoolId);
   const [error, setError] = useState<string | null>(null);
+  const isFetching = useRef(false);
 
   useEffect(() => {
     if (!schoolId) {
@@ -30,17 +53,31 @@ export function useSchoolModules(schoolId: string | undefined) {
       return;
     }
 
+    // Skip if cache is valid
+    if (modulesCache.schoolId === schoolId && 
+        modulesCache.lastFetched && 
+        modulesCache.isSuperAdmin === isSuperAdminUser) {
+      setModules(modulesCache.modules);
+      setLoading(false);
+      return;
+    }
+
     fetchSchoolModules();
-  }, [schoolId, isSuperAdmin]);
+  }, [schoolId, isSuperAdminUser]);
 
   const fetchSchoolModules = async () => {
-    if (!schoolId) return;
+    if (!schoolId || isFetching.current) return;
 
+    isFetching.current = true;
+    
     try {
-      setLoading(true);
+      // Only show loading if no cached data
+      if (!modulesCache.modules.length) {
+        setLoading(true);
+      }
 
       // Super Admins get ALL modules enabled by default
-      if (isSuperAdmin()) {
+      if (isSuperAdminUser) {
         console.log('🔑 Super Admin detected - loading ALL modules');
         
         const { data: allModules, error: fetchError } = await supabase
@@ -68,6 +105,13 @@ export function useSchoolModules(schoolId: string | undefined) {
         }));
 
         console.log('📦 Loaded ALL modules for Super Admin:', superAdminModules.length);
+        
+        // Update cache
+        modulesCache.schoolId = schoolId;
+        modulesCache.modules = superAdminModules;
+        modulesCache.lastFetched = Date.now();
+        modulesCache.isSuperAdmin = true;
+        
         setModules(superAdminModules);
         setError(null);
       } else {
@@ -90,6 +134,13 @@ export function useSchoolModules(schoolId: string | undefined) {
         if (fetchError) throw fetchError;
 
         console.log('📦 Loaded school modules:', data?.length || 0);
+        
+        // Update cache
+        modulesCache.schoolId = schoolId;
+        modulesCache.modules = data || [];
+        modulesCache.lastFetched = Date.now();
+        modulesCache.isSuperAdmin = false;
+        
         setModules(data || []);
         setError(null);
       }
@@ -98,12 +149,13 @@ export function useSchoolModules(schoolId: string | undefined) {
       setError(err instanceof Error ? err.message : 'Failed to load modules');
     } finally {
       setLoading(false);
+      isFetching.current = false;
     }
   };
 
   const isModuleEnabled = (moduleName: string): boolean => {
     // Super Admins have all modules enabled
-    if (isSuperAdmin()) {
+    if (isSuperAdminUser) {
       return true;
     }
     

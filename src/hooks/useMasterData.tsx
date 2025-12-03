@@ -160,33 +160,38 @@ export function useMasterData() {
   // Initialize from cache if available for the same school
   const { currentSchoolId, currentSchool, isSuperAdmin } = useSchoolFilter();
   
-  const [isLoading, setIsLoading] = useState(false);
+  // Check if cache is valid for current school
+  const cacheValid = masterDataCache.schoolId === currentSchoolId && masterDataCache.lastFetched;
+  const hasCachedData = cacheValid && masterDataCache.schools.length > 0;
+  
+  // Only show loading if no cached data available
+  const [isLoading, setIsLoading] = useState(!hasCachedData && !!currentSchoolId);
   const [schools, setSchools] = useState<School[]>(
-    masterDataCache.schoolId === currentSchoolId ? masterDataCache.schools : []
+    cacheValid ? masterDataCache.schools : []
   );
   const [subjects, setSubjects] = useState<Subject[]>(
-    masterDataCache.schoolId === currentSchoolId ? masterDataCache.subjects : []
+    cacheValid ? masterDataCache.subjects : []
   );
   const [students, setStudents] = useState<Student[]>(
-    masterDataCache.schoolId === currentSchoolId ? masterDataCache.students : []
+    cacheValid ? masterDataCache.students : []
   );
   const [staff, setStaff] = useState<Staff[]>(
-    masterDataCache.schoolId === currentSchoolId ? masterDataCache.staff : []
+    cacheValid ? masterDataCache.staff : []
   );
   const [parents, setParents] = useState<Parent[]>(
-    masterDataCache.schoolId === currentSchoolId ? masterDataCache.parents : []
+    cacheValid ? masterDataCache.parents : []
   );
   const [yearGroups, setYearGroups] = useState<YearGroup[]>(
-    masterDataCache.schoolId === currentSchoolId ? masterDataCache.yearGroups : []
+    cacheValid ? masterDataCache.yearGroups : []
   );
   const [houses, setHouses] = useState<House[]>(
-    masterDataCache.schoolId === currentSchoolId ? masterDataCache.houses : []
+    cacheValid ? masterDataCache.houses : []
   );
   const [departments, setDepartments] = useState<DBDepartment[]>(
-    masterDataCache.schoolId === currentSchoolId ? masterDataCache.departments : []
+    cacheValid ? masterDataCache.departments : []
   );
   const [classes, setClasses] = useState<Class[]>(
-    masterDataCache.schoolId === currentSchoolId ? masterDataCache.classes : []
+    cacheValid ? masterDataCache.classes : []
   );
   const { toast } = useToast();
 
@@ -198,7 +203,10 @@ export function useMasterData() {
       return;
     }
 
-    setIsLoading(true);
+    // Only show loading if we don't have any data yet
+    if (!hasCachedData) {
+      setIsLoading(true);
+    }
     try {
       // Super admins can see all schools, regular admins see only their school
       const schoolsQuery = isSuperAdmin 
