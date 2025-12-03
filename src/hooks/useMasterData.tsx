@@ -729,17 +729,6 @@ export function useMasterData() {
     };
   };
 
-  const refreshData = () => {
-    // Force refresh by clearing cache
-    masterDataCache.lastFetched = null;
-    fetchAllData().then(() => {
-      toast({
-        title: "Success",
-        description: "Master data refreshed successfully",
-      });
-    });
-  };
-
   useEffect(() => {
     // Only fetch if school changed or cache is empty/stale
     const cacheValid = masterDataCache.schoolId === currentSchoolId && masterDataCache.lastFetched;
@@ -774,7 +763,6 @@ export function useMasterData() {
     updateHouse,
     deleteRecord,
     getEntityCounts,
-    getActiveEntities,
-    refreshData
+    getActiveEntities
   };
 }
