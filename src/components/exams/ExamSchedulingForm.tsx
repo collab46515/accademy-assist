@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -8,9 +8,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent } from '@/components/ui/card';
-import { CalendarIcon, Clock, FileText, Users } from 'lucide-react';
+import { CalendarIcon, Clock, FileText, Users, Loader2 } from 'lucide-react';
 import { useRBAC } from '@/hooks/useRBAC';
 import { CreateExamData } from '@/hooks/useExamData';
+import { supabase } from '@/integrations/supabase/client';
 
 const examSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -35,9 +36,105 @@ interface ExamSchedulingFormProps {
   onClose: () => void;
 }
 
+interface ExamBoard {
+  id: string;
+  name: string;
+  full_name: string;
+}
+
+interface Subject {
+  id: string;
+  subject_name: string;
+  subject_code: string;
+}
+
+interface YearGroup {
+  id: string;
+  year_name: string;
+  year_code: string;
+}
+
 export function ExamSchedulingForm({ createExam, onClose }: ExamSchedulingFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingMasterData, setLoadingMasterData] = useState(true);
+  const [examBoards, setExamBoards] = useState<ExamBoard[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [yearGroups, setYearGroups] = useState<YearGroup[]>([]);
   const { currentSchool } = useRBAC();
+
+  // Fetch master data on mount
+  useEffect(() => {
+    const fetchMasterData = async () => {
+      setLoadingMasterData(true);
+      try {
+        // Get school_id from user_roles
+        const { data: { user } } = await supabase.auth.getUser();
+        let schoolId: string | null = null;
+        
+        if (user) {
+          const { data: userRoles } = await supabase
+            .from('user_roles')
+            .select('school_id')
+            .eq('user_id', user.id)
+            .eq('is_active', true)
+            .single();
+          schoolId = userRoles?.school_id || null;
+        }
+
+        // Fetch exam boards (global, not school-specific)
+        const { data: boardsData, error: boardsError } = await supabase
+          .from('exam_boards')
+          .select('id, name, full_name')
+          .eq('is_active', true)
+          .order('name');
+
+        if (!boardsError && boardsData) {
+          setExamBoards(boardsData);
+        }
+
+        // Fetch subjects (school-specific)
+        const subjectsQuery = supabase
+          .from('subjects')
+          .select('id, subject_name, subject_code')
+          .eq('is_active', true)
+          .order('subject_name');
+
+        if (schoolId) {
+          subjectsQuery.eq('school_id', schoolId);
+        }
+
+        const { data: subjectsData, error: subjectsError } = await subjectsQuery;
+
+        if (!subjectsError && subjectsData) {
+          setSubjects(subjectsData);
+        }
+
+        // Fetch year groups (school-specific)
+        const yearGroupsQuery = supabase
+          .from('year_groups')
+          .select('id, year_name, year_code')
+          .eq('is_active', true)
+          .order('sort_order');
+
+        if (schoolId) {
+          yearGroupsQuery.eq('school_id', schoolId);
+        }
+
+        const { data: yearGroupsData, error: yearGroupsError } = await yearGroupsQuery;
+
+        if (!yearGroupsError && yearGroupsData) {
+          setYearGroups(yearGroupsData);
+        }
+
+      } catch (error) {
+        console.error('Error fetching master data:', error);
+      } finally {
+        setLoadingMasterData(false);
+      }
+    };
+
+    fetchMasterData();
+  }, []);
 
   const form = useForm<ExamFormData>({
     resolver: zodResolver(examSchema),
@@ -109,6 +206,15 @@ export function ExamSchedulingForm({ createExam, onClose }: ExamSchedulingFormPr
     return () => subscription.unsubscribe();
   }, [form]);
 
+  if (loadingMasterData) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <span className="ml-2 text-muted-foreground">Loading master data...</span>
+      </div>
+    );
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -141,9 +247,31 @@ export function ExamSchedulingForm({ createExam, onClose }: ExamSchedulingFormPr
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Subject</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Mathematics" {...field} />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select subject" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {subjects.length > 0 ? (
+                          subjects.map((subject) => (
+                            <SelectItem key={subject.id} value={subject.subject_name}>
+                              {subject.subject_name} ({subject.subject_code})
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="_no_subjects" disabled>
+                            No subjects in master data
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    {subjects.length === 0 && (
+                      <p className="text-xs text-amber-600">
+                        Add subjects in Master Data → Academic Settings
+                      </p>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -186,13 +314,24 @@ export function ExamSchedulingForm({ createExam, onClose }: ExamSchedulingFormPr
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="AQA">AQA</SelectItem>
-                        <SelectItem value="OCR">OCR</SelectItem>
-                        <SelectItem value="Edexcel">Edexcel</SelectItem>
-                        <SelectItem value="WJEC">WJEC</SelectItem>
-                        <SelectItem value="Internal">Internal</SelectItem>
+                        {examBoards.length > 0 ? (
+                          examBoards.map((board) => (
+                            <SelectItem key={board.id} value={board.name}>
+                              {board.name} - {board.full_name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="_no_boards" disabled>
+                            No exam boards in master data
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
+                    {examBoards.length === 0 && (
+                      <p className="text-xs text-amber-600">
+                        Add exam boards in Exams → Exam Boards tab
+                      </p>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -221,15 +360,24 @@ export function ExamSchedulingForm({ createExam, onClose }: ExamSchedulingFormPr
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Year 7">Year 7</SelectItem>
-                        <SelectItem value="Year 8">Year 8</SelectItem>
-                        <SelectItem value="Year 9">Year 9</SelectItem>
-                        <SelectItem value="Year 10">Year 10</SelectItem>
-                        <SelectItem value="Year 11">Year 11</SelectItem>
-                        <SelectItem value="Year 12">Year 12</SelectItem>
-                        <SelectItem value="Year 13">Year 13</SelectItem>
+                        {yearGroups.length > 0 ? (
+                          yearGroups.map((yg) => (
+                            <SelectItem key={yg.id} value={yg.year_name}>
+                              {yg.year_name} ({yg.year_code})
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="_no_year_groups" disabled>
+                            No year groups in master data
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
+                    {yearGroups.length === 0 && (
+                      <p className="text-xs text-amber-600">
+                        Add year groups in Master Data → Academic Settings
+                      </p>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -248,6 +396,9 @@ export function ExamSchedulingForm({ createExam, onClose }: ExamSchedulingFormPr
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
+                        <SelectItem value="Term 1">Term 1</SelectItem>
+                        <SelectItem value="Term 2">Term 2</SelectItem>
+                        <SelectItem value="Term 3">Term 3</SelectItem>
                         <SelectItem value="Autumn Term">Autumn Term</SelectItem>
                         <SelectItem value="Spring Term">Spring Term</SelectItem>
                         <SelectItem value="Summer Term">Summer Term</SelectItem>

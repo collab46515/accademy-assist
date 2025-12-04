@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ import { ExamBoardManager } from "@/components/exams/ExamBoardManager";
 import { ExamSchedulingForm } from "@/components/exams/ExamSchedulingForm";
 import { ExamResultsManager } from "@/components/exams/ExamResultsManager";
 import { ModuleGuard } from "@/components/modules/ModuleGuard";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function ExamsPage() {
   return (
@@ -30,7 +31,42 @@ function ExamsPageContent() {
   const [activeTab, setActiveTab] = useState("schedule");
   const [examTypeFilter, setExamTypeFilter] = useState("all");
   const [gradeLevelFilter, setGradeLevelFilter] = useState("all");
+  const [yearGroups, setYearGroups] = useState<{ id: string; year_name: string }[]>([]);
   const { exams, examResults, loading, refreshTrigger, createExam } = useExamData();
+
+  // Fetch year groups from master data
+  useEffect(() => {
+    const fetchYearGroups = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: userRoles } = await supabase
+        .from('user_roles')
+        .select('school_id')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .single();
+
+      const schoolId = userRoles?.school_id;
+
+      const query = supabase
+        .from('year_groups')
+        .select('id, year_name')
+        .eq('is_active', true)
+        .order('sort_order');
+
+      if (schoolId) {
+        query.eq('school_id', schoolId);
+      }
+
+      const { data } = await query;
+      if (data) {
+        setYearGroups(data);
+      }
+    };
+
+    fetchYearGroups();
+  }, []);
 
   console.log('ExamsPage render - refreshTrigger:', refreshTrigger);
   console.log('ExamsPage render - exams:', exams);
@@ -230,13 +266,15 @@ function ExamsPageContent() {
                      </SelectTrigger>
                      <SelectContent>
                        <SelectItem value="all">All Levels</SelectItem>
-                       <SelectItem value="Year 7">Year 7</SelectItem>
-                       <SelectItem value="Year 8">Year 8</SelectItem>
-                       <SelectItem value="Year 9">Year 9</SelectItem>
-                       <SelectItem value="Year 10">Year 10</SelectItem>
-                       <SelectItem value="Year 11">Year 11</SelectItem>
-                       <SelectItem value="Year 12">Year 12</SelectItem>
-                       <SelectItem value="Year 13">Year 13</SelectItem>
+                       {yearGroups.length > 0 ? (
+                         yearGroups.map((yg) => (
+                           <SelectItem key={yg.id} value={yg.year_name}>
+                             {yg.year_name}
+                           </SelectItem>
+                         ))
+                       ) : (
+                         <SelectItem value="_no_data" disabled>No year groups</SelectItem>
+                       )}
                      </SelectContent>
                    </Select>
                    <Button variant="outline" size="sm" onClick={() => {
