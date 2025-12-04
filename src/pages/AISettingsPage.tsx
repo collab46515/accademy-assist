@@ -19,6 +19,7 @@ import {
   Database
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { AgentBillTest } from '@/components/ai/AgentBillTest';
 
 export const AISettingsPage = () => {
   const { toast } = useToast();
@@ -47,6 +48,11 @@ export const AISettingsPage = () => {
           <span>AI Settings & Configuration</span>
         </h1>
         <p className="text-muted-foreground">Configure AI models, API keys, and generation preferences for all AI features</p>
+      </div>
+
+      {/* Agent Bill Integration Test */}
+      <div className="mb-8">
+        <AgentBillTest />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
