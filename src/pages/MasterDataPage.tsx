@@ -39,6 +39,7 @@ import { FeeManagementMasterData } from '@/components/master-data/FeeManagementM
 import { HRMasterData } from '@/components/master-data/HRMasterData';
 import { AccountingMasterData } from '@/components/master-data/AccountingMasterData';
 import { MasterDataHierarchy } from '@/components/master-data/MasterDataHierarchy';
+import { ExamBoardsMasterData } from '@/components/master-data/ExamBoardsMasterData';
 
 export function MasterDataPage() {
   return (
@@ -857,6 +858,44 @@ function MasterDataPageContent() {
                   <TableCell>{item.relationship_type || 'Not specified'}</TableCell>
                 </>
               )}
+              {type === 'yearGroups' && (
+                <>
+                  <TableCell>
+                    <p className="font-medium">{item.year_name}</p>
+                  </TableCell>
+                  <TableCell className="font-medium">{item.year_code}</TableCell>
+                  <TableCell>{item.key_stage || '-'}</TableCell>
+                  <TableCell>{item.sort_order || '-'}</TableCell>
+                </>
+              )}
+              {type === 'houses' && (
+                <>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {item.house_color && (
+                        <div 
+                          className="w-4 h-4 rounded-full"
+                          style={{ backgroundColor: item.house_color }}
+                        />
+                      )}
+                      <p className="font-medium">{item.house_name}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-medium">{item.house_code}</TableCell>
+                  <TableCell>
+                    {item.house_color && (
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-4 h-4 rounded border"
+                          style={{ backgroundColor: item.house_color }}
+                        />
+                        <span className="text-xs">{item.house_color}</span>
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell>{item.points || 0}</TableCell>
+                </>
+              )}
               <TableCell>
                 <div className="flex items-center gap-2">
                   <Button size="sm" variant="outline" onClick={() => openEditDialog(item)}>
@@ -1034,16 +1073,19 @@ function MasterDataPageContent() {
           {/* Academic Data Tab */}
           <TabsContent value="academic" className="space-y-6">
             <Tabs value={activeEntityTab} onValueChange={setActiveEntityTab} className="space-y-4">
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid w-full grid-cols-8">
                 <TabsTrigger value="schools">Schools</TabsTrigger>
                 <TabsTrigger value="subjects">Subjects</TabsTrigger>
+                <TabsTrigger value="yearGroups">Year Groups</TabsTrigger>
                 <TabsTrigger value="classes">Classes</TabsTrigger>
                 <TabsTrigger value="students">Students</TabsTrigger>
                 <TabsTrigger value="parents">Parents</TabsTrigger>
+                <TabsTrigger value="houses">Houses</TabsTrigger>
+                <TabsTrigger value="examBoards">Exam Boards</TabsTrigger>
               </TabsList>
 
               {/* Academic Entity Management */}
-              {['schools', 'subjects', 'classes', 'students', 'parents'].map((entityType) => (
+              {['schools', 'subjects', 'yearGroups', 'classes', 'students', 'parents', 'houses'].map((entityType) => (
                 <TabsContent key={entityType} value={entityType} className="space-y-4">
                   <Card>
                     <CardHeader>
@@ -1051,10 +1093,12 @@ function MasterDataPageContent() {
                         <CardTitle className="flex items-center gap-2 capitalize">
                           {entityType === 'schools' && <SchoolIcon className="h-5 w-5" />}
                           {entityType === 'subjects' && <BookOpen className="h-5 w-5" />}
+                          {entityType === 'yearGroups' && <GraduationCap className="h-5 w-5" />}
                           {entityType === 'classes' && <Building2 className="h-5 w-5" />}
                           {entityType === 'students' && <GraduationCap className="h-5 w-5" />}
                           {entityType === 'parents' && <Home className="h-5 w-5" />}
-                          {entityType} Management
+                          {entityType === 'houses' && <Home className="h-5 w-5" />}
+                          {entityType === 'yearGroups' ? 'Year Groups' : entityType === 'examBoards' ? 'Exam Boards' : entityType} Management
                         </CardTitle>
                         <div className="flex items-center gap-3">
                           <div className="relative">
@@ -1071,13 +1115,13 @@ function MasterDataPageContent() {
                               <DialogTrigger asChild>
                                 <Button onClick={() => { setEditingItem(null); form.reset(); setActiveEntityTab(entityType); }}>
                                   <Plus className="h-4 w-4 mr-2" />
-                                  Add {entityType.slice(0, -1)}
+                                  Add {entityType === 'yearGroups' ? 'Year Group' : entityType === 'classes' ? 'Class' : entityType.slice(0, -1)}
                                 </Button>
                               </DialogTrigger>
                               <DialogContent className="max-w-2xl">
                                 <DialogHeader>
                                   <DialogTitle>
-                                    {editingItem ? 'Edit' : 'Add New'} {entityType.slice(0, -1)}
+                                    {editingItem ? 'Edit' : 'Add New'} {entityType === 'yearGroups' ? 'Year Group' : entityType === 'classes' ? 'Class' : entityType.slice(0, -1)}
                                   </DialogTitle>
                                 </DialogHeader>
                                 <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
@@ -1087,7 +1131,7 @@ function MasterDataPageContent() {
                                       Cancel
                                     </Button>
                                     <Button type="submit">
-                                      {editingItem ? 'Update' : 'Add'} {entityType.slice(0, -1)}
+                                      {editingItem ? 'Update' : 'Add'} {entityType === 'yearGroups' ? 'Year Group' : entityType === 'classes' ? 'Class' : entityType.slice(0, -1)}
                                     </Button>
                                   </div>
                                 </form>
@@ -1103,6 +1147,11 @@ function MasterDataPageContent() {
                   </Card>
                 </TabsContent>
               ))}
+
+              {/* Exam Boards Tab - Embedded from Exams Module */}
+              <TabsContent value="examBoards" className="space-y-4">
+                <ExamBoardsMasterData />
+              </TabsContent>
             </Tabs>
           </TabsContent>
 
