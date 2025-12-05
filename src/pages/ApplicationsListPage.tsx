@@ -66,7 +66,7 @@ export default function ApplicationsListPage() {
       } else if (filterParam === 'approved') {
         query = query.in('status', ['approved', 'enrolled']);
       } else if (filterParam === 'rejected') {
-        query = query.eq('status', 'rejected');
+        query = query.in('status', ['rejected', 'offer_declined', 'withdrawn']);
       } else if (filterParam === 'assessment_complete') {
         query = query.eq('status', 'assessment_complete');
       } else if (filterParam === 'interview_complete') {
