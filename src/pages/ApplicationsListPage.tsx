@@ -66,8 +66,7 @@ export default function ApplicationsListPage() {
       } else if (filterParam === 'approved') {
         query = query.in('status', ['approved', 'enrolled']);
       } else if (filterParam === 'rejected') {
-        // Include applications with rejected status OR failed assessments/interviews
-        query = query.or('status.in.(rejected,offer_declined,withdrawn),assessment_data->>result.eq.fail,interview_data->>result.eq.fail');
+        query = query.in('status', ['rejected', 'offer_declined', 'withdrawn']);
       } else if (filterParam === 'assessment_complete') {
         query = query.eq('status', 'assessment_complete');
       } else if (filterParam === 'interview_complete') {
