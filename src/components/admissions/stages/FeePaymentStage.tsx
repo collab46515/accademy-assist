@@ -61,20 +61,32 @@ export function FeePaymentStage({ applicationId, onMoveToNext }: FeePaymentStage
       setApplicationData(app);
 
       // Fetch fee structure for this student's year group
+      // Extract the numeric part from year_group (e.g., "Class 8" -> "8", "Year 8 - 8A" -> "8")
+      const yearGroupNumber = app.year_group?.match(/\d+/)?.[0] || '';
+      
+      // Fetch all active fee structures for the school and filter client-side
+      // because applicable_year_groups may have different naming conventions
       const { data: feeStructures, error: feeError } = await supabase
         .from('fee_structures')
         .select('*')
         .eq('status', 'active')
         .eq('school_id', app.school_id)
         .in('student_type', ['new', 'all'])
-        .contains('applicable_year_groups', [app.year_group])
-        .order('created_at', { ascending: false })
-        .limit(1);
+        .order('created_at', { ascending: false });
+      
+      // Filter to find matching fee structure based on year group number
+      const matchingStructures = feeStructures?.filter(fs => {
+        const applicableYearGroups = fs.applicable_year_groups || [];
+        return applicableYearGroups.some((yg: string) => {
+          const structureYearNumber = yg?.match(/\d+/)?.[0] || '';
+          return structureYearNumber === yearGroupNumber;
+        });
+      }) || [];
 
       if (feeError) throw feeError;
 
-      if (feeStructures && feeStructures.length > 0) {
-        setFeeStructure(feeStructures[0]);
+      if (matchingStructures.length > 0) {
+        setFeeStructure(matchingStructures[0]);
       } else {
         toast({
           title: 'No Fee Structure Found',
