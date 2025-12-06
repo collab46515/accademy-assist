@@ -301,24 +301,36 @@ export class AdmissionsFeeService {
         return null;
       }
 
+      // Extract numeric part from year group for flexible matching
+      // e.g., "Class 8" -> "8", "Year 8 - 8A" -> "8"
+      const yearGroupNumber = yearGroup.match(/\d+/)?.[0] || '';
+
       const { data: feeStructures, error } = await supabase
         .from('fee_structures')
         .select('*')
         .eq('status', 'active')
         .eq('school_id', schoolId)
         .in('student_type', ['new', 'all'])
-        .contains('applicable_year_groups', [yearGroup])
-        .order('created_at', { ascending: false })
-        .limit(1);
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching fee structure:', error);
         return null;
       }
 
-      if (feeStructures && feeStructures.length > 0) {
-        console.log(`📋 Found fee structure for ${yearGroup}:`, feeStructures[0].name);
-        return feeStructures[0];
+      // Filter to find matching fee structure based on year group number
+      const matchingStructures = (feeStructures || []).filter(fs => {
+        const applicableYearGroups = fs.applicable_year_groups || [];
+        if (applicableYearGroups.length === 0) return true; // Applies to all
+        return applicableYearGroups.some((yg: string) => {
+          const structureYearNumber = yg?.match(/\d+/)?.[0] || '';
+          return structureYearNumber === yearGroupNumber;
+        });
+      });
+
+      if (matchingStructures.length > 0) {
+        console.log(`📋 Found fee structure for ${yearGroup}:`, matchingStructures[0].name);
+        return matchingStructures[0];
       }
 
       console.warn(`No fee structure found for year group: ${yearGroup}`);
