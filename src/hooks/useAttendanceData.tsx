@@ -209,6 +209,7 @@ export function useAttendanceData() {
     student_id: string;
     date: string;
     status: 'present' | 'absent' | 'late' | 'left_early';
+    session?: string;
     period?: number;
     subject?: string;
     reason?: string;
@@ -218,17 +219,24 @@ export function useAttendanceData() {
 
     try {
       const date = attendanceList[0]?.date;
+      const session = attendanceList[0]?.session;
       const studentIds = attendanceList.map(a => a.student_id);
 
-      // Map existing records by student_id for this date
+      // Map existing records by student_id for this date (+ session when provided)
       const existingMap = new Map<string, string>();
       if (date && studentIds.length) {
-        const { data: existing, error: fetchErr } = await supabase
+        let query = supabase
           .from('attendance_records')
           .select('id, student_id')
           .eq('school_id', currentSchool.id)
           .eq('date', date)
           .in('student_id', studentIds);
+
+        if (session) {
+          query = query.eq('session', session as any);
+        }
+
+        const { data: existing, error: fetchErr } = await query;
         if (fetchErr) throw fetchErr;
         (existing || []).forEach((r: any) => existingMap.set(r.student_id, r.id));
       }
@@ -240,6 +248,7 @@ export function useAttendanceData() {
           school_id: currentSchool.id,
           teacher_id: user.id,
           date: att.date,
+          session: att.session,
           period: att.period,
           status: att.status,
           subject: att.subject,
@@ -259,12 +268,12 @@ export function useAttendanceData() {
         .upsert(records);
 
       if (error) throw error;
-      
+
       toast({
         title: 'Success',
         description: `Attendance marked for ${attendanceList.length} students`,
       });
-      
+
       return true;
     } catch (error: any) {
       console.error('Error marking bulk attendance:', error);
