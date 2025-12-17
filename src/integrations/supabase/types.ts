@@ -550,11 +550,13 @@ export type Database = {
           excused_by: string | null
           id: string
           is_excused: boolean | null
+          is_submitted: boolean | null
           marked_at: string
           notes: string | null
           period: number | null
           reason: string | null
           school_id: string
+          session: string | null
           status: string
           student_id: string
           subject: string | null
@@ -569,11 +571,13 @@ export type Database = {
           excused_by?: string | null
           id?: string
           is_excused?: boolean | null
+          is_submitted?: boolean | null
           marked_at?: string
           notes?: string | null
           period?: number | null
           reason?: string | null
           school_id: string
+          session?: string | null
           status: string
           student_id: string
           subject?: string | null
@@ -588,11 +592,13 @@ export type Database = {
           excused_by?: string | null
           id?: string
           is_excused?: boolean | null
+          is_submitted?: boolean | null
           marked_at?: string
           notes?: string | null
           period?: number | null
           reason?: string | null
           school_id?: string
+          session?: string | null
           status?: string
           student_id?: string
           subject?: string | null
@@ -650,6 +656,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      attendance_session_summaries: {
+        Row: {
+          absent_count: number
+          class_id: string
+          created_at: string
+          date: string
+          id: string
+          is_submitted: boolean | null
+          late_count: number
+          notes: string | null
+          present_count: number
+          school_id: string
+          session: string
+          submitted_at: string | null
+          submitted_by: string | null
+          total_students: number
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          absent_count?: number
+          class_id: string
+          created_at?: string
+          date: string
+          id?: string
+          is_submitted?: boolean | null
+          late_count?: number
+          notes?: string | null
+          present_count?: number
+          school_id: string
+          session: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          total_students?: number
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          absent_count?: number
+          class_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          is_submitted?: boolean | null
+          late_count?: number
+          notes?: string | null
+          present_count?: number
+          school_id?: string
+          session?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          total_students?: number
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
       }
       attendance_settings: {
         Row: {
