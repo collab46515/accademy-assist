@@ -339,12 +339,12 @@ export function AttendanceMarker() {
     if (error) {
       console.error('Error submitting session:', error);
       toast.error('Failed to submit attendance');
+      setIsSubmitting(false);
     } else {
       toast.success(`${selectedSession === 'morning' ? 'Morning' : 'Afternoon'} attendance submitted!`);
-      fetchSessionSummaries();
+      await fetchSessionSummaries();
+      setIsSubmitting(false);
     }
-
-    setIsSubmitting(false);
   };
 
   const filteredStudents = getFilteredStudents();
