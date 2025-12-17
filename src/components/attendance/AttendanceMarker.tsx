@@ -272,7 +272,7 @@ export function AttendanceMarker() {
     return manualPresent !== getStatusCounts.present || manualAbsent !== getStatusCounts.absent;
   }, [manualSummary, getStatusCounts]);
 
-  const handleSave = async () => {
+  const handleSave = async (): Promise<boolean> => {
     const filteredStudents = getFilteredStudents();
     const attendanceList = filteredStudents
       .filter(student => attendanceState[student.id]?.status)
@@ -287,18 +287,19 @@ export function AttendanceMarker() {
 
     if (attendanceList.length === 0) {
       toast.error('No attendance to save');
-      return;
+      return false;
     }
 
     setIsSaving(true);
-    const success = await markBulkAttendance(attendanceList);
-    
+    const success = await markBulkAttendance(attendanceList as any);
+
     if (success) {
       fetchAttendanceRecords(selectedDate, selectedDate);
       toast.success('Attendance saved');
     }
-    
+
     setIsSaving(false);
+    return success;
   };
 
   const handleSubmitSession = async () => {
@@ -312,8 +313,9 @@ export function AttendanceMarker() {
       return;
     }
 
-    // First save the attendance
-    await handleSave();
+    // First save the attendance (stop if save failed)
+    const saved = await handleSave();
+    if (!saved) return;
 
     setIsSubmitting(true);
 
@@ -338,7 +340,7 @@ export function AttendanceMarker() {
 
     if (error) {
       console.error('Error submitting session:', error);
-      toast.error('Failed to submit attendance');
+      toast.error(error.message ? `Failed to submit attendance: ${error.message}` : 'Failed to submit attendance');
       setIsSubmitting(false);
     } else {
       toast.success(`${selectedSession === 'morning' ? 'Morning' : 'Afternoon'} attendance submitted!`);
