@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -80,6 +80,9 @@ export function AttendanceMarker() {
   const [sessionSummaries, setSessionSummaries] = useState<{morning?: SessionSummary, afternoon?: SessionSummary}>({});
   const [manualSummary, setManualSummary] = useState({ presentCount: '', absentCount: '' });
   const [showVerification, setShowVerification] = useState(false);
+  
+  // Track the initialization key to prevent unwanted resets
+  const lastInitKey = useRef<string>('');
 
   // Fetch session summaries
   const fetchSessionSummaries = async () => {
@@ -117,7 +120,17 @@ export function AttendanceMarker() {
   }, [currentSchool?.id, selectedDate, selectedClass, fetchAttendanceRecords]);
 
   // Initialize attendance state - DEFAULT TO PRESENT
+  // Only reset when session, date, or class changes - NOT when attendanceRecords updates
   useEffect(() => {
+    const initKey = `${selectedDate}-${selectedSession}-${selectedClass}`;
+    
+    // Skip if we've already initialized for this combination
+    if (lastInitKey.current === initKey) {
+      return;
+    }
+    
+    lastInitKey.current = initKey;
+    
     const filteredStudents = getFilteredStudents();
     const existingRecords = attendanceRecords.filter(
       r => r.date === selectedDate && (r as any).session === selectedSession
@@ -144,7 +157,30 @@ export function AttendanceMarker() {
     });
 
     setAttendanceState(initialState);
-  }, [attendanceRecords, selectedDate, selectedSession, students, selectedClass]);
+  }, [selectedDate, selectedSession, selectedClass, students]);
+
+  // Update state from records when they load (only for records matching current session)
+  useEffect(() => {
+    if (attendanceRecords.length === 0) return;
+    
+    const existingRecords = attendanceRecords.filter(
+      r => r.date === selectedDate && (r as any).session === selectedSession
+    );
+    
+    if (existingRecords.length > 0) {
+      setAttendanceState(prev => {
+        const updated = { ...prev };
+        existingRecords.forEach(record => {
+          updated[record.student_id] = {
+            status: record.status,
+            reason: record.reason || '',
+            notes: record.notes || '',
+          };
+        });
+        return updated;
+      });
+    }
+  }, [attendanceRecords, selectedDate, selectedSession]);
 
   const getFilteredStudents = () => {
     let filtered = students;
