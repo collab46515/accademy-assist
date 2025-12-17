@@ -8967,6 +8967,10 @@ export type Database = {
         Args: { lesson_plan_id: string; user_id?: string }
         Returns: boolean
       }
+      can_manage_attendance_summary: {
+        Args: { target_school_id: string }
+        Returns: boolean
+      }
       check_must_change_password: { Args: never; Returns: boolean }
       clear_password_change_requirement: { Args: never; Returns: undefined }
       create_complete_student_enrollment: {
