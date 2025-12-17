@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAttendanceData } from '@/hooks/useAttendanceData';
 import { useStudentData } from '@/hooks/useStudentData';
 import { useRBAC } from '@/hooks/useRBAC';
+import { supabase } from '@/integrations/supabase/client';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { 
   Users, 
@@ -15,8 +17,22 @@ import {
   Calendar,
   TrendingUp,
   AlertTriangle,
-  BarChart3
+  BarChart3,
+  Sun,
+  Sunset,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
+
+interface SessionSummary {
+  class_id: string;
+  session: 'morning' | 'afternoon';
+  is_submitted: boolean;
+  present_count: number;
+  absent_count: number;
+  late_count: number;
+  total_students: number;
+}
 
 export function AttendanceDashboard() {
   const { currentSchool } = useRBAC();
@@ -29,8 +45,13 @@ export function AttendanceDashboard() {
   const { students } = useStudentData();
   
   const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month'>('today');
+  const [sessionSummaries, setSessionSummaries] = useState<SessionSummary[]>([]);
 
   const today = new Date();
+  const todayFormatted = format(today, 'yyyy-MM-dd');
+  const currentHour = today.getHours();
+  const currentSession = currentHour < 12 ? 'morning' : 'afternoon';
+
   const getDateRange = () => {
     switch (timeRange) {
       case 'today':
@@ -56,10 +77,26 @@ export function AttendanceDashboard() {
     }
   };
 
+  // Fetch session summaries for today
+  const fetchSessionSummaries = async () => {
+    if (!currentSchool?.id) return;
+    
+    const { data, error } = await supabase
+      .from('attendance_session_summaries')
+      .select('*')
+      .eq('school_id', currentSchool.id)
+      .eq('date', todayFormatted);
+    
+    if (data && !error) {
+      setSessionSummaries(data as SessionSummary[]);
+    }
+  };
+
   useEffect(() => {
     if (currentSchool?.id) {
       const { start, end } = getDateRange();
       fetchAttendanceRecords(start, end);
+      fetchSessionSummaries();
     }
   }, [timeRange, currentSchool?.id, fetchAttendanceRecords]);
 
@@ -69,6 +106,7 @@ export function AttendanceDashboard() {
       if (currentSchool?.id) {
         const { start, end } = getDateRange();
         fetchAttendanceRecords(start, end);
+        fetchSessionSummaries();
       }
     }, 30000);
     
@@ -78,16 +116,47 @@ export function AttendanceDashboard() {
   const stats = getAttendanceStats(attendanceRecords);
   const totalStudents = students.length;
   
-  const todayFormatted = format(today, 'yyyy-MM-dd');
   const todayRecords = attendanceRecords.filter(record => record.date === todayFormatted);
   const todayStats = getAttendanceStats(todayRecords);
   const studentsMarkedToday = new Set(todayRecords.map(r => r.student_id)).size;
   const studentsNotMarkedToday = totalStudents - studentsMarkedToday;
 
+  // Get unique classes
+  const uniqueClasses = Array.from(new Set(students.map(s => s.form_class).filter(Boolean)));
+
+  // Get classes with pending attendance for current session
+  const getPendingClasses = () => {
+    const pending: { className: string; session: 'morning' | 'afternoon' }[] = [];
+    
+    uniqueClasses.forEach(className => {
+      // Check morning session
+      const morningSubmitted = sessionSummaries.some(
+        s => s.class_id === className && s.session === 'morning' && s.is_submitted
+      );
+      if (!morningSubmitted) {
+        pending.push({ className: className!, session: 'morning' });
+      }
+      
+      // Check afternoon session (only if past noon)
+      if (currentHour >= 12) {
+        const afternoonSubmitted = sessionSummaries.some(
+          s => s.class_id === className && s.session === 'afternoon' && s.is_submitted
+        );
+        if (!afternoonSubmitted) {
+          pending.push({ className: className!, session: 'afternoon' });
+        }
+      }
+    });
+    
+    return pending;
+  };
+
+  const pendingClasses = getPendingClasses();
+
   const classStats = students.reduce((acc, student) => {
     const className = student.form_class || student.year_group;
     if (!acc[className]) {
-      acc[className] = { total: 0, present: 0, absent: 0, late: 0, notMarked: 0 };
+      acc[className] = { total: 0, present: 0, absent: 0, late: 0, notMarked: 0, morningDone: false, afternoonDone: false };
     }
     acc[className].total++;
     
@@ -99,9 +168,15 @@ export function AttendanceDashboard() {
     } else {
       acc[className].notMarked++;
     }
+
+    // Check session status
+    const morningSummary = sessionSummaries.find(s => s.class_id === className && s.session === 'morning');
+    const afternoonSummary = sessionSummaries.find(s => s.class_id === className && s.session === 'afternoon');
+    acc[className].morningDone = morningSummary?.is_submitted || false;
+    acc[className].afternoonDone = afternoonSummary?.is_submitted || false;
     
     return acc;
-  }, {} as Record<string, { total: number; present: number; absent: number; late: number; notMarked: number }>);
+  }, {} as Record<string, { total: number; present: number; absent: number; late: number; notMarked: number; morningDone: boolean; afternoonDone: boolean }>);
 
   const getAlerts = () => {
     const alerts = [];
@@ -165,6 +240,24 @@ export function AttendanceDashboard() {
           </CardTitle>
         </CardHeader>
       </Card>
+
+      {/* Pending Attendance Alert */}
+      {pendingClasses.length > 0 && (
+        <Alert variant="destructive" className="border-destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Attendance Pending</AlertTitle>
+          <AlertDescription>
+            <div className="mt-2 space-y-1">
+              {pendingClasses.map((item, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  {item.session === 'morning' ? <Sun className="h-4 w-4" /> : <Sunset className="h-4 w-4" />}
+                  <span>{item.className} - {item.session === 'morning' ? 'Morning' : 'Afternoon'} session not marked</span>
+                </div>
+              ))}
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
@@ -247,7 +340,7 @@ export function AttendanceDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Today's Class Breakdown
+            Today's Class Status
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -255,12 +348,30 @@ export function AttendanceDashboard() {
             {Object.entries(classStats).map(([className, classStat]) => {
               const attendanceRate = classStat.total > 0 ? (classStat.present / classStat.total) * 100 : 0;
               return (
-                <div key={className} className="space-y-2">
+                <div key={className} className="space-y-2 p-4 border rounded-lg">
                   <div className="flex items-center justify-between">
                     <div className="font-medium">{className}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {classStat.present}/{classStat.total} present ({Math.round(attendanceRate)}%)
+                    <div className="flex gap-2">
+                      <Badge variant={classStat.morningDone ? 'default' : 'outline'} className="gap-1">
+                        <Sun className="h-3 w-3" />
+                        {classStat.morningDone ? (
+                          <><CheckCircle className="h-3 w-3" /> AM</>
+                        ) : (
+                          <><XCircle className="h-3 w-3" /> AM</>
+                        )}
+                      </Badge>
+                      <Badge variant={classStat.afternoonDone ? 'default' : 'outline'} className="gap-1">
+                        <Sunset className="h-3 w-3" />
+                        {classStat.afternoonDone ? (
+                          <><CheckCircle className="h-3 w-3" /> PM</>
+                        ) : (
+                          <><XCircle className="h-3 w-3" /> PM</>
+                        )}
+                      </Badge>
                     </div>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {classStat.present}/{classStat.total} present ({Math.round(attendanceRate)}%)
                   </div>
                   <Progress value={attendanceRate} className="h-2" />
                   <div className="flex gap-4 text-xs text-muted-foreground">
