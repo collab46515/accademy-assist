@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Search, Plus, Book, Edit, Eye, Copy } from "lucide-react";
 import { useLibraryData } from "@/hooks/useLibraryData";
+import { BulkBookUpload } from "./BulkBookUpload";
 import type { LibraryBookTitle, LibraryBookType } from "@/types/library";
 
 const CATEGORIES = [
@@ -159,6 +160,29 @@ export function BookCatalogNew() {
     if (available === 0) return <Badge variant="destructive">All Issued</Badge>;
     if (available < total) return <Badge variant="secondary">{available}/{total} Available</Badge>;
     return <Badge variant="default">{available} Available</Badge>;
+  };
+
+  const handleBulkUpload = async (books: Array<{
+    title: string;
+    authors: string[];
+    publisher: string | null;
+    publication_year: number | null;
+    isbn: string | null;
+    language: string;
+    ddc_number: string | null;
+    call_number_base: string | null;
+    category: string | null;
+    book_type: LibraryBookType;
+    pages: number | null;
+    binding: string | null;
+    description: string | null;
+  }>) => {
+    let successCount = 0;
+    for (const book of books) {
+      const result = await createBookTitle(book);
+      if (result) successCount++;
+    }
+    return successCount;
   };
 
   return (
@@ -337,6 +361,8 @@ export function BookCatalogNew() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+
+          <BulkBookUpload onUpload={handleBulkUpload} />
 
           <Dialog open={showAddCopy} onOpenChange={setShowAddCopy}>
             <DialogTrigger asChild>
