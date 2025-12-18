@@ -5550,6 +5550,1211 @@ export type Database = {
         }
         Relationships: []
       }
+      library_accession_sequence: {
+        Row: {
+          last_accession_number: number
+          school_id: string
+          updated_at: string
+        }
+        Insert: {
+          last_accession_number?: number
+          school_id: string
+          updated_at?: string
+        }
+        Update: {
+          last_accession_number?: number
+          school_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_accession_sequence_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: true
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      library_audit_log: {
+        Row: {
+          action: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_address: unknown
+          new_values: Json | null
+          old_values: Json | null
+          performed_at: string
+          performed_by: string | null
+          school_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: unknown
+          new_values?: Json | null
+          old_values?: Json | null
+          performed_at?: string
+          performed_by?: string | null
+          school_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: unknown
+          new_values?: Json | null
+          old_values?: Json | null
+          performed_at?: string
+          performed_by?: string | null
+          school_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_audit_log_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      library_book_copies: {
+        Row: {
+          accession_number: number
+          acquisition_date: string
+          barcode: string | null
+          call_number: string
+          condition: string | null
+          copy_number: number
+          created_at: string
+          created_by: string | null
+          donation_id: string | null
+          id: string
+          invoice_number: string | null
+          is_reference: boolean
+          price: number | null
+          purchase_id: string | null
+          rack_id: string | null
+          remarks: string | null
+          rfid_tag: string | null
+          school_id: string
+          shelf_number: string | null
+          source: Database["public"]["Enums"]["library_source_type"]
+          status: Database["public"]["Enums"]["library_book_status"]
+          title_id: string
+          updated_at: string
+          vendor_name: string | null
+          withdrawn_approved_by: string | null
+          withdrawn_date: string | null
+          withdrawn_reason: string | null
+        }
+        Insert: {
+          accession_number: number
+          acquisition_date?: string
+          barcode?: string | null
+          call_number: string
+          condition?: string | null
+          copy_number?: number
+          created_at?: string
+          created_by?: string | null
+          donation_id?: string | null
+          id?: string
+          invoice_number?: string | null
+          is_reference?: boolean
+          price?: number | null
+          purchase_id?: string | null
+          rack_id?: string | null
+          remarks?: string | null
+          rfid_tag?: string | null
+          school_id: string
+          shelf_number?: string | null
+          source?: Database["public"]["Enums"]["library_source_type"]
+          status?: Database["public"]["Enums"]["library_book_status"]
+          title_id: string
+          updated_at?: string
+          vendor_name?: string | null
+          withdrawn_approved_by?: string | null
+          withdrawn_date?: string | null
+          withdrawn_reason?: string | null
+        }
+        Update: {
+          accession_number?: number
+          acquisition_date?: string
+          barcode?: string | null
+          call_number?: string
+          condition?: string | null
+          copy_number?: number
+          created_at?: string
+          created_by?: string | null
+          donation_id?: string | null
+          id?: string
+          invoice_number?: string | null
+          is_reference?: boolean
+          price?: number | null
+          purchase_id?: string | null
+          rack_id?: string | null
+          remarks?: string | null
+          rfid_tag?: string | null
+          school_id?: string
+          shelf_number?: string | null
+          source?: Database["public"]["Enums"]["library_source_type"]
+          status?: Database["public"]["Enums"]["library_book_status"]
+          title_id?: string
+          updated_at?: string
+          vendor_name?: string | null
+          withdrawn_approved_by?: string | null
+          withdrawn_date?: string | null
+          withdrawn_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_book_copies_rack_id_fkey"
+            columns: ["rack_id"]
+            isOneToOne: false
+            referencedRelation: "library_racks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_book_copies_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_book_copies_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "library_book_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      library_book_titles: {
+        Row: {
+          authors: string[]
+          available_copies: number
+          binding: string | null
+          book_type: Database["public"]["Enums"]["library_book_type"]
+          call_number_base: string | null
+          category: string | null
+          cover_image_url: string | null
+          created_at: string
+          created_by: string | null
+          ddc_number: string | null
+          description: string | null
+          edition: string | null
+          id: string
+          isbn: string | null
+          keywords: string[] | null
+          language: string
+          pages: number | null
+          publication_year: number | null
+          publisher: string | null
+          school_id: string
+          subcategory: string | null
+          subtitle: string | null
+          title: string
+          total_copies: number
+          updated_at: string
+        }
+        Insert: {
+          authors?: string[]
+          available_copies?: number
+          binding?: string | null
+          book_type?: Database["public"]["Enums"]["library_book_type"]
+          call_number_base?: string | null
+          category?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          ddc_number?: string | null
+          description?: string | null
+          edition?: string | null
+          id?: string
+          isbn?: string | null
+          keywords?: string[] | null
+          language?: string
+          pages?: number | null
+          publication_year?: number | null
+          publisher?: string | null
+          school_id: string
+          subcategory?: string | null
+          subtitle?: string | null
+          title: string
+          total_copies?: number
+          updated_at?: string
+        }
+        Update: {
+          authors?: string[]
+          available_copies?: number
+          binding?: string | null
+          book_type?: Database["public"]["Enums"]["library_book_type"]
+          call_number_base?: string | null
+          category?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          ddc_number?: string | null
+          description?: string | null
+          edition?: string | null
+          id?: string
+          isbn?: string | null
+          keywords?: string[] | null
+          language?: string
+          pages?: number | null
+          publication_year?: number | null
+          publisher?: string | null
+          school_id?: string
+          subcategory?: string | null
+          subtitle?: string | null
+          title?: string
+          total_copies?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_book_titles_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      library_circulation: {
+        Row: {
+          copy_id: string
+          created_at: string
+          due_date: string
+          fine_amount: number | null
+          fine_paid: boolean | null
+          id: string
+          is_overdue: boolean
+          issue_date: string
+          issued_by: string | null
+          last_renewed_date: string | null
+          member_id: string
+          overdue_days: number | null
+          remarks: string | null
+          renewal_count: number
+          return_condition: string | null
+          return_date: string | null
+          returned_by: string | null
+          school_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          copy_id: string
+          created_at?: string
+          due_date: string
+          fine_amount?: number | null
+          fine_paid?: boolean | null
+          id?: string
+          is_overdue?: boolean
+          issue_date?: string
+          issued_by?: string | null
+          last_renewed_date?: string | null
+          member_id: string
+          overdue_days?: number | null
+          remarks?: string | null
+          renewal_count?: number
+          return_condition?: string | null
+          return_date?: string | null
+          returned_by?: string | null
+          school_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          copy_id?: string
+          created_at?: string
+          due_date?: string
+          fine_amount?: number | null
+          fine_paid?: boolean | null
+          id?: string
+          is_overdue?: boolean
+          issue_date?: string
+          issued_by?: string | null
+          last_renewed_date?: string | null
+          member_id?: string
+          overdue_days?: number | null
+          remarks?: string | null
+          renewal_count?: number
+          return_condition?: string | null
+          return_date?: string | null
+          returned_by?: string | null
+          school_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_circulation_copy_id_fkey"
+            columns: ["copy_id"]
+            isOneToOne: false
+            referencedRelation: "library_book_copies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_circulation_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "library_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_circulation_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      library_donations: {
+        Row: {
+          accession_end: number | null
+          accession_start: number | null
+          acknowledgement_date: string | null
+          acknowledgement_letter_ref: string | null
+          acknowledgement_sent: boolean | null
+          created_at: string
+          created_by: string | null
+          donation_date: string
+          donation_number: string
+          donor_address: string | null
+          donor_contact: string | null
+          donor_email: string | null
+          donor_name: string
+          donor_type: string | null
+          estimated_value: number | null
+          id: string
+          occasion: string | null
+          purpose: string | null
+          received_by: string | null
+          remarks: string | null
+          school_id: string
+          thanked_by: string | null
+          total_books: number
+          updated_at: string
+        }
+        Insert: {
+          accession_end?: number | null
+          accession_start?: number | null
+          acknowledgement_date?: string | null
+          acknowledgement_letter_ref?: string | null
+          acknowledgement_sent?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          donation_date?: string
+          donation_number: string
+          donor_address?: string | null
+          donor_contact?: string | null
+          donor_email?: string | null
+          donor_name: string
+          donor_type?: string | null
+          estimated_value?: number | null
+          id?: string
+          occasion?: string | null
+          purpose?: string | null
+          received_by?: string | null
+          remarks?: string | null
+          school_id: string
+          thanked_by?: string | null
+          total_books?: number
+          updated_at?: string
+        }
+        Update: {
+          accession_end?: number | null
+          accession_start?: number | null
+          acknowledgement_date?: string | null
+          acknowledgement_letter_ref?: string | null
+          acknowledgement_sent?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          donation_date?: string
+          donation_number?: string
+          donor_address?: string | null
+          donor_contact?: string | null
+          donor_email?: string | null
+          donor_name?: string
+          donor_type?: string | null
+          estimated_value?: number | null
+          id?: string
+          occasion?: string | null
+          purpose?: string | null
+          received_by?: string | null
+          remarks?: string | null
+          school_id?: string
+          thanked_by?: string | null
+          total_books?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_donations_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      library_fines: {
+        Row: {
+          balance: number
+          circulation_id: string | null
+          closure_date: string | null
+          collected_by: string | null
+          copy_id: string | null
+          created_at: string
+          due_date: string | null
+          fine_amount: number
+          fine_date: string
+          fine_type: string
+          id: string
+          member_id: string
+          paid_amount: number
+          payment_date: string | null
+          payment_method: string | null
+          receipt_number: string | null
+          recovery_action: string | null
+          remarks: string | null
+          replacement_accession_number: number | null
+          replacement_date: string | null
+          replacement_received: boolean | null
+          school_id: string
+          status: Database["public"]["Enums"]["library_fine_status"]
+          updated_at: string
+        }
+        Insert: {
+          balance: number
+          circulation_id?: string | null
+          closure_date?: string | null
+          collected_by?: string | null
+          copy_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          fine_amount: number
+          fine_date?: string
+          fine_type: string
+          id?: string
+          member_id: string
+          paid_amount?: number
+          payment_date?: string | null
+          payment_method?: string | null
+          receipt_number?: string | null
+          recovery_action?: string | null
+          remarks?: string | null
+          replacement_accession_number?: number | null
+          replacement_date?: string | null
+          replacement_received?: boolean | null
+          school_id: string
+          status?: Database["public"]["Enums"]["library_fine_status"]
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          circulation_id?: string | null
+          closure_date?: string | null
+          collected_by?: string | null
+          copy_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          fine_amount?: number
+          fine_date?: string
+          fine_type?: string
+          id?: string
+          member_id?: string
+          paid_amount?: number
+          payment_date?: string | null
+          payment_method?: string | null
+          receipt_number?: string | null
+          recovery_action?: string | null
+          remarks?: string | null
+          replacement_accession_number?: number | null
+          replacement_date?: string | null
+          replacement_received?: boolean | null
+          school_id?: string
+          status?: Database["public"]["Enums"]["library_fine_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_fines_circulation_id_fkey"
+            columns: ["circulation_id"]
+            isOneToOne: false
+            referencedRelation: "library_circulation"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_fines_copy_id_fkey"
+            columns: ["copy_id"]
+            isOneToOne: false
+            referencedRelation: "library_book_copies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_fines_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "library_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_fines_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      library_members: {
+        Row: {
+          admission_number: string | null
+          blocked_reason: string | null
+          card_expiry_date: string | null
+          card_issued_date: string | null
+          class_name: string | null
+          created_at: string
+          current_borrowed: number
+          department: string | null
+          email: string | null
+          full_name: string
+          id: string
+          is_active: boolean
+          is_blocked: boolean
+          library_card_number: string | null
+          member_type: Database["public"]["Enums"]["library_member_type"]
+          parent_contact: string | null
+          phone: string | null
+          roll_number: string | null
+          school_id: string
+          section: string | null
+          staff_db_id: string | null
+          staff_id: string | null
+          student_id: string | null
+          total_borrowed: number
+          total_fines_pending: number
+          updated_at: string
+        }
+        Insert: {
+          admission_number?: string | null
+          blocked_reason?: string | null
+          card_expiry_date?: string | null
+          card_issued_date?: string | null
+          class_name?: string | null
+          created_at?: string
+          current_borrowed?: number
+          department?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          is_active?: boolean
+          is_blocked?: boolean
+          library_card_number?: string | null
+          member_type: Database["public"]["Enums"]["library_member_type"]
+          parent_contact?: string | null
+          phone?: string | null
+          roll_number?: string | null
+          school_id: string
+          section?: string | null
+          staff_db_id?: string | null
+          staff_id?: string | null
+          student_id?: string | null
+          total_borrowed?: number
+          total_fines_pending?: number
+          updated_at?: string
+        }
+        Update: {
+          admission_number?: string | null
+          blocked_reason?: string | null
+          card_expiry_date?: string | null
+          card_issued_date?: string | null
+          class_name?: string | null
+          created_at?: string
+          current_borrowed?: number
+          department?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          is_blocked?: boolean
+          library_card_number?: string | null
+          member_type?: Database["public"]["Enums"]["library_member_type"]
+          parent_contact?: string | null
+          phone?: string | null
+          roll_number?: string | null
+          school_id?: string
+          section?: string | null
+          staff_db_id?: string | null
+          staff_id?: string | null
+          student_id?: string | null
+          total_borrowed?: number
+          total_fines_pending?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_members_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_members_staff_db_id_fkey"
+            columns: ["staff_db_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_members_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      library_purchases: {
+        Row: {
+          accession_end: number | null
+          accession_start: number | null
+          approved_by: string | null
+          approved_date: string | null
+          created_at: string
+          created_by: string | null
+          discount_amount: number | null
+          id: string
+          invoice_amount: number | null
+          invoice_date: string | null
+          invoice_number: string | null
+          net_amount: number
+          order_date: string | null
+          order_number: string | null
+          payment_date: string | null
+          payment_reference: string | null
+          payment_status: string | null
+          purchase_date: string
+          purchase_number: string
+          remarks: string | null
+          school_id: string
+          tax_amount: number | null
+          total_amount: number
+          total_books: number
+          updated_at: string
+          vendor_address: string | null
+          vendor_contact: string | null
+          vendor_gst: string | null
+          vendor_name: string
+        }
+        Insert: {
+          accession_end?: number | null
+          accession_start?: number | null
+          approved_by?: string | null
+          approved_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          discount_amount?: number | null
+          id?: string
+          invoice_amount?: number | null
+          invoice_date?: string | null
+          invoice_number?: string | null
+          net_amount?: number
+          order_date?: string | null
+          order_number?: string | null
+          payment_date?: string | null
+          payment_reference?: string | null
+          payment_status?: string | null
+          purchase_date?: string
+          purchase_number: string
+          remarks?: string | null
+          school_id: string
+          tax_amount?: number | null
+          total_amount?: number
+          total_books?: number
+          updated_at?: string
+          vendor_address?: string | null
+          vendor_contact?: string | null
+          vendor_gst?: string | null
+          vendor_name: string
+        }
+        Update: {
+          accession_end?: number | null
+          accession_start?: number | null
+          approved_by?: string | null
+          approved_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          discount_amount?: number | null
+          id?: string
+          invoice_amount?: number | null
+          invoice_date?: string | null
+          invoice_number?: string | null
+          net_amount?: number
+          order_date?: string | null
+          order_number?: string | null
+          payment_date?: string | null
+          payment_reference?: string | null
+          payment_status?: string | null
+          purchase_date?: string
+          purchase_number?: string
+          remarks?: string | null
+          school_id?: string
+          tax_amount?: number | null
+          total_amount?: number
+          total_books?: number
+          updated_at?: string
+          vendor_address?: string | null
+          vendor_contact?: string | null
+          vendor_gst?: string | null
+          vendor_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_purchases_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      library_racks: {
+        Row: {
+          capacity: number | null
+          created_at: string
+          description: string | null
+          floor: string | null
+          id: string
+          is_active: boolean
+          rack_code: string
+          rack_name: string
+          room: string | null
+          school_id: string
+          section: string | null
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string
+          description?: string | null
+          floor?: string | null
+          id?: string
+          is_active?: boolean
+          rack_code: string
+          rack_name: string
+          room?: string | null
+          school_id: string
+          section?: string | null
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string
+          description?: string | null
+          floor?: string | null
+          id?: string
+          is_active?: boolean
+          rack_code?: string
+          rack_name?: string
+          room?: string | null
+          school_id?: string
+          section?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_racks_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      library_reservations: {
+        Row: {
+          created_at: string
+          expiry_date: string | null
+          fulfilled_copy_id: string | null
+          fulfilled_date: string | null
+          id: string
+          member_id: string
+          notification_sent: boolean | null
+          notified_date: string | null
+          queue_position: number | null
+          reserved_date: string
+          school_id: string
+          status: string
+          title_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expiry_date?: string | null
+          fulfilled_copy_id?: string | null
+          fulfilled_date?: string | null
+          id?: string
+          member_id: string
+          notification_sent?: boolean | null
+          notified_date?: string | null
+          queue_position?: number | null
+          reserved_date?: string
+          school_id: string
+          status?: string
+          title_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expiry_date?: string | null
+          fulfilled_copy_id?: string | null
+          fulfilled_date?: string | null
+          id?: string
+          member_id?: string
+          notification_sent?: boolean | null
+          notified_date?: string | null
+          queue_position?: number | null
+          reserved_date?: string
+          school_id?: string
+          status?: string
+          title_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_reservations_fulfilled_copy_id_fkey"
+            columns: ["fulfilled_copy_id"]
+            isOneToOne: false
+            referencedRelation: "library_book_copies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_reservations_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "library_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_reservations_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_reservations_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "library_book_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      library_settings: {
+        Row: {
+          academic_year: string | null
+          allow_reservations: boolean
+          created_at: string
+          grace_period_days: number
+          id: string
+          lost_book_processing_fee: number
+          school_id: string
+          staff_fine_per_day: number
+          staff_loan_days: number
+          staff_max_books: number
+          staff_max_renewals: number
+          student_fine_per_day: number
+          student_loan_days: number
+          student_max_books: number
+          student_max_renewals: number
+          updated_at: string
+        }
+        Insert: {
+          academic_year?: string | null
+          allow_reservations?: boolean
+          created_at?: string
+          grace_period_days?: number
+          id?: string
+          lost_book_processing_fee?: number
+          school_id: string
+          staff_fine_per_day?: number
+          staff_loan_days?: number
+          staff_max_books?: number
+          staff_max_renewals?: number
+          student_fine_per_day?: number
+          student_loan_days?: number
+          student_max_books?: number
+          student_max_renewals?: number
+          updated_at?: string
+        }
+        Update: {
+          academic_year?: string | null
+          allow_reservations?: boolean
+          created_at?: string
+          grace_period_days?: number
+          id?: string
+          lost_book_processing_fee?: number
+          school_id?: string
+          staff_fine_per_day?: number
+          staff_loan_days?: number
+          staff_max_books?: number
+          staff_max_renewals?: number
+          student_fine_per_day?: number
+          student_loan_days?: number
+          student_max_books?: number
+          student_max_renewals?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_settings_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: true
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      library_stock_verification_items: {
+        Row: {
+          condition_at_verification: string | null
+          copy_id: string
+          created_at: string
+          found_at_location: string | null
+          found_at_rack_id: string | null
+          id: string
+          remarks: string | null
+          status: Database["public"]["Enums"]["library_verification_status"]
+          verification_id: string
+          verified_by: string | null
+          verified_date: string | null
+        }
+        Insert: {
+          condition_at_verification?: string | null
+          copy_id: string
+          created_at?: string
+          found_at_location?: string | null
+          found_at_rack_id?: string | null
+          id?: string
+          remarks?: string | null
+          status?: Database["public"]["Enums"]["library_verification_status"]
+          verification_id: string
+          verified_by?: string | null
+          verified_date?: string | null
+        }
+        Update: {
+          condition_at_verification?: string | null
+          copy_id?: string
+          created_at?: string
+          found_at_location?: string | null
+          found_at_rack_id?: string | null
+          id?: string
+          remarks?: string | null
+          status?: Database["public"]["Enums"]["library_verification_status"]
+          verification_id?: string
+          verified_by?: string | null
+          verified_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_stock_verification_items_copy_id_fkey"
+            columns: ["copy_id"]
+            isOneToOne: false
+            referencedRelation: "library_book_copies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_stock_verification_items_found_at_rack_id_fkey"
+            columns: ["found_at_rack_id"]
+            isOneToOne: false
+            referencedRelation: "library_racks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_stock_verification_items_verification_id_fkey"
+            columns: ["verification_id"]
+            isOneToOne: false
+            referencedRelation: "library_stock_verifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      library_stock_verifications: {
+        Row: {
+          accession_range_end: number | null
+          accession_range_start: number | null
+          approval_date: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          end_date: string | null
+          id: string
+          rack_ids: string[] | null
+          remarks: string | null
+          school_id: string
+          start_date: string
+          status: string
+          supervised_by: string | null
+          total_damaged: number
+          total_expected: number
+          total_found: number
+          total_missing: number
+          total_withdrawn: number
+          updated_at: string
+          verification_name: string
+          verification_number: string
+          verified_by: string[] | null
+        }
+        Insert: {
+          accession_range_end?: number | null
+          accession_range_start?: number | null
+          approval_date?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          rack_ids?: string[] | null
+          remarks?: string | null
+          school_id: string
+          start_date: string
+          status?: string
+          supervised_by?: string | null
+          total_damaged?: number
+          total_expected?: number
+          total_found?: number
+          total_missing?: number
+          total_withdrawn?: number
+          updated_at?: string
+          verification_name: string
+          verification_number: string
+          verified_by?: string[] | null
+        }
+        Update: {
+          accession_range_end?: number | null
+          accession_range_start?: number | null
+          approval_date?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          rack_ids?: string[] | null
+          remarks?: string | null
+          school_id?: string
+          start_date?: string
+          status?: string
+          supervised_by?: string | null
+          total_damaged?: number
+          total_expected?: number
+          total_found?: number
+          total_missing?: number
+          total_withdrawn?: number
+          updated_at?: string
+          verification_name?: string
+          verification_number?: string
+          verified_by?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_stock_verifications_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      library_withdrawals: {
+        Row: {
+          approval_authority: string | null
+          approval_date: string
+          approval_reference: string | null
+          approved_by: string
+          created_at: string
+          created_by: string | null
+          disposal_amount: number | null
+          disposal_date: string | null
+          disposal_method: string | null
+          disposal_remarks: string | null
+          id: string
+          reason: string
+          remarks: string | null
+          school_id: string
+          total_books: number
+          total_value: number | null
+          updated_at: string
+          withdrawal_date: string
+          withdrawal_number: string
+        }
+        Insert: {
+          approval_authority?: string | null
+          approval_date: string
+          approval_reference?: string | null
+          approved_by: string
+          created_at?: string
+          created_by?: string | null
+          disposal_amount?: number | null
+          disposal_date?: string | null
+          disposal_method?: string | null
+          disposal_remarks?: string | null
+          id?: string
+          reason: string
+          remarks?: string | null
+          school_id: string
+          total_books?: number
+          total_value?: number | null
+          updated_at?: string
+          withdrawal_date?: string
+          withdrawal_number: string
+        }
+        Update: {
+          approval_authority?: string | null
+          approval_date?: string
+          approval_reference?: string | null
+          approved_by?: string
+          created_at?: string
+          created_by?: string | null
+          disposal_amount?: number | null
+          disposal_date?: string | null
+          disposal_method?: string | null
+          disposal_remarks?: string | null
+          id?: string
+          reason?: string
+          remarks?: string | null
+          school_id?: string
+          total_books?: number
+          total_value?: number | null
+          updated_at?: string
+          withdrawal_date?: string
+          withdrawal_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_withdrawals_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medical_incidents: {
         Row: {
           created_at: string | null
@@ -9004,6 +10209,10 @@ export type Database = {
         }
         Returns: Json
       }
+      get_next_accession_number: {
+        Args: { p_school_id: string }
+        Returns: number
+      }
       get_user_roles: {
         Args: { school_uuid?: string; user_uuid: string }
         Returns: {
@@ -9013,6 +10222,7 @@ export type Database = {
           year_group: string
         }[]
       }
+      has_library_access: { Args: { p_school_id: string }; Returns: boolean }
       has_permission: {
         Args: {
           permission: Database["public"]["Enums"]["permission_type"]
@@ -9135,6 +10345,19 @@ export type Database = {
         | "medication"
         | "emergency"
         | "other"
+      library_book_status:
+        | "available"
+        | "issued"
+        | "reserved"
+        | "lost"
+        | "withdrawn"
+        | "repair"
+        | "processing"
+      library_book_type: "circulation" | "reference"
+      library_fine_status: "pending" | "paid" | "waived" | "partially_paid"
+      library_member_type: "student" | "staff"
+      library_source_type: "purchase" | "donation"
+      library_verification_status: "found" | "missing" | "withdrawn" | "pending"
       medical_visit_status: "pending" | "in_progress" | "completed" | "referred"
       medical_visit_type:
         | "routine_checkup"
@@ -9425,6 +10648,20 @@ export const Constants = {
         "emergency",
         "other",
       ],
+      library_book_status: [
+        "available",
+        "issued",
+        "reserved",
+        "lost",
+        "withdrawn",
+        "repair",
+        "processing",
+      ],
+      library_book_type: ["circulation", "reference"],
+      library_fine_status: ["pending", "paid", "waived", "partially_paid"],
+      library_member_type: ["student", "staff"],
+      library_source_type: ["purchase", "donation"],
+      library_verification_status: ["found", "missing", "withdrawn", "pending"],
       medical_visit_status: ["pending", "in_progress", "completed", "referred"],
       medical_visit_type: [
         "routine_checkup",
