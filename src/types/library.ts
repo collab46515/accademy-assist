@@ -106,6 +106,7 @@ export interface LibraryMember {
   id: string;
   school_id: string;
   member_type: LibraryMemberType;
+  full_name: string;
   student_id: string | null;
   admission_number: string | null;
   class_name: string | null;
@@ -114,7 +115,6 @@ export interface LibraryMember {
   staff_db_id: string | null;
   staff_id: string | null;
   department: string | null;
-  full_name: string;
   email: string | null;
   phone: string | null;
   parent_contact: string | null;
