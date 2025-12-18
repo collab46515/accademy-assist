@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useSchoolId } from '@/contexts/SchoolContext';
+import { useSchoolFilter } from '@/hooks/useSchoolFilter';
 import { toast } from 'sonner';
 import type {
   LibrarySettings,
@@ -16,11 +16,10 @@ import type {
   LibraryStockVerification,
   LibraryDashboardStats,
   LibraryBookStatus,
-  LibrarySourceType,
 } from '@/types/library';
 
 export function useLibraryData() {
-  const { currentSchoolId } = useSchoolId();
+  const { currentSchoolId, hasSchoolContext } = useSchoolFilter();
   const [isLoading, setIsLoading] = useState(false);
   
   // Settings
@@ -151,14 +150,36 @@ export function useLibraryData() {
   const createBookTitle = async (title: Partial<LibraryBookTitle>) => {
     if (!currentSchoolId) return null;
     
+    const insertData = {
+      title: title.title || '',
+      authors: title.authors || [],
+      school_id: currentSchoolId,
+      publisher: title.publisher,
+      publication_year: title.publication_year,
+      edition: title.edition,
+      isbn: title.isbn,
+      language: title.language || 'English',
+      category: title.category,
+      subcategory: title.subcategory,
+      ddc_number: title.ddc_number,
+      call_number_base: title.call_number_base,
+      keywords: title.keywords,
+      book_type: title.book_type || 'circulation',
+      description: title.description,
+      cover_image_url: title.cover_image_url,
+      pages: title.pages,
+      binding: title.binding,
+    };
+    
     const { data, error } = await supabase
       .from('library_book_titles')
-      .insert({ ...title, school_id: currentSchoolId })
+      .insert(insertData)
       .select()
       .single();
     
     if (error) {
       toast.error('Failed to add book title');
+      console.error(error);
       return null;
     }
     
@@ -195,14 +216,26 @@ export function useLibraryData() {
       return null;
     }
     
+    const insertData = {
+      school_id: currentSchoolId,
+      title_id: copy.title_id || '',
+      accession_number: accessionNumber,
+      call_number: copy.call_number || '',
+      copy_number: copy.copy_number || 1,
+      rack_id: copy.rack_id,
+      source: copy.source || 'purchase',
+      price: copy.price,
+      acquisition_date: copy.acquisition_date || new Date().toISOString().split('T')[0],
+      condition: copy.condition || 'Good',
+      is_reference: copy.is_reference || false,
+      barcode: copy.barcode,
+      remarks: copy.remarks,
+      status: 'available' as LibraryBookStatus,
+    };
+    
     const { data, error } = await supabase
       .from('library_book_copies')
-      .insert({ 
-        ...copy, 
-        school_id: currentSchoolId,
-        accession_number: accessionNumber,
-        status: 'available' as LibraryBookStatus
-      })
+      .insert(insertData)
       .select('*, book_title:library_book_titles(*), rack:library_racks(*)')
       .single();
     
@@ -239,14 +272,33 @@ export function useLibraryData() {
   const createMember = async (member: Partial<LibraryMember>) => {
     if (!currentSchoolId) return null;
     
+    const insertData = {
+      school_id: currentSchoolId,
+      member_type: member.member_type || 'student',
+      full_name: member.full_name || '',
+      email: member.email,
+      phone: member.phone,
+      class_name: member.class_name,
+      section: member.section,
+      roll_number: member.roll_number,
+      admission_number: member.admission_number,
+      department: member.department,
+      staff_id: member.staff_id,
+      parent_contact: member.parent_contact,
+      card_issued_date: member.card_issued_date,
+      card_expiry_date: member.card_expiry_date,
+      is_active: member.is_active ?? true,
+    };
+    
     const { data, error } = await supabase
       .from('library_members')
-      .insert({ ...member, school_id: currentSchoolId })
+      .insert(insertData)
       .select()
       .single();
     
     if (error) {
       toast.error('Failed to add member');
+      console.error(error);
       return null;
     }
     
@@ -459,14 +511,27 @@ export function useLibraryData() {
   const createRack = async (rack: Partial<LibraryRack>) => {
     if (!currentSchoolId) return null;
     
+    const insertData = {
+      school_id: currentSchoolId,
+      rack_code: rack.rack_code || '',
+      rack_name: rack.rack_name || '',
+      section: rack.section,
+      room: rack.room,
+      floor: rack.floor,
+      capacity: rack.capacity,
+      description: rack.description,
+      is_active: rack.is_active ?? true,
+    };
+    
     const { data, error } = await supabase
       .from('library_racks')
-      .insert({ ...rack, school_id: currentSchoolId })
+      .insert(insertData)
       .select()
       .single();
     
     if (error) {
       toast.error('Failed to add rack');
+      console.error(error);
       return null;
     }
     
@@ -479,14 +544,35 @@ export function useLibraryData() {
   const createPurchase = async (purchase: Partial<LibraryPurchase>) => {
     if (!currentSchoolId) return null;
     
+    const insertData = {
+      school_id: currentSchoolId,
+      purchase_number: purchase.purchase_number || `PO-${Date.now()}`,
+      purchase_date: purchase.purchase_date || new Date().toISOString().split('T')[0],
+      vendor_name: purchase.vendor_name || '',
+      vendor_address: purchase.vendor_address,
+      vendor_contact: purchase.vendor_contact,
+      vendor_gst: purchase.vendor_gst,
+      invoice_number: purchase.invoice_number,
+      invoice_date: purchase.invoice_date,
+      invoice_amount: purchase.invoice_amount,
+      total_books: purchase.total_books || 0,
+      total_amount: purchase.total_amount || 0,
+      net_amount: purchase.net_amount || 0,
+      payment_status: purchase.payment_status || 'pending',
+      payment_date: purchase.payment_date,
+      payment_reference: purchase.payment_reference,
+      remarks: purchase.remarks,
+    };
+    
     const { data, error } = await supabase
       .from('library_purchases')
-      .insert({ ...purchase, school_id: currentSchoolId })
+      .insert(insertData)
       .select()
       .single();
     
     if (error) {
       toast.error('Failed to add purchase');
+      console.error(error);
       return null;
     }
     
@@ -499,14 +585,32 @@ export function useLibraryData() {
   const createDonation = async (donation: Partial<LibraryDonation>) => {
     if (!currentSchoolId) return null;
     
+    const insertData = {
+      school_id: currentSchoolId,
+      donation_number: donation.donation_number || `DN-${Date.now()}`,
+      donation_date: donation.donation_date || new Date().toISOString().split('T')[0],
+      donor_name: donation.donor_name || '',
+      donor_type: donation.donor_type,
+      donor_address: donation.donor_address,
+      donor_contact: donation.donor_contact,
+      donor_email: donation.donor_email,
+      occasion: donation.occasion,
+      purpose: donation.purpose,
+      total_books: donation.total_books || 0,
+      estimated_value: donation.estimated_value,
+      acknowledgement_sent: donation.acknowledgement_sent || false,
+      remarks: donation.remarks,
+    };
+    
     const { data, error } = await supabase
       .from('library_donations')
-      .insert({ ...donation, school_id: currentSchoolId })
+      .insert(insertData)
       .select()
       .single();
     
     if (error) {
       toast.error('Failed to add donation');
+      console.error(error);
       return null;
     }
     
@@ -549,6 +653,7 @@ export function useLibraryData() {
 
   return {
     isLoading,
+    hasSchoolContext,
     settings,
     racks,
     bookTitles,
