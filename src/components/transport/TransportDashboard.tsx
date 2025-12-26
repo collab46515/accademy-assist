@@ -15,7 +15,8 @@ import {
   Building2,
   FileCheck,
   Wrench,
-  Activity
+  Activity,
+  Bell
 } from 'lucide-react';
 import { useTransportData } from '@/hooks/useTransportData';
 import { DriversManager } from './DriversManager';
@@ -29,6 +30,7 @@ import { VehicleComplianceManager } from './VehicleComplianceManager';
 import { VehiclePartsManager } from './VehiclePartsManager';
 import { TripPlanningTab } from './TripPlanningTab';
 import { LiveOperationsTab } from './LiveOperationsTab';
+import { CommunicationsTab } from './CommunicationsTab';
 
 export const TransportDashboard = () => {
   const { drivers, vehicles, routes, incidents, studentTransport, loading } = useTransportData();
@@ -92,11 +94,12 @@ export const TransportDashboard = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-9">
+        <TabsList className="grid w-full grid-cols-10">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="setup" className="gap-1"><Settings className="h-4 w-4" /> Setup</TabsTrigger>
-          <TabsTrigger value="trip-planning" className="gap-1"><Route className="h-4 w-4" /> Trip Planning</TabsTrigger>
-          <TabsTrigger value="live-ops" className="gap-1"><Activity className="h-4 w-4" /> Live Ops</TabsTrigger>
+          <TabsTrigger value="trip-planning" className="gap-1"><Route className="h-4 w-4" /> Trips</TabsTrigger>
+          <TabsTrigger value="live-ops" className="gap-1"><Activity className="h-4 w-4" /> Live</TabsTrigger>
+          <TabsTrigger value="comms" className="gap-1"><Bell className="h-4 w-4" /> Comms</TabsTrigger>
           <TabsTrigger value="drivers">Drivers</TabsTrigger>
           <TabsTrigger value="vehicles">Vehicles</TabsTrigger>
           <TabsTrigger value="routes">Routes</TabsTrigger>
@@ -286,6 +289,10 @@ export const TransportDashboard = () => {
 
         <TabsContent value="live-ops">
           <LiveOperationsTab />
+        </TabsContent>
+
+        <TabsContent value="comms">
+          <CommunicationsTab />
         </TabsContent>
 
         <TabsContent value="drivers">
