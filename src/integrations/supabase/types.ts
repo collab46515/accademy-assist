@@ -8252,20 +8252,114 @@ export type Database = {
         }
         Relationships: []
       }
+      route_profiles: {
+        Row: {
+          apply_school_holidays: boolean | null
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          custom_holiday_ids: string[] | null
+          days_of_week: number[] | null
+          description: string | null
+          end_time: string
+          frequency: string
+          id: string
+          profile_code: string | null
+          profile_name: string
+          requires_approval: boolean | null
+          school_id: string
+          start_time: string
+          status: string
+          student_pool_criteria: Json | null
+          student_pool_type: string
+          trip_category: string
+          updated_at: string
+          valid_from: string
+          valid_until: string
+        }
+        Insert: {
+          apply_school_holidays?: boolean | null
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          custom_holiday_ids?: string[] | null
+          days_of_week?: number[] | null
+          description?: string | null
+          end_time: string
+          frequency?: string
+          id?: string
+          profile_code?: string | null
+          profile_name: string
+          requires_approval?: boolean | null
+          school_id: string
+          start_time: string
+          status?: string
+          student_pool_criteria?: Json | null
+          student_pool_type?: string
+          trip_category?: string
+          updated_at?: string
+          valid_from: string
+          valid_until: string
+        }
+        Update: {
+          apply_school_holidays?: boolean | null
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          custom_holiday_ids?: string[] | null
+          days_of_week?: number[] | null
+          description?: string | null
+          end_time?: string
+          frequency?: string
+          id?: string
+          profile_code?: string | null
+          profile_name?: string
+          requires_approval?: boolean | null
+          school_id?: string
+          start_time?: string
+          status?: string
+          student_pool_criteria?: Json | null
+          student_pool_type?: string
+          trip_category?: string
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_profiles_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       route_stops: {
         Row: {
           created_at: string
           distance_from_school: number | null
           drop_time: string | null
           estimated_travel_time: number | null
+          geofence_radius_meters: number | null
           id: string
+          is_active: boolean | null
           latitude: number | null
           location_address: string | null
           longitude: number | null
+          notes: string | null
           pickup_time: string
           route_id: string
           stop_name: string
           stop_order: number
+          stop_type: string | null
+          student_count: number | null
           updated_at: string
         }
         Insert: {
@@ -8273,14 +8367,19 @@ export type Database = {
           distance_from_school?: number | null
           drop_time?: string | null
           estimated_travel_time?: number | null
+          geofence_radius_meters?: number | null
           id?: string
+          is_active?: boolean | null
           latitude?: number | null
           location_address?: string | null
           longitude?: number | null
+          notes?: string | null
           pickup_time: string
           route_id: string
           stop_name: string
           stop_order: number
+          stop_type?: string | null
+          student_count?: number | null
           updated_at?: string
         }
         Update: {
@@ -8288,14 +8387,19 @@ export type Database = {
           distance_from_school?: number | null
           drop_time?: string | null
           estimated_travel_time?: number | null
+          geofence_radius_meters?: number | null
           id?: string
+          is_active?: boolean | null
           latitude?: number | null
           location_address?: string | null
           longitude?: number | null
+          notes?: string | null
           pickup_time?: string
           route_id?: string
           stop_name?: string
           stop_order?: number
+          stop_type?: string | null
+          student_count?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -8833,6 +8937,89 @@ export type Database = {
           },
         ]
       }
+      standby_resources: {
+        Row: {
+          assigned_at: string | null
+          available_from: string | null
+          available_until: string | null
+          created_at: string
+          currently_assigned_to: string | null
+          days_available: number[] | null
+          driver_id: string | null
+          id: string
+          is_available: boolean | null
+          notes: string | null
+          resource_type: string
+          route_profile_id: string | null
+          school_id: string
+          updated_at: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          assigned_at?: string | null
+          available_from?: string | null
+          available_until?: string | null
+          created_at?: string
+          currently_assigned_to?: string | null
+          days_available?: number[] | null
+          driver_id?: string | null
+          id?: string
+          is_available?: boolean | null
+          notes?: string | null
+          resource_type: string
+          route_profile_id?: string | null
+          school_id: string
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          assigned_at?: string | null
+          available_from?: string | null
+          available_until?: string | null
+          created_at?: string
+          currently_assigned_to?: string | null
+          days_available?: number[] | null
+          driver_id?: string | null
+          id?: string
+          is_available?: boolean | null
+          notes?: string | null
+          resource_type?: string
+          route_profile_id?: string | null
+          school_id?: string
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "standby_resources_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "standby_resources_route_profile_id_fkey"
+            columns: ["route_profile_id"]
+            isOneToOne: false
+            referencedRelation: "route_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "standby_resources_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "standby_resources_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_fee_assignments: {
         Row: {
           amount_due: number
@@ -9110,6 +9297,89 @@ export type Database = {
             columns: ["stop_id"]
             isOneToOne: false
             referencedRelation: "route_stops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_trip_assignments: {
+        Row: {
+          assignment_type: string
+          created_at: string
+          id: string
+          parent_name: string | null
+          parent_notification_preference: string | null
+          parent_phone: string | null
+          school_id: string
+          special_instructions: string | null
+          status: string
+          student_id: string
+          trip_id: string
+          trip_stop_id: string
+          updated_at: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          assignment_type?: string
+          created_at?: string
+          id?: string
+          parent_name?: string | null
+          parent_notification_preference?: string | null
+          parent_phone?: string | null
+          school_id: string
+          special_instructions?: string | null
+          status?: string
+          student_id: string
+          trip_id: string
+          trip_stop_id: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          assignment_type?: string
+          created_at?: string
+          id?: string
+          parent_name?: string | null
+          parent_notification_preference?: string | null
+          parent_phone?: string | null
+          school_id?: string
+          special_instructions?: string | null
+          status?: string
+          student_id?: string
+          trip_id?: string
+          trip_stop_id?: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_trip_assignments_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_trip_assignments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_trip_assignments_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "transport_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_trip_assignments_trip_stop_id_fkey"
+            columns: ["trip_stop_id"]
+            isOneToOne: false
+            referencedRelation: "trip_stops"
             referencedColumns: ["id"]
           },
         ]
@@ -10053,6 +10323,114 @@ export type Database = {
           },
         ]
       }
+      transport_trips: {
+        Row: {
+          assigned_students_count: number | null
+          attender_id: string | null
+          created_at: string
+          driver_id: string | null
+          end_point: string | null
+          estimated_distance_km: number | null
+          estimated_duration_minutes: number | null
+          estimated_fuel_required: number | null
+          id: string
+          route_profile_id: string
+          scheduled_end_time: string | null
+          scheduled_start_time: string
+          school_id: string
+          start_point: string | null
+          status: string
+          trip_code: string | null
+          trip_name: string
+          trip_type: string
+          updated_at: string
+          vehicle_capacity: number | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          assigned_students_count?: number | null
+          attender_id?: string | null
+          created_at?: string
+          driver_id?: string | null
+          end_point?: string | null
+          estimated_distance_km?: number | null
+          estimated_duration_minutes?: number | null
+          estimated_fuel_required?: number | null
+          id?: string
+          route_profile_id: string
+          scheduled_end_time?: string | null
+          scheduled_start_time: string
+          school_id: string
+          start_point?: string | null
+          status?: string
+          trip_code?: string | null
+          trip_name: string
+          trip_type?: string
+          updated_at?: string
+          vehicle_capacity?: number | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          assigned_students_count?: number | null
+          attender_id?: string | null
+          created_at?: string
+          driver_id?: string | null
+          end_point?: string | null
+          estimated_distance_km?: number | null
+          estimated_duration_minutes?: number | null
+          estimated_fuel_required?: number | null
+          id?: string
+          route_profile_id?: string
+          scheduled_end_time?: string | null
+          scheduled_start_time?: string
+          school_id?: string
+          start_point?: string | null
+          status?: string
+          trip_code?: string | null
+          trip_name?: string
+          trip_type?: string
+          updated_at?: string
+          vehicle_capacity?: number | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_trips_attender_id_fkey"
+            columns: ["attender_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_trips_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_trips_route_profile_id_fkey"
+            columns: ["route_profile_id"]
+            isOneToOne: false
+            referencedRelation: "route_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_trips_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_trips_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       travel_requests: {
         Row: {
           accommodation_required: boolean | null
@@ -10115,6 +10493,179 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_instances: {
+        Row: {
+          actual_attender_id: string | null
+          actual_distance_km: number | null
+          actual_driver_id: string | null
+          actual_end_time: string | null
+          actual_start_time: string | null
+          actual_vehicle_id: string | null
+          created_at: string
+          delay_minutes: number | null
+          delay_reason: string | null
+          fuel_consumed_litres: number | null
+          gps_tracking_id: string | null
+          id: string
+          instance_date: string
+          status: string
+          total_students_boarded: number | null
+          total_students_dropped: number | null
+          total_students_expected: number | null
+          trip_id: string
+          updated_at: string
+        }
+        Insert: {
+          actual_attender_id?: string | null
+          actual_distance_km?: number | null
+          actual_driver_id?: string | null
+          actual_end_time?: string | null
+          actual_start_time?: string | null
+          actual_vehicle_id?: string | null
+          created_at?: string
+          delay_minutes?: number | null
+          delay_reason?: string | null
+          fuel_consumed_litres?: number | null
+          gps_tracking_id?: string | null
+          id?: string
+          instance_date: string
+          status?: string
+          total_students_boarded?: number | null
+          total_students_dropped?: number | null
+          total_students_expected?: number | null
+          trip_id: string
+          updated_at?: string
+        }
+        Update: {
+          actual_attender_id?: string | null
+          actual_distance_km?: number | null
+          actual_driver_id?: string | null
+          actual_end_time?: string | null
+          actual_start_time?: string | null
+          actual_vehicle_id?: string | null
+          created_at?: string
+          delay_minutes?: number | null
+          delay_reason?: string | null
+          fuel_consumed_litres?: number | null
+          gps_tracking_id?: string | null
+          id?: string
+          instance_date?: string
+          status?: string
+          total_students_boarded?: number | null
+          total_students_dropped?: number | null
+          total_students_expected?: number | null
+          trip_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_instances_actual_attender_id_fkey"
+            columns: ["actual_attender_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_instances_actual_driver_id_fkey"
+            columns: ["actual_driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_instances_actual_vehicle_id_fkey"
+            columns: ["actual_vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_instances_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "transport_trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_stops: {
+        Row: {
+          assigned_students_count: number | null
+          assignment_status: string | null
+          created_at: string
+          distance_from_previous_km: number | null
+          estimated_wait_minutes: number | null
+          geofence_radius_meters: number | null
+          id: string
+          latitude: number | null
+          location_address: string | null
+          longitude: number | null
+          scheduled_arrival_time: string
+          scheduled_departure_time: string | null
+          stop_id: string | null
+          stop_name: string
+          stop_order: number
+          total_students_at_stop: number | null
+          trip_id: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_students_count?: number | null
+          assignment_status?: string | null
+          created_at?: string
+          distance_from_previous_km?: number | null
+          estimated_wait_minutes?: number | null
+          geofence_radius_meters?: number | null
+          id?: string
+          latitude?: number | null
+          location_address?: string | null
+          longitude?: number | null
+          scheduled_arrival_time: string
+          scheduled_departure_time?: string | null
+          stop_id?: string | null
+          stop_name: string
+          stop_order: number
+          total_students_at_stop?: number | null
+          trip_id: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_students_count?: number | null
+          assignment_status?: string | null
+          created_at?: string
+          distance_from_previous_km?: number | null
+          estimated_wait_minutes?: number | null
+          geofence_radius_meters?: number | null
+          id?: string
+          latitude?: number | null
+          location_address?: string | null
+          longitude?: number | null
+          scheduled_arrival_time?: string
+          scheduled_departure_time?: string | null
+          stop_id?: string | null
+          stop_name?: string
+          stop_order?: number
+          total_students_at_stop?: number | null
+          trip_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_stops_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
+            referencedRelation: "route_stops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_stops_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "transport_trips"
             referencedColumns: ["id"]
           },
         ]
