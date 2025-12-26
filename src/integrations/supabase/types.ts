@@ -10287,6 +10287,116 @@ export type Database = {
           },
         ]
       }
+      transport_emergency_contacts: {
+        Row: {
+          contact_name: string
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean | null
+          is_authorized_pickup: boolean | null
+          notes: string | null
+          phone_primary: string
+          phone_secondary: string | null
+          priority_order: number | null
+          relationship: string
+          school_id: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          contact_name: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_authorized_pickup?: boolean | null
+          notes?: string | null
+          phone_primary: string
+          phone_secondary?: string | null
+          priority_order?: number | null
+          relationship: string
+          school_id: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          contact_name?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_authorized_pickup?: boolean | null
+          notes?: string | null
+          phone_primary?: string
+          phone_secondary?: string | null
+          priority_order?: number | null
+          relationship?: string
+          school_id?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      transport_geofences: {
+        Row: {
+          center_lat: number
+          center_lng: number
+          created_at: string
+          geofence_type: string
+          id: string
+          is_active: boolean | null
+          name: string
+          notification_template_id: string | null
+          radius_meters: number
+          reference_id: string | null
+          school_id: string
+          trigger_on_entry: boolean | null
+          trigger_on_exit: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          center_lat: number
+          center_lng: number
+          created_at?: string
+          geofence_type: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          notification_template_id?: string | null
+          radius_meters?: number
+          reference_id?: string | null
+          school_id: string
+          trigger_on_entry?: boolean | null
+          trigger_on_exit?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          center_lat?: number
+          center_lng?: number
+          created_at?: string
+          geofence_type?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          notification_template_id?: string | null
+          radius_meters?: number
+          reference_id?: string | null
+          school_id?: string
+          trigger_on_entry?: boolean | null
+          trigger_on_exit?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_geofences_notification_template_id_fkey"
+            columns: ["notification_template_id"]
+            isOneToOne: false
+            referencedRelation: "transport_notification_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transport_holidays: {
         Row: {
           affects_transport: boolean | null
@@ -10417,6 +10527,229 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      transport_notification_logs: {
+        Row: {
+          channel: string
+          created_at: string
+          delivered_at: string | null
+          error_message: string | null
+          event_trigger: string
+          external_id: string | null
+          id: string
+          message: string
+          read_at: string | null
+          recipient_contact: string
+          recipient_id: string
+          recipient_type: string
+          retry_count: number | null
+          school_id: string
+          sent_at: string | null
+          status: string
+          subject: string | null
+          template_id: string | null
+          trip_event_id: string | null
+          trip_instance_id: string | null
+          variables_used: Json | null
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          event_trigger: string
+          external_id?: string | null
+          id?: string
+          message: string
+          read_at?: string | null
+          recipient_contact: string
+          recipient_id: string
+          recipient_type: string
+          retry_count?: number | null
+          school_id: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          template_id?: string | null
+          trip_event_id?: string | null
+          trip_instance_id?: string | null
+          variables_used?: Json | null
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          event_trigger?: string
+          external_id?: string | null
+          id?: string
+          message?: string
+          read_at?: string | null
+          recipient_contact?: string
+          recipient_id?: string
+          recipient_type?: string
+          retry_count?: number | null
+          school_id?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          template_id?: string | null
+          trip_event_id?: string | null
+          trip_instance_id?: string | null
+          variables_used?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_notification_logs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "transport_notification_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_notification_logs_trip_event_id_fkey"
+            columns: ["trip_event_id"]
+            isOneToOne: false
+            referencedRelation: "trip_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_notification_logs_trip_instance_id_fkey"
+            columns: ["trip_instance_id"]
+            isOneToOne: false
+            referencedRelation: "trip_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transport_notification_preferences: {
+        Row: {
+          arrival_notify_minutes: number | null
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean | null
+          notify_arrival_soon: boolean | null
+          notify_delays: boolean | null
+          notify_emergencies: boolean | null
+          notify_student_alight: boolean | null
+          notify_student_board: boolean | null
+          notify_trip_end: boolean | null
+          notify_trip_start: boolean | null
+          parent_id: string
+          phone_number: string | null
+          preferred_channel: string | null
+          push_token: string | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          school_id: string
+          student_id: string
+          updated_at: string
+          whatsapp_number: string | null
+        }
+        Insert: {
+          arrival_notify_minutes?: number | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          notify_arrival_soon?: boolean | null
+          notify_delays?: boolean | null
+          notify_emergencies?: boolean | null
+          notify_student_alight?: boolean | null
+          notify_student_board?: boolean | null
+          notify_trip_end?: boolean | null
+          notify_trip_start?: boolean | null
+          parent_id: string
+          phone_number?: string | null
+          preferred_channel?: string | null
+          push_token?: string | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          school_id: string
+          student_id: string
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Update: {
+          arrival_notify_minutes?: number | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          notify_arrival_soon?: boolean | null
+          notify_delays?: boolean | null
+          notify_emergencies?: boolean | null
+          notify_student_alight?: boolean | null
+          notify_student_board?: boolean | null
+          notify_trip_end?: boolean | null
+          notify_trip_start?: boolean | null
+          parent_id?: string
+          phone_number?: string | null
+          preferred_channel?: string | null
+          push_token?: string | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          school_id?: string
+          student_id?: string
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
+      transport_notification_templates: {
+        Row: {
+          body_template: string
+          created_at: string
+          created_by: string | null
+          event_trigger: string
+          id: string
+          is_active: boolean | null
+          school_id: string
+          send_to_admin: boolean | null
+          send_to_driver: boolean | null
+          send_to_parent: boolean | null
+          subject_template: string | null
+          template_name: string
+          template_type: string
+          updated_at: string
+          variables: string[] | null
+        }
+        Insert: {
+          body_template: string
+          created_at?: string
+          created_by?: string | null
+          event_trigger: string
+          id?: string
+          is_active?: boolean | null
+          school_id: string
+          send_to_admin?: boolean | null
+          send_to_driver?: boolean | null
+          send_to_parent?: boolean | null
+          subject_template?: string | null
+          template_name: string
+          template_type: string
+          updated_at?: string
+          variables?: string[] | null
+        }
+        Update: {
+          body_template?: string
+          created_at?: string
+          created_by?: string | null
+          event_trigger?: string
+          id?: string
+          is_active?: boolean | null
+          school_id?: string
+          send_to_admin?: boolean | null
+          send_to_driver?: boolean | null
+          send_to_parent?: boolean | null
+          subject_template?: string | null
+          template_name?: string
+          template_type?: string
+          updated_at?: string
+          variables?: string[] | null
+        }
+        Relationships: []
       }
       transport_notifications: {
         Row: {
