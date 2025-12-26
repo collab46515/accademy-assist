@@ -2450,6 +2450,94 @@ export type Database = {
         }
         Relationships: []
       }
+      driver_checkins: {
+        Row: {
+          checkin_time: string
+          checkin_type: string
+          created_at: string
+          driver_id: string | null
+          fuel_level_percent: number | null
+          id: string
+          location_address: string | null
+          location_lat: number | null
+          location_lng: number | null
+          notes: string | null
+          odometer_reading: number | null
+          photo_url: string | null
+          school_id: string
+          trip_instance_id: string | null
+          vehicle_condition: string | null
+          vehicle_id: string | null
+          vehicle_issues: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          checkin_time?: string
+          checkin_type: string
+          created_at?: string
+          driver_id?: string | null
+          fuel_level_percent?: number | null
+          id?: string
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          notes?: string | null
+          odometer_reading?: number | null
+          photo_url?: string | null
+          school_id: string
+          trip_instance_id?: string | null
+          vehicle_condition?: string | null
+          vehicle_id?: string | null
+          vehicle_issues?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          checkin_time?: string
+          checkin_type?: string
+          created_at?: string
+          driver_id?: string | null
+          fuel_level_percent?: number | null
+          id?: string
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          notes?: string | null
+          odometer_reading?: number | null
+          photo_url?: string | null
+          school_id?: string
+          trip_instance_id?: string | null
+          vehicle_condition?: string | null
+          vehicle_id?: string | null
+          vehicle_issues?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_checkins_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_checkins_trip_instance_id_fkey"
+            columns: ["trip_instance_id"]
+            isOneToOne: false
+            referencedRelation: "trip_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_checkins_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       drivers: {
         Row: {
           aadhar_document_url: string | null
@@ -9384,6 +9472,85 @@ export type Database = {
           },
         ]
       }
+      student_trip_logs: {
+        Row: {
+          action_time: string
+          action_type: string
+          created_at: string
+          id: string
+          location_lat: number | null
+          location_lng: number | null
+          notes: string | null
+          parent_notification_time: string | null
+          parent_notified: boolean | null
+          recorded_by: string | null
+          recorded_method: string | null
+          school_id: string
+          student_assignment_id: string | null
+          student_id: string
+          trip_instance_id: string | null
+          trip_stop_id: string | null
+        }
+        Insert: {
+          action_time?: string
+          action_type: string
+          created_at?: string
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          notes?: string | null
+          parent_notification_time?: string | null
+          parent_notified?: boolean | null
+          recorded_by?: string | null
+          recorded_method?: string | null
+          school_id: string
+          student_assignment_id?: string | null
+          student_id: string
+          trip_instance_id?: string | null
+          trip_stop_id?: string | null
+        }
+        Update: {
+          action_time?: string
+          action_type?: string
+          created_at?: string
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          notes?: string | null
+          parent_notification_time?: string | null
+          parent_notified?: boolean | null
+          recorded_by?: string | null
+          recorded_method?: string | null
+          school_id?: string
+          student_assignment_id?: string | null
+          student_id?: string
+          trip_instance_id?: string | null
+          trip_stop_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_trip_logs_student_assignment_id_fkey"
+            columns: ["student_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "student_trip_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_trip_logs_trip_instance_id_fkey"
+            columns: ["trip_instance_id"]
+            isOneToOne: false
+            referencedRelation: "trip_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_trip_logs_trip_stop_id_fkey"
+            columns: ["trip_stop_id"]
+            isOneToOne: false
+            referencedRelation: "trip_stops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       students: {
         Row: {
           admission_date: string | null
@@ -9896,6 +10063,65 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transport_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_type: string
+          auto_resolved: boolean | null
+          created_at: string
+          id: string
+          message: string
+          metadata: Json | null
+          priority: string
+          resolved_at: string | null
+          resolved_by: string | null
+          school_id: string
+          title: string
+          trip_instance_id: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type: string
+          auto_resolved?: boolean | null
+          created_at?: string
+          id?: string
+          message: string
+          metadata?: Json | null
+          priority?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          school_id: string
+          title: string
+          trip_instance_id?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type?: string
+          auto_resolved?: boolean | null
+          created_at?: string
+          id?: string
+          message?: string
+          metadata?: Json | null
+          priority?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          school_id?: string
+          title?: string
+          trip_instance_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_alerts_trip_instance_id_fkey"
+            columns: ["trip_instance_id"]
+            isOneToOne: false
+            referencedRelation: "trip_instances"
             referencedColumns: ["id"]
           },
         ]
@@ -10497,6 +10723,83 @@ export type Database = {
           },
         ]
       }
+      trip_events: {
+        Row: {
+          admin_notification_sent: boolean | null
+          affected_students_count: number | null
+          created_at: string
+          description: string
+          event_time: string
+          event_type: string
+          id: string
+          location_address: string | null
+          location_lat: number | null
+          location_lng: number | null
+          parent_notification_sent: boolean | null
+          photos: string[] | null
+          reported_by: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          school_id: string
+          severity: string | null
+          trip_instance_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_notification_sent?: boolean | null
+          affected_students_count?: number | null
+          created_at?: string
+          description: string
+          event_time?: string
+          event_type: string
+          id?: string
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          parent_notification_sent?: boolean | null
+          photos?: string[] | null
+          reported_by?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          school_id: string
+          severity?: string | null
+          trip_instance_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_notification_sent?: boolean | null
+          affected_students_count?: number | null
+          created_at?: string
+          description?: string
+          event_time?: string
+          event_type?: string
+          id?: string
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          parent_notification_sent?: boolean | null
+          photos?: string[] | null
+          reported_by?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          school_id?: string
+          severity?: string | null
+          trip_instance_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_events_trip_instance_id_fkey"
+            columns: ["trip_instance_id"]
+            isOneToOne: false
+            referencedRelation: "trip_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trip_instances: {
         Row: {
           actual_attender_id: string | null
@@ -10512,6 +10815,7 @@ export type Database = {
           gps_tracking_id: string | null
           id: string
           instance_date: string
+          school_id: string | null
           status: string
           total_students_boarded: number | null
           total_students_dropped: number | null
@@ -10533,6 +10837,7 @@ export type Database = {
           gps_tracking_id?: string | null
           id?: string
           instance_date: string
+          school_id?: string | null
           status?: string
           total_students_boarded?: number | null
           total_students_dropped?: number | null
@@ -10554,6 +10859,7 @@ export type Database = {
           gps_tracking_id?: string | null
           id?: string
           instance_date?: string
+          school_id?: string | null
           status?: string
           total_students_boarded?: number | null
           total_students_dropped?: number | null
@@ -10588,6 +10894,79 @@ export type Database = {
             columns: ["trip_id"]
             isOneToOne: false
             referencedRelation: "transport_trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_location_logs: {
+        Row: {
+          accuracy_meters: number | null
+          altitude: number | null
+          created_at: string
+          driver_id: string | null
+          heading: number | null
+          id: string
+          latitude: number
+          longitude: number
+          recorded_at: string
+          school_id: string | null
+          source: string | null
+          speed_kmh: number | null
+          trip_instance_id: string | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          accuracy_meters?: number | null
+          altitude?: number | null
+          created_at?: string
+          driver_id?: string | null
+          heading?: number | null
+          id?: string
+          latitude: number
+          longitude: number
+          recorded_at?: string
+          school_id?: string | null
+          source?: string | null
+          speed_kmh?: number | null
+          trip_instance_id?: string | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          accuracy_meters?: number | null
+          altitude?: number | null
+          created_at?: string
+          driver_id?: string | null
+          heading?: number | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          recorded_at?: string
+          school_id?: string | null
+          source?: string | null
+          speed_kmh?: number | null
+          trip_instance_id?: string | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_location_logs_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_location_logs_trip_instance_id_fkey"
+            columns: ["trip_instance_id"]
+            isOneToOne: false
+            referencedRelation: "trip_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_location_logs_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]
