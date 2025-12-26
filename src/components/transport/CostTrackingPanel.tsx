@@ -45,7 +45,7 @@ export function CostTrackingPanel() {
       vendor_name: formData.vendor_name || undefined,
       invoice_number: formData.invoice_number || undefined,
       notes: formData.notes || undefined,
-      currency: 'USD',
+      currency: 'INR',
       metadata: {},
     });
     setFormData({
