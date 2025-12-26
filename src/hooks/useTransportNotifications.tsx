@@ -105,7 +105,15 @@ export const useTransportNotifications = (schoolId: string | null) => {
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
-    if (!schoolId) return;
+    if (!schoolId) {
+      // Stop loading spinner when no school context
+      setTemplates([]);
+      setLogs([]);
+      setGeofences([]);
+      setEmergencyContacts([]);
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
