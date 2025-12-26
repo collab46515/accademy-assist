@@ -97,9 +97,9 @@ export const TransportDashboard = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-12">
+        <TabsList className="flex flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="setup" className="gap-1"><Settings className="h-4 w-4" /> Setup</TabsTrigger>
+          <TabsTrigger value="setup" className="gap-1 bg-primary/10 font-semibold"><Settings className="h-4 w-4" /> Master Data</TabsTrigger>
           <TabsTrigger value="trip-planning" className="gap-1"><Route className="h-4 w-4" /> Trips</TabsTrigger>
           <TabsTrigger value="live-ops" className="gap-1"><Activity className="h-4 w-4" /> Live</TabsTrigger>
           <TabsTrigger value="comms" className="gap-1"><Bell className="h-4 w-4" /> Comms</TabsTrigger>
