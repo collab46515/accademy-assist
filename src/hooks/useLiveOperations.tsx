@@ -382,7 +382,13 @@ export const useLiveOperations = (schoolId: string | null) => {
 
   // Subscribe to real-time updates
   useEffect(() => {
-    if (!schoolId) return;
+    if (!schoolId) {
+      // Important: avoid infinite loading when the user has no school context yet.
+      setTripInstances([]);
+      setAlerts([]);
+      setLoading(false);
+      return;
+    }
 
     fetchTodaysInstances();
     fetchAlerts();
