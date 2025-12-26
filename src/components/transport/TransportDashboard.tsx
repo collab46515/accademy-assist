@@ -227,6 +227,54 @@ export const TransportDashboard = () => {
           )}
         </TabsContent>
 
+        <TabsContent value="setup" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Setup & Configuration
+              </CardTitle>
+              <CardDescription>
+                Manage contractors, holidays, compliance documents, and vehicle parts
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs value={setupSubTab} onValueChange={setSetupSubTab}>
+                <TabsList className="mb-6">
+                  <TabsTrigger value="contractors" className="gap-1">
+                    <Building2 className="h-4 w-4" /> Contractors
+                  </TabsTrigger>
+                  <TabsTrigger value="holidays" className="gap-1">
+                    <Calendar className="h-4 w-4" /> Holidays
+                  </TabsTrigger>
+                  <TabsTrigger value="compliance" className="gap-1">
+                    <FileCheck className="h-4 w-4" /> Compliance Docs
+                  </TabsTrigger>
+                  <TabsTrigger value="parts" className="gap-1">
+                    <Wrench className="h-4 w-4" /> Parts & Warranty
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="contractors">
+                  <ContractorsManager />
+                </TabsContent>
+
+                <TabsContent value="holidays">
+                  <HolidaysManager />
+                </TabsContent>
+
+                <TabsContent value="compliance">
+                  <VehicleComplianceManager />
+                </TabsContent>
+
+                <TabsContent value="parts">
+                  <VehiclePartsManager />
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="drivers">
           <DriversManager />
         </TabsContent>
