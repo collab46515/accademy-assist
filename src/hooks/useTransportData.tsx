@@ -172,7 +172,18 @@ export const useTransportData = () => {
 
   // Fetch all transport data
   const fetchTransportData = async () => {
-    if (!user) return;
+    if (!user) {
+      // If user isn't signed in yet (or signed out), don't block UI with an infinite spinner.
+      setDrivers([]);
+      setVehicles([]);
+      setRoutes([]);
+      setStops([]);
+      setStudentTransport([]);
+      setIncidents([]);
+      setUserSchoolId(null);
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
