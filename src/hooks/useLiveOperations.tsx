@@ -135,7 +135,10 @@ export const useLiveOperations = (schoolId: string | null) => {
   const [loading, setLoading] = useState(true);
 
   const fetchTodaysInstances = useCallback(async () => {
-    if (!schoolId) return;
+    if (!schoolId) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
