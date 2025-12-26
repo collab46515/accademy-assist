@@ -26,6 +26,7 @@ import { ContractorsManager } from './ContractorsManager';
 import { HolidaysManager } from './HolidaysManager';
 import { VehicleComplianceManager } from './VehicleComplianceManager';
 import { VehiclePartsManager } from './VehiclePartsManager';
+import { TripPlanningTab } from './TripPlanningTab';
 
 export const TransportDashboard = () => {
   const { drivers, vehicles, routes, incidents, studentTransport, loading } = useTransportData();
