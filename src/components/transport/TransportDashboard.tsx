@@ -1,23 +1,20 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import {
   Bus,
   Users,
-  MapPin,
   AlertTriangle,
-  Plus,
-  Car,
   Route,
   UserCheck,
-  Activity,
   Calendar,
   Clock,
-  Phone,
-  Shield
+  Shield,
+  Settings,
+  Building2,
+  FileCheck,
+  Wrench
 } from 'lucide-react';
 import { useTransportData } from '@/hooks/useTransportData';
 import { DriversManager } from './DriversManager';
@@ -25,10 +22,15 @@ import { VehiclesManager } from './VehiclesManager';
 import { RoutesManager } from './RoutesManager';
 import { IncidentsManager } from './IncidentsManager';
 import { StudentTransportManager } from './StudentTransportManager';
+import { ContractorsManager } from './ContractorsManager';
+import { HolidaysManager } from './HolidaysManager';
+import { VehicleComplianceManager } from './VehicleComplianceManager';
+import { VehiclePartsManager } from './VehiclePartsManager';
 
 export const TransportDashboard = () => {
   const { drivers, vehicles, routes, incidents, studentTransport, loading } = useTransportData();
   const [activeTab, setActiveTab] = useState('overview');
+  const [setupSubTab, setSetupSubTab] = useState('contractors');
 
   if (loading) {
     return (
@@ -87,8 +89,9 @@ export const TransportDashboard = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="setup" className="gap-1"><Settings className="h-4 w-4" /> Setup</TabsTrigger>
           <TabsTrigger value="drivers">Drivers</TabsTrigger>
           <TabsTrigger value="vehicles">Vehicles</TabsTrigger>
           <TabsTrigger value="routes">Routes</TabsTrigger>

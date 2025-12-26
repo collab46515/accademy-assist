@@ -2452,8 +2452,15 @@ export type Database = {
       }
       drivers: {
         Row: {
+          aadhar_document_url: string | null
+          aadhar_number: string | null
           address: string | null
+          background_check_date: string | null
+          background_check_document_url: string | null
+          background_check_status: string | null
           birth_date: string | null
+          blood_group: string | null
+          contractor_id: string | null
           created_at: string
           dbs_check_date: string | null
           dbs_expiry: string | null
@@ -2461,24 +2468,49 @@ export type Database = {
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
           employee_id: string
+          employee_type: string | null
+          employment_type: string | null
           first_aid_cert_date: string | null
           first_aid_expiry: string | null
           first_name: string
+          gender: string | null
           hire_date: string
+          hmv_permit_expiry: string | null
+          hmv_permit_number: string | null
           id: string
+          id_card_issued: boolean | null
+          id_card_number: string | null
           last_name: string
           license_expiry: string
           license_number: string
           license_type: string[]
+          marital_status: string | null
+          medical_certificate_url: string | null
+          medical_fitness_date: string | null
+          medical_fitness_expiry: string | null
           notes: string | null
+          permanent_address: string | null
           phone: string
+          photo_url: string | null
+          police_verification_date: string | null
+          police_verification_status: string | null
+          psv_badge_expiry: string | null
+          psv_badge_number: string | null
           school_id: string
           status: string
+          uniform_size: string | null
           updated_at: string
         }
         Insert: {
+          aadhar_document_url?: string | null
+          aadhar_number?: string | null
           address?: string | null
+          background_check_date?: string | null
+          background_check_document_url?: string | null
+          background_check_status?: string | null
           birth_date?: string | null
+          blood_group?: string | null
+          contractor_id?: string | null
           created_at?: string
           dbs_check_date?: string | null
           dbs_expiry?: string | null
@@ -2486,24 +2518,49 @@ export type Database = {
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           employee_id: string
+          employee_type?: string | null
+          employment_type?: string | null
           first_aid_cert_date?: string | null
           first_aid_expiry?: string | null
           first_name: string
+          gender?: string | null
           hire_date: string
+          hmv_permit_expiry?: string | null
+          hmv_permit_number?: string | null
           id?: string
+          id_card_issued?: boolean | null
+          id_card_number?: string | null
           last_name: string
           license_expiry: string
           license_number: string
           license_type?: string[]
+          marital_status?: string | null
+          medical_certificate_url?: string | null
+          medical_fitness_date?: string | null
+          medical_fitness_expiry?: string | null
           notes?: string | null
+          permanent_address?: string | null
           phone: string
+          photo_url?: string | null
+          police_verification_date?: string | null
+          police_verification_status?: string | null
+          psv_badge_expiry?: string | null
+          psv_badge_number?: string | null
           school_id: string
           status?: string
+          uniform_size?: string | null
           updated_at?: string
         }
         Update: {
+          aadhar_document_url?: string | null
+          aadhar_number?: string | null
           address?: string | null
+          background_check_date?: string | null
+          background_check_document_url?: string | null
+          background_check_status?: string | null
           birth_date?: string | null
+          blood_group?: string | null
+          contractor_id?: string | null
           created_at?: string
           dbs_check_date?: string | null
           dbs_expiry?: string | null
@@ -2511,22 +2568,48 @@ export type Database = {
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           employee_id?: string
+          employee_type?: string | null
+          employment_type?: string | null
           first_aid_cert_date?: string | null
           first_aid_expiry?: string | null
           first_name?: string
+          gender?: string | null
           hire_date?: string
+          hmv_permit_expiry?: string | null
+          hmv_permit_number?: string | null
           id?: string
+          id_card_issued?: boolean | null
+          id_card_number?: string | null
           last_name?: string
           license_expiry?: string
           license_number?: string
           license_type?: string[]
+          marital_status?: string | null
+          medical_certificate_url?: string | null
+          medical_fitness_date?: string | null
+          medical_fitness_expiry?: string | null
           notes?: string | null
+          permanent_address?: string | null
           phone?: string
+          photo_url?: string | null
+          police_verification_date?: string | null
+          police_verification_status?: string | null
+          psv_badge_expiry?: string | null
+          psv_badge_number?: string | null
           school_id?: string
           status?: string
+          uniform_size?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "drivers_contractor_id_fkey"
+            columns: ["contractor_id"]
+            isOneToOne: false
+            referencedRelation: "transport_contractors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       employee_benefits: {
         Row: {
@@ -9643,6 +9726,118 @@ export type Database = {
           },
         ]
       }
+      transport_contractors: {
+        Row: {
+          bank_account_name: string | null
+          bank_account_number: string | null
+          bank_ifsc_code: string | null
+          contact_email: string | null
+          contact_person_name: string | null
+          contact_phone: string | null
+          contractor_name: string
+          created_at: string
+          gst_number: string | null
+          id: string
+          notes: string | null
+          office_address: string | null
+          pan_number: string | null
+          school_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          bank_account_name?: string | null
+          bank_account_number?: string | null
+          bank_ifsc_code?: string | null
+          contact_email?: string | null
+          contact_person_name?: string | null
+          contact_phone?: string | null
+          contractor_name: string
+          created_at?: string
+          gst_number?: string | null
+          id?: string
+          notes?: string | null
+          office_address?: string | null
+          pan_number?: string | null
+          school_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          bank_account_name?: string | null
+          bank_account_number?: string | null
+          bank_ifsc_code?: string | null
+          contact_email?: string | null
+          contact_person_name?: string | null
+          contact_phone?: string | null
+          contractor_name?: string
+          created_at?: string
+          gst_number?: string | null
+          id?: string
+          notes?: string | null
+          office_address?: string | null
+          pan_number?: string | null
+          school_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_contractors_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transport_holidays: {
+        Row: {
+          affects_transport: boolean | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          holiday_date: string
+          holiday_name: string
+          holiday_type: string
+          id: string
+          school_id: string
+          updated_at: string
+        }
+        Insert: {
+          affects_transport?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          holiday_date: string
+          holiday_name: string
+          holiday_type: string
+          id?: string
+          school_id: string
+          updated_at?: string
+        }
+        Update: {
+          affects_transport?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          holiday_date?: string
+          holiday_name?: string
+          holiday_type?: string
+          id?: string
+          school_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_holidays_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transport_incidents: {
         Row: {
           authorities_notified: boolean | null
@@ -9984,65 +10179,358 @@ export type Database = {
           },
         ]
       }
+      vehicle_compliance_docs: {
+        Row: {
+          created_at: string
+          document_number: string | null
+          document_type: string
+          document_url: string | null
+          expiry_date: string | null
+          id: string
+          insurance_policy_number: string | null
+          insurance_premium: number | null
+          insurance_provider: string | null
+          issue_date: string | null
+          issuing_authority: string | null
+          notes: string | null
+          permit_states: string[] | null
+          permit_type: string | null
+          reminder_sent: boolean | null
+          status: string
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_number?: string | null
+          document_type: string
+          document_url?: string | null
+          expiry_date?: string | null
+          id?: string
+          insurance_policy_number?: string | null
+          insurance_premium?: number | null
+          insurance_provider?: string | null
+          issue_date?: string | null
+          issuing_authority?: string | null
+          notes?: string | null
+          permit_states?: string[] | null
+          permit_type?: string | null
+          reminder_sent?: boolean | null
+          status?: string
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          document_number?: string | null
+          document_type?: string
+          document_url?: string | null
+          expiry_date?: string | null
+          id?: string
+          insurance_policy_number?: string | null
+          insurance_premium?: number | null
+          insurance_provider?: string | null
+          issue_date?: string | null
+          issuing_authority?: string | null
+          notes?: string | null
+          permit_states?: string[] | null
+          permit_type?: string | null
+          reminder_sent?: boolean | null
+          status?: string
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_compliance_docs_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_contracts: {
+        Row: {
+          contract_document_url: string | null
+          contract_end_date: string
+          contract_number: string | null
+          contract_start_date: string
+          contractor_id: string
+          created_at: string
+          id: string
+          payment_amount: number
+          payment_frequency: string | null
+          payment_type: string
+          school_id: string
+          status: string
+          terms_and_conditions: string | null
+          updated_at: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          contract_document_url?: string | null
+          contract_end_date: string
+          contract_number?: string | null
+          contract_start_date: string
+          contractor_id: string
+          created_at?: string
+          id?: string
+          payment_amount: number
+          payment_frequency?: string | null
+          payment_type: string
+          school_id: string
+          status?: string
+          terms_and_conditions?: string | null
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          contract_document_url?: string | null
+          contract_end_date?: string
+          contract_number?: string | null
+          contract_start_date?: string
+          contractor_id?: string
+          created_at?: string
+          id?: string
+          payment_amount?: number
+          payment_frequency?: string | null
+          payment_type?: string
+          school_id?: string
+          status?: string
+          terms_and_conditions?: string | null
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_contracts_contractor_id_fkey"
+            columns: ["contractor_id"]
+            isOneToOne: false
+            referencedRelation: "transport_contractors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_contracts_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_contracts_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_parts: {
+        Row: {
+          created_at: string
+          expected_replacement_date: string | null
+          id: string
+          installation_date: string
+          installation_odometer: number | null
+          manufacturer: string | null
+          notes: string | null
+          part_category: string | null
+          part_name: string
+          part_serial_number: string | null
+          replaced_part_id: string | null
+          replacement_cost: number | null
+          standard_lifetime_kms: number | null
+          standard_lifetime_months: number | null
+          status: string
+          updated_at: string
+          vehicle_id: string
+          warranty_expiry_date: string | null
+          warranty_kms: number | null
+          warranty_months: number | null
+          warranty_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          expected_replacement_date?: string | null
+          id?: string
+          installation_date: string
+          installation_odometer?: number | null
+          manufacturer?: string | null
+          notes?: string | null
+          part_category?: string | null
+          part_name: string
+          part_serial_number?: string | null
+          replaced_part_id?: string | null
+          replacement_cost?: number | null
+          standard_lifetime_kms?: number | null
+          standard_lifetime_months?: number | null
+          status?: string
+          updated_at?: string
+          vehicle_id: string
+          warranty_expiry_date?: string | null
+          warranty_kms?: number | null
+          warranty_months?: number | null
+          warranty_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          expected_replacement_date?: string | null
+          id?: string
+          installation_date?: string
+          installation_odometer?: number | null
+          manufacturer?: string | null
+          notes?: string | null
+          part_category?: string | null
+          part_name?: string
+          part_serial_number?: string | null
+          replaced_part_id?: string | null
+          replacement_cost?: number | null
+          standard_lifetime_kms?: number | null
+          standard_lifetime_months?: number | null
+          status?: string
+          updated_at?: string
+          vehicle_id?: string
+          warranty_expiry_date?: string | null
+          warranty_kms?: number | null
+          warranty_months?: number | null
+          warranty_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_parts_replaced_part_id_fkey"
+            columns: ["replaced_part_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_parts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_parts_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicles: {
         Row: {
           assistant_id: string | null
           capacity: number
+          chassis_number: string | null
+          color: string | null
+          contractor_id: string | null
           created_at: string
+          current_mileage_kmpl: number | null
+          current_odometer: number | null
           driver_id: string | null
+          engine_number: string | null
           fuel_type: string | null
+          gps_device_id: string | null
+          gps_device_status: string | null
           id: string
           insurance_expiry: string | null
           last_maintenance: string | null
+          make: string | null
           make_model: string | null
+          manufacturer_mileage_kmpl: number | null
+          model: string | null
           next_maintenance: string | null
+          ownership_type: string | null
+          purchase_date: string | null
+          purchase_price: number | null
           registration_number: string | null
+          retirement_date: string | null
           school_id: string
           status: string
+          tank_capacity_litres: number | null
           updated_at: string
           vehicle_number: string
           vehicle_type: string
+          virtual_fuel_litres: number | null
           year_manufactured: number | null
         }
         Insert: {
           assistant_id?: string | null
           capacity: number
+          chassis_number?: string | null
+          color?: string | null
+          contractor_id?: string | null
           created_at?: string
+          current_mileage_kmpl?: number | null
+          current_odometer?: number | null
           driver_id?: string | null
+          engine_number?: string | null
           fuel_type?: string | null
+          gps_device_id?: string | null
+          gps_device_status?: string | null
           id?: string
           insurance_expiry?: string | null
           last_maintenance?: string | null
+          make?: string | null
           make_model?: string | null
+          manufacturer_mileage_kmpl?: number | null
+          model?: string | null
           next_maintenance?: string | null
+          ownership_type?: string | null
+          purchase_date?: string | null
+          purchase_price?: number | null
           registration_number?: string | null
+          retirement_date?: string | null
           school_id: string
           status?: string
+          tank_capacity_litres?: number | null
           updated_at?: string
           vehicle_number: string
           vehicle_type?: string
+          virtual_fuel_litres?: number | null
           year_manufactured?: number | null
         }
         Update: {
           assistant_id?: string | null
           capacity?: number
+          chassis_number?: string | null
+          color?: string | null
+          contractor_id?: string | null
           created_at?: string
+          current_mileage_kmpl?: number | null
+          current_odometer?: number | null
           driver_id?: string | null
+          engine_number?: string | null
           fuel_type?: string | null
+          gps_device_id?: string | null
+          gps_device_status?: string | null
           id?: string
           insurance_expiry?: string | null
           last_maintenance?: string | null
+          make?: string | null
           make_model?: string | null
+          manufacturer_mileage_kmpl?: number | null
+          model?: string | null
           next_maintenance?: string | null
+          ownership_type?: string | null
+          purchase_date?: string | null
+          purchase_price?: number | null
           registration_number?: string | null
+          retirement_date?: string | null
           school_id?: string
           status?: string
+          tank_capacity_litres?: number | null
           updated_at?: string
           vehicle_number?: string
           vehicle_type?: string
+          virtual_fuel_litres?: number | null
           year_manufactured?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_contractor_id_fkey"
+            columns: ["contractor_id"]
+            isOneToOne: false
+            referencedRelation: "transport_contractors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vendors: {
         Row: {
