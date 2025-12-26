@@ -2538,6 +2538,98 @@ export type Database = {
           },
         ]
       }
+      driver_performance: {
+        Row: {
+          checkin_compliance_rate: number | null
+          checkins_completed: number | null
+          checkins_expected: number | null
+          complaints_received: number | null
+          completed_trips: number | null
+          created_at: string | null
+          driver_id: string | null
+          fuel_efficiency_score: number | null
+          id: string
+          incidents_reported: number | null
+          late_arrivals: number | null
+          on_time_arrivals: number | null
+          overall_rating: number | null
+          period_end: string
+          period_start: string
+          punctuality_score: number | null
+          rating_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          safety_score: number | null
+          school_id: string
+          total_distance_km: number | null
+          total_fuel_used: number | null
+          total_trips: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          checkin_compliance_rate?: number | null
+          checkins_completed?: number | null
+          checkins_expected?: number | null
+          complaints_received?: number | null
+          completed_trips?: number | null
+          created_at?: string | null
+          driver_id?: string | null
+          fuel_efficiency_score?: number | null
+          id?: string
+          incidents_reported?: number | null
+          late_arrivals?: number | null
+          on_time_arrivals?: number | null
+          overall_rating?: number | null
+          period_end: string
+          period_start: string
+          punctuality_score?: number | null
+          rating_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          safety_score?: number | null
+          school_id: string
+          total_distance_km?: number | null
+          total_fuel_used?: number | null
+          total_trips?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          checkin_compliance_rate?: number | null
+          checkins_completed?: number | null
+          checkins_expected?: number | null
+          complaints_received?: number | null
+          completed_trips?: number | null
+          created_at?: string | null
+          driver_id?: string | null
+          fuel_efficiency_score?: number | null
+          id?: string
+          incidents_reported?: number | null
+          late_arrivals?: number | null
+          on_time_arrivals?: number | null
+          overall_rating?: number | null
+          period_end?: string
+          period_start?: string
+          punctuality_score?: number | null
+          rating_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          safety_score?: number | null
+          school_id?: string
+          total_distance_km?: number | null
+          total_fuel_used?: number | null
+          total_trips?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_performance_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       drivers: {
         Row: {
           aadhar_document_url: string | null
@@ -8340,6 +8432,81 @@ export type Database = {
         }
         Relationships: []
       }
+      route_efficiency: {
+        Row: {
+          actual_distance_km: number | null
+          actual_duration_minutes: number | null
+          analysis_date: string
+          assigned_students: number | null
+          average_riders: number | null
+          average_stop_duration_seconds: number | null
+          cost_per_student_per_trip: number | null
+          cost_per_trip: number | null
+          created_at: string | null
+          distance_variance_percentage: number | null
+          duration_variance_percentage: number | null
+          efficiency_score: number | null
+          id: string
+          planned_distance_km: number | null
+          planned_duration_minutes: number | null
+          recommendations: Json | null
+          ridership_rate: number | null
+          route_id: string | null
+          school_id: string
+          stops_with_delays: number | null
+          total_stops: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          actual_distance_km?: number | null
+          actual_duration_minutes?: number | null
+          analysis_date: string
+          assigned_students?: number | null
+          average_riders?: number | null
+          average_stop_duration_seconds?: number | null
+          cost_per_student_per_trip?: number | null
+          cost_per_trip?: number | null
+          created_at?: string | null
+          distance_variance_percentage?: number | null
+          duration_variance_percentage?: number | null
+          efficiency_score?: number | null
+          id?: string
+          planned_distance_km?: number | null
+          planned_duration_minutes?: number | null
+          recommendations?: Json | null
+          ridership_rate?: number | null
+          route_id?: string | null
+          school_id: string
+          stops_with_delays?: number | null
+          total_stops?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          actual_distance_km?: number | null
+          actual_duration_minutes?: number | null
+          analysis_date?: string
+          assigned_students?: number | null
+          average_riders?: number | null
+          average_stop_duration_seconds?: number | null
+          cost_per_student_per_trip?: number | null
+          cost_per_trip?: number | null
+          created_at?: string | null
+          distance_variance_percentage?: number | null
+          duration_variance_percentage?: number | null
+          efficiency_score?: number | null
+          id?: string
+          planned_distance_km?: number | null
+          planned_duration_minutes?: number | null
+          recommendations?: Json | null
+          ridership_rate?: number | null
+          route_id?: string | null
+          school_id?: string
+          stops_with_delays?: number | null
+          total_stops?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       route_profiles: {
         Row: {
           apply_school_holidays: boolean | null
@@ -10126,6 +10293,93 @@ export type Database = {
           },
         ]
       }
+      transport_analytics: {
+        Row: {
+          average_boarding_time_seconds: number | null
+          average_trip_duration_minutes: number | null
+          cancelled_trips: number | null
+          complaints_count: number | null
+          completed_trips: number | null
+          cost_per_km: number | null
+          cost_per_student: number | null
+          created_at: string | null
+          delayed_trips: number | null
+          fuel_efficiency_km_per_litre: number | null
+          id: string
+          incidents_count: number | null
+          metadata: Json | null
+          no_shows: number | null
+          on_time_percentage: number | null
+          report_date: string
+          report_type: string
+          route_id: string | null
+          school_id: string
+          total_cost: number | null
+          total_delay_minutes: number | null
+          total_distance_km: number | null
+          total_fuel_litres: number | null
+          total_students_transported: number | null
+          total_trips: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          average_boarding_time_seconds?: number | null
+          average_trip_duration_minutes?: number | null
+          cancelled_trips?: number | null
+          complaints_count?: number | null
+          completed_trips?: number | null
+          cost_per_km?: number | null
+          cost_per_student?: number | null
+          created_at?: string | null
+          delayed_trips?: number | null
+          fuel_efficiency_km_per_litre?: number | null
+          id?: string
+          incidents_count?: number | null
+          metadata?: Json | null
+          no_shows?: number | null
+          on_time_percentage?: number | null
+          report_date: string
+          report_type?: string
+          route_id?: string | null
+          school_id: string
+          total_cost?: number | null
+          total_delay_minutes?: number | null
+          total_distance_km?: number | null
+          total_fuel_litres?: number | null
+          total_students_transported?: number | null
+          total_trips?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          average_boarding_time_seconds?: number | null
+          average_trip_duration_minutes?: number | null
+          cancelled_trips?: number | null
+          complaints_count?: number | null
+          completed_trips?: number | null
+          cost_per_km?: number | null
+          cost_per_student?: number | null
+          created_at?: string | null
+          delayed_trips?: number | null
+          fuel_efficiency_km_per_litre?: number | null
+          id?: string
+          incidents_count?: number | null
+          metadata?: Json | null
+          no_shows?: number | null
+          on_time_percentage?: number | null
+          report_date?: string
+          report_type?: string
+          route_id?: string | null
+          school_id?: string
+          total_cost?: number | null
+          total_delay_minutes?: number | null
+          total_distance_km?: number | null
+          total_fuel_litres?: number | null
+          total_students_transported?: number | null
+          total_trips?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       transport_attendance: {
         Row: {
           attendance_date: string
@@ -10283,6 +10537,87 @@ export type Database = {
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transport_costs: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          cost_category: string
+          cost_date: string
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          driver_id: string | null
+          id: string
+          invoice_number: string | null
+          metadata: Json | null
+          notes: string | null
+          receipt_url: string | null
+          route_id: string | null
+          school_id: string
+          updated_at: string | null
+          vehicle_id: string | null
+          vendor_name: string | null
+        }
+        Insert: {
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          cost_category: string
+          cost_date: string
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          driver_id?: string | null
+          id?: string
+          invoice_number?: string | null
+          metadata?: Json | null
+          notes?: string | null
+          receipt_url?: string | null
+          route_id?: string | null
+          school_id: string
+          updated_at?: string | null
+          vehicle_id?: string | null
+          vendor_name?: string | null
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          cost_category?: string
+          cost_date?: string
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          driver_id?: string | null
+          id?: string
+          invoice_number?: string | null
+          metadata?: Json | null
+          notes?: string | null
+          receipt_url?: string | null
+          route_id?: string | null
+          school_id?: string
+          updated_at?: string | null
+          vehicle_id?: string | null
+          vendor_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_costs_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_costs_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]
@@ -11669,6 +12004,74 @@ export type Database = {
           },
           {
             foreignKeyName: "vehicle_parts_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_utilization: {
+        Row: {
+          average_occupancy: number | null
+          breakdowns_count: number | null
+          created_at: string | null
+          fuel_consumed_litres: number | null
+          fuel_cost: number | null
+          id: string
+          maintenance_cost: number | null
+          occupancy_rate: number | null
+          report_date: string
+          school_id: string
+          total_capacity: number | null
+          total_distance_km: number | null
+          total_hours_used: number | null
+          trips_count: number | null
+          updated_at: string | null
+          utilization_percentage: number | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          average_occupancy?: number | null
+          breakdowns_count?: number | null
+          created_at?: string | null
+          fuel_consumed_litres?: number | null
+          fuel_cost?: number | null
+          id?: string
+          maintenance_cost?: number | null
+          occupancy_rate?: number | null
+          report_date: string
+          school_id: string
+          total_capacity?: number | null
+          total_distance_km?: number | null
+          total_hours_used?: number | null
+          trips_count?: number | null
+          updated_at?: string | null
+          utilization_percentage?: number | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          average_occupancy?: number | null
+          breakdowns_count?: number | null
+          created_at?: string | null
+          fuel_consumed_litres?: number | null
+          fuel_cost?: number | null
+          id?: string
+          maintenance_cost?: number | null
+          occupancy_rate?: number | null
+          report_date?: string
+          school_id?: string
+          total_capacity?: number | null
+          total_distance_km?: number | null
+          total_hours_used?: number | null
+          trips_count?: number | null
+          updated_at?: string | null
+          utilization_percentage?: number | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_utilization_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
