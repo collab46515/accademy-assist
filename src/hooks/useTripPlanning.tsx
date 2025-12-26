@@ -17,7 +17,8 @@ export interface RouteProfile {
   days_of_week: number[];
   trip_category: string;
   student_pool_type: string;
-  student_pool_criteria: Record<string, any>;
+  student_pool_criteria: any;
+  custom_holiday_ids?: string[];
   apply_school_holidays: boolean;
   requires_approval: boolean;
   approved_by?: string;

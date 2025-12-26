@@ -90,9 +90,10 @@ export const TransportDashboard = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="setup" className="gap-1"><Settings className="h-4 w-4" /> Setup</TabsTrigger>
+          <TabsTrigger value="trip-planning" className="gap-1"><Route className="h-4 w-4" /> Trip Planning</TabsTrigger>
           <TabsTrigger value="drivers">Drivers</TabsTrigger>
           <TabsTrigger value="vehicles">Vehicles</TabsTrigger>
           <TabsTrigger value="routes">Routes</TabsTrigger>
@@ -274,6 +275,10 @@ export const TransportDashboard = () => {
               </Tabs>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="trip-planning">
+          <TripPlanningTab />
         </TabsContent>
 
         <TabsContent value="drivers">
