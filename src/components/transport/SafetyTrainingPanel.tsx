@@ -11,14 +11,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { GraduationCap, Plus, Edit, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { useTransportData } from '@/hooks/useTransportData';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 export const SafetyTrainingPanel = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [editingTraining, setEditingTraining] = useState<any>(null);
-  const { data: trainings, isLoading } = useSafetyTraining();
-  const { data: drivers } = useDrivers();
-  const createTraining = useCreateTraining();
-  const updateTraining = useUpdateTraining();
+  const { drivers } = useTransportData();
+  const { toast } = useToast();
+  
+  const [trainings, setTrainings] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
     driver_id: '',
@@ -30,34 +30,27 @@ export const SafetyTrainingPanel = () => {
     status: 'completed',
     score: '',
     passing_score: '',
-    certificate_number: '',
-    expiry_date: '',
     notes: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const driver = drivers.find(d => d.id === formData.driver_id);
     const score = formData.score ? parseFloat(formData.score) : null;
     const passingScore = formData.passing_score ? parseFloat(formData.passing_score) : null;
     
-    const payload = {
+    const newTraining = {
+      id: crypto.randomUUID(),
       ...formData,
-      driver_id: formData.driver_id || null,
-      duration_hours: formData.duration_hours ? parseFloat(formData.duration_hours) : null,
+      driver_name: driver ? `${driver.first_name} ${driver.last_name}` : 'Unknown',
       score,
       passing_score: passingScore,
       passed: score !== null && passingScore !== null ? score >= passingScore : null,
-      expiry_date: formData.expiry_date || null,
-      certificate_issued: !!formData.certificate_number,
     };
     
-    if (editingTraining) {
-      await updateTraining.mutateAsync({ id: editingTraining.id, ...payload });
-    } else {
-      await createTraining.mutateAsync(payload);
-    }
+    setTrainings([newTraining, ...trainings]);
+    toast({ title: 'Training record added successfully' });
     setIsOpen(false);
-    setEditingTraining(null);
     setFormData({
       driver_id: '',
       training_type: 'induction',
@@ -68,29 +61,8 @@ export const SafetyTrainingPanel = () => {
       status: 'completed',
       score: '',
       passing_score: '',
-      certificate_number: '',
-      expiry_date: '',
       notes: '',
     });
-  };
-
-  const handleEdit = (training: any) => {
-    setEditingTraining(training);
-    setFormData({
-      driver_id: training.driver_id || '',
-      training_type: training.training_type,
-      training_name: training.training_name,
-      training_provider: training.training_provider || '',
-      training_date: training.training_date,
-      duration_hours: training.duration_hours?.toString() || '',
-      status: training.status,
-      score: training.score?.toString() || '',
-      passing_score: training.passing_score?.toString() || '',
-      certificate_number: training.certificate_number || '',
-      expiry_date: training.expiry_date || '',
-      notes: training.notes || '',
-    });
-    setIsOpen(true);
   };
 
   const getStatusBadge = (training: any) => {
@@ -103,8 +75,6 @@ export const SafetyTrainingPanel = () => {
         return <Badge className="bg-blue-500">In Progress</Badge>;
       case 'scheduled':
         return <Badge className="bg-yellow-500">Scheduled</Badge>;
-      case 'failed':
-        return <Badge className="bg-red-500">Failed</Badge>;
       default:
         return <Badge variant="outline">{training.status}</Badge>;
     }
@@ -121,10 +91,10 @@ export const SafetyTrainingPanel = () => {
   };
 
   const stats = {
-    total: trainings?.length || 0,
-    completed: trainings?.filter((t: any) => t.status === 'completed').length || 0,
-    passed: trainings?.filter((t: any) => t.passed === true).length || 0,
-    scheduled: trainings?.filter((t: any) => t.status === 'scheduled').length || 0,
+    total: trainings.length,
+    completed: trainings.filter((t: any) => t.status === 'completed').length,
+    passed: trainings.filter((t: any) => t.passed === true).length,
+    scheduled: trainings.filter((t: any) => t.status === 'scheduled').length,
   };
 
   return (
@@ -179,32 +149,13 @@ export const SafetyTrainingPanel = () => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Safety Training Records</CardTitle>
-          <Dialog open={isOpen} onOpenChange={(open) => {
-            setIsOpen(open);
-            if (!open) {
-              setEditingTraining(null);
-              setFormData({
-                driver_id: '',
-                training_type: 'induction',
-                training_name: '',
-                training_provider: '',
-                training_date: '',
-                duration_hours: '',
-                status: 'completed',
-                score: '',
-                passing_score: '',
-                certificate_number: '',
-                expiry_date: '',
-                notes: '',
-              });
-            }
-          }}>
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
               <Button><Plus className="h-4 w-4 mr-2" />Add Training</Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>{editingTraining ? 'Edit Training' : 'Add Training Record'}</DialogTitle>
+                <DialogTitle>Add Training Record</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -275,17 +226,8 @@ export const SafetyTrainingPanel = () => {
                         <SelectItem value="scheduled">Scheduled</SelectItem>
                         <SelectItem value="in_progress">In Progress</SelectItem>
                         <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="failed">Failed</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
-                  <div>
-                    <Label>Expiry Date</Label>
-                    <Input
-                      type="date"
-                      value={formData.expiry_date}
-                      onChange={(e) => setFormData({ ...formData, expiry_date: e.target.value })}
-                    />
                   </div>
                   <div>
                     <Label>Score</Label>
@@ -295,24 +237,6 @@ export const SafetyTrainingPanel = () => {
                       value={formData.score}
                       onChange={(e) => setFormData({ ...formData, score: e.target.value })}
                       placeholder="0.0"
-                    />
-                  </div>
-                  <div>
-                    <Label>Passing Score</Label>
-                    <Input
-                      type="number"
-                      step="0.1"
-                      value={formData.passing_score}
-                      onChange={(e) => setFormData({ ...formData, passing_score: e.target.value })}
-                      placeholder="0.0"
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <Label>Certificate Number</Label>
-                    <Input
-                      value={formData.certificate_number}
-                      onChange={(e) => setFormData({ ...formData, certificate_number: e.target.value })}
-                      placeholder="If certificate was issued"
                     />
                   </div>
                 </div>
@@ -326,71 +250,57 @@ export const SafetyTrainingPanel = () => {
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-                  <Button type="submit" disabled={createTraining.isPending || updateTraining.isPending}>
-                    {editingTraining ? 'Update' : 'Add'} Training
-                  </Button>
+                  <Button type="submit">Add Training</Button>
                 </div>
               </form>
             </DialogContent>
           </Dialog>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <p>Loading training records...</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Driver</TableHead>
-                  <TableHead>Training</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Duration</TableHead>
-                  <TableHead>Score</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Driver</TableHead>
+                <TableHead>Training</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Duration</TableHead>
+                <TableHead>Score</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {trainings.map((training: any) => (
+                <TableRow key={training.id}>
+                  <TableCell>{training.driver_name || '-'}</TableCell>
+                  <TableCell className="font-medium">{training.training_name}</TableCell>
+                  <TableCell>
+                    <Badge className={getTypeColor(training.training_type)}>
+                      {training.training_type}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{training.training_date ? format(new Date(training.training_date), 'MMM dd, yyyy') : '-'}</TableCell>
+                  <TableCell>{training.duration_hours ? `${training.duration_hours}h` : '-'}</TableCell>
+                  <TableCell>
+                    {training.score !== null ? (
+                      <span>
+                        {training.score}
+                        {training.passing_score && <span className="text-muted-foreground">/{training.passing_score}</span>}
+                      </span>
+                    ) : '-'}
+                  </TableCell>
+                  <TableCell>{getStatusBadge(training)}</TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {trainings?.map((training: any) => (
-                  <TableRow key={training.id}>
-                    <TableCell>
-                      {training.drivers ? `${training.drivers.first_name} ${training.drivers.last_name}` : '-'}
-                    </TableCell>
-                    <TableCell className="font-medium">{training.training_name}</TableCell>
-                    <TableCell>
-                      <Badge className={getTypeColor(training.training_type)}>
-                        {training.training_type}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{format(new Date(training.training_date), 'MMM dd, yyyy')}</TableCell>
-                    <TableCell>{training.duration_hours ? `${training.duration_hours}h` : '-'}</TableCell>
-                    <TableCell>
-                      {training.score !== null ? (
-                        <span>
-                          {training.score}
-                          {training.passing_score && <span className="text-muted-foreground">/{training.passing_score}</span>}
-                        </span>
-                      ) : '-'}
-                    </TableCell>
-                    <TableCell>{getStatusBadge(training)}</TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm" onClick={() => handleEdit(training)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {(!trainings || trainings.length === 0) && (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                      No training records
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          )}
+              ))}
+              {trainings.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                    No training records
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>

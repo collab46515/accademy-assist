@@ -11,57 +11,50 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Car, Plus, Eye, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { useTransportData } from '@/hooks/useTransportData';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 export const VehicleInspectionsPanel = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedInspection, setSelectedInspection] = useState<any>(null);
-  const { data: inspections, isLoading } = useVehicleInspections();
-  const { data: vehicles } = useVehicles();
-  const createInspection = useCreateInspection();
-  const updateInspection = useUpdateInspection();
+  const { vehicles } = useTransportData();
+  const { toast } = useToast();
+  
+  const [inspections, setInspections] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
     vehicle_id: '',
     inspection_type: 'daily',
     inspection_date: new Date().toISOString().slice(0, 10),
-    next_inspection_date: '',
     inspector_name: '',
     inspector_type: 'internal',
     overall_result: 'pass',
     odometer_reading: '',
     defects_found: '',
-    repairs_required: '',
-    estimated_repair_cost: '',
-    certificate_number: '',
     notes: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = {
+    const vehicle = vehicles.find(v => v.id === formData.vehicle_id);
+    const newInspection = {
+      id: crypto.randomUUID(),
       ...formData,
+      vehicle_reg: vehicle?.registration_number || 'Unknown',
       odometer_reading: formData.odometer_reading ? parseInt(formData.odometer_reading) : null,
-      estimated_repair_cost: formData.estimated_repair_cost ? parseFloat(formData.estimated_repair_cost) : null,
-      next_inspection_date: formData.next_inspection_date || null,
-      defects_found: formData.defects_found ? formData.defects_found.split(',').map(s => s.trim()) : null,
-      repairs_required: formData.repairs_required ? formData.repairs_required.split(',').map(s => s.trim()) : null,
+      defects_found: formData.defects_found ? formData.defects_found.split(',').map(s => s.trim()) : [],
     };
-    
-    await createInspection.mutateAsync(payload);
+    setInspections([newInspection, ...inspections]);
+    toast({ title: 'Inspection recorded successfully' });
     setIsOpen(false);
     setFormData({
       vehicle_id: '',
       inspection_type: 'daily',
       inspection_date: new Date().toISOString().slice(0, 10),
-      next_inspection_date: '',
       inspector_name: '',
       inspector_type: 'internal',
       overall_result: 'pass',
       odometer_reading: '',
       defects_found: '',
-      repairs_required: '',
-      estimated_repair_cost: '',
-      certificate_number: '',
       notes: '',
     });
   };
@@ -87,10 +80,10 @@ export const VehicleInspectionsPanel = () => {
   };
 
   const stats = {
-    total: inspections?.length || 0,
-    passed: inspections?.filter((i: any) => i.overall_result === 'pass').length || 0,
-    failed: inspections?.filter((i: any) => i.overall_result === 'fail').length || 0,
-    pending: inspections?.filter((i: any) => !i.repairs_completed && i.overall_result !== 'pass').length || 0,
+    total: inspections.length,
+    passed: inspections.filter((i: any) => i.overall_result === 'pass').length,
+    failed: inspections.filter((i: any) => i.overall_result === 'fail').length,
+    pending: inspections.filter((i: any) => i.overall_result === 'conditional').length,
   };
 
   return (
@@ -135,7 +128,7 @@ export const VehicleInspectionsPanel = () => {
               <AlertTriangle className="h-8 w-8 text-orange-500" />
               <div>
                 <p className="text-2xl font-bold">{stats.pending}</p>
-                <p className="text-sm text-muted-foreground">Pending Repairs</p>
+                <p className="text-sm text-muted-foreground">Conditional</p>
               </div>
             </div>
           </CardContent>
@@ -189,14 +182,6 @@ export const VehicleInspectionsPanel = () => {
                     />
                   </div>
                   <div>
-                    <Label>Next Inspection Date</Label>
-                    <Input
-                      type="date"
-                      value={formData.next_inspection_date}
-                      onChange={(e) => setFormData({ ...formData, next_inspection_date: e.target.value })}
-                    />
-                  </div>
-                  <div>
                     <Label>Inspector Name *</Label>
                     <Input
                       value={formData.inspector_name}
@@ -204,17 +189,6 @@ export const VehicleInspectionsPanel = () => {
                       placeholder="Name of inspector"
                       required
                     />
-                  </div>
-                  <div>
-                    <Label>Inspector Type</Label>
-                    <Select value={formData.inspector_type} onValueChange={(v) => setFormData({ ...formData, inspector_type: v })}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="internal">Internal</SelectItem>
-                        <SelectItem value="external">External</SelectItem>
-                        <SelectItem value="government">Government</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </div>
                   <div>
                     <Label>Overall Result *</Label>
@@ -236,24 +210,6 @@ export const VehicleInspectionsPanel = () => {
                       placeholder="Current mileage"
                     />
                   </div>
-                  <div>
-                    <Label>Certificate Number</Label>
-                    <Input
-                      value={formData.certificate_number}
-                      onChange={(e) => setFormData({ ...formData, certificate_number: e.target.value })}
-                      placeholder="If applicable"
-                    />
-                  </div>
-                  <div>
-                    <Label>Estimated Repair Cost</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={formData.estimated_repair_cost}
-                      onChange={(e) => setFormData({ ...formData, estimated_repair_cost: e.target.value })}
-                      placeholder="0.00"
-                    />
-                  </div>
                 </div>
                 <div>
                   <Label>Defects Found</Label>
@@ -261,14 +217,6 @@ export const VehicleInspectionsPanel = () => {
                     value={formData.defects_found}
                     onChange={(e) => setFormData({ ...formData, defects_found: e.target.value })}
                     placeholder="List defects separated by commas"
-                  />
-                </div>
-                <div>
-                  <Label>Repairs Required</Label>
-                  <Textarea
-                    value={formData.repairs_required}
-                    onChange={(e) => setFormData({ ...formData, repairs_required: e.target.value })}
-                    placeholder="List repairs needed separated by commas"
                   />
                 </div>
                 <div>
@@ -281,68 +229,61 @@ export const VehicleInspectionsPanel = () => {
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-                  <Button type="submit" disabled={createInspection.isPending}>Record Inspection</Button>
+                  <Button type="submit">Record Inspection</Button>
                 </div>
               </form>
             </DialogContent>
           </Dialog>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <p>Loading inspections...</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Vehicle</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Inspector</TableHead>
-                  <TableHead>Odometer</TableHead>
-                  <TableHead>Result</TableHead>
-                  <TableHead>Actions</TableHead>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Vehicle</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Inspector</TableHead>
+                <TableHead>Odometer</TableHead>
+                <TableHead>Result</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {inspections.map((inspection: any) => (
+                <TableRow key={inspection.id}>
+                  <TableCell>{inspection.vehicle_reg}</TableCell>
+                  <TableCell>
+                    <Badge className={getTypeColor(inspection.inspection_type)}>
+                      {inspection.inspection_type}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{format(new Date(inspection.inspection_date), 'MMM dd, yyyy')}</TableCell>
+                  <TableCell>{inspection.inspector_name}</TableCell>
+                  <TableCell>{inspection.odometer_reading?.toLocaleString() || '-'}</TableCell>
+                  <TableCell>{getResultBadge(inspection.overall_result)}</TableCell>
+                  <TableCell>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setSelectedInspection(inspection)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {inspections?.map((inspection: any) => (
-                  <TableRow key={inspection.id}>
-                    <TableCell>
-                      {inspection.vehicles ? `${inspection.vehicles.registration_number}` : '-'}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getTypeColor(inspection.inspection_type)}>
-                        {inspection.inspection_type}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{format(new Date(inspection.inspection_date), 'MMM dd, yyyy')}</TableCell>
-                    <TableCell>{inspection.inspector_name}</TableCell>
-                    <TableCell>{inspection.odometer_reading?.toLocaleString() || '-'}</TableCell>
-                    <TableCell>{getResultBadge(inspection.overall_result)}</TableCell>
-                    <TableCell>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => setSelectedInspection(inspection)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {(!inspections || inspections.length === 0) && (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                      No inspections recorded
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          )}
+              ))}
+              {inspections.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                    No inspections recorded
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 
-      {/* Inspection Detail Dialog */}
       <Dialog open={!!selectedInspection} onOpenChange={() => setSelectedInspection(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -351,12 +292,10 @@ export const VehicleInspectionsPanel = () => {
           {selectedInspection && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div><strong>Vehicle:</strong> {selectedInspection.vehicles?.registration_number}</div>
+                <div><strong>Vehicle:</strong> {selectedInspection.vehicle_reg}</div>
                 <div><strong>Type:</strong> <span className="capitalize">{selectedInspection.inspection_type}</span></div>
                 <div><strong>Date:</strong> {format(new Date(selectedInspection.inspection_date), 'PPP')}</div>
-                <div><strong>Next Inspection:</strong> {selectedInspection.next_inspection_date ? format(new Date(selectedInspection.next_inspection_date), 'PPP') : '-'}</div>
                 <div><strong>Inspector:</strong> {selectedInspection.inspector_name}</div>
-                <div><strong>Inspector Type:</strong> <span className="capitalize">{selectedInspection.inspector_type}</span></div>
                 <div><strong>Result:</strong> {getResultBadge(selectedInspection.overall_result)}</div>
                 <div><strong>Odometer:</strong> {selectedInspection.odometer_reading?.toLocaleString() || '-'} km</div>
               </div>
@@ -366,16 +305,6 @@ export const VehicleInspectionsPanel = () => {
                   <ul className="mt-1 list-disc list-inside text-muted-foreground">
                     {selectedInspection.defects_found.map((d: string, i: number) => (
                       <li key={i}>{d}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {selectedInspection.repairs_required?.length > 0 && (
-                <div>
-                  <strong>Repairs Required:</strong>
-                  <ul className="mt-1 list-disc list-inside text-muted-foreground">
-                    {selectedInspection.repairs_required.map((r: string, i: number) => (
-                      <li key={i}>{r}</li>
                     ))}
                   </ul>
                 </div>

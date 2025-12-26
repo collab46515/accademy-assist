@@ -10,15 +10,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Award, Plus, Edit, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { useTransportData } from '@/hooks/useTransportData';
-import { format, differenceInDays, addDays } from 'date-fns';
+import { format, differenceInDays } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 export const DriverCertificationsPanel = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [editingCert, setEditingCert] = useState<any>(null);
-  const { data: certifications, isLoading } = useDriverCertifications();
-  const { data: drivers } = useDrivers();
-  const createCertification = useCreateCertification();
-  const updateCertification = useUpdateCertification();
+  const { drivers } = useTransportData();
+  const { toast } = useToast();
+  
+  // Mock data for demo
+  const [certifications, setCertifications] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
     driver_id: '',
@@ -33,18 +34,15 @@ export const DriverCertificationsPanel = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = {
+    const driver = drivers.find(d => d.id === formData.driver_id);
+    const newCert = {
+      id: crypto.randomUUID(),
       ...formData,
-      expiry_date: formData.expiry_date || null,
+      driver_name: driver ? `${driver.first_name} ${driver.last_name}` : 'Unknown',
     };
-    
-    if (editingCert) {
-      await updateCertification.mutateAsync({ id: editingCert.id, ...payload });
-    } else {
-      await createCertification.mutateAsync(payload);
-    }
+    setCertifications([...certifications, newCert]);
+    toast({ title: 'Certification added successfully' });
     setIsOpen(false);
-    setEditingCert(null);
     setFormData({
       driver_id: '',
       certification_type: '',
@@ -55,21 +53,6 @@ export const DriverCertificationsPanel = () => {
       expiry_date: '',
       notes: '',
     });
-  };
-
-  const handleEdit = (cert: any) => {
-    setEditingCert(cert);
-    setFormData({
-      driver_id: cert.driver_id,
-      certification_type: cert.certification_type,
-      certification_name: cert.certification_name,
-      issuing_authority: cert.issuing_authority || '',
-      certificate_number: cert.certificate_number || '',
-      issue_date: cert.issue_date,
-      expiry_date: cert.expiry_date || '',
-      notes: cert.notes || '',
-    });
-    setIsOpen(true);
   };
 
   const getStatusBadge = (cert: any) => {
@@ -87,16 +70,16 @@ export const DriverCertificationsPanel = () => {
     return <Badge className="bg-green-500">Valid</Badge>;
   };
 
-  const expiringCount = certifications?.filter((c: any) => {
+  const expiringCount = certifications.filter((c: any) => {
     if (!c.expiry_date) return false;
     const days = differenceInDays(new Date(c.expiry_date), new Date());
     return days >= 0 && days <= 30;
-  }).length || 0;
+  }).length;
 
-  const expiredCount = certifications?.filter((c: any) => {
+  const expiredCount = certifications.filter((c: any) => {
     if (!c.expiry_date) return false;
     return differenceInDays(new Date(c.expiry_date), new Date()) < 0;
-  }).length || 0;
+  }).length;
 
   return (
     <div className="space-y-6">
@@ -106,7 +89,7 @@ export const DriverCertificationsPanel = () => {
             <div className="flex items-center gap-3">
               <Award className="h-8 w-8 text-muted-foreground" />
               <div>
-                <p className="text-2xl font-bold">{certifications?.length || 0}</p>
+                <p className="text-2xl font-bold">{certifications.length}</p>
                 <p className="text-sm text-muted-foreground">Total Certifications</p>
               </div>
             </div>
@@ -118,7 +101,7 @@ export const DriverCertificationsPanel = () => {
               <CheckCircle className="h-8 w-8 text-green-500" />
               <div>
                 <p className="text-2xl font-bold">
-                  {(certifications?.length || 0) - expiringCount - expiredCount}
+                  {certifications.length - expiringCount - expiredCount}
                 </p>
                 <p className="text-sm text-muted-foreground">Valid</p>
               </div>
@@ -152,28 +135,13 @@ export const DriverCertificationsPanel = () => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Driver Certifications</CardTitle>
-          <Dialog open={isOpen} onOpenChange={(open) => {
-            setIsOpen(open);
-            if (!open) {
-              setEditingCert(null);
-              setFormData({
-                driver_id: '',
-                certification_type: '',
-                certification_name: '',
-                issuing_authority: '',
-                certificate_number: '',
-                issue_date: '',
-                expiry_date: '',
-                notes: '',
-              });
-            }
-          }}>
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
               <Button><Plus className="h-4 w-4 mr-2" />Add Certification</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{editingCert ? 'Edit Certification' : 'Add New Certification'}</DialogTitle>
+                <DialogTitle>Add New Certification</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -215,24 +183,6 @@ export const DriverCertificationsPanel = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Issuing Authority</Label>
-                    <Input
-                      value={formData.issuing_authority}
-                      onChange={(e) => setFormData({ ...formData, issuing_authority: e.target.value })}
-                      placeholder="e.g., Traffic Department"
-                    />
-                  </div>
-                  <div>
-                    <Label>Certificate Number</Label>
-                    <Input
-                      value={formData.certificate_number}
-                      onChange={(e) => setFormData({ ...formData, certificate_number: e.target.value })}
-                      placeholder="Certificate #"
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
                     <Label>Issue Date *</Label>
                     <Input
                       type="date"
@@ -250,70 +200,48 @@ export const DriverCertificationsPanel = () => {
                     />
                   </div>
                 </div>
-                <div>
-                  <Label>Notes</Label>
-                  <Textarea
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    placeholder="Additional notes"
-                  />
-                </div>
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-                  <Button type="submit" disabled={createCertification.isPending || updateCertification.isPending}>
-                    {editingCert ? 'Update' : 'Add'} Certification
-                  </Button>
+                  <Button type="submit">Add Certification</Button>
                 </div>
               </form>
             </DialogContent>
           </Dialog>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <p>Loading certifications...</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Driver</TableHead>
-                  <TableHead>Certification</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Issue Date</TableHead>
-                  <TableHead>Expiry Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Driver</TableHead>
+                <TableHead>Certification</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Issue Date</TableHead>
+                <TableHead>Expiry Date</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {certifications.map((cert: any) => (
+                <TableRow key={cert.id}>
+                  <TableCell>{cert.driver_name}</TableCell>
+                  <TableCell className="font-medium">{cert.certification_name}</TableCell>
+                  <TableCell className="capitalize">{cert.certification_type?.replace('_', ' ')}</TableCell>
+                  <TableCell>{cert.issue_date ? format(new Date(cert.issue_date), 'MMM dd, yyyy') : '-'}</TableCell>
+                  <TableCell>
+                    {cert.expiry_date ? format(new Date(cert.expiry_date), 'MMM dd, yyyy') : '-'}
+                  </TableCell>
+                  <TableCell>{getStatusBadge(cert)}</TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {certifications?.map((cert: any) => (
-                  <TableRow key={cert.id}>
-                    <TableCell>
-                      {cert.drivers ? `${cert.drivers.first_name} ${cert.drivers.last_name}` : '-'}
-                    </TableCell>
-                    <TableCell className="font-medium">{cert.certification_name}</TableCell>
-                    <TableCell className="capitalize">{cert.certification_type.replace('_', ' ')}</TableCell>
-                    <TableCell>{format(new Date(cert.issue_date), 'MMM dd, yyyy')}</TableCell>
-                    <TableCell>
-                      {cert.expiry_date ? format(new Date(cert.expiry_date), 'MMM dd, yyyy') : '-'}
-                    </TableCell>
-                    <TableCell>{getStatusBadge(cert)}</TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm" onClick={() => handleEdit(cert)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {(!certifications || certifications.length === 0) && (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                      No certifications recorded
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          )}
+              ))}
+              {certifications.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                    No certifications recorded
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>

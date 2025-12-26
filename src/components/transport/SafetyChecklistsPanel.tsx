@@ -6,19 +6,18 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { ClipboardCheck, Plus, Edit, Trash2, CheckCircle, XCircle } from 'lucide-react';
-import { useSafetyChecklists, useCreateChecklist, useUpdateChecklist, useChecklistCompletions } from '@/hooks/useTransportSafety';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 export const SafetyChecklistsPanel = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [editingChecklist, setEditingChecklist] = useState<any>(null);
-  const { data: checklists, isLoading } = useSafetyChecklists();
-  const { data: completions } = useChecklistCompletions();
-  const createChecklist = useCreateChecklist();
-  const updateChecklist = useUpdateChecklist();
+  const { toast } = useToast();
+  
+  const [checklists, setChecklists] = useState<any[]>([]);
+  const [completions, setCompletions] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
     checklist_name: '',
@@ -50,9 +49,17 @@ export const SafetyChecklistsPanel = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingChecklist) {
-      await updateChecklist.mutateAsync({ id: editingChecklist.id, ...formData });
+      setChecklists(checklists.map(c => c.id === editingChecklist.id ? { ...c, ...formData } : c));
+      toast({ title: 'Checklist updated successfully' });
     } else {
-      await createChecklist.mutateAsync(formData);
+      const newChecklist = {
+        id: crypto.randomUUID(),
+        ...formData,
+        is_active: true,
+        created_at: new Date().toISOString(),
+      };
+      setChecklists([...checklists, newChecklist]);
+      toast({ title: 'Checklist created successfully' });
     }
     setIsOpen(false);
     setEditingChecklist(null);
@@ -77,8 +84,8 @@ export const SafetyChecklistsPanel = () => {
     setIsOpen(true);
   };
 
-  const handleToggleActive = async (id: string, isActive: boolean) => {
-    await updateChecklist.mutateAsync({ id, is_active: isActive });
+  const handleToggleActive = (id: string) => {
+    setChecklists(checklists.map(c => c.id === id ? { ...c, is_active: !c.is_active } : c));
   };
 
   const getTypeColor = (type: string) => {
@@ -90,8 +97,6 @@ export const SafetyChecklistsPanel = () => {
       default: return 'bg-gray-500';
     }
   };
-
-  const recentCompletions = completions?.slice(0, 10) || [];
 
   return (
     <div className="space-y-6">
@@ -205,7 +210,7 @@ export const SafetyChecklistsPanel = () => {
 
                   <div className="flex justify-end gap-2">
                     <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-                    <Button type="submit" disabled={createChecklist.isPending || updateChecklist.isPending}>
+                    <Button type="submit">
                       {editingChecklist ? 'Update' : 'Create'} Checklist
                     </Button>
                   </div>
@@ -214,48 +219,44 @@ export const SafetyChecklistsPanel = () => {
             </Dialog>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
-              <p>Loading checklists...</p>
-            ) : (
-              <div className="space-y-3">
-                {checklists?.map((checklist: any) => (
-                  <div 
-                    key={checklist.id} 
-                    className="flex items-center justify-between p-3 border rounded-lg"
-                  >
-                    <div className="flex items-center gap-3">
-                      <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
-                      <div>
-                        <p className="font-medium">{checklist.checklist_name}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge className={getTypeColor(checklist.checklist_type)}>
-                            {checklist.checklist_type.replace('_', '-')}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {(checklist.items as any[])?.length || 0} items
-                          </span>
-                          {checklist.is_mandatory && (
-                            <Badge variant="outline">Mandatory</Badge>
-                          )}
-                        </div>
+            <div className="space-y-3">
+              {checklists.map((checklist: any) => (
+                <div 
+                  key={checklist.id} 
+                  className="flex items-center justify-between p-3 border rounded-lg"
+                >
+                  <div className="flex items-center gap-3">
+                    <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">{checklist.checklist_name}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge className={getTypeColor(checklist.checklist_type)}>
+                          {checklist.checklist_type.replace('_', '-')}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {checklist.items?.length || 0} items
+                        </span>
+                        {checklist.is_mandatory && (
+                          <Badge variant="outline">Mandatory</Badge>
+                        )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={checklist.is_active}
-                        onCheckedChange={(v) => handleToggleActive(checklist.id, v)}
-                      />
-                      <Button variant="ghost" size="sm" onClick={() => handleEdit(checklist)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </div>
                   </div>
-                ))}
-                {(!checklists || checklists.length === 0) && (
-                  <p className="text-center text-muted-foreground py-8">No checklists created yet</p>
-                )}
-              </div>
-            )}
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={checklist.is_active}
+                      onCheckedChange={() => handleToggleActive(checklist.id)}
+                    />
+                    <Button variant="ghost" size="sm" onClick={() => handleEdit(checklist)}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              {checklists.length === 0 && (
+                <p className="text-center text-muted-foreground py-8">No checklists created yet</p>
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -265,7 +266,7 @@ export const SafetyChecklistsPanel = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {recentCompletions.map((completion: any) => (
+              {completions.map((completion: any) => (
                 <div 
                   key={completion.id} 
                   className="flex items-center justify-between p-3 border rounded-lg"
@@ -277,7 +278,7 @@ export const SafetyChecklistsPanel = () => {
                       <XCircle className="h-5 w-5 text-red-500" />
                     )}
                     <div>
-                      <p className="font-medium">{completion.transport_safety_checklists?.checklist_name}</p>
+                      <p className="font-medium">{completion.checklist_name}</p>
                       <p className="text-xs text-muted-foreground">
                         {completion.completed_by} • {format(new Date(completion.completed_at), 'MMM dd, HH:mm')}
                       </p>
@@ -288,7 +289,7 @@ export const SafetyChecklistsPanel = () => {
                   </Badge>
                 </div>
               ))}
-              {recentCompletions.length === 0 && (
+              {completions.length === 0 && (
                 <p className="text-center text-muted-foreground py-8">No completions yet</p>
               )}
             </div>

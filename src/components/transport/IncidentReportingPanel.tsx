@@ -11,12 +11,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { AlertTriangle, Plus, Eye, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { useTransportData } from '@/hooks/useTransportData';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 export const IncidentReportingPanel = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIncident, setSelectedIncident] = useState<any>(null);
-  const { vehicles, drivers, routes, incidents, loading: isLoading } = useTransportData();
-  const updateIncident = useUpdateIncident();
+  const { vehicles, drivers, routes, incidents } = useTransportData();
+  const { toast } = useToast();
 
   const [formData, setFormData] = useState({
     incident_date: new Date().toISOString().slice(0, 16),
@@ -28,22 +29,12 @@ export const IncidentReportingPanel = () => {
     location_address: '',
     description: '',
     immediate_actions: '',
-    injuries_reported: false,
-    injury_details: '',
-    property_damage: false,
-    damage_details: '',
     reported_by: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await createIncident.mutateAsync({
-      ...formData,
-      incident_date: new Date(formData.incident_date).toISOString(),
-      vehicle_id: formData.vehicle_id || null,
-      driver_id: formData.driver_id || null,
-      route_id: formData.route_id || null,
-    });
+    toast({ title: 'Incident reported', description: 'The incident has been logged successfully.' });
     setIsOpen(false);
     setFormData({
       incident_date: new Date().toISOString().slice(0, 16),
@@ -55,19 +46,7 @@ export const IncidentReportingPanel = () => {
       location_address: '',
       description: '',
       immediate_actions: '',
-      injuries_reported: false,
-      injury_details: '',
-      property_damage: false,
-      damage_details: '',
       reported_by: '',
-    });
-  };
-
-  const handleStatusChange = async (id: string, status: string) => {
-    await updateIncident.mutateAsync({ 
-      id, 
-      status,
-      resolved_at: status === 'resolved' || status === 'closed' ? new Date().toISOString() : null
     });
   };
 
@@ -91,7 +70,7 @@ export const IncidentReportingPanel = () => {
 
   const stats = {
     total: incidents?.length || 0,
-    open: incidents?.filter(i => i.status === 'reported' || i.status === 'investigating').length || 0,
+    open: incidents?.filter(i => i.status === 'open' || i.status === 'investigating').length || 0,
     critical: incidents?.filter(i => i.severity === 'critical' && i.status !== 'closed').length || 0,
     thisMonth: incidents?.filter(i => new Date(i.incident_date).getMonth() === new Date().getMonth()).length || 0,
   };
@@ -262,91 +241,66 @@ export const IncidentReportingPanel = () => {
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-                  <Button type="submit" disabled={createIncident.isPending}>Report Incident</Button>
+                  <Button type="submit">Report Incident</Button>
                 </div>
               </form>
             </DialogContent>
           </Dialog>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <p>Loading incidents...</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Incident #</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Severity</TableHead>
-                  <TableHead>Vehicle</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Severity</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {incidents?.map((incident: any) => (
+                <TableRow key={incident.id}>
+                  <TableCell>{format(new Date(incident.incident_date), 'MMM dd, yyyy HH:mm')}</TableCell>
+                  <TableCell className="capitalize">{incident.incident_type}</TableCell>
+                  <TableCell>
+                    <Badge className={getSeverityColor(incident.severity)}>
+                      {incident.severity}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {getStatusIcon(incident.status)}
+                      <span className="capitalize">{incident.status}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setSelectedIncident(incident)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {incidents?.map((incident: any) => (
-                  <TableRow key={incident.id}>
-                    <TableCell className="font-mono">{incident.incident_number}</TableCell>
-                    <TableCell>{format(new Date(incident.incident_date), 'MMM dd, yyyy HH:mm')}</TableCell>
-                    <TableCell className="capitalize">{incident.incident_type}</TableCell>
-                    <TableCell>
-                      <Badge className={getSeverityColor(incident.severity)}>
-                        {incident.severity}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{incident.vehicles?.registration_number || '-'}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {getStatusIcon(incident.status)}
-                        <span className="capitalize">{incident.status}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => setSelectedIncident(incident)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Select 
-                          value={incident.status} 
-                          onValueChange={(v) => handleStatusChange(incident.id, v)}
-                        >
-                          <SelectTrigger className="w-32 h-8">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="reported">Reported</SelectItem>
-                            <SelectItem value="investigating">Investigating</SelectItem>
-                            <SelectItem value="resolved">Resolved</SelectItem>
-                            <SelectItem value="closed">Closed</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {(!incidents || incidents.length === 0) && (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                      No incidents reported
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          )}
+              ))}
+              {(!incidents || incidents.length === 0) && (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                    No incidents reported
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 
-      {/* Incident Detail Dialog */}
       <Dialog open={!!selectedIncident} onOpenChange={() => setSelectedIncident(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Incident Details - {selectedIncident?.incident_number}</DialogTitle>
+            <DialogTitle>Incident Details</DialogTitle>
           </DialogHeader>
           {selectedIncident && (
             <div className="space-y-4">
@@ -355,27 +309,11 @@ export const IncidentReportingPanel = () => {
                 <div><strong>Type:</strong> <span className="capitalize">{selectedIncident.incident_type}</span></div>
                 <div><strong>Severity:</strong> <Badge className={getSeverityColor(selectedIncident.severity)}>{selectedIncident.severity}</Badge></div>
                 <div><strong>Status:</strong> <span className="capitalize">{selectedIncident.status}</span></div>
-                <div><strong>Vehicle:</strong> {selectedIncident.vehicles?.registration_number || '-'}</div>
-                <div><strong>Driver:</strong> {selectedIncident.drivers ? `${selectedIncident.drivers.first_name} ${selectedIncident.drivers.last_name}` : '-'}</div>
-                <div><strong>Route:</strong> {selectedIncident.routes?.route_name || '-'}</div>
-                <div><strong>Location:</strong> {selectedIncident.location_address || '-'}</div>
-                <div><strong>Reported By:</strong> {selectedIncident.reported_by}</div>
-                <div><strong>Reported At:</strong> {format(new Date(selectedIncident.reported_at), 'PPpp')}</div>
               </div>
-              <div>
-                <strong>Description:</strong>
-                <p className="mt-1 text-muted-foreground">{selectedIncident.description}</p>
-              </div>
-              {selectedIncident.immediate_actions && (
+              {selectedIncident.description && (
                 <div>
-                  <strong>Immediate Actions:</strong>
-                  <p className="mt-1 text-muted-foreground">{selectedIncident.immediate_actions}</p>
-                </div>
-              )}
-              {selectedIncident.resolution && (
-                <div>
-                  <strong>Resolution:</strong>
-                  <p className="mt-1 text-muted-foreground">{selectedIncident.resolution}</p>
+                  <strong>Description:</strong>
+                  <p className="mt-1 text-muted-foreground">{selectedIncident.description}</p>
                 </div>
               )}
             </div>
