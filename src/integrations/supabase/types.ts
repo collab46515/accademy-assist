@@ -8605,6 +8605,7 @@ export type Database = {
           geofence_radius_meters: number | null
           id: string
           is_active: boolean | null
+          landmark: string | null
           latitude: number | null
           location_address: string | null
           longitude: number | null
@@ -8625,6 +8626,7 @@ export type Database = {
           geofence_radius_meters?: number | null
           id?: string
           is_active?: boolean | null
+          landmark?: string | null
           latitude?: number | null
           location_address?: string | null
           longitude?: number | null
@@ -8645,6 +8647,7 @@ export type Database = {
           geofence_radius_meters?: number | null
           id?: string
           is_active?: boolean | null
+          landmark?: string | null
           latitude?: number | null
           location_address?: string | null
           longitude?: number | null
@@ -9051,6 +9054,10 @@ export type Database = {
           academic_year_end: string | null
           academic_year_start: string | null
           address: string | null
+          branch_name: string | null
+          branch_principal_email: string | null
+          branch_principal_name: string | null
+          branch_principal_phone: string | null
           code: string
           colors: Json | null
           contact_email: string | null
@@ -9059,6 +9066,9 @@ export type Database = {
           custom_domain: string | null
           establishment_type: string | null
           founded_year: number | null
+          geofence_radius_meters: number | null
+          gps_latitude: number | null
+          gps_longitude: number | null
           id: string
           is_active: boolean
           logo_url: string | null
@@ -9066,7 +9076,13 @@ export type Database = {
           motto: string | null
           name: string
           principal_name: string | null
+          school_head_email: string | null
+          school_head_name: string | null
+          school_head_phone: string | null
           settings: Json | null
+          transport_admin_email: string | null
+          transport_admin_name: string | null
+          transport_admin_phone: string | null
           updated_at: string
           website: string | null
         }
@@ -9074,6 +9090,10 @@ export type Database = {
           academic_year_end?: string | null
           academic_year_start?: string | null
           address?: string | null
+          branch_name?: string | null
+          branch_principal_email?: string | null
+          branch_principal_name?: string | null
+          branch_principal_phone?: string | null
           code: string
           colors?: Json | null
           contact_email?: string | null
@@ -9082,6 +9102,9 @@ export type Database = {
           custom_domain?: string | null
           establishment_type?: string | null
           founded_year?: number | null
+          geofence_radius_meters?: number | null
+          gps_latitude?: number | null
+          gps_longitude?: number | null
           id?: string
           is_active?: boolean
           logo_url?: string | null
@@ -9089,7 +9112,13 @@ export type Database = {
           motto?: string | null
           name: string
           principal_name?: string | null
+          school_head_email?: string | null
+          school_head_name?: string | null
+          school_head_phone?: string | null
           settings?: Json | null
+          transport_admin_email?: string | null
+          transport_admin_name?: string | null
+          transport_admin_phone?: string | null
           updated_at?: string
           website?: string | null
         }
@@ -9097,6 +9126,10 @@ export type Database = {
           academic_year_end?: string | null
           academic_year_start?: string | null
           address?: string | null
+          branch_name?: string | null
+          branch_principal_email?: string | null
+          branch_principal_name?: string | null
+          branch_principal_phone?: string | null
           code?: string
           colors?: Json | null
           contact_email?: string | null
@@ -9105,6 +9138,9 @@ export type Database = {
           custom_domain?: string | null
           establishment_type?: string | null
           founded_year?: number | null
+          geofence_radius_meters?: number | null
+          gps_latitude?: number | null
+          gps_longitude?: number | null
           id?: string
           is_active?: boolean
           logo_url?: string | null
@@ -9112,7 +9148,13 @@ export type Database = {
           motto?: string | null
           name?: string
           principal_name?: string | null
+          school_head_email?: string | null
+          school_head_name?: string | null
+          school_head_phone?: string | null
           settings?: Json | null
+          transport_admin_email?: string | null
+          transport_admin_name?: string | null
+          transport_admin_phone?: string | null
           updated_at?: string
           website?: string | null
         }
