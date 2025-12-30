@@ -54,6 +54,25 @@ const driverFormSchema = z.object({
   first_aid_cert_date: z.date().optional(),
   first_aid_expiry: z.date().optional(),
   notes: z.string().optional(),
+  // KYC fields
+  aadhar_number: z.string().optional(),
+  photo_url: z.string().optional(),
+  blood_group: z.string().optional(),
+  gender: z.string().optional(),
+  // Background check
+  background_check_status: z.string().optional(),
+  background_check_date: z.date().optional(),
+  police_verification_status: z.string().optional(),
+  // Medical fitness
+  medical_fitness_date: z.date().optional(),
+  medical_fitness_expiry: z.date().optional(),
+  // Driver-specific qualifications
+  psv_badge_number: z.string().optional(),
+  psv_badge_expiry: z.date().optional(),
+  hmv_permit_number: z.string().optional(),
+  hmv_permit_expiry: z.date().optional(),
+  // Employment
+  employee_type: z.string().optional(),
 });
 
 type DriverFormData = z.infer<typeof driverFormSchema>;
@@ -123,6 +142,24 @@ export const DriversManager = () => {
         first_aid_expiry: data.first_aid_expiry ? format(data.first_aid_expiry, 'yyyy-MM-dd') : null,
         notes: data.notes || null,
         school_id: userSchoolId,
+        // KYC fields
+        aadhar_number: data.aadhar_number || null,
+        photo_url: data.photo_url || null,
+        blood_group: data.blood_group || null,
+        gender: data.gender || null,
+        // Background check
+        background_check_status: data.background_check_status || null,
+        background_check_date: data.background_check_date ? format(data.background_check_date, 'yyyy-MM-dd') : null,
+        police_verification_status: data.police_verification_status || null,
+        // Medical fitness
+        medical_fitness_date: data.medical_fitness_date ? format(data.medical_fitness_date, 'yyyy-MM-dd') : null,
+        medical_fitness_expiry: data.medical_fitness_expiry ? format(data.medical_fitness_expiry, 'yyyy-MM-dd') : null,
+        // Driver qualifications
+        psv_badge_number: data.psv_badge_number || null,
+        psv_badge_expiry: data.psv_badge_expiry ? format(data.psv_badge_expiry, 'yyyy-MM-dd') : null,
+        hmv_permit_number: data.hmv_permit_number || null,
+        hmv_permit_expiry: data.hmv_permit_expiry ? format(data.hmv_permit_expiry, 'yyyy-MM-dd') : null,
+        employee_type: data.employee_type || null,
       };
 
       if (editingDriver) {
@@ -161,6 +198,24 @@ export const DriversManager = () => {
       first_aid_cert_date: driver.first_aid_cert_date ? new Date(driver.first_aid_cert_date) : undefined,
       first_aid_expiry: driver.first_aid_expiry ? new Date(driver.first_aid_expiry) : undefined,
       notes: driver.notes || '',
+      // KYC fields
+      aadhar_number: driver.aadhar_number || '',
+      photo_url: driver.photo_url || '',
+      blood_group: driver.blood_group || '',
+      gender: driver.gender || '',
+      // Background check
+      background_check_status: driver.background_check_status || '',
+      background_check_date: driver.background_check_date ? new Date(driver.background_check_date) : undefined,
+      police_verification_status: driver.police_verification_status || '',
+      // Medical fitness
+      medical_fitness_date: driver.medical_fitness_date ? new Date(driver.medical_fitness_date) : undefined,
+      medical_fitness_expiry: driver.medical_fitness_expiry ? new Date(driver.medical_fitness_expiry) : undefined,
+      // Driver qualifications
+      psv_badge_number: driver.psv_badge_number || '',
+      psv_badge_expiry: driver.psv_badge_expiry ? new Date(driver.psv_badge_expiry) : undefined,
+      hmv_permit_number: driver.hmv_permit_number || '',
+      hmv_permit_expiry: driver.hmv_permit_expiry ? new Date(driver.hmv_permit_expiry) : undefined,
+      employee_type: driver.employee_type || '',
     });
     setIsFormOpen(true);
   };
@@ -446,6 +501,312 @@ export const DriversManager = () => {
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* KYC Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">KYC Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="aadhar_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Aadhar Number</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="XXXX XXXX XXXX" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="blood_group"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Blood Group</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="A+">A+</SelectItem>
+                              <SelectItem value="A-">A-</SelectItem>
+                              <SelectItem value="B+">B+</SelectItem>
+                              <SelectItem value="B-">B-</SelectItem>
+                              <SelectItem value="AB+">AB+</SelectItem>
+                              <SelectItem value="AB-">AB-</SelectItem>
+                              <SelectItem value="O+">O+</SelectItem>
+                              <SelectItem value="O-">O-</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="gender"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Gender</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="male">Male</SelectItem>
+                              <SelectItem value="female">Female</SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="employee_type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Role</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="driver">Driver</SelectItem>
+                              <SelectItem value="attender">Attender</SelectItem>
+                              <SelectItem value="both">Driver & Attender</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Background Check & Verification */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Background Check & Verification</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="background_check_status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Background Check Status</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select status" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="cleared">Cleared</SelectItem>
+                              <SelectItem value="failed">Failed</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="police_verification_status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Police Verification Status</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select status" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="verified">Verified</SelectItem>
+                              <SelectItem value="rejected">Rejected</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Medical Fitness */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Medical Fitness</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="medical_fitness_date"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Medical Fitness Date</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                    "w-full pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="medical_fitness_expiry"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Medical Fitness Expiry</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                    "w-full pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Driver Qualifications */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Driver Qualifications (Driver Only)</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="psv_badge_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>PSV Badge Number</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Badge number" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="psv_badge_expiry"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>PSV Badge Expiry</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                    "w-full pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="hmv_permit_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Heavy Vehicle Permit Number</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="HMV permit number" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="hmv_permit_expiry"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>HMV Permit Validity</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                    "w-full pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                            </PopoverContent>
+                          </Popover>
                           <FormMessage />
                         </FormItem>
                       )}

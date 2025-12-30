@@ -46,6 +46,16 @@ interface VehicleFormData {
   fuel_type?: string;
   year_manufactured?: number;
   make_model?: string;
+  // Fleet management fields
+  tank_capacity_litres?: number;
+  current_mileage_kmpl?: number;
+  manufacturer_mileage_kmpl?: number;
+  current_odometer?: number;
+  virtual_fuel_litres?: number;
+  ownership_type?: string;
+  contractor_id?: string;
+  chassis_number?: string;
+  engine_number?: string;
 }
 
 export const VehiclesManager = () => {
@@ -64,6 +74,9 @@ export const VehiclesManager = () => {
       capacity: 30,
       status: 'active',
       fuel_type: 'diesel',
+      ownership_type: 'school_owned',
+      tank_capacity_litres: 0,
+      current_odometer: 0,
     }
   });
 
@@ -120,6 +133,15 @@ export const VehiclesManager = () => {
       fuel_type: vehicle.fuel_type || 'diesel',
       year_manufactured: vehicle.year_manufactured || undefined,
       make_model: vehicle.make_model || '',
+      // Fleet management fields
+      tank_capacity_litres: vehicle.tank_capacity_litres || undefined,
+      current_mileage_kmpl: vehicle.current_mileage_kmpl || undefined,
+      manufacturer_mileage_kmpl: vehicle.manufacturer_mileage_kmpl || undefined,
+      current_odometer: vehicle.current_odometer || undefined,
+      virtual_fuel_litres: vehicle.virtual_fuel_litres || undefined,
+      ownership_type: vehicle.ownership_type || 'school_owned',
+      chassis_number: vehicle.chassis_number || '',
+      engine_number: vehicle.engine_number || '',
     });
     setIsFormOpen(true);
   };
@@ -290,7 +312,123 @@ export const VehiclesManager = () => {
                     />
                   </div>
 
-                  {/* Assignment & Status */}
+                  {/* Fleet Management */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Fleet Management</h3>
+                    <FormField
+                      control={form.control}
+                      name="ownership_type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Ownership</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="school_owned">School Owned</SelectItem>
+                              <SelectItem value="contractor_owned">Contractor Owned</SelectItem>
+                              <SelectItem value="leased">Leased</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="tank_capacity_litres"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tank Capacity (Litres)</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="number" onChange={e => field.onChange(parseFloat(e.target.value) || 0)} placeholder="100" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="current_odometer"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Current Odometer (KM)</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="number" onChange={e => field.onChange(parseFloat(e.target.value) || 0)} placeholder="50000" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="manufacturer_mileage_kmpl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Manufacturer Mileage (KMPL)</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="number" step="0.1" onChange={e => field.onChange(parseFloat(e.target.value) || 0)} placeholder="8.5" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="current_mileage_kmpl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Current Mileage (KMPL)</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="number" step="0.1" onChange={e => field.onChange(parseFloat(e.target.value) || 0)} placeholder="7.5" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="virtual_fuel_litres"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Virtual Fuel Level (Litres)</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="number" step="0.1" onChange={e => field.onChange(parseFloat(e.target.value) || 0)} placeholder="50" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="chassis_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Chassis Number</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Chassis number" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="engine_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Engine Number</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Engine number" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Assignment & Status</h3>
                     <FormField
