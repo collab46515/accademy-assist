@@ -17,7 +17,9 @@ import {
   Wrench,
   Activity,
   Bell,
-  BarChart3
+  BarChart3,
+  MapPin,
+  FileText
 } from 'lucide-react';
 import { useTransportData } from '@/hooks/useTransportData';
 import { DriversManager } from './DriversManager';
@@ -34,6 +36,9 @@ import { LiveOperationsTab } from './LiveOperationsTab';
 import { CommunicationsTab } from './CommunicationsTab';
 import { AnalyticsTab } from './AnalyticsTab';
 import { SafetyComplianceTab } from './SafetyComplianceTab';
+import { VehicleContractsManager } from './VehicleContractsManager';
+import { SchoolTransportProfile } from './SchoolTransportProfile';
+import { StopsManager } from './StopsManager';
 
 export const TransportDashboard = () => {
   const { drivers, vehicles, routes, incidents, studentTransport, loading } = useTransportData();
@@ -253,23 +258,44 @@ export const TransportDashboard = () => {
             </CardHeader>
             <CardContent>
               <Tabs value={setupSubTab} onValueChange={setSetupSubTab}>
-                <TabsList className="mb-6">
+                <TabsList className="mb-6 flex-wrap">
+                  <TabsTrigger value="school-profile" className="gap-1">
+                    <Building2 className="h-4 w-4" /> School Profile
+                  </TabsTrigger>
                   <TabsTrigger value="contractors" className="gap-1">
-                    <Building2 className="h-4 w-4" /> Contractors
+                    <Users className="h-4 w-4" /> Contractors
+                  </TabsTrigger>
+                  <TabsTrigger value="contracts" className="gap-1">
+                    <FileText className="h-4 w-4" /> Contracts
+                  </TabsTrigger>
+                  <TabsTrigger value="stops" className="gap-1">
+                    <MapPin className="h-4 w-4" /> Stops
                   </TabsTrigger>
                   <TabsTrigger value="holidays" className="gap-1">
                     <Calendar className="h-4 w-4" /> Holidays
                   </TabsTrigger>
                   <TabsTrigger value="compliance" className="gap-1">
-                    <FileCheck className="h-4 w-4" /> Compliance Docs
+                    <FileCheck className="h-4 w-4" /> Compliance
                   </TabsTrigger>
                   <TabsTrigger value="parts" className="gap-1">
-                    <Wrench className="h-4 w-4" /> Parts & Warranty
+                    <Wrench className="h-4 w-4" /> Parts
                   </TabsTrigger>
                 </TabsList>
 
+                <TabsContent value="school-profile">
+                  <SchoolTransportProfile />
+                </TabsContent>
+
                 <TabsContent value="contractors">
                   <ContractorsManager />
+                </TabsContent>
+
+                <TabsContent value="contracts">
+                  <VehicleContractsManager />
+                </TabsContent>
+
+                <TabsContent value="stops">
+                  <StopsManager />
                 </TabsContent>
 
                 <TabsContent value="holidays">
