@@ -8612,6 +8612,7 @@ export type Database = {
           notes: string | null
           pickup_time: string
           route_id: string
+          school_id: string | null
           stop_name: string
           stop_order: number
           stop_type: string | null
@@ -8633,6 +8634,7 @@ export type Database = {
           notes?: string | null
           pickup_time: string
           route_id: string
+          school_id?: string | null
           stop_name: string
           stop_order: number
           stop_type?: string | null
@@ -8654,6 +8656,7 @@ export type Database = {
           notes?: string | null
           pickup_time?: string
           route_id?: string
+          school_id?: string | null
           stop_name?: string
           stop_order?: number
           stop_type?: string | null
@@ -8666,6 +8669,13 @@ export type Database = {
             columns: ["route_id"]
             isOneToOne: false
             referencedRelation: "transport_routes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_stops_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
             referencedColumns: ["id"]
           },
         ]
@@ -12418,6 +12428,7 @@ export type Database = {
           year_group: string
         }[]
       }
+      get_user_school_ids: { Args: { _user_id: string }; Returns: string[] }
       has_library_access: { Args: { p_school_id: string }; Returns: boolean }
       has_permission: {
         Args: {
