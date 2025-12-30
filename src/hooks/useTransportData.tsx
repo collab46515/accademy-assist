@@ -17,6 +17,7 @@ export interface Driver {
   hire_date: string;
   birth_date?: string;
   address?: string;
+  permanent_address?: string;
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
   status: string;
@@ -25,6 +26,35 @@ export interface Driver {
   first_aid_cert_date?: string;
   first_aid_expiry?: string;
   notes?: string;
+  // KYC fields
+  aadhar_number?: string;
+  aadhar_document_url?: string;
+  photo_url?: string;
+  // Background check
+  background_check_status?: string;
+  background_check_date?: string;
+  background_check_document_url?: string;
+  police_verification_status?: string;
+  police_verification_date?: string;
+  // Medical fitness
+  medical_fitness_date?: string;
+  medical_fitness_expiry?: string;
+  medical_certificate_url?: string;
+  blood_group?: string;
+  // Driver-specific qualifications
+  psv_badge_number?: string;
+  psv_badge_expiry?: string;
+  hmv_permit_number?: string;
+  hmv_permit_expiry?: string;
+  // Employment details
+  employee_type?: string;
+  employment_type?: string;
+  contractor_id?: string;
+  gender?: string;
+  marital_status?: string;
+  uniform_size?: string;
+  id_card_issued?: boolean;
+  id_card_number?: string;
   created_at: string;
   updated_at: string;
 }
@@ -45,6 +75,25 @@ export interface Vehicle {
   fuel_type?: string;
   year_manufactured?: number;
   make_model?: string;
+  // Fleet management fields
+  tank_capacity_litres?: number;
+  current_mileage_kmpl?: number;
+  manufacturer_mileage_kmpl?: number;
+  current_odometer?: number;
+  virtual_fuel_litres?: number;
+  ownership_type?: string;
+  contractor_id?: string;
+  // Additional details
+  make?: string;
+  model?: string;
+  color?: string;
+  chassis_number?: string;
+  engine_number?: string;
+  purchase_date?: string;
+  purchase_price?: number;
+  retirement_date?: string;
+  gps_device_id?: string;
+  gps_device_status?: string;
   created_at: string;
   updated_at: string;
 }
@@ -79,6 +128,13 @@ export interface RouteStop {
   longitude?: number;
   distance_from_school?: number;
   estimated_travel_time?: number;
+  // New fields for Stop Location Master
+  stop_type?: string;
+  geofence_radius_meters?: number;
+  landmark?: string;
+  is_active?: boolean;
+  student_count?: number;
+  notes?: string;
   created_at: string;
   updated_at: string;
 }
