@@ -50,7 +50,7 @@ interface StopFormData {
 }
 
 export const StopsManager = () => {
-  const { stops, routes, loading, refetch } = useTransportData();
+  const { stops, routes, loading, refetch, userSchoolId } = useTransportData();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingStop, setEditingStop] = useState<RouteStop | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -168,6 +168,7 @@ export const StopsManager = () => {
         is_active: formData.is_active,
         notes: formData.notes || null,
         stop_order: editingStop ? editingStop.stop_order : stops.filter(s => s.route_id === selectedRoute).length + 1,
+        school_id: userSchoolId,
       };
 
       if (editingStop) {
