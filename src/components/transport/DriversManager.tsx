@@ -23,7 +23,8 @@ import {
   Eye,
   AlertCircle,
   Shield,
-  FileText
+  FileText,
+  Upload
 } from 'lucide-react';
 import { useTransportData, type Driver } from '@/hooks/useTransportData';
 import { useAuth } from '@/hooks/useAuth';
@@ -33,6 +34,7 @@ import * as z from 'zod';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { DriverDocumentUploader } from './DriverDocumentUploader';
 
 const driverFormSchema = z.object({
   employee_id: z.string().optional(),
@@ -73,6 +75,13 @@ const driverFormSchema = z.object({
   hmv_permit_expiry: z.date().optional(),
   // Employment
   employee_type: z.string().optional(),
+  // Document URLs (excluding photo_url which is already defined above)
+  aadhar_document_url: z.string().optional(),
+  background_check_document_url: z.string().optional(),
+  medical_certificate_url: z.string().optional(),
+  license_document_url: z.string().optional(),
+  psv_badge_document_url: z.string().optional(),
+  hmv_permit_document_url: z.string().optional(),
 });
 
 type DriverFormData = z.infer<typeof driverFormSchema>;
@@ -160,6 +169,13 @@ export const DriversManager = () => {
         hmv_permit_number: data.hmv_permit_number || null,
         hmv_permit_expiry: data.hmv_permit_expiry ? format(data.hmv_permit_expiry, 'yyyy-MM-dd') : null,
         employee_type: data.employee_type || null,
+        // Document URLs
+        aadhar_document_url: data.aadhar_document_url || null,
+        background_check_document_url: data.background_check_document_url || null,
+        medical_certificate_url: data.medical_certificate_url || null,
+        license_document_url: data.license_document_url || null,
+        psv_badge_document_url: data.psv_badge_document_url || null,
+        hmv_permit_document_url: data.hmv_permit_document_url || null,
       };
 
       if (editingDriver) {
@@ -216,6 +232,13 @@ export const DriversManager = () => {
       hmv_permit_number: driver.hmv_permit_number || '',
       hmv_permit_expiry: driver.hmv_permit_expiry ? new Date(driver.hmv_permit_expiry) : undefined,
       employee_type: driver.employee_type || '',
+      // Document URLs
+      aadhar_document_url: driver.aadhar_document_url || '',
+      background_check_document_url: driver.background_check_document_url || '',
+      medical_certificate_url: driver.medical_certificate_url || '',
+      license_document_url: driver.license_document_url || '',
+      psv_badge_document_url: driver.psv_badge_document_url || '',
+      hmv_permit_document_url: driver.hmv_permit_document_url || '',
     });
     setIsFormOpen(true);
   };
@@ -811,6 +834,115 @@ export const DriversManager = () => {
                         </FormItem>
                       )}
                     />
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Document Uploads */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Document Uploads
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Photo Upload */}
+                    <div className="space-y-2">
+                      <Label>Recent Photo</Label>
+                      <DriverDocumentUploader
+                        driverId={editingDriver?.id}
+                        documentType="photo"
+                        documentLabel="Photo"
+                        currentUrl={form.watch('photo_url')}
+                        onUploadComplete={(url) => form.setValue('photo_url', url)}
+                        onRemove={() => form.setValue('photo_url', '')}
+                        schoolId={userSchoolId || ''}
+                      />
+                    </div>
+
+                    {/* Aadhar Document */}
+                    <div className="space-y-2">
+                      <Label>Aadhar Document</Label>
+                      <DriverDocumentUploader
+                        driverId={editingDriver?.id}
+                        documentType="aadhar"
+                        documentLabel="Aadhar"
+                        currentUrl={form.watch('aadhar_document_url')}
+                        onUploadComplete={(url) => form.setValue('aadhar_document_url', url)}
+                        onRemove={() => form.setValue('aadhar_document_url', '')}
+                        schoolId={userSchoolId || ''}
+                      />
+                    </div>
+
+                    {/* Background Check Report */}
+                    <div className="space-y-2">
+                      <Label>Background Check Report</Label>
+                      <DriverDocumentUploader
+                        driverId={editingDriver?.id}
+                        documentType="background_check"
+                        documentLabel="Background Check"
+                        currentUrl={form.watch('background_check_document_url')}
+                        onUploadComplete={(url) => form.setValue('background_check_document_url', url)}
+                        onRemove={() => form.setValue('background_check_document_url', '')}
+                        schoolId={userSchoolId || ''}
+                      />
+                    </div>
+
+                    {/* Medical Certificate */}
+                    <div className="space-y-2">
+                      <Label>Medical Fitness Certificate</Label>
+                      <DriverDocumentUploader
+                        driverId={editingDriver?.id}
+                        documentType="medical_certificate"
+                        documentLabel="Medical Certificate"
+                        currentUrl={form.watch('medical_certificate_url')}
+                        onUploadComplete={(url) => form.setValue('medical_certificate_url', url)}
+                        onRemove={() => form.setValue('medical_certificate_url', '')}
+                        schoolId={userSchoolId || ''}
+                      />
+                    </div>
+
+                    {/* Driving License */}
+                    <div className="space-y-2">
+                      <Label>Driving License Document</Label>
+                      <DriverDocumentUploader
+                        driverId={editingDriver?.id}
+                        documentType="license"
+                        documentLabel="Driving License"
+                        currentUrl={form.watch('license_document_url')}
+                        onUploadComplete={(url) => form.setValue('license_document_url', url)}
+                        onRemove={() => form.setValue('license_document_url', '')}
+                        schoolId={userSchoolId || ''}
+                      />
+                    </div>
+
+                    {/* PSV Badge */}
+                    <div className="space-y-2">
+                      <Label>PSV Badge Document</Label>
+                      <DriverDocumentUploader
+                        driverId={editingDriver?.id}
+                        documentType="psv_badge"
+                        documentLabel="PSV Badge"
+                        currentUrl={form.watch('psv_badge_document_url')}
+                        onUploadComplete={(url) => form.setValue('psv_badge_document_url', url)}
+                        onRemove={() => form.setValue('psv_badge_document_url', '')}
+                        schoolId={userSchoolId || ''}
+                      />
+                    </div>
+
+                    {/* HMV Permit */}
+                    <div className="space-y-2">
+                      <Label>Heavy Vehicle Permit Document</Label>
+                      <DriverDocumentUploader
+                        driverId={editingDriver?.id}
+                        documentType="hmv_permit"
+                        documentLabel="HMV Permit"
+                        currentUrl={form.watch('hmv_permit_document_url')}
+                        onUploadComplete={(url) => form.setValue('hmv_permit_document_url', url)}
+                        onRemove={() => form.setValue('hmv_permit_document_url', '')}
+                        schoolId={userSchoolId || ''}
+                      />
+                    </div>
                   </div>
                 </div>
 
