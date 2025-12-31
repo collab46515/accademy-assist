@@ -3,6 +3,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
+const getErrorMessage = (err: unknown) => {
+  if (!err) return 'Unknown error';
+  if (typeof err === 'string') return err;
+  if (err instanceof Error) return err.message;
+  // Supabase/PostgREST errors often come as plain objects
+  const anyErr = err as any;
+  return (
+    anyErr?.message ||
+    anyErr?.error_description ||
+    anyErr?.details ||
+    anyErr?.hint ||
+    'Unknown error'
+  );
+};
+
 export interface Contractor {
   id: string;
   school_id: string;
@@ -182,7 +197,8 @@ export const useTransportMasterData = (schoolId: string | null) => {
       toast.success('Contractor added successfully');
       return result;
     } catch (err) {
-      toast.error('Failed to add contractor');
+      console.error('addContractor failed:', err);
+      toast.error(`Failed to add contractor: ${getErrorMessage(err)}`);
       throw err;
     }
   };
