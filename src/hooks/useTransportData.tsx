@@ -45,8 +45,11 @@ export interface Driver {
   // Driver-specific qualifications
   psv_badge_number?: string;
   psv_badge_expiry?: string;
+  psv_badge_document_url?: string;
   hmv_permit_number?: string;
   hmv_permit_expiry?: string;
+  hmv_permit_document_url?: string;
+  license_document_url?: string;
   // Employment details
   employee_type?: string;
   employment_type?: string;

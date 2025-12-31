@@ -2655,12 +2655,14 @@ export type Database = {
           first_name: string
           gender: string | null
           hire_date: string
+          hmv_permit_document_url: string | null
           hmv_permit_expiry: string | null
           hmv_permit_number: string | null
           id: string
           id_card_issued: boolean | null
           id_card_number: string | null
           last_name: string
+          license_document_url: string | null
           license_expiry: string
           license_number: string
           license_type: string[]
@@ -2674,6 +2676,7 @@ export type Database = {
           photo_url: string | null
           police_verification_date: string | null
           police_verification_status: string | null
+          psv_badge_document_url: string | null
           psv_badge_expiry: string | null
           psv_badge_number: string | null
           school_id: string
@@ -2705,12 +2708,14 @@ export type Database = {
           first_name: string
           gender?: string | null
           hire_date: string
+          hmv_permit_document_url?: string | null
           hmv_permit_expiry?: string | null
           hmv_permit_number?: string | null
           id?: string
           id_card_issued?: boolean | null
           id_card_number?: string | null
           last_name: string
+          license_document_url?: string | null
           license_expiry: string
           license_number: string
           license_type?: string[]
@@ -2724,6 +2729,7 @@ export type Database = {
           photo_url?: string | null
           police_verification_date?: string | null
           police_verification_status?: string | null
+          psv_badge_document_url?: string | null
           psv_badge_expiry?: string | null
           psv_badge_number?: string | null
           school_id: string
@@ -2755,12 +2761,14 @@ export type Database = {
           first_name?: string
           gender?: string | null
           hire_date?: string
+          hmv_permit_document_url?: string | null
           hmv_permit_expiry?: string | null
           hmv_permit_number?: string | null
           id?: string
           id_card_issued?: boolean | null
           id_card_number?: string | null
           last_name?: string
+          license_document_url?: string | null
           license_expiry?: string
           license_number?: string
           license_type?: string[]
@@ -2774,6 +2782,7 @@ export type Database = {
           photo_url?: string | null
           police_verification_date?: string | null
           police_verification_status?: string | null
+          psv_badge_document_url?: string | null
           psv_badge_expiry?: string | null
           psv_badge_number?: string | null
           school_id?: string
