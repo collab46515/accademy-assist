@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useRBAC } from '@/hooks/useRBAC';
@@ -196,10 +196,14 @@ export const useTransportData = () => {
   const [error, setError] = useState<string | null>(null);
   const [userSchoolId, setUserSchoolId] = useState<string | null>(null);
 
+  // Refs to prevent duplicate fetches and cache data
+  const isFetchingRef = useRef(false);
+  const lastFetchedSchoolRef = useRef<string | null>(null);
+  const hasCachedDataRef = useRef(false);
+
   // Fetch all transport data
-  const fetchTransportData = async () => {
+  const fetchTransportData = useCallback(async (forceRefresh = false) => {
     if (!user || rbacLoading) {
-      // If user isn't signed in yet (or signed out), don't block UI with an infinite spinner.
       setDrivers([]);
       setVehicles([]);
       setRoutes([]);
@@ -211,7 +215,6 @@ export const useTransportData = () => {
       return;
     }
 
-    // Use the currentSchool from RBAC context (handles super_admin properly)
     const schoolId = currentSchool?.id || null;
 
     if (!schoolId) {
@@ -221,7 +224,19 @@ export const useTransportData = () => {
       return;
     }
 
+    // Skip fetch if we already have cached data for this school and not forcing refresh
+    if (!forceRefresh && hasCachedDataRef.current && lastFetchedSchoolRef.current === schoolId) {
+      setLoading(false);
+      return;
+    }
+
+    // Prevent duplicate concurrent fetches
+    if (isFetchingRef.current) {
+      return;
+    }
+
     try {
+      isFetchingRef.current = true;
       setLoading(true);
       setError(null);
       setUserSchoolId(schoolId);
@@ -249,13 +264,18 @@ export const useTransportData = () => {
       setStudentTransport(studentTransportRes.data || []);
       setIncidents(incidentsRes.data || []);
 
+      // Mark as cached
+      lastFetchedSchoolRef.current = schoolId;
+      hasCachedDataRef.current = true;
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch transport data');
       toast.error('Failed to load transport data');
     } finally {
+      isFetchingRef.current = false;
       setLoading(false);
     }
-  };
+  }, [user, currentSchool?.id, rbacLoading]);
 
   // CRUD operations for drivers
   const addDriver = async (driverData: Omit<Driver, 'id' | 'created_at' | 'updated_at'>) => {
@@ -493,7 +513,7 @@ export const useTransportData = () => {
     if (!rbacLoading) {
       fetchTransportData();
     }
-  }, [user, currentSchool?.id, rbacLoading]);
+  }, [fetchTransportData, rbacLoading]);
 
   return {
     drivers,

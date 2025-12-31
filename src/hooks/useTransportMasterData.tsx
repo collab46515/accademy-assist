@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -123,10 +123,30 @@ export const useTransportMasterData = (schoolId: string | null) => {
   const [holidays, setHolidays] = useState<TransportHoliday[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchMasterData = useCallback(async () => {
-    if (!schoolId) return;
+  // Refs to prevent duplicate fetches and cache data
+  const isFetchingRef = useRef(false);
+  const lastFetchedSchoolRef = useRef<string | null>(null);
+  const hasCachedDataRef = useRef(false);
+
+  const fetchMasterData = useCallback(async (forceRefresh = false) => {
+    if (!schoolId) {
+      setLoading(false);
+      return;
+    }
+
+    // Skip fetch if we already have cached data for this school and not forcing refresh
+    if (!forceRefresh && hasCachedDataRef.current && lastFetchedSchoolRef.current === schoolId) {
+      setLoading(false);
+      return;
+    }
+
+    // Prevent duplicate concurrent fetches
+    if (isFetchingRef.current) {
+      return;
+    }
 
     try {
+      isFetchingRef.current = true;
       setLoading(true);
 
       const [contractorsRes, contractsRes, holidaysRes] = await Promise.all([
@@ -139,10 +159,15 @@ export const useTransportMasterData = (schoolId: string | null) => {
       if (contractsRes.data) setContracts(contractsRes.data);
       if (holidaysRes.data) setHolidays(holidaysRes.data);
 
+      // Mark as cached
+      lastFetchedSchoolRef.current = schoolId;
+      hasCachedDataRef.current = true;
+
     } catch (err) {
       console.error('Error fetching master data:', err);
       toast.error('Failed to load master data');
     } finally {
+      isFetchingRef.current = false;
       setLoading(false);
     }
   }, [schoolId]);
@@ -417,6 +442,9 @@ export const useTransportMasterData = (schoolId: string | null) => {
     fetchMasterData();
   }, [fetchMasterData]);
 
+  // Force refetch function for manual refresh
+  const refetch = useCallback(() => fetchMasterData(true), [fetchMasterData]);
+
   return {
     contractors,
     contracts,
@@ -424,7 +452,7 @@ export const useTransportMasterData = (schoolId: string | null) => {
     parts,
     holidays,
     loading,
-    refetch: fetchMasterData,
+    refetch,
     fetchComplianceDocs,
     fetchParts,
     // Contractor operations
