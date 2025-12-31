@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useRBAC } from '@/hooks/useRBAC';
 import { toast } from 'sonner';
 
 export interface Driver {
@@ -184,6 +185,7 @@ export interface TransportIncident {
 
 export const useTransportData = () => {
   const { user } = useAuth();
+  const { currentSchool, loading: rbacLoading } = useRBAC();
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [routes, setRoutes] = useState<TransportRoute[]>([]);
@@ -194,32 +196,9 @@ export const useTransportData = () => {
   const [error, setError] = useState<string | null>(null);
   const [userSchoolId, setUserSchoolId] = useState<string | null>(null);
 
-  // Get user's school_id from their roles
-  const getUserSchoolId = async () => {
-    if (!user) return null;
-
-    try {
-      // A user can have multiple roles; we just need one active school_id.
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('school_id')
-        .eq('user_id', user.id)
-        .eq('is_active', true)
-        .not('school_id', 'is', null)
-        .limit(1)
-        .maybeSingle();
-
-      if (error || !data?.school_id) return null;
-      return data.school_id;
-    } catch (err) {
-      console.error('Error getting user school:', err);
-      return null;
-    }
-  };
-
   // Fetch all transport data
   const fetchTransportData = async () => {
-    if (!user) {
+    if (!user || rbacLoading) {
       // If user isn't signed in yet (or signed out), don't block UI with an infinite spinner.
       setDrivers([]);
       setVehicles([]);
@@ -232,19 +211,20 @@ export const useTransportData = () => {
       return;
     }
 
+    // Use the currentSchool from RBAC context (handles super_admin properly)
+    const schoolId = currentSchool?.id || null;
+
+    if (!schoolId) {
+      setUserSchoolId(null);
+      toast.error('Please select a school from the header dropdown.');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
-
-      // Get user's school ID first
-      const schoolId = await getUserSchoolId();
       setUserSchoolId(schoolId);
-
-      if (!schoolId) {
-        setUserSchoolId(null);
-        toast.error('Your account is not linked to a school. Please ask an admin to assign your school access.');
-        return;
-      }
 
       const [driversRes, vehiclesRes, routesRes, stopsRes, studentTransportRes, incidentsRes] = await Promise.all([
         supabase.from('drivers').select('*').eq('school_id', schoolId).order('first_name'),
@@ -510,8 +490,10 @@ export const useTransportData = () => {
   };
 
   useEffect(() => {
-    fetchTransportData();
-  }, [user]);
+    if (!rbacLoading) {
+      fetchTransportData();
+    }
+  }, [user, currentSchool?.id, rbacLoading]);
 
   return {
     drivers,
