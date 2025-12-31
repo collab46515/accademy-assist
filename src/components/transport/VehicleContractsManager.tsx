@@ -238,14 +238,14 @@ export const VehicleContractsManager = () => {
                 <div>
                   <Label htmlFor="vehicle_id">Associated Vehicle</Label>
                   <Select
-                    value={formData.vehicle_id}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, vehicle_id: value }))}
+                    value={formData.vehicle_id || 'all'}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, vehicle_id: value === 'all' ? '' : value }))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="All vehicles" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Vehicles</SelectItem>
+                      <SelectItem value="all">All Vehicles</SelectItem>
                       {vehicles.map((vehicle) => (
                         <SelectItem key={vehicle.id} value={vehicle.id}>
                           {vehicle.vehicle_number} - {vehicle.make_model || vehicle.vehicle_type}
