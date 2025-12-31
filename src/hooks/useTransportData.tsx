@@ -199,26 +199,17 @@ export const useTransportData = () => {
     if (!user) return null;
 
     try {
+      // A user can have multiple roles; we just need one active school_id.
       const { data, error } = await supabase
         .from('user_roles')
         .select('school_id')
         .eq('user_id', user.id)
         .eq('is_active', true)
         .not('school_id', 'is', null)
-        .single();
+        .limit(1)
+        .maybeSingle();
 
-      if (error || !data) {
-        console.log('No school found for user, using default school');
-        // If no school found, get the first active school
-        const { data: schoolData } = await supabase
-          .from('schools')
-          .select('id')
-          .eq('is_active', true)
-          .single();
-        
-        return schoolData?.id || null;
-      }
-
+      if (error || !data?.school_id) return null;
       return data.school_id;
     } catch (err) {
       console.error('Error getting user school:', err);
@@ -250,7 +241,8 @@ export const useTransportData = () => {
       setUserSchoolId(schoolId);
 
       if (!schoolId) {
-        toast.error('No school association found. Please contact administrator.');
+        setUserSchoolId(null);
+        toast.error('Your account is not linked to a school. Please ask an admin to assign your school access.');
         return;
       }
 
