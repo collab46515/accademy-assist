@@ -184,11 +184,24 @@ export const useTransportMasterData = (schoolId: string | null) => {
   };
 
   // CRUD for Contractors
-  const addContractor = async (data: Omit<Contractor, 'id' | 'created_at' | 'updated_at'>) => {
+  const addContractor = async (
+    data: Omit<Contractor, 'id' | 'created_at' | 'updated_at'>
+  ) => {
+    if (!schoolId) {
+      toast.error('Please select a school first.');
+      throw new Error('No school selected');
+    }
+
     try {
+      const payload = {
+        ...data,
+        // Enforce correct school_id for RLS
+        school_id: schoolId,
+      };
+
       const { data: result, error } = await supabase
         .from('transport_contractors')
-        .insert([data])
+        .insert([payload])
         .select()
         .single();
 
