@@ -493,7 +493,16 @@ export const RouteProfilesManager: React.FC<RouteProfilesManagerProps> = ({ onSe
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                       {onSelectProfile && (
-                        <Button variant="ghost" size="icon">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectProfile(profile);
+                          }}
+                          className="gap-1"
+                        >
+                          Manage Trips
                           <ChevronRight className="h-4 w-4" />
                         </Button>
                       )}
