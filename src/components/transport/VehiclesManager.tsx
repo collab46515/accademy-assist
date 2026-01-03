@@ -23,7 +23,9 @@ import {
   AlertTriangle,
   Wrench,
   Users,
-  Fuel
+  Fuel,
+  Building2,
+  Handshake
 } from 'lucide-react';
 import { useTransportData, type Vehicle } from '@/hooks/useTransportData';
 import { useAuth } from '@/hooks/useAuth';
@@ -685,6 +687,18 @@ export const VehiclesManager = () => {
                     <span>{vehicle.fuel_type}</span>
                   </div>
                 )}
+                <div className="flex items-center space-x-2 text-sm">
+                  {vehicle.ownership_type === 'contractor_owned' ? (
+                    <Handshake className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  <Badge variant="outline" className="text-xs">
+                    {vehicle.ownership_type === 'school_owned' ? 'School Owned' : 
+                     vehicle.ownership_type === 'contractor_owned' ? 'Contractor Owned' : 
+                     vehicle.ownership_type === 'leased' ? 'Leased' : 'School Owned'}
+                  </Badge>
+                </div>
                 
                 {/* Alerts */}
                 {(isMaintenanceDue(vehicle.next_maintenance) || isInsuranceExpiringSoon(vehicle.insurance_expiry)) && (
