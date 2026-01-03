@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import {
   Plus,
   Search,
@@ -23,13 +24,24 @@ import {
   Route,
   GraduationCap,
   DollarSign,
-  Clock
+  Clock,
+  Loader2
 } from 'lucide-react';
 import { useTransportData, type StudentTransport } from '@/hooks/useTransportData';
 import { useAuth } from '@/hooks/useAuth';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+
+interface StudentResult {
+  id: string;
+  student_number: string;
+  year_group: string;
+  form_class: string;
+  first_name: string;
+  last_name: string;
+}
 
 interface StudentTransportFormData {
   student_id: string;
@@ -56,6 +68,13 @@ export const StudentTransportManager = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<StudentTransport | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  
+  // Student search state
+  const [studentSearchTerm, setStudentSearchTerm] = useState('');
+  const [studentResults, setStudentResults] = useState<StudentResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<StudentResult | null>(null);
+  const [isStudentPopoverOpen, setIsStudentPopoverOpen] = useState(false);
 
   const form = useForm<StudentTransportFormData>({
     defaultValues: {
@@ -65,6 +84,91 @@ export const StudentTransportManager = () => {
       status: 'active',
     }
   });
+
+  // Debounced student search
+  useEffect(() => {
+    const searchStudents = async () => {
+      if (studentSearchTerm.length < 2) {
+        setStudentResults([]);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        const { data, error } = await supabase
+          .from('students')
+          .select(`
+            id,
+            student_number,
+            year_group,
+            form_class,
+            profiles:user_id (
+              first_name,
+              last_name
+            )
+          `)
+          .or(`student_number.ilike.%${studentSearchTerm}%`)
+          .limit(10);
+
+        if (error) throw error;
+
+        // Also search by name in profiles
+        const { data: profileData, error: profileError } = await supabase
+          .from('students')
+          .select(`
+            id,
+            student_number,
+            year_group,
+            form_class,
+            profiles:user_id (
+              first_name,
+              last_name
+            )
+          `)
+          .limit(10);
+
+        if (profileError) throw profileError;
+
+        // Filter by name match
+        const nameFiltered = (profileData || []).filter((s: any) => {
+          const fullName = `${s.profiles?.first_name || ''} ${s.profiles?.last_name || ''}`.toLowerCase();
+          return fullName.includes(studentSearchTerm.toLowerCase());
+        });
+
+        // Combine and dedupe results
+        const allResults = [...(data || []), ...nameFiltered];
+        const uniqueResults = allResults.reduce((acc: any[], curr: any) => {
+          if (!acc.find(s => s.id === curr.id)) {
+            acc.push({
+              id: curr.id,
+              student_number: curr.student_number,
+              year_group: curr.year_group,
+              form_class: curr.form_class,
+              first_name: curr.profiles?.first_name || '',
+              last_name: curr.profiles?.last_name || '',
+            });
+          }
+          return acc;
+        }, []);
+
+        setStudentResults(uniqueResults.slice(0, 10));
+      } catch (error) {
+        console.error('Error searching students:', error);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(searchStudents, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [studentSearchTerm]);
+
+  const handleStudentSelect = (student: StudentResult) => {
+    setSelectedStudent(student);
+    form.setValue('student_id', student.id);
+    setStudentSearchTerm(`${student.first_name} ${student.last_name} (${student.student_number})`);
+    setIsStudentPopoverOpen(false);
+  };
 
   const filteredAssignments = studentTransport.filter(assignment => {
     const matchesSearch = searchTerm === '' || 
@@ -138,11 +242,81 @@ export const StudentTransportManager = () => {
                       control={form.control}
                       name="student_id"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Student ID</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Enter student ID" />
-                          </FormControl>
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Student</FormLabel>
+                          <Popover open={isStudentPopoverOpen} onOpenChange={setIsStudentPopoverOpen}>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  className={cn(
+                                    "w-full justify-between",
+                                    !selectedStudent && "text-muted-foreground"
+                                  )}
+                                >
+                                  {selectedStudent 
+                                    ? `${selectedStudent.first_name} ${selectedStudent.last_name} (${selectedStudent.student_number})`
+                                    : "Search student by name or ID..."}
+                                  <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[400px] p-0" align="start">
+                              <Command shouldFilter={false}>
+                                <CommandInput 
+                                  placeholder="Type student name or ID..." 
+                                  value={studentSearchTerm}
+                                  onValueChange={setStudentSearchTerm}
+                                />
+                                <CommandList>
+                                  {isSearching && (
+                                    <div className="flex items-center justify-center py-6">
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                      <span className="ml-2 text-sm text-muted-foreground">Searching...</span>
+                                    </div>
+                                  )}
+                                  {!isSearching && studentSearchTerm.length >= 2 && studentResults.length === 0 && (
+                                    <CommandEmpty>No students found.</CommandEmpty>
+                                  )}
+                                  {!isSearching && studentSearchTerm.length < 2 && (
+                                    <div className="py-6 text-center text-sm text-muted-foreground">
+                                      Type at least 2 characters to search
+                                    </div>
+                                  )}
+                                  {studentResults.length > 0 && (
+                                    <CommandGroup heading="Students">
+                                      {studentResults.map((student) => (
+                                        <CommandItem
+                                          key={student.id}
+                                          value={student.id}
+                                          onSelect={() => handleStudentSelect(student)}
+                                          className="cursor-pointer"
+                                        >
+                                          <div className="flex flex-col">
+                                            <span className="font-medium">
+                                              {student.first_name} {student.last_name}
+                                            </span>
+                                            <span className="text-xs text-muted-foreground">
+                                              ID: {student.student_number} • {student.year_group} • {student.form_class}
+                                            </span>
+                                          </div>
+                                        </CommandItem>
+                                      ))}
+                                    </CommandGroup>
+                                  )}
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                          {selectedStudent && (
+                            <div className="mt-2 p-2 bg-muted rounded-md text-sm">
+                              <div className="font-medium">{selectedStudent.first_name} {selectedStudent.last_name}</div>
+                              <div className="text-muted-foreground">
+                                {selectedStudent.year_group} • {selectedStudent.form_class}
+                              </div>
+                            </div>
+                          )}
                           <FormMessage />
                         </FormItem>
                       )}
