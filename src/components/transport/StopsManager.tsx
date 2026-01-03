@@ -195,9 +195,10 @@ export const StopsManager = () => {
       setIsDialogOpen(false);
       resetForm();
       refetch();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error saving stop:', err);
-      toast.error('Failed to save stop');
+      const errorMessage = err?.message || err?.details || 'Failed to save stop';
+      toast.error(`Failed to save stop: ${errorMessage}`);
     }
   };
 
