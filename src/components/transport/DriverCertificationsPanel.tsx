@@ -7,19 +7,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Textarea } from '@/components/ui/textarea';
-import { Award, Plus, Edit, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { Award, Plus, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { useTransportData } from '@/hooks/useTransportData';
+import { useSafetyCompliance } from '@/hooks/useSafetyCompliance';
 import { format, differenceInDays } from 'date-fns';
-import { useToast } from '@/hooks/use-toast';
 
 export const DriverCertificationsPanel = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { drivers } = useTransportData();
-  const { toast } = useToast();
-  
-  // Mock data for demo
-  const [certifications, setCertifications] = useState<any[]>([]);
+  const { certifications, addCertification, loading } = useSafetyCompliance();
 
   const [formData, setFormData] = useState({
     driver_id: '',
@@ -35,13 +31,19 @@ export const DriverCertificationsPanel = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const driver = drivers.find(d => d.id === formData.driver_id);
-    const newCert = {
-      id: crypto.randomUUID(),
-      ...formData,
-      driver_name: driver ? `${driver.first_name} ${driver.last_name}` : 'Unknown',
-    };
-    setCertifications([...certifications, newCert]);
-    toast({ title: 'Certification added successfully' });
+    const driverName = driver ? `${driver.first_name} ${driver.last_name}` : 'Unknown';
+    
+    await addCertification({
+      driver_id: formData.driver_id,
+      certification_type: formData.certification_type,
+      certification_name: formData.certification_name,
+      issuing_authority: formData.issuing_authority || undefined,
+      certificate_number: formData.certificate_number || undefined,
+      issue_date: formData.issue_date,
+      expiry_date: formData.expiry_date || undefined,
+      notes: formData.notes || undefined,
+    }, driverName);
+    
     setIsOpen(false);
     setFormData({
       driver_id: '',
@@ -80,6 +82,14 @@ export const DriverCertificationsPanel = () => {
     if (!c.expiry_date) return false;
     return differenceInDays(new Date(c.expiry_date), new Date()) < 0;
   }).length;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

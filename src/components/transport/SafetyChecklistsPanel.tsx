@@ -9,15 +9,13 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { ClipboardCheck, Plus, Edit, Trash2, CheckCircle, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
-import { useToast } from '@/hooks/use-toast';
+import { useSafetyCompliance } from '@/hooks/useSafetyCompliance';
 
 export const SafetyChecklistsPanel = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [editingChecklist, setEditingChecklist] = useState<any>(null);
-  const { toast } = useToast();
   
-  const [checklists, setChecklists] = useState<any[]>([]);
-  const [completions, setCompletions] = useState<any[]>([]);
+  const { checklists, completions, addChecklist, updateChecklist, toggleChecklistActive, loading } = useSafetyCompliance();
 
   const [formData, setFormData] = useState({
     checklist_name: '',
@@ -49,20 +47,16 @@ export const SafetyChecklistsPanel = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingChecklist) {
-      setChecklists(checklists.map(c => c.id === editingChecklist.id ? { ...c, ...formData } : c));
-      toast({ title: 'Checklist updated successfully' });
+      await updateChecklist(editingChecklist.id, formData);
     } else {
-      const newChecklist = {
-        id: crypto.randomUUID(),
-        ...formData,
-        is_active: true,
-        created_at: new Date().toISOString(),
-      };
-      setChecklists([...checklists, newChecklist]);
-      toast({ title: 'Checklist created successfully' });
+      await addChecklist(formData);
     }
     setIsOpen(false);
     setEditingChecklist(null);
+    resetForm();
+  };
+
+  const resetForm = () => {
     setFormData({
       checklist_name: '',
       checklist_type: 'pre_trip',
@@ -84,10 +78,6 @@ export const SafetyChecklistsPanel = () => {
     setIsOpen(true);
   };
 
-  const handleToggleActive = (id: string) => {
-    setChecklists(checklists.map(c => c.id === id ? { ...c, is_active: !c.is_active } : c));
-  };
-
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'pre_trip': return 'bg-blue-500';
@@ -97,6 +87,14 @@ export const SafetyChecklistsPanel = () => {
       default: return 'bg-gray-500';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -108,13 +106,7 @@ export const SafetyChecklistsPanel = () => {
               setIsOpen(open);
               if (!open) {
                 setEditingChecklist(null);
-                setFormData({
-                  checklist_name: '',
-                  checklist_type: 'pre_trip',
-                  applies_to: 'vehicle',
-                  is_mandatory: true,
-                  items: [],
-                });
+                resetForm();
               }
             }}>
               <DialogTrigger asChild>
@@ -245,7 +237,7 @@ export const SafetyChecklistsPanel = () => {
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={checklist.is_active}
-                      onCheckedChange={() => handleToggleActive(checklist.id)}
+                      onCheckedChange={() => toggleChecklistActive(checklist.id)}
                     />
                     <Button variant="ghost" size="sm" onClick={() => handleEdit(checklist)}>
                       <Edit className="h-4 w-4" />

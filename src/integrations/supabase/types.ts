@@ -2450,6 +2450,69 @@ export type Database = {
         }
         Relationships: []
       }
+      driver_certifications: {
+        Row: {
+          certificate_number: string | null
+          certification_name: string
+          certification_type: string
+          created_at: string | null
+          document_url: string | null
+          driver_id: string | null
+          expiry_date: string | null
+          id: string
+          issue_date: string
+          issuing_authority: string | null
+          notes: string | null
+          school_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          certificate_number?: string | null
+          certification_name: string
+          certification_type: string
+          created_at?: string | null
+          document_url?: string | null
+          driver_id?: string | null
+          expiry_date?: string | null
+          id?: string
+          issue_date: string
+          issuing_authority?: string | null
+          notes?: string | null
+          school_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          certificate_number?: string | null
+          certification_name?: string
+          certification_type?: string
+          created_at?: string | null
+          document_url?: string | null
+          driver_id?: string | null
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string
+          issuing_authority?: string | null
+          notes?: string | null
+          school_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_certifications_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_certifications_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_checkins: {
         Row: {
           checkin_time: string
@@ -10537,6 +10600,77 @@ export type Database = {
           },
         ]
       }
+      transport_checklist_completions: {
+        Row: {
+          checklist_id: string | null
+          completed_at: string | null
+          completed_by: string
+          created_at: string | null
+          driver_id: string | null
+          id: string
+          notes: string | null
+          overall_status: string | null
+          responses: Json | null
+          school_id: string | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          checklist_id?: string | null
+          completed_at?: string | null
+          completed_by: string
+          created_at?: string | null
+          driver_id?: string | null
+          id?: string
+          notes?: string | null
+          overall_status?: string | null
+          responses?: Json | null
+          school_id?: string | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          checklist_id?: string | null
+          completed_at?: string | null
+          completed_by?: string
+          created_at?: string | null
+          driver_id?: string | null
+          id?: string
+          notes?: string | null
+          overall_status?: string | null
+          responses?: Json | null
+          school_id?: string | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_checklist_completions_checklist_id_fkey"
+            columns: ["checklist_id"]
+            isOneToOne: false
+            referencedRelation: "transport_safety_checklists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_checklist_completions_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_checklist_completions_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_checklist_completions_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transport_contractors: {
         Row: {
           bank_account_name: string | null
@@ -11278,6 +11412,125 @@ export type Database = {
           },
         ]
       }
+      transport_safety_checklists: {
+        Row: {
+          applies_to: string
+          checklist_name: string
+          checklist_type: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          is_mandatory: boolean | null
+          items: Json | null
+          school_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          applies_to?: string
+          checklist_name: string
+          checklist_type?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_mandatory?: boolean | null
+          items?: Json | null
+          school_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          applies_to?: string
+          checklist_name?: string
+          checklist_type?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_mandatory?: boolean | null
+          items?: Json | null
+          school_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_safety_checklists_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transport_safety_training: {
+        Row: {
+          certificate_url: string | null
+          created_at: string | null
+          driver_id: string | null
+          duration_hours: number | null
+          id: string
+          notes: string | null
+          passed: boolean | null
+          passing_score: number | null
+          school_id: string | null
+          score: number | null
+          status: string | null
+          training_date: string
+          training_name: string
+          training_provider: string | null
+          training_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          certificate_url?: string | null
+          created_at?: string | null
+          driver_id?: string | null
+          duration_hours?: number | null
+          id?: string
+          notes?: string | null
+          passed?: boolean | null
+          passing_score?: number | null
+          school_id?: string | null
+          score?: number | null
+          status?: string | null
+          training_date: string
+          training_name: string
+          training_provider?: string | null
+          training_type?: string
+          updated_at?: string | null
+        }
+        Update: {
+          certificate_url?: string | null
+          created_at?: string | null
+          driver_id?: string | null
+          duration_hours?: number | null
+          id?: string
+          notes?: string | null
+          passed?: boolean | null
+          passing_score?: number | null
+          school_id?: string | null
+          score?: number | null
+          status?: string | null
+          training_date?: string
+          training_name?: string
+          training_provider?: string | null
+          training_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_safety_training_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_safety_training_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transport_trips: {
         Row: {
           assigned_students_count: number | null
@@ -11978,6 +12231,72 @@ export type Database = {
           },
           {
             foreignKeyName: "vehicle_contracts_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_inspections: {
+        Row: {
+          created_at: string | null
+          defects_found: Json | null
+          document_url: string | null
+          id: string
+          inspection_date: string
+          inspection_type: string
+          inspector_name: string
+          inspector_type: string | null
+          notes: string | null
+          odometer_reading: number | null
+          overall_result: string
+          school_id: string | null
+          updated_at: string | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          defects_found?: Json | null
+          document_url?: string | null
+          id?: string
+          inspection_date: string
+          inspection_type?: string
+          inspector_name: string
+          inspector_type?: string | null
+          notes?: string | null
+          odometer_reading?: number | null
+          overall_result?: string
+          school_id?: string | null
+          updated_at?: string | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          defects_found?: Json | null
+          document_url?: string | null
+          id?: string
+          inspection_date?: string
+          inspection_type?: string
+          inspector_name?: string
+          inspector_type?: string | null
+          notes?: string | null
+          odometer_reading?: number | null
+          overall_result?: string
+          school_id?: string | null
+          updated_at?: string | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_inspections_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_inspections_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"

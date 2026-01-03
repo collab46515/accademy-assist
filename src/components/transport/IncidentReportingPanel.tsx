@@ -16,7 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 export const IncidentReportingPanel = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIncident, setSelectedIncident] = useState<any>(null);
-  const { vehicles, drivers, routes, incidents } = useTransportData();
+  const { vehicles, drivers, routes, incidents, addIncident } = useTransportData();
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -34,20 +34,39 @@ export const IncidentReportingPanel = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({ title: 'Incident reported', description: 'The incident has been logged successfully.' });
-    setIsOpen(false);
-    setFormData({
-      incident_date: new Date().toISOString().slice(0, 16),
-      incident_type: '',
-      severity: 'low',
-      vehicle_id: '',
-      driver_id: '',
-      route_id: '',
-      location_address: '',
-      description: '',
-      immediate_actions: '',
-      reported_by: '',
+    
+    const result = await addIncident({
+      school_id: '', // Will be set by the hook
+      incident_date: formData.incident_date,
+      incident_type: formData.incident_type,
+      severity: formData.severity,
+      vehicle_id: formData.vehicle_id || '',
+      route_id: formData.route_id || undefined,
+      location: formData.location_address || undefined,
+      description: formData.description,
+      reported_by: formData.reported_by,
+      status: 'open',
+      parent_notified: false,
+      authorities_notified: false,
+      insurance_claim: false,
     });
+
+    if (result) {
+      toast({ title: 'Incident reported', description: 'The incident has been logged successfully.' });
+      setIsOpen(false);
+      setFormData({
+        incident_date: new Date().toISOString().slice(0, 16),
+        incident_type: '',
+        severity: 'low',
+        vehicle_id: '',
+        driver_id: '',
+        route_id: '',
+        location_address: '',
+        description: '',
+        immediate_actions: '',
+        reported_by: '',
+      });
+    }
   };
 
   const getSeverityColor = (severity: string) => {
