@@ -9,11 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, Edit, Trash2, Phone, User, Shield, Search } from 'lucide-react';
 import { useTransportNotifications } from '@/hooks/useTransportNotifications';
-import { useAuth } from '@/hooks/useAuth';
+import { useRBAC } from '@/hooks/useRBAC';
 
 export const EmergencyContactsManager = () => {
-  const { user } = useAuth();
-  const schoolId = user?.user_metadata?.school_id || null;
+  const { currentSchool } = useRBAC();
+  const schoolId = currentSchool?.id || null;
   const { emergencyContacts, loading, addEmergencyContact, updateEmergencyContact, deleteEmergencyContact } = useTransportNotifications(schoolId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<any>(null);

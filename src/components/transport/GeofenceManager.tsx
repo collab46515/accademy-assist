@@ -9,11 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, Edit, Trash2, MapPin, Circle, ArrowRightCircle, ArrowLeftCircle } from 'lucide-react';
 import { useTransportNotifications } from '@/hooks/useTransportNotifications';
-import { useAuth } from '@/hooks/useAuth';
+import { useRBAC } from '@/hooks/useRBAC';
 
 export const GeofenceManager = () => {
-  const { user } = useAuth();
-  const schoolId = user?.user_metadata?.school_id || null;
+  const { currentSchool } = useRBAC();
+  const schoolId = currentSchool?.id || null;
   const { geofences, loading, addGeofence, updateGeofence, deleteGeofence } = useTransportNotifications(schoolId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingGeofence, setEditingGeofence] = useState<any>(null);
