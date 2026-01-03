@@ -24,7 +24,8 @@ import {
   AlertCircle,
   Shield,
   FileText,
-  Upload
+  Upload,
+  Briefcase
 } from 'lucide-react';
 import { useTransportData, type Driver } from '@/hooks/useTransportData';
 import { useAuth } from '@/hooks/useAuth';
@@ -998,6 +999,14 @@ export const DriversManager = () => {
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
+              <div className="flex items-center space-x-2 text-sm">
+                <Briefcase className="h-4 w-4 text-muted-foreground" />
+                <Badge variant="outline" className="text-xs">
+                  {driver.employee_type === 'driver' ? 'Driver' : 
+                   driver.employee_type === 'assistant' ? 'Assistant' : 
+                   driver.employee_type === 'both' ? 'Driver & Assistant' : 'Driver'}
+                </Badge>
+              </div>
               <div className="flex items-center space-x-2 text-sm">
                 <Phone className="h-4 w-4 text-muted-foreground" />
                 <span>{driver.phone}</span>
