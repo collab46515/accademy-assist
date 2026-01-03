@@ -57,7 +57,7 @@ export const StopsManager = () => {
   const [selectedRoute, setSelectedRoute] = useState<string>('');
   const [formData, setFormData] = useState<StopFormData>({
     stop_name: '',
-    stop_type: 'student_stop',
+    stop_type: 'regular',
     location_address: '',
     landmark: '',
     latitude: null,
@@ -72,7 +72,7 @@ export const StopsManager = () => {
   const resetForm = () => {
     setFormData({
       stop_name: '',
-      stop_type: 'student_stop',
+      stop_type: 'regular',
       location_address: '',
       landmark: '',
       latitude: null,
@@ -92,7 +92,7 @@ export const StopsManager = () => {
     setSelectedRoute(stop.route_id);
     setFormData({
       stop_name: stop.stop_name,
-      stop_type: stop.stop_type || 'student_stop',
+      stop_type: stop.stop_type || 'regular',
       location_address: stop.location_address || '',
       landmark: stop.landmark || '',
       latitude: stop.latitude || null,
@@ -224,9 +224,9 @@ export const StopsManager = () => {
         return <Badge className="bg-purple-100 text-purple-800">Depot</Badge>;
       case 'school':
         return <Badge className="bg-blue-100 text-blue-800">School</Badge>;
-      case 'student_stop':
+      case 'regular':
       default:
-        return <Badge className="bg-green-100 text-green-800">Student Stop</Badge>;
+        return <Badge className="bg-green-100 text-green-800">Regular Stop</Badge>;
     }
   };
 
@@ -322,9 +322,9 @@ export const StopsManager = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="regular">Regular Stop</SelectItem>
                       <SelectItem value="depot">Depot</SelectItem>
                       <SelectItem value="school">School</SelectItem>
-                      <SelectItem value="student_stop">Student Stop</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
