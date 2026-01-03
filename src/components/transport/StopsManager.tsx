@@ -134,6 +134,12 @@ export const StopsManager = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!userSchoolId) {
+      toast.error('Please select a school from the header dropdown');
+      return;
+    }
+    
     if (!selectedRoute) {
       toast.error('Please select a route');
       return;
