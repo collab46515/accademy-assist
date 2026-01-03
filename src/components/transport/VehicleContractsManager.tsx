@@ -29,7 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Plus, Pencil, Trash2, FileText, Calendar, DollarSign, Upload } from 'lucide-react';
+import { Plus, Pencil, Trash2, FileText, Calendar, DollarSign, Upload, ExternalLink, X } from 'lucide-react';
 import { useTransportMasterData, VehicleContract } from '@/hooks/useTransportMasterData';
 import { useTransportData } from '@/hooks/useTransportData';
 import { format, parseISO, isAfter, isBefore, addDays } from 'date-fns';
@@ -41,6 +41,7 @@ export const VehicleContractsManager = () => {
   const { contractors, contracts, loading, refetch } = useTransportMasterData(userSchoolId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingContract, setEditingContract] = useState<VehicleContract | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
     contractor_id: '',
     vehicle_id: '',
@@ -52,6 +53,7 @@ export const VehicleContractsManager = () => {
     payment_frequency: 'monthly',
     terms_and_conditions: '',
     status: 'active',
+    contract_document_url: '',
   });
 
   const resetForm = () => {
@@ -66,6 +68,7 @@ export const VehicleContractsManager = () => {
       payment_frequency: 'monthly',
       terms_and_conditions: '',
       status: 'active',
+      contract_document_url: '',
     });
     setEditingContract(null);
   };
@@ -83,8 +86,54 @@ export const VehicleContractsManager = () => {
       payment_frequency: contract.payment_frequency || 'monthly',
       terms_and_conditions: contract.terms_and_conditions || '',
       status: contract.status,
+      contract_document_url: contract.contract_document_url || '',
     });
     setIsDialogOpen(true);
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !userSchoolId) return;
+
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      toast.error('File size must be less than 10MB');
+      return;
+    }
+
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Please upload a PDF, Word document, or image file');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${userSchoolId}/contracts/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('transport-documents')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('transport-documents')
+        .getPublicUrl(fileName);
+
+      setFormData(prev => ({ ...prev, contract_document_url: publicUrl }));
+      toast.success('SLA document uploaded successfully');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Failed to upload document');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveDocument = () => {
+    setFormData(prev => ({ ...prev, contract_document_url: '' }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -363,6 +412,57 @@ export const VehicleContractsManager = () => {
                     placeholder="Enter contract terms and SLA details..."
                   />
                 </div>
+
+                <div className="col-span-2">
+                  <Label>SLA Document</Label>
+                  <div className="mt-2">
+                    {formData.contract_document_url ? (
+                      <div className="flex items-center gap-2 p-3 border rounded-lg bg-muted/50">
+                        <FileText className="h-5 w-5 text-primary" />
+                        <span className="flex-1 text-sm truncate">SLA Document Uploaded</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => window.open(formData.contract_document_url, '_blank')}
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleRemoveDocument}
+                        >
+                          <X className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="file"
+                          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                          onChange={handleFileUpload}
+                          disabled={isUploading}
+                          className="hidden"
+                          id="sla-document-upload"
+                        />
+                        <label
+                          htmlFor="sla-document-upload"
+                          className="flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                        >
+                          <Upload className="h-4 w-4" />
+                          <span className="text-sm">
+                            {isUploading ? 'Uploading...' : 'Upload SLA Document'}
+                          </span>
+                        </label>
+                        <span className="text-xs text-muted-foreground">
+                          PDF, Word, or Image (Max 10MB)
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
               <DialogFooter>
@@ -393,6 +493,7 @@ export const VehicleContractsManager = () => {
                 <TableHead>Vehicle</TableHead>
                 <TableHead>Validity</TableHead>
                 <TableHead>Payment</TableHead>
+                <TableHead>SLA Doc</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -426,6 +527,21 @@ export const VehicleContractsManager = () => {
                         {getPaymentTypeLabel(contract.payment_type)}
                       </div>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    {contract.contract_document_url ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => window.open(contract.contract_document_url, '_blank')}
+                        className="text-primary"
+                      >
+                        <FileText className="h-4 w-4 mr-1" />
+                        View
+                      </Button>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">—</span>
+                    )}
                   </TableCell>
                   <TableCell>{getStatusBadge(contract)}</TableCell>
                   <TableCell className="text-right">
