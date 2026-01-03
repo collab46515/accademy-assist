@@ -58,9 +58,9 @@ export const EmergencyContactsManager = () => {
       
       const { data: studentsData, error: studentsError } = await client
         .from('students')
-        .select('id, student_number, year_group, user_id')
+        .select('id, student_number, year_group, user_id, status')
         .eq('school_id', schoolId)
-        .eq('is_active', true)
+        .eq('status', 'Active')
         .order('year_group');
       
       if (studentsError) throw studentsError;
@@ -221,9 +221,9 @@ export const EmergencyContactsManager = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {loadingStudents ? (
-                        <SelectItem value="" disabled>Loading students...</SelectItem>
+                        <SelectItem value="_loading" disabled>Loading students...</SelectItem>
                       ) : students.length === 0 ? (
-                        <SelectItem value="" disabled>No students found</SelectItem>
+                        <SelectItem value="_empty" disabled>No students found</SelectItem>
                       ) : (
                         students.map((student) => (
                           <SelectItem key={student.id} value={student.id}>
