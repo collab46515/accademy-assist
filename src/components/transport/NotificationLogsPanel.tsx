@@ -3,12 +3,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Mail, MessageSquare, Bell, CheckCircle, Clock, XCircle, Eye } from 'lucide-react';
 import { useTransportNotifications } from '@/hooks/useTransportNotifications';
-import { useAuth } from '@/hooks/useAuth';
+import { useRBAC } from '@/hooks/useRBAC';
 import { formatDistanceToNow } from 'date-fns';
 
 export const NotificationLogsPanel = () => {
-  const { user } = useAuth();
-  const schoolId = user?.user_metadata?.school_id || null;
+  const { currentSchool } = useRBAC();
+  const schoolId = currentSchool?.id || null;
   const { logs, loading } = useTransportNotifications(schoolId);
 
   const getChannelIcon = (channel: string) => {
