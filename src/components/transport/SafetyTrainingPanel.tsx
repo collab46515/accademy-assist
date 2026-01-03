@@ -8,17 +8,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { GraduationCap, Plus, Edit, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { GraduationCap, Plus, CheckCircle, Clock } from 'lucide-react';
 import { useTransportData } from '@/hooks/useTransportData';
+import { useSafetyCompliance } from '@/hooks/useSafetyCompliance';
 import { format } from 'date-fns';
-import { useToast } from '@/hooks/use-toast';
 
 export const SafetyTrainingPanel = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { drivers } = useTransportData();
-  const { toast } = useToast();
-  
-  const [trainings, setTrainings] = useState<any[]>([]);
+  const { trainings, addTraining, loading } = useSafetyCompliance();
 
   const [formData, setFormData] = useState({
     driver_id: '',
@@ -36,20 +34,24 @@ export const SafetyTrainingPanel = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const driver = drivers.find(d => d.id === formData.driver_id);
-    const score = formData.score ? parseFloat(formData.score) : null;
-    const passingScore = formData.passing_score ? parseFloat(formData.passing_score) : null;
+    const driverName = driver ? `${driver.first_name} ${driver.last_name}` : undefined;
+    const score = formData.score ? parseFloat(formData.score) : undefined;
+    const passingScore = formData.passing_score ? parseFloat(formData.passing_score) : undefined;
     
-    const newTraining = {
-      id: crypto.randomUUID(),
-      ...formData,
-      driver_name: driver ? `${driver.first_name} ${driver.last_name}` : 'Unknown',
+    await addTraining({
+      driver_id: formData.driver_id || undefined,
+      training_type: formData.training_type,
+      training_name: formData.training_name,
+      training_provider: formData.training_provider || undefined,
+      training_date: formData.training_date,
+      duration_hours: formData.duration_hours ? parseFloat(formData.duration_hours) : undefined,
+      status: formData.status,
       score,
       passing_score: passingScore,
-      passed: score !== null && passingScore !== null ? score >= passingScore : null,
-    };
+      passed: score !== undefined && passingScore !== undefined ? score >= passingScore : undefined,
+      notes: formData.notes || undefined,
+    }, driverName);
     
-    setTrainings([newTraining, ...trainings]);
-    toast({ title: 'Training record added successfully' });
     setIsOpen(false);
     setFormData({
       driver_id: '',
@@ -96,6 +98,14 @@ export const SafetyTrainingPanel = () => {
     passed: trainings.filter((t: any) => t.passed === true).length,
     scheduled: trainings.filter((t: any) => t.status === 'scheduled').length,
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

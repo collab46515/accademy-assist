@@ -10,16 +10,14 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Car, Plus, Eye, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { useTransportData } from '@/hooks/useTransportData';
+import { useSafetyCompliance } from '@/hooks/useSafetyCompliance';
 import { format } from 'date-fns';
-import { useToast } from '@/hooks/use-toast';
 
 export const VehicleInspectionsPanel = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedInspection, setSelectedInspection] = useState<any>(null);
   const { vehicles } = useTransportData();
-  const { toast } = useToast();
-  
-  const [inspections, setInspections] = useState<any[]>([]);
+  const { inspections, addInspection, loading } = useSafetyCompliance();
 
   const [formData, setFormData] = useState({
     vehicle_id: '',
@@ -36,15 +34,20 @@ export const VehicleInspectionsPanel = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const vehicle = vehicles.find(v => v.id === formData.vehicle_id);
-    const newInspection = {
-      id: crypto.randomUUID(),
-      ...formData,
-      vehicle_reg: vehicle?.registration_number || 'Unknown',
-      odometer_reading: formData.odometer_reading ? parseInt(formData.odometer_reading) : null,
+    const vehicleReg = vehicle?.registration_number || 'Unknown';
+    
+    await addInspection({
+      vehicle_id: formData.vehicle_id,
+      inspection_type: formData.inspection_type,
+      inspection_date: formData.inspection_date,
+      inspector_name: formData.inspector_name,
+      inspector_type: formData.inspector_type,
+      overall_result: formData.overall_result,
+      odometer_reading: formData.odometer_reading ? parseInt(formData.odometer_reading) : undefined,
       defects_found: formData.defects_found ? formData.defects_found.split(',').map(s => s.trim()) : [],
-    };
-    setInspections([newInspection, ...inspections]);
-    toast({ title: 'Inspection recorded successfully' });
+      notes: formData.notes || undefined,
+    }, vehicleReg);
+    
     setIsOpen(false);
     setFormData({
       vehicle_id: '',
@@ -85,6 +88,14 @@ export const VehicleInspectionsPanel = () => {
     failed: inspections.filter((i: any) => i.overall_result === 'fail').length,
     pending: inspections.filter((i: any) => i.overall_result === 'conditional').length,
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
