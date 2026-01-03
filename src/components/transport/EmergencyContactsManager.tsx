@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Plus, Edit, Trash2, Phone, User, Shield, Search } from 'lucide-react';
 import { useTransportNotifications } from '@/hooks/useTransportNotifications';
 import { useRBAC } from '@/hooks/useRBAC';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+interface StudentWithProfile {
+  id: string;
+  student_number: string;
+  year_group: string;
+  first_name: string | null;
+  last_name: string | null;
+}
 
 export const EmergencyContactsManager = () => {
   const { currentSchool } = useRBAC();
@@ -18,6 +28,8 @@ export const EmergencyContactsManager = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [students, setStudents] = useState<StudentWithProfile[]>([]);
+  const [loadingStudents, setLoadingStudents] = useState(false);
   const [formData, setFormData] = useState({
     student_id: '',
     contact_name: '',
@@ -31,19 +43,100 @@ export const EmergencyContactsManager = () => {
     is_active: true
   });
 
+  useEffect(() => {
+    if (schoolId) {
+      fetchStudents();
+    }
+  }, [schoolId]);
+
+  const fetchStudents = async () => {
+    if (!schoolId) return;
+    setLoadingStudents(true);
+    try {
+      // Use any type to avoid TS2589 type recursion with deeply nested Supabase generated types
+      const client = supabase as any;
+      
+      const { data: studentsData, error: studentsError } = await client
+        .from('students')
+        .select('id, student_number, year_group, user_id')
+        .eq('school_id', schoolId)
+        .eq('is_active', true)
+        .order('year_group');
+      
+      if (studentsError) throw studentsError;
+      
+      // Get user_ids to fetch profiles
+      const userIds = (studentsData || [])
+        .map((s: any) => s.user_id)
+        .filter((id: string | null): id is string => id !== null);
+      
+      let profilesMap: Record<string, { first_name: string | null; last_name: string | null }> = {};
+      
+      if (userIds.length > 0) {
+        const { data: profilesData } = await client
+          .from('profiles')
+          .select('id, first_name, last_name')
+          .in('id', userIds);
+        
+        profilesMap = (profilesData || []).reduce((acc: any, p: any) => {
+          acc[p.id] = { first_name: p.first_name, last_name: p.last_name };
+          return acc;
+        }, {} as Record<string, { first_name: string | null; last_name: string | null }>);
+      }
+      
+      // Combine students with profiles
+      const studentsWithProfiles: StudentWithProfile[] = (studentsData || []).map((s: any) => ({
+        id: s.id,
+        student_number: s.student_number,
+        year_group: s.year_group,
+        first_name: s.user_id ? profilesMap[s.user_id]?.first_name || null : null,
+        last_name: s.user_id ? profilesMap[s.user_id]?.last_name || null : null
+      }));
+      
+      setStudents(studentsWithProfiles);
+    } catch (err) {
+      console.error('Error fetching students:', err);
+    } finally {
+      setLoadingStudents(false);
+    }
+  };
+
+  const getStudentName = (studentId: string) => {
+    const student = students.find(s => s.id === studentId);
+    if (!student) return 'Unknown Student';
+    return `${student.first_name || ''} ${student.last_name || ''}`.trim() || student.student_number;
+  };
+
   const handleSubmit = async () => {
     if (!schoolId) return;
+    
+    // Validation
+    if (!formData.student_id) {
+      toast.error('Please select a student');
+      return;
+    }
+    if (!formData.contact_name.trim()) {
+      toast.error('Please enter contact name');
+      return;
+    }
+    if (!formData.phone_primary.trim()) {
+      toast.error('Please enter primary phone number');
+      return;
+    }
     
     try {
       if (editingContact) {
         await updateEmergencyContact(editingContact.id, formData);
+        toast.success('Contact updated successfully');
       } else {
         await addEmergencyContact({ ...formData, school_id: schoolId });
+        toast.success('Contact added successfully');
       }
       setIsDialogOpen(false);
       resetForm();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error saving contact:', err);
+      toast.error(`Failed to save contact: ${err.message || 'Unknown error'}`);
     }
   };
 
@@ -118,7 +211,34 @@ export const EmergencyContactsManager = () => {
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label>Contact Name</Label>
+                  <Label>Student *</Label>
+                  <Select 
+                    value={formData.student_id} 
+                    onValueChange={(v) => setFormData({ ...formData, student_id: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a student" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {loadingStudents ? (
+                        <SelectItem value="" disabled>Loading students...</SelectItem>
+                      ) : students.length === 0 ? (
+                        <SelectItem value="" disabled>No students found</SelectItem>
+                      ) : (
+                        students.map((student) => (
+                          <SelectItem key={student.id} value={student.id}>
+                            {student.first_name || student.last_name 
+                              ? `${student.first_name || ''} ${student.last_name || ''}`.trim()
+                              : student.student_number} ({student.year_group})
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Contact Name *</Label>
                   <Input
                     value={formData.contact_name}
                     onChange={(e) => setFormData({ ...formData, contact_name: e.target.value })}
@@ -162,7 +282,7 @@ export const EmergencyContactsManager = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Primary Phone</Label>
+                    <Label>Primary Phone *</Label>
                     <Input
                       value={formData.phone_primary}
                       onChange={(e) => setFormData({ ...formData, phone_primary: e.target.value })}
