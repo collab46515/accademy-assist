@@ -133,7 +133,7 @@ export const useTripPlanning = (schoolId: string | null) => {
 
       const [profilesRes, tripsRes, standbyRes] = await Promise.all([
         supabase.from('route_profiles').select('*').eq('school_id', schoolId).order('profile_name'),
-        supabase.from('transport_trips').select('*, vehicle:vehicles(*), driver:drivers(*)').eq('school_id', schoolId).order('trip_name'),
+        supabase.from('transport_trips').select('*, vehicle:vehicles(*), driver:drivers!transport_trips_driver_id_fkey(*), attender:drivers!transport_trips_attender_id_fkey(*)').eq('school_id', schoolId).order('trip_name'),
         supabase.from('standby_resources').select('*, driver:drivers(*), vehicle:vehicles(*)').eq('school_id', schoolId)
       ]);
 
@@ -154,7 +154,7 @@ export const useTripPlanning = (schoolId: string | null) => {
     try {
       const { data, error } = await supabase
         .from('transport_trips')
-        .select('*, vehicle:vehicles(*), driver:drivers(*)')
+        .select('*, vehicle:vehicles(*), driver:drivers!transport_trips_driver_id_fkey(*), attender:drivers!transport_trips_attender_id_fkey(*)')
         .eq('route_profile_id', profileId)
         .order('scheduled_start_time');
 
@@ -258,7 +258,7 @@ export const useTripPlanning = (schoolId: string | null) => {
       const { data: result, error } = await supabase
         .from('transport_trips')
         .insert([data])
-        .select('*, vehicle:vehicles(*), driver:drivers(*)')
+        .select('*, vehicle:vehicles(*), driver:drivers!transport_trips_driver_id_fkey(*), attender:drivers!transport_trips_attender_id_fkey(*)')
         .single();
 
       if (error) throw error;
@@ -277,7 +277,7 @@ export const useTripPlanning = (schoolId: string | null) => {
         .from('transport_trips')
         .update(updates)
         .eq('id', id)
-        .select('*, vehicle:vehicles(*), driver:drivers(*)')
+        .select('*, vehicle:vehicles(*), driver:drivers!transport_trips_driver_id_fkey(*), attender:drivers!transport_trips_attender_id_fkey(*)')
         .single();
 
       if (error) throw error;
