@@ -58,9 +58,9 @@ export const EmergencyContactsManager = () => {
       
       const { data: studentsData, error: studentsError } = await client
         .from('students')
-        .select('id, student_number, year_group, user_id, status')
+        .select('id, student_number, year_group, user_id')
         .eq('school_id', schoolId)
-        .eq('status', 'Active')
+        .eq('is_enrolled', true)
         .order('year_group');
       
       if (studentsError) throw studentsError;
