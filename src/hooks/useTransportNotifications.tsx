@@ -117,15 +117,17 @@ export const useTransportNotifications = (schoolId: string | null) => {
 
     try {
       setLoading(true);
-      const [templatesRes, logsRes, geofencesRes] = await Promise.all([
+      const [templatesRes, logsRes, geofencesRes, emergencyContactsRes] = await Promise.all([
         supabase.from('transport_notification_templates').select('*').eq('school_id', schoolId).order('template_name'),
         supabase.from('transport_notification_logs').select('*').eq('school_id', schoolId).order('created_at', { ascending: false }).limit(100),
-        supabase.from('transport_geofences').select('*').eq('school_id', schoolId).order('name')
+        supabase.from('transport_geofences').select('*').eq('school_id', schoolId).order('name'),
+        supabase.from('transport_emergency_contacts').select('*').eq('school_id', schoolId).order('priority_order')
       ]);
 
       if (templatesRes.data) setTemplates(templatesRes.data);
       if (logsRes.data) setLogs(logsRes.data);
       if (geofencesRes.data) setGeofences(geofencesRes.data);
+      if (emergencyContactsRes.data) setEmergencyContacts(emergencyContactsRes.data);
     } catch (err) {
       console.error('Error fetching notification data:', err);
     } finally {
