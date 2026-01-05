@@ -33,6 +33,7 @@ import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface StudentResult {
   id: string;
@@ -60,7 +61,7 @@ interface StudentTransportFormData {
 }
 
 export const StudentTransportManager = () => {
-  const { studentTransport, routes, stops, loading } = useTransportData();
+  const { studentTransport, routes, stops, loading, addStudentTransport, updateStudentTransport, userSchoolId } = useTransportData();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAssignment, setSelectedAssignment] = useState<StudentTransport | null>(null);
@@ -170,6 +171,36 @@ export const StudentTransportManager = () => {
     setIsStudentPopoverOpen(false);
   };
 
+  const handleSubmit = async (data: StudentTransportFormData) => {
+    if (!userSchoolId) {
+      toast.error('No school association found. Please contact administrator.');
+      return;
+    }
+
+    try {
+      const assignmentData = {
+        ...data,
+        school_id: userSchoolId,
+        start_date: format(data.start_date, 'yyyy-MM-dd'),
+        end_date: data.end_date ? format(data.end_date, 'yyyy-MM-dd') : undefined,
+      };
+
+      if (editingAssignment) {
+        await updateStudentTransport(editingAssignment.id, assignmentData);
+      } else {
+        await addStudentTransport(assignmentData as any);
+      }
+
+      setIsFormOpen(false);
+      setEditingAssignment(null);
+      setSelectedStudent(null);
+      setStudentSearchTerm('');
+      form.reset();
+    } catch (error) {
+      console.error('Failed to save assignment:', error);
+    }
+  };
+
   const filteredAssignments = studentTransport.filter(assignment => {
     const matchesSearch = searchTerm === '' || 
                          assignment.student_id.includes(searchTerm) ||
@@ -233,7 +264,7 @@ export const StudentTransportManager = () => {
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
-              <form className="space-y-6">
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Assignment Details */}
                   <div className="space-y-4">
