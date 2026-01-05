@@ -74,9 +74,11 @@ export const IncidentsManager = () => {
   });
 
   const filteredIncidents = incidents.filter(incident => {
-    const matchesSearch = incident.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         incident.incident_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         incident.location?.toLowerCase().includes(searchTerm.toLowerCase());
+    if (!incident) return false;
+    
+    const matchesSearch = (incident.description?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                         (incident.incident_type?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                         (incident.location?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     
     const matchesStatus = filterStatus === 'all' || incident.status === filterStatus;
     const matchesSeverity = filterSeverity === 'all' || incident.severity === filterSeverity;
