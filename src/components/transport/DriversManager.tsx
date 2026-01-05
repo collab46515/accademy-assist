@@ -38,20 +38,22 @@ import { toast } from 'sonner';
 import { DriverDocumentUploader } from './DriverDocumentUploader';
 
 const driverFormSchema = z.object({
-  employee_id: z.string().optional(),
-  first_name: z.string().optional(),
-  last_name: z.string().optional(),
-  email: z.string().optional(),
-  phone: z.string().optional(),
-  license_number: z.string().optional(),
-  license_expiry: z.date().optional(),
-  license_type: z.array(z.string()).default([]),
-  hire_date: z.date().optional(),
+  // Required fields (must match database NOT NULL constraints)
+  employee_id: z.string().min(1, 'Employee ID is required'),
+  first_name: z.string().min(1, 'First name is required'),
+  last_name: z.string().min(1, 'Last name is required'),
+  phone: z.string().min(1, 'Phone number is required'),
+  license_number: z.string().min(1, 'License number is required'),
+  license_expiry: z.date({ required_error: 'License expiry date is required' }),
+  license_type: z.array(z.string()).min(1, 'At least one license type is required').default(['B']),
+  hire_date: z.date({ required_error: 'Hire date is required' }),
+  status: z.string().default('active'),
+  // Optional fields
+  email: z.string().email().optional().or(z.literal('')),
   birth_date: z.date().optional(),
   address: z.string().optional(),
   emergency_contact_name: z.string().optional(),
   emergency_contact_phone: z.string().optional(),
-  status: z.string().default('active'),
   dbs_check_date: z.date().optional(),
   dbs_expiry: z.date().optional(),
   first_aid_cert_date: z.date().optional(),
@@ -76,7 +78,7 @@ const driverFormSchema = z.object({
   hmv_permit_expiry: z.date().optional(),
   // Employment
   employee_type: z.string().optional(),
-  // Document URLs (excluding photo_url which is already defined above)
+  // Document URLs
   aadhar_document_url: z.string().optional(),
   background_check_document_url: z.string().optional(),
   medical_certificate_url: z.string().optional(),
