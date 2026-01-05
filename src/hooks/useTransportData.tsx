@@ -512,6 +512,63 @@ export const useTransportData = () => {
     }
   };
 
+  // CRUD operations for student transport
+  const addStudentTransport = async (assignmentData: Omit<StudentTransport, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('student_transport')
+        .insert([assignmentData])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setStudentTransport(prev => [...prev, data]);
+      toast.success('Student assigned to transport successfully');
+      return data;
+    } catch (err) {
+      toast.error('Failed to assign student');
+      throw err;
+    }
+  };
+
+  const updateStudentTransport = async (id: string, updates: Partial<StudentTransport>) => {
+    try {
+      const { data, error } = await supabase
+        .from('student_transport')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setStudentTransport(prev => prev.map(st => st.id === id ? data : st));
+      toast.success('Assignment updated successfully');
+      return data;
+    } catch (err) {
+      toast.error('Failed to update assignment');
+      throw err;
+    }
+  };
+
+  const deleteStudentTransport = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('student_transport')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setStudentTransport(prev => prev.filter(st => st.id !== id));
+      toast.success('Assignment deleted successfully');
+    } catch (err) {
+      toast.error('Failed to delete assignment');
+      throw err;
+    }
+  };
+
   useEffect(() => {
     if (!rbacLoading) {
       fetchTransportData();
@@ -544,5 +601,9 @@ export const useTransportData = () => {
     // Incident operations
     addIncident,
     updateIncident,
+    // Student transport operations
+    addStudentTransport,
+    updateStudentTransport,
+    deleteStudentTransport,
   };
 };
