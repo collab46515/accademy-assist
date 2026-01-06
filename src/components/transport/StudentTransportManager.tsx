@@ -23,9 +23,9 @@ import {
   Phone,
   Route,
   GraduationCap,
-  DollarSign,
   Clock,
-  Loader2
+  Loader2,
+  IndianRupee
 } from 'lucide-react';
 import { useTransportData, type StudentTransport } from '@/hooks/useTransportData';
 import { useAuth } from '@/hooks/useAuth';
@@ -76,6 +76,9 @@ export const StudentTransportManager = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<StudentResult | null>(null);
   const [isStudentPopoverOpen, setIsStudentPopoverOpen] = useState(false);
+  
+  // Student names cache for display
+  const [studentNames, setStudentNames] = useState<Record<string, string>>({});
 
   const form = useForm<StudentTransportFormData>({
     defaultValues: {
@@ -85,6 +88,47 @@ export const StudentTransportManager = () => {
       status: 'active',
     }
   });
+
+  // Fetch student names for display
+  useEffect(() => {
+    const fetchStudentNames = async () => {
+      if (studentTransport.length === 0) return;
+      
+      const studentIds = studentTransport.map(st => st.student_id);
+      const uniqueIds = [...new Set(studentIds)];
+      
+      try {
+        const { data, error } = await supabase
+          .from('students')
+          .select(`
+            id,
+            student_number,
+            profiles:user_id (
+              first_name,
+              last_name
+            )
+          `)
+          .in('id', uniqueIds);
+        
+        if (error) throw error;
+        
+        const namesMap: Record<string, string> = {};
+        (data || []).forEach((student: any) => {
+          const firstName = student.profiles?.first_name || '';
+          const lastName = student.profiles?.last_name || '';
+          namesMap[student.id] = firstName || lastName 
+            ? `${firstName} ${lastName}`.trim() 
+            : student.student_number || 'Unknown';
+        });
+        
+        setStudentNames(namesMap);
+      } catch (error) {
+        console.error('Error fetching student names:', error);
+      }
+    };
+    
+    fetchStudentNames();
+  }, [studentTransport]);
 
   // Debounced student search
   useEffect(() => {
@@ -601,7 +645,7 @@ export const StudentTransportManager = () => {
               <div className="flex items-center space-x-2">
                 <GraduationCap className="h-5 w-5 text-blue-600" />
                 <div>
-                  <CardTitle className="text-lg">Student {assignment.student_id}</CardTitle>
+                  <CardTitle className="text-lg">{studentNames[assignment.student_id] || 'Loading...'}</CardTitle>
                   <CardDescription>{getRouteName(assignment.route_id)}</CardDescription>
                 </div>
               </div>
@@ -622,8 +666,8 @@ export const StudentTransportManager = () => {
               
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center space-x-2">
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  <span>£{assignment.transport_fee}</span>
+                  <IndianRupee className="h-4 w-4 text-muted-foreground" />
+                  <span>₹{assignment.transport_fee}</span>
                 </div>
                 <Badge className={getFrequencyColor(assignment.fee_frequency)}>
                   {assignment.fee_frequency}
@@ -704,8 +748,8 @@ export const StudentTransportManager = () => {
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm font-medium">Student ID</Label>
-                  <p className="text-sm text-muted-foreground">{selectedAssignment.student_id}</p>
+                  <Label className="text-sm font-medium">Student Name</Label>
+                  <p className="text-sm text-muted-foreground">{studentNames[selectedAssignment.student_id] || selectedAssignment.student_id}</p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium">Status</Label>
@@ -724,7 +768,7 @@ export const StudentTransportManager = () => {
                 <div>
                   <Label className="text-sm font-medium">Transport Fee</Label>
                   <p className="text-sm text-muted-foreground">
-                    £{selectedAssignment.transport_fee} 
+                    ₹{selectedAssignment.transport_fee} 
                     <Badge className={`${getFrequencyColor(selectedAssignment.fee_frequency)} ml-2 text-xs`}>
                       {selectedAssignment.fee_frequency}
                     </Badge>
