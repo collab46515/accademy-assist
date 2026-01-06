@@ -1005,8 +1005,8 @@ export const DriversManager = () => {
                 <Briefcase className="h-4 w-4 text-muted-foreground" />
                 <Badge variant="outline" className="text-xs">
                   {driver.employee_type === 'driver' ? 'Driver' : 
-                   driver.employee_type === 'assistant' ? 'Assistant' : 
-                   driver.employee_type === 'both' ? 'Driver & Assistant' : 'Driver'}
+                   driver.employee_type === 'attender' ? 'Attender' : 
+                   driver.employee_type === 'both' ? 'Driver & Attender' : 'Driver'}
                 </Badge>
               </div>
               <div className="flex items-center space-x-2 text-sm">
