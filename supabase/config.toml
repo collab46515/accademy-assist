@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.route-optimizer]
 verify_jwt = false
+
+[functions.maps-api]
+verify_jwt = false
