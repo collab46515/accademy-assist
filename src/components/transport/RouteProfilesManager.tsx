@@ -494,7 +494,7 @@ export const RouteProfilesManager: React.FC<RouteProfilesManagerProps> = ({ onSe
                       </Button>
                       {onSelectProfile && (
                         <Button 
-                          variant="outline" 
+                          variant="default" 
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -502,7 +502,8 @@ export const RouteProfilesManager: React.FC<RouteProfilesManagerProps> = ({ onSe
                           }}
                           className="gap-1"
                         >
-                          Manage Trips
+                          <Map className="h-4 w-4" />
+                          Plan Trips
                           <ChevronRight className="h-4 w-4" />
                         </Button>
                       )}

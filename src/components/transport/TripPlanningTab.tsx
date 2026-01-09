@@ -5,11 +5,13 @@ import { Map, Bus, Users, Shield } from 'lucide-react';
 import { RouteProfilesManager } from './RouteProfilesManager';
 import { TripsManager } from './TripsManager';
 import { StandbyResourcesManager } from './StandbyResourcesManager';
+import { TripMapPlanner } from './TripMapPlanner';
 import { RouteProfile } from '@/hooks/useTripPlanning';
 
 export const TripPlanningTab = () => {
   const [selectedProfile, setSelectedProfile] = useState<RouteProfile | null>(null);
   const [activeSubTab, setActiveSubTab] = useState('profiles');
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('map');
 
   const handleSelectProfile = (profile: RouteProfile) => {
     setSelectedProfile(profile);
@@ -29,7 +31,7 @@ export const TripPlanningTab = () => {
           Trip Planning
         </CardTitle>
         <CardDescription>
-          Create route profiles, define trips, and manage student assignments
+          Create route profiles, auto-generate trips, and manage student assignments with map-based planning
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -39,7 +41,7 @@ export const TripPlanningTab = () => {
               <Map className="h-4 w-4" /> Route Profiles
             </TabsTrigger>
             <TabsTrigger value="trips" className="gap-1" disabled={!selectedProfile}>
-              <Bus className="h-4 w-4" /> Trips {selectedProfile && `(${selectedProfile.profile_name})`}
+              <Bus className="h-4 w-4" /> Trip Planner {selectedProfile && `(${selectedProfile.profile_name})`}
             </TabsTrigger>
             <TabsTrigger value="standby" className="gap-1">
               <Shield className="h-4 w-4" /> Standby Pool
@@ -52,7 +54,7 @@ export const TripPlanningTab = () => {
 
           <TabsContent value="trips">
             {selectedProfile ? (
-              <TripsManager 
+              <TripMapPlanner 
                 routeProfile={selectedProfile} 
                 onBack={handleBackToProfiles} 
               />
