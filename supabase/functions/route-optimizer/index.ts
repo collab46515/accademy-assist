@@ -313,45 +313,61 @@ async function handleTripGeneration(
     .single();
 
   if (profileError || !profile) {
+    console.error('Profile error:', profileError);
     throw new Error('Route profile not found');
   }
 
-  // Fetch assigned students with their addresses
+  console.log('Profile found:', profile.profile_name, 'Pool type:', profile.student_pool_type);
+
+  // Get students based on profile criteria
+  // For now, we'll fetch all enrolled students from the school
   const { data: students, error: studentsError } = await supabase
-    .from('student_trip_assignments')
+    .from('students')
     .select(`
       id,
-      student_id,
-      pickup_address,
-      dropoff_address,
-      pickup_latitude,
-      pickup_longitude,
-      dropoff_latitude,
-      dropoff_longitude
+      year_group,
+      school_id,
+      profiles:user_id (
+        first_name,
+        last_name,
+        address
+      )
     `)
-    .eq('route_profile_id', request.profileId);
+    .eq('school_id', request.schoolId)
+    .eq('is_enrolled', true);
 
   if (studentsError) {
     console.error('Error fetching students:', studentsError);
-    throw new Error('Failed to fetch student assignments');
+    throw new Error('Failed to fetch students');
   }
 
-  console.log('Found', students?.length || 0, 'student assignments');
+  console.log('Found', students?.length || 0, 'enrolled students');
 
-  // Group students by pickup location for efficient routing
-  const pickupLocations = new Map<string, any[]>();
+  // Filter students based on pool criteria if specified
+  let eligibleStudents = students || [];
   
-  for (const student of students || []) {
-    const key = student.pickup_address || 'unknown';
-    if (!pickupLocations.has(key)) {
-      pickupLocations.set(key, []);
-    }
-    pickupLocations.get(key)!.push(student);
+  if (profile.student_pool_type === 'year_group' && profile.student_pool_criteria?.year_groups) {
+    const yearGroups = profile.student_pool_criteria.year_groups;
+    eligibleStudents = eligibleStudents.filter((s: any) => yearGroups.includes(s.year_group));
+    console.log('Filtered to', eligibleStudents.length, 'students by year group');
   }
+
+  // Group students by address for efficient routing
+  const addressGroups = new Map<string, any[]>();
+  
+  for (const student of eligibleStudents) {
+    const address = (student.profiles as any)?.address || 'Unknown Address';
+    if (!addressGroups.has(address)) {
+      addressGroups.set(address, []);
+    }
+    addressGroups.get(address)!.push(student);
+  }
+
+  console.log('Grouped into', addressGroups.size, 'unique addresses');
 
   // Fetch available vehicles
   const { data: vehicles, error: vehiclesError } = await supabase
-    .from('transport_vehicles')
+    .from('vehicles')
     .select('*')
     .eq('school_id', request.schoolId)
     .eq('status', 'active');
@@ -361,14 +377,14 @@ async function handleTripGeneration(
   }
 
   const vehicleCapacity = request.vehicleCapacity || 40;
-  const totalStudents = students?.length || 0;
+  const totalStudents = eligibleStudents.length;
   const estimatedTrips = Math.ceil(totalStudents / vehicleCapacity);
 
-  console.log('Estimated trips needed:', estimatedTrips, 'for', totalStudents, 'students');
+  console.log('Estimated trips needed:', estimatedTrips, 'for', totalStudents, 'students with capacity', vehicleCapacity);
 
   // Generate trip suggestions
   const tripSuggestions = [];
-  let remainingStudents = [...(students || [])];
+  let remainingStudents = [...eligibleStudents];
   let tripNumber = 1;
 
   while (remainingStudents.length > 0) {
@@ -376,14 +392,18 @@ async function handleTripGeneration(
     remainingStudents = remainingStudents.slice(vehicleCapacity);
 
     // Get unique pickup addresses for this trip
-    const tripAddresses = [...new Set(tripStudents.map(s => s.pickup_address).filter(Boolean))];
+    const tripAddresses = [...new Set(tripStudents.map((s: any) => 
+      (s.profiles as any)?.address || 'Unknown'
+    ).filter((addr: string) => addr !== 'Unknown'))];
     
-    // Geocode addresses if needed and optimize route
+    // Create stops from addresses
     const stops: Stop[] = tripAddresses.map((addr, idx) => ({
       id: `stop-${idx}`,
       name: `Stop ${idx + 1}`,
       address: addr || '',
-      estimatedStudents: tripStudents.filter(s => s.pickup_address === addr).length,
+      estimatedStudents: tripStudents.filter((s: any) => 
+        (s.profiles as any)?.address === addr
+      ).length,
     }));
 
     let optimizedRoute = null;
@@ -454,7 +474,7 @@ async function handleTripGeneration(
       tripName: `${profile.profile_name} - Trip ${tripNumber}`,
       studentCount: tripStudents.length,
       stops: stops.length,
-      students: tripStudents.map(s => s.student_id),
+      students: tripStudents.map((s: any) => s.id),
       estimatedDistance: optimizedRoute?.distanceText || 'N/A',
       estimatedDuration: optimizedRoute?.durationText || 'N/A',
       pickupAddresses: tripAddresses,
