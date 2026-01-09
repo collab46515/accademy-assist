@@ -36,7 +36,8 @@ export const useRouteOptimizer = () => {
   const autoGenerateTrips = async (
     profileId: string,
     schoolId: string,
-    vehicleCapacity: number = 40
+    vehicleCapacity: number = 40,
+    optimizationMode: 'distance' | 'time' | 'balanced' = 'distance'
   ): Promise<AutoGenerateResult | null> => {
     setIsGenerating(true);
     try {
@@ -46,6 +47,7 @@ export const useRouteOptimizer = () => {
           profileId,
           schoolId,
           vehicleCapacity,
+          optimizationMode,
         },
       });
 

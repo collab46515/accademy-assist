@@ -25,6 +25,7 @@ interface RouteRequest {
   profileId?: string;
   schoolId?: string;
   vehicleCapacity?: number;
+  optimizationMode?: 'distance' | 'time' | 'balanced';
 }
 
 interface GeocodeResult {
@@ -292,7 +293,8 @@ async function handleTripGeneration(
   apiKey: string,
   req: Request
 ): Promise<Response> {
-  console.log('Generating trips for profile:', request.profileId);
+  const optimizationMode = request.optimizationMode || 'distance';
+  console.log('Generating trips for profile:', request.profileId, 'with optimization:', optimizationMode);
 
   // Get Supabase client
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -391,21 +393,27 @@ async function handleTripGeneration(
       });
     }
 
+    // Estimated distance/duration based on optimization mode
+    // In a real implementation, these would be calculated using Google Directions API
+    const estimatedDistancePerStop = optimizationMode === 'distance' ? 1.5 : 2.0; // km
+    const estimatedTimePerStop = optimizationMode === 'time' ? 3 : 5; // minutes
+    
     tripSuggestions.push({
       tripNumber,
       tripName: `${profile.profile_name} - Trip ${tripNumber}`,
       studentCount: tripStudents.length,
       stops: stops.length,
       students: tripStudents.map((s: any) => s.id),
-      estimatedDistance: 'N/A',
-      estimatedDuration: 'N/A',
+      estimatedDistance: `${(stops.length * estimatedDistancePerStop).toFixed(1)} km`,
+      estimatedDuration: `${stops.length * estimatedTimePerStop} min`,
       pickupAddresses: stops.map(s => s.address),
+      optimizationMode,
     });
 
     tripNumber++;
   }
 
-  console.log('Generated', tripSuggestions.length, 'trip suggestions');
+  console.log('Generated', tripSuggestions.length, 'trip suggestions with', optimizationMode, 'optimization');
 
   return new Response(
     JSON.stringify({
@@ -415,6 +423,7 @@ async function handleTripGeneration(
       availableVehicles: vehicles?.length || 0,
       vehicleCapacity,
       tripSuggestions,
+      optimizationMode,
     }),
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   );
