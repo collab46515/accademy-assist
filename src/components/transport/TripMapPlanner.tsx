@@ -44,6 +44,7 @@ import { useRouteOptimizer, TripSuggestion, ConflictCheck } from '@/hooks/useRou
 import { useTransportData } from '@/hooks/useTransportData';
 import { StopAssignmentPanel } from './StopAssignmentPanel';
 import { TripMapView } from './TripMapView';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface TripMapPlannerProps {
@@ -87,6 +88,7 @@ export const TripMapPlanner: React.FC<TripMapPlannerProps> = ({ routeProfile, on
   const [vehicleCapacity, setVehicleCapacity] = useState(40);
   const [loading, setLoading] = useState(true);
   const [conflict, setConflict] = useState<ConflictCheck | null>(null);
+  const [totalStudentsInPool, setTotalStudentsInPool] = useState(0);
 
   const [editFormData, setEditFormData] = useState({
     trip_name: '',
@@ -96,12 +98,33 @@ export const TripMapPlanner: React.FC<TripMapPlannerProps> = ({ routeProfile, on
     vehicle_id: '',
     driver_id: '',
     attender_id: '',
+    start_point: '',
+    end_point: '',
   });
 
   const loadProfileTrips = useCallback(async () => {
     const data = await fetchTripsForProfile(routeProfile.id);
     setProfileTrips(data);
   }, [routeProfile.id, fetchTripsForProfile]);
+
+  // Load total student pool for this route profile (e.g., enrolled students matching the profile criteria)
+  const loadStudentPool = useCallback(async () => {
+    if (!userSchoolId) return;
+    try {
+      // Fetch count of all enrolled students in school (in a real system, you'd filter by route profile criteria)
+      const { count, error } = await supabase
+        .from('students')
+        .select('id', { count: 'exact', head: true })
+        .eq('school_id', userSchoolId)
+        .eq('is_enrolled', true);
+      
+      if (!error && count !== null) {
+        setTotalStudentsInPool(count);
+      }
+    } catch (err) {
+      console.error('Error loading student pool:', err);
+    }
+  }, [userSchoolId]);
 
   useEffect(() => {
     let mounted = true;
@@ -114,6 +137,7 @@ export const TripMapPlanner: React.FC<TripMapPlannerProps> = ({ routeProfile, on
       }
     };
     load();
+    loadStudentPool();
     return () => { mounted = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routeProfile.id]);
@@ -193,6 +217,8 @@ export const TripMapPlanner: React.FC<TripMapPlannerProps> = ({ routeProfile, on
       vehicle_id: trip.vehicle_id || '',
       driver_id: trip.driver_id || '',
       attender_id: trip.attender_id || '',
+      start_point: trip.start_point || '',
+      end_point: trip.end_point || '',
     });
     setSelectedTrip(trip);
     setConflict(null);
@@ -241,6 +267,8 @@ export const TripMapPlanner: React.FC<TripMapPlannerProps> = ({ routeProfile, on
       vehicle_id: editFormData.vehicle_id || null,
       driver_id: editFormData.driver_id || null,
       attender_id: editFormData.attender_id || null,
+      start_point: editFormData.start_point || null,
+      end_point: editFormData.end_point || null,
     });
 
     setShowEditTripDialog(false);
@@ -316,7 +344,7 @@ export const TripMapPlanner: React.FC<TripMapPlannerProps> = ({ routeProfile, on
         </CardHeader>
         <CardContent>
           {/* Capacity Overview */}
-          <div className="grid grid-cols-4 gap-4 mb-4">
+          <div className="grid grid-cols-5 gap-4 mb-4">
             <div className="text-center p-3 bg-muted rounded-lg">
               <div className="text-2xl font-bold">{profileTrips.length}</div>
               <div className="text-sm text-muted-foreground">Trips</div>
@@ -324,6 +352,12 @@ export const TripMapPlanner: React.FC<TripMapPlannerProps> = ({ routeProfile, on
             <div className="text-center p-3 bg-muted rounded-lg">
               <div className="text-2xl font-bold">{getTotalAssigned()}</div>
               <div className="text-sm text-muted-foreground">Students Assigned</div>
+            </div>
+            <div className="text-center p-3 bg-muted rounded-lg">
+              <div className={`text-2xl font-bold ${(totalStudentsInPool - getTotalAssigned()) > 0 ? 'text-amber-600' : 'text-green-600'}`}>
+                {Math.max(0, totalStudentsInPool - getTotalAssigned())}
+              </div>
+              <div className="text-sm text-muted-foreground">Unassigned Pool</div>
             </div>
             <div className="text-center p-3 bg-muted rounded-lg">
               <div className="text-2xl font-bold">{getTotalCapacity()}</div>
@@ -412,7 +446,7 @@ export const TripMapPlanner: React.FC<TripMapPlannerProps> = ({ routeProfile, on
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
                         <div className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           {trip.scheduled_start_time}
@@ -421,22 +455,40 @@ export const TripMapPlanner: React.FC<TripMapPlannerProps> = ({ routeProfile, on
                           <Users className="h-3 w-3" />
                           {trip.assigned_students_count} / {trip.vehicle_capacity || '?'}
                         </div>
+                        {trip.estimated_distance_km && (
+                          <div className="flex items-center gap-1">
+                            <Route className="h-3 w-3" />
+                            {trip.estimated_distance_km} km
+                          </div>
+                        )}
                         <Badge variant="outline">{trip.trip_type}</Badge>
                       </div>
                       
-                      {/* Capacity Bar */}
+                      {/* Capacity Bar with warning color if over */}
                       <div className="mt-2">
                         <Progress 
                           value={trip.vehicle_capacity 
-                            ? (trip.assigned_students_count / trip.vehicle_capacity) * 100 
+                            ? Math.min((trip.assigned_students_count / trip.vehicle_capacity) * 100, 100)
                             : 0
                           } 
-                          className="h-1.5"
+                          className={`h-1.5 ${
+                            trip.vehicle_capacity && trip.assigned_students_count > trip.vehicle_capacity 
+                              ? '[&>div]:bg-destructive' 
+                              : ''
+                          }`}
                         />
                       </div>
 
+                      {/* Over capacity warning */}
+                      {trip.vehicle_capacity && trip.assigned_students_count > trip.vehicle_capacity && (
+                        <div className="mt-1.5 flex items-center gap-1 text-xs text-destructive">
+                          <AlertTriangle className="h-3 w-3" />
+                          Over capacity by {trip.assigned_students_count - trip.vehicle_capacity} students
+                        </div>
+                      )}
+
                       {/* Resource Assignment Status */}
-                      <div className="mt-2 flex gap-2 text-xs">
+                      <div className="mt-2 flex gap-2 text-xs flex-wrap">
                         {trip.vehicle ? (
                           <Badge variant="secondary" className="gap-1">
                             <Bus className="h-3 w-3" />
@@ -491,6 +543,7 @@ export const TripMapPlanner: React.FC<TripMapPlannerProps> = ({ routeProfile, on
                     tripId={selectedTrip.id}
                     schoolId={userSchoolId || ''}
                     stops={selectedTripStops}
+                    vehicleCapacity={selectedTrip.vehicle_capacity}
                     onStopsUpdated={() => loadTripStops(selectedTrip)}
                     onAddStop={async (stop) => {
                       await addTripStop(stop as any);
@@ -711,6 +764,26 @@ export const TripMapPlanner: React.FC<TripMapPlannerProps> = ({ routeProfile, on
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Start & End Points */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Start Point</Label>
+                <Input
+                  value={editFormData.start_point}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, start_point: e.target.value }))}
+                  placeholder="e.g., Main Depot"
+                />
+              </div>
+              <div>
+                <Label>End Point</Label>
+                <Input
+                  value={editFormData.end_point}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, end_point: e.target.value }))}
+                  placeholder="e.g., School Campus"
+                />
+              </div>
             </div>
 
             {/* Conflict Warning */}
