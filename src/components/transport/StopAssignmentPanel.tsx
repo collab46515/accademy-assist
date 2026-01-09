@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { MapPin, Users, Plus, Search, Clock, Trash2 } from 'lucide-react';
+import { MapPin, Users, Plus, Search, Clock, Trash2, AlertTriangle } from 'lucide-react';
 import { TripStop } from '@/hooks/useTripPlanning';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -29,6 +29,7 @@ interface StopAssignmentPanelProps {
   tripId: string;
   schoolId: string;
   stops: TripStop[];
+  vehicleCapacity?: number;
   onStopsUpdated: () => void;
   onAddStop: (stop: Partial<TripStop>) => Promise<void>;
   onUpdateStop: (stopId: string, updates: Partial<TripStop>) => Promise<void>;
@@ -39,6 +40,7 @@ export const StopAssignmentPanel: React.FC<StopAssignmentPanelProps> = ({
   tripId,
   schoolId,
   stops,
+  vehicleCapacity,
   onStopsUpdated,
   onAddStop,
   onUpdateStop,
@@ -216,6 +218,21 @@ export const StopAssignmentPanel: React.FC<StopAssignmentPanelProps> = ({
   const filteredStudents = students.filter(s =>
     `${s.first_name} ${s.last_name}`.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Calculate total assigned across all stops
+  const getTotalAssignedCount = () => {
+    return Object.values(assignments).reduce((sum, studentIds) => sum + studentIds.length, 0);
+  };
+
+  // Calculate what total would be if we save current selection
+  const getProjectedTotalAfterSave = () => {
+    if (!selectedStop) return getTotalAssignedCount();
+    const currentStopCount = assignments[selectedStop.id]?.length || 0;
+    return getTotalAssignedCount() - currentStopCount + selectedStudents.length;
+  };
+
+  const projectedTotal = getProjectedTotalAfterSave();
+  const isOverCapacity = vehicleCapacity != null && projectedTotal > vehicleCapacity;
 
   const getStopStatus = (stop: TripStop): 'red' | 'yellow' | 'green' => {
     const count = assignments[stop.id]?.length || 0;
@@ -406,9 +423,27 @@ export const StopAssignmentPanel: React.FC<StopAssignmentPanelProps> = ({
               />
             </div>
 
-            <div className="text-sm text-muted-foreground">
-              {selectedStudents.length} students selected
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">
+                {selectedStudents.length} students selected
+              </span>
+              {vehicleCapacity != null && (
+                <span className={`${isOverCapacity ? 'text-destructive font-medium' : 'text-muted-foreground'}`}>
+                  Trip total: {projectedTotal} / {vehicleCapacity}
+                </span>
+              )}
             </div>
+
+            {/* Over capacity warning */}
+            {isOverCapacity && (
+              <div className="flex items-center gap-2 p-2 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive text-sm">
+                <AlertTriangle className="h-4 w-4 shrink-0" />
+                <span>
+                  Exceeds vehicle capacity by {projectedTotal - (vehicleCapacity || 0)} students. 
+                  Assignment is blocked.
+                </span>
+              </div>
+            )}
 
             <ScrollArea className="h-[250px] border rounded-lg p-2">
               {filteredStudents.length === 0 ? (
@@ -446,7 +481,11 @@ export const StopAssignmentPanel: React.FC<StopAssignmentPanelProps> = ({
             <Button variant="outline" onClick={() => setShowAssignDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSaveAssignments} disabled={loading}>
+            <Button 
+              onClick={handleSaveAssignments} 
+              disabled={loading || isOverCapacity}
+              title={isOverCapacity ? 'Cannot save: exceeds vehicle capacity' : undefined}
+            >
               Save Assignments
             </Button>
           </DialogFooter>
