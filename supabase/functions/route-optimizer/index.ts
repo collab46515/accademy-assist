@@ -326,12 +326,7 @@ async function handleTripGeneration(
     .select(`
       id,
       year_group,
-      school_id,
-      profiles:user_id (
-        first_name,
-        last_name,
-        address
-      )
+      school_id
     `)
     .eq('school_id', request.schoolId)
     .eq('is_enrolled', true);
@@ -352,18 +347,9 @@ async function handleTripGeneration(
     console.log('Filtered to', eligibleStudents.length, 'students by year group');
   }
 
-  // Group students by address for efficient routing
-  const addressGroups = new Map<string, any[]>();
-  
-  for (const student of eligibleStudents) {
-    const address = (student.profiles as any)?.address || 'Unknown Address';
-    if (!addressGroups.has(address)) {
-      addressGroups.set(address, []);
-    }
-    addressGroups.get(address)!.push(student);
-  }
-
-  console.log('Grouped into', addressGroups.size, 'unique addresses');
+  // Since there's no address in the schema, we'll create placeholder stops
+  // In a real implementation, you'd need to add address fields to student records
+  console.log('Note: No address data available, creating placeholder stops');
 
   // Fetch available vehicles
   const { data: vehicles, error: vehiclesError } = await supabase
@@ -391,82 +377,18 @@ async function handleTripGeneration(
     const tripStudents = remainingStudents.slice(0, vehicleCapacity);
     remainingStudents = remainingStudents.slice(vehicleCapacity);
 
-    // Get unique pickup addresses for this trip
-    const tripAddresses = [...new Set(tripStudents.map((s: any) => 
-      (s.profiles as any)?.address || 'Unknown'
-    ).filter((addr: string) => addr !== 'Unknown'))];
+    // Create placeholder stops based on student count
+    // Since no address data is available, create generic stops
+    const stopsNeeded = Math.ceil(tripStudents.length / 5); // ~5 students per stop
+    const stops: Stop[] = [];
     
-    // Create stops from addresses
-    const stops: Stop[] = tripAddresses.map((addr, idx) => ({
-      id: `stop-${idx}`,
-      name: `Stop ${idx + 1}`,
-      address: addr || '',
-      estimatedStudents: tripStudents.filter((s: any) => 
-        (s.profiles as any)?.address === addr
-      ).length,
-    }));
-
-    let optimizedRoute = null;
-    if (stops.length > 1) {
-      try {
-        // Geocode stops
-        const geocodedStops = await Promise.all(
-          stops.map(async (stop) => {
-            if (!stop.address) return stop;
-            
-            const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(stop.address)}&key=${apiKey}`;
-            const response = await fetch(url);
-            const data = await response.json();
-            
-            if (data.status === 'OK' && data.results?.length) {
-              return {
-                ...stop,
-                latitude: data.results[0].geometry.location.lat,
-                longitude: data.results[0].geometry.location.lng,
-              };
-            }
-            return stop;
-          })
-        );
-
-        const validStops = geocodedStops.filter(s => s.latitude && s.longitude);
-        
-        if (validStops.length >= 2) {
-          const origin = validStops[0];
-          const destination = validStops[validStops.length - 1];
-          const waypoints = validStops.slice(1, -1);
-          
-          let url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&key=${apiKey}`;
-          
-          if (waypoints.length > 0) {
-            const waypointStr = waypoints.map(wp => `${wp.latitude},${wp.longitude}`).join('|');
-            url += `&waypoints=optimize:true|${waypointStr}`;
-          }
-          
-          const response = await fetch(url);
-          const data = await response.json();
-          
-          if (data.status === 'OK') {
-            const route = data.routes[0];
-            let totalDistance = 0;
-            let totalDuration = 0;
-            
-            for (const leg of route.legs) {
-              totalDistance += leg.distance.value;
-              totalDuration += leg.duration.value;
-            }
-            
-            optimizedRoute = {
-              distance: totalDistance,
-              duration: totalDuration,
-              distanceText: `${(totalDistance / 1000).toFixed(1)} km`,
-              durationText: formatDuration(totalDuration),
-            };
-          }
-        }
-      } catch (routeError) {
-        console.error('Route optimization error:', routeError);
-      }
+    for (let i = 0; i < stopsNeeded; i++) {
+      stops.push({
+        id: `stop-${i}`,
+        name: `Stop ${i + 1}`,
+        address: `Pickup Point ${i + 1}`,
+        estimatedStudents: Math.min(5, tripStudents.length - (i * 5)),
+      });
     }
 
     tripSuggestions.push({
@@ -475,9 +397,9 @@ async function handleTripGeneration(
       studentCount: tripStudents.length,
       stops: stops.length,
       students: tripStudents.map((s: any) => s.id),
-      estimatedDistance: optimizedRoute?.distanceText || 'N/A',
-      estimatedDuration: optimizedRoute?.durationText || 'N/A',
-      pickupAddresses: tripAddresses,
+      estimatedDistance: 'N/A',
+      estimatedDuration: 'N/A',
+      pickupAddresses: stops.map(s => s.address),
     });
 
     tripNumber++;
