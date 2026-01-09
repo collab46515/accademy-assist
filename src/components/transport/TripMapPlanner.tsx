@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -31,18 +31,19 @@ import {
   AlertTriangle, 
   CheckCircle2, 
   Clock, 
-  ChevronRight,
   Loader2,
   Route,
-  Eye,
   Edit2,
   Trash2,
   Plus,
-  RefreshCw
+  RefreshCw,
+  ListChecks
 } from 'lucide-react';
 import { RouteProfile, TransportTrip, TripStop, useTripPlanning } from '@/hooks/useTripPlanning';
 import { useRouteOptimizer, TripSuggestion, ConflictCheck } from '@/hooks/useRouteOptimizer';
 import { useTransportData } from '@/hooks/useTransportData';
+import { StopAssignmentPanel } from './StopAssignmentPanel';
+import { TripMapView } from './TripMapView';
 import { toast } from 'sonner';
 
 interface TripMapPlannerProps {
@@ -453,87 +454,57 @@ export const TripMapPlanner: React.FC<TripMapPlannerProps> = ({ routeProfile, on
 
         {/* Trip Details / Stop View */}
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
               <MapPin className="h-5 w-5" />
-              {selectedTrip ? `Stops - ${selectedTrip.trip_name}` : 'Select a Trip'}
+              {selectedTrip ? `${selectedTrip.trip_name}` : 'Select a Trip'}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {!selectedTrip ? (
               <div className="text-center py-8 text-muted-foreground">
                 <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Select a trip to view its stops</p>
-              </div>
-            ) : selectedTripStops.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Route className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No stops defined for this trip</p>
-                <Button variant="outline" className="mt-4">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Stops
-                </Button>
+                <p>Select a trip to view and manage stops</p>
               </div>
             ) : (
-              <ScrollArea className="h-[400px]">
-                {/* Stop Color Legend */}
-                <div className="flex items-center gap-4 mb-4 p-2 bg-muted rounded-lg text-sm">
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 rounded-full bg-red-500" />
-                    <span>Unassigned</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                    <span>Partial</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 rounded-full bg-green-500" />
-                    <span>Complete</span>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  {selectedTripStops.map((stop, index) => (
-                    <div key={stop.id} className="flex items-start gap-3">
-                      {/* Stop Number & Connection Line */}
-                      <div className="flex flex-col items-center">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${getStopColorClass(stop.colorStatus)}`}>
-                          {index + 1}
-                        </div>
-                        {index < selectedTripStops.length - 1 && (
-                          <div className="w-0.5 h-8 bg-border mt-1" />
-                        )}
-                      </div>
-                      
-                      {/* Stop Details */}
-                      <div className="flex-1 pb-4">
-                        <div className="flex items-center justify-between">
-                          <div className="font-medium">{stop.stop_name}</div>
-                          {getStopColorBadge(stop.colorStatus)}
-                        </div>
-                        <div className="text-sm text-muted-foreground mt-1">
-                          {stop.location_address || 'No address set'}
-                        </div>
-                        <div className="flex items-center gap-4 mt-2 text-sm">
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {stop.scheduled_arrival_time}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            {stop.assigned_students_count} / {stop.total_students_at_stop}
-                          </div>
-                          {stop.distance_from_previous_km && (
-                            <div className="text-muted-foreground">
-                              {stop.distance_from_previous_km} km
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
+              <Tabs defaultValue="stops" className="w-full">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="stops" className="gap-1">
+                    <ListChecks className="h-4 w-4" /> Stops
+                  </TabsTrigger>
+                  <TabsTrigger value="map" className="gap-1">
+                    <Map className="h-4 w-4" /> Route View
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="stops">
+                  <StopAssignmentPanel
+                    tripId={selectedTrip.id}
+                    schoolId={userSchoolId || ''}
+                    stops={selectedTripStops}
+                    onStopsUpdated={() => loadTripStops(selectedTrip)}
+                    onAddStop={async (stop) => {
+                      await addTripStop(stop as any);
+                      await loadTripStops(selectedTrip);
+                    }}
+                    onUpdateStop={async (stopId, updates) => {
+                      await updateTripStop(stopId, updates);
+                      await loadTripStops(selectedTrip);
+                    }}
+                    onDeleteStop={async (stopId) => {
+                      await deleteTripStop(stopId);
+                      await loadTripStops(selectedTrip);
+                    }}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="map">
+                  <TripMapView 
+                    stops={selectedTripStops} 
+                    tripName={selectedTrip.trip_name}
+                  />
+                </TabsContent>
+              </Tabs>
             )}
           </CardContent>
         </Card>
