@@ -352,6 +352,71 @@ export const useTripPlanning = (schoolId: string | null) => {
     }
   };
 
+  // Calculate total trip distance from stops with coordinates
+  const calculateTripDistance = async (tripId: string): Promise<number | null> => {
+    try {
+      const { data: stops, error } = await supabase
+        .from('trip_stops')
+        .select('latitude, longitude, stop_order, distance_from_previous_km')
+        .eq('trip_id', tripId)
+        .order('stop_order');
+
+      if (error) throw error;
+      if (!stops || stops.length < 2) return null;
+
+      // If distances are already calculated, sum them
+      const hasCalculatedDistances = stops.some(s => s.distance_from_previous_km != null);
+      if (hasCalculatedDistances) {
+        return stops.reduce((sum, stop) => sum + (stop.distance_from_previous_km || 0), 0);
+      }
+
+      // Otherwise, calculate straight-line distances (Haversine formula)
+      const stopsWithCoords = stops.filter(s => s.latitude != null && s.longitude != null);
+      if (stopsWithCoords.length < 2) return null;
+
+      let totalDistance = 0;
+      for (let i = 1; i < stopsWithCoords.length; i++) {
+        const prev = stopsWithCoords[i - 1];
+        const curr = stopsWithCoords[i];
+        const distance = haversineDistance(
+          prev.latitude!, prev.longitude!,
+          curr.latitude!, curr.longitude!
+        );
+        totalDistance += distance;
+      }
+
+      return Math.round(totalDistance * 10) / 10; // Round to 1 decimal
+    } catch (err) {
+      console.error('Error calculating trip distance:', err);
+      return null;
+    }
+  };
+
+  // Haversine formula to calculate distance between two points
+  const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  // Update trip with calculated distance
+  const updateTripDistance = async (tripId: string) => {
+    const distance = await calculateTripDistance(tripId);
+    if (distance !== null) {
+      await supabase
+        .from('transport_trips')
+        .update({ estimated_distance_km: distance })
+        .eq('id', tripId);
+    }
+    return distance;
+  };
+
   // CRUD for Student Assignments
   const addStudentAssignment = async (data: Omit<StudentTripAssignment, 'id' | 'created_at' | 'updated_at'>) => {
     try {
@@ -460,6 +525,9 @@ export const useTripPlanning = (schoolId: string | null) => {
     addTripStop,
     updateTripStop,
     deleteTripStop,
+    // Distance calculation
+    calculateTripDistance,
+    updateTripDistance,
     // Student Assignment operations
     addStudentAssignment,
     removeStudentAssignment,

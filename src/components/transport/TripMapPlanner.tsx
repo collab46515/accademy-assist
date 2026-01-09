@@ -69,6 +69,7 @@ export const TripMapPlanner: React.FC<TripMapPlannerProps> = ({ routeProfile, on
     addTripStop,
     updateTripStop,
     deleteTripStop,
+    updateTripDistance,
   } = useTripPlanning(userSchoolId);
 
   const {
@@ -517,10 +518,30 @@ export const TripMapPlanner: React.FC<TripMapPlannerProps> = ({ routeProfile, on
         {/* Trip Details / Stop View */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
-              {selectedTrip ? `${selectedTrip.trip_name}` : 'Select a Trip'}
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                {selectedTrip ? `${selectedTrip.trip_name}` : 'Select a Trip'}
+              </CardTitle>
+              {selectedTrip && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    const distance = await updateTripDistance(selectedTrip.id);
+                    if (distance !== null) {
+                      toast.success(`Trip distance calculated: ${distance} km`);
+                      await loadProfileTrips();
+                    } else {
+                      toast.info('Could not calculate distance. Ensure stops have GPS coordinates.');
+                    }
+                  }}
+                >
+                  <Route className="h-4 w-4 mr-2" />
+                  Calculate Distance
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             {!selectedTrip ? (
