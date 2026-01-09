@@ -2,3 +2,6 @@ project_id = "iosceukdfokpptvqfirp"
 
 [functions.test-ai]
 verify_jwt = false
+
+[functions.route-optimizer]
+verify_jwt = false

@@ -1106,7 +1106,7 @@ export const DriversManager = () => {
               {selectedDriver?.first_name} {selectedDriver?.last_name}
             </DialogTitle>
             <DialogDescription>
-              Driver details and certification information
+              Staff details and certification information
             </DialogDescription>
           </DialogHeader>
           {selectedDriver && (
@@ -1115,6 +1115,14 @@ export const DriversManager = () => {
                 <div>
                   <Label className="text-sm font-medium">Employee ID</Label>
                   <p className="text-sm text-muted-foreground">{selectedDriver.employee_id}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Role</Label>
+                  <Badge variant="outline">
+                    {selectedDriver.employee_type === 'driver' ? 'Driver' : 
+                     selectedDriver.employee_type === 'attender' ? 'Attender' : 
+                     selectedDriver.employee_type === 'both' ? 'Driver & Attender' : 'Driver'}
+                  </Badge>
                 </div>
                 <div>
                   <Label className="text-sm font-medium">Status</Label>
