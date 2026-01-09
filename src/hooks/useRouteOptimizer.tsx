@@ -225,7 +225,7 @@ export const useRouteOptimizer = () => {
           geofence_radius_meters: 50,
           total_students_at_stop: Math.ceil(suggestion.studentCount / uniqueAddresses.length),
           assigned_students_count: 0,
-          assignment_status: 'pending',
+          assignment_status: 'red', // Uses valid status: red (not assigned), yellow (partial), green (complete)
         }));
 
         if (stopsToCreate.length > 0) {
