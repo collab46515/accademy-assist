@@ -79,8 +79,10 @@ export const TripMapView: React.FC<TripMapViewProps> = ({ stops, tripName }) => 
     });
     markersRef.current = [];
 
-    // Add new markers for stops with coordinates (use latitude/longitude fields)
-    const stopsWithCoords = stops.filter(stop => stop.latitude && stop.longitude);
+    // Add new markers for stops with coordinates (latitude/longitude can be 0, so check for null/undefined)
+    const stopsWithCoords = stops.filter(
+      (stop) => stop.latitude != null && stop.longitude != null
+    );
     
     if (stopsWithCoords.length > 0) {
       const bounds = new google.maps.LatLngBounds();
@@ -129,6 +131,7 @@ export const TripMapView: React.FC<TripMapViewProps> = ({ stops, tripName }) => 
 
   const totalStudents = stops.reduce((sum, s) => sum + s.assigned_students_count, 0);
   const totalDistance = stops.reduce((sum, s) => sum + (s.distance_from_previous_km || 0), 0);
+  const hasStopCoordinates = stops.some((s) => s.latitude != null && s.longitude != null);
 
   // Show visual route when no map is available
   const renderVisualRoute = () => (
@@ -257,14 +260,21 @@ export const TripMapView: React.FC<TripMapViewProps> = ({ stops, tripName }) => 
                 </div>
               )}
 
-              {isLoaded && !error && !mapError ? (
-                <div ref={mapRef} className="w-full h-full" />
-              ) : !isLoading && !error && !mapError ? (
-                <div className="w-full h-full bg-muted flex items-center justify-center">
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                </div>
-              ) : null}
-            </div>
+               {isLoaded && !error && !mapError ? (
+                 <div ref={mapRef} className="w-full h-full" />
+               ) : !isLoading && !error && !mapError ? (
+                 <div className="w-full h-full bg-muted flex items-center justify-center">
+                   <Loader2 className="h-6 w-6 animate-spin" />
+                 </div>
+               ) : null}
+
+               {/* When stops exist but coordinates are missing, we can still show the sequence below */}
+               {isLoaded && !isLoading && !error && !mapError && !hasStopCoordinates && (
+                 <div className="absolute inset-x-3 bottom-3 rounded-md border bg-muted/90 px-3 py-2 text-xs text-muted-foreground">
+                   Markers aren’t shown because these stops don’t have latitude/longitude yet.
+                 </div>
+               )}
+             </div>
 
             {/* Visual Route Fallback */}
             <div className="bg-gradient-to-br from-muted/50 to-muted rounded-lg p-4 border">
