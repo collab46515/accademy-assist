@@ -99,15 +99,24 @@ export const TripMapPlanner: React.FC<TripMapPlannerProps> = ({ routeProfile, on
   });
 
   const loadProfileTrips = useCallback(async () => {
-    setLoading(true);
     const data = await fetchTripsForProfile(routeProfile.id);
     setProfileTrips(data);
-    setLoading(false);
   }, [routeProfile.id, fetchTripsForProfile]);
 
   useEffect(() => {
-    loadProfileTrips();
-  }, [loadProfileTrips]);
+    let mounted = true;
+    const load = async () => {
+      setLoading(true);
+      const data = await fetchTripsForProfile(routeProfile.id);
+      if (mounted) {
+        setProfileTrips(data);
+        setLoading(false);
+      }
+    };
+    load();
+    return () => { mounted = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routeProfile.id]);
 
   const loadTripStops = async (trip: TransportTrip) => {
     const stops = await fetchTripStops(trip.id);
