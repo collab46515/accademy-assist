@@ -9595,11 +9595,17 @@ export type Database = {
         Row: {
           created_at: string
           drop_stop_id: string | null
+          dropoff_address: string | null
+          dropoff_latitude: number | null
+          dropoff_longitude: number | null
           emergency_contact: string | null
           end_date: string | null
           fee_frequency: string
           id: string
           parent_phone: string | null
+          pickup_address: string | null
+          pickup_latitude: number | null
+          pickup_longitude: number | null
           pickup_stop_id: string | null
           route_id: string
           school_id: string
@@ -9614,11 +9620,17 @@ export type Database = {
         Insert: {
           created_at?: string
           drop_stop_id?: string | null
+          dropoff_address?: string | null
+          dropoff_latitude?: number | null
+          dropoff_longitude?: number | null
           emergency_contact?: string | null
           end_date?: string | null
           fee_frequency?: string
           id?: string
           parent_phone?: string | null
+          pickup_address?: string | null
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
           pickup_stop_id?: string | null
           route_id: string
           school_id: string
@@ -9633,11 +9645,17 @@ export type Database = {
         Update: {
           created_at?: string
           drop_stop_id?: string | null
+          dropoff_address?: string | null
+          dropoff_latitude?: number | null
+          dropoff_longitude?: number | null
           emergency_contact?: string | null
           end_date?: string | null
           fee_frequency?: string
           id?: string
           parent_phone?: string | null
+          pickup_address?: string | null
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
           pickup_stop_id?: string | null
           route_id?: string
           school_id?: string

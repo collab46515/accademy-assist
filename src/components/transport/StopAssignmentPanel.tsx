@@ -13,10 +13,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { MapPin, Users, Plus, Search, Clock, Trash2, AlertTriangle } from 'lucide-react';
+import { MapPin, Users, Plus, Search, Clock, Trash2, AlertTriangle, Loader2, Navigation } from 'lucide-react';
 import { TripStop } from '@/hooks/useTripPlanning';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useRouteOptimizer } from '@/hooks/useRouteOptimizer';
 
 interface StudentData {
   id: string;
@@ -54,11 +55,16 @@ export const StopAssignmentPanel: React.FC<StopAssignmentPanelProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isGeocoding, setIsGeocoding] = useState(false);
+
+  const { geocodeAddress } = useRouteOptimizer();
 
   const [newStopForm, setNewStopForm] = useState({
     stop_name: '',
     location_address: '',
     scheduled_arrival_time: '07:30',
+    latitude: null as number | null,
+    longitude: null as number | null,
   });
 
   useEffect(() => {
@@ -122,6 +128,34 @@ export const StopAssignmentPanel: React.FC<StopAssignmentPanelProps> = ({
     }
   };
 
+  // Geocode address to get lat/lng
+  const handleGeocodeAddress = async () => {
+    if (!newStopForm.location_address) {
+      toast.error('Please enter an address to geocode');
+      return;
+    }
+    
+    setIsGeocoding(true);
+    try {
+      const result = await geocodeAddress(newStopForm.location_address);
+      if (result) {
+        setNewStopForm(prev => ({
+          ...prev,
+          latitude: result.lat,
+          longitude: result.lng,
+          location_address: result.formattedAddress || prev.location_address,
+        }));
+        toast.success('Address geocoded successfully');
+      } else {
+        toast.error('Could not geocode address. Please check the address and try again.');
+      }
+    } catch (err) {
+      toast.error('Geocoding failed');
+    } finally {
+      setIsGeocoding(false);
+    }
+  };
+
   const handleAddStop = async () => {
     if (!newStopForm.stop_name) {
       toast.error('Stop name is required');
@@ -134,6 +168,8 @@ export const StopAssignmentPanel: React.FC<StopAssignmentPanelProps> = ({
         trip_id: tripId,
         stop_name: newStopForm.stop_name,
         location_address: newStopForm.location_address,
+        latitude: newStopForm.latitude,
+        longitude: newStopForm.longitude,
         scheduled_arrival_time: newStopForm.scheduled_arrival_time,
         stop_order: stops.length + 1,
         assigned_students_count: 0,
@@ -145,8 +181,11 @@ export const StopAssignmentPanel: React.FC<StopAssignmentPanelProps> = ({
         stop_name: '',
         location_address: '',
         scheduled_arrival_time: '07:30',
+        latitude: null,
+        longitude: null,
       });
       onStopsUpdated();
+      toast.success('Stop added successfully');
     } catch (err) {
       toast.error('Failed to add stop');
     } finally {
@@ -336,7 +375,7 @@ export const StopAssignmentPanel: React.FC<StopAssignmentPanelProps> = ({
                     <div className="text-xs text-muted-foreground truncate">
                       {stop.location_address || 'No address'}
                     </div>
-                    <div className="flex items-center gap-3 mt-1 text-xs">
+                    <div className="flex items-center gap-3 mt-1 text-xs flex-wrap">
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         {stop.scheduled_arrival_time}
@@ -345,6 +384,16 @@ export const StopAssignmentPanel: React.FC<StopAssignmentPanelProps> = ({
                         <Users className="h-3 w-3 mr-1" />
                         {studentCount} students
                       </Badge>
+                      {stop.latitude && stop.longitude ? (
+                        <Badge variant="outline" className="text-xs text-green-600">
+                          <Navigation className="h-3 w-3 mr-1" />
+                          GPS
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-xs text-muted-foreground">
+                          No GPS
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -375,11 +424,36 @@ export const StopAssignmentPanel: React.FC<StopAssignmentPanelProps> = ({
             </div>
             <div>
               <Label>Address</Label>
-              <Input
-                value={newStopForm.location_address}
-                onChange={(e) => setNewStopForm(prev => ({ ...prev, location_address: e.target.value }))}
-                placeholder="Full address"
-              />
+              <div className="flex gap-2">
+                <Input
+                  value={newStopForm.location_address}
+                  onChange={(e) => setNewStopForm(prev => ({ ...prev, location_address: e.target.value, latitude: null, longitude: null }))}
+                  placeholder="Full address"
+                  className="flex-1"
+                />
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={handleGeocodeAddress}
+                  disabled={isGeocoding || !newStopForm.location_address}
+                >
+                  {isGeocoding ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Navigation className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+              {newStopForm.latitude && newStopForm.longitude ? (
+                <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                  <Navigation className="h-3 w-3" />
+                  GPS: {newStopForm.latitude.toFixed(6)}, {newStopForm.longitude.toFixed(6)}
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Click the button to geocode address and get GPS coordinates
+                </p>
+              )}
             </div>
             <div>
               <Label>Scheduled Time</Label>
