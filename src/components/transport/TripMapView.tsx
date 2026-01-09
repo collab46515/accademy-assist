@@ -40,12 +40,16 @@ export const TripMapView: React.FC<TripMapViewProps> = ({ stops, tripName }) => 
       </CardHeader>
       <CardContent>
         {/* Map Placeholder - Visual Route */}
-        <div className="relative bg-muted rounded-lg p-4 min-h-[300px]">
+        <div className="relative bg-gradient-to-br from-muted/50 to-muted rounded-lg p-4 min-h-[300px] border">
           {stops.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-[300px] text-muted-foreground">
-              <Map className="h-16 w-16 mb-4 opacity-30" />
-              <p className="text-sm">No stops to display</p>
-              <p className="text-xs mt-1">Add stops to see the route visualization</p>
+              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Map className="h-10 w-10 opacity-50" />
+              </div>
+              <p className="font-medium">No stops to display</p>
+              <p className="text-sm mt-1 text-center max-w-xs">
+                Click "Add Stop" in the Stops tab to add pickup/drop-off points, or use Auto-Generate to create trips with stops automatically.
+              </p>
             </div>
           ) : (
             <>

@@ -266,8 +266,11 @@ export const StopAssignmentPanel: React.FC<StopAssignmentPanelProps> = ({
       <ScrollArea className="h-[300px]">
         {stops.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            <MapPin className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No stops added yet</p>
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+              <MapPin className="h-8 w-8 opacity-50" />
+            </div>
+            <p className="font-medium">No stops added yet</p>
+            <p className="text-sm mt-1">Click "Add Stop" above to create pickup/drop-off points</p>
           </div>
         ) : (
           <div className="space-y-2">
