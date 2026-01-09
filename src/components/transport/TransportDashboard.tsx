@@ -39,6 +39,7 @@ import { SafetyComplianceTab } from './SafetyComplianceTab';
 import { VehicleContractsManager } from './VehicleContractsManager';
 import { SchoolTransportProfile } from './SchoolTransportProfile';
 import { StopsManager } from './StopsManager';
+import { MasterRouteList } from './MasterRouteList';
 
 export const TransportDashboard = () => {
   const { drivers, vehicles, routes, incidents, studentTransport, loading } = useTransportData();
@@ -105,6 +106,7 @@ export const TransportDashboard = () => {
         <TabsList className="flex flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="setup" className="gap-1 bg-primary/10 font-semibold"><Settings className="h-4 w-4" /> Master Data</TabsTrigger>
+          <TabsTrigger value="master-routes" className="gap-1"><Route className="h-4 w-4" /> Routes</TabsTrigger>
           <TabsTrigger value="trip-planning" className="gap-1"><Route className="h-4 w-4" /> Trips</TabsTrigger>
           <TabsTrigger value="live-ops" className="gap-1"><Activity className="h-4 w-4" /> Live</TabsTrigger>
           <TabsTrigger value="comms" className="gap-1"><Bell className="h-4 w-4" /> Comms</TabsTrigger>
@@ -312,6 +314,10 @@ export const TransportDashboard = () => {
               </Tabs>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="master-routes">
+          <MasterRouteList />
         </TabsContent>
 
         <TabsContent value="trip-planning">
