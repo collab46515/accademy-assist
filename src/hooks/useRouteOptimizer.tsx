@@ -181,7 +181,7 @@ export const useRouteOptimizer = () => {
     }
   };
 
-  // Batch create trips from suggestions
+  // Batch create trips from suggestions with stops
   const createTripsFromSuggestions = async (
     suggestions: TripSuggestion[],
     profileId: string,
@@ -190,33 +190,69 @@ export const useRouteOptimizer = () => {
     startTime: string = '07:00'
   ): Promise<boolean> => {
     try {
-      const tripsToCreate = suggestions.map((suggestion, index) => ({
-        school_id: schoolId,
-        route_profile_id: profileId,
-        trip_name: suggestion.tripName,
-        trip_code: `T${String(index + 1).padStart(2, '0')}`,
-        trip_type: tripType,
-        scheduled_start_time: startTime,
-        estimated_duration_minutes: 60,
-        vehicle_capacity: null,
-        assigned_students_count: suggestion.studentCount,
-        status: 'active',
-      }));
+      for (let i = 0; i < suggestions.length; i++) {
+        const suggestion = suggestions[i];
+        
+        // Create trip
+        const { data: tripData, error: tripError } = await supabase
+          .from('transport_trips')
+          .insert({
+            school_id: schoolId,
+            route_profile_id: profileId,
+            trip_name: suggestion.tripName,
+            trip_code: `T${String(i + 1).padStart(2, '0')}`,
+            trip_type: tripType,
+            scheduled_start_time: startTime,
+            estimated_duration_minutes: 60,
+            vehicle_capacity: null,
+            assigned_students_count: suggestion.studentCount,
+            status: 'active',
+          })
+          .select()
+          .single();
 
-      const { data, error } = await supabase
-        .from('transport_trips')
-        .insert(tripsToCreate)
-        .select();
+        if (tripError) throw tripError;
 
-      if (error) throw error;
+        // Create stops from unique addresses
+        const uniqueAddresses = [...new Set(suggestion.pickupAddresses)];
+        const stopsToCreate = uniqueAddresses.map((address, stopIndex) => ({
+          trip_id: tripData.id,
+          stop_name: `Stop ${stopIndex + 1}`,
+          location_address: address,
+          stop_order: stopIndex + 1,
+          scheduled_arrival_time: calculateStopTime(startTime, stopIndex * 5),
+          estimated_wait_minutes: 3,
+          geofence_radius_meters: 50,
+          total_students_at_stop: Math.ceil(suggestion.studentCount / uniqueAddresses.length),
+          assigned_students_count: 0,
+          assignment_status: 'pending',
+        }));
+
+        if (stopsToCreate.length > 0) {
+          const { error: stopsError } = await supabase
+            .from('trip_stops')
+            .insert(stopsToCreate);
+
+          if (stopsError) throw stopsError;
+        }
+      }
       
-      toast.success(`Created ${data.length} trips successfully`);
+      toast.success(`Created ${suggestions.length} trips with stops successfully`);
       return true;
     } catch (err) {
       console.error('Error creating trips:', err);
       toast.error('Failed to create trips');
       return false;
     }
+  };
+
+  // Helper to calculate stop times
+  const calculateStopTime = (startTime: string, minutesToAdd: number): string => {
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const totalMinutes = hours * 60 + minutes + minutesToAdd;
+    const newHours = Math.floor(totalMinutes / 60) % 24;
+    const newMinutes = totalMinutes % 60;
+    return `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
   };
 
   return {
