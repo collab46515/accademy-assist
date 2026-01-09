@@ -656,14 +656,14 @@ export const TripMapPlanner: React.FC<TripMapPlannerProps> = ({ routeProfile, on
             <div>
               <Label>Vehicle</Label>
               <Select
-                value={editFormData.vehicle_id}
-                onValueChange={(value) => handleResourceChange('vehicle', value)}
+                value={editFormData.vehicle_id || '__none__'}
+                onValueChange={(value) => handleResourceChange('vehicle', value === '__none__' ? '' : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select vehicle" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="__none__">None</SelectItem>
                   {activeVehicles.map(v => (
                     <SelectItem key={v.id} value={v.id}>
                       {v.vehicle_number} ({v.capacity} seats)
@@ -676,14 +676,14 @@ export const TripMapPlanner: React.FC<TripMapPlannerProps> = ({ routeProfile, on
             <div>
               <Label>Driver</Label>
               <Select
-                value={editFormData.driver_id}
-                onValueChange={(value) => handleResourceChange('driver', value)}
+                value={editFormData.driver_id || '__none__'}
+                onValueChange={(value) => handleResourceChange('driver', value === '__none__' ? '' : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select driver" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="__none__">None</SelectItem>
                   {activeDrivers.map(d => (
                     <SelectItem key={d.id} value={d.id}>
                       {d.first_name} {d.last_name}
@@ -696,14 +696,14 @@ export const TripMapPlanner: React.FC<TripMapPlannerProps> = ({ routeProfile, on
             <div>
               <Label>Attender</Label>
               <Select
-                value={editFormData.attender_id}
-                onValueChange={(value) => handleResourceChange('attender', value)}
+                value={editFormData.attender_id || '__none__'}
+                onValueChange={(value) => handleResourceChange('attender', value === '__none__' ? '' : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select attender" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="__none__">None</SelectItem>
                   {activeDrivers.map(d => (
                     <SelectItem key={d.id} value={d.id}>
                       {d.first_name} {d.last_name}
