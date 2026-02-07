@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TeacherSidebar } from './teacher/TeacherSidebar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -765,9 +765,9 @@ export function TeacherPortal() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="p-6 space-y-6">
-        {/* Welcome Header */}
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
+      {/* Welcome Header */}
+      <div className="p-6 pb-0">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Teacher Portal</h1>
@@ -786,44 +786,17 @@ export function TeacherPortal() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Main Content with Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="dashboard" className="flex items-center gap-2">
-              <GraduationCap className="h-4 w-4" />
-              Dashboard
-            </TabsTrigger>
-            <TabsTrigger value="hr-details" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              HR Details
-            </TabsTrigger>
-            <TabsTrigger value="payroll" className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
-              Payroll
-            </TabsTrigger>
-            <TabsTrigger value="leave" className="flex items-center gap-2">
-              <PlaneTakeoff className="h-4 w-4" />
-              Leave Management
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="dashboard">
-            <DashboardContent />
-          </TabsContent>
-
-          <TabsContent value="hr-details">
-            <HRDetailsContent />
-          </TabsContent>
-
-          <TabsContent value="payroll">
-            <PayrollContent />
-          </TabsContent>
-
-          <TabsContent value="leave">
-            <LeaveManagementContent />
-          </TabsContent>
-        </Tabs>
+      {/* Sidebar + Content */}
+      <div className="flex flex-1 mt-4">
+        <TeacherSidebar activeView={activeTab} onViewChange={setActiveTab} />
+        <div className="flex-1 p-6 overflow-auto">
+          {activeTab === 'dashboard' && <DashboardContent />}
+          {activeTab === 'hr-details' && <HRDetailsContent />}
+          {activeTab === 'payroll' && <PayrollContent />}
+          {activeTab === 'leave' && <LeaveManagementContent />}
+        </div>
       </div>
     </div>
   );
