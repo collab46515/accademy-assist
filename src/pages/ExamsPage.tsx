@@ -19,7 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export default function ExamsPage() {
   return (
-    <ModuleGuard moduleName="Examinations">
+    <ModuleGuard moduleName="Exams & Assessment">
       <ExamsPageContent />
     </ModuleGuard>
   );

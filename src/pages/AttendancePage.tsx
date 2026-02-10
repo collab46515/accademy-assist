@@ -11,7 +11,7 @@ import { BarChart3, UserCheck, Settings, Users, AlertTriangle } from 'lucide-rea
 
 export default function AttendancePage() {
   return (
-    <ModuleGuard moduleName="Attendance Management">
+    <ModuleGuard moduleName="Attendance Tracking">
       <AttendancePageContent />
     </ModuleGuard>
   );
