@@ -96,16 +96,19 @@ export function usePermissions() {
     moduleId: string,
     permissions: Partial<Pick<RoleModulePermission, 'can_view' | 'can_create' | 'can_edit' | 'can_delete' | 'can_approve'>>
   ) => {
+    // First, get the existing permission record to preserve other values
+    const existing = rolePermissions.find(p => p.role === role && p.module_id === moduleId);
+    
     const { error } = await supabase
       .from('role_module_permissions')
       .upsert({
         role,
         module_id: moduleId,
-        can_view: false,
-        can_create: false,
-        can_edit: false,
-        can_delete: false,
-        can_approve: false,
+        can_view: existing?.can_view ?? false,
+        can_create: existing?.can_create ?? false,
+        can_edit: existing?.can_edit ?? false,
+        can_delete: existing?.can_delete ?? false,
+        can_approve: existing?.can_approve ?? false,
         ...permissions
       }, {
         onConflict: 'role,module_id'
