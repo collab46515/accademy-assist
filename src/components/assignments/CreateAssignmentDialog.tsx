@@ -130,7 +130,12 @@ export const CreateAssignmentDialog: React.FC<CreateAssignmentDialogProps> = ({
 
     setLoading(true);
     try {
-      await createAssignment(formData);
+      await createAssignment({
+        ...formData,
+        curriculum_topic_id: formData.curriculum_topic_id || undefined,
+        lesson_plan_id: formData.lesson_plan_id || undefined,
+        instructions: formData.instructions || undefined,
+      });
       onOpenChange(false);
       setFormData({
         title: '',
