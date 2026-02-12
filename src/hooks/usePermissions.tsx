@@ -96,27 +96,42 @@ export function usePermissions() {
     moduleId: string,
     permissions: Partial<Pick<RoleModulePermission, 'can_view' | 'can_create' | 'can_edit' | 'can_delete' | 'can_approve'>>
   ) => {
-    // First, get the existing permission record to preserve other values
+    // Check if a record already exists
     const existing = rolePermissions.find(p => p.role === role && p.module_id === moduleId);
     
-    const { error } = await supabase
-      .from('role_module_permissions')
-      .upsert({
-        role,
-        module_id: moduleId,
-        can_view: existing?.can_view ?? false,
-        can_create: existing?.can_create ?? false,
-        can_edit: existing?.can_edit ?? false,
-        can_delete: existing?.can_delete ?? false,
-        can_approve: existing?.can_approve ?? false,
-        ...permissions
-      }, {
-        onConflict: 'role,module_id'
-      });
+    if (existing) {
+      // Update existing record by ID - most reliable approach
+      const { error } = await supabase
+        .from('role_module_permissions')
+        .update({
+          ...permissions,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existing.id);
 
-    if (error) {
-      console.error('Error updating role permission:', error);
-      throw error;
+      if (error) {
+        console.error('Error updating role permission:', error);
+        throw error;
+      }
+    } else {
+      // Insert new record
+      const { error } = await supabase
+        .from('role_module_permissions')
+        .insert({
+          role,
+          module_id: moduleId,
+          can_view: false,
+          can_create: false,
+          can_edit: false,
+          can_delete: false,
+          can_approve: false,
+          ...permissions
+        });
+
+      if (error) {
+        console.error('Error inserting role permission:', error);
+        throw error;
+      }
     }
 
     await fetchRolePermissions();
