@@ -151,6 +151,9 @@ export function usePermissions() {
     const module = modules.find(m => m.name === moduleName);
     if (!module) return false;
 
+    // Super admins have all permissions
+    if (userRoles.some(r => r.role === 'super_admin')) return true;
+
     const currentRoles = userRoles.filter(role => 
       !currentSchool || role.school_id === currentSchool.id || role.role === 'super_admin'
     );
@@ -178,6 +181,14 @@ export function usePermissions() {
     const currentRoles = userRoles.filter(role => 
       !currentSchool || role.school_id === currentSchool.id || role.role === 'super_admin'
     );
+
+    // Super admins can access all active modules
+    const isSuperAdminUser = currentRoles.some(r => r.role === 'super_admin');
+    if (isSuperAdminUser) {
+      return modules
+        .filter(m => m.is_active)
+        .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    }
 
     const accessibleModuleIds = new Set<string>();
     
